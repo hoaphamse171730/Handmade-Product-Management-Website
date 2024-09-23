@@ -1,0 +1,11 @@
+C:\Users\VH\Desktop\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\obj\Debug\net8.0\PubTmp\Out\HandmadeProductManagementAPI.exe
+C:\Users\VH\Desktop\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\obj\Debug\net8.0\PubTmp\Out\appsettings.Development.json
+C:\Users\VH\Desktop\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\obj\Debug\net8.0\PubTmp\Out\appsettings.json
+C:\Users\VH\Desktop\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\obj\Debug\net8.0\PubTmp\Out\HandmadeProductManagementAPI.dll
+C:\Users\VH\Desktop\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\obj\Debug\net8.0\PubTmp\Out\HandmadeProductManagementAPI.deps.json
+C:\Users\VH\Desktop\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\obj\Debug\net8.0\PubTmp\Out\HandmadeProductManagementAPI.runtimeconfig.json
+C:\Users\VH\Desktop\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\obj\Debug\net8.0\PubTmp\Out\HandmadeProductManagementAPI.pdb
+C:\Users\VH\Desktop\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\obj\Debug\net8.0\PubTmp\Out\Microsoft.OpenApi.dll
+C:\Users\VH\Desktop\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\obj\Debug\net8.0\PubTmp\Out\Swashbuckle.AspNetCore.Swagger.dll
+C:\Users\VH\Desktop\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\obj\Debug\net8.0\PubTmp\Out\Swashbuckle.AspNetCore.SwaggerGen.dll
+C:\Users\VH\Desktop\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\obj\Debug\net8.0\PubTmp\Out\Swashbuckle.AspNetCore.SwaggerUI.dll
