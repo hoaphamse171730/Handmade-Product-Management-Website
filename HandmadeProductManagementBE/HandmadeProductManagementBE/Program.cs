@@ -1,36 +1,36 @@
+using HandmadeProductManagement.Repositories.Context;
+using HandmadeProductManagementBE.API;
+using Microsoft.EntityFrameworkCore;
 
-namespace HandmadeProductManagementBE
-{
-    public class Program
-    {
-        public static void Main(string[] args)
-        {
-            var builder = WebApplication.CreateBuilder(args);
+var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+// config appsettings by env
+builder.Configuration
+    .SetBasePath(Directory.GetCurrentDirectory())
+    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
+    .AddEnvironmentVariables();
 
-            builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-            builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+builder.Services.AddControllers();
 
-            var app = builder.Build();
+builder.Services.AddDbContext<DatabaseContext>(options =>
+   options.UseSqlServer(builder.Configuration.GetConnectionString("BloggingDatabase"),
+   b => b.MigrationsAssembly("HandmadeProductManagementAPI")));
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+builder.Services.AddConfig(builder.Configuration);
 
-            // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            }
+var app = builder.Build();
 
-            app.UseHttpsRedirection();
+// Configure the HTTP request pipeline.
+app.UseSwagger();
+app.UseSwaggerUI();
 
-            app.UseAuthorization();
+app.UseHttpsRedirection();
 
+app.UseAuthorization();
 
-            app.MapControllers();
+app.MapControllers();
 
-            app.Run();
-        }
-    }
-}
+app.Run();
