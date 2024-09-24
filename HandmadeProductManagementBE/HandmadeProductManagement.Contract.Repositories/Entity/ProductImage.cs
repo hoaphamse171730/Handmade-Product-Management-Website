@@ -9,9 +9,8 @@ namespace HandmadeProductManagement.Contract.Repositories.Entity
 {
     public class ProductImage : BaseEntity
     {
-        public string Id { get; set; }
-        public string Url { get; set; }
-        public string ProductId { get; set; }
-        public Product Product { get; set; }
+        public string Url { get; set; } = string.Empty;
+        public string ProductId { get; set; } = string.Empty;
+        public Product Product { get; set; } = new Product();
     }
 }

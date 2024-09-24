@@ -9,8 +9,8 @@ namespace HandmadeProductManagement.Contract.Repositories.Entity
         public string CartId { get; set; } = string.Empty;
         public Cart Cart { get; set; } = new Cart();
 
-        /*        public String ProductId { get; set; }
-                public Product Product { get; set; } = new Product();*/
+        public string ProductId { get; set; } = string.Empty;
+        public Product Product { get; set; } = new Product();
         public int ProductQuantity { get; set; }
     }
 }

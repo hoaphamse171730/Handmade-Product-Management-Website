@@ -16,7 +16,7 @@ namespace HandmadeProductManagement.Contract.Repositories.Entity
 
         // Foreign key to the Product entity
         public string ProductId { get; set; } = string.Empty;
-        //public Product Product { get; set; } = new Product();
+        public Product Product { get; set; } = new Product();
 
 
         // Foreign key to the User entity
