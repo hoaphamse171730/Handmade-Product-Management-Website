@@ -20,8 +20,8 @@ namespace HandmadeProductManagement.Repositories.Context
 
         public virtual DbSet<UserInfo> UserInfos => Set<UserInfo>();
 
-
-        
+        public virtual DbSet<Review> Reviews => Set<Review>();
+        public virtual DbSet<Reply> Replies => Set<Reply>();
 
 
     }
