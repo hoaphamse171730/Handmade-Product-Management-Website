@@ -23,5 +23,6 @@ namespace HandmadeProductManagement.Contract.Repositories.Entity
 
         public ApplicationUser User { get; set; } = new ApplicationUser();
         public CancelReason CancelReason { get; set; } = new CancelReason();
+        public virtual ICollection<OrderDetail> OrderDetails { get; set; }
     }
 }

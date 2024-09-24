@@ -10,17 +10,19 @@ namespace HandmadeProductManagement.Contract.Repositories.Entity
 {
     public class OrderDetail : BaseEntity
     {
-        [MaxLength(50)]
-        public string OrderId { get; set; } = string.Empty;
-
-        [MaxLength(50)]
-        public string ProductId { get; set; } = string.Empty ;
+        
+        public required string OrderDetailId { get; set; }
+        public required string ProductId { get; set; }
+        public required string OrderId { get; set; }
+        
         public int ProductQuantity { get; set; }
         public float UnitPrice { get; set; }
 
 
         // Navigation properties
-        public  Order Order { get; set; } = new Order();
+        public virtual Order? Order { get; set; }
+        public virtual Product? Product { get; set; }
+        
         //public Product Product { get; set; } = new Product();
     }
 }

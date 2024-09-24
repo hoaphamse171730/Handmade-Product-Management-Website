@@ -4,7 +4,14 @@ namespace HandmadeProductManagement.Contract.Repositories.Entity
 {
     public class Category : BaseEntity
     {
-        public string Name { get; set; } = string.Empty;
-        public string? Description { get; set; }
+        public required string CategoryId { get; set; } 
+        public required string CategoryName { get; set; } 
+        public string? CategoryDescription { get; set; }
+
+        public required string PromotionId { get; set; } 
+        public virtual Promotion? Promotion { get; set; }
+        
+        
+        
     }
 }
