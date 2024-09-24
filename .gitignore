@@ -131,3 +131,6 @@ $RECYCLE.BIN/
 .DS_Store
 
 _NCrunch*
+*.cache
+*.vsidx
+HandmadeProductManagementBE/HandmadeProductManagement.Contract.Services/obj/Debug/net8.0/HandmadeProductManagement.Contract.Services.AssemblyInfo.cs
