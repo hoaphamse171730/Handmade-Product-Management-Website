@@ -28,8 +28,48 @@ namespace HandmadeProductManagement.Repositories.Context
         {
             base.OnModelCreating(modelBuilder);
 
-            //....
+
+            //Quan he giua cart va user
+            modelBuilder.Entity<Cart>()
+                .HasOne(c=>c.User)
+                .WithOne()
+                .HasForeignKey<Cart>(c=>c.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            //Quan he giua cart va cartItem
+            modelBuilder.Entity<Cart>()
+                .HasMany(c=>c.CartItems)
+                .WithOne()
+                .HasForeignKey(ci => ci.CartId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+
+            // Quan hệ giữa CartItem và ProductItem 
+            modelBuilder.Entity<CartItem>()
+                .HasOne(ci => ci.ProductItem)  
+                .WithMany(pi => pi.CartItem)  
+                .HasForeignKey(ci => ci.ProductItemId)  
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Quan hệ giữa ProductConfiguration và ProductItem (1-N)
+            modelBuilder.Entity<ProductConfiguration>()
+                .HasOne(pc => pc.ProductItem)  
+                .WithMany(pi => pi.ProductConfiguration) 
+                .HasForeignKey(pc => pc.ProductItemId)  
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Quan hệ giữa ProductConfiguration và VariationOption (1-N)
+            modelBuilder.Entity<ProductConfiguration>()
+                .HasOne(pc => pc.VariationOption)  
+                .WithMany(vo => vo.ProductConfiguration)  
+                .HasForeignKey(pc => pc.VariationOptionId)  
+                .OnDelete(DeleteBehavior.Restrict);
+
         }
+
+
+
+
     }
 
 }

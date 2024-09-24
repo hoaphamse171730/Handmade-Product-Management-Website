@@ -11,6 +11,8 @@ namespace HandmadeProductManagement.Contract.Repositories.Entity
         public int QuantityInStock { get; set; }
         public int Price { get; set; }
 
+        public ICollection<CartItem> CartItem { get; set; } = new List<CartItem>();
 
+        public ICollection<ProductConfiguration> ProductConfiguration { get; set; } = new List<ProductConfiguration>();
     }
 }
