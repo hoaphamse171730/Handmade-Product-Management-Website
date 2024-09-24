@@ -6832,19 +6832,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\VH\\.nuget\\packages\\": {}
+    "C:\\Users\\thanh\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\VH\\Desktop\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj",
+      "projectUniqueName": "C:\\Users\\thanh\\source\\repos\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj",
       "projectName": "HandmadeProductManagementAPI",
-      "projectPath": "C:\\Users\\VH\\Desktop\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj",
-      "packagesPath": "C:\\Users\\VH\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\VH\\Desktop\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\obj\\",
+      "projectPath": "C:\\Users\\thanh\\source\\repos\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj",
+      "packagesPath": "C:\\Users\\thanh\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\thanh\\source\\repos\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\VH\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\thanh\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
@@ -6859,8 +6859,8 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "projectReferences": {
-            "C:\\Users\\VH\\Desktop\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj": {
-              "projectPath": "C:\\Users\\VH\\Desktop\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj"
+            "C:\\Users\\thanh\\source\\repos\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj": {
+              "projectPath": "C:\\Users\\thanh\\source\\repos\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj"
             }
           }
         }
@@ -6911,15 +6911,15 @@
         "downloadDependencies": [
           {
             "name": "Microsoft.AspNetCore.App.Runtime.linux-x64",
-            "version": "[8.0.7, 8.0.7]"
+            "version": "[8.0.8, 8.0.8]"
           },
           {
             "name": "Microsoft.NETCore.App.Host.linux-x64",
-            "version": "[8.0.7, 8.0.7]"
+            "version": "[8.0.8, 8.0.8]"
           },
           {
             "name": "Microsoft.NETCore.App.Runtime.linux-x64",
-            "version": "[8.0.7, 8.0.7]"
+            "version": "[8.0.8, 8.0.8]"
           }
         ],
         "frameworkReferences": {
@@ -6930,7 +6930,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.303/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.401/PortableRuntimeIdentifierGraph.json"
       }
     },
     "runtimes": {
