@@ -27,10 +27,50 @@ namespace HandmadeProductManagement.Repositories.Context
         public DbSet<VariationOption> VariationOptions => Set<VariationOption>();
         public DbSet<Review> Reviews => Set<Review>();
         public DbSet<Reply> Replies => Set<Reply>();
+        public DbSet<Shop> Shops => Set<Shop>();
+        public DbSet<Order> Orders => Set<Order>();
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
+            // Configuration for Shop entity relationships and properties
+            modelBuilder.Entity<Shop>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.Description).HasMaxLength(500);
+                entity.Property(e => e.Rating).IsRequired().HasColumnType("decimal(2, 1)").HasDefaultValue(0);
+                entity.Property(e => e.UserId).IsRequired();
+                entity.HasOne(e => e.User)
+                      .WithOne(u => u.Shop)
+                      .HasForeignKey<Shop>(e => e.UserId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // Configuration for Order entity relationships and properties
+            modelBuilder.Entity<Order>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.TotalPrice).IsRequired().HasColumnType("decimal(18, 2)");
+                entity.Property(e => e.OrderDate).IsRequired();
+                entity.Property(e => e.Status).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.UserId).IsRequired();
+                entity.Property(e => e.Address).IsRequired().HasMaxLength(200);
+                entity.Property(e => e.CustomerName).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.Phone).HasMaxLength(15);
+                entity.Property(e => e.Note).HasMaxLength(500);
+                entity.HasOne(e => e.User)
+                      .WithMany(u => u.Orders)
+                      .HasForeignKey(e => e.UserId)
+                      .OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(e => e.CancelReason)
+                      .WithMany(cr => cr.Orders)
+                      .HasForeignKey(e => e.CancelReasonId)
+                      .OnDelete(DeleteBehavior.SetNull);
+            });
+        }
+    }
 
             //Quan he giua cart va user
             modelBuilder.Entity<Cart>()

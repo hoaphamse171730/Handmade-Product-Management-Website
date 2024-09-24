@@ -24,5 +24,7 @@ namespace HandmadeProductManagement.Repositories.Entity
             CreatedTime = CoreHelper.SystemTimeNow;
             LastUpdatedTime = CreatedTime;
         }
+        public Shop? Shop { get; set; }
+        public ICollection<Order> Orders { get; set; } = [];
     }
 }
