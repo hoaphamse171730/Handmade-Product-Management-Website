@@ -58,8 +58,7 @@
               "RelativeToolTip": "HandmadeProductManagement.Contract.Repositories\\Entity\\Order.cs",
               "ViewState": "AQIAAAYAAAAAAAAAAAAqwBoAAAAIAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-24T06:43:11.497Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-09-24T06:43:11.497Z"
             },
             {
               "$type": "Document",
@@ -71,8 +70,7 @@
               "RelativeToolTip": "HandmadeProductManagement.Contract.Repositories\\Entity\\StatusChange.cs",
               "ViewState": "AQIAAAAAAAAAAAAAAAAAAAoAAAAEAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-24T02:00:08.404Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-09-24T02:00:08.404Z"
             },
             {
               "$type": "Document",
@@ -82,7 +80,7 @@
               "RelativeDocumentMoniker": "HandmadeProductManagement.Repositories\\Context\\DatabaseContext.cs",
               "ToolTip": "C:\\Users\\SON\\Desktop\\AT_Project\\HandmadeProductManagementBE\\HandmadeProductManagement.Repositories\\Context\\DatabaseContext.cs",
               "RelativeToolTip": "HandmadeProductManagement.Repositories\\Context\\DatabaseContext.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAA0AAAAAAAAA",
+              "ViewState": "AQIAABcAAAAAAAAAAAA0wA0AAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-09-24T02:12:21.65Z",
               "EditorCaption": ""
@@ -97,8 +95,7 @@
               "RelativeToolTip": "HandmadeProductManagement.Contract.Repositories\\Entity\\CancelReason.cs",
               "ViewState": "AQIAAAAAAAAAAAAAAAAAAA8AAAAIAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-24T02:00:34.16Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-09-24T02:00:34.16Z"
             }
           ]
         }
