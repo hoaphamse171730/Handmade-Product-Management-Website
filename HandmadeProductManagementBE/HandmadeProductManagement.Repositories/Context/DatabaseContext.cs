@@ -28,8 +28,56 @@ namespace HandmadeProductManagement.Repositories.Context
         {
             base.OnModelCreating(modelBuilder);
 
-            //....
+            // Payment Entity Configuration
+            modelBuilder.Entity<Payment>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.OrderId)
+                      .IsRequired()
+                      .HasMaxLength(50);
+
+                entity.Property(e => e.ExpirationDate)
+                      .IsRequired();
+
+                entity.Property(e => e.TotalAmount)
+                      .IsRequired();
+
+                entity.HasOne(e => e.Order)
+                      .WithMany()
+                      .HasForeignKey(e => e.OrderId);
+
+                // One-to-one relationship with PaymentDetail
+                entity.HasOne<PaymentDetail>()
+                      .WithOne(pd => pd.Payment)
+                      .HasForeignKey<PaymentDetail>(pd => pd.PaymentId);
+            });
+
+            // PaymentDetail Entity Configuration
+            modelBuilder.Entity<PaymentDetail>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.PaymentId)
+                      .IsRequired()
+                      .HasMaxLength(50);
+
+                entity.Property(e => e.Status)
+                      .IsRequired()
+                      .HasMaxLength(15);
+
+                entity.Property(e => e.Amount)
+                      .IsRequired();
+
+                entity.Property(e => e.Method)
+                      .IsRequired()
+                      .HasMaxLength(30);
+
+                entity.Property(e => e.ExternalTransaction)
+                      .HasMaxLength(100);
+            });
         }
+
     }
 
 }
