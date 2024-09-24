@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace HandmadeProductManagement.Contract.Repositories.Entity
 {
-    internal class ProductConfiguration
+    public class ProductConfiguration
     {
         public string ProductItemId { get; set; } = string.Empty;
         public ProductItem ProductItem { get; set; } = new ProductItem();
