@@ -20,7 +20,8 @@ namespace HandmadeProductManagement.Repositories.Context
 
         public virtual DbSet<UserInfo> UserInfos => Set<UserInfo>();
 
-
+        public virtual DbSet<StatusChange> StatusChange => Set<StatusChange>();
+        public virtual DbSet<CancelReason> CancelReason => Set<CancelReason>();
         
 
 
