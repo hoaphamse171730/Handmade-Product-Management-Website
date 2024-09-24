@@ -15,11 +15,11 @@ namespace HandmadeProductManagement.Contract.Repositories.Entity
 
         // Foreign key to the Review entity for one-to-one relationship
         public string ReviewId { get; set; } = string.Empty;
-        public Review? Review { get; set; }
+        public Review Review { get; set; } = new Review();
 
 
         // Foreign key to the Shop entity
         public string ShopId { get; set; } = string.Empty;
-        //public Shop? Shop { get; set; }
+        public Shop Shop { get; set; } = new Shop();
     }
 }

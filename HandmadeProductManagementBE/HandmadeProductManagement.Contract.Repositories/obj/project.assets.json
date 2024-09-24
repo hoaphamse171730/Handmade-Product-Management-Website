@@ -837,11 +837,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj",
+      "projectUniqueName": "D:\\1. Project\\School Fall24\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj",
       "projectName": "HandmadeProductManagement.Contract.Repositories",
-      "projectPath": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj",
+      "projectPath": "D:\\1. Project\\School Fall24\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj",
       "packagesPath": "C:\\Users\\my pc\\.nuget\\packages\\",
-      "outputPath": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\obj\\",
+      "outputPath": "D:\\1. Project\\School Fall24\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -863,8 +863,8 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "projectReferences": {
-            "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Core\\HandmadeProductManagement.Core.csproj": {
-              "projectPath": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Core\\HandmadeProductManagement.Core.csproj"
+            "D:\\1. Project\\School Fall24\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Core\\HandmadeProductManagement.Core.csproj": {
+              "projectPath": "D:\\1. Project\\School Fall24\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Core\\HandmadeProductManagement.Core.csproj"
             }
           }
         }
