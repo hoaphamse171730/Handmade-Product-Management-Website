@@ -47,7 +47,8 @@ namespace HandmadeProductManagement.Repositories.Context
                 // Many-to-one relationship with Order
                 entity.HasOne(e => e.Order)
                       .WithMany(o => o.StatusChanges) // Assuming Order has a collection of StatusChanges
-                      .HasForeignKey(e => e.OrderId);
+                      .HasForeignKey(e => e.OrderId)
+                      .OnDelete(DeleteBehavior.Cascade);
             });
 
             // Configurations for CancelReason
@@ -66,7 +67,8 @@ namespace HandmadeProductManagement.Repositories.Context
                 // One-to-many relationship with Order
                 entity.HasMany(cr => cr.Orders)
                       .WithOne(o => o.CancelReason)  // Each Order has one CancelReason
-                      .HasForeignKey(o => o.CancelReasonId); 
+                      .HasForeignKey(o => o.CancelReasonId)
+                      .OnDelete(DeleteBehavior.Cascade);
             });
         }
     }
