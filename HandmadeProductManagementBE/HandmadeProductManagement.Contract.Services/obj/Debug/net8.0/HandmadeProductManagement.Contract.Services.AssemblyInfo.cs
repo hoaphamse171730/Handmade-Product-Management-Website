@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("HandmadeProductManagement.Contract.Services")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9db21fadfc147077c2dc786c38e46c4023931557")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+84152f6a3388530f06928ebe5a2885c2bb4bddf6")]
 [assembly: System.Reflection.AssemblyProductAttribute("HandmadeProductManagement.Contract.Services")]
 [assembly: System.Reflection.AssemblyTitleAttribute("HandmadeProductManagement.Contract.Services")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

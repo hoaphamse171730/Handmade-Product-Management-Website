@@ -831,19 +831,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\VH\\.nuget\\packages\\": {}
+    "C:\\Users\\phiye\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\VH\\Desktop\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj",
+      "projectUniqueName": "D:\\FPT\\SEMESTER_6\\New folder\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj",
       "projectName": "HandmadeProductManagement.Contract.Repositories",
-      "projectPath": "C:\\Users\\VH\\Desktop\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj",
-      "packagesPath": "C:\\Users\\VH\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\VH\\Desktop\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\obj\\",
+      "projectPath": "D:\\FPT\\SEMESTER_6\\New folder\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj",
+      "packagesPath": "C:\\Users\\phiye\\.nuget\\packages\\",
+      "outputPath": "D:\\FPT\\SEMESTER_6\\New folder\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\VH\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\phiye\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
@@ -858,8 +858,8 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "projectReferences": {
-            "C:\\Users\\VH\\Desktop\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Core\\HandmadeProductManagement.Core.csproj": {
-              "projectPath": "C:\\Users\\VH\\Desktop\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Core\\HandmadeProductManagement.Core.csproj"
+            "D:\\FPT\\SEMESTER_6\\New folder\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Core\\HandmadeProductManagement.Core.csproj": {
+              "projectPath": "D:\\FPT\\SEMESTER_6\\New folder\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Core\\HandmadeProductManagement.Core.csproj"
             }
           }
         }
@@ -900,7 +900,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.303/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.400/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HandmadeProductManagementAPI.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20240923032311_InitialCreate")]
+    [Migration("20240923094144_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />

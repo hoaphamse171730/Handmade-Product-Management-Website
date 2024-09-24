@@ -209,7 +209,10 @@
       },
       "HandmadeProductManagement.Core/1.0.0": {
         "runtime": {
-          "HandmadeProductManagement.Core.dll": {}
+          "HandmadeProductManagement.Core.dll": {
+            "assemblyVersion": "1.0.0",
+            "fileVersion": "1.0.0.0"
+          }
         }
       }
     }
