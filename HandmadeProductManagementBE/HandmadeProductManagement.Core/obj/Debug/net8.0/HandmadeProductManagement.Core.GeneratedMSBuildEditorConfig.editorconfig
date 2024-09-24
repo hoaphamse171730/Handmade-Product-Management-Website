@@ -8,6 +8,10 @@ build_property.PlatformNeutralAssembly =
 build_property.EnforceExtendedAnalyzerRules = 
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = HandmadeProductManagement.Core
+<<<<<<< HEAD
 build_property.ProjectDir = C:\Users\SON\Desktop\AT_Project\HandmadeProductManagementBE\HandmadeProductManagement.Core\
+=======
+build_property.ProjectDir = D:\branch-dev\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Core\
+>>>>>>> df571df881653c190a9bcc24a8e036b5e9ac7ad7
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 

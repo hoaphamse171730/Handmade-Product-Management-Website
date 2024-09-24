@@ -3,11 +3,11 @@ using HandmadeProductManagement.Repositories.Entity;
 
 namespace HandmadeProductManagement.Contract.Repositories.Entity
 {
-    internal class Cart : BaseEntity
+    public class Cart : BaseEntity
     {
-        public string UserId { get; set; } = string.Empty;
+        public Guid UserId { get; set; }
         public ApplicationUser User { get; set; } = new ApplicationUser();
 
-        public ICollection<CartItem> CartItems { get; set; } = new List<CartItem>();
+        public ICollection<CartItem> CartItems { get; set; } = [];
     }
 }

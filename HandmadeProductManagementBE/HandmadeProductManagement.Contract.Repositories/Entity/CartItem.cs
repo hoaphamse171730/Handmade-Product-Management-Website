@@ -4,13 +4,13 @@ using System.ComponentModel.DataAnnotations;
 
 namespace HandmadeProductManagement.Contract.Repositories.Entity
 {
-    internal class CartItem : BaseEntity
+    public class CartItem : BaseEntity
     {
-        public string CartId { get; set; } = string.Empty;
+        public string CartId { get; set; }
         public Cart Cart { get; set; } = new Cart();
 
-        public string ProductId { get; set; } = string.Empty;
-        public Product Product { get; set; } = new Product();
+        public string ProductItemId { get; set; } = string.Empty;
+        public ProductItem ProductItem { get; set; } = new ProductItem();
         public int ProductQuantity { get; set; }
     }
 }

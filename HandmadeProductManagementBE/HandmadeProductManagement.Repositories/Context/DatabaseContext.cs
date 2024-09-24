@@ -25,12 +25,91 @@ namespace HandmadeProductManagement.Repositories.Context
         public virtual DbSet<OrderDetail> OrderDetails => Set<OrderDetail>();
         public DbSet<Variation> Variations => Set<Variation>();
         public DbSet<VariationOption> VariationOptions => Set<VariationOption>();
-
+        public DbSet<Review> Reviews => Set<Review>();
+        public DbSet<Reply> Replies => Set<Reply>();
+        public DbSet<Shop> Shops => Set<Shop>();
+        public DbSet<Order> Orders => Set<Order>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
+            // Configuration for Shop entity relationships and properties
+            modelBuilder.Entity<Shop>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.Description).HasMaxLength(500);
+                entity.Property(e => e.Rating).IsRequired().HasColumnType("decimal(2, 1)").HasDefaultValue(0);
+                entity.Property(e => e.UserId).IsRequired();
+                entity.HasOne(e => e.User)
+                      .WithOne(u => u.Shop)
+                      .HasForeignKey<Shop>(e => e.UserId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // Configuration for Order entity relationships and properties
+            modelBuilder.Entity<Order>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.TotalPrice).IsRequired().HasColumnType("decimal(18, 2)");
+                entity.Property(e => e.OrderDate).IsRequired();
+                entity.Property(e => e.Status).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.UserId).IsRequired();
+                entity.Property(e => e.Address).IsRequired().HasMaxLength(200);
+                entity.Property(e => e.CustomerName).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.Phone).HasMaxLength(15);
+                entity.Property(e => e.Note).HasMaxLength(500);
+                entity.HasOne(e => e.User)
+                      .WithMany(u => u.Orders)
+                      .HasForeignKey(e => e.UserId)
+                      .OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(e => e.CancelReason)
+                      .WithMany(cr => cr.Orders)
+                      .HasForeignKey(e => e.CancelReasonId)
+                      .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            //Quan he giua cart va user
+            modelBuilder.Entity<Cart>()
+                .HasOne(c => c.User)
+                .WithOne(u => u.Cart)
+                .HasForeignKey<Cart>(e => e.UserId);
+
+            //Quan he giua cart va cartItem
+            modelBuilder.Entity<Cart>()
+                .HasMany(c=>c.CartItems)
+                .WithOne()
+                .HasForeignKey(ci => ci.CartId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+
+            // Quan hệ giữa CartItem và ProductItem 
+            modelBuilder.Entity<CartItem>()
+                .HasOne(ci => ci.ProductItem)
+                .WithMany(pi => pi.CartItem)
+                .HasForeignKey(ci => ci.ProductItemId)
+                .OnDelete(DeleteBehavior.NoAction);  
+
+
+            //Primary Key cua ProductConfiguration
+            modelBuilder.Entity<ProductConfiguration>().HasKey(e => e.ProductItemId);
+            modelBuilder.Entity<ProductConfiguration>().HasKey(e => e.VariationOptionId);
+
+
+            // Quan hệ giữa ProductConfiguration và ProductItem (1-N)
+            modelBuilder.Entity<ProductConfiguration>()
+                .HasOne(pc => pc.ProductItem)  
+                .WithMany(pi => pi.ProductConfiguration) 
+                .HasForeignKey(pc => pc.ProductItemId)  
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Quan hệ giữa ProductConfiguration và VariationOption (1-N)
+            modelBuilder.Entity<ProductConfiguration>()
+                .HasOne(pc => pc.VariationOption)  
+                .WithMany(vo => vo.ProductConfiguration)  
+                .HasForeignKey(pc => pc.VariationOptionId)  
+                .OnDelete(DeleteBehavior.Restrict);
 
             // ProductItem Configuration
             modelBuilder.Entity<ProductItem>(entity =>
@@ -171,6 +250,100 @@ namespace HandmadeProductManagement.Repositories.Context
                       .HasForeignKey(o => o.CancelReasonId)
                       .OnDelete(DeleteBehavior.Cascade);
             });
+            // Payment Entity Configuration
+            modelBuilder.Entity<Payment>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.OrderId)
+                      .IsRequired();
+
+                entity.Property(e => e.ExpirationDate)
+                      .IsRequired();
+
+                entity.Property(e => e.TotalAmount)
+                      .IsRequired();
+
+                entity.HasOne(e => e.Order)
+                      .WithMany()
+                      .HasForeignKey(e => e.OrderId);
+
+                // One-to-one relationship with PaymentDetail
+                entity.HasOne<PaymentDetail>()
+                      .WithOne(pd => pd.Payment)
+                      .HasForeignKey<PaymentDetail>(pd => pd.PaymentId);
+            });
+
+            // PaymentDetail Entity Configuration
+            modelBuilder.Entity<PaymentDetail>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.PaymentId)
+                      .IsRequired();
+
+                entity.Property(e => e.Status)
+                      .IsRequired()
+                      .HasMaxLength(15);
+
+                entity.Property(e => e.Amount)
+                      .IsRequired();
+
+                entity.Property(e => e.Method)
+                      .IsRequired()
+                      .HasMaxLength(30);
+
+                entity.Property(e => e.ExternalTransaction)
+                      .HasMaxLength(100);
+            });
+
+            // Configure Review entity
+            modelBuilder.Entity<Review>(entity =>
+            {
+                entity.Property(r => r.Content)
+                      .HasColumnType("text") 
+                      .IsRequired(false);
+
+                entity.Property(r => r.Rating)
+                      .IsRequired();
+
+                entity.Property(r => r.Date)
+                      .HasDefaultValueSql("GETDATE()");
+
+                entity.HasOne(r => r.Product)
+                      .WithMany(p => p.Reviews)
+                      .HasForeignKey(r => r.ProductId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                // One-to-many: Review belongs to ApplicationUser
+                entity.HasOne(r => r.User)
+                      .WithMany(u => u.Reviews)
+                      .HasForeignKey(r => r.UserId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                // One-to-one: Review has one Reply
+                entity.HasOne(r => r.Reply)
+                      .WithOne(re => re.Review)
+                      .HasForeignKey<Reply>(re => re.ReviewId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // Configure Reply entity
+            modelBuilder.Entity<Reply>(entity =>
+            {
+                entity.Property(rp => rp.Content)
+                      .HasColumnType("text")
+                      .IsRequired(false);
+
+                entity.Property(rp => rp.Date)
+                      .HasDefaultValueSql("GETDATE()");
+
+                entity.HasOne(rp => rp.Shop)
+                      .WithMany()
+                      .HasForeignKey(rp => rp.ShopId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
         }
+
     }
 }
