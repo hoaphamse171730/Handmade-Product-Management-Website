@@ -5,7 +5,8 @@ namespace HandmadeProductManagement.Contract.Repositories.Entity
 {
     internal class Cart : BaseEntity
     {
-        public ApplicationUser UserId { get; set; }
+        public string UserId { get; set; } = string.Empty;
+        public ApplicationUser User { get; set; } = new ApplicationUser();
 
         public ICollection<CartItem> CartItems { get; set; } = new List<CartItem>();
     }

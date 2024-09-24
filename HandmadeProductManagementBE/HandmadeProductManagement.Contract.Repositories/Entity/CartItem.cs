@@ -1,15 +1,16 @@
 ﻿using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.Repositories.Entity;
+using System.ComponentModel.DataAnnotations;
 
 namespace HandmadeProductManagement.Contract.Repositories.Entity
 {
     internal class CartItem : BaseEntity
     {
-        public String CartId { get; set; }
-        public Cart cart { get; set; }
+        public string CartId { get; set; } = string.Empty;
+        public Cart Cart { get; set; } = new Cart();
 
-        /*        public String ProductId { get; set; }
-                public Product Product { get; set; }*/
-
+        public string ProductId { get; set; } = string.Empty;
+        public Product Product { get; set; } = new Product();
         public int ProductQuantity { get; set; }
     }
 }
