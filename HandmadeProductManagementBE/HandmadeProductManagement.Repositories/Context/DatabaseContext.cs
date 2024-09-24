@@ -69,8 +69,6 @@ namespace HandmadeProductManagement.Repositories.Context
                       .HasForeignKey(e => e.CancelReasonId)
                       .OnDelete(DeleteBehavior.SetNull);
             });
-        }
-    }
 
             //Quan he giua cart va user
             modelBuilder.Entity<Cart>()
@@ -83,15 +81,15 @@ namespace HandmadeProductManagement.Repositories.Context
                 .HasMany(c=>c.CartItems)
                 .WithOne()
                 .HasForeignKey(ci => ci.CartId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.NoAction);
 
 
             // Quan hệ giữa CartItem và ProductItem 
             modelBuilder.Entity<CartItem>()
-                .HasOne(ci => ci.ProductItem)  
-                .WithMany(pi => pi.CartItem)  
-                .HasForeignKey(ci => ci.ProductItemId)  
-                .OnDelete(DeleteBehavior.Restrict);
+                .HasOne(ci => ci.ProductItem)
+                .WithMany(pi => pi.CartItem)
+                .HasForeignKey(ci => ci.ProductItemId)
+                .OnDelete(DeleteBehavior.NoAction);  
 
 
             //Primary Key cua ProductConfiguration

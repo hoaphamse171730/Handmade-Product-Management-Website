@@ -14,7 +14,7 @@ namespace HandmadeProductManagement.Contract.Repositories.Entity
         public decimal TotalPrice { get; set; }
         public DateTime OrderDate { get; set; }
         public string Status { get; set; } = string.Empty;
-        public string UserId { get; set; } = string.Empty;
+        public Guid UserId { get; set; }
         public string Address { get; set; } = string.Empty;
         public string CustomerName { get; set; } = string.Empty;
         public string? Phone { get; set; }

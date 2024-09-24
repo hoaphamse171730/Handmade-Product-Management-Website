@@ -6,7 +6,7 @@ namespace HandmadeProductManagement.Contract.Repositories.Entity
 {
     public class CartItem : BaseEntity
     {
-        public string CartId { get; set; } = string.Empty;
+        public string CartId { get; set; }
         public Cart Cart { get; set; } = new Cart();
 
         public string ProductItemId { get; set; } = string.Empty;
