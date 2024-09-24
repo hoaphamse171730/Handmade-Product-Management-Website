@@ -1,4 +1,6 @@
-﻿namespace HandmadeProductManagement.Contract.Repositories.Interface
+﻿
+
+namespace HandmadeProductManagement.Contract.Repositories.Interface
 {
     public interface IUnitOfWork : IDisposable
     {

@@ -3,10 +3,15 @@ using HandmadeProductManagement.Repositories.Context;
 
 namespace HandmadeProductManagement.Repositories.UOW
 {
-    public class UnitOfWork(DatabaseContext dbContext) : IUnitOfWork
+    public class UnitOfWork : IUnitOfWork
     {
         private bool disposed = false;
-        private readonly DatabaseContext _dbContext = dbContext;
+        private readonly DatabaseContext _dbContext;
+        public UnitOfWork(DatabaseContext dbContext)
+        {
+            _dbContext = dbContext;
+        }
+
         public void BeginTransaction()
         {
             _dbContext.Database.BeginTransaction();
@@ -22,6 +27,7 @@ namespace HandmadeProductManagement.Repositories.UOW
             Dispose(true);
             GC.SuppressFinalize(this);
         }
+
         protected virtual void Dispose(bool disposing)
         {
             if (!disposed)

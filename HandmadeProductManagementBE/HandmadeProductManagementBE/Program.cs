@@ -1,3 +1,7 @@
+using HandmadeProductManagement.Contract.Repositories.Interface;
+using HandmadeProductManagement.Repositories.Context;
+using HandmadeProductManagement.Repositories.UOW;
+using Microsoft.EntityFrameworkCore;
 
 namespace HandmadeProductManagementBE
 {
@@ -14,6 +18,21 @@ namespace HandmadeProductManagementBE
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            builder.Services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(builder =>
+                {
+                    builder.AllowAnyOrigin()
+                        .AllowAnyMethod()
+                        .AllowAnyHeader();
+                });
+            });
+
+            builder.Services.AddDbContext<DatabaseContext>(options =>
+                options.UseSqlServer(builder.Configuration.GetConnectionString("BloggingDatabase"),
+                    b => b.MigrationsAssembly("HandmadeProductManagementAPI")));
+
+            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -26,7 +45,6 @@ namespace HandmadeProductManagementBE
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
-
 
             app.MapControllers();
 
