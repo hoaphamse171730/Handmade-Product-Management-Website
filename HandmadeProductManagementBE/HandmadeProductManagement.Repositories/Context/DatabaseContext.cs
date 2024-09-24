@@ -34,10 +34,9 @@ namespace HandmadeProductManagement.Repositories.Context
 
             //Quan he giua cart va user
             modelBuilder.Entity<Cart>()
-                .HasOne(c=>c.User)
-                .WithOne()
-                .HasForeignKey<Cart>(c=>c.UserId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .HasOne(c => c.User)
+                .WithOne(u => u.Cart)
+                .HasForeignKey<Cart>(e => e.UserId);
 
             //Quan he giua cart va cartItem
             modelBuilder.Entity<Cart>()
@@ -53,6 +52,12 @@ namespace HandmadeProductManagement.Repositories.Context
                 .WithMany(pi => pi.CartItem)  
                 .HasForeignKey(ci => ci.ProductItemId)  
                 .OnDelete(DeleteBehavior.Restrict);
+
+
+            //Primary Key cua ProductConfiguration
+            modelBuilder.Entity<ProductConfiguration>().HasKey(e => e.ProductItemId);
+            modelBuilder.Entity<ProductConfiguration>().HasKey(e => e.VariationOptionId);
+
 
             // Quan hệ giữa ProductConfiguration và ProductItem (1-N)
             modelBuilder.Entity<ProductConfiguration>()
@@ -237,8 +242,7 @@ namespace HandmadeProductManagement.Repositories.Context
                 entity.HasKey(e => e.Id);
 
                 entity.Property(e => e.PaymentId)
-                      .IsRequired()
-                      .HasMaxLength(50);
+                      .IsRequired();
 
                 entity.Property(e => e.Status)
                       .IsRequired()

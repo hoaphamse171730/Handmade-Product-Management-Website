@@ -14,6 +14,9 @@ namespace HandmadeProductManagement.Repositories.Entity
         public DateTimeOffset CreatedTime { get; set; }
         public DateTimeOffset LastUpdatedTime { get; set; }
         public DateTimeOffset? DeletedTime { get; set; }
+        public Guid CartId { get; set; }
+        public Cart Cart { get; set; } = new Cart();
+
         public ApplicationUser()
         {
             CreatedTime = CoreHelper.SystemTimeNow;

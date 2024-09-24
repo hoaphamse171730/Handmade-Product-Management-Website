@@ -8,7 +8,7 @@ namespace HandmadeProductManagement.Contract.Repositories.Entity
         public string? Description { get; set; }
         public ICollection<Variation> Variations { get; set; }= [];
 
-        public required string PromotionId { get; set; } 
+        public string PromotionId { get; set; } = string.Empty ;
         public virtual Promotion? Promotion { get; set; }
         
         
