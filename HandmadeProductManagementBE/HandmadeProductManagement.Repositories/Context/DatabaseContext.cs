@@ -20,9 +20,9 @@ namespace HandmadeProductManagement.Repositories.Context
         public virtual DbSet<ApplicationUserLogins> ApplicationUserLogins => Set<ApplicationUserLogins>();
         public virtual DbSet<ApplicationRoleClaims> ApplicationRoleClaims => Set<ApplicationRoleClaims>();
         public virtual DbSet<ApplicationUserTokens> ApplicationUserTokens => Set<ApplicationUserTokens>();
-
         public virtual DbSet<UserInfo> UserInfos => Set<UserInfo>();
-
+        public virtual DbSet<Promotion> Promotions => Set<Promotion>();
+        public virtual DbSet<OrderDetail> OrderDetails => Set<OrderDetail>();
         public DbSet<Variation> Variations => Set<Variation>();
         public DbSet<VariationOption> VariationOptions => Set<VariationOption>();
 
@@ -100,6 +100,35 @@ namespace HandmadeProductManagement.Repositories.Context
                     .HasForeignKey(v => v.VariationId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
+            
+            // Promotion
+            modelBuilder.Entity<Promotion>()  
+                .HasKey(p => p.PromotionId);
+            modelBuilder.Entity<Promotion>()  
+                .Property(p => p.PromotionName)  
+                .IsRequired() 
+                .HasMaxLength(255);
+            modelBuilder.Entity<Promotion>()  
+                .Property(p => p.Description)  
+                .HasMaxLength(500);
+            modelBuilder.Entity<Promotion>()  
+                .HasMany(p => p.Categories) 
+                .WithOne(c => c.Promotion) 
+                .HasForeignKey(c => c.PromotionId);
+            
+            // OrderDetail  
+            modelBuilder.Entity<OrderDetail>()  
+                .HasKey(od => od.OrderDetailId); 
+            modelBuilder.Entity<OrderDetail>()  
+                .HasOne(od => od.Order)  
+                .WithMany(o => o.OrderDetails)  
+                .HasForeignKey(od => od.OrderId) 
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<OrderDetail>()  
+                .HasOne(od => od.Product)  
+                .WithMany(p => p.OrderDetails)  
+                .HasForeignKey(od => od.ProductId) 
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

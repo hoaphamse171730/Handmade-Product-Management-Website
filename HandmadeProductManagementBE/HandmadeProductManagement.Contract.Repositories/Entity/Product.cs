@@ -16,11 +16,11 @@ namespace HandmadeProductManagement.Contract.Repositories.Entity
         public int Rating { get; set; } 
         public string Status { get; set; } = string.Empty;  
         public int SoldCount { get; set; }
-        public ICollection<ProductImage> ProductImages { get; set; } = []; 
-        public ICollection<ProductItem> ProductItems { get; set; } = [];
 
+        public ICollection<ProductImage> ProductImages { get; set; } = new List<ProductImage>(); 
+        public ICollection<ProductItem> ProductItems { get; set; } = [];
         public Category Category { get; set; } = new Category();
         public Shop Shop { get; set; } = new Shop();
-
+        public virtual ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
     }
 }
