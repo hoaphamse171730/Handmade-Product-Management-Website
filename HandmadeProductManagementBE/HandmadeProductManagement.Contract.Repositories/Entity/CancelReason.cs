@@ -12,6 +12,7 @@ namespace HandmadeProductManagement.Contract.Repositories.Entity
     {
         public string? Description { get; set; }
         public float RefundRate { get; set; }
+        // Mot Cancel Reason co the o trong nhieu Order
         public ICollection<Order> Orders { get; set; } = [];
     }
 }
