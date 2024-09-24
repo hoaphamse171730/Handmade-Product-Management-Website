@@ -9,17 +9,12 @@ namespace HandmadeProductManagement.Contract.Repositories.Entity
     {
         public string OrderId { get; set; } = string.Empty;
 
-        public DateTimeOffset CreatedDate { get; set; }
+        public DateTime ExpirationDate { get; set; }
 
-        public DateTimeOffset ExpirationDate { get; set; }
+        public float TotalAmount { get; set; }
 
-        [Required]
-        public double TotalAmount { get; set; }
+        public Order Order { get; set; } = new Order();
 
-        public Payment()
-        {
-            CreatedTime = CoreHelper.SystemTimeNow;
-            LastUpdatedTime = CreatedTime;
-        }
+
     }
 }

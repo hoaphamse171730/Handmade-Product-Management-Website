@@ -1,4 +1,5 @@
 ﻿using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.Repositories.Entity;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -20,10 +21,7 @@ namespace HandmadeProductManagement.Contract.Repositories.Entity
         public string? Note { get; set; }
         public string? CancelReasonId { get; set; }
 
-        //[ForeignKey("UserId")]
-        //public virtual User User { get; set; } 
-
-        //[ForeignKey("CancelReasonId")]
-        //public virtual CancelReason? CancelReason { get; set; } 
+        public ApplicationUser User { get; set; } = new ApplicationUser();
+        public CancelReason CancelReason { get; set; } = new CancelReason();
     }
 }

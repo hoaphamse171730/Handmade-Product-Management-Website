@@ -8,11 +8,11 @@ namespace HandmadeProductManagement.Contract.Repositories.Entity
 {
     internal class ProductConfiguration
     {
-        public String ProductItemId { get; set; }
-/*        public ProductItem ProductItem { get; set; }
-*/
-        public String VariationOptionId { get; set; }
-/*        public VariationOption VariationOption { get; set; }*/
+        public string ProductItemId { get; set; } = string.Empty;
+        public ProductItem ProductItem { get; set; } = new ProductItem();
+
+        public string VariationOptionId { get; set; } = string.Empty ;
+        public VariationOption VariationOption { get; set; } = new VariationOption();
 
     }
 }

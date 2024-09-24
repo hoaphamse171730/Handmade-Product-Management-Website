@@ -1,4 +1,5 @@
 ﻿using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.Repositories.Entity;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -14,8 +15,7 @@ namespace HandmadeProductManagement.Contract.Repositories.Entity
         public string? Description { get; set; }
         public double Rating { get; set; }
         public string UserId { get; set; } = string.Empty;
+        public ApplicationUser User { get; set; } = new ApplicationUser();
 
-        //[ForeignKey("UserId")]
-        //public virtual User User { get; set; }
     }
 }

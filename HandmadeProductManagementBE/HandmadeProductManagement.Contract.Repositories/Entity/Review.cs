@@ -1,4 +1,5 @@
 ﻿using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.Repositories.Entity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,12 +16,12 @@ namespace HandmadeProductManagement.Contract.Repositories.Entity
 
         // Foreign key to the Product entity
         public string ProductId { get; set; } = string.Empty;
-        //public Product? Product { get; set; }
+        public Product Product { get; set; } = new Product();
 
 
         // Foreign key to the User entity
         public string UserId { get; set; } = string.Empty;
-        //public User? User { get; set; }
+        public ApplicationUser User { get; set; } =  new ApplicationUser();
 
 
         // One-to-one relationship with Reply

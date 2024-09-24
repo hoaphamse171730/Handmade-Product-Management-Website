@@ -15,19 +15,14 @@ namespace HandmadeProductManagement.Contract.Repositories.Entity
         public string Status { get; set; } = string.Empty;
 
         [Required]
-        public double Amount { get; set; }
+        public float Amount { get; set; }
 
         [Required]
         public string Method { get; set; } = string.Empty;
 
         public string? ExternalTransaction { get; set; }
 
-        public virtual Payment Payment { get; set; } 
+        public Payment Payment { get; set; } = new Payment();
 
-        public PaymentDetail()
-        {
-            CreatedTime = CoreHelper.SystemTimeNow;
-            LastUpdatedTime = CreatedTime;
-        }
     }
 }

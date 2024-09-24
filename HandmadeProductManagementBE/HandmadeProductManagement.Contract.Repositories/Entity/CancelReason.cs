@@ -10,8 +10,8 @@ namespace HandmadeProductManagement.Contract.Repositories.Entity
 {
     public class CancelReason : BaseEntity
     {
-        public String Description { get; set; }
+        public string? Description { get; set; }
         public float RefundRate { get; set; }
-        //public ICollection<Order> Orders { get; set; };
+        public ICollection<Order> Orders { get; set; } = [];
     }
 }

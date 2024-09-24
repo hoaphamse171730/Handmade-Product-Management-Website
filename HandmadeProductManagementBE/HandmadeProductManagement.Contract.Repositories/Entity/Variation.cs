@@ -4,8 +4,9 @@ namespace HandmadeProductManagement.Contract.Repositories.Entity;
 
 public class Variation : BaseEntity
 {
-    public required string Name { get; set; }
-    public required string CategoryId { get; set; }
-    // public required Category Category { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string CategoryId { get; set; } = string.Empty;
+    public Category Category { get; set; } = new Category();
+
     public ICollection<VariationOption> VariationOptions { get; set; } = [];
 }
