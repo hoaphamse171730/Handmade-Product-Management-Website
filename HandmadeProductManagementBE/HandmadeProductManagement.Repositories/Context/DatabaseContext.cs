@@ -25,8 +25,8 @@ namespace HandmadeProductManagement.Repositories.Context
         public virtual DbSet<OrderDetail> OrderDetails => Set<OrderDetail>();
         public DbSet<Variation> Variations => Set<Variation>();
         public DbSet<VariationOption> VariationOptions => Set<VariationOption>();
-
-
+        public DbSet<Review> Reviews => Set<Review>();
+        public DbSet<Reply> Replies => Set<Reply>();
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -257,6 +257,53 @@ namespace HandmadeProductManagement.Repositories.Context
 
                 entity.Property(e => e.ExternalTransaction)
                       .HasMaxLength(100);
+            });
+
+            // Configure Review entity
+            modelBuilder.Entity<Review>(entity =>
+            {
+                entity.Property(r => r.Content)
+                      .HasColumnType("text") 
+                      .IsRequired(false);
+
+                entity.Property(r => r.Rating)
+                      .IsRequired();
+
+                entity.Property(r => r.Date)
+                      .HasDefaultValueSql("GETDATE()");
+
+                entity.HasOne(r => r.Product)
+                      .WithMany(p => p.Reviews)
+                      .HasForeignKey(r => r.ProductId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                // One-to-many: Review belongs to ApplicationUser
+                entity.HasOne(r => r.User)
+                      .WithMany(u => u.Reviews)
+                      .HasForeignKey(r => r.UserId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                // One-to-one: Review has one Reply
+                entity.HasOne(r => r.Reply)
+                      .WithOne(re => re.Review)
+                      .HasForeignKey<Reply>(re => re.ReviewId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // Configure Reply entity
+            modelBuilder.Entity<Reply>(entity =>
+            {
+                entity.Property(rp => rp.Content)
+                      .HasColumnType("text")
+                      .IsRequired(false);
+
+                entity.Property(rp => rp.Date)
+                      .HasDefaultValueSql("GETDATE()");
+
+                entity.HasOne(rp => rp.Shop)
+                      .WithMany()
+                      .HasForeignKey(rp => rp.ShopId)
+                      .OnDelete(DeleteBehavior.Cascade);
             });
         }
 
