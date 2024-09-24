@@ -12,5 +12,6 @@ namespace HandmadeProductManagement.Contract.Repositories.Entity
     {
         public String Description { get; set; }
         public float RefundRate { get; set; }
+        //public ICollection<Order> Order { get; set; } = [];
     }
 }

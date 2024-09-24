@@ -10,12 +10,9 @@ namespace HandmadeProductManagement.Contract.Repositories.Entity
 {
     public class StatusChange : BaseEntity
     {
-        public DateTime ChangeTime { get; set; }
-        public String Status { get; set; }
+        public required DateTime ChangeTime { get; set; }
+        public required String Status { get; set; }
 
-        [ForeignKey("Order")]
-        public string OrderId { get; set; }
-
-        public Order Order { get; set; }
+        // public Order Order { get; set; }
     }
 }
