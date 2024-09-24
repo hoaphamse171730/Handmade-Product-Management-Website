@@ -18,7 +18,8 @@ namespace HandmadeProductManagement.Contract.Repositories.Entity
         public int Rating { get; set; }
         public string Status { get; set; }
         public int SoldCount { get; set; }
-        public ICollection<ProductImage> ProductImages { get; set; }
-        public virtual ICollection<OrderDetail> OrderDetails { get; set; }
+        
+        public ICollection<ProductImage> ProductImages { get; set; } = new List<ProductImage>(); 
+        public virtual ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
     }
 }

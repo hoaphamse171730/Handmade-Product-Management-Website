@@ -18,7 +18,7 @@ namespace HandmadeProductManagement.Contract.Repositories.Entity
         public DateTime EndDate { get; set; }
         public string? Status { get; set; }
 
-        public virtual ICollection<Category> Categories { get; set; }
+        public virtual ICollection<Category> Categories { get; set; } = new List<Category>();
         
     }
 }
