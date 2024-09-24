@@ -51,5 +51,5 @@ git commit
 ### 7. Push the Changes to the Remote Repository
 Once the merge is complete, push your changes to the remote repository:
 ```bash
-git commit
+git push
 ```
