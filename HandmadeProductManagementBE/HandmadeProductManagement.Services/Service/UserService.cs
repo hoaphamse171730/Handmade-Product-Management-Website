@@ -2,7 +2,7 @@
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.ModelViews.UserModelViews;
 
-namespace XuongMay.Services.Service
+namespace HandmadeProductManagement.Services.Service
 {
     public class UserService : IUserService
     {
