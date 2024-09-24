@@ -1,25 +1,32 @@
 {
   "format": 1,
   "restore": {
-    "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Core\\HandmadeProductManagement.Core.csproj": {}
+    "C:\\Users\\SON\\Desktop\\AT_Project\\HandmadeProductManagementBE\\HandmadeProductManagement.Core\\HandmadeProductManagement.Core.csproj": {}
   },
   "projects": {
-    "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Core\\HandmadeProductManagement.Core.csproj": {
+    "C:\\Users\\SON\\Desktop\\AT_Project\\HandmadeProductManagementBE\\HandmadeProductManagement.Core\\HandmadeProductManagement.Core.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Core\\HandmadeProductManagement.Core.csproj",
+        "projectUniqueName": "C:\\Users\\SON\\Desktop\\AT_Project\\HandmadeProductManagementBE\\HandmadeProductManagement.Core\\HandmadeProductManagement.Core.csproj",
         "projectName": "HandmadeProductManagement.Core",
-        "projectPath": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Core\\HandmadeProductManagement.Core.csproj",
-        "packagesPath": "C:\\Users\\luan.tran\\.nuget\\packages\\",
-        "outputPath": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Core\\obj\\",
+        "projectPath": "C:\\Users\\SON\\Desktop\\AT_Project\\HandmadeProductManagementBE\\HandmadeProductManagement.Core\\HandmadeProductManagement.Core.csproj",
+        "packagesPath": "C:\\Users\\SON\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\SON\\Desktop\\AT_Project\\HandmadeProductManagementBE\\HandmadeProductManagement.Core\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
         "configFilePaths": [
-          "C:\\Users\\luan.tran\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\SON\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
         ],
         "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -53,26 +60,12 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
-          "downloadDependencies": [
-            {
-              "name": "Microsoft.AspNetCore.App.Ref",
-              "version": "[8.0.4, 8.0.4]"
-            },
-            {
-              "name": "Microsoft.NETCore.App.Ref",
-              "version": "[8.0.4, 8.0.4]"
-            },
-            {
-              "name": "Microsoft.WindowsDesktop.App.Ref",
-              "version": "[8.0.4, 8.0.4]"
-            }
-          ],
           "frameworkReferences": {
             "Microsoft.NETCore.App": {
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.100-preview.4.24267.66/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.303/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
