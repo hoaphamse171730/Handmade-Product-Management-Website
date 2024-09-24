@@ -20,7 +20,7 @@ namespace HandmadeProductManagement.Contract.Repositories.Entity
 
 
         // Foreign key to the User entity
-        public string UserId { get; set; } = string.Empty;
+        public Guid UserId { get; set; }
         public ApplicationUser User { get; set; } =  new ApplicationUser();
 
 

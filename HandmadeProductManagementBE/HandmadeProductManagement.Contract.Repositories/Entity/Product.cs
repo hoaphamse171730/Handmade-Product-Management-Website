@@ -22,5 +22,6 @@ namespace HandmadeProductManagement.Contract.Repositories.Entity
         public Category Category { get; set; } = new Category();
         public Shop Shop { get; set; } = new Shop();
         public virtual ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
+        public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
     }
 }

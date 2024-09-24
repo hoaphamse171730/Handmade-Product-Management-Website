@@ -14,7 +14,7 @@ namespace HandmadeProductManagement.Contract.Repositories.Entity
         public string Name { get; set; } = string.Empty;
         public string? Description { get; set; }
         public double Rating { get; set; }
-        public string UserId { get; set; } = string.Empty;
+        public Guid UserId { get; set; }
         public ApplicationUser User { get; set; } = new ApplicationUser();
 
     }
