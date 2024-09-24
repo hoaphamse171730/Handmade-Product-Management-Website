@@ -12,8 +12,8 @@ namespace HandmadeProductManagement.Contract.Repositories.Entity
     {
         public required DateTime ChangeTime { get; set; }
         public required String Status { get; set; }
-        public required string OrderId { get; set; }
 
+        public required string OrderId { get; set; }
         // public Order Order { get; set; }
     }
 }
