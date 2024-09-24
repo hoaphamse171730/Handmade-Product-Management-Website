@@ -10,3 +10,15 @@ C:\Users\VH\Desktop\Handmade-Product-Management-Website\HandmadeProductManagemen
 C:\Users\VH\Desktop\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Core\obj\Debug\net8.0\refint\HandmadeProductManagement.Core.dll
 C:\Users\VH\Desktop\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Core\obj\Debug\net8.0\HandmadeProductManagement.Core.pdb
 C:\Users\VH\Desktop\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Core\obj\Debug\net8.0\ref\HandmadeProductManagement.Core.dll
+D:\FPT\SEMESTER_6\OJT\Handicraft\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Core\bin\Debug\net8.0\HandmadeProductManagement.Core.deps.json
+D:\FPT\SEMESTER_6\OJT\Handicraft\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Core\bin\Debug\net8.0\HandmadeProductManagement.Core.dll
+D:\FPT\SEMESTER_6\OJT\Handicraft\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Core\bin\Debug\net8.0\HandmadeProductManagement.Core.pdb
+D:\FPT\SEMESTER_6\OJT\Handicraft\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Core\obj\Debug\net8.0\HandmadeProductManagement.Core.GeneratedMSBuildEditorConfig.editorconfig
+D:\FPT\SEMESTER_6\OJT\Handicraft\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Core\obj\Debug\net8.0\HandmadeProductManagement.Core.AssemblyInfoInputs.cache
+D:\FPT\SEMESTER_6\OJT\Handicraft\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Core\obj\Debug\net8.0\HandmadeProductManagement.Core.AssemblyInfo.cs
+D:\FPT\SEMESTER_6\OJT\Handicraft\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Core\obj\Debug\net8.0\HandmadeProductManagement.Core.csproj.CoreCompileInputs.cache
+D:\FPT\SEMESTER_6\OJT\Handicraft\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Core\obj\Debug\net8.0\HandmadeProductManagement.Core.sourcelink.json
+D:\FPT\SEMESTER_6\OJT\Handicraft\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Core\obj\Debug\net8.0\HandmadeProductManagement.Core.dll
+D:\FPT\SEMESTER_6\OJT\Handicraft\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Core\obj\Debug\net8.0\refint\HandmadeProductManagement.Core.dll
+D:\FPT\SEMESTER_6\OJT\Handicraft\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Core\obj\Debug\net8.0\HandmadeProductManagement.Core.pdb
+D:\FPT\SEMESTER_6\OJT\Handicraft\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Core\obj\Debug\net8.0\ref\HandmadeProductManagement.Core.dll

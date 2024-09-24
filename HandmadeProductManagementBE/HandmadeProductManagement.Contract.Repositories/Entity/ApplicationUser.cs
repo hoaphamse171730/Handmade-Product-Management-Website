@@ -14,6 +14,9 @@ namespace HandmadeProductManagement.Repositories.Entity
         public DateTimeOffset CreatedTime { get; set; }
         public DateTimeOffset LastUpdatedTime { get; set; }
         public DateTimeOffset? DeletedTime { get; set; }
+
+        public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
+
         public ApplicationUser()
         {
             CreatedTime = CoreHelper.SystemTimeNow;
