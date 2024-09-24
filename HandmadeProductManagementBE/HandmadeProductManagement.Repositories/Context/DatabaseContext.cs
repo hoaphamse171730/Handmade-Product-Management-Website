@@ -28,7 +28,39 @@ namespace HandmadeProductManagement.Repositories.Context
         {
             base.OnModelCreating(modelBuilder);
 
-            //....
+
+            // ProductItem Configuration
+            modelBuilder.Entity<ProductItem>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.ProductId)
+                      .IsRequired();
+
+                entity.HasOne(e => e.Product)
+                      .WithMany(p => p.ProductItems)
+                      .HasForeignKey(e => e.ProductId);
+
+                entity.Property(e => e.QuantityInStock)
+                      .IsRequired();
+
+                entity.Property(e => e.Price)
+                      .IsRequired();
+            });
+
+            // Category Configuration
+            modelBuilder.Entity<Category>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Name)
+                      .IsRequired();
+
+                entity.Property(e => e.Description)
+                      .HasMaxLength(500);
+
+                entity.HasMany(e => e.Variations)
+                      .WithOne(v => v.Category)
+                      .HasForeignKey(v => v.CategoryId);
+            });
         }
     }
 
