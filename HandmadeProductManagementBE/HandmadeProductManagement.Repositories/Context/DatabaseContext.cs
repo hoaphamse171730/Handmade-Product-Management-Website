@@ -23,6 +23,13 @@ namespace HandmadeProductManagement.Repositories.Context
         public DbSet<Variation> Variations => Set<Variation>();
         public DbSet<VariationOption> VariationOptions => Set<VariationOption>();
 
-    }
-}
 
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            //....
+        }
+    }
+
+}
