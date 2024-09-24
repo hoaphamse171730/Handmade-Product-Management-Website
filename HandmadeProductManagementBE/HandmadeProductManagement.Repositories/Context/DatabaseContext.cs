@@ -5,9 +5,12 @@ using HandmadeProductManagement.Repositories.Entity;
 
 namespace HandmadeProductManagement.Repositories.Context
 {
-    public class DatabaseContext : IdentityDbContext<ApplicationUser, ApplicationRole, Guid, ApplicationUserClaims, ApplicationUserRoles, ApplicationUserLogins, ApplicationRoleClaims, ApplicationUserTokens>
+    public class DatabaseContext : IdentityDbContext<ApplicationUser, ApplicationRole, Guid, ApplicationUserClaims,
+        ApplicationUserRoles, ApplicationUserLogins, ApplicationRoleClaims, ApplicationUserTokens>
     {
-        public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options) { }
+        public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options)
+        {
+        }
 
         // user
         public virtual DbSet<ApplicationUser> ApplicationUsers => Set<ApplicationUser>();
@@ -38,7 +41,8 @@ namespace HandmadeProductManagement.Repositories.Context
 
                 entity.HasOne(e => e.Product)
                       .WithMany(p => p.ProductItems)
-                      .HasForeignKey(e => e.ProductId);
+                      .HasForeignKey(e => e.ProductId)
+                      .OnDelete(DeleteBehavior.Cascade);
 
                 entity.Property(e => e.QuantityInStock)
                       .IsRequired();
@@ -59,9 +63,43 @@ namespace HandmadeProductManagement.Repositories.Context
 
                 entity.HasMany(e => e.Variations)
                       .WithOne(v => v.Category)
-                      .HasForeignKey(v => v.CategoryId);
+                      .HasForeignKey(v => v.CategoryId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+            });
+
+            // Variation Configuration
+            modelBuilder.Entity<Variation>(entity =>
+            {
+                entity.ToTable("Variation");
+                
+                entity.HasOne(v => v.Category)
+                    .WithMany(c => c.Variations)
+                    .HasForeignKey(v => v.CategoryId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.Property(v => v.Name)
+                    .HasColumnType("text")
+                    .HasMaxLength(150)
+                    .IsRequired();
+                
+            });
+
+            // Variation Option Configuration
+            modelBuilder.Entity<VariationOption>(entity =>
+            {
+                entity.ToTable("VariationOption");
+
+                entity.Property(vo => vo.Value)
+                    .HasColumnType("text")
+                    .HasMaxLength(150)
+                    .IsRequired();
+                
+                entity.HasOne(vo => vo.Variation)
+                    .WithMany(v => v.VariationOptions)
+                    .HasForeignKey(v => v.VariationId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
         }
     }
-
 }
