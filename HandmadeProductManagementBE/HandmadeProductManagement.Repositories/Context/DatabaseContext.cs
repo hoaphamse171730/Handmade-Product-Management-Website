@@ -93,8 +93,7 @@ namespace HandmadeProductManagement.Repositories.Context
 
 
             //Primary Key cua ProductConfiguration
-            modelBuilder.Entity<ProductConfiguration>().HasKey(e => e.ProductItemId);
-            modelBuilder.Entity<ProductConfiguration>().HasKey(e => e.VariationOptionId);
+            modelBuilder.Entity<ProductConfiguration>().HasKey(pc => new { pc.ProductItemId, pc.VariationOptionId });
 
 
             // Quan hệ giữa ProductConfiguration và ProductItem (1-N)
@@ -144,6 +143,11 @@ namespace HandmadeProductManagement.Repositories.Context
                       .WithOne(v => v.Category)
                       .HasForeignKey(v => v.CategoryId)
                       .OnDelete(DeleteBehavior.Cascade);
+                
+                entity.HasOne(e => e.Promotion)
+                      .WithMany(v => v.Categories)
+                      .HasForeignKey(v => v.PromotionId)
+                      .OnDelete(DeleteBehavior.Cascade);
 
             });
 
@@ -182,7 +186,7 @@ namespace HandmadeProductManagement.Repositories.Context
             
             // Promotion
             modelBuilder.Entity<Promotion>()  
-                .HasKey(p => p.PromotionId);
+                .HasKey(p => p.Id);
             modelBuilder.Entity<Promotion>()  
                 .Property(p => p.PromotionName)  
                 .IsRequired() 
