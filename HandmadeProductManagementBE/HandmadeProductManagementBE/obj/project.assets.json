@@ -6832,19 +6832,24 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\VH\\.nuget\\packages\\": {}
+    "C:\\Users\\luan.tran\\.nuget\\packages\\": {},
+    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\VH\\Desktop\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj",
+      "projectUniqueName": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj",
       "projectName": "HandmadeProductManagementAPI",
-      "projectPath": "C:\\Users\\VH\\Desktop\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj",
-      "packagesPath": "C:\\Users\\VH\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\VH\\Desktop\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\obj\\",
+      "projectPath": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj",
+      "packagesPath": "C:\\Users\\luan.tran\\.nuget\\packages\\",
+      "outputPath": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\obj\\",
       "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+      ],
       "configFilePaths": [
-        "C:\\Users\\VH\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\luan.tran\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
@@ -6852,15 +6857,14 @@
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-        "C:\\Program Files\\dotnet\\library-packs": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
         "net8.0": {
           "targetAlias": "net8.0",
           "projectReferences": {
-            "C:\\Users\\VH\\Desktop\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj": {
-              "projectPath": "C:\\Users\\VH\\Desktop\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj"
+            "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj": {
+              "projectPath": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj"
             }
           }
         }
@@ -6873,8 +6877,9 @@
       "restoreAuditProperties": {
         "enableAudit": "true",
         "auditLevel": "low",
-        "auditMode": "direct"
-      }
+        "auditMode": "all"
+      },
+      "SdkAnalysisLevel": "9.0.100"
     },
     "frameworks": {
       "net8.0": {
@@ -6911,15 +6916,15 @@
         "downloadDependencies": [
           {
             "name": "Microsoft.AspNetCore.App.Runtime.linux-x64",
-            "version": "[8.0.7, 8.0.7]"
+            "version": "[8.0.8, 8.0.8]"
           },
           {
             "name": "Microsoft.NETCore.App.Host.linux-x64",
-            "version": "[8.0.7, 8.0.7]"
+            "version": "[8.0.8, 8.0.8]"
           },
           {
             "name": "Microsoft.NETCore.App.Runtime.linux-x64",
-            "version": "[8.0.7, 8.0.7]"
+            "version": "[8.0.8, 8.0.8]"
           }
         ],
         "frameworkReferences": {
@@ -6930,7 +6935,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.303/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.100-rc.1.24452.12/PortableRuntimeIdentifierGraph.json"
       }
     },
     "runtimes": {
@@ -6938,5 +6943,92 @@
         "#import": []
       }
     }
-  }
+  },
+  "logs": [
+    {
+      "code": "NU1902",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Package 'Azure.Identity' 1.10.3 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-m5vv-6r4h-3vj9",
+      "libraryId": "Azure.Identity",
+      "targetGraphs": [
+        "net8.0",
+        "net8.0/linux-x64"
+      ]
+    },
+    {
+      "code": "NU1902",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Package 'Azure.Identity' 1.10.3 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-wvxc-855f-jvrv",
+      "libraryId": "Azure.Identity",
+      "targetGraphs": [
+        "net8.0",
+        "net8.0/linux-x64"
+      ]
+    },
+    {
+      "code": "NU1902",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Package 'Microsoft.Identity.Client' 4.56.0 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-m5vv-6r4h-3vj9",
+      "libraryId": "Microsoft.Identity.Client",
+      "targetGraphs": [
+        "net8.0",
+        "net8.0/linux-x64"
+      ]
+    },
+    {
+      "code": "NU1901",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Package 'Microsoft.Identity.Client' 4.56.0 has a known low severity vulnerability, https://github.com/advisories/GHSA-x674-v45j-fwxw",
+      "libraryId": "Microsoft.Identity.Client",
+      "targetGraphs": [
+        "net8.0",
+        "net8.0/linux-x64"
+      ]
+    },
+    {
+      "code": "NU1903",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Package 'System.Formats.Asn1' 5.0.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-447r-wph3-92pm",
+      "libraryId": "System.Formats.Asn1",
+      "targetGraphs": [
+        "net8.0",
+        "net8.0/linux-x64"
+      ]
+    },
+    {
+      "code": "NU1903",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Package 'System.Private.Uri' 4.3.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-5f2m-466j-3848",
+      "libraryId": "System.Private.Uri",
+      "targetGraphs": [
+        "net8.0/linux-x64"
+      ]
+    },
+    {
+      "code": "NU1902",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Package 'System.Private.Uri' 4.3.0 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-x5qj-9vmx-7g6g",
+      "libraryId": "System.Private.Uri",
+      "targetGraphs": [
+        "net8.0/linux-x64"
+      ]
+    },
+    {
+      "code": "NU1903",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Package 'System.Private.Uri' 4.3.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-xhfc-gr8f-ffwc",
+      "libraryId": "System.Private.Uri",
+      "targetGraphs": [
+        "net8.0/linux-x64"
+      ]
+    }
+  ]
 }
