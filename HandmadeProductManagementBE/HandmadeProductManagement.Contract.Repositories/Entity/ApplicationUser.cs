@@ -15,7 +15,7 @@ namespace HandmadeProductManagement.Repositories.Entity
         public DateTimeOffset LastUpdatedTime { get; set; }
         public DateTimeOffset? DeletedTime { get; set; }
         public Guid CartId { get; set; }
-        public Cart Cart { get; set; } = new Cart();
+        public Cart Cart { get; set; }
 
         public ICollection<Review> Reviews { get; set; } = new List<Review>();
 
