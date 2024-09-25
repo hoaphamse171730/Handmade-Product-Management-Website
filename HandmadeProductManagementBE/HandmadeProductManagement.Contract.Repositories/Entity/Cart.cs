@@ -7,7 +7,6 @@ namespace HandmadeProductManagement.Contract.Repositories.Entity
     {
         public Guid UserId { get; set; }
         public ApplicationUser User { get; set; } = new ApplicationUser();
-
         public ICollection<CartItem> CartItems { get; set; } = [];
     }
 }
