@@ -3,6 +3,7 @@ using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.ModelViews.ShopModelViews;
+using HandmadeProductManagement.Repositories.Entity;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -23,15 +24,47 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<ShopResponseModel> CreateShopAsync(CreateShopDto createShop)
         {
+            var userRepository = _unitOfWork.GetRepository<ApplicationUser>();
+            var userExists = await userRepository.Entities.AnyAsync(u => u.Id == createShop.UserId);
+            if (!userExists)
+            {
+                throw new BaseException.ErrorException(404, "user_not_found", "User not found.");
+            }
+
             var repository = _unitOfWork.GetRepository<Shop>();
 
             var existingShop = await repository.Entities
                 .FirstOrDefaultAsync(s => s.UserId == createShop.UserId);
 
-            if (existingShop != null && existingShop.DeletedBy == null)
+            if (existingShop != null)
             {
-                throw new BaseException.ErrorException(
-                    400, "user_active_shop", "User already has an active shop.");
+                if (existingShop.DeletedBy == null)
+                {
+                    throw new BaseException.ErrorException(
+                        400, "user_active_shop", "User already has an active shop.");
+                }
+                else
+                {
+                    existingShop.Name = createShop.Name;
+                    existingShop.Description = createShop.Description;
+                    existingShop.Rating = createShop.Rating;
+                    existingShop.DeletedBy = null;
+                    existingShop.DeletedTime = null;
+                    existingShop.LastUpdatedBy = createShop.UserId.ToString();
+                    existingShop.LastUpdatedTime = DateTime.UtcNow;
+
+                    repository.Update(existingShop);
+                    await _unitOfWork.SaveAsync();
+
+                    return new ShopResponseModel
+                    {
+                        Id = existingShop.Id.ToString(),
+                        Name = existingShop.Name,
+                        Description = existingShop.Description,
+                        Rating = existingShop.Rating,
+                        UserId = existingShop.UserId
+                    };
+                }
             }
 
             var shop = new Shop
@@ -96,6 +129,13 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<ShopResponseModel> GetShopByUserIdAsync(Guid userId)
         {
+            var userRepository = _unitOfWork.GetRepository<ApplicationUser>();
+            var userExists = await userRepository.Entities.AnyAsync(u => u.Id == userId);
+            if (!userExists)
+            {
+                throw new BaseException.ErrorException(404, "user_not_found", "User not found.");
+            }
+
             var repository = _unitOfWork.GetRepository<Shop>();
             var shop = await repository.Entities
                 .FirstOrDefaultAsync(s => s.UserId == userId && s.DeletedBy == null);
