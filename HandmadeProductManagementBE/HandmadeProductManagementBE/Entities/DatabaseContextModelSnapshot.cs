@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace HandmadeProductManagementAPI.Migrations
+namespace HandmadeProductManagementAPI.Entities
 {
     [DbContext(typeof(DatabaseContext))]
     partial class DatabaseContextModelSnapshot : ModelSnapshot
@@ -339,10 +339,6 @@ namespace HandmadeProductManagementAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("CartId1")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<string>("CreatedBy")
                         .HasColumnType("nvarchar(max)");
 
@@ -371,8 +367,6 @@ namespace HandmadeProductManagementAPI.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CartId");
-
-                    b.HasIndex("CartId1");
 
                     b.HasIndex("ProductItemId");
 
@@ -688,15 +682,15 @@ namespace HandmadeProductManagementAPI.Migrations
 
             modelBuilder.Entity("HandmadeProductManagement.Contract.Repositories.Entity.ProductConfiguration", b =>
                 {
-                    b.Property<string>("ProductItemId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<string>("VariationOptionId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.HasKey("ProductItemId", "VariationOptionId");
+                    b.Property<string>("ProductItemId")
+                        .HasColumnType("nvarchar(450)");
 
-                    b.HasIndex("VariationOptionId");
+                    b.HasKey("VariationOptionId");
+
+                    b.HasIndex("ProductItemId");
 
                     b.ToTable("ProductConfiguration");
                 });
@@ -1300,17 +1294,12 @@ namespace HandmadeProductManagementAPI.Migrations
 
             modelBuilder.Entity("HandmadeProductManagement.Contract.Repositories.Entity.CartItem", b =>
                 {
-                    b.HasOne("HandmadeProductManagement.Contract.Repositories.Entity.Cart", null)
+                    b.HasOne("HandmadeProductManagement.Contract.Repositories.Entity.Cart", "Cart")
                         .WithMany("CartItems")
                         .HasForeignKey("CartId")
                         .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("HandmadeProductManagement.Contract.Repositories.Entity.Cart", "Cart")
-                        .WithMany()
-                        .HasForeignKey("CartId1")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK_Cart_CartItem_2645B050");
 
                     b.HasOne("HandmadeProductManagement.Contract.Repositories.Entity.ProductItem", "ProductItem")
                         .WithMany("CartItem")
@@ -1328,7 +1317,7 @@ namespace HandmadeProductManagementAPI.Migrations
                     b.HasOne("HandmadeProductManagement.Contract.Repositories.Entity.Promotion", "Promotion")
                         .WithMany("Categories")
                         .HasForeignKey("PromotionId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Promotion");
@@ -1338,8 +1327,7 @@ namespace HandmadeProductManagementAPI.Migrations
                 {
                     b.HasOne("HandmadeProductManagement.Contract.Repositories.Entity.CancelReason", "CancelReason")
                         .WithMany("Orders")
-                        .HasForeignKey("CancelReasonId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("CancelReasonId");
 
                     b.HasOne("HandmadeProductManagement.Repositories.Entity.ApplicationUser", "User")
                         .WithMany("Orders")
@@ -1416,14 +1404,12 @@ namespace HandmadeProductManagementAPI.Migrations
                 {
                     b.HasOne("HandmadeProductManagement.Contract.Repositories.Entity.ProductItem", "ProductItem")
                         .WithMany("ProductConfiguration")
-                        .HasForeignKey("ProductItemId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .HasForeignKey("ProductItemId");
 
                     b.HasOne("HandmadeProductManagement.Contract.Repositories.Entity.VariationOption", "VariationOption")
                         .WithMany("ProductConfiguration")
                         .HasForeignKey("VariationOptionId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("ProductItem");
@@ -1458,7 +1444,7 @@ namespace HandmadeProductManagementAPI.Migrations
                     b.HasOne("HandmadeProductManagement.Contract.Repositories.Entity.Review", "Review")
                         .WithOne("Reply")
                         .HasForeignKey("HandmadeProductManagement.Contract.Repositories.Entity.Reply", "ReviewId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("HandmadeProductManagement.Contract.Repositories.Entity.Shop", "Shop")
@@ -1477,7 +1463,7 @@ namespace HandmadeProductManagementAPI.Migrations
                     b.HasOne("HandmadeProductManagement.Contract.Repositories.Entity.Product", "Product")
                         .WithMany("Reviews")
                         .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("HandmadeProductManagement.Repositories.Entity.ApplicationUser", "User")

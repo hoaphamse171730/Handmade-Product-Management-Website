@@ -3,10 +3,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace HandmadeProductManagementAPI.Migrations
+namespace HandmadeProductManagementAPI.Entities
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -144,8 +144,7 @@ namespace HandmadeProductManagementAPI.Migrations
                         name: "FK_Category_Promotions_PromotionId",
                         column: x => x.PromotionId,
                         principalTable: "Promotions",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -379,8 +378,7 @@ namespace HandmadeProductManagementAPI.Migrations
                         name: "FK_Orders_CancelReason_CancelReasonId",
                         column: x => x.CancelReasonId,
                         principalTable: "CancelReason",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -666,8 +664,7 @@ namespace HandmadeProductManagementAPI.Migrations
                         name: "FK_Reviews_Product_ProductId",
                         column: x => x.ProductId,
                         principalTable: "Product",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -676,7 +673,6 @@ namespace HandmadeProductManagementAPI.Migrations
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     CartId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    CartId1 = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     ProductItemId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     ProductQuantity = table.Column<int>(type: "int", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -690,20 +686,14 @@ namespace HandmadeProductManagementAPI.Migrations
                 {
                     table.PrimaryKey("PK_CartItem", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_CartItem_Cart_CartId",
-                        column: x => x.CartId,
-                        principalTable: "Cart",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_CartItem_Cart_CartId1",
-                        column: x => x.CartId1,
-                        principalTable: "Cart",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
                         name: "FK_CartItem_ProductItem_ProductItemId",
                         column: x => x.ProductItemId,
                         principalTable: "ProductItem",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Cart_CartItem_2645B050",
+                        column: x => x.CartId,
+                        principalTable: "Cart",
                         principalColumn: "Id");
                 });
 
@@ -711,24 +701,23 @@ namespace HandmadeProductManagementAPI.Migrations
                 name: "ProductConfiguration",
                 columns: table => new
                 {
-                    ProductItemId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    VariationOptionId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                    VariationOptionId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ProductItemId = table.Column<string>(type: "nvarchar(450)", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ProductConfiguration", x => new { x.ProductItemId, x.VariationOptionId });
+                    table.PrimaryKey("PK_ProductConfiguration", x => x.VariationOptionId);
                     table.ForeignKey(
                         name: "FK_ProductConfiguration_ProductItem_ProductItemId",
                         column: x => x.ProductItemId,
                         principalTable: "ProductItem",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_ProductConfiguration_VariationOption_VariationOptionId",
                         column: x => x.VariationOptionId,
                         principalTable: "VariationOption",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -754,8 +743,7 @@ namespace HandmadeProductManagementAPI.Migrations
                         name: "FK_Replies_Reviews_ReviewId",
                         column: x => x.ReviewId,
                         principalTable: "Reviews",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Replies_Shops_ShopId",
                         column: x => x.ShopId,
@@ -820,11 +808,6 @@ namespace HandmadeProductManagementAPI.Migrations
                 column: "CartId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_CartItem_CartId1",
-                table: "CartItem",
-                column: "CartId1");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_CartItem_ProductItemId",
                 table: "CartItem",
                 column: "ProductItemId");
@@ -876,9 +859,9 @@ namespace HandmadeProductManagementAPI.Migrations
                 column: "ShopId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ProductConfiguration_VariationOptionId",
+                name: "IX_ProductConfiguration_ProductItemId",
                 table: "ProductConfiguration",
-                column: "VariationOptionId");
+                column: "ProductItemId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ProductImage_ProductId",
