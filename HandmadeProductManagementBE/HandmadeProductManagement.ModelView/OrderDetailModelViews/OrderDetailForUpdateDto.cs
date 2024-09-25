@@ -1,6 +1,6 @@
 namespace HandmadeProductManagement.ModelViews.OrderDetailModelViews;
 
-public class OrderDetailForUpdateDto
+public class OrderDetailForUpdateDto : OrderDetailForManipulationDto
 {
     
 }

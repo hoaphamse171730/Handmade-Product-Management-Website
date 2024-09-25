@@ -51,20 +51,17 @@ public static class MappingConfig
         #endregion
 
         #region OrderDetail
-
         TypeAdapterConfig<OrderDetail, OrderDetailDto>.NewConfig()
-            .Map(dest => dest.OrderDetailId, src => src.OrderDetailId)
+            .Map(dest => dest.Id, src => src.OrderDetailId)
             .Map(dest => dest.ProductId, src => src.ProductId)
             .Map(dest => dest.OrderId, src => src.OrderId)
             .Map(dest => dest.ProductQuantity, src => src.ProductQuantity)
             .Map(dest => dest.UnitPrice, src => src.UnitPrice);
-
         TypeAdapterConfig<OrderDetailForCreationDto, OrderDetail>.NewConfig()
             .Map(dest => dest.ProductId, src => src.ProductId)
             .Map(dest => dest.OrderId, src => src.OrderId)
             .Map(dest => dest.ProductQuantity, src => src.ProductQuantity)
             .Map(dest => dest.UnitPrice, src => src.UnitPrice);
-
         TypeAdapterConfig<OrderDetailForUpdateDto, OrderDetail>.NewConfig()
             .Map(dest => dest.ProductId, src => src.ProductId)
             .Map(dest => dest.OrderId, src => src.OrderId)
@@ -72,7 +69,6 @@ public static class MappingConfig
             .Map(dest => dest.UnitPrice, src => src.UnitPrice);
 
         #endregion
-
 
         #region Product
         TypeAdapterConfig<Product, ProductDto>.NewConfig()
@@ -102,7 +98,6 @@ public static class MappingConfig
             .Map(dest => dest.Rating, src => src.Rating)
             .Map(dest => dest.Status, src => src.Status)
             .Map(dest => dest.SoldCount, src => src.SoldCount);
-
         #endregion
     }
 }
