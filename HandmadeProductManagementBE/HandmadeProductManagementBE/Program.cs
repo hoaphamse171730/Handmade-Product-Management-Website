@@ -1,9 +1,6 @@
-using HandmadeProductManagement.Contract.Services.Interface;
-using HandmadeProductManagement.Repositories.Context;
-using HandmadeProductManagement.Services.Service;
-using HandmadeProductManagementBE.API;
-using Microsoft.EntityFrameworkCore;
-using HandmadeProductManagement.Services;
+using HandmadeProductManagementAPI.Extensions;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,28 +11,15 @@ builder.Configuration
     .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
     .AddEnvironmentVariables();
 
-builder.Services.AddControllers();
-builder.Services.AddDbContext<DatabaseContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("BloggingDatabase"),
-    sqlOptions => sqlOptions.EnableRetryOnFailure(
-        maxRetryCount: 5, // Number of retry attempts
-        maxRetryDelay: TimeSpan.FromSeconds(10), // Delay between retries
-        errorNumbersToAdd: null // Additional error codes to consider as transient errors
-    ).MigrationsAssembly("HandmadeProductManagementAPI")));
-builder.Services.AddDbContext<DatabaseContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("BloggingDatabase"))
-           .EnableSensitiveDataLogging() // Enable detailed logging
-           .EnableDetailedErrors()); // Enable detailed error messages
+builder.Services.AddControllers(opt =>
+{
+    var policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
+    opt.Filters.Add(new AuthorizeFilter(policy));
+});
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddInfrastructure(builder.Configuration);
-
-
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-builder.Services.AddConfig(builder.Configuration);
-builder.Services.AddScoped<ICancelReasonService, CancelReasonService>();
-builder.Services.AddScoped<IStatusChangeService, StatusChangeService>();
+//All extra services must be contained in ApplicationServiceExtentions & IdentityServiceExtensions
+builder.Services.AddApplicationServices(builder.Configuration);
+builder.Services.AddIdentityServices(builder.Configuration);
 
 var app = builder.Build();
 
@@ -45,6 +29,7 @@ app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
