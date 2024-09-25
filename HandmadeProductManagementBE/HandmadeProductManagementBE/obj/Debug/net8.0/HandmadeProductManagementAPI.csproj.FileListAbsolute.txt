@@ -318,3 +318,5 @@ D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\
 D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\obj\Debug\net8.0\HandmadeProductManagementAPI.pdb
 D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\obj\Debug\net8.0\HandmadeProductManagementAPI.genruntimeconfig.cache
 D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\obj\Debug\net8.0\ref\HandmadeProductManagementAPI.dll
+D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\bin\Debug\net8.0\Mapster.dll
+D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\bin\Debug\net8.0\Mapster.Core.dll
