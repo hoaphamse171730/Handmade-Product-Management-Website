@@ -24,10 +24,7 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<BaseResponse<IEnumerable<ProductResponseModel>>> SearchProductsAsync(ProductSearchModel searchModel)
         {
-            var query = _unitOfWork.GetRepository<Product>().Entities
-                .Include(p => p.ProductItems)
-                .Include(p => p.Reviews)
-                .AsQueryable();
+            var query = _unitOfWork.GetRepository<Product>().Entities.AsQueryable();
 
             // Apply Search Filters
             if (!string.IsNullOrEmpty(searchModel.Name))
@@ -55,37 +52,50 @@ namespace HandmadeProductManagement.Services.Service
                 query = query.Where(p => p.Rating >= searchModel.MinRating.Value);
             }
 
-            // Apply Sort logic
+            //Apply Sorting Logic
             if (searchModel.SortByPrice)
             {
                 query = searchModel.SortDescending
                     ? query.OrderByDescending(p => p.ProductItems.Any() ? p.ProductItems.Min(pi => pi.Price) : 0)
                     : query.OrderBy(p => p.ProductItems.Any() ? p.ProductItems.Min(pi => pi.Price) : 0);
             }
-            else if (searchModel.SortByRating)
+            else // Default or Sort by Rating
             {
                 query = searchModel.SortDescending
                     ? query.OrderByDescending(p => p.Rating)
                     : query.OrderBy(p => p.Rating);
             }
 
-            var products = await query.ToListAsync();
 
-            var productResponseModels = products.Select(p => new ProductResponseModel
-            {
-                Id = p.Id,
-                Name = p.Name,
-                Description = p.Description,
-                CategoryId = p.CategoryId,
-                ShopId = p.ShopId,
-                Rating = p.Rating,
-                Status = p.Status,
-                SoldCount = p.SoldCount,
-                Price = p.ProductItems.Any() ? p.ProductItems.Min(pi => pi.Price) : 0
-
-            });
+            var productResponseModels = await query
+                .GroupBy(p => new
+                {
+                    p.Id,
+                    p.Name,
+                    p.Description,
+                    p.CategoryId,
+                    p.ShopId,
+                    p.Rating,
+                    p.Status,
+                    p.SoldCount
+                })
+                .Select(g => new ProductResponseModel
+                {
+                    Id = g.Key.Id,
+                    Name = g.Key.Name,
+                    Description = g.Key.Description,
+                    CategoryId = g.Key.CategoryId,
+                    ShopId = g.Key.ShopId,
+                    Rating = g.Key.Rating,
+                    Status = g.Key.Status,
+                    SoldCount = g.Key.SoldCount,
+                    // Avoid duplicates
+                    Price = g.SelectMany(p => p.ProductItems).Any() ? g.SelectMany(p => p.ProductItems).Min(pi => pi.Price) : 0
+                })
+                .ToListAsync();
 
             return BaseResponse<IEnumerable<ProductResponseModel>>.OkResponse(productResponseModels);
+
 
         }
 
