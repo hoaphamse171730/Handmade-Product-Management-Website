@@ -9,5 +9,6 @@ namespace HandmadeProductManagement.Contract.Services.Interface
         Task<CancelReason> Create(CancelReason cancelReason);
         Task<CancelReason> Update(string id, CancelReason cancelReason);
         Task<bool> Delete(string id);
+        Task<bool> SoftDelete(string id);
     }
 }

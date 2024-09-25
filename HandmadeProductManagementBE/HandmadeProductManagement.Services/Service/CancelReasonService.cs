@@ -70,6 +70,20 @@ namespace HandmadeProductManagement.Services.Service
                 return false;
             }
         }
+        // Soft delete 
+        public async Task<bool> SoftDelete(string id)
+        {
+            var cancelReason = await GetById(id);
+            if (cancelReason == null)
+                return false;
 
+            // Set DeletedTime to current time and update the DeletedBy field
+            cancelReason.DeletedTime = DateTimeOffset.UtcNow;
+            cancelReason.DeletedBy = "currentUser";
+
+            _unitOfWork.GetRepository<CancelReason>().Update(cancelReason);
+            await _unitOfWork.SaveAsync();
+            return true;
+        }
     }
 }

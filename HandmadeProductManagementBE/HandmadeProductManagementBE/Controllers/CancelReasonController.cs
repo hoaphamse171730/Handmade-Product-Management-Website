@@ -60,5 +60,18 @@ namespace HandmadeProductManagementAPI.Controllers
             return NoContent();
         }
 
+        // PUT: api/CancelReason/{id}/soft-delete
+        [HttpPut("{id}/soft-delete")]
+        public async Task<ActionResult> SoftDeleteCancelReason(string id)
+        {
+            bool success = await _cancelReasonService.SoftDelete(id);
+            if (!success)
+            {
+                return NotFound();
+            }
+            return NoContent();
+        }
+
+
     }
 }
