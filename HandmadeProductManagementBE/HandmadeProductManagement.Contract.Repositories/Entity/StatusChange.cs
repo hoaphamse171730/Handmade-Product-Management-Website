@@ -13,6 +13,6 @@ namespace HandmadeProductManagement.Contract.Repositories.Entity
         public DateTime ChangeTime { get; set; }
         public string Status { get; set; } = string.Empty;  
         public string OrderId { get; set; } = string.Empty;
-        public Order Order { get; set; } = new Order();
+        public virtual Order? Order { get; set; }
     }
 }

@@ -26,6 +26,14 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(BaseResponse<IList<StatusChange>>.OkResponse(statusChanges));
         }
 
+        // GET: api/StatusChange/Order/{orderId}
+        [HttpGet("Order/{orderId}")]
+        public async Task<ActionResult<IEnumerable<StatusChange>>> GetStatusChangesByOrderId(string orderId)
+        {
+            IList<StatusChange> statusChanges = await _statusChangeService.GetByOrderId(orderId);
+            return Ok(BaseResponse<IList<StatusChange>>.OkResponse(statusChanges));
+        }
+
         // GET: api/StatusChange/{id}
         [HttpGet("{id}")]
         public async Task<ActionResult<StatusChange>> GetStatusChange(string id)
@@ -55,6 +63,10 @@ namespace HandmadeProductManagementAPI.Controllers
         public async Task<ActionResult> DeleteStatusChange(string id)
         {
             bool success = await _statusChangeService.Delete(id);
+            if (!success)
+            {
+                return NotFound();
+            }
             return NoContent();
         }
     }
