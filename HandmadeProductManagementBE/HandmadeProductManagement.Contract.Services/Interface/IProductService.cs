@@ -1,8 +1,17 @@
-namespace HandmadeProductManagement.Contract.Services.Interface;
+﻿using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.ModelViews.ProductModelViews;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-public interface IProductService
+namespace HandmadeProductManagement.Contract.Services.Interface
 {
-    Task<IEnumerable<>>
-    
-    
+    public interface IProductService
+    {
+        Task<BaseResponse<IEnumerable<ProductResponseModel>>> SearchProductsAsync(ProductSearchModel searchModel);
+        Task<BaseResponse<IEnumerable<ProductResponseModel>>> SortProductsAsync(ProductSortModel sortModel);
+
+    }
 }

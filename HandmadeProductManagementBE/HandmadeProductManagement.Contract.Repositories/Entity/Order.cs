@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace HandmadeProductManagement.Contract.Repositories.Entity
@@ -20,9 +21,10 @@ namespace HandmadeProductManagement.Contract.Repositories.Entity
         public string? Phone { get; set; }
         public string? Note { get; set; }
         public string? CancelReasonId { get; set; }
-
-        public ApplicationUser User { get; set; } = new ApplicationUser();
-        public CancelReason CancelReason { get; set; } = new CancelReason();
+        [JsonIgnore]
+        public ApplicationUser? User { get; set; }
+        [JsonIgnore]
+        public CancelReason? CancelReason { get; set; }
         public ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
         public ICollection<StatusChange> StatusChanges { get; set; } = [];
     }

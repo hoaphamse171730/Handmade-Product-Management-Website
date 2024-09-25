@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("HandmadeProductManagement.ModelViews")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+836827c4eff22ed9b4afcd6f1fcfea07407e5a97")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3263e63e29efacd13633972672eeb2a752714261")]
 [assembly: System.Reflection.AssemblyProductAttribute("HandmadeProductManagement.ModelViews")]
 [assembly: System.Reflection.AssemblyTitleAttribute("HandmadeProductManagement.ModelViews")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

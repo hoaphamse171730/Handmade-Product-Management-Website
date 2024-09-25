@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\HandmadeProductManagement.ModelView\HandmadeProductManagement.ModelViews.csproj" />
     <ProjectReference Include="..\HandmadeProductManagement.Repositories\HandmadeProductManagement.Repositories.csproj" />
   </ItemGroup>
 

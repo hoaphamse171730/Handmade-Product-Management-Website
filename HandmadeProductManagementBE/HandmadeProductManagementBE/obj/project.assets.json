@@ -1786,6 +1786,7 @@
         "type": "project",
         "framework": ".NETCoreApp,Version=v8.0",
         "dependencies": {
+          "HandmadeProductManagement.ModelViews": "1.0.0",
           "HandmadeProductManagement.Repositories": "1.0.0"
         },
         "compile": {
@@ -1798,6 +1799,9 @@
       "HandmadeProductManagement.Core/1.0.0": {
         "type": "project",
         "framework": ".NETCoreApp,Version=v8.0",
+        "dependencies": {
+          "Mapster": "7.4.0"
+        },
         "compile": {
           "bin/placeholder/HandmadeProductManagement.Core.dll": {}
         },
@@ -3582,6 +3586,7 @@
         "type": "project",
         "framework": ".NETCoreApp,Version=v8.0",
         "dependencies": {
+          "HandmadeProductManagement.ModelViews": "1.0.0",
           "HandmadeProductManagement.Repositories": "1.0.0"
         },
         "compile": {
@@ -3594,6 +3599,9 @@
       "HandmadeProductManagement.Core/1.0.0": {
         "type": "project",
         "framework": ".NETCoreApp,Version=v8.0",
+        "dependencies": {
+          "Mapster": "7.4.0"
+        },
         "compile": {
           "bin/placeholder/HandmadeProductManagement.Core.dll": {}
         },
@@ -6902,7 +6910,6 @@
   "projectFileDependencyGroups": {
     "net8.0": [
       "HandmadeProductManagement.Services >= 1.0.0",
-      "Mapster >= 7.4.0",
       "Microsoft.EntityFrameworkCore.Design >= 8.0.8",
       "Microsoft.EntityFrameworkCore.Tools >= 8.0.8",
       "Swashbuckle.AspNetCore >= 6.4.0"
@@ -6954,10 +6961,6 @@
       "net8.0": {
         "targetAlias": "net8.0",
         "dependencies": {
-          "Mapster": {
-            "target": "Package",
-            "version": "[7.4.0, )"
-          },
           "Microsoft.EntityFrameworkCore.Design": {
             "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
             "suppressParent": "All",
@@ -7032,5 +7035,13 @@
         "#import": []
       }
     }
-  }
+  },
+  "logs": [
+    {
+      "code": "Undefined",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Problem reading the cache file D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\obj\\project.nuget.cache : Invalid property identifier character: <. Path 'version', line 3, position 0."
+    }
+  ]
 }

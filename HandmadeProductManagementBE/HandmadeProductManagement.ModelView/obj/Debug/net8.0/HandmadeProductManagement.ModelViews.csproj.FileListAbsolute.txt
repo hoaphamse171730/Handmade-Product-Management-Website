@@ -10,3 +10,15 @@ C:\Users\VH\Desktop\Handmade-Product-Management-Website\HandmadeProductManagemen
 C:\Users\VH\Desktop\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.ModelView\obj\Debug\net8.0\refint\HandmadeProductManagement.ModelViews.dll
 C:\Users\VH\Desktop\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.ModelView\obj\Debug\net8.0\HandmadeProductManagement.ModelViews.pdb
 C:\Users\VH\Desktop\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.ModelView\obj\Debug\net8.0\ref\HandmadeProductManagement.ModelViews.dll
+D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.ModelView\bin\Debug\net8.0\HandmadeProductManagement.ModelViews.deps.json
+D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.ModelView\bin\Debug\net8.0\HandmadeProductManagement.ModelViews.dll
+D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.ModelView\bin\Debug\net8.0\HandmadeProductManagement.ModelViews.pdb
+D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.ModelView\obj\Debug\net8.0\HandmadeProductManagement.ModelViews.GeneratedMSBuildEditorConfig.editorconfig
+D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.ModelView\obj\Debug\net8.0\HandmadeProductManagement.ModelViews.AssemblyInfoInputs.cache
+D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.ModelView\obj\Debug\net8.0\HandmadeProductManagement.ModelViews.AssemblyInfo.cs
+D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.ModelView\obj\Debug\net8.0\HandmadeProductManagement.ModelViews.csproj.CoreCompileInputs.cache
+D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.ModelView\obj\Debug\net8.0\HandmadeProductManagement.ModelViews.sourcelink.json
+D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.ModelView\obj\Debug\net8.0\HandmadeProductManagement.ModelViews.dll
+D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.ModelView\obj\Debug\net8.0\refint\HandmadeProductManagement.ModelViews.dll
+D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.ModelView\obj\Debug\net8.0\HandmadeProductManagement.ModelViews.pdb
+D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.ModelView\obj\Debug\net8.0\ref\HandmadeProductManagement.ModelViews.dll

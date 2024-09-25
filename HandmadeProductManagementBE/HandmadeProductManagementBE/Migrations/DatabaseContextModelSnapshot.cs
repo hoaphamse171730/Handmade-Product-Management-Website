@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace HandmadeProductManagementAPI.Entities
+namespace HandmadeProductManagementAPI.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
     partial class DatabaseContextModelSnapshot : ModelSnapshot
@@ -275,7 +275,7 @@ namespace HandmadeProductManagementAPI.Entities
                     b.Property<string>("DeletedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTimeOffset>("DeletedTime")
+                    b.Property<DateTimeOffset?>("DeletedTime")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("Description")
@@ -310,7 +310,7 @@ namespace HandmadeProductManagementAPI.Entities
                     b.Property<string>("DeletedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTimeOffset>("DeletedTime")
+                    b.Property<DateTimeOffset?>("DeletedTime")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("LastUpdatedBy")
@@ -348,7 +348,7 @@ namespace HandmadeProductManagementAPI.Entities
                     b.Property<string>("DeletedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTimeOffset>("DeletedTime")
+                    b.Property<DateTimeOffset?>("DeletedTime")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("LastUpdatedBy")
@@ -387,7 +387,7 @@ namespace HandmadeProductManagementAPI.Entities
                     b.Property<string>("DeletedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTimeOffset>("DeletedTime")
+                    b.Property<DateTimeOffset?>("DeletedTime")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("Description")
@@ -442,7 +442,7 @@ namespace HandmadeProductManagementAPI.Entities
                     b.Property<string>("DeletedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTimeOffset>("DeletedTime")
+                    b.Property<DateTimeOffset?>("DeletedTime")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("LastUpdatedBy")
@@ -496,7 +496,7 @@ namespace HandmadeProductManagementAPI.Entities
                     b.Property<string>("DeletedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTimeOffset>("DeletedTime")
+                    b.Property<DateTimeOffset?>("DeletedTime")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("Id")
@@ -545,7 +545,7 @@ namespace HandmadeProductManagementAPI.Entities
                     b.Property<string>("DeletedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTimeOffset>("DeletedTime")
+                    b.Property<DateTimeOffset?>("DeletedTime")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<DateTime>("ExpirationDate")
@@ -588,7 +588,7 @@ namespace HandmadeProductManagementAPI.Entities
                     b.Property<string>("DeletedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTimeOffset>("DeletedTime")
+                    b.Property<DateTimeOffset?>("DeletedTime")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("ExternalTransaction")
@@ -641,7 +641,7 @@ namespace HandmadeProductManagementAPI.Entities
                     b.Property<string>("DeletedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTimeOffset>("DeletedTime")
+                    b.Property<DateTimeOffset?>("DeletedTime")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("Description")
@@ -657,8 +657,8 @@ namespace HandmadeProductManagementAPI.Entities
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Rating")
-                        .HasColumnType("int");
+                    b.Property<float>("Rating")
+                        .HasColumnType("real");
 
                     b.Property<string>("ShopId")
                         .IsRequired()
@@ -709,7 +709,7 @@ namespace HandmadeProductManagementAPI.Entities
                     b.Property<string>("DeletedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTimeOffset>("DeletedTime")
+                    b.Property<DateTimeOffset?>("DeletedTime")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("LastUpdatedBy")
@@ -747,7 +747,7 @@ namespace HandmadeProductManagementAPI.Entities
                     b.Property<string>("DeletedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTimeOffset>("DeletedTime")
+                    b.Property<DateTimeOffset?>("DeletedTime")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("LastUpdatedBy")
@@ -787,7 +787,7 @@ namespace HandmadeProductManagementAPI.Entities
                     b.Property<string>("DeletedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTimeOffset>("DeletedTime")
+                    b.Property<DateTimeOffset?>("DeletedTime")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("Description")
@@ -848,7 +848,7 @@ namespace HandmadeProductManagementAPI.Entities
                     b.Property<string>("DeletedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTimeOffset>("DeletedTime")
+                    b.Property<DateTimeOffset?>("DeletedTime")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("LastUpdatedBy")
@@ -897,7 +897,7 @@ namespace HandmadeProductManagementAPI.Entities
                     b.Property<string>("DeletedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTimeOffset>("DeletedTime")
+                    b.Property<DateTimeOffset?>("DeletedTime")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("LastUpdatedBy")
@@ -939,7 +939,7 @@ namespace HandmadeProductManagementAPI.Entities
                     b.Property<string>("DeletedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTimeOffset>("DeletedTime")
+                    b.Property<DateTimeOffset?>("DeletedTime")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("Description")
@@ -990,7 +990,7 @@ namespace HandmadeProductManagementAPI.Entities
                     b.Property<string>("DeletedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTimeOffset>("DeletedTime")
+                    b.Property<DateTimeOffset?>("DeletedTime")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("LastUpdatedBy")
@@ -1038,7 +1038,7 @@ namespace HandmadeProductManagementAPI.Entities
                     b.Property<string>("DeletedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTimeOffset>("DeletedTime")
+                    b.Property<DateTimeOffset?>("DeletedTime")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("FullName")
@@ -1074,7 +1074,7 @@ namespace HandmadeProductManagementAPI.Entities
                     b.Property<string>("DeletedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTimeOffset>("DeletedTime")
+                    b.Property<DateTimeOffset?>("DeletedTime")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("LastUpdatedBy")
@@ -1109,7 +1109,7 @@ namespace HandmadeProductManagementAPI.Entities
                     b.Property<string>("DeletedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTimeOffset>("DeletedTime")
+                    b.Property<DateTimeOffset?>("DeletedTime")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("LastUpdatedBy")
@@ -1384,7 +1384,7 @@ namespace HandmadeProductManagementAPI.Entities
             modelBuilder.Entity("HandmadeProductManagement.Contract.Repositories.Entity.Product", b =>
                 {
                     b.HasOne("HandmadeProductManagement.Contract.Repositories.Entity.Category", "Category")
-                        .WithMany()
+                        .WithMany("Products")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1542,6 +1542,8 @@ namespace HandmadeProductManagementAPI.Entities
 
             modelBuilder.Entity("HandmadeProductManagement.Contract.Repositories.Entity.Category", b =>
                 {
+                    b.Navigation("Products");
+
                     b.Navigation("Variations");
                 });
 

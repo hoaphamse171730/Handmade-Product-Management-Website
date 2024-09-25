@@ -9,7 +9,6 @@
       "HandmadeProductManagementAPI/1.0.0": {
         "dependencies": {
           "HandmadeProductManagement.Services": "1.0.0",
-          "Mapster": "7.4.0",
           "Microsoft.EntityFrameworkCore.Design": "8.0.8",
           "Microsoft.EntityFrameworkCore.Tools": "8.0.8",
           "Swashbuckle.AspNetCore": "6.4.0"
@@ -68,25 +67,6 @@
           "lib/net6.0/Humanizer.dll": {
             "assemblyVersion": "2.14.0.0",
             "fileVersion": "2.14.1.48190"
-          }
-        }
-      },
-      "Mapster/7.4.0": {
-        "dependencies": {
-          "Mapster.Core": "1.2.1"
-        },
-        "runtime": {
-          "lib/net7.0/Mapster.dll": {
-            "assemblyVersion": "7.4.0.0",
-            "fileVersion": "7.4.0.0"
-          }
-        }
-      },
-      "Mapster.Core/1.2.1": {
-        "runtime": {
-          "lib/net7.0/Mapster.Core.dll": {
-            "assemblyVersion": "1.2.1.0",
-            "fileVersion": "1.2.1.0"
           }
         }
       },
@@ -1000,12 +980,6 @@
       "System.Text.Json/8.0.4": {
         "dependencies": {
           "System.Text.Encodings.Web": "8.0.0"
-        },
-        "runtime": {
-          "lib/net8.0/System.Text.Json.dll": {
-            "assemblyVersion": "8.0.0.0",
-            "fileVersion": "8.0.724.31311"
-          }
         }
       },
       "System.Threading.Channels/6.0.0": {},
@@ -1035,28 +1009,38 @@
           "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "8.0.8"
         },
         "runtime": {
-          "HandmadeProductManagement.Contract.Repositories.dll": {}
+          "HandmadeProductManagement.Contract.Repositories.dll": {
+            "assemblyVersion": "1.0.0",
+            "fileVersion": "1.0.0.0"
+          }
         }
       },
       "HandmadeProductManagement.Contract.Services/1.0.0": {
         "dependencies": {
+          "HandmadeProductManagement.ModelViews": "1.0.0",
           "HandmadeProductManagement.Repositories": "1.0.0"
         },
         "runtime": {
-          "HandmadeProductManagement.Contract.Services.dll": {}
+          "HandmadeProductManagement.Contract.Services.dll": {
+            "assemblyVersion": "1.0.0",
+            "fileVersion": "1.0.0.0"
+          }
         }
       },
       "HandmadeProductManagement.Core/1.0.0": {
         "runtime": {
-          "HandmadeProductManagement.Core.dll": {}
+          "HandmadeProductManagement.Core.dll": {
+            "assemblyVersion": "1.0.0",
+            "fileVersion": "1.0.0.0"
+          }
         }
       },
       "HandmadeProductManagement.ModelViews/1.0.0": {
-        "dependencies": {
-          "HandmadeProductManagement.Core": "1.0.0"
-        },
         "runtime": {
-          "HandmadeProductManagement.ModelViews.dll": {}
+          "HandmadeProductManagement.ModelViews.dll": {
+            "assemblyVersion": "1.0.0",
+            "fileVersion": "1.0.0.0"
+          }
         }
       },
       "HandmadeProductManagement.Repositories/1.0.0": {
@@ -1069,16 +1053,21 @@
           "Microsoft.EntityFrameworkCore.SqlServer": "8.0.8"
         },
         "runtime": {
-          "HandmadeProductManagement.Repositories.dll": {}
+          "HandmadeProductManagement.Repositories.dll": {
+            "assemblyVersion": "1.0.0",
+            "fileVersion": "1.0.0.0"
+          }
         }
       },
       "HandmadeProductManagement.Services/1.0.0": {
         "dependencies": {
-          "HandmadeProductManagement.Contract.Services": "1.0.0",
-          "Mapster": "7.4.0"
+          "HandmadeProductManagement.Contract.Services": "1.0.0"
         },
         "runtime": {
-          "HandmadeProductManagement.Services.dll": {}
+          "HandmadeProductManagement.Services.dll": {
+            "assemblyVersion": "1.0.0",
+            "fileVersion": "1.0.0.0"
+          }
         }
       }
     }
@@ -1116,20 +1105,6 @@
       "sha512": "sha512-lQKvtaTDOXnoVJ20ibTuSIOf2i0uO0MPbDhd1jm238I+U/2ZnRENj0cktKZhtchBMtCUSRQ5v4xBCUbKNmyVMw==",
       "path": "humanizer.core/2.14.1",
       "hashPath": "humanizer.core.2.14.1.nupkg.sha512"
-    },
-    "Mapster/7.4.0": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-RYGoDqvS4WTKIq0HDyPBBVIj6N0mluOCXQ1Vk95JKseMHEsbCXSEGKSlP95oL+s42IXAXbqvHj7p0YaRBUcfqg==",
-      "path": "mapster/7.4.0",
-      "hashPath": "mapster.7.4.0.nupkg.sha512"
-    },
-    "Mapster.Core/1.2.1": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-11lokmfliBEMMmjeqxFGNpqGXq6tN96zFqpBmfYeahr4Ybk63oDmeJmOflsATjobYkX248g5Y62oQ2NNnZaeww==",
-      "path": "mapster.core/1.2.1",
-      "hashPath": "mapster.core.1.2.1.nupkg.sha512"
     },
     "Microsoft.AspNetCore.Cryptography.Internal/8.0.8": {
       "type": "package",

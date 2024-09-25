@@ -1,4 +1,5 @@
-﻿using HandmadeProductManagement.ModelViews.UserModelViews;
+﻿using HandmadeProductManagement.Contract.Repositories.Interface;
+using HandmadeProductManagement.ModelViews.UserModelViews;
 
 namespace HandmadeProductManagement.Contract.Services.Interface
 {

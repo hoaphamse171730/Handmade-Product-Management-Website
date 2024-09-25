@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace HandmadeProductManagement.Contract.Repositories.Entity
@@ -13,14 +14,16 @@ namespace HandmadeProductManagement.Contract.Repositories.Entity
         public string? Description { get; set; }
         public string CategoryId { get; set; } = string.Empty;
         public string ShopId { get; set; } = string.Empty ;
-        public int Rating { get; set; } 
+        public float Rating { get; set; } 
         public string Status { get; set; } = string.Empty;  
         public int SoldCount { get; set; }
 
-        public ICollection<ProductImage> ProductImages { get; set; } = new List<ProductImage>(); 
+        public ICollection<ProductImage> ProductImages { get; set; } = []; 
         public ICollection<ProductItem> ProductItems { get; set; } = [];
-        public Category Category { get; set; } = new Category();
-        public Shop Shop { get; set; } = new Shop();
+        
+        [JsonIgnore]
+        public Category Category { get; set; }
+        public Shop Shop { get; set; }
         public virtual ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
         public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
     }
