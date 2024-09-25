@@ -45,7 +45,7 @@ namespace HandmadeProductManagementAPI.Controllers
         {
             try
             {
-                _promotionService.Delete(id); 
+                await _promotionService.Delete(id); 
                 return NoContent();
             }
             catch (Exception ex)
