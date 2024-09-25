@@ -7,16 +7,16 @@
       "RelativeMoniker": "D:0:0:{EA9CF239-AA84-4A09-957A-646C14A6F04B}|HandmadeProductManagement.Repositories\\HandmadeProductManagement.Repositories.csproj|solutionrelative:handmadeproductmanagement.repositories\\context\\databasecontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|c:\\users\\son\\desktop\\at_project\\handmadeproductmanagementbe\\handmadeproductmanagement.contract.repositories\\entity\\statuschange.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|solutionrelative:handmadeproductmanagement.contract.repositories\\entity\\statuschange.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|c:\\users\\son\\desktop\\at_project\\handmadeproductmanagementbe\\handmadeproductmanagement.contract.repositories\\entity\\category.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|solutionrelative:handmadeproductmanagement.contract.repositories\\entity\\category.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|c:\\users\\son\\desktop\\at_project\\handmadeproductmanagementbe\\handmadeproductmanagement.contract.repositories\\entity\\order.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|solutionrelative:handmadeproductmanagement.contract.repositories\\entity\\order.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|c:\\users\\son\\desktop\\at_project\\handmadeproductmanagementbe\\handmadeproductmanagementbe\\appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|solutionrelative:handmadeproductmanagementbe\\appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|c:\\users\\son\\desktop\\at_project\\handmadeproductmanagementbe\\handmadeproductmanagement.contract.repositories\\entity\\cancelreason.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|solutionrelative:handmadeproductmanagement.contract.repositories\\entity\\cancelreason.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|c:\\users\\son\\desktop\\at_project\\handmadeproductmanagementbe\\handmadeproductmanagement.contract.repositories\\entity\\promotion.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|solutionrelative:handmadeproductmanagement.contract.repositories\\entity\\promotion.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -26,7 +26,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 7,
+          "SelectedChildIndex": 8,
           "Children": [
             {
               "$type": "Bookmark",
@@ -50,27 +50,42 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "Order.cs",
-              "DocumentMoniker": "C:\\Users\\SON\\Desktop\\AT_Project\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\Order.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Repositories\\Entity\\Order.cs",
-              "ToolTip": "C:\\Users\\SON\\Desktop\\AT_Project\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\Order.cs",
-              "RelativeToolTip": "HandmadeProductManagement.Contract.Repositories\\Entity\\Order.cs",
-              "ViewState": "AQIAAAYAAAAAAAAAAAAqwBoAAAAIAAAA",
+              "DocumentIndex": 1,
+              "Title": "Category.cs",
+              "DocumentMoniker": "C:\\Users\\SON\\Desktop\\AT_Project\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\Category.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Repositories\\Entity\\Category.cs",
+              "ToolTip": "C:\\Users\\SON\\Desktop\\AT_Project\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\Category.cs",
+              "RelativeToolTip": "HandmadeProductManagement.Contract.Repositories\\Entity\\Category.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-24T06:43:11.497Z"
+              "WhenOpened": "2024-09-24T09:36:33.305Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "StatusChange.cs",
-              "DocumentMoniker": "C:\\Users\\SON\\Desktop\\AT_Project\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\StatusChange.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Repositories\\Entity\\StatusChange.cs",
-              "ToolTip": "C:\\Users\\SON\\Desktop\\AT_Project\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\StatusChange.cs",
-              "RelativeToolTip": "HandmadeProductManagement.Contract.Repositories\\Entity\\StatusChange.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAoAAAAEAAAA",
+              "DocumentIndex": 3,
+              "Title": "Promotion.cs",
+              "DocumentMoniker": "C:\\Users\\SON\\Desktop\\AT_Project\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\Promotion.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Repositories\\Entity\\Promotion.cs",
+              "ToolTip": "C:\\Users\\SON\\Desktop\\AT_Project\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\Promotion.cs",
+              "RelativeToolTip": "HandmadeProductManagement.Contract.Repositories\\Entity\\Promotion.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-24T02:00:08.404Z"
+              "WhenOpened": "2024-09-24T09:36:22.269Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "appsettings.Development.json",
+              "DocumentMoniker": "C:\\Users\\SON\\Desktop\\AT_Project\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\appsettings.Development.json",
+              "RelativeDocumentMoniker": "HandmadeProductManagementBE\\appsettings.Development.json",
+              "ToolTip": "C:\\Users\\SON\\Desktop\\AT_Project\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\appsettings.Development.json",
+              "RelativeToolTip": "HandmadeProductManagementBE\\appsettings.Development.json",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAwAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2024-09-24T08:52:41.226Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -80,22 +95,14 @@
               "RelativeDocumentMoniker": "HandmadeProductManagement.Repositories\\Context\\DatabaseContext.cs",
               "ToolTip": "C:\\Users\\SON\\Desktop\\AT_Project\\HandmadeProductManagementBE\\HandmadeProductManagement.Repositories\\Context\\DatabaseContext.cs",
               "RelativeToolTip": "HandmadeProductManagement.Repositories\\Context\\DatabaseContext.cs",
-              "ViewState": "AQIAABcAAAAAAAAAAAA0wA0AAAAAAAAA",
+              "ViewState": "AQIAAJ4AAAAAAAAAAAArwK4AAAAMAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-24T02:12:21.65Z",
+              "WhenOpened": "2024-09-24T08:48:08.975Z",
               "EditorCaption": ""
             },
             {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "CancelReason.cs",
-              "DocumentMoniker": "C:\\Users\\SON\\Desktop\\AT_Project\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\CancelReason.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Repositories\\Entity\\CancelReason.cs",
-              "ToolTip": "C:\\Users\\SON\\Desktop\\AT_Project\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\CancelReason.cs",
-              "RelativeToolTip": "HandmadeProductManagement.Contract.Repositories\\Entity\\CancelReason.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAA8AAAAIAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-24T02:00:34.16Z"
+              "$type": "Bookmark",
+              "Name": "ST:12:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
             }
           ]
         }
