@@ -45,6 +45,8 @@ namespace HandmadeProductManagement.Services.Service
             // Retrieve the user by username
             var user = await query.FirstOrDefaultAsync(u => u.UserName == username);
 
+
+
             // If the user is found and the password matches, return the UserResponseModel
             if (user != null && BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
             {

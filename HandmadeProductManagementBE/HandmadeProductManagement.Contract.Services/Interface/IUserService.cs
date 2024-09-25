@@ -6,6 +6,8 @@ namespace HandmadeProductManagement.Contract.Services.Interface
     {
         Task<IList<UserResponseModel>> GetAll();
         Task<UserResponseModel> GetUserByCredentials(string username, string password);
+
+
         Task<string> LoginUser(string username, string password);
     }
 }
