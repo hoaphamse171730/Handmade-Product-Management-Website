@@ -26,9 +26,12 @@ public static class ApplicationServiceExtenstions
                     .AllowAnyHeader()
                     .AllowAnyMethod()
                     .AllowCredentials()
-                    .WithOrigins("http://localhost:3000"); });
+                    .WithOrigins("https://localhost:7159"); });
         });
 
+        services.AddScoped<ICancelReasonService, CancelReasonService>();
+        services.AddScoped<IStatusChangeService, StatusChangeService>();
+        services.AddScoped<IProductService, ProductService>();
         services.AddScoped<IPromotionService, PromotionService>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 

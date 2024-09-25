@@ -11,11 +11,13 @@ builder.Configuration
     .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
     .AddEnvironmentVariables();
 
-builder.Services.AddControllers(opt =>
-{
-    var policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
-    opt.Filters.Add(new AuthorizeFilter(policy));
-});
+builder.Services.AddControllers(
+//    opt =>
+//{
+//    var policy = new AuthorizationPolicyBuilder().Build();
+//    opt.Filters.Add(new AuthorizeFilter(policy));
+//}
+);
 
 //All extra services must be contained in ApplicationServiceExtentions & IdentityServiceExtensions
 builder.Services.AddApplicationServices(builder.Configuration);
