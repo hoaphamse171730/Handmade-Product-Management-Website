@@ -96,7 +96,6 @@ namespace HandmadeProductManagement.Services.Service
 
             return BaseResponse<IEnumerable<ProductResponseModel>>.OkResponse(productResponseModels);
 
-
         }
 
 

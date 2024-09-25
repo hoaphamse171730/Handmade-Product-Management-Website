@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HandmadeProductManagementAPI.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20240925035813_InitialCreate")]
+    [Migration("20240925082634_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -660,8 +660,8 @@ namespace HandmadeProductManagementAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Rating")
-                        .HasColumnType("int");
+                    b.Property<float>("Rating")
+                        .HasColumnType("real");
 
                     b.Property<string>("ShopId")
                         .IsRequired()
