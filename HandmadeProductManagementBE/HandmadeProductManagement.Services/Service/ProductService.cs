@@ -52,19 +52,22 @@ namespace HandmadeProductManagement.Services.Service
                 query = query.Where(p => p.Rating >= searchModel.MinRating.Value);
             }
 
-            //Apply Sorting Logic
+
+            // Sort Logic
             if (searchModel.SortByPrice)
             {
                 query = searchModel.SortDescending
-                    ? query.OrderByDescending(p => p.ProductItems.Any() ? p.ProductItems.Min(pi => pi.Price) : 0)
-                    : query.OrderBy(p => p.ProductItems.Any() ? p.ProductItems.Min(pi => pi.Price) : 0);
+                    ? query.OrderByDescending(p => p.ProductItems.Min(pi => pi.Price))
+                    : query.OrderBy(p => p.ProductItems.Min(pi => pi.Price));
             }
-            else // Default or Sort by Rating
+
+            else
             {
                 query = searchModel.SortDescending
                     ? query.OrderByDescending(p => p.Rating)
                     : query.OrderBy(p => p.Rating);
             }
+
 
 
             var productResponseModels = await query
@@ -91,7 +94,9 @@ namespace HandmadeProductManagement.Services.Service
                     SoldCount = g.Key.SoldCount,
                     // Avoid duplicates
                     Price = g.SelectMany(p => p.ProductItems).Any() ? g.SelectMany(p => p.ProductItems).Min(pi => pi.Price) : 0
-                })
+                }).OrderBy(pr => searchModel.SortByPrice
+                    ? (searchModel.SortDescending ? -pr.Price : pr.Price) // Sort by price ascending or descending
+                    : (searchModel.SortDescending ? -pr.Rating : pr.Rating)) // Sort by rating ascending or descending
                 .ToListAsync();
 
             return BaseResponse<IEnumerable<ProductResponseModel>>.OkResponse(productResponseModels);
