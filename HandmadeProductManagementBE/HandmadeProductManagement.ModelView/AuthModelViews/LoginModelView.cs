@@ -1,8 +1,11 @@
-﻿namespace HandmadeProductManagement.ModelViews.AuthModelViews
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace HandmadeProductManagement.ModelViews.AuthModelViews
 {
     public class LoginModelView
     {
-        public required string Username { get; set; }
-        public required string Password { get; set; }
+        [Required] public required string Username { get; set; }
+        [Required] public required string Password { get; set; }
+
     }
 }

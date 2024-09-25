@@ -36,7 +36,7 @@ namespace HandmadeProductManagementBE.API
 
         public static void AddIdentity(this IServiceCollection services)
         {
-            services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
+            services.AddIdentity<ApplocationUserLogins, ApplicationRole>(options =>
             {
             })
              .AddEntityFrameworkStores<DatabaseContext>()

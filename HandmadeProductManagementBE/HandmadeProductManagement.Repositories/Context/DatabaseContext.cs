@@ -5,7 +5,7 @@ using HandmadeProductManagement.Repositories.Entity;
 
 namespace HandmadeProductManagement.Repositories.Context
 {
-    public class DatabaseContext : IdentityDbContext<ApplicationUser, ApplicationRole, Guid, ApplicationUserClaims,
+    public class DatabaseContext : IdentityDbContext<ApplocationUserLogins, ApplicationRole, Guid, ApplicationUserClaims,
         ApplicationUserRoles, ApplicationUserLogins, ApplicationRoleClaims, ApplicationUserTokens>
     {
         public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options)
@@ -13,7 +13,7 @@ namespace HandmadeProductManagement.Repositories.Context
         }
 
         // user
-        public virtual DbSet<ApplicationUser> ApplicationUsers => Set<ApplicationUser>();
+        public virtual DbSet<ApplocationUserLogins> ApplicationUsers => Set<ApplocationUserLogins>();
         public virtual DbSet<ApplicationRole> ApplicationRoles => Set<ApplicationRole>();
         public virtual DbSet<ApplicationUserClaims> ApplicationUserClaims => Set<ApplicationUserClaims>();
         public virtual DbSet<ApplicationUserRoles> ApplicationUserRoles => Set<ApplicationUserRoles>();

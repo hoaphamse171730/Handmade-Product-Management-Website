@@ -21,7 +21,7 @@ namespace HandmadeProductManagement.Contract.Repositories.Entity
 
         // Foreign key to the User entity
         public Guid UserId { get; set; }
-        public ApplicationUser User { get; set; } =  new ApplicationUser();
+        public ApplocationUserLogins User { get; set; } =  new ApplocationUserLogins();
 
 
         // One-to-one relationship with Reply

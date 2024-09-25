@@ -4,7 +4,7 @@ using HandmadeProductManagement.Core.Utils;
 
 namespace HandmadeProductManagement.Repositories.Entity
 {
-    public class ApplicationUser : IdentityUser<Guid>
+    public class ApplocationUserLogins : IdentityUser<Guid>
     {
         public string Password {  get; set; } = string.Empty;
         public virtual UserInfo? UserInfo { get; set; }
@@ -19,7 +19,7 @@ namespace HandmadeProductManagement.Repositories.Entity
 
         public ICollection<Review> Reviews { get; set; } = new List<Review>();
 
-        public ApplicationUser()
+        public ApplocationUserLogins()
         {
             CreatedTime = CoreHelper.SystemTimeNow;
             LastUpdatedTime = CreatedTime;

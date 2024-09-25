@@ -48,6 +48,14 @@
           }
         }
       },
+      "BCrypt.Net-Next/4.0.3": {
+        "runtime": {
+          "lib/net6.0/BCrypt.Net-Next.dll": {
+            "assemblyVersion": "4.0.3.0",
+            "fileVersion": "4.0.3.0"
+          }
+        }
+      },
       "Castle.Core/5.1.1": {
         "dependencies": {
           "System.Diagnostics.EventLog": "6.0.0"
@@ -678,25 +686,38 @@
           "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "8.0.8"
         },
         "runtime": {
-          "HandmadeProductManagement.Contract.Repositories.dll": {}
+          "HandmadeProductManagement.Contract.Repositories.dll": {
+            "assemblyVersion": "1.0.0",
+            "fileVersion": "1.0.0.0"
+          }
         }
       },
       "HandmadeProductManagement.Contract.Services/1.0.0": {
         "dependencies": {
+          "BCrypt.Net-Next": "4.0.3",
           "HandmadeProductManagement.Repositories": "1.0.0"
         },
         "runtime": {
-          "HandmadeProductManagement.Contract.Services.dll": {}
+          "HandmadeProductManagement.Contract.Services.dll": {
+            "assemblyVersion": "1.0.0",
+            "fileVersion": "1.0.0.0"
+          }
         }
       },
       "HandmadeProductManagement.Core/1.0.0": {
         "runtime": {
-          "HandmadeProductManagement.Core.dll": {}
+          "HandmadeProductManagement.Core.dll": {
+            "assemblyVersion": "1.0.0",
+            "fileVersion": "1.0.0.0"
+          }
         }
       },
       "HandmadeProductManagement.ModelViews/1.0.0": {
         "runtime": {
-          "HandmadeProductManagement.ModelViews.dll": {}
+          "HandmadeProductManagement.ModelViews.dll": {
+            "assemblyVersion": "1.0.0",
+            "fileVersion": "1.0.0.0"
+          }
         }
       },
       "HandmadeProductManagement.Repositories/1.0.0": {
@@ -709,7 +730,10 @@
           "Microsoft.EntityFrameworkCore.SqlServer": "8.0.8"
         },
         "runtime": {
-          "HandmadeProductManagement.Repositories.dll": {}
+          "HandmadeProductManagement.Repositories.dll": {
+            "assemblyVersion": "1.0.0",
+            "fileVersion": "1.0.0.0"
+          }
         }
       }
     }
@@ -733,6 +757,13 @@
       "sha512": "sha512-l1Xm2MWOF2Mzcwuarlw8kWQXLZk3UeB55aQXVyjj23aBfDwOZ3gu5GP2kJ6KlmZeZv2TCzw7x4L3V36iNr3gww==",
       "path": "azure.identity/1.10.3",
       "hashPath": "azure.identity.1.10.3.nupkg.sha512"
+    },
+    "BCrypt.Net-Next/4.0.3": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-W+U9WvmZQgi5cX6FS5GDtDoPzUCV4LkBLkywq/kRZhuDwcbavOzcDAr3LXJFqHUi952Yj3LEYoWW0jbEUQChsA==",
+      "path": "bcrypt.net-next/4.0.3",
+      "hashPath": "bcrypt.net-next.4.0.3.nupkg.sha512"
     },
     "Castle.Core/5.1.1": {
       "type": "package",
