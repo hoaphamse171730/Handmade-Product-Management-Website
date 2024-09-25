@@ -313,3 +313,4 @@ D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductM
 D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\obj\Debug\net8.0\HandmadeProductManagementAPI.pdb
 D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\obj\Debug\net8.0\HandmadeProductManagementAPI.genruntimeconfig.cache
 D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\obj\Debug\net8.0\ref\HandmadeProductManagementAPI.dll
+D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\obj\Debug\net8.0\HandmadeProductManagementAPI.MvcApplicationPartsAssemblyInfo.cs
