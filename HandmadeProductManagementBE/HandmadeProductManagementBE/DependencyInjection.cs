@@ -49,7 +49,8 @@ namespace HandmadeProductManagementBE.API
                 .AddScoped<IUserService, UserService>()
                 .AddScoped<IPromotionService, PromotionService>()
                 .AddScoped<IOrderDetailService, OrderDetailService>()
-                .AddScoped<IPromotionService, PromotionService>();
+                .AddScoped<IPromotionService, PromotionService>()
+                .AddScoped<IProductService, ProductService>();
         }
     }
 }

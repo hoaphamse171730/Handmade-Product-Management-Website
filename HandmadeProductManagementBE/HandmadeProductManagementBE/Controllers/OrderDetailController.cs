@@ -73,6 +73,8 @@ namespace HandmadeProductManagementAPI.Controllers
                 return StatusCode(500, BaseResponse<string>.ErrorResponse($"Error updating order detail: {ex.Message}"));
             }
         }
+        
+        
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteOrderDetail(string id)
