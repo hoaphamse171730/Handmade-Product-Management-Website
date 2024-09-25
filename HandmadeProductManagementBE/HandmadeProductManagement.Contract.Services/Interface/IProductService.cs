@@ -11,5 +11,7 @@ namespace HandmadeProductManagement.Contract.Services.Interface
     public interface IProductService
     {
         Task<BaseResponse<IEnumerable<ProductResponseModel>>> SearchProductsAsync(ProductSearchModel searchModel);
+        Task<BaseResponse<IEnumerable<ProductResponseModel>>> SortProductsAsync(ProductSortModel sortModel);
+
     }
 }

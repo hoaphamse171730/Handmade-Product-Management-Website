@@ -26,7 +26,7 @@ namespace HandmadeProductManagement.Services.Service
         {
             var query = _unitOfWork.GetRepository<Product>().Entities.AsQueryable();
 
-            // Apply filters based on searchDto properties
+            // Apply filters based on searchModel properties
             if (!string.IsNullOrEmpty(searchModel.Name))
             {
                 query = query.Where(p => p.Name.Contains(searchModel.Name));
@@ -70,6 +70,50 @@ namespace HandmadeProductManagement.Services.Service
 
         }
 
+
+        // Sort Function
+
+        public async Task<BaseResponse<IEnumerable<ProductResponseModel>>> SortProductsAsync(ProductSortModel sortModel)
+        {
+            var query = _unitOfWork.GetRepository<Product>().Entities
+                .Include(p => p.ProductItems)
+                .Include(p => p.Reviews)
+                .AsQueryable();
+
+            // Sort by Price
+            if (sortModel.SortByPrice)
+            {
+                query = sortModel.SortDescending
+                    ? query.OrderByDescending(p => p.ProductItems.Min(pi => pi.Price))
+                    : query.OrderBy(p => p.ProductItems.Min(pi => pi.Price));
+            }
+
+            // Sort by Rating
+            else if (sortModel.SortByRating)
+            {
+                query = sortModel.SortDescending
+                    ? query.OrderByDescending(p => p.Rating)
+                    : query.OrderBy(p => p.Rating);
+            }
+
+            var products = await query.ToListAsync();
+
+            var productResponseModels = products.Select(p => new ProductResponseModel
+            {
+                Id = p.Id,
+                Name = p.Name,
+                Description = p.Description,
+                CategoryId = p.CategoryId,
+                ShopId = p.ShopId,
+                Rating = p.Rating,
+                Status = p.Status,
+                SoldCount = p.SoldCount,
+                Price = p.ProductItems.Any() ? p.ProductItems.Min(pi => pi.Price) : 0
+            });
+
+            return BaseResponse<IEnumerable<ProductResponseModel>>.OkResponse(productResponseModels);
+
+        }
 
     }
 }

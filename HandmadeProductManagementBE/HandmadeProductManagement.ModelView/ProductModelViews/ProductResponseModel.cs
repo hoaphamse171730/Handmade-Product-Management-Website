@@ -16,6 +16,6 @@ namespace HandmadeProductManagement.ModelViews.ProductModelViews
         public int Rating { get; set; }
         public string Status { get; set; } = string.Empty;
         public int SoldCount { get; set; }
-
+        public int Price { get; set; }
     }
 }

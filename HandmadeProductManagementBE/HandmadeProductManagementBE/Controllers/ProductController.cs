@@ -1,4 +1,5 @@
-﻿using HandmadeProductManagement.Contract.Services.Interface;
+﻿using Azure;
+using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.ProductModelViews;
 using Microsoft.AspNetCore.Http;
@@ -27,6 +28,17 @@ namespace HandmadeProductManagementAPI.Controllers
 
             return StatusCode((int)response.StatusCode, response);
 
+        }
+
+        [HttpGet("sort")]
+        public async Task<IActionResult> SortProducts([FromQuery] ProductSortModel sortModel)
+        {
+            var response = await _productService.SortProductsAsync(sortModel);
+            if (response.StatusCode == StatusCodeHelper.OK)
+            {
+                return Ok(response);
+            }
+            return StatusCode((int)response.StatusCode, response);
         }
 
 

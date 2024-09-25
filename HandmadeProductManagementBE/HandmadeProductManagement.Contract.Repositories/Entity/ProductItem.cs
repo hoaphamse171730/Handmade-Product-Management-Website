@@ -6,13 +6,13 @@ namespace HandmadeProductManagement.Contract.Repositories.Entity
     {
         // Foreign Key Property
         public string ProductId { get; set; } = string.Empty;
-        public Product Product { get; set; } = new Product();
+        public Product Product { get; set; }
 
         public int QuantityInStock { get; set; }
         public int Price { get; set; }
 
-        public ICollection<CartItem> CartItem { get; set; } = new List<CartItem>();
+        public ICollection<CartItem> CartItem { get; set; }
 
-        public ICollection<ProductConfiguration> ProductConfiguration { get; set; } = new List<ProductConfiguration>();
+        public ICollection<ProductConfiguration> ProductConfiguration { get; set; }
     }
 }
