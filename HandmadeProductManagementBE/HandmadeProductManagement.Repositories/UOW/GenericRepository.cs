@@ -2,6 +2,7 @@
 using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Core;
 using HandmadeProductManagement.Repositories.Context;
+using System.Linq.Expressions;
 
 namespace HandmadeProductManagement.Repositories.UOW
 {
@@ -90,5 +91,11 @@ namespace HandmadeProductManagement.Repositories.UOW
         {
             return Task.FromResult(_dbSet.Update(obj));
         }
+
+        public async Task<IList<T>> SearchAsync(Expression<Func<T, bool>> filter)
+        {
+            return await _dbSet.Where(filter).ToListAsync();
+        }
+
     }
 }

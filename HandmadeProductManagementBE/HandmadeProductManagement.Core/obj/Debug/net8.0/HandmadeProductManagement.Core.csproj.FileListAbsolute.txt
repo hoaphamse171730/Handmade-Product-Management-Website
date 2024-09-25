@@ -10,3 +10,15 @@ C:\Users\VH\Desktop\Handmade-Product-Management-Website\HandmadeProductManagemen
 C:\Users\VH\Desktop\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Core\obj\Debug\net8.0\refint\HandmadeProductManagement.Core.dll
 C:\Users\VH\Desktop\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Core\obj\Debug\net8.0\HandmadeProductManagement.Core.pdb
 C:\Users\VH\Desktop\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Core\obj\Debug\net8.0\ref\HandmadeProductManagement.Core.dll
+D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Core\bin\Debug\net8.0\HandmadeProductManagement.Core.deps.json
+D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Core\bin\Debug\net8.0\HandmadeProductManagement.Core.dll
+D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Core\bin\Debug\net8.0\HandmadeProductManagement.Core.pdb
+D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Core\obj\Debug\net8.0\HandmadeProductManagement.Core.GeneratedMSBuildEditorConfig.editorconfig
+D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Core\obj\Debug\net8.0\HandmadeProductManagement.Core.AssemblyInfoInputs.cache
+D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Core\obj\Debug\net8.0\HandmadeProductManagement.Core.AssemblyInfo.cs
+D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Core\obj\Debug\net8.0\HandmadeProductManagement.Core.csproj.CoreCompileInputs.cache
+D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Core\obj\Debug\net8.0\HandmadeProductManagement.Core.sourcelink.json
+D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Core\obj\Debug\net8.0\HandmadeProductManagement.Core.dll
+D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Core\obj\Debug\net8.0\refint\HandmadeProductManagement.Core.dll
+D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Core\obj\Debug\net8.0\HandmadeProductManagement.Core.pdb
+D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Core\obj\Debug\net8.0\ref\HandmadeProductManagement.Core.dll

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace HandmadeProductManagement.Contract.Repositories.Entity
@@ -19,6 +20,7 @@ namespace HandmadeProductManagement.Contract.Repositories.Entity
 
         public ICollection<ProductImage> ProductImages { get; set; } = new List<ProductImage>(); 
         public ICollection<ProductItem> ProductItems { get; set; } = [];
+        [JsonIgnore]
         public Category Category { get; set; } = new Category();
         public Shop Shop { get; set; } = new Shop();
         public virtual ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();

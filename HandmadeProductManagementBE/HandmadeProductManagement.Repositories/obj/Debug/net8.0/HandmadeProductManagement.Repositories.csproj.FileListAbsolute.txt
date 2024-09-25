@@ -20,3 +20,25 @@ C:\Users\VH\Desktop\Handmade-Product-Management-Website\HandmadeProductManagemen
 C:\Users\VH\Desktop\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Repositories\obj\Debug\net8.0\HandmadeProductManagement.Repositories.pdb
 C:\Users\VH\Desktop\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Repositories\obj\Debug\net8.0\HandmadeProductManagement.Repositories.genruntimeconfig.cache
 C:\Users\VH\Desktop\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Repositories\obj\Debug\net8.0\ref\HandmadeProductManagement.Repositories.dll
+D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Repositories\bin\Debug\net8.0\HandmadeProductManagement.Repositories.deps.json
+D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Repositories\bin\Debug\net8.0\HandmadeProductManagement.Repositories.runtimeconfig.json
+D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Repositories\bin\Debug\net8.0\HandmadeProductManagement.Repositories.dll
+D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Repositories\bin\Debug\net8.0\HandmadeProductManagement.Repositories.pdb
+D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Repositories\bin\Debug\net8.0\HandmadeProductManagement.Contract.Repositories.dll
+D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Repositories\bin\Debug\net8.0\HandmadeProductManagement.Core.dll
+D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Repositories\bin\Debug\net8.0\HandmadeProductManagement.ModelViews.dll
+D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Repositories\bin\Debug\net8.0\HandmadeProductManagement.Contract.Repositories.pdb
+D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Repositories\bin\Debug\net8.0\HandmadeProductManagement.ModelViews.pdb
+D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Repositories\bin\Debug\net8.0\HandmadeProductManagement.Core.pdb
+D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Repositories\obj\Debug\net8.0\HandmadeProductManagement.Repositories.csproj.AssemblyReference.cache
+D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Repositories\obj\Debug\net8.0\HandmadeProductManagement.Repositories.GeneratedMSBuildEditorConfig.editorconfig
+D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Repositories\obj\Debug\net8.0\HandmadeProductManagement.Repositories.AssemblyInfoInputs.cache
+D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Repositories\obj\Debug\net8.0\HandmadeProductManagement.Repositories.AssemblyInfo.cs
+D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Repositories\obj\Debug\net8.0\HandmadeProductManagement.Repositories.csproj.CoreCompileInputs.cache
+D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Repositories\obj\Debug\net8.0\HandmadeProductManagement.Repositories.sourcelink.json
+D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Repositories\obj\Debug\net8.0\Handmade.5DEB1838.Up2Date
+D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Repositories\obj\Debug\net8.0\HandmadeProductManagement.Repositories.dll
+D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Repositories\obj\Debug\net8.0\refint\HandmadeProductManagement.Repositories.dll
+D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Repositories\obj\Debug\net8.0\HandmadeProductManagement.Repositories.pdb
+D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Repositories\obj\Debug\net8.0\HandmadeProductManagement.Repositories.genruntimeconfig.cache
+D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Repositories\obj\Debug\net8.0\ref\HandmadeProductManagement.Repositories.dll
