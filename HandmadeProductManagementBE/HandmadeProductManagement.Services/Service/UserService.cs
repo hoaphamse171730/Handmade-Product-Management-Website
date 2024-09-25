@@ -1,6 +1,10 @@
 ﻿using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
+using HandmadeProductManagement.Core.Utils;
 using HandmadeProductManagement.ModelViews.UserModelViews;
+using HandmadeProductManagement.Repositories.Entity;
+using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace HandmadeProductManagement.Services.Service
 {
@@ -12,16 +16,18 @@ namespace HandmadeProductManagement.Services.Service
             _unitOfWork = unitOfWork;
         }
 
-        public Task<IList<UserResponseModel>> GetAll()
+        public async Task<IList<UserResponseModel>> GetAll()
         {
-            IList<UserResponseModel> users = new List<UserResponseModel>
-            {
-                new UserResponseModel { Id = "1" },
-                new UserResponseModel { Id = "2" },
-                new UserResponseModel { Id = "3" }
-            };
+            IQueryable<ApplicationUser> query = _unitOfWork.GetRepository<ApplicationUser>().Entities;
 
-            return Task.FromResult(users);
+            // Map ApplicationUser to UserResponseModel
+            var result = await query.Select(user => new UserResponseModel
+            {
+                Id = user.Id.ToString()   // Convert Guid to string to match UserResponseModel
+            }).ToListAsync();
+
+            return result as IList<UserResponseModel>;  // Cast List to IList
         }
+
     }
 }
