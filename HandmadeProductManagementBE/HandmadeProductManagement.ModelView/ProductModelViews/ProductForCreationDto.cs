@@ -1,6 +1,6 @@
 namespace HandmadeProductManagement.ModelViews.ProductModelViews;
 
-public class ProductForCreationDto
+public class ProductForCreationDto : ProductForManipulationDto
 {
     
 }

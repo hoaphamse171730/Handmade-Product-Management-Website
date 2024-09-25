@@ -1,6 +1,6 @@
 namespace HandmadeProductManagement.ModelViews.PromotionModelViews;
 
-public class PromotionForCreationDto
+public class PromotionForCreationDto : PromotionForManipulationDto
 {
     
 }

@@ -12,7 +12,6 @@ public static class MappingConfig
     public static void RegisterMapping()
     {
         #region Promotion
-
         TypeAdapterConfig<Promotion, PromotionDto>.NewConfig()
             .Map(dest => dest.Id, src => src.Id)
             .Map(dest => dest.PromotionName, src => src.Name)

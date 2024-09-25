@@ -1,6 +1,6 @@
 namespace HandmadeProductManagement.Contract.Services.Interface;
 
-public class IProductService
+public interface IProductService
 {
     
 }

@@ -1840,8 +1840,7 @@
         "type": "project",
         "framework": ".NETCoreApp,Version=v8.0",
         "dependencies": {
-          "HandmadeProductManagement.Contract.Services": "1.0.0",
-          "Mapster": "7.4.0"
+          "HandmadeProductManagement.Contract.Services": "1.0.0"
         },
         "compile": {
           "bin/placeholder/HandmadeProductManagement.Services.dll": {}
@@ -3637,8 +3636,7 @@
         "type": "project",
         "framework": ".NETCoreApp,Version=v8.0",
         "dependencies": {
-          "HandmadeProductManagement.Contract.Services": "1.0.0",
-          "Mapster": "7.4.0"
+          "HandmadeProductManagement.Contract.Services": "1.0.0"
         },
         "compile": {
           "bin/placeholder/HandmadeProductManagement.Services.dll": {}
