@@ -3,6 +3,7 @@ using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.ModelViews.OrderModelViews;
+using HandmadeProductManagement.Repositories.Entity;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -23,6 +24,13 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<OrderResponseModel> CreateOrderAsync(CreateOrderDto createOrder)
         {
+            var userRepository = _unitOfWork.GetRepository<ApplicationUser>();
+            var userExists = await userRepository.Entities.AnyAsync(u => u.Id == createOrder.UserId);
+            if (!userExists)
+            {
+                throw new BaseException.ErrorException(404, "user_not_found", "User not found.");
+            }
+
             var repository = _unitOfWork.GetRepository<Order>();
 
             var order = new Order
@@ -170,6 +178,13 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<IList<OrderResponseModel>> GetOrderByUserIdAsync(Guid userId)
         {
+            var userRepository = _unitOfWork.GetRepository<ApplicationUser>();
+            var userExists = await userRepository.Entities.AnyAsync(u => u.Id == userId);
+            if (!userExists)
+            {
+                throw new BaseException.ErrorException(404, "user_not_found", "User not found.");
+            }
+
             var repository = _unitOfWork.GetRepository<Order>();
             var orders = await repository.Entities
                 .Where(o => o.UserId == userId && o.DeletedBy == null)
