@@ -24,9 +24,12 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<BaseResponse<IEnumerable<ProductResponseModel>>> SearchProductsAsync(ProductSearchModel searchModel)
         {
-            var query = _unitOfWork.GetRepository<Product>().Entities.AsQueryable();
+            var query = _unitOfWork.GetRepository<Product>().Entities
+                .Include(p => p.ProductItems)
+                .Include(p => p.Reviews)
+                .AsQueryable();
 
-            // Apply filters based on searchModel properties
+            // Apply Search Filters
             if (!string.IsNullOrEmpty(searchModel.Name))
             {
                 query = query.Where(p => p.Name.Contains(searchModel.Name));
@@ -52,6 +55,20 @@ namespace HandmadeProductManagement.Services.Service
                 query = query.Where(p => p.Rating >= searchModel.MinRating.Value);
             }
 
+            // Apply Sort logic
+            if (searchModel.SortByPrice)
+            {
+                query = searchModel.SortDescending
+                    ? query.OrderByDescending(p => p.ProductItems.Any() ? p.ProductItems.Min(pi => pi.Price) : 0)
+                    : query.OrderBy(p => p.ProductItems.Any() ? p.ProductItems.Min(pi => pi.Price) : 0);
+            }
+            else if (searchModel.SortByRating)
+            {
+                query = searchModel.SortDescending
+                    ? query.OrderByDescending(p => p.Rating)
+                    : query.OrderBy(p => p.Rating);
+            }
+
             var products = await query.ToListAsync();
 
             var productResponseModels = products.Select(p => new ProductResponseModel
@@ -64,6 +81,8 @@ namespace HandmadeProductManagement.Services.Service
                 Rating = p.Rating,
                 Status = p.Status,
                 SoldCount = p.SoldCount,
+                Price = p.ProductItems.Any() ? p.ProductItems.Min(pi => pi.Price) : 0
+
             });
 
             return BaseResponse<IEnumerable<ProductResponseModel>>.OkResponse(productResponseModels);
