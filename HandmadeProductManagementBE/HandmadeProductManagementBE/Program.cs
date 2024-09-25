@@ -1,4 +1,6 @@
+using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Repositories.Context;
+using HandmadeProductManagement.Services.Service;
 using HandmadeProductManagementBE.API;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,6 +22,8 @@ builder.Services.AddDbContext<DatabaseContext>(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddConfig(builder.Configuration);
+builder.Services.AddScoped<ICancelReasonService, CancelReasonService>();
+builder.Services.AddScoped<IStatusChangeService, StatusChangeService>();
 
 var app = builder.Build();
 
