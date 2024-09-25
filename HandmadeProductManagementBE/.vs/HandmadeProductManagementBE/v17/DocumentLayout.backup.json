@@ -1,165 +1,229 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\",
+  "WorkspaceRootPath": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|d:\\1. project\\ojt\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagementbe\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
-      "RelativeMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|solutionrelative:handmadeproductmanagementbe\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+      "AbsoluteMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|d:\\project\\handmade-product\\handmadeproductmanagementbe\\handmadeproductmanagementbe\\controllers\\ordercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|solutionrelative:handmadeproductmanagementbe\\controllers\\ordercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|d:\\1. project\\ojt\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagementbe\\appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
-      "RelativeMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|solutionrelative:handmadeproductmanagementbe\\appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+      "AbsoluteMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|d:\\project\\handmade-product\\handmadeproductmanagementbe\\handmadeproductmanagement.contract.repositories\\entity\\order.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|solutionrelative:handmadeproductmanagement.contract.repositories\\entity\\order.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{EA9CF239-AA84-4A09-957A-646C14A6F04B}|HandmadeProductManagement.Repositories\\HandmadeProductManagement.Repositories.csproj|d:\\1. project\\ojt\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.repositories\\context\\databasecontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{EA9CF239-AA84-4A09-957A-646C14A6F04B}|HandmadeProductManagement.Repositories\\HandmadeProductManagement.Repositories.csproj|solutionrelative:handmadeproductmanagement.repositories\\context\\databasecontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{B48678A4-822E-4A18-9F58-32C525718D88}|HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj|d:\\project\\handmade-product\\handmadeproductmanagementbe\\handmadeproductmanagement.services\\service\\orderservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B48678A4-822E-4A18-9F58-32C525718D88}|HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj|solutionrelative:handmadeproductmanagement.services\\service\\orderservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|d:\\1. project\\ojt\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagementbe\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|solutionrelative:handmadeproductmanagementbe\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{5ECD79B2-DBFD-424D-B888-3C9BBB2FA09D}|HandmadeProductManagement.Contract.Services\\HandmadeProductManagement.Contract.Services.csproj|d:\\project\\handmade-product\\handmadeproductmanagementbe\\handmadeproductmanagement.contract.services\\interface\\iorderservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5ECD79B2-DBFD-424D-B888-3C9BBB2FA09D}|HandmadeProductManagement.Contract.Services\\HandmadeProductManagement.Contract.Services.csproj|solutionrelative:handmadeproductmanagement.contract.services\\interface\\iorderservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|d:\\1. project\\ojt\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagementbe\\dependencyinjection.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|solutionrelative:handmadeproductmanagementbe\\dependencyinjection.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{B48678A4-822E-4A18-9F58-32C525718D88}|HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj|d:\\project\\handmade-product\\handmadeproductmanagementbe\\handmadeproductmanagement.services\\service\\shopservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B48678A4-822E-4A18-9F58-32C525718D88}|HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj|solutionrelative:handmadeproductmanagement.services\\service\\shopservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|d:\\1. project\\ojt\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagementbe\\weatherforecast.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|solutionrelative:handmadeproductmanagementbe\\weatherforecast.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{29FDA659-8E8E-460D-8CF9-0F992D752ECA}|HandmadeProductManagement.ModelView\\HandmadeProductManagement.ModelViews.csproj|d:\\project\\handmade-product\\handmadeproductmanagementbe\\handmadeproductmanagement.modelview\\shopmodelviews\\createshopdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{29FDA659-8E8E-460D-8CF9-0F992D752ECA}|HandmadeProductManagement.ModelView\\HandmadeProductManagement.ModelViews.csproj|solutionrelative:handmadeproductmanagement.modelview\\shopmodelviews\\createshopdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|d:\\1. project\\ojt\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagementbe\\handmadeproductmanagementbe.http||{5703B403-55E7-4C63-8C88-A8F52C7A45C5}",
-      "RelativeMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|solutionrelative:handmadeproductmanagementbe\\handmadeproductmanagementbe.http||{5703B403-55E7-4C63-8C88-A8F52C7A45C5}"
+      "AbsoluteMoniker": "D:0:0:{29FDA659-8E8E-460D-8CF9-0F992D752ECA}|HandmadeProductManagement.ModelView\\HandmadeProductManagement.ModelViews.csproj|d:\\project\\handmade-product\\handmadeproductmanagementbe\\handmadeproductmanagement.modelview\\ordermodelviews\\createorderdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{29FDA659-8E8E-460D-8CF9-0F992D752ECA}|HandmadeProductManagement.ModelView\\HandmadeProductManagement.ModelViews.csproj|solutionrelative:handmadeproductmanagement.modelview\\ordermodelviews\\createorderdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|d:\\1. project\\ojt\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagementbe\\properties\\launchsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
-      "RelativeMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|solutionrelative:handmadeproductmanagementbe\\properties\\launchsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+      "AbsoluteMoniker": "D:0:0:{B48678A4-822E-4A18-9F58-32C525718D88}|HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj|d:\\project\\handmade-product\\handmadeproductmanagementbe\\handmadeproductmanagement.services\\service\\userservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B48678A4-822E-4A18-9F58-32C525718D88}|HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj|solutionrelative:handmadeproductmanagement.services\\service\\userservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|d:\\1. project\\ojt\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagementbe\\handmadeproductmanagementapi.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
-      "RelativeMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|solutionrelative:handmadeproductmanagementbe\\handmadeproductmanagementapi.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+      "AbsoluteMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|d:\\project\\handmade-product\\handmadeproductmanagementbe\\handmadeproductmanagementbe\\controllers\\shopcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|solutionrelative:handmadeproductmanagementbe\\controllers\\shopcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|d:\\1. project\\ojt\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.contract.repositories\\entity\\userinfo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|solutionrelative:handmadeproductmanagement.contract.repositories\\entity\\userinfo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{5ECD79B2-DBFD-424D-B888-3C9BBB2FA09D}|HandmadeProductManagement.Contract.Services\\HandmadeProductManagement.Contract.Services.csproj|d:\\project\\handmade-product\\handmadeproductmanagementbe\\handmadeproductmanagement.contract.services\\interface\\ishopservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5ECD79B2-DBFD-424D-B888-3C9BBB2FA09D}|HandmadeProductManagement.Contract.Services\\HandmadeProductManagement.Contract.Services.csproj|solutionrelative:handmadeproductmanagement.contract.services\\interface\\ishopservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|d:\\1. project\\ojt\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.contract.repositories\\iuow\\iunitofwork.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|solutionrelative:handmadeproductmanagement.contract.repositories\\iuow\\iunitofwork.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{C1EB3DE5-152E-4663-BD84-2D1155B125D8}|HandmadeProductManagement.Core\\HandmadeProductManagement.Core.csproj|d:\\project\\handmade-product\\handmadeproductmanagementbe\\handmadeproductmanagement.core\\base\\baseentity.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C1EB3DE5-152E-4663-BD84-2D1155B125D8}|HandmadeProductManagement.Core\\HandmadeProductManagement.Core.csproj|solutionrelative:handmadeproductmanagement.core\\base\\baseentity.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{EA9CF239-AA84-4A09-957A-646C14A6F04B}|HandmadeProductManagement.Repositories\\HandmadeProductManagement.Repositories.csproj|d:\\1. project\\ojt\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.repositories\\uow\\unitofwork.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{EA9CF239-AA84-4A09-957A-646C14A6F04B}|HandmadeProductManagement.Repositories\\HandmadeProductManagement.Repositories.csproj|solutionrelative:handmadeproductmanagement.repositories\\uow\\unitofwork.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{29FDA659-8E8E-460D-8CF9-0F992D752ECA}|HandmadeProductManagement.ModelView\\HandmadeProductManagement.ModelViews.csproj|d:\\project\\handmade-product\\handmadeproductmanagementbe\\handmadeproductmanagement.modelview\\ordermodelviews\\orderresponsemodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{29FDA659-8E8E-460D-8CF9-0F992D752ECA}|HandmadeProductManagement.ModelView\\HandmadeProductManagement.ModelViews.csproj|solutionrelative:handmadeproductmanagement.modelview\\ordermodelviews\\orderresponsemodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|d:\\1. project\\ojt\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.contract.repositories\\iuow\\igenericrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|solutionrelative:handmadeproductmanagement.contract.repositories\\iuow\\igenericrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{29FDA659-8E8E-460D-8CF9-0F992D752ECA}|HandmadeProductManagement.ModelView\\HandmadeProductManagement.ModelViews.csproj|d:\\project\\handmade-product\\handmadeproductmanagementbe\\handmadeproductmanagement.modelview\\shopmodelviews\\shopresponsemodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{29FDA659-8E8E-460D-8CF9-0F992D752ECA}|HandmadeProductManagement.ModelView\\HandmadeProductManagement.ModelViews.csproj|solutionrelative:handmadeproductmanagement.modelview\\shopmodelviews\\shopresponsemodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|d:\\1. project\\ojt\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.contract.repositories\\entity\\applicationusertokens.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|solutionrelative:handmadeproductmanagement.contract.repositories\\entity\\applicationusertokens.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|d:\\project\\handmade-product\\handmadeproductmanagementbe\\handmadeproductmanagement.contract.repositories\\entity\\shop.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|solutionrelative:handmadeproductmanagement.contract.repositories\\entity\\shop.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{29FDA659-8E8E-460D-8CF9-0F992D752ECA}|HandmadeProductManagement.ModelView\\HandmadeProductManagement.ModelViews.csproj|d:\\1. project\\ojt\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.modelview\\handmadeproductmanagement.modelviews.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
-      "RelativeMoniker": "D:0:0:{29FDA659-8E8E-460D-8CF9-0F992D752ECA}|HandmadeProductManagement.ModelView\\HandmadeProductManagement.ModelViews.csproj|solutionrelative:handmadeproductmanagement.modelview\\handmadeproductmanagement.modelviews.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|d:\\1. project\\ojt\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.contract.repositories\\entity\\applicationuserclaims.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|solutionrelative:handmadeproductmanagement.contract.repositories\\entity\\applicationuserclaims.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|d:\\1. project\\ojt\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.contract.repositories\\entity\\applicationuser.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|d:\\project\\handmade-product\\handmadeproductmanagementbe\\handmadeproductmanagement.contract.repositories\\entity\\applicationuser.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|solutionrelative:handmadeproductmanagement.contract.repositories\\entity\\applicationuser.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|d:\\1. project\\ojt\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.contract.repositories\\entity\\applicationroleclaims.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|d:\\project\\handmade-product\\handmadeproductmanagementbe\\handmadeproductmanagement.contract.repositories\\entity\\cart.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|solutionrelative:handmadeproductmanagement.contract.repositories\\entity\\cart.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|d:\\project\\handmade-product\\handmadeproductmanagementbe\\handmadeproductmanagementbe\\appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|solutionrelative:handmadeproductmanagementbe\\appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|d:\\project\\handmade-product\\handmadeproductmanagementbe\\handmadeproductmanagementbe\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|solutionrelative:handmadeproductmanagementbe\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C1EB3DE5-152E-4663-BD84-2D1155B125D8}|HandmadeProductManagement.Core\\HandmadeProductManagement.Core.csproj|d:\\project\\handmade-product\\handmadeproductmanagementbe\\handmadeproductmanagement.core\\base\\baseexception.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C1EB3DE5-152E-4663-BD84-2D1155B125D8}|HandmadeProductManagement.Core\\HandmadeProductManagement.Core.csproj|solutionrelative:handmadeproductmanagement.core\\base\\baseexception.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EA9CF239-AA84-4A09-957A-646C14A6F04B}|HandmadeProductManagement.Repositories\\HandmadeProductManagement.Repositories.csproj|d:\\project\\handmade-product\\handmadeproductmanagementbe\\handmadeproductmanagement.repositories\\context\\databasecontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EA9CF239-AA84-4A09-957A-646C14A6F04B}|HandmadeProductManagement.Repositories\\HandmadeProductManagement.Repositories.csproj|solutionrelative:handmadeproductmanagement.repositories\\context\\databasecontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|d:\\project\\handmade-product\\handmadeproductmanagementbe\\handmadeproductmanagement.contract.repositories\\iuow\\igenericrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|solutionrelative:handmadeproductmanagement.contract.repositories\\iuow\\igenericrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|d:\\project\\handmade-product\\handmadeproductmanagementbe\\handmadeproductmanagement.contract.repositories\\iuow\\iunitofwork.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|solutionrelative:handmadeproductmanagement.contract.repositories\\iuow\\iunitofwork.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5ECD79B2-DBFD-424D-B888-3C9BBB2FA09D}|HandmadeProductManagement.Contract.Services\\HandmadeProductManagement.Contract.Services.csproj|d:\\project\\handmade-product\\handmadeproductmanagementbe\\handmadeproductmanagement.contract.services\\interface\\iuserservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5ECD79B2-DBFD-424D-B888-3C9BBB2FA09D}|HandmadeProductManagement.Contract.Services\\HandmadeProductManagement.Contract.Services.csproj|solutionrelative:handmadeproductmanagement.contract.services\\interface\\iuserservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EA9CF239-AA84-4A09-957A-646C14A6F04B}|HandmadeProductManagement.Repositories\\HandmadeProductManagement.Repositories.csproj|d:\\project\\handmade-product\\handmadeproductmanagementbe\\handmadeproductmanagement.repositories\\uow\\unitofwork.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EA9CF239-AA84-4A09-957A-646C14A6F04B}|HandmadeProductManagement.Repositories\\HandmadeProductManagement.Repositories.csproj|solutionrelative:handmadeproductmanagement.repositories\\uow\\unitofwork.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C1EB3DE5-152E-4663-BD84-2D1155B125D8}|HandmadeProductManagement.Core\\HandmadeProductManagement.Core.csproj|d:\\project\\handmade-product\\handmadeproductmanagementbe\\handmadeproductmanagement.core\\base\\baseresponse.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C1EB3DE5-152E-4663-BD84-2D1155B125D8}|HandmadeProductManagement.Core\\HandmadeProductManagement.Core.csproj|solutionrelative:handmadeproductmanagement.core\\base\\baseresponse.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|d:\\project\\handmade-product\\handmadeproductmanagementbe\\handmadeproductmanagementbe\\controllers\\weatherforecastcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|solutionrelative:handmadeproductmanagementbe\\controllers\\weatherforecastcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{29FDA659-8E8E-460D-8CF9-0F992D752ECA}|HandmadeProductManagement.ModelView\\HandmadeProductManagement.ModelViews.csproj|d:\\project\\handmade-product\\handmadeproductmanagementbe\\handmadeproductmanagement.modelview\\usermodelviews\\userresponsemodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{29FDA659-8E8E-460D-8CF9-0F992D752ECA}|HandmadeProductManagement.ModelView\\HandmadeProductManagement.ModelViews.csproj|solutionrelative:handmadeproductmanagement.modelview\\usermodelviews\\userresponsemodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|d:\\project\\handmade-product\\handmadeproductmanagementbe\\handmadeproductmanagement.contract.repositories\\entity\\promotion.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|solutionrelative:handmadeproductmanagement.contract.repositories\\entity\\promotion.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|d:\\project\\handmade-product\\handmadeproductmanagementbe\\handmadeproductmanagement.contract.repositories\\entity\\review.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|solutionrelative:handmadeproductmanagement.contract.repositories\\entity\\review.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|d:\\project\\handmade-product\\handmadeproductmanagementbe\\handmadeproductmanagement.contract.repositories\\entity\\productimage.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|solutionrelative:handmadeproductmanagement.contract.repositories\\entity\\productimage.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{29FDA659-8E8E-460D-8CF9-0F992D752ECA}|HandmadeProductManagement.ModelView\\HandmadeProductManagement.ModelViews.csproj|d:\\project\\handmade-product\\handmadeproductmanagementbe\\handmadeproductmanagement.modelview\\authmodelviews\\loginmodelview.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{29FDA659-8E8E-460D-8CF9-0F992D752ECA}|HandmadeProductManagement.ModelView\\HandmadeProductManagement.ModelViews.csproj|solutionrelative:handmadeproductmanagement.modelview\\authmodelviews\\loginmodelview.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{29FDA659-8E8E-460D-8CF9-0F992D752ECA}|HandmadeProductManagement.ModelView\\HandmadeProductManagement.ModelViews.csproj|d:\\project\\handmade-product\\handmadeproductmanagementbe\\handmadeproductmanagement.modelview\\handmadeproductmanagement.modelviews.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{29FDA659-8E8E-460D-8CF9-0F992D752ECA}|HandmadeProductManagement.ModelView\\HandmadeProductManagement.ModelViews.csproj|solutionrelative:handmadeproductmanagement.modelview\\handmadeproductmanagement.modelviews.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5ECD79B2-DBFD-424D-B888-3C9BBB2FA09D}|HandmadeProductManagement.Contract.Services\\HandmadeProductManagement.Contract.Services.csproj|d:\\project\\handmade-product\\handmadeproductmanagementbe\\handmadeproductmanagement.contract.services\\handmadeproductmanagement.contract.services.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{5ECD79B2-DBFD-424D-B888-3C9BBB2FA09D}|HandmadeProductManagement.Contract.Services\\HandmadeProductManagement.Contract.Services.csproj|solutionrelative:handmadeproductmanagement.contract.services\\handmadeproductmanagement.contract.services.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|d:\\project\\handmade-product\\handmadeproductmanagementbe\\handmadeproductmanagementbe\\weatherforecast.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|solutionrelative:handmadeproductmanagementbe\\weatherforecast.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|d:\\project\\handmade-product\\handmadeproductmanagementbe\\handmadeproductmanagementbe\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|solutionrelative:handmadeproductmanagementbe\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|d:\\project\\handmade-product\\handmadeproductmanagementbe\\handmadeproductmanagementbe\\dependencyinjection.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|solutionrelative:handmadeproductmanagementbe\\dependencyinjection.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|d:\\project\\handmade-product\\handmadeproductmanagementbe\\handmadeproductmanagementbe\\handmadeproductmanagementbe.http||{5703B403-55E7-4C63-8C88-A8F52C7A45C5}",
+      "RelativeMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|solutionrelative:handmadeproductmanagementbe\\handmadeproductmanagementbe.http||{5703B403-55E7-4C63-8C88-A8F52C7A45C5}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|d:\\project\\handmade-product\\handmadeproductmanagementbe\\handmadeproductmanagementbe\\properties\\launchsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|solutionrelative:handmadeproductmanagementbe\\properties\\launchsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|d:\\project\\handmade-product\\handmadeproductmanagementbe\\handmadeproductmanagementbe\\handmadeproductmanagementapi.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|solutionrelative:handmadeproductmanagementbe\\handmadeproductmanagementapi.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|d:\\project\\handmade-product\\handmadeproductmanagementbe\\handmadeproductmanagement.contract.repositories\\entity\\userinfo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|solutionrelative:handmadeproductmanagement.contract.repositories\\entity\\userinfo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|d:\\project\\handmade-product\\handmadeproductmanagementbe\\handmadeproductmanagement.contract.repositories\\entity\\applicationusertokens.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|solutionrelative:handmadeproductmanagement.contract.repositories\\entity\\applicationusertokens.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|d:\\project\\handmade-product\\handmadeproductmanagementbe\\handmadeproductmanagement.contract.repositories\\entity\\applicationuserclaims.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|solutionrelative:handmadeproductmanagement.contract.repositories\\entity\\applicationuserclaims.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|d:\\project\\handmade-product\\handmadeproductmanagementbe\\handmadeproductmanagement.contract.repositories\\entity\\applicationroleclaims.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|solutionrelative:handmadeproductmanagement.contract.repositories\\entity\\applicationroleclaims.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|d:\\1. project\\ojt\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.contract.repositories\\entity\\applicationrole.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|d:\\project\\handmade-product\\handmadeproductmanagementbe\\handmadeproductmanagement.contract.repositories\\entity\\applicationrole.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|solutionrelative:handmadeproductmanagement.contract.repositories\\entity\\applicationrole.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\VH\\.nuget\\packages\\microsoft.aspnetcore.identity.entityframeworkcore\\8.0.8\\THIRD-PARTY-NOTICES.TXT||{8B382828-6202-11D1-8870-0000F87579D2}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|d:\\1. project\\ojt\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.contract.repositories\\entity\\applicationuserroles.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|d:\\project\\handmade-product\\handmadeproductmanagementbe\\handmadeproductmanagement.contract.repositories\\entity\\applicationuserroles.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|solutionrelative:handmadeproductmanagement.contract.repositories\\entity\\applicationuserroles.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|d:\\1. project\\ojt\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.contract.repositories\\entity\\applicationuserlogins.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|d:\\project\\handmade-product\\handmadeproductmanagementbe\\handmadeproductmanagement.contract.repositories\\entity\\applicationuserlogins.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|solutionrelative:handmadeproductmanagement.contract.repositories\\entity\\applicationuserlogins.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{B48678A4-822E-4A18-9F58-32C525718D88}|HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj|d:\\1. project\\ojt\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.services\\service\\userservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{B48678A4-822E-4A18-9F58-32C525718D88}|HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj|solutionrelative:handmadeproductmanagement.services\\service\\userservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{5ECD79B2-DBFD-424D-B888-3C9BBB2FA09D}|HandmadeProductManagement.Contract.Services\\HandmadeProductManagement.Contract.Services.csproj|d:\\1. project\\ojt\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.contract.services\\interface\\iuserservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{5ECD79B2-DBFD-424D-B888-3C9BBB2FA09D}|HandmadeProductManagement.Contract.Services\\HandmadeProductManagement.Contract.Services.csproj|solutionrelative:handmadeproductmanagement.contract.services\\interface\\iuserservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{B48678A4-822E-4A18-9F58-32C525718D88}|HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj|d:\\1. project\\ojt\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.services\\dependencyinjection.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{B48678A4-822E-4A18-9F58-32C525718D88}|HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj|d:\\project\\handmade-product\\handmadeproductmanagementbe\\handmadeproductmanagement.services\\dependencyinjection.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{B48678A4-822E-4A18-9F58-32C525718D88}|HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj|solutionrelative:handmadeproductmanagement.services\\dependencyinjection.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|d:\\1. project\\ojt\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagementbe\\controllers\\weatherforecastcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|solutionrelative:handmadeproductmanagementbe\\controllers\\weatherforecastcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{C1EB3DE5-152E-4663-BD84-2D1155B125D8}|HandmadeProductManagement.Core\\HandmadeProductManagement.Core.csproj|d:\\1. project\\ojt\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.core\\base\\baseentity.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{C1EB3DE5-152E-4663-BD84-2D1155B125D8}|HandmadeProductManagement.Core\\HandmadeProductManagement.Core.csproj|solutionrelative:handmadeproductmanagement.core\\base\\baseentity.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{C1EB3DE5-152E-4663-BD84-2D1155B125D8}|HandmadeProductManagement.Core\\HandmadeProductManagement.Core.csproj|d:\\1. project\\ojt\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.core\\utils\\enumhelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{C1EB3DE5-152E-4663-BD84-2D1155B125D8}|HandmadeProductManagement.Core\\HandmadeProductManagement.Core.csproj|d:\\project\\handmade-product\\handmadeproductmanagementbe\\handmadeproductmanagement.core\\utils\\enumhelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{C1EB3DE5-152E-4663-BD84-2D1155B125D8}|HandmadeProductManagement.Core\\HandmadeProductManagement.Core.csproj|solutionrelative:handmadeproductmanagement.core\\utils\\enumhelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{C1EB3DE5-152E-4663-BD84-2D1155B125D8}|HandmadeProductManagement.Core\\HandmadeProductManagement.Core.csproj|d:\\1. project\\ojt\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.core\\utils\\customname.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{C1EB3DE5-152E-4663-BD84-2D1155B125D8}|HandmadeProductManagement.Core\\HandmadeProductManagement.Core.csproj|d:\\project\\handmade-product\\handmadeproductmanagementbe\\handmadeproductmanagement.core\\utils\\customname.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{C1EB3DE5-152E-4663-BD84-2D1155B125D8}|HandmadeProductManagement.Core\\HandmadeProductManagement.Core.csproj|solutionrelative:handmadeproductmanagement.core\\utils\\customname.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{C1EB3DE5-152E-4663-BD84-2D1155B125D8}|HandmadeProductManagement.Core\\HandmadeProductManagement.Core.csproj|d:\\1. project\\ojt\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.core\\utils\\corehelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{C1EB3DE5-152E-4663-BD84-2D1155B125D8}|HandmadeProductManagement.Core\\HandmadeProductManagement.Core.csproj|d:\\project\\handmade-product\\handmadeproductmanagementbe\\handmadeproductmanagement.core\\utils\\corehelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{C1EB3DE5-152E-4663-BD84-2D1155B125D8}|HandmadeProductManagement.Core\\HandmadeProductManagement.Core.csproj|solutionrelative:handmadeproductmanagement.core\\utils\\corehelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{C1EB3DE5-152E-4663-BD84-2D1155B125D8}|HandmadeProductManagement.Core\\HandmadeProductManagement.Core.csproj|d:\\1. project\\ojt\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.core\\store\\statuscodehelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{C1EB3DE5-152E-4663-BD84-2D1155B125D8}|HandmadeProductManagement.Core\\HandmadeProductManagement.Core.csproj|d:\\project\\handmade-product\\handmadeproductmanagementbe\\handmadeproductmanagement.core\\store\\statuscodehelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{C1EB3DE5-152E-4663-BD84-2D1155B125D8}|HandmadeProductManagement.Core\\HandmadeProductManagement.Core.csproj|solutionrelative:handmadeproductmanagement.core\\store\\statuscodehelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{C1EB3DE5-152E-4663-BD84-2D1155B125D8}|HandmadeProductManagement.Core\\HandmadeProductManagement.Core.csproj|d:\\1. project\\ojt\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.core\\base\\baseresponse.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{C1EB3DE5-152E-4663-BD84-2D1155B125D8}|HandmadeProductManagement.Core\\HandmadeProductManagement.Core.csproj|solutionrelative:handmadeproductmanagement.core\\base\\baseresponse.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{C1EB3DE5-152E-4663-BD84-2D1155B125D8}|HandmadeProductManagement.Core\\HandmadeProductManagement.Core.csproj|d:\\1. project\\ojt\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.core\\base\\basepaginatedlist.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{C1EB3DE5-152E-4663-BD84-2D1155B125D8}|HandmadeProductManagement.Core\\HandmadeProductManagement.Core.csproj|d:\\project\\handmade-product\\handmadeproductmanagementbe\\handmadeproductmanagement.core\\base\\basepaginatedlist.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{C1EB3DE5-152E-4663-BD84-2D1155B125D8}|HandmadeProductManagement.Core\\HandmadeProductManagement.Core.csproj|solutionrelative:handmadeproductmanagement.core\\base\\basepaginatedlist.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{C1EB3DE5-152E-4663-BD84-2D1155B125D8}|HandmadeProductManagement.Core\\HandmadeProductManagement.Core.csproj|d:\\1. project\\ojt\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.core\\base\\baseexception.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{C1EB3DE5-152E-4663-BD84-2D1155B125D8}|HandmadeProductManagement.Core\\HandmadeProductManagement.Core.csproj|solutionrelative:handmadeproductmanagement.core\\base\\baseexception.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{C1EB3DE5-152E-4663-BD84-2D1155B125D8}|HandmadeProductManagement.Core\\HandmadeProductManagement.Core.csproj|d:\\1. project\\ojt\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.core\\utils\\timehelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{C1EB3DE5-152E-4663-BD84-2D1155B125D8}|HandmadeProductManagement.Core\\HandmadeProductManagement.Core.csproj|d:\\project\\handmade-product\\handmadeproductmanagementbe\\handmadeproductmanagement.core\\utils\\timehelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{C1EB3DE5-152E-4663-BD84-2D1155B125D8}|HandmadeProductManagement.Core\\HandmadeProductManagement.Core.csproj|solutionrelative:handmadeproductmanagement.core\\utils\\timehelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{EA9CF239-AA84-4A09-957A-646C14A6F04B}|HandmadeProductManagement.Repositories\\HandmadeProductManagement.Repositories.csproj|d:\\1. project\\ojt\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.repositories\\uow\\genericrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{EA9CF239-AA84-4A09-957A-646C14A6F04B}|HandmadeProductManagement.Repositories\\HandmadeProductManagement.Repositories.csproj|d:\\project\\handmade-product\\handmadeproductmanagementbe\\handmadeproductmanagement.repositories\\uow\\genericrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{EA9CF239-AA84-4A09-957A-646C14A6F04B}|HandmadeProductManagement.Repositories\\HandmadeProductManagement.Repositories.csproj|solutionrelative:handmadeproductmanagement.repositories\\uow\\genericrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{B48678A4-822E-4A18-9F58-32C525718D88}|HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj|d:\\1. project\\ojt\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.services\\handmadeproductmanagement.services.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "AbsoluteMoniker": "D:0:0:{B48678A4-822E-4A18-9F58-32C525718D88}|HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj|d:\\project\\handmade-product\\handmadeproductmanagementbe\\handmadeproductmanagement.services\\handmadeproductmanagement.services.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
       "RelativeMoniker": "D:0:0:{B48678A4-822E-4A18-9F58-32C525718D88}|HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj|solutionrelative:handmadeproductmanagement.services\\handmadeproductmanagement.services.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{5ECD79B2-DBFD-424D-B888-3C9BBB2FA09D}|HandmadeProductManagement.Contract.Services\\HandmadeProductManagement.Contract.Services.csproj|d:\\1. project\\ojt\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.contract.services\\handmadeproductmanagement.contract.services.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
-      "RelativeMoniker": "D:0:0:{5ECD79B2-DBFD-424D-B888-3C9BBB2FA09D}|HandmadeProductManagement.Contract.Services\\HandmadeProductManagement.Contract.Services.csproj|solutionrelative:handmadeproductmanagement.contract.services\\handmadeproductmanagement.contract.services.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{29FDA659-8E8E-460D-8CF9-0F992D752ECA}|HandmadeProductManagement.ModelView\\HandmadeProductManagement.ModelViews.csproj|d:\\1. project\\ojt\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.modelview\\usermodelviews\\userresponsemodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{29FDA659-8E8E-460D-8CF9-0F992D752ECA}|HandmadeProductManagement.ModelView\\HandmadeProductManagement.ModelViews.csproj|solutionrelative:handmadeproductmanagement.modelview\\usermodelviews\\userresponsemodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{29FDA659-8E8E-460D-8CF9-0F992D752ECA}|HandmadeProductManagement.ModelView\\HandmadeProductManagement.ModelViews.csproj|d:\\1. project\\ojt\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.modelview\\authmodelviews\\loginmodelview.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{29FDA659-8E8E-460D-8CF9-0F992D752ECA}|HandmadeProductManagement.ModelView\\HandmadeProductManagement.ModelViews.csproj|solutionrelative:handmadeproductmanagement.modelview\\authmodelviews\\loginmodelview.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Program Files\\dotnet\\sdk\\8.0.303\\Containers\\build\\Microsoft.NET.Build.Containers.targets||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
@@ -177,47 +241,451 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "appsettings.json",
-              "DocumentMoniker": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\appsettings.json",
-              "RelativeDocumentMoniker": "HandmadeProductManagementBE\\appsettings.json",
-              "ToolTip": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\appsettings.json",
-              "RelativeToolTip": "HandmadeProductManagementBE\\appsettings.json",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAVAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2024-09-21T01:56:53.05Z",
+              "Title": "OrderController.cs",
+              "DocumentMoniker": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\Controllers\\OrderController.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagementBE\\Controllers\\OrderController.cs",
+              "ToolTip": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\Controllers\\OrderController.cs",
+              "RelativeToolTip": "HandmadeProductManagementBE\\Controllers\\OrderController.cs",
+              "ViewState": "AgIAAEAAAAAAAAAAAAAcwEkAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-09-25T08:19:56.813Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "OrderService.cs",
+              "DocumentMoniker": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\Service\\OrderService.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagement.Services\\Service\\OrderService.cs",
+              "ToolTip": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\Service\\OrderService.cs",
+              "RelativeToolTip": "HandmadeProductManagement.Services\\Service\\OrderService.cs",
+              "ViewState": "AgIAADgAAAAAAAAAAAAiwOMAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-09-25T07:37:56.016Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "CreateShopDto.cs",
+              "DocumentMoniker": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.ModelView\\ShopModelViews\\CreateShopDto.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagement.ModelView\\ShopModelViews\\CreateShopDto.cs",
+              "ToolTip": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.ModelView\\ShopModelViews\\CreateShopDto.cs",
+              "RelativeToolTip": "HandmadeProductManagement.ModelView\\ShopModelViews\\CreateShopDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAqwA0AAAATAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-09-25T06:43:22.832Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "ShopService.cs",
+              "DocumentMoniker": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\Service\\ShopService.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagement.Services\\Service\\ShopService.cs",
+              "ToolTip": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\Service\\ShopService.cs",
+              "RelativeToolTip": "HandmadeProductManagement.Services\\Service\\ShopService.cs",
+              "ViewState": "AgIAAGwAAAAAAAAAAADwv4IAAAAqAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-09-25T02:54:22.264Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "IOrderService.cs",
+              "DocumentMoniker": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Services\\Interface\\IOrderService.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Services\\Interface\\IOrderService.cs",
+              "ToolTip": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Services\\Interface\\IOrderService.cs",
+              "RelativeToolTip": "HandmadeProductManagement.Contract.Services\\Interface\\IOrderService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABUAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-09-25T07:32:28.194Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 6,
-              "Title": "HandmadeProductManagementBE.http",
-              "DocumentMoniker": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\HandmadeProductManagementBE.http",
-              "RelativeDocumentMoniker": "HandmadeProductManagementBE\\HandmadeProductManagementBE.http",
-              "ToolTip": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\HandmadeProductManagementBE.http",
-              "RelativeToolTip": "HandmadeProductManagementBE\\HandmadeProductManagementBE.http",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003502|",
-              "WhenOpened": "2024-09-21T01:57:08.304Z"
+              "Title": "CreateOrderDto.cs",
+              "DocumentMoniker": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.ModelView\\OrderModelViews\\CreateOrderDto.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagement.ModelView\\OrderModelViews\\CreateOrderDto.cs",
+              "ToolTip": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.ModelView\\OrderModelViews\\CreateOrderDto.cs",
+              "RelativeToolTip": "HandmadeProductManagement.ModelView\\OrderModelViews\\CreateOrderDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABIAAAAzAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-09-25T07:35:15.453Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "Program.cs",
-              "DocumentMoniker": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\Program.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagementBE\\Program.cs",
-              "ToolTip": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\Program.cs",
-              "RelativeToolTip": "HandmadeProductManagementBE\\Program.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAABYAAAAAAAAA",
+              "DocumentIndex": 1,
+              "Title": "Order.cs",
+              "DocumentMoniker": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\Order.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Repositories\\Entity\\Order.cs",
+              "ToolTip": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\Order.cs",
+              "RelativeToolTip": "HandmadeProductManagement.Contract.Repositories\\Entity\\Order.cs",
+              "ViewState": "AgIAAAQAAAAAAAAAAAAAABUAAAApAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-21T01:57:09.614Z"
+              "WhenOpened": "2024-09-25T07:22:07.529Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 7,
+              "Title": "UserService.cs",
+              "DocumentMoniker": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\Service\\UserService.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagement.Services\\Service\\UserService.cs",
+              "ToolTip": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\Service\\UserService.cs",
+              "RelativeToolTip": "HandmadeProductManagement.Services\\Service\\UserService.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAABcAAAAqAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-09-20T05:47:14.651Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "ShopController.cs",
+              "DocumentMoniker": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\Controllers\\ShopController.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagementBE\\Controllers\\ShopController.cs",
+              "ToolTip": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\Controllers\\ShopController.cs",
+              "RelativeToolTip": "HandmadeProductManagementBE\\Controllers\\ShopController.cs",
+              "ViewState": "AgIAAEIAAAAAAAAAAIAwwFUAAAANAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-09-25T04:32:43.399Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "IShopService.cs",
+              "DocumentMoniker": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Services\\Interface\\IShopService.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Services\\Interface\\IShopService.cs",
+              "ToolTip": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Services\\Interface\\IShopService.cs",
+              "RelativeToolTip": "HandmadeProductManagement.Contract.Services\\Interface\\IShopService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAABIAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-09-25T02:52:34.665Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "BaseEntity.cs",
+              "DocumentMoniker": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Core\\Base\\BaseEntity.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagement.Core\\Base\\BaseEntity.cs",
+              "ToolTip": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Core\\Base\\BaseEntity.cs",
+              "RelativeToolTip": "HandmadeProductManagement.Core\\Base\\BaseEntity.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAANAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-09-21T01:57:32.061Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "OrderResponseModel.cs",
+              "DocumentMoniker": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.ModelView\\OrderModelViews\\OrderResponseModel.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagement.ModelView\\OrderModelViews\\OrderResponseModel.cs",
+              "ToolTip": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.ModelView\\OrderModelViews\\OrderResponseModel.cs",
+              "RelativeToolTip": "HandmadeProductManagement.ModelView\\OrderModelViews\\OrderResponseModel.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAqwBEAAAAWAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-09-25T07:34:22.536Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "Shop.cs",
+              "DocumentMoniker": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\Shop.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Repositories\\Entity\\Shop.cs",
+              "ToolTip": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\Shop.cs",
+              "RelativeToolTip": "HandmadeProductManagement.Contract.Repositories\\Entity\\Shop.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAABQAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-09-25T02:06:37.408Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "ApplicationUser.cs",
+              "DocumentMoniker": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationUser.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationUser.cs",
+              "ToolTip": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationUser.cs",
+              "RelativeToolTip": "HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationUser.cs",
+              "ViewState": "AgIAAAsAAAAAAAAAAAAwwAwAAAAuAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-09-20T05:39:25.91Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "ShopResponseModel.cs",
+              "DocumentMoniker": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.ModelView\\ShopModelViews\\ShopResponseModel.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagement.ModelView\\ShopModelViews\\ShopResponseModel.cs",
+              "ToolTip": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.ModelView\\ShopModelViews\\ShopResponseModel.cs",
+              "RelativeToolTip": "HandmadeProductManagement.ModelView\\ShopModelViews\\ShopResponseModel.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAqwA0AAAAqAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-09-25T02:40:54.014Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "Cart.cs",
+              "DocumentMoniker": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\Cart.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Repositories\\Entity\\Cart.cs",
+              "ToolTip": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\Cart.cs",
+              "RelativeToolTip": "HandmadeProductManagement.Contract.Repositories\\Entity\\Cart.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-09-25T07:16:22.763Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "appsettings.Development.json",
+              "DocumentMoniker": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\appsettings.Development.json",
+              "RelativeDocumentMoniker": "HandmadeProductManagementBE\\appsettings.Development.json",
+              "ToolTip": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\appsettings.Development.json",
+              "RelativeToolTip": "HandmadeProductManagementBE\\appsettings.Development.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2024-09-21T01:56:55.467Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "Program.cs",
+              "DocumentMoniker": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\Program.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagementBE\\Program.cs",
+              "ToolTip": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\Program.cs",
+              "RelativeToolTip": "HandmadeProductManagementBE\\Program.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAABoAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-09-21T01:57:09.614Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 18,
+              "Title": "BaseException.cs",
+              "DocumentMoniker": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Core\\Base\\BaseException.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagement.Core\\Base\\BaseException.cs",
+              "ToolTip": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Core\\Base\\BaseException.cs",
+              "RelativeToolTip": "HandmadeProductManagement.Core\\Base\\BaseException.cs",
+              "ViewState": "AgIAABQAAAAAAAAAAAAwwEAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-09-21T02:09:58.368Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 19,
+              "Title": "DatabaseContext.cs",
+              "DocumentMoniker": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Repositories\\Context\\DatabaseContext.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagement.Repositories\\Context\\DatabaseContext.cs",
+              "ToolTip": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Repositories\\Context\\DatabaseContext.cs",
+              "RelativeToolTip": "HandmadeProductManagement.Repositories\\Context\\DatabaseContext.cs",
+              "ViewState": "AgIAAA8AAAAAAAAAAAA5wAUAAAA0AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-09-20T05:05:01.634Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 20,
+              "Title": "IGenericRepository.cs",
+              "DocumentMoniker": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\IUOW\\IGenericRepository.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Repositories\\IUOW\\IGenericRepository.cs",
+              "ToolTip": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\IUOW\\IGenericRepository.cs",
+              "RelativeToolTip": "HandmadeProductManagement.Contract.Repositories\\IUOW\\IGenericRepository.cs",
+              "ViewState": "AgIAAAUAAAAAAAAAAAAQwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-09-25T03:47:38.062Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 21,
+              "Title": "IUnitOfWork.cs",
+              "DocumentMoniker": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\IUOW\\IUnitOfWork.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Repositories\\IUOW\\IUnitOfWork.cs",
+              "ToolTip": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\IUOW\\IUnitOfWork.cs",
+              "RelativeToolTip": "HandmadeProductManagement.Contract.Repositories\\IUOW\\IUnitOfWork.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAYAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-09-20T05:23:33.485Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 22,
+              "Title": "IUserService.cs",
+              "DocumentMoniker": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Services\\Interface\\IUserService.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Services\\Interface\\IUserService.cs",
+              "ToolTip": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Services\\Interface\\IUserService.cs",
+              "RelativeToolTip": "HandmadeProductManagement.Contract.Services\\Interface\\IUserService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-09-20T05:41:01.056Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 23,
+              "Title": "UnitOfWork.cs",
+              "DocumentMoniker": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Repositories\\UOW\\UnitOfWork.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagement.Repositories\\UOW\\UnitOfWork.cs",
+              "ToolTip": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Repositories\\UOW\\UnitOfWork.cs",
+              "RelativeToolTip": "HandmadeProductManagement.Repositories\\UOW\\UnitOfWork.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAABIAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-09-20T05:20:26.976Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 25,
+              "Title": "WeatherForecastController.cs",
+              "DocumentMoniker": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\Controllers\\WeatherForecastController.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagementBE\\Controllers\\WeatherForecastController.cs",
+              "ToolTip": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\Controllers\\WeatherForecastController.cs",
+              "RelativeToolTip": "HandmadeProductManagementBE\\Controllers\\WeatherForecastController.cs",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-09-21T02:08:40.519Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 24,
+              "Title": "BaseResponse.cs",
+              "DocumentMoniker": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Core\\Base\\BaseResponse.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagement.Core\\Base\\BaseResponse.cs",
+              "ToolTip": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Core\\Base\\BaseResponse.cs",
+              "RelativeToolTip": "HandmadeProductManagement.Core\\Base\\BaseResponse.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-09-21T02:10:11.127Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 26,
+              "Title": "UserResponseModel.cs",
+              "DocumentMoniker": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.ModelView\\UserModelViews\\UserResponseModel.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagement.ModelView\\UserModelViews\\UserResponseModel.cs",
+              "ToolTip": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.ModelView\\UserModelViews\\UserResponseModel.cs",
+              "RelativeToolTip": "HandmadeProductManagement.ModelView\\UserModelViews\\UserResponseModel.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAnAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-09-20T05:43:24.003Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 28,
+              "Title": "Review.cs",
+              "DocumentMoniker": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\Review.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Repositories\\Entity\\Review.cs",
+              "ToolTip": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\Review.cs",
+              "RelativeToolTip": "HandmadeProductManagement.Contract.Repositories\\Entity\\Review.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-09-25T02:06:42.769Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 29,
+              "Title": "ProductImage.cs",
+              "DocumentMoniker": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\ProductImage.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Repositories\\Entity\\ProductImage.cs",
+              "ToolTip": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\ProductImage.cs",
+              "RelativeToolTip": "HandmadeProductManagement.Contract.Repositories\\Entity\\ProductImage.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-09-25T01:59:09.141Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 30,
+              "Title": "LoginModelView.cs",
+              "DocumentMoniker": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.ModelView\\AuthModelViews\\LoginModelView.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagement.ModelView\\AuthModelViews\\LoginModelView.cs",
+              "ToolTip": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.ModelView\\AuthModelViews\\LoginModelView.cs",
+              "RelativeToolTip": "HandmadeProductManagement.ModelView\\AuthModelViews\\LoginModelView.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAMAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-09-20T05:42:58.338Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 27,
+              "Title": "Promotion.cs",
+              "DocumentMoniker": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\Promotion.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Repositories\\Entity\\Promotion.cs",
+              "ToolTip": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\Promotion.cs",
+              "RelativeToolTip": "HandmadeProductManagement.Contract.Repositories\\Entity\\Promotion.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-09-24T09:37:48.571Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 31,
+              "Title": "HandmadeProductManagement.ModelViews.csproj",
+              "DocumentMoniker": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.ModelView\\HandmadeProductManagement.ModelViews.csproj",
+              "RelativeDocumentMoniker": "HandmadeProductManagement.ModelView\\HandmadeProductManagement.ModelViews.csproj",
+              "ToolTip": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.ModelView\\HandmadeProductManagement.ModelViews.csproj",
+              "RelativeToolTip": "HandmadeProductManagement.ModelView\\HandmadeProductManagement.ModelViews.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2024-09-21T02:17:07.14Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 32,
+              "Title": "HandmadeProductManagement.Contract.Services.csproj",
+              "DocumentMoniker": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Services\\HandmadeProductManagement.Contract.Services.csproj",
+              "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Services\\HandmadeProductManagement.Contract.Services.csproj",
+              "ToolTip": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Services\\HandmadeProductManagement.Contract.Services.csproj",
+              "RelativeToolTip": "HandmadeProductManagement.Contract.Services\\HandmadeProductManagement.Contract.Services.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2024-09-20T05:46:59.417Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 33,
+              "Title": "WeatherForecast.cs",
+              "DocumentMoniker": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\WeatherForecast.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagementBE\\WeatherForecast.cs",
+              "ToolTip": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\WeatherForecast.cs",
+              "RelativeToolTip": "HandmadeProductManagementBE\\WeatherForecast.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-09-21T01:57:09.094Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 37,
               "Title": "launchSettings.json",
-              "DocumentMoniker": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\Properties\\launchSettings.json",
+              "DocumentMoniker": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\Properties\\launchSettings.json",
               "RelativeDocumentMoniker": "HandmadeProductManagementBE\\Properties\\launchSettings.json",
-              "ToolTip": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\Properties\\launchSettings.json",
+              "ToolTip": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\Properties\\launchSettings.json",
               "RelativeToolTip": "HandmadeProductManagementBE\\Properties\\launchSettings.json",
               "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
@@ -225,49 +693,35 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "DatabaseContext.cs",
-              "DocumentMoniker": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Repositories\\Context\\DatabaseContext.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagement.Repositories\\Context\\DatabaseContext.cs",
-              "ToolTip": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Repositories\\Context\\DatabaseContext.cs",
-              "RelativeToolTip": "HandmadeProductManagement.Repositories\\Context\\DatabaseContext.cs",
-              "ViewState": "AgIAAAwAAAAAAAAAAAA1wBoAAAAFAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-20T05:05:01.634Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "WeatherForecast.cs",
-              "DocumentMoniker": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\WeatherForecast.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagementBE\\WeatherForecast.cs",
-              "ToolTip": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\WeatherForecast.cs",
-              "RelativeToolTip": "HandmadeProductManagementBE\\WeatherForecast.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-21T01:57:09.094Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "appsettings.Development.json",
-              "DocumentMoniker": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\appsettings.Development.json",
-              "RelativeDocumentMoniker": "HandmadeProductManagementBE\\appsettings.Development.json",
-              "ToolTip": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\appsettings.Development.json",
-              "RelativeToolTip": "HandmadeProductManagementBE\\appsettings.Development.json",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAhAAAAAAAAAA==",
+              "DocumentIndex": 34,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\appsettings.json",
+              "RelativeDocumentMoniker": "HandmadeProductManagementBE\\appsettings.json",
+              "ToolTip": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\appsettings.json",
+              "RelativeToolTip": "HandmadeProductManagementBE\\appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAVAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2024-09-21T01:56:55.467Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-09-21T01:56:53.05Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 36,
+              "Title": "HandmadeProductManagementBE.http",
+              "DocumentMoniker": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\HandmadeProductManagementBE.http",
+              "RelativeDocumentMoniker": "HandmadeProductManagementBE\\HandmadeProductManagementBE.http",
+              "ToolTip": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\HandmadeProductManagementBE.http",
+              "RelativeToolTip": "HandmadeProductManagementBE\\HandmadeProductManagementBE.http",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003502|",
+              "WhenOpened": "2024-09-21T01:57:08.304Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 35,
               "Title": "DependencyInjection.cs",
-              "DocumentMoniker": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\DependencyInjection.cs",
+              "DocumentMoniker": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\DependencyInjection.cs",
               "RelativeDocumentMoniker": "HandmadeProductManagementBE\\DependencyInjection.cs",
-              "ToolTip": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\DependencyInjection.cs",
+              "ToolTip": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\DependencyInjection.cs",
               "RelativeToolTip": "HandmadeProductManagementBE\\DependencyInjection.cs",
               "ViewState": "AQIAAAIAAAAAAAAAAAAnwA0AAABWAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
@@ -275,47 +729,24 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 38,
               "Title": "HandmadeProductManagementAPI.csproj",
-              "DocumentMoniker": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj",
+              "DocumentMoniker": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj",
               "RelativeDocumentMoniker": "HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj",
-              "ToolTip": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj",
+              "ToolTip": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj",
               "RelativeToolTip": "HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj",
               "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2024-09-23T02:28:48.233Z"
+              "WhenOpened": "2024-09-23T02:28:48.233Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
-              "Title": "IUnitOfWork.cs",
-              "DocumentMoniker": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\IUOW\\IUnitOfWork.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Repositories\\IUOW\\IUnitOfWork.cs",
-              "ToolTip": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\IUOW\\IUnitOfWork.cs",
-              "RelativeToolTip": "HandmadeProductManagement.Contract.Repositories\\IUOW\\IUnitOfWork.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAkAAAAYAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-20T05:23:33.485Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 11,
-              "Title": "UnitOfWork.cs",
-              "DocumentMoniker": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Repositories\\UOW\\UnitOfWork.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagement.Repositories\\UOW\\UnitOfWork.cs",
-              "ToolTip": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Repositories\\UOW\\UnitOfWork.cs",
-              "RelativeToolTip": "HandmadeProductManagement.Repositories\\UOW\\UnitOfWork.cs",
-              "ViewState": "AQIAAA8AAAAAAAAAAAAowBIAAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-20T05:20:26.976Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 39,
               "Title": "UserInfo.cs",
-              "DocumentMoniker": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\UserInfo.cs",
+              "DocumentMoniker": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\UserInfo.cs",
               "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Repositories\\Entity\\UserInfo.cs",
-              "ToolTip": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\UserInfo.cs",
+              "ToolTip": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\UserInfo.cs",
               "RelativeToolTip": "HandmadeProductManagement.Contract.Repositories\\Entity\\UserInfo.cs",
               "ViewState": "AQIAAAAAAAAAAAAAAAAAAAkAAAApAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
@@ -323,23 +754,11 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
-              "Title": "IGenericRepository.cs",
-              "DocumentMoniker": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\IUOW\\IGenericRepository.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Repositories\\IUOW\\IGenericRepository.cs",
-              "ToolTip": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\IUOW\\IGenericRepository.cs",
-              "RelativeToolTip": "HandmadeProductManagement.Contract.Repositories\\IUOW\\IGenericRepository.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAABAAAAAUAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-20T05:23:32.465Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 15,
+              "DocumentIndex": 41,
               "Title": "ApplicationUserClaims.cs",
-              "DocumentMoniker": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationUserClaims.cs",
+              "DocumentMoniker": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationUserClaims.cs",
               "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationUserClaims.cs",
-              "ToolTip": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationUserClaims.cs",
+              "ToolTip": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationUserClaims.cs",
               "RelativeToolTip": "HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationUserClaims.cs",
               "ViewState": "AQIAAAsAAAAAAAAAAAAwwAcAAAAqAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
@@ -347,23 +766,11 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 16,
-              "Title": "ApplicationUser.cs",
-              "DocumentMoniker": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationUser.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationUser.cs",
-              "ToolTip": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationUser.cs",
-              "RelativeToolTip": "HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationUser.cs",
-              "ViewState": "AQIAAAMAAAAAAAAAAIBJwAAAAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-20T05:39:25.91Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 13,
+              "DocumentIndex": 40,
               "Title": "ApplicationUserTokens.cs",
-              "DocumentMoniker": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationUserTokens.cs",
+              "DocumentMoniker": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationUserTokens.cs",
               "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationUserTokens.cs",
-              "ToolTip": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationUserTokens.cs",
+              "ToolTip": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationUserTokens.cs",
               "RelativeToolTip": "HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationUserTokens.cs",
               "ViewState": "AQIAABEAAAAAAAAAAIBJwAwAAAA4AAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
@@ -371,11 +778,11 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 17,
+              "DocumentIndex": 42,
               "Title": "ApplicationRoleClaims.cs",
-              "DocumentMoniker": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationRoleClaims.cs",
+              "DocumentMoniker": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationRoleClaims.cs",
               "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationRoleClaims.cs",
-              "ToolTip": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationRoleClaims.cs",
+              "ToolTip": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationRoleClaims.cs",
               "RelativeToolTip": "HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationRoleClaims.cs",
               "ViewState": "AQIAAAAAAAAAAAAAAAAAAAsAAAA7AAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
@@ -383,11 +790,11 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 18,
+              "DocumentIndex": 43,
               "Title": "ApplicationRole.cs",
-              "DocumentMoniker": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationRole.cs",
+              "DocumentMoniker": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationRole.cs",
               "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationRole.cs",
-              "ToolTip": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationRole.cs",
+              "ToolTip": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationRole.cs",
               "RelativeToolTip": "HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationRole.cs",
               "ViewState": "AQIAAAAAAAAAAAAAAIBJwAoAAAA3AAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
@@ -395,19 +802,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 14,
-              "Title": "HandmadeProductManagement.ModelViews.csproj",
-              "DocumentMoniker": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.ModelView\\HandmadeProductManagement.ModelViews.csproj",
-              "RelativeDocumentMoniker": "HandmadeProductManagement.ModelView\\HandmadeProductManagement.ModelViews.csproj",
-              "ToolTip": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.ModelView\\HandmadeProductManagement.ModelViews.csproj",
-              "RelativeToolTip": "HandmadeProductManagement.ModelView\\HandmadeProductManagement.ModelViews.csproj",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2024-09-21T02:17:07.14Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 19,
+              "DocumentIndex": 44,
               "Title": "THIRD-PARTY-NOTICES.TXT",
               "DocumentMoniker": "C:\\Users\\VH\\.nuget\\packages\\microsoft.aspnetcore.identity.entityframeworkcore\\8.0.8\\THIRD-PARTY-NOTICES.TXT",
               "ToolTip": "C:\\Users\\VH\\.nuget\\packages\\microsoft.aspnetcore.identity.entityframeworkcore\\8.0.8\\THIRD-PARTY-NOTICES.TXT",
@@ -417,11 +812,11 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 21,
+              "DocumentIndex": 46,
               "Title": "ApplicationUserLogins.cs",
-              "DocumentMoniker": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationUserLogins.cs",
+              "DocumentMoniker": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationUserLogins.cs",
               "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationUserLogins.cs",
-              "ToolTip": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationUserLogins.cs",
+              "ToolTip": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationUserLogins.cs",
               "RelativeToolTip": "HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationUserLogins.cs",
               "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
@@ -429,11 +824,11 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 20,
+              "DocumentIndex": 45,
               "Title": "ApplicationUserRoles.cs",
-              "DocumentMoniker": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationUserRoles.cs",
+              "DocumentMoniker": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationUserRoles.cs",
               "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationUserRoles.cs",
-              "ToolTip": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationUserRoles.cs",
+              "ToolTip": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationUserRoles.cs",
               "RelativeToolTip": "HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationUserRoles.cs",
               "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
@@ -441,35 +836,11 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 22,
-              "Title": "UserService.cs",
-              "DocumentMoniker": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\Service\\UserService.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagement.Services\\Service\\UserService.cs",
-              "ToolTip": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\Service\\UserService.cs",
-              "RelativeToolTip": "HandmadeProductManagement.Services\\Service\\UserService.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAIBJwAwAAAAJAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-20T05:47:14.651Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 23,
-              "Title": "IUserService.cs",
-              "DocumentMoniker": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Services\\Interface\\IUserService.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Services\\Interface\\IUserService.cs",
-              "ToolTip": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Services\\Interface\\IUserService.cs",
-              "RelativeToolTip": "HandmadeProductManagement.Contract.Services\\Interface\\IUserService.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAoAAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-20T05:41:01.056Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 24,
+              "DocumentIndex": 47,
               "Title": "DependencyInjection.cs",
-              "DocumentMoniker": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\DependencyInjection.cs",
+              "DocumentMoniker": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\DependencyInjection.cs",
               "RelativeDocumentMoniker": "HandmadeProductManagement.Services\\DependencyInjection.cs",
-              "ToolTip": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\DependencyInjection.cs",
+              "ToolTip": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\DependencyInjection.cs",
               "RelativeToolTip": "HandmadeProductManagement.Services\\DependencyInjection.cs",
               "ViewState": "AQIAABAAAAAAAAAAAIBJwBEAAAAFAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
@@ -477,35 +848,11 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 25,
-              "Title": "WeatherForecastController.cs",
-              "DocumentMoniker": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\Controllers\\WeatherForecastController.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagementBE\\Controllers\\WeatherForecastController.cs",
-              "ToolTip": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\Controllers\\WeatherForecastController.cs",
-              "RelativeToolTip": "HandmadeProductManagementBE\\Controllers\\WeatherForecastController.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-21T02:08:40.519Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 26,
-              "Title": "BaseEntity.cs",
-              "DocumentMoniker": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Core\\Base\\BaseEntity.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagement.Core\\Base\\BaseEntity.cs",
-              "ToolTip": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Core\\Base\\BaseEntity.cs",
-              "RelativeToolTip": "HandmadeProductManagement.Core\\Base\\BaseEntity.cs",
-              "ViewState": "AQIAAAgAAAAAAAAAAAAQwBIAAAA3AAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-21T01:57:32.061Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 27,
+              "DocumentIndex": 48,
               "Title": "EnumHelper.cs",
-              "DocumentMoniker": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Core\\Utils\\EnumHelper.cs",
+              "DocumentMoniker": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Core\\Utils\\EnumHelper.cs",
               "RelativeDocumentMoniker": "HandmadeProductManagement.Core\\Utils\\EnumHelper.cs",
-              "ToolTip": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Core\\Utils\\EnumHelper.cs",
+              "ToolTip": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Core\\Utils\\EnumHelper.cs",
               "RelativeToolTip": "HandmadeProductManagement.Core\\Utils\\EnumHelper.cs",
               "ViewState": "AQIAAAAAAAAAAAAAAAAAAAwAAAAOAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
@@ -513,11 +860,11 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 28,
+              "DocumentIndex": 49,
               "Title": "CustomName.cs",
-              "DocumentMoniker": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Core\\Utils\\CustomName.cs",
+              "DocumentMoniker": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Core\\Utils\\CustomName.cs",
               "RelativeDocumentMoniker": "HandmadeProductManagement.Core\\Utils\\CustomName.cs",
-              "ToolTip": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Core\\Utils\\CustomName.cs",
+              "ToolTip": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Core\\Utils\\CustomName.cs",
               "RelativeToolTip": "HandmadeProductManagement.Core\\Utils\\CustomName.cs",
               "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
@@ -525,11 +872,11 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 29,
+              "DocumentIndex": 50,
               "Title": "CoreHelper.cs",
-              "DocumentMoniker": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Core\\Utils\\CoreHelper.cs",
+              "DocumentMoniker": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Core\\Utils\\CoreHelper.cs",
               "RelativeDocumentMoniker": "HandmadeProductManagement.Core\\Utils\\CoreHelper.cs",
-              "ToolTip": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Core\\Utils\\CoreHelper.cs",
+              "ToolTip": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Core\\Utils\\CoreHelper.cs",
               "RelativeToolTip": "HandmadeProductManagement.Core\\Utils\\CoreHelper.cs",
               "ViewState": "AQIAAAAAAAAAAAAAAAAAAAgAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
@@ -537,11 +884,11 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 30,
+              "DocumentIndex": 51,
               "Title": "StatusCodeHelper.cs",
-              "DocumentMoniker": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Core\\Store\\StatusCodeHelper.cs",
+              "DocumentMoniker": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Core\\Store\\StatusCodeHelper.cs",
               "RelativeDocumentMoniker": "HandmadeProductManagement.Core\\Store\\StatusCodeHelper.cs",
-              "ToolTip": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Core\\Store\\StatusCodeHelper.cs",
+              "ToolTip": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Core\\Store\\StatusCodeHelper.cs",
               "RelativeToolTip": "HandmadeProductManagement.Core\\Store\\StatusCodeHelper.cs",
               "ViewState": "AQIAAAAAAAAAAAAAAAAAAA8AAAAlAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
@@ -549,23 +896,11 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 31,
-              "Title": "BaseResponse.cs",
-              "DocumentMoniker": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Core\\Base\\BaseResponse.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagement.Core\\Base\\BaseResponse.cs",
-              "ToolTip": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Core\\Base\\BaseResponse.cs",
-              "RelativeToolTip": "HandmadeProductManagement.Core\\Base\\BaseResponse.cs",
-              "ViewState": "AQIAABgAAAAAAAAAAAAmwAAAAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-21T02:10:11.127Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 32,
+              "DocumentIndex": 52,
               "Title": "BasePaginatedList.cs",
-              "DocumentMoniker": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Core\\Base\\BasePaginatedList.cs",
+              "DocumentMoniker": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Core\\Base\\BasePaginatedList.cs",
               "RelativeDocumentMoniker": "HandmadeProductManagement.Core\\Base\\BasePaginatedList.cs",
-              "ToolTip": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Core\\Base\\BasePaginatedList.cs",
+              "ToolTip": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Core\\Base\\BasePaginatedList.cs",
               "RelativeToolTip": "HandmadeProductManagement.Core\\Base\\BasePaginatedList.cs",
               "ViewState": "AQIAAB4AAAAAAAAAAAAmwAcAAAAdAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
@@ -573,23 +908,11 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 33,
-              "Title": "BaseException.cs",
-              "DocumentMoniker": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Core\\Base\\BaseException.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagement.Core\\Base\\BaseException.cs",
-              "ToolTip": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Core\\Base\\BaseException.cs",
-              "RelativeToolTip": "HandmadeProductManagement.Core\\Base\\BaseException.cs",
-              "ViewState": "AQIAACoAAAAAAAAAAAAkwAAAAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-21T02:09:58.368Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 34,
+              "DocumentIndex": 53,
               "Title": "TimeHelper.cs",
-              "DocumentMoniker": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Core\\Utils\\TimeHelper.cs",
+              "DocumentMoniker": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Core\\Utils\\TimeHelper.cs",
               "RelativeDocumentMoniker": "HandmadeProductManagement.Core\\Utils\\TimeHelper.cs",
-              "ToolTip": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Core\\Utils\\TimeHelper.cs",
+              "ToolTip": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Core\\Utils\\TimeHelper.cs",
               "RelativeToolTip": "HandmadeProductManagement.Core\\Utils\\TimeHelper.cs",
               "ViewState": "AQIAAAAAAAAAAAAAAAAAAAkAAAAJAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
@@ -597,59 +920,24 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 37,
-              "Title": "HandmadeProductManagement.Contract.Services.csproj",
-              "DocumentMoniker": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Services\\HandmadeProductManagement.Contract.Services.csproj",
-              "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Services\\HandmadeProductManagement.Contract.Services.csproj",
-              "ToolTip": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Services\\HandmadeProductManagement.Contract.Services.csproj",
-              "RelativeToolTip": "HandmadeProductManagement.Contract.Services\\HandmadeProductManagement.Contract.Services.csproj",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2024-09-20T05:46:59.417Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 36,
+              "DocumentIndex": 55,
               "Title": "HandmadeProductManagement.Services.csproj",
-              "DocumentMoniker": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj",
+              "DocumentMoniker": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj",
               "RelativeDocumentMoniker": "HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj",
-              "ToolTip": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj",
+              "ToolTip": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj",
               "RelativeToolTip": "HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj",
               "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2024-09-20T05:46:58.758Z"
+              "WhenOpened": "2024-09-20T05:46:58.758Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 38,
-              "Title": "UserResponseModel.cs",
-              "DocumentMoniker": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.ModelView\\UserModelViews\\UserResponseModel.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagement.ModelView\\UserModelViews\\UserResponseModel.cs",
-              "ToolTip": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.ModelView\\UserModelViews\\UserResponseModel.cs",
-              "RelativeToolTip": "HandmadeProductManagement.ModelView\\UserModelViews\\UserResponseModel.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAQAAAAnAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-20T05:43:24.003Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 39,
-              "Title": "LoginModelView.cs",
-              "DocumentMoniker": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.ModelView\\AuthModelViews\\LoginModelView.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagement.ModelView\\AuthModelViews\\LoginModelView.cs",
-              "ToolTip": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.ModelView\\AuthModelViews\\LoginModelView.cs",
-              "RelativeToolTip": "HandmadeProductManagement.ModelView\\AuthModelViews\\LoginModelView.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAMAAAAFAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-20T05:42:58.338Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 35,
+              "DocumentIndex": 54,
               "Title": "GenericRepository.cs",
-              "DocumentMoniker": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Repositories\\UOW\\GenericRepository.cs",
+              "DocumentMoniker": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Repositories\\UOW\\GenericRepository.cs",
               "RelativeDocumentMoniker": "HandmadeProductManagement.Repositories\\UOW\\GenericRepository.cs",
-              "ToolTip": "D:\\1. Project\\OJT\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Repositories\\UOW\\GenericRepository.cs",
+              "ToolTip": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.Repositories\\UOW\\GenericRepository.cs",
               "RelativeToolTip": "HandmadeProductManagement.Repositories\\UOW\\GenericRepository.cs",
               "ViewState": "AQIAAAAAAAAAAAAAAAAqwAUAAAAjAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
@@ -657,7 +945,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 40,
+              "DocumentIndex": 56,
               "Title": "Microsoft.NET.Build.Containers.targets",
               "DocumentMoniker": "C:\\Program Files\\dotnet\\sdk\\8.0.303\\Containers\\build\\Microsoft.NET.Build.Containers.targets",
               "ToolTip": "C:\\Program Files\\dotnet\\sdk\\8.0.303\\Containers\\build\\Microsoft.NET.Build.Containers.targets",

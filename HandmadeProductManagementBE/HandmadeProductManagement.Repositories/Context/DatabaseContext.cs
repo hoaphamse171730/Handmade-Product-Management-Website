@@ -175,7 +175,7 @@ namespace HandmadeProductManagement.Repositories.Context
             
             // Promotion
             modelBuilder.Entity<Promotion>()  
-                .HasKey(p => p.PromotionId);
+                .HasKey(p => p.Id);
             modelBuilder.Entity<Promotion>()  
                 .Property(p => p.PromotionName)  
                 .IsRequired() 

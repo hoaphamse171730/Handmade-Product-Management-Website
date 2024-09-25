@@ -1,12 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "rza6sM+UheY=",
+  "dgSpecHash": "QoIl2I6iyd4=",
   "success": true,
-  "projectFilePath": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.ModelView\\HandmadeProductManagement.ModelViews.csproj",
-  "expectedPackageFiles": [
-    "C:\\Users\\luan.tran\\.nuget\\packages\\microsoft.netcore.app.ref\\8.0.4\\microsoft.netcore.app.ref.8.0.4.nupkg.sha512",
-    "C:\\Users\\luan.tran\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\8.0.4\\microsoft.windowsdesktop.app.ref.8.0.4.nupkg.sha512",
-    "C:\\Users\\luan.tran\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\8.0.4\\microsoft.aspnetcore.app.ref.8.0.4.nupkg.sha512"
-  ],
+  "projectFilePath": "D:\\Project\\Handmade-Product\\HandmadeProductManagementBE\\HandmadeProductManagement.ModelView\\HandmadeProductManagement.ModelViews.csproj",
+  "expectedPackageFiles": [],
   "logs": []
 }

@@ -1,4 +1,6 @@
+using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Repositories.Context;
+using HandmadeProductManagement.Services.Service;
 using HandmadeProductManagementBE.API;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,7 +22,7 @@ builder.Services.AddDbContext<DatabaseContext>(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddConfig(builder.Configuration);
-
+builder.Services.AddScoped<IShopService, ShopService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

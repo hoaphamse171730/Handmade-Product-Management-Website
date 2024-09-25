@@ -10,3 +10,15 @@ C:\Users\VH\Desktop\Handmade-Product-Management-Website\HandmadeProductManagemen
 C:\Users\VH\Desktop\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.ModelView\obj\Debug\net8.0\refint\HandmadeProductManagement.ModelViews.dll
 C:\Users\VH\Desktop\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.ModelView\obj\Debug\net8.0\HandmadeProductManagement.ModelViews.pdb
 C:\Users\VH\Desktop\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.ModelView\obj\Debug\net8.0\ref\HandmadeProductManagement.ModelViews.dll
+D:\Project\Handmade-Product\HandmadeProductManagementBE\HandmadeProductManagement.ModelView\bin\Debug\net8.0\HandmadeProductManagement.ModelViews.deps.json
+D:\Project\Handmade-Product\HandmadeProductManagementBE\HandmadeProductManagement.ModelView\bin\Debug\net8.0\HandmadeProductManagement.ModelViews.dll
+D:\Project\Handmade-Product\HandmadeProductManagementBE\HandmadeProductManagement.ModelView\bin\Debug\net8.0\HandmadeProductManagement.ModelViews.pdb
+D:\Project\Handmade-Product\HandmadeProductManagementBE\HandmadeProductManagement.ModelView\obj\Debug\net8.0\HandmadeProductManagement.ModelViews.GeneratedMSBuildEditorConfig.editorconfig
+D:\Project\Handmade-Product\HandmadeProductManagementBE\HandmadeProductManagement.ModelView\obj\Debug\net8.0\HandmadeProductManagement.ModelViews.AssemblyInfoInputs.cache
+D:\Project\Handmade-Product\HandmadeProductManagementBE\HandmadeProductManagement.ModelView\obj\Debug\net8.0\HandmadeProductManagement.ModelViews.AssemblyInfo.cs
+D:\Project\Handmade-Product\HandmadeProductManagementBE\HandmadeProductManagement.ModelView\obj\Debug\net8.0\HandmadeProductManagement.ModelViews.csproj.CoreCompileInputs.cache
+D:\Project\Handmade-Product\HandmadeProductManagementBE\HandmadeProductManagement.ModelView\obj\Debug\net8.0\HandmadeProductManagement.ModelViews.sourcelink.json
+D:\Project\Handmade-Product\HandmadeProductManagementBE\HandmadeProductManagement.ModelView\obj\Debug\net8.0\HandmadeProductManagement.ModelViews.dll
+D:\Project\Handmade-Product\HandmadeProductManagementBE\HandmadeProductManagement.ModelView\obj\Debug\net8.0\refint\HandmadeProductManagement.ModelViews.dll
+D:\Project\Handmade-Product\HandmadeProductManagementBE\HandmadeProductManagement.ModelView\obj\Debug\net8.0\HandmadeProductManagement.ModelViews.pdb
+D:\Project\Handmade-Product\HandmadeProductManagementBE\HandmadeProductManagement.ModelView\obj\Debug\net8.0\ref\HandmadeProductManagement.ModelViews.dll
