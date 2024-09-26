@@ -1081,9 +1081,6 @@
         }
       },
       "HandmadeProductManagement.ModelViews/1.0.0": {
-        "dependencies": {
-          "HandmadeProductManagement.Core": "1.0.0"
-        },
         "runtime": {
           "HandmadeProductManagement.ModelViews.dll": {}
         }
