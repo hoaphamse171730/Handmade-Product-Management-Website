@@ -21,6 +21,11 @@ public class CartService : ICartService
                    .Include(c => c.CartItems)
                    .FirstOrDefaultAsync();
 
+        if (cart == null)
+        {
+            throw new InvalidOperationException($"No cart found for user ID {userId}.");  // Throw an exception if no cart is found
+        }
+
         return new CartModel
         {
             CartId = cart.Id,
@@ -34,40 +39,49 @@ public class CartService : ICartService
         };
     }
 
-    public async Task<CartModel> CreateOrUpdateCart(Guid userId, CartModel cartModel)
-    {
-        var cartRepo = _unitOfWork.GetRepository<Cart>();
-        var cart = await cartRepo.Entities
-                        .Where(c => c.UserId == userId && c.DeletedTime == null)
-                        .Include(c => c.CartItems)
-                        .FirstOrDefaultAsync();
 
-        if (cart == null)
-        {
-            cart = new Cart
-            {
-                UserId = userId,
-            };
-            cartRepo.Insert(cart);
-        }
-        cart.LastUpdatedTime = CoreHelper.SystemTimeNow;
-        await _unitOfWork.SaveAsync();
-        return cartModel; // Return updated model, ideally map from entity
-    }
+    //public async Task<CartModel> CreateCart(Guid userId)
+    //{
+    //    var cartRepo = _unitOfWork.GetRepository<Cart>();
+    //    var cartExists = await cartRepo.Entities
+    //                           .AnyAsync(c => c.UserId == userId && c.DeletedTime == null);
 
-    public async Task<bool> DeleteCart(Guid userId)
-    {
-        var cart = await _unitOfWork.GetRepository<Cart>().Entities
-                   .FirstOrDefaultAsync(c => c.UserId == userId && c.DeletedTime == null);
+    //    if (cartExists)
+    //    {
+    //        throw new InvalidOperationException($"A cart already exists for user ID {userId}.");
+    //    }
 
-        if (cart != null)
-        {
-            cart.DeletedTime = CoreHelper.SystemTimeNow;
-            cart.DeletedBy = userId;
-            await _unitOfWork.SaveAsync();
-            return true;
-        }
+    //    var newCart = new Cart
+    //    {
+    //        UserId = userId,
+    //        CreatedTime = CoreHelper.SystemTimeNow,
+    //        LastUpdatedTime = CoreHelper.SystemTimeNow
+    //    };
 
-        return false;
-    }
+    //    cartRepo.Insert(newCart);
+    //    await _unitOfWork.SaveAsync();
+
+    //    return new CartModel
+    //    {
+    //        CartId = newCart.Id,
+    //        UserId = newCart.UserId,
+    //    };
+    //}
+
+
+    //public async Task<bool> DeleteCart(Guid userId)
+    //{
+    //    var cart = await _unitOfWork.GetRepository<Cart>().Entities
+    //               .FirstOrDefaultAsync(c => c.UserId == userId && c.DeletedTime == null);
+
+    //    if (cart != null)
+    //    {
+    //        cart.DeletedTime = CoreHelper.SystemTimeNow;
+    //        cart.DeletedBy = userId.ToString();
+    //        await _unitOfWork.SaveAsync();
+    //        return true;
+    //    }
+
+    //    return false;
+    //}
 }

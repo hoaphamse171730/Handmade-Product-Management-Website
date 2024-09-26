@@ -11,7 +11,7 @@ namespace HandmadeProductManagement.Contract.Services
     public interface ICartService
     {
         Task<CartModel> GetCartByUserId(Guid userId);
-        Task<CartModel> CreateOrUpdateCart(Guid userId, CartModel cartModel);
-        Task<bool> DeleteCart(Guid userId);
+        //Task<CartModel> CreateCart(Guid userId);
+        //Task<bool> DeleteCart(Guid userId);
     }
 }

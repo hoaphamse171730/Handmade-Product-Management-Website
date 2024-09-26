@@ -14,29 +14,34 @@ public class CartItemService : ICartItemService
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<bool> AddOrUpdateCartItem(Guid cartId, CartItemModel cartItemModel)
+    public async Task<bool> AddCartItem(Guid cartId, CreateCartItemDto createCartItemDto)
+    {
+        var cartItemRepo = _unitOfWork.GetRepository<CartItem>();
+        var cartItem = new CartItem
+        {
+            CartId = cartId.ToString(),
+            ProductItemId = createCartItemDto.ProductItemId,
+            ProductQuantity = createCartItemDto.ProductQuantity,
+            CreatedTime = CoreHelper.SystemTimeNow,
+            LastUpdatedTime = CoreHelper.SystemTimeNow
+        };
+        cartItemRepo.Insert(cartItem);
+        await _unitOfWork.SaveAsync();
+        return true;
+    }
+
+    public async Task<bool> UpdateCartItem(Guid cartItemId, CartItemModel cartItemModel)
     {
         var cartItemRepo = _unitOfWork.GetRepository<CartItem>();
         var cartItem = await cartItemRepo.Entities
-                           .Where(ci => ci.Id == cartItemModel.CartItemId && ci.DeletedTime == null)
+                           .Where(ci => ci.Id == cartItemId.ToString() && ci.DeletedTime == null)
                            .FirstOrDefaultAsync();
 
         if (cartItem == null)
-        {
-            cartItem = new CartItem
-            {
-                CartId = cartId.ToString(),
-                ProductItemId = cartItemModel.ProductItemId,
-                ProductQuantity = cartItemModel.ProductQuantity
-            };
-            cartItemRepo.Insert(cartItem);
-        }
-        else
-        {
-            cartItem.ProductQuantity = cartItemModel.ProductQuantity; // Update existing item
-            cartItem.LastUpdatedTime = CoreHelper.SystemTimeNow;
-        }
+            throw new InvalidOperationException("Cart item not found.");
 
+        cartItem.ProductQuantity = cartItemModel.ProductQuantity;
+        cartItem.LastUpdatedTime = CoreHelper.SystemTimeNow;
         await _unitOfWork.SaveAsync();
         return true;
     }
@@ -49,8 +54,7 @@ public class CartItemService : ICartItemService
         if (cartItem != null)
         {
             cartItem.DeletedTime = CoreHelper.SystemTimeNow;
-            cartItem.DeletedBy = "System"; // Example, use actual user context if available
-
+            cartItem.DeletedBy = "System";//update later after have context accessor
             await _unitOfWork.SaveAsync();
             return true;
         }
