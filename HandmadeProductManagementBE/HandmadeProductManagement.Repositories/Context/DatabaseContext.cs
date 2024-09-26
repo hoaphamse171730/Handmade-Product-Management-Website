@@ -258,16 +258,20 @@ namespace HandmadeProductManagement.Repositories.Context
                       .IsRequired();
 
                 entity.Property(e => e.TotalAmount)
-                      .IsRequired();
+                      .IsRequired()
+                      .HasColumnType("decimal(18, 2)");
+
+                entity.Property(e => e.Status)
+                      .IsRequired()
+                      .HasMaxLength(20);
 
                 entity.HasOne(e => e.Order)
-                      .WithMany()
-                      .HasForeignKey(e => e.OrderId);
+                      .WithOne(o => o.Payment)
+                      .HasForeignKey<Payment>(e => e.OrderId);
 
-                // One-to-one relationship with PaymentDetail
-                entity.HasOne<PaymentDetail>()
+                entity.HasMany(e => e.PaymentDetails)
                       .WithOne(pd => pd.Payment)
-                      .HasForeignKey<PaymentDetail>(pd => pd.PaymentId);
+                      .HasForeignKey(pd => pd.PaymentId);
             });
 
             // PaymentDetail Entity Configuration
@@ -283,7 +287,8 @@ namespace HandmadeProductManagement.Repositories.Context
                       .HasMaxLength(15);
 
                 entity.Property(e => e.Amount)
-                      .IsRequired();
+                      .IsRequired()
+                      .HasColumnType("decimal(18, 2)"); 
 
                 entity.Property(e => e.Method)
                       .IsRequired()
