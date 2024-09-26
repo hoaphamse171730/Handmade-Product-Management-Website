@@ -9,8 +9,8 @@ namespace HandmadeProductManagement.Contract.Services.Interface
 {
     public interface ICartItemService
     {
-        Task<bool> AddCartItem(Guid cartId, CreateCartItemDto createCartItemDto);
-        Task<bool> UpdateCartItem(Guid cartItemId, CartItemModel cartItemModel);
-        Task<bool> RemoveCartItem(Guid cartItemId);
+        Task<bool> AddCartItem(string cartId, CreateCartItemDto createCartItemDto);
+        Task<bool> UpdateCartItem(string cartItemId, CartItemModel cartItemModel);
+        Task<bool> RemoveCartItem(string cartItemId);
     }
 }

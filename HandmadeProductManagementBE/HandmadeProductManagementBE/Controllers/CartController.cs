@@ -4,6 +4,8 @@ using HandmadeProductManagement.ModelViews.CartModelViews;
 using System;
 using System.Threading.Tasks;
 using HandmadeProductManagement.Contract.Services;
+using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.Contract.Repositories.Entity;
 
 namespace HandmadeProductManagementAPI.Controllers
 {
@@ -21,38 +23,32 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [HttpGet("{userId}")]
-        public async Task<IActionResult> GetCart(Guid userId)
+        public async Task<ActionResult<CartModel>> GetCart(Guid userId)
         {
             var cart = await _cartService.GetCartByUserId(userId);
-            return Ok(cart);
+            return Ok(BaseResponse<CartModel>.OkResponse(cart));
         }
 
-        [HttpPost("{userId}")]
-        public async Task<IActionResult> UpdateCart(Guid userId, [FromBody] CartModel cartModel)
+        [HttpPost("item/add/{cartId}")]
+        public async Task<ActionResult<bool>> AddCartItem(string cartId, [FromBody] CreateCartItemDto createCartItemDto)
         {
-            var updatedCart = await _cartService.CreateOrUpdateCart(userId, cartModel);
-            return Ok(updatedCart);
+            var result = await _cartItemService.AddCartItem(cartId, createCartItemDto);
+            return Ok(BaseResponse<bool>.OkResponse(result));
         }
 
-        [HttpDelete("{userId}")]
-        public async Task<IActionResult> DeleteCart(Guid userId)
+        [HttpPut("item/update/{cartItemId}")]
+        public async Task<ActionResult<bool>> UpdateCartItem(string cartItemId, [FromBody] CartItemModel cartItemModel)
         {
-            var result = await _cartService.DeleteCart(userId);
-            return Ok(result);
+            var result = await _cartItemService.UpdateCartItem(cartItemId, cartItemModel);
+            return Ok(BaseResponse<bool>.OkResponse(result));
         }
 
-        [HttpPost("item/{cartId}")]
-        public async Task<IActionResult> AddOrUpdateCartItem(Guid cartId, [FromBody] CartItemModel cartItemModel)
-        {
-            var result = await _cartItemService.AddOrUpdateCartItem(cartId, cartItemModel);
-            return Ok(result);
-        }
 
         [HttpDelete("item/{cartItemId}")]
-        public async Task<IActionResult> RemoveCartItem(Guid cartItemId)
+        public async Task<ActionResult<bool>> RemoveCartItem(string cartItemId)
         {
             var result = await _cartItemService.RemoveCartItem(cartItemId);
-            return Ok(result);
+            return Ok(BaseResponse<bool>.OkResponse(result));
         }
     }
 }

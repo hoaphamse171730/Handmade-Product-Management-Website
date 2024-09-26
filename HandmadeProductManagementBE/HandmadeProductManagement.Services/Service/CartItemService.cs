@@ -4,33 +4,39 @@ using HandmadeProductManagement.ModelViews.CartModelViews;
 using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Utils;
+using HandmadeProductManagement.Contract.Services.Security;
 
 public class CartItemService : ICartItemService
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly UserAccessor _userAccessor;
 
-    public CartItemService(IUnitOfWork unitOfWork)
+    public CartItemService(IUnitOfWork unitOfWork,UserAccessor userAccessor)
     {
         _unitOfWork = unitOfWork;
+        _userAccessor = userAccessor;
     }
 
-    public async Task<bool> AddCartItem(Guid cartId, CreateCartItemDto createCartItemDto)
+    public async Task<bool> AddCartItem(string cartId, CreateCartItemDto createCartItemDto)
     {
         var cartItemRepo = _unitOfWork.GetRepository<CartItem>();
+        //var cartRepo = _unitOfWork.GetRepository<Cart>();
+        //var cart = cartRepo.GetById(cartId);
         var cartItem = new CartItem
         {
-            CartId = cartId.ToString(),
+            CartId = cartId,
             ProductItemId = createCartItemDto.ProductItemId,
             ProductQuantity = createCartItemDto.ProductQuantity,
             CreatedTime = CoreHelper.SystemTimeNow,
             LastUpdatedTime = CoreHelper.SystemTimeNow
         };
         cartItemRepo.Insert(cartItem);
+        //if (cart!=null) cart.CartItems.Add(cartItem);
         await _unitOfWork.SaveAsync();
         return true;
     }
 
-    public async Task<bool> UpdateCartItem(Guid cartItemId, CartItemModel cartItemModel)
+    public async Task<bool> UpdateCartItem(string cartItemId, CartItemModel cartItemModel)
     {
         var cartItemRepo = _unitOfWork.GetRepository<CartItem>();
         var cartItem = await cartItemRepo.Entities
@@ -46,7 +52,7 @@ public class CartItemService : ICartItemService
         return true;
     }
 
-    public async Task<bool> RemoveCartItem(Guid cartItemId)
+    public async Task<bool> RemoveCartItem(string cartItemId)
     {
         var cartItem = await _unitOfWork.GetRepository<CartItem>().Entities
                          .FirstOrDefaultAsync(ci => ci.Id == cartItemId.ToString() && ci.DeletedTime == null);
@@ -54,11 +60,10 @@ public class CartItemService : ICartItemService
         if (cartItem != null)
         {
             cartItem.DeletedTime = CoreHelper.SystemTimeNow;
-            cartItem.DeletedBy = "System";//update later after have context accessor
+            cartItem.DeletedBy = _userAccessor.GetUsername();//update later after have context accessor
             await _unitOfWork.SaveAsync();
             return true;
         }
-
         return false;
     }
 }
