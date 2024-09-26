@@ -15,7 +15,7 @@ public class OrderDetailService : IOrderDetailService
 
     public async Task<IEnumerable<OrderDetailDto>> GetAllAsync()
     {
-        var result = _unitOfWork.GetRepository<Or>()
+        
     }
 
 }
