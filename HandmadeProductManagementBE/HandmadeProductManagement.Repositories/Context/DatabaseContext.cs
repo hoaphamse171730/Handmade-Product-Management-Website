@@ -256,7 +256,8 @@ namespace HandmadeProductManagement.Repositories.Context
                       .IsRequired();
 
                 entity.Property(e => e.TotalAmount)
-                      .IsRequired();
+                      .IsRequired()
+                      .HasColumnType("decimal(18, 2)");
 
                 entity.Property(e => e.Status)
                       .IsRequired()
@@ -284,7 +285,8 @@ namespace HandmadeProductManagement.Repositories.Context
                       .HasMaxLength(15);
 
                 entity.Property(e => e.Amount)
-                      .IsRequired();
+                      .IsRequired()
+                      .HasColumnType("decimal(18, 2)"); 
 
                 entity.Property(e => e.Method)
                       .IsRequired()

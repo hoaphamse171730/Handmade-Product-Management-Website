@@ -47,11 +47,8 @@ namespace HandmadeProductManagementBE.API
         {
             services
                 //.AddScoped<IUserService, UserService>()
-                .AddScoped<IUserService, UserService>()
-                .AddScoped<IShopService, ShopService>()
-                .AddScoped<IOrderService, OrderService>() 
-                .AddScoped<IPaymentService, PaymentService>()
-                .AddHostedService<PaymentExpirationBackgroundService>();
+                .AddScoped<IUserService, UserService>();
+                
         }
     }
 }

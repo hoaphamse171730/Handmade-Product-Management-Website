@@ -4,12 +4,12 @@ namespace HandmadeProductManagementAPI.BackgroundServices
 {
     public class PaymentExpirationBackgroundService : BackgroundService
     {
-        private readonly IPaymentService _paymentService;
+        private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly ILogger<PaymentExpirationBackgroundService> _logger;
 
-        public PaymentExpirationBackgroundService(IPaymentService paymentService, ILogger<PaymentExpirationBackgroundService> logger)
+        public PaymentExpirationBackgroundService(IServiceScopeFactory serviceScopeFactory, ILogger<PaymentExpirationBackgroundService> logger)
         {
-            _paymentService = paymentService;
+            _serviceScopeFactory = serviceScopeFactory;
             _logger = logger;
         }
 
@@ -17,16 +17,20 @@ namespace HandmadeProductManagementAPI.BackgroundServices
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                try
+                using (var scope = _serviceScopeFactory.CreateScope())
                 {
-                    await _paymentService.CheckAndExpirePaymentsAsync();
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Error occurred while checking and expiring payments.");
+                    var paymentService = scope.ServiceProvider.GetRequiredService<IPaymentService>();
+                    try
+                    {
+                        await paymentService.CheckAndExpirePaymentsAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Error occurred while checking and expiring payments.");
+                    }
                 }
 
-                await Task.Delay(TimeSpan.FromHours(1), stoppingToken); 
+                await Task.Delay(TimeSpan.FromHours(1), stoppingToken);
             }
         }
     }

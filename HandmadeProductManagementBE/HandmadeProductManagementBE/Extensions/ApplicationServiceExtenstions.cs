@@ -3,6 +3,7 @@ using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Repositories.Context;
 using HandmadeProductManagement.Repositories.UOW;
 using HandmadeProductManagement.Services.Service;
+using HandmadeProductManagementAPI.BackgroundServices;
 using Microsoft.EntityFrameworkCore;
 
 namespace HandmadeProductManagementAPI.Extensions;
@@ -36,7 +37,9 @@ public static class ApplicationServiceExtenstions
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IShopService, ShopService>();
         services.AddScoped<IOrderService, OrderService>();
-
+        services.AddScoped<IPaymentService, PaymentService>();
+        services.AddScoped<IPaymentDetailService, PaymentDetailService>();
+        services.AddHostedService<PaymentExpirationBackgroundService>();
 
         return services;
     }
