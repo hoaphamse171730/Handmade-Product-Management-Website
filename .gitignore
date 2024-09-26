@@ -6,6 +6,67 @@
 *.user
 *.sln.docstates
 
+# Ignore user-specific files for other IDEs
+.idea/
+*.iml
+
+# Ignore package management directories
+node_modules/
+bower_components/
+jspm_packages/
+vendor/
+
+# Ignore log files
+*.log
+
+# Ignore environment variables and secret keys
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Ignore coverage directories
+coverage/
+*.lcov
+
+# Ignore temporary files
+*.tmp
+*.temp
+*.bak
+*.swp
+
+# Ignore MacOS specific files
+.AppleDouble
+.LSOverride
+.DS_Store
+.DS_Store?
+._*
+
+# Ignore Windows specific files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Ignore build output directories
+dist/
+build/
+out/
+
+# Ignore documentation files
+*.md~  # Backup markdown files
+
+# Ignore generated files from various tools
+*.generated.cs
+*.generated.h
+
+# Ignore IntelliJ IDEA files
+*.idea/
+*.ipr
+*.iws
+
+
 # Build results
 
 [Dd]ebug/
@@ -73,6 +134,10 @@ publish/
 *.pubxml
 *.azurePubxml
 
+# Ignore appsettings.json
+appsettings.json
+appsettings.*.json
+
 # NuGet Packages Directory
 ## TODO: If you have NuGet Package Restore enabled, uncomment the next line
 packages/
@@ -85,6 +150,8 @@ csx/
 
 # Windows Store app package directory
 AppPackages/
+
+
 
 # Others
 sql/

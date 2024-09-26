@@ -30,6 +30,7 @@
 
   <ItemGroup>
     <Folder Include="Middlerware\" />
+    <Folder Include="Migrations\" />
   </ItemGroup>
 
   <ItemGroup>

@@ -42,3 +42,25 @@ D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductM
 D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Repositories\obj\Debug\net8.0\HandmadeProductManagement.Repositories.pdb
 D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Repositories\obj\Debug\net8.0\HandmadeProductManagement.Repositories.genruntimeconfig.cache
 D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Repositories\obj\Debug\net8.0\ref\HandmadeProductManagement.Repositories.dll
+D:\FPT\2024\sem6\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Repositories\bin\Debug\net8.0\HandmadeProductManagement.Repositories.deps.json
+D:\FPT\2024\sem6\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Repositories\bin\Debug\net8.0\HandmadeProductManagement.Repositories.runtimeconfig.json
+D:\FPT\2024\sem6\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Repositories\bin\Debug\net8.0\HandmadeProductManagement.Repositories.dll
+D:\FPT\2024\sem6\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Repositories\bin\Debug\net8.0\HandmadeProductManagement.Repositories.pdb
+D:\FPT\2024\sem6\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Repositories\bin\Debug\net8.0\HandmadeProductManagement.Contract.Repositories.dll
+D:\FPT\2024\sem6\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Repositories\bin\Debug\net8.0\HandmadeProductManagement.Core.dll
+D:\FPT\2024\sem6\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Repositories\bin\Debug\net8.0\HandmadeProductManagement.ModelViews.dll
+D:\FPT\2024\sem6\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Repositories\bin\Debug\net8.0\HandmadeProductManagement.Contract.Repositories.pdb
+D:\FPT\2024\sem6\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Repositories\bin\Debug\net8.0\HandmadeProductManagement.ModelViews.pdb
+D:\FPT\2024\sem6\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Repositories\bin\Debug\net8.0\HandmadeProductManagement.Core.pdb
+D:\FPT\2024\sem6\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Repositories\obj\Debug\net8.0\HandmadeProductManagement.Repositories.csproj.AssemblyReference.cache
+D:\FPT\2024\sem6\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Repositories\obj\Debug\net8.0\HandmadeProductManagement.Repositories.GeneratedMSBuildEditorConfig.editorconfig
+D:\FPT\2024\sem6\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Repositories\obj\Debug\net8.0\HandmadeProductManagement.Repositories.AssemblyInfoInputs.cache
+D:\FPT\2024\sem6\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Repositories\obj\Debug\net8.0\HandmadeProductManagement.Repositories.AssemblyInfo.cs
+D:\FPT\2024\sem6\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Repositories\obj\Debug\net8.0\HandmadeProductManagement.Repositories.csproj.CoreCompileInputs.cache
+D:\FPT\2024\sem6\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Repositories\obj\Debug\net8.0\HandmadeProductManagement.Repositories.sourcelink.json
+D:\FPT\2024\sem6\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Repositories\obj\Debug\net8.0\Handmade.5DEB1838.Up2Date
+D:\FPT\2024\sem6\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Repositories\obj\Debug\net8.0\HandmadeProductManagement.Repositories.dll
+D:\FPT\2024\sem6\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Repositories\obj\Debug\net8.0\refint\HandmadeProductManagement.Repositories.dll
+D:\FPT\2024\sem6\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Repositories\obj\Debug\net8.0\HandmadeProductManagement.Repositories.pdb
+D:\FPT\2024\sem6\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Repositories\obj\Debug\net8.0\HandmadeProductManagement.Repositories.genruntimeconfig.cache
+D:\FPT\2024\sem6\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Repositories\obj\Debug\net8.0\ref\HandmadeProductManagement.Repositories.dll
