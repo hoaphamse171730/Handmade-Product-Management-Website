@@ -1,20 +1,16 @@
-﻿using HandmadeProductManagement.Contract.Repositories.Entity;
-using HandmadeProductManagement.Contract.Repositories.Interface;
+using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.ModelViews.ProductModelViews;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using HandmadeProductManagement.Contract.Repositories.Interface;
 
 namespace HandmadeProductManagement.Services.Service
 {
     public class ProductService : IProductService
     {
-
         private readonly IUnitOfWork _unitOfWork;
 
         public ProductService(IUnitOfWork unitOfWork)
@@ -22,131 +18,55 @@ namespace HandmadeProductManagement.Services.Service
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<BaseResponse<IEnumerable<ProductResponseModel>>> SearchProductsAsync(ProductSearchModel searchModel)
+        public async Task<IList<Product>> GetAll()
         {
-            var query = _unitOfWork.GetRepository<Product>().Entities.AsQueryable();
-
-            // Apply Search Filters
-            if (!string.IsNullOrEmpty(searchModel.Name))
-            {
-                query = query.Where(p => p.Name.Contains(searchModel.Name));
-            }
-
-            if (!string.IsNullOrEmpty(searchModel.CategoryId))
-            {
-                query = query.Where(p => p.CategoryId == searchModel.CategoryId);
-            }
-
-            if (!string.IsNullOrEmpty(searchModel.ShopId))
-            {
-                query = query.Where(p => p.ShopId == searchModel.ShopId);
-            }
-
-            if (!string.IsNullOrEmpty(searchModel.Status))
-            {
-                query = query.Where(p => p.Status == searchModel.Status);
-            }
-
-            if (searchModel.MinRating.HasValue)
-            {
-                query = query.Where(p => p.Rating >= searchModel.MinRating.Value);
-            }
-
-
-            // Sort Logic
-            if (searchModel.SortByPrice)
-            {
-                query = searchModel.SortDescending
-                    ? query.OrderByDescending(p => p.ProductItems.Min(pi => pi.Price))
-                    : query.OrderBy(p => p.ProductItems.Min(pi => pi.Price));
-            }
-
-            else
-            {
-                query = searchModel.SortDescending
-                    ? query.OrderByDescending(p => p.Rating)
-                    : query.OrderBy(p => p.Rating);
-            }
-
-
-
-            var productResponseModels = await query
-                .GroupBy(p => new
-                {
-                    p.Id,
-                    p.Name,
-                    p.Description,
-                    p.CategoryId,
-                    p.ShopId,
-                    p.Rating,
-                    p.Status,
-                    p.SoldCount
-                })
-                .Select(g => new ProductResponseModel
-                {
-                    Id = g.Key.Id,
-                    Name = g.Key.Name,
-                    Description = g.Key.Description,
-                    CategoryId = g.Key.CategoryId,
-                    ShopId = g.Key.ShopId,
-                    Rating = g.Key.Rating,
-                    Status = g.Key.Status,
-                    SoldCount = g.Key.SoldCount,
-                    // Avoid duplicates
-                    Price = g.SelectMany(p => p.ProductItems).Any() ? g.SelectMany(p => p.ProductItems).Min(pi => pi.Price) : 0
-                }).OrderBy(pr => searchModel.SortByPrice
-                    ? (searchModel.SortDescending ? -pr.Price : pr.Price) // Sort by price ascending or descending
-                    : (searchModel.SortDescending ? -pr.Rating : pr.Rating)) // Sort by rating ascending or descending
-                .ToListAsync();
-
-            return BaseResponse<IEnumerable<ProductResponseModel>>.OkResponse(productResponseModels);
-
+            var products = await _unitOfWork.GetRepository<Product>().Entities.ToListAsync();
+            return products;
+        }
+        public async Task<Product> GetById(string id)
+        {
+            var product = await _unitOfWork.GetRepository<Product>().GetByIdAsync(id);
+            return product ?? throw new KeyNotFoundException("Product not found");
+        }
+        public async Task<Product> Create(Product product)
+        {
+            var productRepo = _unitOfWork.GetRepository<Product>();
+            await productRepo.InsertAsync(product);
+            await _unitOfWork.SaveAsync();
+            return product;
         }
 
-
-        // Sort Function
-
-        public async Task<BaseResponse<IEnumerable<ProductResponseModel>>> SortProductsAsync(ProductSortModel sortModel)
+        public async Task<Product> Update(string id, Product updatedProduct)
         {
-            var query = _unitOfWork.GetRepository<Product>().Entities
-                .Include(p => p.ProductItems)
-                .Include(p => p.Reviews)
-                .AsQueryable();
-
-            // Sort by Price
-            if (sortModel.SortByPrice)
-            {
-                query = sortModel.SortDescending
-                    ? query.OrderByDescending(p => p.ProductItems.Min(pi => pi.Price))
-                    : query.OrderBy(p => p.ProductItems.Min(pi => pi.Price));
-            }
-
-            // Sort by Rating
-            else if (sortModel.SortByRating)
-            {
-                query = sortModel.SortDescending
-                    ? query.OrderByDescending(p => p.Rating)
-                    : query.OrderBy(p => p.Rating);
-            }
-
-            var products = await query.ToListAsync();
-
-            var productResponseModels = products.Select(p => new ProductResponseModel
-            {
-                Id = p.Id,
-                Name = p.Name,
-                Description = p.Description,
-                CategoryId = p.CategoryId,
-                ShopId = p.ShopId,
-                Rating = p.Rating,
-                Status = p.Status,
-                SoldCount = p.SoldCount,
-                Price = p.ProductItems.Any() ? p.ProductItems.Min(pi => pi.Price) : 0
-            });
-
-            return BaseResponse<IEnumerable<ProductResponseModel>>.OkResponse(productResponseModels);
-
+            var productRepo = _unitOfWork.GetRepository<Product>();
+            var existingProduct = await productRepo.GetByIdAsync(id);
+            if (existingProduct == null)
+                throw new KeyNotFoundException("Product not found");
+            existingProduct.Name = updatedProduct.Name;
+            existingProduct.Description = updatedProduct.Description;
+            existingProduct.Rating = updatedProduct.Rating;
+            existingProduct.CategoryId = updatedProduct.CategoryId;
+            existingProduct.SoldCount = updatedProduct.SoldCount;
+            existingProduct.CreatedBy = updatedProduct.CreatedBy;
+            existingProduct.DeletedBy = updatedProduct.DeletedBy;
+            existingProduct.CreatedTime = updatedProduct.CreatedTime;
+            existingProduct.DeletedTime = updatedProduct.DeletedTime;
+            existingProduct.LastUpdatedBy = updatedProduct.LastUpdatedBy;
+            existingProduct.LastUpdatedTime = updatedProduct.LastUpdatedTime;
+            await productRepo.UpdateAsync(existingProduct);
+            await _unitOfWork.SaveAsync();
+            return existingProduct;
         }
 
+        public async Task<bool> Delete(string id)
+        {
+            var productRepo = _unitOfWork.GetRepository<Product>();
+            var product = await productRepo.GetByIdAsync(id);
+            if (product == null)
+                return false;
+            await productRepo.DeleteAsync(product);
+            await _unitOfWork.SaveAsync();
+            return true;
+        }
     }
 }

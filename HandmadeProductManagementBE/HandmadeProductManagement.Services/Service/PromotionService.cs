@@ -1,12 +1,13 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using AutoMapper;
 using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
-using HandmadeProductManagement.ModelViews.UserModelViews;
+using HandmadeProductManagement.ModelViews.PromotionModelViews;
 using HandmadeProductManagement.Repositories.Entity;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,35 +16,59 @@ namespace HandmadeProductManagement.Services.Service
     public class PromotionService : IPromotionService
     {
         private readonly IUnitOfWork _unitOfWork;
-        public PromotionService(IUnitOfWork unitOfWork)
+        private readonly IMapper _mapper;
+
+        public PromotionService(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
+            _mapper = mapper;
         }
 
-        public async Task<IList<Promotion>> GetAll()
+
+        public async Task<PromotionDto> GetById(string id)
         {
-            IQueryable<Promotion> query = _unitOfWork.GetRepository<Promotion>().Entities;
-
-            // Map ApplicationUser to UserResponseModel
-            var result = await query.Select(pi => new Promotion
-            {
-                Id = pi.Id,
-                Name = pi.Name,
-                Description = pi.Description,
-                PromotionName = pi.PromotionName,
-                DiscountRate = pi.DiscountRate,
-                StartDate = pi.StartDate,
-                EndDate = pi.EndDate,
-        //public string Name { get; set; } = string.Empty;
-        //public string? Description { get; set; }
-        //public string PromotionName { get; set; } = string.Empty;
-        //public float DiscountRate { get; set; }
-        //public DateTime StartDate { get; set; }
-        //public DateTime EndDate { get; set; }
-        //public string? Status { get; set; }
-    }).ToListAsync();
-
-            return result;  // Cast List to IList
+            var promotion = await _unitOfWork.GetRepository<Promotion>().GetByIdAsync(id);
+            if (promotion is null)
+                throw new KeyNotFoundException("Promotion not found");
+            var promotionToReturn = _mapper.Map<PromotionDto>(promotion);
+            return promotionToReturn;
         }
+
+        public async Task<PromotionDto> Create(PromotionForCreationDto promotion)
+        {
+            var promotionEntity = _mapper.Map<Promotion>(promotion);
+            await _unitOfWork.GetRepository<Promotion>().InsertAsync(promotionEntity);
+            await _unitOfWork.SaveAsync();
+            var promotionToReturn = _mapper.Map<PromotionDto>(promotionEntity);
+            return promotionToReturn;
+        }
+
+        public async Task Update(string id, PromotionForUpdateDto promotion)
+        {
+            var promotionEntity = await _unitOfWork.GetRepository<Promotion>().GetByIdAsync(id);
+            if (promotionEntity is null)
+                throw new KeyNotFoundException("Promotion not found");
+            _mapper.Map(promotion, promotionEntity);
+            await _unitOfWork.GetRepository<Promotion>().UpdateAsync(promotionEntity);
+            await _unitOfWork.SaveAsync();
+        }
+        
+        
+        public async Task Delete(string id)
+        {
+            var promotionEntity = await _unitOfWork.GetRepository<Promotion>().GetByIdAsync(id);
+            var promotionRepo = _unitOfWork.GetRepository<Promotion>();
+            if (promotionEntity is null)
+                throw new KeyNotFoundException("Promotion not found");
+            await promotionRepo.DeleteAsync(id);
+            await _unitOfWork.SaveAsync();
+        }
+
+        Task<IList<PromotionDto>> IPromotionService.GetAll()
+        {
+            var promotions = _unitOfWork.GetRepository<Promotion>().Entities;
+            var promotionsDto = _mapper.Map<IList<PromotionDto>>(promotions);
+            return Task.FromResult(promotionsDto);
+        } 
     }
 }

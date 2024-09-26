@@ -1,9 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "nQMw0vdj1jc=",
+  "dgSpecHash": "Po6g/wjPlJ8=",
   "success": true,
   "projectFilePath": "C:\\Users\\SON\\Desktop\\AT_Project\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj",
   "expectedPackageFiles": [
+    "C:\\Users\\SON\\.nuget\\packages\\automapper\\13.0.1\\automapper.13.0.1.nupkg.sha512",
     "C:\\Users\\SON\\.nuget\\packages\\azure.core\\1.35.0\\azure.core.1.35.0.nupkg.sha512",
     "C:\\Users\\SON\\.nuget\\packages\\azure.identity\\1.10.3\\azure.identity.1.10.3.nupkg.sha512",
     "C:\\Users\\SON\\.nuget\\packages\\castle.core\\5.1.1\\castle.core.5.1.1.nupkg.sha512",
@@ -106,5 +107,12 @@
     "C:\\Users\\SON\\.nuget\\packages\\microsoft.netcore.app.host.linux-x64\\8.0.7\\microsoft.netcore.app.host.linux-x64.8.0.7.nupkg.sha512",
     "C:\\Users\\SON\\.nuget\\packages\\microsoft.aspnetcore.app.runtime.linux-x64\\8.0.7\\microsoft.aspnetcore.app.runtime.linux-x64.8.0.7.nupkg.sha512"
   ],
-  "logs": []
+  "logs": [
+    {
+      "code": "Undefined",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Problem reading the cache file C:\\Users\\SON\\Desktop\\AT_Project\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\obj\\project.nuget.cache : Invalid property identifier character: <. Path 'version', line 3, position 0."
+    }
+  ]
 }
