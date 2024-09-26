@@ -4,6 +4,7 @@ using HandmadeProductManagement.Contract.Repositories.Entity;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using HandmadeProductManagement.Services.Service;
 
 namespace HandmadeProductManagementAPI.Controllers
 {
@@ -22,52 +23,110 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<StatusChange>>> GetStatusChanges()
         {
-            IList<StatusChange> statusChanges = await _statusChangeService.GetAll();
-            return Ok(BaseResponse<IList<StatusChange>>.OkResponse(statusChanges));
+            try
+            {
+                IList<StatusChange> statusChanges = await _statusChangeService.GetAll();
+                return Ok(BaseResponse<IList<StatusChange>>.OkResponse(statusChanges));
+            }
+            catch (System.Exception ex)
+            {
+                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
+            }
         }
 
         // GET: api/StatusChange/Order/{orderId}
         [HttpGet("Order/{orderId}")]
         public async Task<ActionResult<IEnumerable<StatusChange>>> GetStatusChangesByOrderId(string orderId)
         {
-            IList<StatusChange> statusChanges = await _statusChangeService.GetByOrderId(orderId);
-            return Ok(BaseResponse<IList<StatusChange>>.OkResponse(statusChanges));
+            try
+            {
+                IList<StatusChange> statusChanges = await _statusChangeService.GetByOrderId(orderId);
+                return Ok(BaseResponse<IList<StatusChange>>.OkResponse(statusChanges));
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound(BaseResponse<string>.FailResponse("Promotion not found"));
+            }
+            catch (System.Exception ex)
+            {
+                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
+            }
         }
 
         // GET: api/StatusChange/{id}
         [HttpGet("{id}")]
         public async Task<ActionResult<StatusChange>> GetStatusChange(string id)
         {
-            StatusChange statusChange = await _statusChangeService.GetById(id);
-            return Ok(BaseResponse<StatusChange>.OkResponse(statusChange));
+            try
+            {
+                StatusChange statusChange = await _statusChangeService.GetById(id);
+                return Ok(BaseResponse<StatusChange>.OkResponse(statusChange));
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound(BaseResponse<string>.FailResponse("Promotion not found"));
+            }
+            catch (System.Exception ex)
+            {
+                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
+            }
         }
 
         // POST: api/StatusChange
         [HttpPost]
         public async Task<ActionResult<StatusChange>> CreateStatusChange(StatusChange statusChange)
         {
-            StatusChange createdStatusChange = await _statusChangeService.Create(statusChange);
-            return CreatedAtAction(nameof(GetStatusChange), new { id = createdStatusChange.Id }, createdStatusChange);
+            try
+            {
+                StatusChange createdStatusChange = await _statusChangeService.Create(statusChange);
+                return CreatedAtAction(nameof(GetStatusChange), new { id = createdStatusChange.Id }, createdStatusChange);
+            }
+            catch (System.Exception ex)
+            {
+                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
+            }
         }
 
         // PUT: api/StatusChange/{id}
         [HttpPut("{id}")]
         public async Task<ActionResult<StatusChange>> UpdateStatusChange(string id, StatusChange updatedStatusChange)
         {
-            StatusChange statusChange = await _statusChangeService.Update(id, updatedStatusChange);
-            return Ok(BaseResponse<StatusChange>.OkResponse(statusChange));
+            try
+            {
+                StatusChange statusChange = await _statusChangeService.Update(id, updatedStatusChange);
+                return Ok(BaseResponse<StatusChange>.OkResponse(statusChange));
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound(BaseResponse<string>.FailResponse("Promotion not found"));
+            }
+            catch (System.Exception ex)
+            {
+                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
+            }
         }
 
         // DELETE: api/StatusChange/{id}
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteStatusChange(string id)
         {
-            bool success = await _statusChangeService.Delete(id);
-            if (!success)
+            try
             {
-                return NotFound();
+                bool success = await _statusChangeService.Delete(id);
+                if (!success)
+                {
+                    return NotFound();
+                }
+                return NoContent();
             }
-            return NoContent();
+            catch (KeyNotFoundException)
+            {
+                return NotFound(BaseResponse<string>.FailResponse("Promotion not found"));
+            }
+            catch (System.Exception ex)
+            {
+                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
+            }
         }
     }
 }
