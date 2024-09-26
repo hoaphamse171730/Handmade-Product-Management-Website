@@ -45,7 +45,7 @@ namespace HandmadeProductManagementAPI.Controllers
             }
             catch (KeyNotFoundException)
             {
-                return NotFound(BaseResponse<string>.FailResponse("Promotion not found"));
+                return NotFound(BaseResponse<string>.FailResponse("Status Change not found"));
             }
             catch (System.Exception ex)
             {
@@ -64,7 +64,7 @@ namespace HandmadeProductManagementAPI.Controllers
             }
             catch (KeyNotFoundException)
             {
-                return NotFound(BaseResponse<string>.FailResponse("Promotion not found"));
+                return NotFound(BaseResponse<string>.FailResponse("Status Change not found"));
             }
             catch (System.Exception ex)
             {
@@ -98,7 +98,7 @@ namespace HandmadeProductManagementAPI.Controllers
             }
             catch (KeyNotFoundException)
             {
-                return NotFound(BaseResponse<string>.FailResponse("Promotion not found"));
+                return NotFound(BaseResponse<string>.FailResponse("Status Change not found"));
             }
             catch (System.Exception ex)
             {
@@ -121,7 +121,7 @@ namespace HandmadeProductManagementAPI.Controllers
             }
             catch (KeyNotFoundException)
             {
-                return NotFound(BaseResponse<string>.FailResponse("Promotion not found"));
+                return NotFound(BaseResponse<string>.FailResponse("Status Change not found"));
             }
             catch (System.Exception ex)
             {

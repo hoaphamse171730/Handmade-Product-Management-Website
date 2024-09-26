@@ -43,7 +43,7 @@ namespace HandmadeProductManagementAPI.Controllers
             }
             catch (KeyNotFoundException)
             {
-                return NotFound(BaseResponse<string>.FailResponse("Promotion not found"));
+                return NotFound(BaseResponse<string>.FailResponse("Cancel Reason not found"));
             }
             catch (System.Exception ex)
             {
@@ -77,7 +77,7 @@ namespace HandmadeProductManagementAPI.Controllers
             }
             catch (KeyNotFoundException)
             {
-                return NotFound(BaseResponse<string>.FailResponse("Promotion not found"));
+                return NotFound(BaseResponse<string>.FailResponse("Cancel Reason not found"));
             }
             catch (System.Exception ex)
             {
@@ -100,7 +100,7 @@ namespace HandmadeProductManagementAPI.Controllers
             }
             catch (KeyNotFoundException)
             {
-                return NotFound(BaseResponse<string>.FailResponse("Promotion not found"));
+                return NotFound(BaseResponse<string>.FailResponse("Cancel Reason not found"));
             }
             catch (System.Exception ex)
             {
@@ -123,7 +123,7 @@ namespace HandmadeProductManagementAPI.Controllers
             }
             catch (KeyNotFoundException)
             {
-                return NotFound(BaseResponse<string>.FailResponse("Promotion not found"));
+                return NotFound(BaseResponse<string>.FailResponse("Cancel Reason not found"));
             }
             catch (System.Exception ex)
             {
