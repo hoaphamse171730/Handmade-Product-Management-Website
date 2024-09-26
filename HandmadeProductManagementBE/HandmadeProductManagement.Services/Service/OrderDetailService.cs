@@ -1,9 +1,12 @@
 using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
+using HandmadeProductManagement.ModelViews.OrderDetailModelViews;
+using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace HandmadeProductManagement.Services.Service
@@ -11,63 +14,94 @@ namespace HandmadeProductManagement.Services.Service
     public class OrderDetailService : IOrderDetailService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
 
-        public OrderDetailService(IUnitOfWork unitOfWork)
+        public OrderDetailService(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
+            _mapper = mapper;
         }
 
-        public async Task<IList<OrderDetail>> GetAll()
+        public async Task<IList<OrderDetailDto>> GetAll()
         {
-            var orderDetails = await _unitOfWork.GetRepository<OrderDetail>().Entities.ToListAsync();
-            return orderDetails;
+            var orderDetails = await _unitOfWork.GetRepository<OrderDetail>().Entities
+                .ToListAsync();
+            var orderDetailsDto = _mapper.Map<IList<OrderDetailDto>>(orderDetails);
+            return orderDetailsDto;
         }
 
-        public async Task<OrderDetail> GetById(string id)
+        public async Task<OrderDetailDto> GetById(string id)
         {
-            var orderDetail = await _unitOfWork.GetRepository<OrderDetail>().GetByIdAsync(id);
+            var orderDetail = await _unitOfWork.GetRepository<OrderDetail>().Entities
+                .FirstOrDefaultAsync(p => p.Id == id);
+
             if (orderDetail == null)
-            {
-                throw new KeyNotFoundException("OrderDetail not found");
-            }
-            return orderDetail;
-        }
-        public async Task<OrderDetail> Create(OrderDetail orderDetail)
-        {
-            var orderDetailRepo = _unitOfWork.GetRepository<OrderDetail>();
-            await orderDetailRepo.InsertAsync(orderDetail);
-            await _unitOfWork.SaveAsync();
-            return orderDetail;
+                throw new KeyNotFoundException("Order Detail not found");
+
+            var orderDetailDto = _mapper.Map<OrderDetailDto>(orderDetail);
+            return orderDetailDto;
         }
 
-        public async Task<OrderDetail> Update(string id, OrderDetail updatedOrderDetail)
+        public async Task<OrderDetailDto> Create(OrderDetailForCreationDto orderDetailForCreation)
         {
-            var orderDetailRepo = _unitOfWork.GetRepository<OrderDetail>();
-            var existingOrderDetail = await orderDetailRepo.GetByIdAsync(id);
-            if (existingOrderDetail == null)
-            {
-                throw new KeyNotFoundException("OrderDetail not found");
-            }
-            existingOrderDetail.ProductId = updatedOrderDetail.ProductId;
-            existingOrderDetail.OrderId = updatedOrderDetail.OrderId;
-            existingOrderDetail.ProductQuantity = updatedOrderDetail.ProductQuantity;
-            existingOrderDetail.UnitPrice = updatedOrderDetail.UnitPrice;
-            await orderDetailRepo.UpdateAsync(updatedOrderDetail);
+            var orderDetailEntity = _mapper.Map<OrderDetail>(orderDetailForCreation);
+            await _unitOfWork.GetRepository<OrderDetail>().InsertAsync(orderDetailEntity);
             await _unitOfWork.SaveAsync();
-            return existingOrderDetail;
+            var orderDetailToReturn = _mapper.Map<OrderDetailDto>(orderDetailEntity);
+            return orderDetailToReturn;
         }
 
-        public async Task<bool> Delete(string id)
+        public async Task Update(string id, OrderDetailForUpdateDto orderDetailForUpdate)
         {
-            var orderDetailRepo = _unitOfWork.GetRepository<OrderDetail>();
-            var orderDetail = await orderDetailRepo.GetByIdAsync(id);
-            if (orderDetail == null)
-            {
-                return false;
-            }
-            await orderDetailRepo.DeleteAsync(orderDetail);
+            var orderDetailEntity = await _unitOfWork.GetRepository<OrderDetail>().Entities
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (orderDetailEntity == null)
+                throw new KeyNotFoundException("Order detail not found");
+
+            _mapper.Map(orderDetailForUpdate, orderDetailEntity);
+            // orderDetailEntity.LastUpdatedBy = orderDetailForUpdate.UserId.ToString();
+            orderDetailEntity.LastUpdatedTime = DateTime.UtcNow;
+            await _unitOfWork.GetRepository<OrderDetail>().UpdateAsync(orderDetailEntity);
             await _unitOfWork.SaveAsync();
-            return true;
+        }
+
+        public async Task Delete(string id)
+        {
+            var repo = _unitOfWork.GetRepository<OrderDetail>();
+            var orderDetailEntity = repo.Entities
+                .FirstOrDefault(p => p.Id == id);
+            if (orderDetailEntity == null)
+                throw new KeyNotFoundException("Order Detail not found");
+            // orderDetailEntity.DeletedBy = userId.ToString();
+            orderDetailEntity.DeletedTime = DateTime.UtcNow;
+            repo.Delete(orderDetailEntity);
+            await _unitOfWork.SaveAsync();
+        }
+
+        public async Task SoftDelete(string id)
+        {
+            var orderDetailEntity = await _unitOfWork.GetRepository<OrderDetail>().Entities
+                .FirstOrDefaultAsync(p => p.Id == id);
+            if (orderDetailEntity == null)
+                throw new KeyNotFoundException("Order Detail not found");
+            // orderDetailEntity.DeletedBy = userId.ToString();
+            orderDetailEntity.DeletedTime = DateTime.UtcNow;
+            await _unitOfWork.GetRepository<OrderDetail>().UpdateAsync(orderDetailEntity);
+            await _unitOfWork.SaveAsync();
+        }
+
+        public async Task<IList<OrderDetailDto>> GetByOrderId(string orderId)
+        {
+            var orderDetails = await _unitOfWork.GetRepository<OrderDetail>().Entities
+                .Where(od => od.OrderId == orderId)
+                .ToListAsync();
+
+            if (orderDetails == null || orderDetails.Count == 0)
+                throw new KeyNotFoundException("No order details found for the given Order ID.");
+
+            var orderDetailsDto = _mapper.Map<IList<OrderDetailDto>>(orderDetails);
+            return orderDetailsDto;
         }
     }
 }

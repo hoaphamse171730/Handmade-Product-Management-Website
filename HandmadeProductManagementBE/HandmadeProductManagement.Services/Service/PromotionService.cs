@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -24,12 +23,14 @@ namespace HandmadeProductManagement.Services.Service
             _mapper = mapper;
         }
 
-
         public async Task<PromotionDto> GetById(string id)
         {
-            var promotion = await _unitOfWork.GetRepository<Promotion>().GetByIdAsync(id);
-            if (promotion is null)
+            var promotion = await _unitOfWork.GetRepository<Promotion>().Entities
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (promotion == null)
                 throw new KeyNotFoundException("Promotion not found");
+
             var promotionToReturn = _mapper.Map<PromotionDto>(promotion);
             return promotionToReturn;
         }
@@ -37,6 +38,7 @@ namespace HandmadeProductManagement.Services.Service
         public async Task<PromotionDto> Create(PromotionForCreationDto promotion)
         {
             var promotionEntity = _mapper.Map<Promotion>(promotion);
+            promotionEntity.CreatedTime = DateTime.UtcNow;
             await _unitOfWork.GetRepository<Promotion>().InsertAsync(promotionEntity);
             await _unitOfWork.SaveAsync();
             var promotionToReturn = _mapper.Map<PromotionDto>(promotionEntity);
@@ -45,30 +47,49 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task Update(string id, PromotionForUpdateDto promotion)
         {
-            var promotionEntity = await _unitOfWork.GetRepository<Promotion>().GetByIdAsync(id);
-            if (promotionEntity is null)
+            var promotionEntity = await _unitOfWork.GetRepository<Promotion>().Entities
+                .FirstOrDefaultAsync(p => p.Id == id);
+            if (promotionEntity == null)
                 throw new KeyNotFoundException("Promotion not found");
             _mapper.Map(promotion, promotionEntity);
+            promotionEntity.LastUpdatedTime = DateTime.UtcNow;
             await _unitOfWork.GetRepository<Promotion>().UpdateAsync(promotionEntity);
             await _unitOfWork.SaveAsync();
         }
-        
-        
+
         public async Task Delete(string id)
         {
-            var promotionEntity = await _unitOfWork.GetRepository<Promotion>().GetByIdAsync(id);
+           var promotionRepo = _unitOfWork.GetRepository<Promotion>();
+           var promotionEntity = promotionRepo.Entities
+               .FirstOrDefault(p => p.Id == id);
+           if (promotionEntity == null)
+               throw new KeyNotFoundException("Promotion not found");
+           // promotionEntity.DeletedBy = userId.ToString();
+           promotionEntity.DeletedTime = DateTime.UtcNow;
+           promotionRepo.Delete(promotionEntity);
+           await _unitOfWork.SaveAsync();
+        }
+
+        public async Task SoftDelete(string id)
+        {
             var promotionRepo = _unitOfWork.GetRepository<Promotion>();
-            if (promotionEntity is null)
+            var promotionEntity = await promotionRepo.Entities
+                .FirstOrDefaultAsync(p => p.Id == id && p.DeletedBy == null);
+            if (promotionEntity == null)
                 throw new KeyNotFoundException("Promotion not found");
-            await promotionRepo.DeleteAsync(id);
+            // promotionEntity.DeletedBy = userId.ToString();
+            promotionEntity.DeletedTime = DateTime.UtcNow;
+            await promotionRepo.UpdateAsync(promotionEntity);
             await _unitOfWork.SaveAsync();
         }
 
-        Task<IList<PromotionDto>> IPromotionService.GetAll()
+        public async Task<IList<PromotionDto>> GetAll()
         {
-            var promotions = _unitOfWork.GetRepository<Promotion>().Entities;
+            var promotions = await _unitOfWork.GetRepository<Promotion>().Entities
+                .Where(p => p.DeletedBy == null)
+                .ToListAsync();
             var promotionsDto = _mapper.Map<IList<PromotionDto>>(promotions);
-            return Task.FromResult(promotionsDto);
-        } 
+            return promotionsDto;
+        }
     }
 }

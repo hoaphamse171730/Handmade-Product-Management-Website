@@ -31,11 +31,11 @@ public static class ApplicationServiceExtenstions
 
         services.AddScoped<ICancelReasonService, CancelReasonService>();
         services.AddScoped<IStatusChangeService, StatusChangeService>();
-        services.AddScoped<IProductService, ProductService>();
         services.AddScoped<IPromotionService, PromotionService>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IShopService, ShopService>();
         services.AddScoped<IOrderService, OrderService>();
+        services.AddScoped<IOrderDetailService, OrderDetailService>();
 
 
         return services;
