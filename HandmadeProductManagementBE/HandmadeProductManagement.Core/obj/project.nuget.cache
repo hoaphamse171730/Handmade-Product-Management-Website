@@ -1,8 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "PaYcGlK23NM=",
+  "dgSpecHash": "hx6d+xfoWT4=",
   "success": true,
-  "projectFilePath": "D:\\1. Project\\School Fall24\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Core\\HandmadeProductManagement.Core.csproj",
-  "expectedPackageFiles": [],
+  "projectFilePath": "C:\\Users\\SON\\Desktop\\AT_Project\\HandmadeProductManagementBE\\HandmadeProductManagement.Core\\HandmadeProductManagement.Core.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\SON\\.nuget\\packages\\mapster\\7.4.0\\mapster.7.4.0.nupkg.sha512",
+    "C:\\Users\\SON\\.nuget\\packages\\mapster.core\\1.2.1\\mapster.core.1.2.1.nupkg.sha512"
+  ],
   "logs": []
 }
