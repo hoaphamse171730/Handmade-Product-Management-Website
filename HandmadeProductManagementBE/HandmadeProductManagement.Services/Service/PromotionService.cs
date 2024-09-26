@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
+using HandmadeProductManagement.ModelViews.PromotionModelViews;
 using HandmadeProductManagement.Repositories.Entity;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,71 +16,59 @@ namespace HandmadeProductManagement.Services.Service
     public class PromotionService : IPromotionService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
 
-        public PromotionService(IUnitOfWork unitOfWork)
+        public PromotionService(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
+            _mapper = mapper;
         }
 
 
-        public async Task<IList<Promotion>> GetAll()
-        {
-            IQueryable<Promotion> query = _unitOfWork.GetRepository<Promotion>().Entities;
-            var result = await query.ToListAsync();
-            return result;
-        }
-
-       
-
-
-        public async Task<Promotion> GetById(string id)
-        {
-            var promotion = await _unitOfWork.GetRepository<Promotion>().GetByIdAsync(Guid.Parse(id));
-
-            if (promotion == null)
-            {
-                throw new KeyNotFoundException("Promotion not found");
-            }
-
-            return promotion;
-        }
-
-        public async Task<Promotion> Create(Promotion promotion)
-        {
-            await _unitOfWork.GetRepository<Promotion>().InsertAsync(promotion);
-            await _unitOfWork.SaveAsync();
-            return promotion;
-        }
-
-        public async Task<Promotion> Update(string id, Promotion updatedPromotion)
+        public async Task<PromotionDto> GetById(string id)
         {
             var promotion = await _unitOfWork.GetRepository<Promotion>().GetByIdAsync(id);
-            if (promotion == null)
-            {
+            if (promotion is null)
                 throw new KeyNotFoundException("Promotion not found");
-            }
-            promotion.Name = updatedPromotion.Name;
-            promotion.Description = updatedPromotion.Description;
-            promotion.PromotionName = updatedPromotion.PromotionName;
-            promotion.DiscountRate = updatedPromotion.DiscountRate;
-            promotion.StartDate = updatedPromotion.StartDate;
-            promotion.EndDate = updatedPromotion.EndDate;
-            promotion.Status = updatedPromotion.Status;
-            _unitOfWork.GetRepository<Promotion>().Update(promotion);
-            await _unitOfWork.SaveAsync();
-            return promotion;
+            var promotionToReturn = _mapper.Map<PromotionDto>(promotion);
+            return promotionToReturn;
         }
 
-        public async Task<bool> Delete(string id)
+        public async Task<PromotionDto> Create(PromotionForCreationDto promotion)
         {
-            var promotion = await _unitOfWork.GetRepository<Promotion>().GetByIdAsync(id);
-            if (promotion == null)
-            {
-                throw new KeyNotFoundException("Promotion not found");
-            }
-            _unitOfWork.GetRepository<Promotion>().Delete(promotion);
+            var promotionEntity = _mapper.Map<Promotion>(promotion);
+            await _unitOfWork.GetRepository<Promotion>().InsertAsync(promotionEntity);
             await _unitOfWork.SaveAsync();
-            return true;
+            var promotionToReturn = _mapper.Map<PromotionDto>(promotionEntity);
+            return promotionToReturn;
         }
+
+        public async Task Update(string id, PromotionForUpdateDto promotion)
+        {
+            var promotionEntity = await _unitOfWork.GetRepository<Promotion>().GetByIdAsync(id);
+            if (promotionEntity is null)
+                throw new KeyNotFoundException("Promotion not found");
+            _mapper.Map(promotion, promotionEntity);
+            await _unitOfWork.GetRepository<Promotion>().UpdateAsync(promotionEntity);
+            await _unitOfWork.SaveAsync();
+        }
+        
+        
+        public async Task Delete(string id)
+        {
+            var promotionEntity = await _unitOfWork.GetRepository<Promotion>().GetByIdAsync(id);
+            var promotionRepo = _unitOfWork.GetRepository<Promotion>();
+            if (promotionEntity is null)
+                throw new KeyNotFoundException("Promotion not found");
+            await promotionRepo.DeleteAsync(id);
+            await _unitOfWork.SaveAsync();
+        }
+
+        Task<IList<PromotionDto>> IPromotionService.GetAll()
+        {
+            var promotions = _unitOfWork.GetRepository<Promotion>().Entities;
+            var promotionsDto = _mapper.Map<IList<PromotionDto>>(promotions);
+            return Task.FromResult(promotionsDto);
+        } 
     }
 }

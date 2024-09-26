@@ -12,10 +12,10 @@ namespace HandmadeProductManagement.Contract.Services.Interface
 {
     public interface IPromotionService
     {
-        Task<IList<Promotion>> GetAll();
-        Task<Promotion> GetById(string id);
-        Task<Promotion> Create(Promotion promotion);
-        Task<Promotion> Update(string id, Promotion promotion);
-        Task<bool> Delete(string id);
+        Task<IList<PromotionDto>> GetAll();
+        Task<PromotionDto> GetById(string id);
+        Task<PromotionDto> Create(PromotionForCreationDto promotion);
+        Task Update(string id, PromotionForUpdateDto promotion);
+        Task Delete(string id);
     }
 }
