@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("HandmadeProductManagement.Core")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3263e63e29efacd13633972672eeb2a752714261")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b54c1f31c9c928588d081548f7f03e9e0d0fb46a")]
 [assembly: System.Reflection.AssemblyProductAttribute("HandmadeProductManagement.Core")]
 [assembly: System.Reflection.AssemblyTitleAttribute("HandmadeProductManagement.Core")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

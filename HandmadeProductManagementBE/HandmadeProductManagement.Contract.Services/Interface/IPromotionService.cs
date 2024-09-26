@@ -1,6 +1,7 @@
 ﻿using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.ModelViews.UserModelViews;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,10 +12,10 @@ namespace HandmadeProductManagement.Contract.Services.Interface
 {
     public interface IPromotionService
     {
-        Task<IEnumerable<PromotionDto>> GetAllPromotionAsync();
-        Task<PromotionDto> GetPromotionByIdAsync(Guid id);
-        Task DeletePromotionAsync(Guid id);
-        Task UpdatePromotionAsync(Guid id, PromotionForUpdateDto promotionDto);
-        Task CreatePromotionAsync(PromotionDto promotionDto);
+        Task<IList<Promotion>> GetAll();
+        Task<Promotion> GetById(string id);
+        Task<Promotion> Create(Promotion promotion);
+        Task<Promotion> Update(string id, Promotion promotion);
+        Task<bool> Delete(string id);
     }
 }
