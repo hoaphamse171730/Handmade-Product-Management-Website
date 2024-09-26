@@ -3,6 +3,7 @@ using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Contract.Repositories.Entity;
 using Microsoft.AspNetCore.Mvc;
 using HandmadeProductManagement.Services.Service;
+using HandmadeProductManagement.ModelViews.PromotionModelViews;
 
 namespace HandmadeProductManagementAPI.Controllers
 {
@@ -58,7 +59,12 @@ namespace HandmadeProductManagementAPI.Controllers
             try
             {
                 CancelReason createdReason = await _cancelReasonService.Create(reason);
-                return CreatedAtAction(nameof(GetCancelReason), new { id = createdReason.Id }, createdReason);
+                return CreatedAtAction(nameof(GetCancelReason), new { id = createdReason.Id }, 
+                       BaseResponse<CancelReason>.OkResponse(reason));
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(BaseResponse<string>.FailResponse(ex.Message));
             }
             catch (System.Exception ex)
             {
@@ -94,9 +100,9 @@ namespace HandmadeProductManagementAPI.Controllers
                 bool success = await _cancelReasonService.Delete(id);
                 if (!success)
                 {
-                    return NotFound();
+                    return NotFound(BaseResponse<string>.FailResponse($"Cancel Reason with ID {id} not found."));
                 }
-                return NoContent();
+                return Ok(BaseResponse<string>.OkResponse($"Cancel Reason with ID {id} has been successfully deleted."));
             }
             catch (KeyNotFoundException)
             {
@@ -117,9 +123,9 @@ namespace HandmadeProductManagementAPI.Controllers
                 bool success = await _cancelReasonService.SoftDelete(id);
                 if (!success)
                 {
-                    return NotFound();
+                    return NotFound(BaseResponse<string>.FailResponse($"Cancel Reason with ID {id} not found."));
                 }
-                return NoContent();
+                return Ok(BaseResponse<string>.OkResponse($"Cancel Reason with ID {id} has been successfully deleted."));
             }
             catch (KeyNotFoundException)
             {
