@@ -32,6 +32,7 @@ public class AuthenticationController(UserManager<ApplicationUser> userManager, 
         
         var user = await userManager.Users
             .Include(u => u.UserInfo)
+            .Include(u => u.Cart)
             .FirstOrDefaultAsync(u => u.Email == loginModelView.Email
                                       || u.PhoneNumber == loginModelView.PhoneNumber
                                       || u.UserName == loginModelView.UserName);

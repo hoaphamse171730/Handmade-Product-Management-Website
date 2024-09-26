@@ -48,6 +48,7 @@ public static class ApplicationServiceExtenstions
     {
         TypeAdapterConfig<RegisterModelView, ApplicationUser>
             .NewConfig()
-            .Map(dest => dest.UserInfo.FullName, src => src.FullName);
+            .Map(dest => dest.UserInfo.FullName, src => src.FullName)
+            .Map(dest => dest.CartId, src => Guid.NewGuid());
     }
 }
