@@ -49,5 +49,7 @@ namespace HandmadeProductManagement.Core.Base
         {
             return new BaseResponse<T>(statusCode, code, message);
         }
+        
+        
     }
 }

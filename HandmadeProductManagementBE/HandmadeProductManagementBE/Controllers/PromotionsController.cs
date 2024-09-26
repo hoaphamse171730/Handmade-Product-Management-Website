@@ -99,5 +99,23 @@ namespace HandmadeProductManagementAPI.Controllers
                 return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
             }
         }
+
+        [HttpDelete("soft-delete/{id}")]
+        public async Task<ActionResult> SoftDeletePromotion(string id)
+        {
+            try
+            {
+                await _promotionService.SoftDelete(id);
+                return Ok(BaseResponse<string>.OkResponse("Promotion soft-deleted successfully"));
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound(BaseResponse<string>.FailResponse("Promotion not found"));
+            }
+            catch (System.Exception ex)
+            {
+                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
+            }
+        }
     }
 }

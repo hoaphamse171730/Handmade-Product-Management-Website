@@ -1,6 +1,6 @@
 ﻿using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
-using HandmadeProductManagement.Contract.Repositories.Entity;
+using HandmadeProductManagement.ModelViews.OrderDetailModelViews;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -19,50 +19,122 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<OrderDetail>>> GetOrderDetails()
+        public async Task<ActionResult<IEnumerable<OrderDetailDto>>> GetOrderDetails()
         {
-            IList<OrderDetail> orderDetails = await _orderDetailService.GetAll();
-            return Ok(BaseResponse<IList<OrderDetail>>.OkResponse(orderDetails));
+            try
+            {
+                IList<OrderDetailDto> orderDetails = await _orderDetailService.GetAll();
+                return Ok(BaseResponse<IList<OrderDetailDto>>.OkResponse(orderDetails));
+            }
+            catch (System.Exception ex)
+            {
+                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
+            }
         }
 
+        // GET: api/OrderDetail/{id}
         [HttpGet("{id}")]
-        public async Task<ActionResult<OrderDetail>> GetOrderDetail(string id)
+        public async Task<ActionResult<OrderDetailDto>> GetOrderDetail(string id)
         {
-            OrderDetail orderDetail = await _orderDetailService.GetById(id);
-            if (orderDetail == null)
+            try
             {
-                return NotFound(BaseResponse<OrderDetail>.FailResponse("OrderDetail not found"));
+                var orderDetail = await _orderDetailService.GetById(id);
+                if (orderDetail == null)
+                {
+                    return NotFound(BaseResponse<string>.FailResponse("OrderDetail not found"));
+                }
+                return Ok(BaseResponse<OrderDetailDto>.OkResponse(orderDetail));
             }
-            return Ok(BaseResponse<OrderDetail>.OkResponse(orderDetail));
+            catch (System.Exception ex)
+            {
+                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
+            }
         }
 
         [HttpPost]
-        public async Task<ActionResult<OrderDetail>> CreateOrderDetail(OrderDetail orderDetail)
+        public async Task<ActionResult<OrderDetailDto>> CreateOrderDetail(OrderDetailForCreationDto orderDetailForCreation)
         {
-            OrderDetail createdOrderDetail = await _orderDetailService.Create(orderDetail);
-            return CreatedAtAction(nameof(GetOrderDetail), new { id = createdOrderDetail.Id }, BaseResponse<OrderDetail>.OkResponse(createdOrderDetail));
+            try
+            {
+                var createdOrderDetail = await _orderDetailService.Create(orderDetailForCreation);
+                return CreatedAtAction(nameof(GetOrderDetail), new { id = createdOrderDetail.OrderId }, BaseResponse<OrderDetailDto>.OkResponse(createdOrderDetail));
+            }
+            catch (System.Exception ex)
+            {
+                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
+            }
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<OrderDetail>> UpdateOrderDetail(string id, OrderDetail updatedOrderDetail)
+        public async Task<ActionResult<OrderDetailDto>> UpdateOrderDetail(string id, OrderDetailForUpdateDto orderDetailForUpdate)
         {
-            OrderDetail orderDetail = await _orderDetailService.Update(id, updatedOrderDetail);
-            if (orderDetail == null)
+            try
             {
-                return NotFound(BaseResponse<OrderDetail>.FailResponse("OrderDetail not found"));
+                await _orderDetailService.Update(id, orderDetailForUpdate);
+                return Ok(BaseResponse<string>.OkResponse("OrderDetail updated successfully"));
             }
-            return Ok(BaseResponse<OrderDetail>.OkResponse(orderDetail));
+            catch (KeyNotFoundException)
+            {
+                return NotFound(BaseResponse<string>.FailResponse("OrderDetail not found"));
+            }
+            catch (System.Exception ex)
+            {
+                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
+            }
         }
 
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteOrderDetail(string id)
         {
-            bool success = await _orderDetailService.Delete(id);
-            if (!success)
+            try
+            {
+                await _orderDetailService.Delete(id);
+                return NoContent();
+            }
+            catch (KeyNotFoundException)
             {
                 return NotFound(BaseResponse<string>.FailResponse("OrderDetail not found"));
             }
-            return NoContent();
+            catch (System.Exception ex)
+            {
+                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
+            }
+        }
+
+        [HttpDelete("soft-delete/{id}")]
+        public async Task<ActionResult> SoftDeleteOrderDetail(string id)
+        {
+            try
+            {
+                await _orderDetailService.SoftDelete(id);
+                return Ok(BaseResponse<string>.OkResponse("OrderDetail soft deleted successfully"));
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound(BaseResponse<string>.FailResponse("OrderDetail not found"));
+            }
+            catch (System.Exception ex)
+            {
+                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
+            }
+        }
+
+        [HttpGet("by-order/{orderId}")]
+        public async Task<ActionResult<IEnumerable<OrderDetailDto>>> GetOrderDetailsByOrderId(string orderId)
+        {
+            try
+            {
+                var orderDetails = await _orderDetailService.GetByOrderId(orderId);
+                return Ok(BaseResponse<IList<OrderDetailDto>>.OkResponse(orderDetails));
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound(BaseResponse<string>.FailResponse("No order details found for the given Order ID"));
+            }
+            catch (System.Exception ex)
+            {
+                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
+            }
         }
     }
 }

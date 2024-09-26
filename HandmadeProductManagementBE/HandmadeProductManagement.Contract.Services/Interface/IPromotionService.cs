@@ -17,5 +17,6 @@ namespace HandmadeProductManagement.Contract.Services.Interface
         Task<PromotionDto> Create(PromotionForCreationDto promotion);
         Task Update(string id, PromotionForUpdateDto promotion);
         Task Delete(string id);
+        Task SoftDelete(string id);
     }
 }
