@@ -1,8 +1,6 @@
-﻿using Azure;
-using HandmadeProductManagement.Contract.Services.Interface;
+﻿using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.ProductModelViews;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HandmadeProductManagementAPI.Controllers

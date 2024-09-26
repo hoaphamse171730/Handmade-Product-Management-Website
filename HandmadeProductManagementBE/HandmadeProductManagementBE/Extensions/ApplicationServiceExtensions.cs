@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HandmadeProductManagementAPI.Extensions;
 
-public static class ApplicationServiceExtenstions
+public static class ApplicationServiceExtensions
 {
     public static IServiceCollection AddApplicationServices(this IServiceCollection services,
         IConfiguration config)
