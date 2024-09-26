@@ -4,7 +4,6 @@ using HandmadeProductManagement.Contract.Repositories.Entity;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using HandmadeProductManagement.Services.Service;
 
 namespace HandmadeProductManagementAPI.Controllers
 {
@@ -21,7 +20,7 @@ namespace HandmadeProductManagementAPI.Controllers
 
         // GET: api/StatusChange
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<StatusChange>>> GetStatusChanges()
+        public async Task<ActionResult<BaseResponse<IList<StatusChange>>>> GetStatusChanges()
         {
             try
             {
@@ -36,7 +35,7 @@ namespace HandmadeProductManagementAPI.Controllers
 
         // GET: api/StatusChange/Order/{orderId}
         [HttpGet("Order/{orderId}")]
-        public async Task<ActionResult<IEnumerable<StatusChange>>> GetStatusChangesByOrderId(string orderId)
+        public async Task<ActionResult<BaseResponse<IList<StatusChange>>>> GetStatusChangesByOrderId(string orderId)
         {
             try
             {
@@ -45,7 +44,7 @@ namespace HandmadeProductManagementAPI.Controllers
             }
             catch (KeyNotFoundException)
             {
-                return NotFound(BaseResponse<string>.FailResponse("Status Change not found"));
+                return NotFound(BaseResponse<string>.FailResponse("No status changes found for the given OrderId."));
             }
             catch (System.Exception ex)
             {
@@ -55,7 +54,7 @@ namespace HandmadeProductManagementAPI.Controllers
 
         // GET: api/StatusChange/{id}
         [HttpGet("{id}")]
-        public async Task<ActionResult<StatusChange>> GetStatusChange(string id)
+        public async Task<ActionResult<BaseResponse<StatusChange>>> GetStatusChange(string id)
         {
             try
             {
@@ -74,12 +73,13 @@ namespace HandmadeProductManagementAPI.Controllers
 
         // POST: api/StatusChange
         [HttpPost]
-        public async Task<ActionResult<StatusChange>> CreateStatusChange(StatusChange statusChange)
+        public async Task<ActionResult<BaseResponse<StatusChange>>> CreateStatusChange(StatusChange statusChange)
         {
             try
             {
                 StatusChange createdStatusChange = await _statusChangeService.Create(statusChange);
-                return CreatedAtAction(nameof(GetStatusChange), new { id = createdStatusChange.Id }, createdStatusChange);
+                return CreatedAtAction(nameof(GetStatusChange), new { id = createdStatusChange.Id }, 
+                       BaseResponse<StatusChange>.OkResponse(createdStatusChange));
             }
             catch (System.Exception ex)
             {
@@ -89,7 +89,7 @@ namespace HandmadeProductManagementAPI.Controllers
 
         // PUT: api/StatusChange/{id}
         [HttpPut("{id}")]
-        public async Task<ActionResult<StatusChange>> UpdateStatusChange(string id, StatusChange updatedStatusChange)
+        public async Task<ActionResult<BaseResponse<StatusChange>>> UpdateStatusChange(string id, StatusChange updatedStatusChange)
         {
             try
             {
@@ -108,16 +108,16 @@ namespace HandmadeProductManagementAPI.Controllers
 
         // DELETE: api/StatusChange/{id}
         [HttpDelete("{id}")]
-        public async Task<ActionResult> DeleteStatusChange(string id)
+        public async Task<ActionResult<BaseResponse<string>>> DeleteStatusChange(string id)
         {
             try
             {
                 bool success = await _statusChangeService.Delete(id);
                 if (!success)
                 {
-                    return NotFound();
+                    return NotFound(BaseResponse<string>.FailResponse("Status Change not found"));
                 }
-                return NoContent();
+                return Ok(BaseResponse<string>.OkResponse("Status Change deleted successfully."));
             }
             catch (KeyNotFoundException)
             {
