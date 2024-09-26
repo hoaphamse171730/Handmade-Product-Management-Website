@@ -22,6 +22,7 @@ builder.Services.AddControllers(
 //All extra services must be contained in ApplicationServiceExtentions & IdentityServiceExtensions
 builder.Services.AddApplicationServices(builder.Configuration);
 builder.Services.AddIdentityServices(builder.Configuration);
+builder.Services.RegisterMapsterConfiguration();
 
 var app = builder.Build();
 

@@ -1,14 +1,14 @@
 using System.Text;
 using HandmadeProductManagement.Repositories.Context;
 using HandmadeProductManagement.Repositories.Entity;
-using HandmadeProductManagement.Services.Service;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 
-namespace HandmadeProductManagementAPI.Extensions;
+namespace HandmadeProductManagement.Services.Service;
 
-public static class IdentityServiceExtensions
+public static class AddIdentityService
 {
     public static IServiceCollection AddIdentityServices(this IServiceCollection services,
         IConfiguration config)
@@ -19,10 +19,10 @@ public static class IdentityServiceExtensions
                 opt.User.RequireUniqueEmail = false;
             })
             .AddEntityFrameworkStores<DatabaseContext>();
-        
+
         var key = new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes(config["TokenKey"]));
-        
+
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(opt =>
             {
@@ -44,12 +44,13 @@ public static class IdentityServiceExtensions
                         {
                             context.Token = accessToken;
                         }
-        
+
                         return Task.CompletedTask;
                     }
                 };
             });
         services.AddAuthorization();
+        // services.AddTransient<IAuthorizationHandler, IsHostRequirementHandler>();
         services.AddScoped<TokenService>();
 
         return services;
