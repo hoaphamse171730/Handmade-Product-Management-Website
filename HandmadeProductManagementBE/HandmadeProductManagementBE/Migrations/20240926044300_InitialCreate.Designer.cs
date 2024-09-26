@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HandmadeProductManagementAPI.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20240925082634_InitialCreate")]
+    [Migration("20240926044300_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -1217,6 +1217,10 @@ namespace HandmadeProductManagementAPI.Migrations
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 

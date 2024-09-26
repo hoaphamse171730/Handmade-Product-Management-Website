@@ -697,10 +697,7 @@
           "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "8.0.8"
         },
         "runtime": {
-          "HandmadeProductManagement.Contract.Repositories.dll": {
-            "assemblyVersion": "1.0.0",
-            "fileVersion": "1.0.0.0"
-          }
+          "HandmadeProductManagement.Contract.Repositories.dll": {}
         }
       },
       "HandmadeProductManagement.Contract.Services/1.0.0": {
@@ -709,10 +706,7 @@
           "HandmadeProductManagement.Repositories": "1.0.0"
         },
         "runtime": {
-          "HandmadeProductManagement.Contract.Services.dll": {
-            "assemblyVersion": "1.0.0",
-            "fileVersion": "1.0.0.0"
-          }
+          "HandmadeProductManagement.Contract.Services.dll": {}
         }
       },
       "HandmadeProductManagement.Core/1.0.0": {
@@ -720,18 +714,12 @@
           "Mapster": "7.4.0"
         },
         "runtime": {
-          "HandmadeProductManagement.Core.dll": {
-            "assemblyVersion": "1.0.0",
-            "fileVersion": "1.0.0.0"
-          }
+          "HandmadeProductManagement.Core.dll": {}
         }
       },
       "HandmadeProductManagement.ModelViews/1.0.0": {
         "runtime": {
-          "HandmadeProductManagement.ModelViews.dll": {
-            "assemblyVersion": "1.0.0",
-            "fileVersion": "1.0.0.0"
-          }
+          "HandmadeProductManagement.ModelViews.dll": {}
         }
       },
       "HandmadeProductManagement.Repositories/1.0.0": {
@@ -744,10 +732,7 @@
           "Microsoft.EntityFrameworkCore.SqlServer": "8.0.8"
         },
         "runtime": {
-          "HandmadeProductManagement.Repositories.dll": {
-            "assemblyVersion": "1.0.0",
-            "fileVersion": "1.0.0.0"
-          }
+          "HandmadeProductManagement.Repositories.dll": {}
         }
       }
     }

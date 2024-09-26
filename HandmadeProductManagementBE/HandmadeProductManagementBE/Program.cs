@@ -1,4 +1,6 @@
+using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagementAPI.Extensions;
+using HandmadeProductManagement.Services.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
 
@@ -22,7 +24,7 @@ builder.Services.AddControllers(
 //All extra services must be contained in ApplicationServiceExtentions & IdentityServiceExtensions
 builder.Services.AddApplicationServices(builder.Configuration);
 builder.Services.AddIdentityServices(builder.Configuration);
-
+builder.Services.AddScoped<IUserService, UserService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
