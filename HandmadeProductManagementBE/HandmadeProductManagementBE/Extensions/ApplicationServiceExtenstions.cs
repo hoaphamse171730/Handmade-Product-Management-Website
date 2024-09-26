@@ -28,16 +28,17 @@ public static class ApplicationServiceExtenstions
                     .AllowCredentials()
                     .WithOrigins("https://localhost:7159"); });
         });
-
+        
+        services.AddScoped<IProductService, ProductService>();
         services.AddScoped<ICancelReasonService, CancelReasonService>();
         services.AddScoped<IStatusChangeService, StatusChangeService>();
-        services.AddScoped<IProductService, ProductService>();
         services.AddScoped<IPromotionService, PromotionService>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IShopService, ShopService>();
         services.AddScoped<IOrderService, OrderService>();
         services.AddScoped<IReviewService, ReviewService>();
         services.AddScoped<IReplyService, ReplyService>();
+        services.AddScoped<IOrderDetailService, OrderDetailService>();
 
 
         return services;

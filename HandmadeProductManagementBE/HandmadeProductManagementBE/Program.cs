@@ -13,6 +13,7 @@ builder.Configuration
     .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
     .AddEnvironmentVariables();
 
+builder.Services.AddAutoMapper(typeof(Program));
 builder.Services.AddControllers(
 //    opt =>
 //{
