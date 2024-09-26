@@ -9,12 +9,10 @@ using HandmadeProductManagement.Contract.Services.Security;
 public class CartItemService : ICartItemService
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly UserAccessor _userAccessor;
 
     public CartItemService(IUnitOfWork unitOfWork,UserAccessor userAccessor)
     {
         _unitOfWork = unitOfWork;
-        _userAccessor = userAccessor;
     }
 
     public async Task<bool> AddCartItem(string cartId, CreateCartItemDto createCartItemDto)
@@ -60,7 +58,7 @@ public class CartItemService : ICartItemService
         if (cartItem != null)
         {
             cartItem.DeletedTime = CoreHelper.SystemTimeNow;
-            cartItem.DeletedBy = _userAccessor.GetUsername();//update later after have context accessor
+            cartItem.DeletedBy = "System";//update later after have context accessor
             await _unitOfWork.SaveAsync();
             return true;
         }
