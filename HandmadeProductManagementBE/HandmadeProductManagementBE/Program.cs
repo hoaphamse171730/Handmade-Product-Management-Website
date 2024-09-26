@@ -1,4 +1,5 @@
 using HandmadeProductManagementAPI.Extensions;
+using HandmadeProductManagementBE.API;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
 
@@ -22,6 +23,7 @@ builder.Services.AddControllers(
 //All extra services must be contained in ApplicationServiceExtentions & IdentityServiceExtensions
 builder.Services.AddApplicationServices(builder.Configuration);
 builder.Services.AddIdentityServices(builder.Configuration);
+builder.Services.AddConfig(builder.Configuration);
 
 var app = builder.Build();
 

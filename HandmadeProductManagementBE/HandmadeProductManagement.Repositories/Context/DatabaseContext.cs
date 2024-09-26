@@ -258,14 +258,17 @@ namespace HandmadeProductManagement.Repositories.Context
                 entity.Property(e => e.TotalAmount)
                       .IsRequired();
 
-                entity.HasOne(e => e.Order)
-                      .WithMany()
-                      .HasForeignKey(e => e.OrderId);
+                entity.Property(e => e.Status)
+                      .IsRequired()
+                      .HasMaxLength(20);
 
-                // One-to-one relationship with PaymentDetail
-                entity.HasOne<PaymentDetail>()
+                entity.HasOne(e => e.Order)
+                      .WithOne(o => o.Payment)
+                      .HasForeignKey<Payment>(e => e.OrderId);
+
+                entity.HasMany(e => e.PaymentDetails)
                       .WithOne(pd => pd.Payment)
-                      .HasForeignKey<PaymentDetail>(pd => pd.PaymentId);
+                      .HasForeignKey(pd => pd.PaymentId);
             });
 
             // PaymentDetail Entity Configuration
