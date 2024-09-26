@@ -36,6 +36,8 @@ public static class ApplicationServiceExtenstions
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IShopService, ShopService>();
         services.AddScoped<IOrderService, OrderService>();
+        services.AddScoped<IReviewService, ReviewService>();
+        services.AddScoped<IReplyService, ReplyService>();
 
 
         return services;
