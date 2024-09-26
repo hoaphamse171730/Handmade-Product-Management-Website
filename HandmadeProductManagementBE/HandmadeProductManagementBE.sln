@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.10.35122.118
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HandmadeProductManagementAPI", "HandmadeProductManagementBE\HandmadeProductManagementAPI.csproj", "{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HandmadeProductManagementAPI", "HandmadeProductManagementBE\HandmadeProductManagementAPI.csproj", "{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SERVER", "SERVER", "{1F89EE8C-46B7-47EC-B572-DE2EBF606973}"
 EndProject
@@ -13,17 +13,17 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "REPOSITORY", "REPOSITORY", 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CORE", "CORE", "{0A649C40-550E-4C3C-82AA-F2CDA8FB9E83}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HandmadeProductManagement.Core", "HandmadeProductManagement.Core\HandmadeProductManagement.Core.csproj", "{C1EB3DE5-152E-4663-BD84-2D1155B125D8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HandmadeProductManagement.Core", "HandmadeProductManagement.Core\HandmadeProductManagement.Core.csproj", "{C1EB3DE5-152E-4663-BD84-2D1155B125D8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HandmadeProductManagement.Contract.Repositories", "HandmadeProductManagement.Contract.Repositories\HandmadeProductManagement.Contract.Repositories.csproj", "{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HandmadeProductManagement.Contract.Repositories", "HandmadeProductManagement.Contract.Repositories\HandmadeProductManagement.Contract.Repositories.csproj", "{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HandmadeProductManagement.ModelViews", "HandmadeProductManagement.ModelView\HandmadeProductManagement.ModelViews.csproj", "{29FDA659-8E8E-460D-8CF9-0F992D752ECA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HandmadeProductManagement.ModelViews", "HandmadeProductManagement.ModelView\HandmadeProductManagement.ModelViews.csproj", "{29FDA659-8E8E-460D-8CF9-0F992D752ECA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HandmadeProductManagement.Repositories", "HandmadeProductManagement.Repositories\HandmadeProductManagement.Repositories.csproj", "{EA9CF239-AA84-4A09-957A-646C14A6F04B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HandmadeProductManagement.Repositories", "HandmadeProductManagement.Repositories\HandmadeProductManagement.Repositories.csproj", "{EA9CF239-AA84-4A09-957A-646C14A6F04B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HandmadeProductManagement.Contract.Services", "HandmadeProductManagement.Contract.Services\HandmadeProductManagement.Contract.Services.csproj", "{5ECD79B2-DBFD-424D-B888-3C9BBB2FA09D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HandmadeProductManagement.Contract.Services", "HandmadeProductManagement.Contract.Services\HandmadeProductManagement.Contract.Services.csproj", "{5ECD79B2-DBFD-424D-B888-3C9BBB2FA09D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HandmadeProductManagement.Services", "HandmadeProductManagement.Services\HandmadeProductManagement.Services.csproj", "{B48678A4-822E-4A18-9F58-32C525718D88}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HandmadeProductManagement.Services", "HandmadeProductManagement.Services\HandmadeProductManagement.Services.csproj", "{B48678A4-822E-4A18-9F58-32C525718D88}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
