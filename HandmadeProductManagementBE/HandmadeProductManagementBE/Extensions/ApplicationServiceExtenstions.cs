@@ -1,8 +1,11 @@
 using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
+using HandmadeProductManagement.ModelViews.AuthModelViews;
 using HandmadeProductManagement.Repositories.Context;
+using HandmadeProductManagement.Repositories.Entity;
 using HandmadeProductManagement.Repositories.UOW;
 using HandmadeProductManagement.Services.Service;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 
 namespace HandmadeProductManagementAPI.Extensions;
@@ -39,5 +42,12 @@ public static class ApplicationServiceExtenstions
 
 
         return services;
+    }
+
+    public static void RegisterMapsterConfiguration(this IServiceCollection services)
+    {
+        TypeAdapterConfig<RegisterModelView, ApplicationUser>
+            .NewConfig()
+            .Map(dest => dest.UserInfo.FullName, src => src.FullName);
     }
 }
