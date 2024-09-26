@@ -57,19 +57,5 @@ namespace HandmadeProductManagementAPI.Controllers
             }
             return NoContent();
         }
-
-        [HttpPost("Search")]
-        public async Task<ActionResult<BaseResponse<IEnumerable<ProductResponseModel>>>> SearchProducts(ProductSearchModel searchModel)
-        {
-            var response = await _productService.SearchProductsAsync(searchModel);
-            return Ok(response);
-        }
-
-        [HttpPost("Sort")]
-        public async Task<ActionResult<BaseResponse<IEnumerable<ProductResponseModel>>>> SortProducts(ProductSortModel sortModel)
-        {
-            var response = await _productService.SortProductsAsync(sortModel);
-            return Ok(response);
-        }
     }
 }

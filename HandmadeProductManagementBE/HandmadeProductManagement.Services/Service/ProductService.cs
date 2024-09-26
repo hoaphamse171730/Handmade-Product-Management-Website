@@ -68,15 +68,5 @@ namespace HandmadeProductManagement.Services.Service
             await _unitOfWork.SaveAsync();
             return true;
         }
-
-        public async Task<BaseResponse<IEnumerable<ProductResponseModel>>> SearchProductsAsync(ProductSearchModel searchModel)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public async Task<BaseResponse<IEnumerable<ProductResponseModel>>> SortProductsAsync(ProductSortModel sortModel)
-        {
-            throw new System.NotImplementedException();
-        }
     }
 }
