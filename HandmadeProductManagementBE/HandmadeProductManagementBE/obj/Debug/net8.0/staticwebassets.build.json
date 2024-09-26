@@ -1,11 +1,12 @@
 {
   "Version": 1,
-  "Hash": "19VrqW12ELhHLpOIhsreOJpDBK9sDSZIfPlFT8L7SbM=",
+  "Hash": "Q8e3IFAlvCexh8gBi/do++NnZJWECsCIJzH/nEQr5bY=",
   "Source": "HandmadeProductManagementAPI",
   "BasePath": "_content/HandmadeProductManagementAPI",
   "Mode": "Default",
   "ManifestType": "Build",
   "ReferencedProjectsConfiguration": [],
   "DiscoveryPatterns": [],
-  "Assets": []
+  "Assets": [],
+  "Endpoints": []
 }
