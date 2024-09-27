@@ -46,27 +46,3 @@ D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductM
 D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Services\obj\Debug\net8.0\refint\HandmadeProductManagement.Services.dll
 D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Services\obj\Debug\net8.0\HandmadeProductManagement.Services.pdb
 D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Services\obj\Debug\net8.0\ref\HandmadeProductManagement.Services.dll
-D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Services\bin\Debug\net8.0\HandmadeProductManagement.Services.deps.json
-D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Services\bin\Debug\net8.0\HandmadeProductManagement.Services.dll
-D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Services\bin\Debug\net8.0\HandmadeProductManagement.Services.pdb
-D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Services\bin\Debug\net8.0\HandmadeProductManagement.Contract.Repositories.dll
-D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Services\bin\Debug\net8.0\HandmadeProductManagement.Contract.Services.dll
-D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Services\bin\Debug\net8.0\HandmadeProductManagement.Core.dll
-D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Services\bin\Debug\net8.0\HandmadeProductManagement.ModelViews.dll
-D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Services\bin\Debug\net8.0\HandmadeProductManagement.Repositories.dll
-D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Services\bin\Debug\net8.0\HandmadeProductManagement.Contract.Services.pdb
-D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Services\bin\Debug\net8.0\HandmadeProductManagement.Contract.Repositories.pdb
-D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Services\bin\Debug\net8.0\HandmadeProductManagement.Core.pdb
-D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Services\bin\Debug\net8.0\HandmadeProductManagement.ModelViews.pdb
-D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Services\bin\Debug\net8.0\HandmadeProductManagement.Repositories.pdb
-D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Services\obj\Debug\net8.0\HandmadeProductManagement.Services.csproj.AssemblyReference.cache
-D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Services\obj\Debug\net8.0\HandmadeProductManagement.Services.GeneratedMSBuildEditorConfig.editorconfig
-D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Services\obj\Debug\net8.0\HandmadeProductManagement.Services.AssemblyInfoInputs.cache
-D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Services\obj\Debug\net8.0\HandmadeProductManagement.Services.AssemblyInfo.cs
-D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Services\obj\Debug\net8.0\HandmadeProductManagement.Services.csproj.CoreCompileInputs.cache
-D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Services\obj\Debug\net8.0\HandmadeProductManagement.Services.sourcelink.json
-D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Services\obj\Debug\net8.0\Handmade.230E6667.Up2Date
-D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Services\obj\Debug\net8.0\HandmadeProductManagement.Services.dll
-D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Services\obj\Debug\net8.0\refint\HandmadeProductManagement.Services.dll
-D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Services\obj\Debug\net8.0\HandmadeProductManagement.Services.pdb
-D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Services\obj\Debug\net8.0\ref\HandmadeProductManagement.Services.dll

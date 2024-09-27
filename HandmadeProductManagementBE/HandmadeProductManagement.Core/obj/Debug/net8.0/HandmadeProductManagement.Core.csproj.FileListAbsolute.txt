@@ -22,16 +22,3 @@ D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductM
 D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Core\obj\Debug\net8.0\refint\HandmadeProductManagement.Core.dll
 D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Core\obj\Debug\net8.0\HandmadeProductManagement.Core.pdb
 D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Core\obj\Debug\net8.0\ref\HandmadeProductManagement.Core.dll
-D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Core\bin\Debug\net8.0\HandmadeProductManagement.Core.deps.json
-D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Core\bin\Debug\net8.0\HandmadeProductManagement.Core.dll
-D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Core\bin\Debug\net8.0\HandmadeProductManagement.Core.pdb
-D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Core\obj\Debug\net8.0\HandmadeProductManagement.Core.csproj.AssemblyReference.cache
-D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Core\obj\Debug\net8.0\HandmadeProductManagement.Core.GeneratedMSBuildEditorConfig.editorconfig
-D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Core\obj\Debug\net8.0\HandmadeProductManagement.Core.AssemblyInfoInputs.cache
-D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Core\obj\Debug\net8.0\HandmadeProductManagement.Core.AssemblyInfo.cs
-D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Core\obj\Debug\net8.0\HandmadeProductManagement.Core.csproj.CoreCompileInputs.cache
-D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Core\obj\Debug\net8.0\HandmadeProductManagement.Core.sourcelink.json
-D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Core\obj\Debug\net8.0\HandmadeProductManagement.Core.dll
-D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Core\obj\Debug\net8.0\refint\HandmadeProductManagement.Core.dll
-D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Core\obj\Debug\net8.0\HandmadeProductManagement.Core.pdb
-D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagement.Core\obj\Debug\net8.0\ref\HandmadeProductManagement.Core.dll
