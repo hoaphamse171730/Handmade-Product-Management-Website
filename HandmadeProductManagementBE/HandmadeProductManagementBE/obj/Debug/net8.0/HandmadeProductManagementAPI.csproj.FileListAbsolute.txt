@@ -475,3 +475,6 @@ D:\FPT\2024\sem6\Handmade-Product-Management-Website\HandmadeProductManagementBE
 D:\FPT\2024\sem6\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\obj\Debug\net8.0\HandmadeProductManagementAPI.pdb
 D:\FPT\2024\sem6\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\obj\Debug\net8.0\HandmadeProductManagementAPI.genruntimeconfig.cache
 D:\FPT\2024\sem6\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\obj\Debug\net8.0\ref\HandmadeProductManagementAPI.dll
+D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\bin\Debug\net8.0\Mapster.dll
+D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\bin\Debug\net8.0\Mapster.Core.dll
+D:\1. Project\School Fall24\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll

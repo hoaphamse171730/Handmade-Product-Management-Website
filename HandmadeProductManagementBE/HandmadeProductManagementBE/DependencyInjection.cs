@@ -15,9 +15,9 @@ namespace HandmadeProductManagementBE.API
         {
             services.ConfigRoute();
             services.AddDatabase(configuration);
-            services.AddIdentity();
+            //services.AddIdentity();
             services.AddInfrastructure(configuration);
-            services.AddServices();
+            //services.AddServices();
         }
         public static void ConfigRoute(this IServiceCollection services)
         {
@@ -34,20 +34,20 @@ namespace HandmadeProductManagementBE.API
             });
         }
 
-        public static void AddIdentity(this IServiceCollection services)
-        {
-            services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
-            {
-            })
-             .AddEntityFrameworkStores<DatabaseContext>()
-             .AddDefaultTokenProviders();
-        }
-        public static void AddServices(this IServiceCollection services)
-        {
-            services
-               // .AddScoped<IUserService, UserService>()
-                .AddScoped<IUserService, UserService>();
+        //public static void AddIdentity(this IServiceCollection services)
+        //{
+        //    services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
+        //    {
+        //    })
+        //     .AddEntityFrameworkStores<DatabaseContext>()
+        //     .AddDefaultTokenProviders();
+        //}
+        //public static void AddServices(this IServiceCollection services)
+        //{
+        //    services
+        //       // .AddScoped<IUserService, UserService>()
+        //        .AddScoped<IUserService, UserService>();
 
-        }
+        //}
     }
 }

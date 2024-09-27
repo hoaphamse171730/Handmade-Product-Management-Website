@@ -1,9 +1,13 @@
 using HandmadeProductManagement.Contract.Repositories.Interface;
+using HandmadeProductManagement.Contract.Services;
 using HandmadeProductManagement.Contract.Services.Interface;
+using HandmadeProductManagement.ModelViews.AuthModelViews;
 using HandmadeProductManagement.Repositories.Context;
+using HandmadeProductManagement.Repositories.Entity;
 using HandmadeProductManagement.Repositories.UOW;
 using HandmadeProductManagement.Services.Service;
 using HandmadeProductManagementAPI.BackgroundServices;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 
 namespace HandmadeProductManagementAPI.Extensions;
@@ -42,6 +46,18 @@ public static class ApplicationServiceExtenstions
         services.AddScoped<IPaymentDetailService, PaymentDetailService>();
         services.AddScoped<IPaymentService, PaymentService>();
         services.AddHostedService<PaymentExpirationBackgroundService>();
+        services.AddScoped<ICartService, CartService>();
+        services.AddScoped<ICartItemService, CartItemService>();
+        services.AddScoped<IUserService, UserService>();
+
+
         return services;
+    }
+
+    public static void RegisterMapsterConfiguration(this IServiceCollection services)
+    {
+        TypeAdapterConfig<RegisterModelView, ApplicationUser>
+            .NewConfig()
+            .Map(dest => dest.UserInfo.FullName, src => src.FullName);
     }
 }
