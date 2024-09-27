@@ -11,6 +11,9 @@ using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.ModelViews.UserModelViews;
 using System.Security.Claims;
+using HandmadeProductManagement.Core.Constants;
+using System.ComponentModel.DataAnnotations;
+using System.Text.RegularExpressions;
 
 namespace HandmadeProductManagementAPI.Controllers
 {
@@ -19,7 +22,7 @@ namespace HandmadeProductManagementAPI.Controllers
     public class UsersController : ControllerBase
     {
         private readonly IUserService _userService;
-
+        private readonly StatusCodeHelper statusCodeHelper;
         public UsersController(IUserService userService)
         {
             _userService = userService;
@@ -30,6 +33,13 @@ namespace HandmadeProductManagementAPI.Controllers
         public async Task<ActionResult<IEnumerable<ApplicationUser>>> GetApplicationUsers()
         {
             IList<UserResponseModel> a = await _userService.GetAll();
+
+                if (a == null)
+            {
+                return StatusCode(404,BaseResponse<String>.FailResponse("No user found"));
+            }
+
+
             return Ok(BaseResponse<IList<UserResponseModel>>.OkResponse(a));
         }
 
@@ -40,10 +50,9 @@ namespace HandmadeProductManagementAPI.Controllers
 
             if (userResponse == null)
             {
-                return NotFound("User not found.");
+                return StatusCode(404, BaseResponse<String>.FailResponse("User not found"));
             }
 
-            // Return a 200 OK response with the user data
             return Ok(BaseResponse<UserResponseByIdModel>.OkResponse(userResponse));
         }
 
@@ -53,14 +62,27 @@ namespace HandmadeProductManagementAPI.Controllers
         {
             if (id == null || updateUserDTO == null)
             {
-                return BadRequest("Invalid data.");
+                return StatusCode(400, BaseResponse<String>.FailResponse("Bad Request"));
+            }
+
+
+            if (!new EmailAddressAttribute().IsValid(updateUserDTO.Email))
+            {
+                return StatusCode(400, BaseResponse<string>.FailResponse("Email is not valid"));
+            }
+
+            
+            var phoneRegex = new Regex(@"^\d{10}$");  
+            if (!phoneRegex.IsMatch(updateUserDTO.PhoneNumber))
+            {
+                return StatusCode(400, BaseResponse<string>.FailResponse("Phone number is not valid"));
             }
 
             var updatedUser = await _userService.UpdateUser(id, updateUserDTO);
 
             if (updatedUser == null)
             {
-                return NotFound("User not found.");
+                return StatusCode(404, BaseResponse<String>.FailResponse("User not found"));
             }
 
             // Return the updated user in the response
@@ -77,7 +99,7 @@ namespace HandmadeProductManagementAPI.Controllers
 
             if (!result)
             {
-                return NotFound(new { Message = "User not found." });
+                return StatusCode(404, BaseResponse<String>.FailResponse("User not found"));
             }
 
             return Ok(BaseResponse<UpdateUserResponseModel>.OkResponse("Deleted successfuly")); // Return a 204 No Content response on successful deletion
@@ -90,7 +112,7 @@ namespace HandmadeProductManagementAPI.Controllers
 
             if (!result)
             {
-                return NotFound(new { Message = "User not found or already active." });
+                return StatusCode(404, BaseResponse<String>.FailResponse("User not found or already active"));
             }
 
             return Ok(BaseResponse<UpdateUserResponseModel>.OkResponse(" Undo deleted successfuly"));
