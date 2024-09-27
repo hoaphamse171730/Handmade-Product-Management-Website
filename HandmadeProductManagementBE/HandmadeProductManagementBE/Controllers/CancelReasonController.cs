@@ -3,7 +3,6 @@ using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Contract.Repositories.Entity;
 using Microsoft.AspNetCore.Mvc;
 using HandmadeProductManagement.Services.Service;
-using HandmadeProductManagement.ModelViews.PromotionModelViews;
 
 namespace HandmadeProductManagementAPI.Controllers
 {
