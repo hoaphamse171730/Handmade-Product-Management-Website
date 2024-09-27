@@ -41,7 +41,7 @@ namespace HandmadeProductManagement.Services.Service
                     CreatedTime = user.CreatedTime,
                     LastUpdatedTime = user.LastUpdatedTime, 
                     DeletedTime = user.DeletedTime,
-                    Status = user.status,
+                    Status = user.Status,
                     CartId = user.CartId,
                 }).ToListAsync();
 
@@ -143,7 +143,7 @@ namespace HandmadeProductManagement.Services.Service
                 return false;
             }
 
-            user.status = "inactive";
+            user.Status = "inactive";
             user.DeletedBy = "admin";
             user.DeletedTime = DateTime.UtcNow;
 
@@ -167,13 +167,13 @@ namespace HandmadeProductManagement.Services.Service
                .Where(u => u.Id == userId)
                .FirstOrDefaultAsync();
 
-            if (user == null || user.status == "active")
+            if (user == null || user.Status == "active")
             {
                 return false;
             }
 
 
-            user.status = "active";
+            user.Status = "active";
             user.DeletedBy = null;
             user.DeletedTime = null;
 
