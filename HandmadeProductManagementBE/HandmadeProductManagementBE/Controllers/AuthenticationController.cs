@@ -89,6 +89,11 @@ public class AuthenticationController(UserManager<ApplicationUser> userManager, 
             ModelState.AddModelError("email", "Email is already taken");
         }
 
+        if (await userManager.Users.AnyAsync(x => x.PhoneNumber == registerModelView.PhoneNumber))
+        {
+            ModelState.AddModelError("phone", "Phone is already taken");
+        }
+
         //Return validation errors if any
         if (!ModelState.IsValid)
         {
