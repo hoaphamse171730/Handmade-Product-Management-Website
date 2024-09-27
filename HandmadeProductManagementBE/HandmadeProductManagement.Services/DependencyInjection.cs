@@ -12,17 +12,18 @@ namespace HandmadeProductManagement.Services
         public static void AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddRepositories();
-            // services.AddServices();
+            services.AddServices();
         }
         public static void AddRepositories(this IServiceCollection services)
         {
             services.AddScoped<IUnitOfWork, UnitOfWork>();
         }
 
-        // public static void AddServices(this IServiceCollection services)
-        // {
-        //     services.AddScoped<IProductService, ProductService>();
-        // }
+        public static void AddServices(this IServiceCollection services)
+        {
+            services.AddScoped<IProductService, ProductService>();
+            services.AddScoped<IUserService, UserService>();
+        }
 
     }
 }
