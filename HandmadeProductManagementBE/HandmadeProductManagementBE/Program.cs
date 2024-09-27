@@ -1,9 +1,6 @@
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagementAPI.Extensions;
-using HandmadeProductManagement.Services.Service;
 using HandmadeProductManagementBE.API;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,7 +22,6 @@ builder.Services.AddControllers(
 //All extra services must be contained in ApplicationServiceExtentions & IdentityServiceExtensions
 builder.Services.AddApplicationServices(builder.Configuration);
 builder.Services.AddIdentityServices(builder.Configuration);
-builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddConfig(builder.Configuration);
 builder.Services.RegisterMapsterConfiguration();
 

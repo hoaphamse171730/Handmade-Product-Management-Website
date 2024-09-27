@@ -48,6 +48,7 @@ public static class ApplicationServiceExtenstions
         services.AddHostedService<PaymentExpirationBackgroundService>();
         services.AddScoped<ICartService, CartService>();
         services.AddScoped<ICartItemService, CartItemService>();
+        services.AddScoped<IUserService, UserService>();
 
 
         return services;
