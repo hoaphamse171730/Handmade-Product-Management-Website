@@ -14,7 +14,7 @@ public class CartService : ICartService
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<CartModel> GetCartByUserId(Guid userId)
+    public async Task<CartModel?> GetCartByUserId(Guid userId)
     {
         var cart = await _unitOfWork.GetRepository<Cart>().Entities
                    .Where(x => x.UserId == userId && x.DeletedTime == null)
@@ -23,7 +23,7 @@ public class CartService : ICartService
 
         if (cart == null)
         {
-            throw new InvalidOperationException($"No cart found for user ID {userId}.");  // Throw an exception if no cart is found
+            return null;  // Return null when no cart is found
         }
 
         return new CartModel
@@ -38,6 +38,7 @@ public class CartService : ICartService
             }).ToList()
         };
     }
+
 
 
     //public async Task<CartModel> CreateCart(Guid userId)
