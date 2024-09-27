@@ -4,9 +4,8 @@ namespace HandmadeProductManagement.Core.Utils;
 
 public static class ValidationHelper
 {
-    public static bool IsValidNames(params string?[] credentials)
+    public static bool IsValidNames(string validRegex, params string?[] credentials)
     {
-        var validRegex = @"^[A-Za-z]+[A-Za-z0-9 ]*$";
         foreach (var credential in credentials)
         {
             if (credential is null ||

@@ -1,4 +1,5 @@
 using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.Core.Common;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.Core.Utils;
 using HandmadeProductManagement.ModelViews.AuthModelViews;
@@ -80,12 +81,13 @@ public class AuthenticationController(UserManager<ApplicationUser> userManager, 
     [HttpPost("register")]
     public async Task<ActionResult<BaseResponse<UserResponseModel>>> Register(RegisterModelView registerModelView)
     {
-        if (!ValidationHelper.IsValidNames(registerModelView.UserName, registerModelView.FullName)
+        if (!ValidationHelper.IsValidNames(CustomRegex.UsernameRegex, registerModelView.UserName) ||
+            !ValidationHelper.IsValidNames(CustomRegex.FullNameRegex, registerModelView.FullName)
            )
             return new BaseResponse<UserResponseModel>()
             {
                 StatusCode = StatusCodeHelper.Unauthorized,
-                Message = "Username and Full Name cannot contain special characters or begin with white space.",
+                Message = "Username or Full Name contains invalid characters.",
             };
 
         if (await userManager.Users.AnyAsync(x => x.UserName == registerModelView.UserName))
