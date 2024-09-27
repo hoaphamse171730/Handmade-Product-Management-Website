@@ -17,6 +17,8 @@ namespace HandmadeProductManagement.Repositories.Entity
         public Guid CartId { get; set; }
         public Cart Cart { get; set; }
 
+        public string Status { get; set; } = "active";
+
         public ICollection<Review> Reviews { get; set; } = new List<Review>();
 
         public ApplicationUser()
