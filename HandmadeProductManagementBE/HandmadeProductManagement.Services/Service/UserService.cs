@@ -1,11 +1,15 @@
 ﻿using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
+using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.Core.Utils;
 using HandmadeProductManagement.ModelViews.UserModelViews;
 using HandmadeProductManagement.Repositories.Entity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace HandmadeProductManagement.Services.Service
 {
@@ -22,12 +26,26 @@ namespace HandmadeProductManagement.Services.Service
             IQueryable<ApplicationUser> query = _unitOfWork.GetRepository<ApplicationUser>().Entities;
 
             // Map ApplicationUser to UserResponseModel
-            var result = await query.Select(user => new UserResponseModel
-            {
-                Id = user.Id.ToString()   // Convert Guid to string to match UserResponseModel
-            }).ToListAsync();
 
-            return result as IList<UserResponseModel>;  // Cast List to IList
+            var user = await _unitOfWork.GetRepository<ApplicationUser>()
+                .Entities
+                .Select(user => new UserResponseModel
+                {
+                    Id = user.Id,
+                    UserName = user.UserName,
+                    Email = user.Email,
+                    PhoneNumber = user.PhoneNumber,
+                    CreatedBy = user.CreatedBy,
+                    LastUpdatedBy = user.LastUpdatedBy,
+                    DeletedBy = user.DeletedBy,
+                    CreatedTime = user.CreatedTime,
+                    LastUpdatedTime = user.LastUpdatedTime, 
+                    DeletedTime = user.DeletedTime,
+                    Status = user.status,
+                    CartId = user.CartId,
+                }).ToListAsync();
+
+            return user as IList<UserResponseModel>;  // Cast List to IList
         }
 
         public async Task<UserResponseByIdModel> GetById(string Id)
@@ -82,6 +100,7 @@ namespace HandmadeProductManagement.Services.Service
             {
                 return null; 
             }
+
 
             user.UserName = updateUserDTO.UserName;
             user.Email = updateUserDTO.Email;

@@ -14,6 +14,9 @@ namespace HandmadeProductManagement.Core.Constants
         Unauthorized = 401,
 
         [CustomName("Internal Server Error")]
-        ServerError = 500
+        ServerError = 500,
+
+        [CustomName("Not found")]
+        NotFound = 404,
     }
 }
