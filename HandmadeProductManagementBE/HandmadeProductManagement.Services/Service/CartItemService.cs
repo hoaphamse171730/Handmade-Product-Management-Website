@@ -10,7 +10,7 @@ public class CartItemService : ICartItemService
 {
     private readonly IUnitOfWork _unitOfWork;
 
-    public CartItemService(IUnitOfWork unitOfWork,UserAccessor userAccessor)
+    public CartItemService(IUnitOfWork unitOfWork)
     {
         _unitOfWork = unitOfWork;
     }
@@ -18,8 +18,7 @@ public class CartItemService : ICartItemService
     public async Task<bool> AddCartItem(string cartId, CreateCartItemDto createCartItemDto)
     {
         var cartItemRepo = _unitOfWork.GetRepository<CartItem>();
-        //var cartRepo = _unitOfWork.GetRepository<Cart>();
-        //var cart = cartRepo.GetById(cartId);
+        Console.WriteLine(cartId);
         var cartItem = new CartItem
         {
             CartId = cartId,
@@ -28,9 +27,17 @@ public class CartItemService : ICartItemService
             CreatedTime = CoreHelper.SystemTimeNow,
             LastUpdatedTime = CoreHelper.SystemTimeNow
         };
-        cartItemRepo.Insert(cartItem);
-        //if (cart!=null) cart.CartItems.Add(cartItem);
-        await _unitOfWork.SaveAsync();
+        try
+        {
+            await cartItemRepo.InsertAsync(cartItem);
+            await _unitOfWork.SaveAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(cartItem.CartId+"|"+cartItem.ProductItemId);
+            Console.WriteLine("Error adding cart item: " + ex.Message);
+            return false;
+        }
         return true;
     }
 
