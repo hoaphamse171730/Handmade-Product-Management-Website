@@ -63,7 +63,7 @@ namespace HandmadeProductManagementAPI.Controllers
             }
             catch (ArgumentException ex)
             {
-                return NotFound(BaseResponse<string>.FailResponse("Cancel Reason not found", StatusCodeHelper.NotFound));
+                return BadRequest(BaseResponse<string>.FailResponse(ex.Message));
             }
             catch (System.Exception ex)
             {
@@ -83,6 +83,10 @@ namespace HandmadeProductManagementAPI.Controllers
             catch (KeyNotFoundException)
             {
                 return NotFound(BaseResponse<string>.FailResponse("Cancel Reason not found", StatusCodeHelper.NotFound));
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(BaseResponse<string>.FailResponse(ex.Message));
             }
             catch (System.Exception ex)
             {
