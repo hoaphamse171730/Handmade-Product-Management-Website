@@ -1,5 +1,6 @@
 ﻿using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.PromotionModelViews;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
@@ -88,7 +89,7 @@ namespace HandmadeProductManagementAPI.Controllers
             try
             {
                 await _promotionService.Delete(id);
-                return NoContent();
+                return Ok(new BaseResponse<bool>(StatusCodeHelper.OK, "Promotion deleted successfully.", true));
             }
             catch (KeyNotFoundException)
             {
