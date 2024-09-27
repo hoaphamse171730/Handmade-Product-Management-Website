@@ -24,11 +24,12 @@ public class AuthenticationController(UserManager<ApplicationUser> userManager, 
     {
         if (string.IsNullOrWhiteSpace(loginModelView.PhoneNumber) &&
             string.IsNullOrWhiteSpace(loginModelView.Email) &&
-            string.IsNullOrWhiteSpace(loginModelView.UserName))
+            string.IsNullOrWhiteSpace(loginModelView.UserName) ||
+            string.IsNullOrWhiteSpace(loginModelView.Password)
+           )
         {
             return new BaseResponse<UserLoginResponseModel>()
             {
-                Data = null,
                 StatusCode = StatusCodeHelper.Unauthorized,
                 Message = "At least one of Phone Number, Email, or Username is required for login.",
             };
@@ -51,7 +52,7 @@ public class AuthenticationController(UserManager<ApplicationUser> userManager, 
         }
 
         var success = await userManager.CheckPasswordAsync(user, loginModelView.Password);
-        
+
         if (success)
         {
             return BaseResponse<UserLoginResponseModel>.OkResponse(CreateUserResponse(user));
@@ -69,7 +70,7 @@ public class AuthenticationController(UserManager<ApplicationUser> userManager, 
         return new UserLoginResponseModel()
         {
             FullName = user.UserInfo.FullName,
-            UserName = user.UserName ?? UsernameHelper.GenerateUsername(user.UserInfo.FullName),
+            UserName = user.UserName,
             DisplayName = user.UserInfo.DisplayName,
             Token = tokenService.CreateToken(user)
         };
@@ -79,6 +80,14 @@ public class AuthenticationController(UserManager<ApplicationUser> userManager, 
     [HttpPost("register")]
     public async Task<ActionResult<BaseResponse<UserResponseModel>>> Register(RegisterModelView registerModelView)
     {
+        if (!ValidationHelper.IsValidNames(registerModelView.UserName, registerModelView.FullName)
+           )
+            return new BaseResponse<UserResponseModel>()
+            {
+                StatusCode = StatusCodeHelper.Unauthorized,
+                Message = "Username and Full Name cannot contain special characters or begin with white space.",
+            };
+
         if (await userManager.Users.AnyAsync(x => x.UserName == registerModelView.UserName))
         {
             ModelState.AddModelError("username", "Username is already taken");
