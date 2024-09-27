@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static HandmadeProductManagement.Core.Base.BaseException;
 
 namespace HandmadeProductManagement.Services.Service
 {
@@ -24,6 +25,16 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<ShopResponseModel> CreateShopAsync(CreateShopDto createShop)
         {
+            if (string.IsNullOrEmpty(createShop.Name) || string.IsNullOrEmpty(createShop.Description))
+            {
+                throw new BaseException.BadRequestException("invalid_input", "Name and Description cannot be null or empty.");
+            }
+
+            if (createShop.Rating < 0 || createShop.Rating > 5)
+            {
+                throw new BaseException.BadRequestException("invalid_rating", "Rating must be between 0 and 5.");
+            }
+
             var userRepository = _unitOfWork.GetRepository<ApplicationUser>();
             var userExists = await userRepository.Entities.AnyAsync(u => u.Id == createShop.UserId);
             if (!userExists)
@@ -96,11 +107,18 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<bool> DeleteShopAsync(Guid userId, string id)
         {
+            var userRepository = _unitOfWork.GetRepository<ApplicationUser>();
+            var userExists = await userRepository.Entities.AnyAsync(u => u.Id == userId);
+            if (!userExists)
+            {
+                throw new BaseException.ErrorException(404, "user_not_found", "User not found.");
+            }
+
             var repository = _unitOfWork.GetRepository<Shop>();
             var shop = await repository.Entities.FirstOrDefaultAsync(s => s.Id == id);
             if (shop == null)
             {
-                return false;
+                throw new BaseException.ErrorException(404, "shop_not_found", "Shop not found.");
             }
 
             shop.DeletedBy = userId.ToString();
@@ -158,6 +176,16 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<ShopResponseModel> UpdateShopAsync(string id, CreateShopDto shop)
         {
+            if (string.IsNullOrEmpty(shop.Name) || string.IsNullOrEmpty(shop.Description))
+            {
+                throw new BaseException.BadRequestException("invalid_input", "Name and Description cannot be null or empty.");
+            }
+
+            if (shop.Rating < 0 || shop.Rating > 5)
+            {
+                throw new BaseException.BadRequestException("invalid_rating", "Rating must be between 0 and 5.");
+            }
+
             var repository = _unitOfWork.GetRepository<Shop>();
             var existingShop = await repository.Entities
                 .FirstOrDefaultAsync(s => s.Id == id && s.DeletedBy == null);
