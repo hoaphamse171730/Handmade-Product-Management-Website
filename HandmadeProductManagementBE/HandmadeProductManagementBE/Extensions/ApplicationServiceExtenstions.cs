@@ -1,4 +1,5 @@
 using HandmadeProductManagement.Contract.Repositories.Interface;
+using HandmadeProductManagement.Contract.Services;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.ModelViews.AuthModelViews;
 using HandmadeProductManagement.Repositories.Context;
@@ -39,6 +40,8 @@ public static class ApplicationServiceExtenstions
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IShopService, ShopService>();
         services.AddScoped<IOrderService, OrderService>();
+        services.AddScoped<ICartService, CartService>();
+        services.AddScoped<ICartItemService, CartItemService>();
 
 
         return services;

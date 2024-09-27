@@ -10,4 +10,8 @@
     <ProjectReference Include="..\HandmadeProductManagement.Contract.Services\HandmadeProductManagement.Contract.Services.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.8" />
+  </ItemGroup>
+
 </Project>

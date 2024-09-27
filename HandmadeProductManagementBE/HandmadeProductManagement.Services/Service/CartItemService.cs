@@ -17,19 +17,35 @@ public class CartItemService : ICartItemService
 
     public async Task<bool> AddCartItem(string cartId, CreateCartItemDto createCartItemDto)
     {
-        var cartItemRepo = _unitOfWork.GetRepository<CartItem>();
+        // var cartItemRepo = _unitOfWork.GetRepository<CartItem>();
+        var cart = await _unitOfWork.GetRepository<Cart>()
+            .Entities
+            .Include(c => c.CartItems)
+            .Include(c => c.User)
+            .SingleOrDefaultAsync(c => c.Id == cartId);
+
+        var productItem = await _unitOfWork.GetRepository<ProductItem>()
+            .Entities
+            .SingleOrDefaultAsync(pi => pi.Id == createCartItemDto.ProductItemId);
+        
+        if (cart is null) throw new ArgumentException($"Cart {cartId} not found");
+        
         Console.WriteLine(cartId);
+        
         var cartItem = new CartItem
         {
-            CartId = cartId,
-            ProductItemId = createCartItemDto.ProductItemId,
+            //catch exception here
+            ProductItem = productItem!,
             ProductQuantity = createCartItemDto.ProductQuantity,
             CreatedTime = CoreHelper.SystemTimeNow,
             LastUpdatedTime = CoreHelper.SystemTimeNow
         };
+        
+        cart.CartItems.Add(cartItem);
+        
         try
         {
-            await cartItemRepo.InsertAsync(cartItem);
+            // await cartItemRepo.InsertAsync(cartItem);
             await _unitOfWork.SaveAsync();
         }
         catch (Exception ex)
