@@ -52,6 +52,15 @@ public class AuthenticationController(UserManager<ApplicationUser> userManager, 
             };
         }
 
+        if (user.Status != Constants.UserActiveStatus)
+        {
+            return new BaseResponse<UserLoginResponseModel>()
+            {
+                StatusCode = StatusCodeHelper.Unauthorized,
+                Message = "This account has been disabled."
+            };
+        }
+        
         var success = await userManager.CheckPasswordAsync(user, loginModelView.Password);
 
         if (success)
