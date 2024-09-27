@@ -37,10 +37,11 @@ public static class ApplicationServiceExtenstions
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IShopService, ShopService>();
         services.AddScoped<IOrderService, OrderService>();
-        services.AddScoped<IPaymentService, PaymentService>();
+        services.AddScoped<IReviewService, ReviewService>();
+        services.AddScoped<IReplyService, ReplyService>();
         services.AddScoped<IPaymentDetailService, PaymentDetailService>();
+        services.AddScoped<IPaymentService, PaymentService>();
         services.AddHostedService<PaymentExpirationBackgroundService>();
-
         return services;
     }
 }

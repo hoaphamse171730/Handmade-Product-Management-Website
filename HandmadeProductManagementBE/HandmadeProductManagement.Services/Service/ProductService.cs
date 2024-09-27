@@ -24,6 +24,24 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<BaseResponse<IEnumerable<ProductResponseModel>>> SearchProductsAsync(ProductSearchModel searchModel)
         {
+            // Validate CategoryId and ShopId datatype (Guid)
+            if (!string.IsNullOrEmpty(searchModel.CategoryId) && !IsValidGuid(searchModel.CategoryId))
+            {
+                return BaseResponse<IEnumerable<ProductResponseModel>>.OkResponse("Invalid Category ID");
+            }
+
+            if (!string.IsNullOrEmpty(searchModel.ShopId) && !IsValidGuid(searchModel.ShopId))
+            {
+                return BaseResponse<IEnumerable<ProductResponseModel>>.OkResponse("Invalid Shop ID");
+            }
+
+            // Validate MinRating limit (from 0 to 5)
+            if (searchModel.MinRating.HasValue && (searchModel.MinRating < 0 || searchModel.MinRating > 5))
+            {
+                return BaseResponse<IEnumerable<ProductResponseModel>>.OkResponse("MinRating must be between 0 and 5.");
+            }
+
+
             var query = _unitOfWork.GetRepository<Product>().Entities.AsQueryable();
 
             // Apply Search Filters
@@ -146,6 +164,11 @@ namespace HandmadeProductManagement.Services.Service
 
             return BaseResponse<IEnumerable<ProductResponseModel>>.OkResponse(productResponseModels);
 
+        }
+
+        private bool IsValidGuid(string input)
+        {
+            return Guid.TryParse(input, out _);
         }
 
     }

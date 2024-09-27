@@ -29,6 +29,8 @@ namespace HandmadeProductManagement.Repositories.Context
         public DbSet<Reply> Replies => Set<Reply>();
         public DbSet<Shop> Shops => Set<Shop>();
         public DbSet<Order> Orders => Set<Order>();
+        public DbSet<Product> Products => Set<Product>();
+        public DbSet<Category> Categories => Set<Category>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -177,10 +179,6 @@ namespace HandmadeProductManagement.Repositories.Context
             modelBuilder.Entity<Promotion>()  
                 .HasKey(p => p.Id);
             modelBuilder.Entity<Promotion>()  
-                .Property(p => p.PromotionName)  
-                .IsRequired() 
-                .HasMaxLength(255);
-            modelBuilder.Entity<Promotion>()  
                 .Property(p => p.Description)  
                 .HasMaxLength(500);
             modelBuilder.Entity<Promotion>()  
@@ -296,50 +294,68 @@ namespace HandmadeProductManagement.Repositories.Context
                       .HasMaxLength(100);
             });
 
-            // Configure Review entity
+            // Configuration for Review entity
             modelBuilder.Entity<Review>(entity =>
             {
-                entity.Property(r => r.Content)
-                      .HasColumnType("text") 
-                      .IsRequired(false);
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Content).IsRequired(false).HasMaxLength(1000);
+                entity.Property(e => e.Rating).IsRequired(false);
+                entity.Property(e => e.Date).IsRequired(false).HasDefaultValueSql("GETDATE()");
+                entity.Property(e => e.ProductId).IsRequired();
+                entity.Property(e => e.UserId).IsRequired();
 
-                entity.Property(r => r.Rating)
-                      .IsRequired();
-
-                entity.Property(r => r.Date)
-                      .HasDefaultValueSql("GETDATE()");
-
-                entity.HasOne(r => r.Product)
+                entity.HasOne(e => e.Product)
                     .WithMany(p => p.Reviews)
-                    .HasForeignKey(r => r.ProductId)
-                    .OnDelete(DeleteBehavior.NoAction);
-                
+                    .HasForeignKey(e => e.ProductId)
+                    .OnDelete(DeleteBehavior.Restrict);
 
-                // One-to-many: Review belongs to ApplicationUser
-                entity.HasOne(r => r.User)
-                      .WithMany(u => u.Reviews)
-                      .HasForeignKey(r => r.UserId);
-
-                // One-to-one: Review has one Reply
-                entity.HasOne(r => r.Reply)
-                      .WithOne(re => re.Review)
-                      .HasForeignKey<Reply>(re => re.ReviewId)
-                      .OnDelete(DeleteBehavior.NoAction);
+                entity.HasOne(e => e.User)
+                    .WithMany(u => u.Reviews)
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
 
-            // Configure Reply entity
+            // Configuration for Reply entity
             modelBuilder.Entity<Reply>(entity =>
             {
-                entity.Property(rp => rp.Content)
-                      .HasColumnType("text")
-                      .IsRequired(false);
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Content).IsRequired(false).HasMaxLength(1000);
+                entity.Property(e => e.Date).IsRequired(false).HasDefaultValueSql("GETDATE()");
+                entity.Property(e => e.ReviewId).IsRequired();
+                entity.Property(e => e.ShopId).IsRequired();
 
-                entity.Property(rp => rp.Date)
-                      .HasDefaultValueSql("GETDATE()");
+                entity.HasOne(e => e.Review)
+                    .WithOne(r => r.Reply)
+                    .HasForeignKey<Reply>(e => e.ReviewId)
+                    .OnDelete(DeleteBehavior.Cascade);
 
-                entity.HasOne(rp => rp.Shop)
-                      .WithMany()
-                      .HasForeignKey(rp => rp.ShopId);
+                entity.HasOne(e => e.Shop)
+                    .WithMany()
+                    .HasForeignKey(e => e.ShopId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // Configuration for Product entity
+            modelBuilder.Entity<Product>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
+                entity.Property(e => e.Description).HasMaxLength(1000);
+                entity.Property(e => e.CategoryId).IsRequired();
+                entity.Property(e => e.ShopId).IsRequired();
+                entity.Property(e => e.Rating).HasColumnType("decimal(2, 1)").HasDefaultValue(0);
+                entity.Property(e => e.Status).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.SoldCount).IsRequired().HasDefaultValue(0);
+
+                entity.HasOne(e => e.Category)
+                    .WithMany(c => c.Products)
+                    .HasForeignKey(e => e.CategoryId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(e => e.Shop)
+                    .WithMany()
+                    .HasForeignKey(e => e.ShopId)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
         }
 

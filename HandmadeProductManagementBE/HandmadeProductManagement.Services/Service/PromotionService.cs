@@ -30,7 +30,6 @@ namespace HandmadeProductManagement.Services.Service
                 Id = pi.Id,
                 Name = pi.Name,
                 Description = pi.Description,
-                PromotionName = pi.PromotionName,
                 DiscountRate = pi.DiscountRate,
                 StartDate = pi.StartDate,
                 EndDate = pi.EndDate,

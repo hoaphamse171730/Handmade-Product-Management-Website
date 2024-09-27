@@ -39,5 +39,14 @@ namespace HandmadeProductManagement.Core.Base
         {
             return new BaseResponse<T>(StatusCodeHelper.OK, StatusCodeHelper.OK.Name(), mess);
         }
+        public static BaseResponse<T> FailResponse(string? message, StatusCodeHelper statusCode = StatusCodeHelper.BadRequest)
+        {
+            return new BaseResponse<T>(statusCode, statusCode.Name(), message);
+        }
+
+        public static BaseResponse<T> FailResponse(string? message, string code, StatusCodeHelper statusCode)
+        {
+            return new BaseResponse<T>(statusCode, code, message);
+        }
     }
 }

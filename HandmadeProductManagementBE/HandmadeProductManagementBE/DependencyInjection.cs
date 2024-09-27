@@ -6,7 +6,6 @@ using HandmadeProductManagement.Repositories.Context;
 using HandmadeProductManagement.Repositories.Entity;
 using HandmadeProductManagement.Services;
 using HandmadeProductManagement.Services.Service;
-using HandmadeProductManagementAPI.BackgroundServices;
 
 namespace HandmadeProductManagementBE.API
 {
@@ -46,9 +45,9 @@ namespace HandmadeProductManagementBE.API
         public static void AddServices(this IServiceCollection services)
         {
             services
-                //.AddScoped<IUserService, UserService>()
+               // .AddScoped<IUserService, UserService>()
                 .AddScoped<IUserService, UserService>();
-                
+
         }
     }
 }
