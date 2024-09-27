@@ -1711,6 +1711,9 @@
       "HandmadeProductManagement.ModelViews/1.0.0": {
         "type": "project",
         "framework": ".NETCoreApp,Version=v8.0",
+        "dependencies": {
+          "HandmadeProductManagement.Core": "1.0.0"
+        },
         "compile": {
           "bin/placeholder/HandmadeProductManagement.ModelViews.dll": {}
         },
@@ -4545,24 +4548,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\my pc\\.nuget\\packages\\": {},
-    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
+    "C:\\Users\\luan.tran\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\1. Project\\School Fall24\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Repositories\\HandmadeProductManagement.Repositories.csproj",
+      "projectUniqueName": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Repositories\\HandmadeProductManagement.Repositories.csproj",
       "projectName": "HandmadeProductManagement.Repositories",
-      "projectPath": "D:\\1. Project\\School Fall24\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Repositories\\HandmadeProductManagement.Repositories.csproj",
-      "packagesPath": "C:\\Users\\my pc\\.nuget\\packages\\",
-      "outputPath": "D:\\1. Project\\School Fall24\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Repositories\\obj\\",
+      "projectPath": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Repositories\\HandmadeProductManagement.Repositories.csproj",
+      "packagesPath": "C:\\Users\\luan.tran\\.nuget\\packages\\",
+      "outputPath": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Repositories\\obj\\",
       "projectStyle": "PackageReference",
-      "fallbackFolders": [
-        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-      ],
       "configFilePaths": [
-        "C:\\Users\\my pc\\AppData\\Roaming\\NuGet\\NuGet.Config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+        "C:\\Users\\luan.tran\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
@@ -4577,11 +4575,11 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "projectReferences": {
-            "D:\\1. Project\\School Fall24\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj": {
-              "projectPath": "D:\\1. Project\\School Fall24\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj"
+            "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj": {
+              "projectPath": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj"
             },
-            "D:\\1. Project\\School Fall24\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.ModelView\\HandmadeProductManagement.ModelViews.csproj": {
-              "projectPath": "D:\\1. Project\\School Fall24\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.ModelView\\HandmadeProductManagement.ModelViews.csproj"
+            "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.ModelView\\HandmadeProductManagement.ModelViews.csproj": {
+              "projectPath": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.ModelView\\HandmadeProductManagement.ModelViews.csproj"
             }
           }
         }
@@ -4641,12 +4639,26 @@
         ],
         "assetTargetFallback": true,
         "warn": true,
+        "downloadDependencies": [
+          {
+            "name": "Microsoft.AspNetCore.App.Ref",
+            "version": "[8.0.4, 8.0.4]"
+          },
+          {
+            "name": "Microsoft.NETCore.App.Ref",
+            "version": "[8.0.4, 8.0.4]"
+          },
+          {
+            "name": "Microsoft.WindowsDesktop.App.Ref",
+            "version": "[8.0.4, 8.0.4]"
+          }
+        ],
         "frameworkReferences": {
           "Microsoft.NETCore.App": {
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.400/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.100-preview.4.24267.66/PortableRuntimeIdentifierGraph.json"
       }
     }
   }
