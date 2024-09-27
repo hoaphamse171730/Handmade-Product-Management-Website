@@ -3,12 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using FluentValidation;
 using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.ModelViews.PromotionModelViews;
 using HandmadeProductManagement.Repositories.Entity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+
 
 namespace HandmadeProductManagement.Services.Service
 {
@@ -16,11 +19,16 @@ namespace HandmadeProductManagement.Services.Service
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IValidator<PromotionForCreationDto> _creationValidator;
+        private readonly IValidator<PromotionForUpdateDto> _updateValidator;
 
-        public PromotionService(IUnitOfWork unitOfWork, IMapper mapper)
+        public PromotionService(IUnitOfWork unitOfWork, IMapper mapper, IValidator<PromotionForCreationDto> validator, IValidator<PromotionForUpdateDto> updateValidator)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _creationValidator = validator;
+            _updateValidator = updateValidator;
+
         }
 
         public async Task<PromotionDto> GetById(string id)
@@ -37,6 +45,9 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<PromotionDto> Create(PromotionForCreationDto promotion)
         {
+            var result = _creationValidator.ValidateAsync(promotion);
+            if (!result.Result.IsValid)
+                throw new ValidationException(result.Result.Errors); 
             var promotionEntity = _mapper.Map<Promotion>(promotion);
             promotionEntity.CreatedTime = DateTime.UtcNow;
             await _unitOfWork.GetRepository<Promotion>().InsertAsync(promotionEntity);
@@ -47,6 +58,9 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task Update(string id, PromotionForUpdateDto promotion)
         {
+            var result = _updateValidator.ValidateAsync(promotion);
+            if (!result.Result.IsValid)
+                throw new ValidationException(result.Result.Errors);
             var promotionEntity = await _unitOfWork.GetRepository<Promotion>().Entities
                 .FirstOrDefaultAsync(p => p.Id == id);
             if (promotionEntity == null)
@@ -59,22 +73,21 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task Delete(string id)
         {
-           var promotionRepo = _unitOfWork.GetRepository<Promotion>();
-           var promotionEntity = promotionRepo.Entities
-               .FirstOrDefault(p => p.Id == id);
-           if (promotionEntity == null)
-               throw new KeyNotFoundException("Promotion not found");
-           // promotionEntity.DeletedBy = userId.ToString();
-           promotionEntity.DeletedTime = DateTime.UtcNow;
-           promotionRepo.Delete(promotionEntity);
-           await _unitOfWork.SaveAsync();
+            var promotionRepo = _unitOfWork.GetRepository<Promotion>();
+            var promotionEntity = await promotionRepo.Entities.FirstOrDefaultAsync(x => x.Id == id);
+            if (promotionEntity == null)
+            {
+                throw new KeyNotFoundException("Promotion not found");
+            }
+            promotionEntity.DeletedTime = DateTime.UtcNow;
+            await promotionRepo.DeleteAsync(id);
+            await _unitOfWork.SaveAsync();
         }
 
         public async Task SoftDelete(string id)
         {
             var promotionRepo = _unitOfWork.GetRepository<Promotion>();
-            var promotionEntity = await promotionRepo.Entities
-                .FirstOrDefaultAsync(p => p.Id == id && p.DeletedBy == null);
+            var promotionEntity = await promotionRepo.Entities.FirstOrDefaultAsync(x => x.Id == id.ToString());
             if (promotionEntity == null)
                 throw new KeyNotFoundException("Promotion not found");
             // promotionEntity.DeletedBy = userId.ToString();

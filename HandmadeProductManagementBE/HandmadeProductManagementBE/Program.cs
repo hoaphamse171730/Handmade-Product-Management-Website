@@ -31,6 +31,9 @@ builder.Services.AddApplicationServices(builder.Configuration);
 builder.Services.AddIdentityServices(builder.Configuration);
 builder.Services.AddConfig(builder.Configuration);
 builder.Services.RegisterMapsterConfiguration();
+builder.Services.ConfigureFluentValidation();
+
+
 
 var app = builder.Build();
 
