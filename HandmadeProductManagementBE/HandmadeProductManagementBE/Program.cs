@@ -27,6 +27,7 @@ builder.Services.AddApplicationServices(builder.Configuration);
 builder.Services.AddIdentityServices(builder.Configuration);
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddConfig(builder.Configuration);
+builder.Services.RegisterMapsterConfiguration();
 
 var app = builder.Build();
 
