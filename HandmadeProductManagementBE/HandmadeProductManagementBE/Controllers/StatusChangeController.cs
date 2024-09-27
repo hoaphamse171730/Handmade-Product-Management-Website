@@ -2,8 +2,7 @@
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Contract.Repositories.Entity;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using HandmadeProductManagement.Core.Constants;
 
 namespace HandmadeProductManagementAPI.Controllers
 {
@@ -29,7 +28,7 @@ namespace HandmadeProductManagementAPI.Controllers
             }
             catch (System.Exception ex)
             {
-                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
+                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message, StatusCodeHelper.ServerError));
             }
         }
 
@@ -44,11 +43,11 @@ namespace HandmadeProductManagementAPI.Controllers
             }
             catch (KeyNotFoundException)
             {
-                return NotFound(BaseResponse<string>.FailResponse("No status changes found for the given OrderId."));
+                return NotFound(BaseResponse<string>.FailResponse("No status changes found for the given OrderId.", StatusCodeHelper.NotFound));
             }
             catch (System.Exception ex)
             {
-                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
+                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message, StatusCodeHelper.ServerError));
             }
         }
 
@@ -63,11 +62,11 @@ namespace HandmadeProductManagementAPI.Controllers
             }
             catch (KeyNotFoundException)
             {
-                return NotFound(BaseResponse<string>.FailResponse("Status Change not found"));
+                return NotFound(BaseResponse<string>.FailResponse("No status changes found for the given OrderId.", StatusCodeHelper.NotFound));
             }
             catch (System.Exception ex)
             {
-                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
+                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message, StatusCodeHelper.ServerError));
             }
         }
 
@@ -83,7 +82,7 @@ namespace HandmadeProductManagementAPI.Controllers
             }
             catch (System.Exception ex)
             {
-                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
+                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message, StatusCodeHelper.ServerError));
             }
         }
 
@@ -98,11 +97,11 @@ namespace HandmadeProductManagementAPI.Controllers
             }
             catch (KeyNotFoundException)
             {
-                return NotFound(BaseResponse<string>.FailResponse("Status Change not found"));
+                return NotFound(BaseResponse<string>.FailResponse("No status changes found for the given OrderId.", StatusCodeHelper.NotFound));
             }
             catch (System.Exception ex)
             {
-                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
+                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message, StatusCodeHelper.ServerError));
             }
         }
 
@@ -115,17 +114,17 @@ namespace HandmadeProductManagementAPI.Controllers
                 bool success = await _statusChangeService.Delete(id);
                 if (!success)
                 {
-                    return NotFound(BaseResponse<string>.FailResponse("Status Change not found"));
+                    return NotFound(BaseResponse<string>.FailResponse("Status Change not found", StatusCodeHelper.NotFound));
                 }
                 return Ok(BaseResponse<string>.OkResponse("Status Change deleted successfully."));
             }
             catch (KeyNotFoundException)
             {
-                return NotFound(BaseResponse<string>.FailResponse("Status Change not found"));
+                return NotFound(BaseResponse<string>.FailResponse("No status changes found for the given OrderId.", StatusCodeHelper.NotFound));
             }
             catch (System.Exception ex)
             {
-                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
+                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message, StatusCodeHelper.ServerError));
             }
         }
     }
