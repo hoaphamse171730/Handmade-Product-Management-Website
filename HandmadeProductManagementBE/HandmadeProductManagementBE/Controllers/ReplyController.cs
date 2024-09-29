@@ -2,7 +2,9 @@
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.ReplyModelViews;
+using HandmadeProductManagement.ModelViews.ReviewModelViews;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 
 namespace HandmadeProductManagementAPI.Controllers
 {
@@ -20,12 +22,23 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<BaseResponse<IList<ReplyModel>>>> GetAll(int pageNumber = 1, int pageSize = 10)
         {
-            var replies = await _replyService.GetAllAsync(pageNumber, pageSize);
-            return Ok(BaseResponse<IList<ReplyModel>>.OkResponse(replies));
+            try
+            {
+                var replies = await _replyService.GetAllAsync(pageNumber, pageSize);
+                return Ok(BaseResponse<IList<ReplyModel>>.OkResponse(replies));
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new BaseResponse<IList<ReviewModel>>(StatusCodeHelper.BadRequest, ex.Message, string.Empty));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new BaseResponse<IList<ReviewModel>>(StatusCodeHelper.ServerError, "An unexpected error occurred.", string.Empty));
+            }
         }
 
         [HttpGet("{replyId}")]
-        public async Task<ActionResult<BaseResponse<ReplyModel>>> GetById(string replyId)
+        public async Task<ActionResult<BaseResponse<ReplyModel>>> GetById([Required] string replyId)
         {
             var reply = await _replyService.GetByIdAsync(replyId);
             if (reply == null)
@@ -37,38 +50,56 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<BaseResponse<ReplyModel>>> Create(string content, string reviewId, string shopId)
+        public async Task<ActionResult<BaseResponse<ReplyModel>>> Create(string? content, [Required] string reviewId, [Required] string shopId)
         {
-            if (string.IsNullOrWhiteSpace(content))
+            try
             {
-                return BadRequest(new BaseResponse<ReplyModel>(StatusCodeHelper.BadRequest, "Invalid reply data.", string.Empty));
+                var replyModel = new ReplyModel
+                {
+                    Content = content,
+                    ReviewId = reviewId,
+                    ShopId = shopId
+                };
+
+                var createdReply = await _replyService.CreateAsync(replyModel);
+                return Ok(new BaseResponse<ReplyModel>(StatusCodeHelper.OK, "Reply created successfully.", createdReply));
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new BaseResponse<ReviewModel>(StatusCodeHelper.BadRequest, ex.Message, string.Empty));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new BaseResponse<ReviewModel>(StatusCodeHelper.ServerError, "An unexpected error occurred.", "Invalid value. Please try again."));
             }
 
-            var replyModel = new ReplyModel
-            {
-                Content = content,
-                ReviewId = reviewId,
-                ShopId = shopId
-            };
-
-            var createdReply = await _replyService.CreateAsync(replyModel);
-            return Ok(new BaseResponse<ReplyModel>(StatusCodeHelper.OK, "Reply created successfully.", createdReply));
         }
 
         [HttpPut("{replyId}")]
-        public async Task<ActionResult<BaseResponse<ReplyModel>>> Update(string replyId, string? content)
+        public async Task<ActionResult<BaseResponse<ReplyModel>>> Update([Required] string replyId, string? content)
         {
-            var existingReply = await _replyService.GetByIdAsync(replyId);
-            if (existingReply == null) return NotFound(new BaseResponse<ReplyModel>(StatusCodeHelper.BadRequest, "Reply not found.", string.Empty));
+            try
+            {
+                var existingReply = await _replyService.GetByIdAsync(replyId);
+                if (existingReply == null) return NotFound(new BaseResponse<ReplyModel>(StatusCodeHelper.BadRequest, "Reply not found.", string.Empty));
 
-            existingReply.Content = content;
+                existingReply.Content = content;
 
-            var updatedReply = await _replyService.UpdateAsync(replyId, existingReply);
-            return Ok(new BaseResponse<ReplyModel>(StatusCodeHelper.OK, "Reply updated successfully.", updatedReply));
+                var updatedReply = await _replyService.UpdateAsync(replyId, existingReply);
+                return Ok(new BaseResponse<ReplyModel>(StatusCodeHelper.OK, "Reply updated successfully.", updatedReply));
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new BaseResponse<ReplyModel>(StatusCodeHelper.BadRequest, ex.Message, string.Empty));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new BaseResponse<ReplyModel>(StatusCodeHelper.ServerError, "An unexpected error occurred.", string.Empty));
+            }
         }
 
         [HttpDelete("{replyId}")]
-        public async Task<ActionResult<BaseResponse<bool>>> Delete(string replyId)
+        public async Task<ActionResult<BaseResponse<bool>>> Delete([Required] string replyId)
         {
             var isDeleted = await _replyService.DeleteAsync(replyId);
             if (!isDeleted)

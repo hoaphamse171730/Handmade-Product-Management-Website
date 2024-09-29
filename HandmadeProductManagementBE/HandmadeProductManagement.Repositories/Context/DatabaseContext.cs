@@ -179,7 +179,7 @@ namespace HandmadeProductManagement.Repositories.Context
             modelBuilder.Entity<Promotion>()  
                 .HasKey(p => p.Id);
             modelBuilder.Entity<Promotion>()  
-                .Property(p => p.PromotionName)  
+                .Property(p => p.Name)  
                 .IsRequired() 
                 .HasMaxLength(255);
             modelBuilder.Entity<Promotion>()  
