@@ -13,6 +13,23 @@ x64/
 [Bb]in/
 [Oo]bj/
 
+# Bỏ qua thư mục bin và obj
+**/bin/
+**/obj/
+
+# Các file tạm thời của Visual Studio và .NET
+*.user
+*.suo
+*.csproj.user
+*.cache
+*.log
+
+# Bỏ qua các file nuget tạm thời
+project.nuget.cache
+*.nuget.g.props
+*.nuget.dgspec.json
+
+
 # MSTest test Results
 [Tt]est[Rr]esult*/
 [Bb]uild[Ll]og.*

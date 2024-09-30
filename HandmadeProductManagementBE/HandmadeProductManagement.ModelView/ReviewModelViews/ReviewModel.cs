@@ -15,6 +15,7 @@ namespace HandmadeProductManagement.ModelViews.ReviewModelViews
         public DateTime? Date { get; set; }
         public string ProductId { get; set; } = string.Empty;
         public Guid UserId { get; set; }
+
         public ReplyModel? Reply { get; set; }
     }
 }

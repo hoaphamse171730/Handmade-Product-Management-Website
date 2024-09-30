@@ -4,7 +4,6 @@ using HandmadeProductManagementBE.API;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,6 +30,9 @@ builder.Services.AddApplicationServices(builder.Configuration);
 builder.Services.AddIdentityServices(builder.Configuration);
 builder.Services.AddConfig(builder.Configuration);
 builder.Services.RegisterMapsterConfiguration();
+builder.Services.ConfigureFluentValidation();
+
+
 
 var app = builder.Build();
 

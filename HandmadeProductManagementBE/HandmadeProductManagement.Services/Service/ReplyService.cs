@@ -2,6 +2,10 @@
 using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.ModelViews.ReplyModelViews;
+using HandmadeProductManagement.ModelViews.ReviewModelViews;
+using HandmadeProductManagement.ModelViews.ShopModelViews;
+using HandmadeProductManagement.Repositories.Entity;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,6 +25,15 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<IList<ReplyModel>> GetAllAsync(int pageNumber, int pageSize)
         {
+            if (pageNumber <= 0)
+            {
+                throw new ArgumentException("Page Number must be greater than zero.");
+            }
+            if (pageSize <= 0)
+            {
+                throw new ArgumentException("Page Size must be greater than zero.");
+            }
+
             var replies = await _unitOfWork.GetRepository<Reply>().GetAllAsync();
             return replies.Skip((pageNumber - 1) * pageSize)
                           .Take(pageSize)
@@ -51,20 +64,51 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<ReplyModel> CreateAsync(ReplyModel replyModel)
         {
-            if (string.IsNullOrWhiteSpace(replyModel.Content))
-                throw new ArgumentException("Invalid reply data.");
+            // Check if reviewId and shopId exist
+            var review = await _unitOfWork.GetRepository<Review>().GetByIdAsync(replyModel.ReviewId);
+            if (review == null)
+            {
+                throw new ArgumentException("Review not found.");
+            }
+
+            var shop = await _unitOfWork.GetRepository<Shop>()
+                                 .Entities
+                                 .FirstOrDefaultAsync(s => s.Id == replyModel.ShopId);
+
+            if (shop == null)
+            {
+                throw new ArgumentException("Shop not found.");
+            }
+
+            // Ensure that each review has only one reply
+            var existingReply = await _unitOfWork.GetRepository<Reply>()
+                                   .Entities
+                                   .FirstOrDefaultAsync(r => r.ReviewId == replyModel.ReviewId);
+            if (existingReply != null)
+            {
+                throw new ArgumentException("This review already has a reply.");
+            }
 
             var reply = new Reply
             {
                 Content = replyModel.Content,
                 ReviewId = replyModel.ReviewId,
-                ShopId = replyModel.ShopId
+                ShopId = replyModel.ShopId,
+                Date = DateTime.UtcNow
             };
+
+            reply.CreatedBy = shop.Name;
+            reply.LastUpdatedBy = shop.Name;
+
+            //reply.CreatedTime = DateTimeOffset.UtcNow;
+            //reply.LastUpdatedTime = DateTimeOffset.UtcNow;
 
             await _unitOfWork.GetRepository<Reply>().InsertAsync(reply);
             await _unitOfWork.SaveAsync();
 
             replyModel.Id = reply.Id;
+            replyModel.Date = reply.Date;
+
             return replyModel;
         }
 
@@ -78,6 +122,23 @@ namespace HandmadeProductManagement.Services.Service
                 existingReply.Content = updatedReply.Content;
             }
 
+            var shop = await _unitOfWork.GetRepository<Shop>()
+                     .Entities
+                     .FirstOrDefaultAsync(s => s.Id == updatedReply.ShopId);
+
+            if (shop == null)
+            {
+                throw new ArgumentException("Shop not found.");
+            }
+
+            if (!string.IsNullOrWhiteSpace(updatedReply.Content))
+            {
+                existingReply.Content = updatedReply.Content;
+            }
+
+            existingReply.LastUpdatedBy = shop.Name;
+            existingReply.LastUpdatedTime = DateTimeOffset.UtcNow;
+
             _unitOfWork.GetRepository<Reply>().Update(existingReply);
             await _unitOfWork.SaveAsync();
 
@@ -89,7 +150,9 @@ namespace HandmadeProductManagement.Services.Service
             var existingReply = await _unitOfWork.GetRepository<Reply>().GetByIdAsync(replyId);
             if (existingReply == null) return false;
 
-            _unitOfWork.GetRepository<Reply>().Delete(replyId);
+            existingReply.DeletedTime = DateTimeOffset.UtcNow;
+
+            _unitOfWork.GetRepository<Reply>().Update(existingReply);
             await _unitOfWork.SaveAsync();
             return true;
         }
