@@ -72,6 +72,13 @@ namespace HandmadeProductManagement.Services.Service
         // Create a new status change
         public async Task<StatusChange> Create(StatusChange statusChange)
         {
+            // Check if OrderId exist
+            var orderExists = await _unitOfWork.GetRepository<Order>().GetByIdAsync(statusChange.OrderId);
+            if (orderExists == null)
+            {
+                throw new ArgumentException("OrderId does not exist.");
+            }
+
             // Validate ChangeTime
             if (statusChange.ChangeTime == default)
             {
@@ -98,6 +105,13 @@ namespace HandmadeProductManagement.Services.Service
         // Update an existing status change
         public async Task<StatusChange> Update(string id, StatusChange updatedStatusChange)
         {
+            // Check if OrderId exist
+            var orderExists = await _unitOfWork.GetRepository<Order>().GetByIdAsync(updatedStatusChange.OrderId);
+            if (orderExists == null)
+            {
+                throw new ArgumentException("OrderId does not exist.");
+            }
+
             var existingStatusChange = await GetById(id);
             if (existingStatusChange == null)
                 throw new KeyNotFoundException("Cancel Reason not found");

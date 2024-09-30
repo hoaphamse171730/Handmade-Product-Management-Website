@@ -103,11 +103,40 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<BaseResponse<StatusChange>>> CreateStatusChange(StatusChange statusChange)
         {
+            if (string.IsNullOrWhiteSpace(statusChange.Status))
+            {
+                ModelState.AddModelError("status", "Status is required.");
+            }
+
+            if (string.IsNullOrWhiteSpace(statusChange.OrderId))
+            {
+                ModelState.AddModelError("orderId", "OrderId is required.");
+            }
+
+            if (statusChange.ChangeTime == default(DateTime))
+            {
+                ModelState.AddModelError("changeTime", "ChangeTime is required.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToList();
+
+                return BadRequest(BaseResponse<string>.FailResponse("Validation failed: " + string.Join("; ", errors)));
+            }
+
             try
             {
                 StatusChange createdStatusChange = await _statusChangeService.Create(statusChange);
-                return CreatedAtAction(nameof(GetStatusChange), new { id = createdStatusChange.Id }, 
+                return CreatedAtAction(nameof(GetStatusChange), new { id = createdStatusChange.Id },
                        BaseResponse<StatusChange>.OkResponse(createdStatusChange));
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(BaseResponse<string>.FailResponse(ex.Message));
             }
             catch (System.Exception ex)
             {
@@ -119,10 +148,39 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpPut("{id}")]
         public async Task<ActionResult<BaseResponse<StatusChange>>> UpdateStatusChange(string id, StatusChange updatedStatusChange)
         {
+            if (string.IsNullOrWhiteSpace(updatedStatusChange.Status))
+            {
+                ModelState.AddModelError("status", "Status is required.");
+            }
+
+            if (string.IsNullOrWhiteSpace(updatedStatusChange.OrderId))
+            {
+                ModelState.AddModelError("orderId", "OrderId is required.");
+            }
+
+            if (updatedStatusChange.ChangeTime == default(DateTime))
+            {
+                ModelState.AddModelError("changeTime", "ChangeTime is required.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToList();
+
+                return BadRequest(BaseResponse<string>.FailResponse("Validation failed: " + string.Join("; ", errors)));
+            }
+
             try
             {
                 StatusChange statusChange = await _statusChangeService.Update(id, updatedStatusChange);
                 return Ok(BaseResponse<StatusChange>.OkResponse(statusChange));
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(BaseResponse<string>.FailResponse(ex.Message));
             }
             catch (KeyNotFoundException)
             {
@@ -133,6 +191,7 @@ namespace HandmadeProductManagementAPI.Controllers
                 return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message, StatusCodeHelper.ServerError));
             }
         }
+
 
         // DELETE: api/StatusChange/{id}
         [HttpDelete("{id}")]

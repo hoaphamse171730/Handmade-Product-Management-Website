@@ -3,6 +3,7 @@ using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Contract.Repositories.Entity;
 using Microsoft.AspNetCore.Mvc;
 using HandmadeProductManagement.Core.Constants;
+using HandmadeProductManagement.Core.Utils;
 
 namespace HandmadeProductManagementAPI.Controllers
 {
@@ -82,13 +83,28 @@ namespace HandmadeProductManagementAPI.Controllers
 
         // POST: api/CancelReason
         [HttpPost]
-        public async Task<ActionResult<CancelReason>> CreateCancelReason(CancelReason reason)
+        public async Task<ActionResult<BaseResponse<CancelReason>>> CreateCancelReason(CancelReason reason)
         {
+            if (string.IsNullOrWhiteSpace(reason.Description))
+            {
+                ModelState.AddModelError("description", "Description is required.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToList();
+
+                return BadRequest(BaseResponse<string>.FailResponse("Validation failed: " + string.Join("; ", errors)));
+            }
+
             try
             {
                 CancelReason createdReason = await _cancelReasonService.Create(reason);
-                return CreatedAtAction(nameof(GetCancelReason), new { id = createdReason.Id }, 
-                       BaseResponse<CancelReason>.OkResponse(reason));
+                return CreatedAtAction(nameof(GetCancelReason), new { id = createdReason.Id },
+                       BaseResponse<CancelReason>.OkResponse(createdReason));
             }
             catch (ArgumentException ex)
             {
@@ -96,14 +112,34 @@ namespace HandmadeProductManagementAPI.Controllers
             }
             catch (System.Exception ex)
             {
-                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message, StatusCodeHelper.ServerError));
+                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
             }
         }
 
         // PUT: api/CancelReason/{id} (string id)
         [HttpPut("{id}")]
-        public async Task<ActionResult<CancelReason>> UpdateCancelReason(string id, CancelReason updatedReason)
+        public async Task<ActionResult<BaseResponse<CancelReason>>> UpdateCancelReason(string id, CancelReason updatedReason)
         {
+            if (string.IsNullOrWhiteSpace(updatedReason.Description))
+            {
+                ModelState.AddModelError("description", "Description is required.");
+            }
+
+            if (updatedReason.RefundRate < 0 || updatedReason.RefundRate > 1)
+            {
+                ModelState.AddModelError("refundRate", "RefundRate must be between 0 and 100.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToList();
+
+                return BadRequest(BaseResponse<string>.FailResponse("Validation failed: " + string.Join("; ", errors)));
+            }
+
             try
             {
                 CancelReason reason = await _cancelReasonService.Update(id, updatedReason);
@@ -122,6 +158,7 @@ namespace HandmadeProductManagementAPI.Controllers
                 return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message, StatusCodeHelper.ServerError));
             }
         }
+
 
         // DELETE: api/CancelReason/{id} (string id)
         [HttpDelete("{id}")]
