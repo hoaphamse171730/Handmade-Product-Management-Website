@@ -1,11 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.ModelViews.CartModelViews;
-using System;
-using System.Threading.Tasks;
 using HandmadeProductManagement.Contract.Services;
 using HandmadeProductManagement.Core.Base;
-using HandmadeProductManagement.Contract.Repositories.Entity;
 
 namespace HandmadeProductManagementAPI.Controllers
 {

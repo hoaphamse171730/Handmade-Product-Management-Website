@@ -1,3 +1,5 @@
+using System.Web;
+using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Common;
 using HandmadeProductManagement.Core.Constants;
@@ -16,7 +18,10 @@ namespace HandmadeProductManagementAPI.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class AuthenticationController(UserManager<ApplicationUser> userManager, TokenService tokenService)
+public class AuthenticationController(UserManager<ApplicationUser> userManager, 
+    TokenService tokenService, 
+    IEmailService emailService
+    )
     : ControllerBase
 {
     [AllowAnonymous]
@@ -60,7 +65,7 @@ public class AuthenticationController(UserManager<ApplicationUser> userManager, 
                 Message = "This account has been disabled."
             };
         }
-        
+
         var success = await userManager.CheckPasswordAsync(user, loginModelView.Password);
 
         if (success)
@@ -143,6 +148,68 @@ public class AuthenticationController(UserManager<ApplicationUser> userManager, 
         {
             StatusCode = StatusCodeHelper.BadRequest,
             Message = result.Errors.ToString(),
+        };
+    }
+
+    [AllowAnonymous]
+    [HttpPost("forgot-password")]
+    public async Task<ActionResult<BaseResponse<string>>> ForgotPassword(ForgotPasswordModelView forgotPasswordModelView)
+    {
+        var user = await userManager.FindByEmailAsync(forgotPasswordModelView.Email);
+        if (user == null 
+            )
+        {
+            return new BaseResponse<string>()
+            {
+                StatusCode = StatusCodeHelper.BadRequest,
+                Message = "Email is invalid or not confirmed."
+            };
+        }
+
+        var resetToken = await userManager.GeneratePasswordResetTokenAsync(user);
+        var encodedToken = HttpUtility.UrlEncode(resetToken);//encode the token for URL safety
+
+        var passwordResetLink = $"{forgotPasswordModelView.ClientUri}?email={user.Email}&token={encodedToken}";
+
+        await emailService.SendPasswordRecoveryEmailAsync(user.Email!, passwordResetLink);
+
+        return new BaseResponse<string>()
+        {
+            StatusCode = StatusCodeHelper.OK,
+            Message = "Password reset link has been sent to your email."
+        };
+    }
+
+    [AllowAnonymous]
+    [HttpPost("reset-password")]
+    public async Task<ActionResult<BaseResponse<string>>> ResetPassword(ResetPasswordModelView resetPasswordModelView)
+    {
+        var user = await userManager.FindByEmailAsync(resetPasswordModelView.Email);
+        if (user == null)
+        {
+            return new BaseResponse<string>()
+            {
+                StatusCode = StatusCodeHelper.BadRequest,
+                Message = "Invalid request."
+            };
+        }
+
+        var decodedToken = HttpUtility.UrlDecode(resetPasswordModelView.Token);//decode the token from the request
+        var result = await userManager.ResetPasswordAsync(user, decodedToken, resetPasswordModelView.NewPassword);
+
+        if (result.Succeeded)
+        {
+            return new BaseResponse<string>()
+            {
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Password has been reset successfully."
+            };
+        }
+
+        return new BaseResponse<string>()
+        {
+            StatusCode = StatusCodeHelper.BadRequest,
+            Message = "Error resetting the password.",
         };
     }
 }
