@@ -1,4 +1,5 @@
 using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.Core.Common;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.Core.Utils;
 using HandmadeProductManagement.ModelViews.AuthModelViews;
@@ -24,11 +25,12 @@ public class AuthenticationController(UserManager<ApplicationUser> userManager, 
     {
         if (string.IsNullOrWhiteSpace(loginModelView.PhoneNumber) &&
             string.IsNullOrWhiteSpace(loginModelView.Email) &&
-            string.IsNullOrWhiteSpace(loginModelView.UserName))
+            string.IsNullOrWhiteSpace(loginModelView.UserName) ||
+            string.IsNullOrWhiteSpace(loginModelView.Password)
+           )
         {
             return new BaseResponse<UserLoginResponseModel>()
             {
-                Data = null,
                 StatusCode = StatusCodeHelper.Unauthorized,
                 Message = "At least one of Phone Number, Email, or Username is required for login.",
             };
@@ -50,8 +52,17 @@ public class AuthenticationController(UserManager<ApplicationUser> userManager, 
             };
         }
 
-        var success = await userManager.CheckPasswordAsync(user, loginModelView.Password);
+        if (user.Status != Constants.UserActiveStatus)
+        {
+            return new BaseResponse<UserLoginResponseModel>()
+            {
+                StatusCode = StatusCodeHelper.Unauthorized,
+                Message = "This account has been disabled."
+            };
+        }
         
+        var success = await userManager.CheckPasswordAsync(user, loginModelView.Password);
+
         if (success)
         {
             return BaseResponse<UserLoginResponseModel>.OkResponse(CreateUserResponse(user));
@@ -69,7 +80,7 @@ public class AuthenticationController(UserManager<ApplicationUser> userManager, 
         return new UserLoginResponseModel()
         {
             FullName = user.UserInfo.FullName,
-            UserName = user.UserName ?? UsernameHelper.GenerateUsername(user.UserInfo.FullName),
+            UserName = user.UserName,
             DisplayName = user.UserInfo.DisplayName,
             Token = tokenService.CreateToken(user)
         };
@@ -79,6 +90,15 @@ public class AuthenticationController(UserManager<ApplicationUser> userManager, 
     [HttpPost("register")]
     public async Task<ActionResult<BaseResponse<UserResponseModel>>> Register(RegisterModelView registerModelView)
     {
+        if (!ValidationHelper.IsValidNames(CustomRegex.UsernameRegex, registerModelView.UserName) ||
+            !ValidationHelper.IsValidNames(CustomRegex.FullNameRegex, registerModelView.FullName)
+           )
+            return new BaseResponse<UserResponseModel>()
+            {
+                StatusCode = StatusCodeHelper.Unauthorized,
+                Message = "Username or Full Name contains invalid characters.",
+            };
+
         if (await userManager.Users.AnyAsync(x => x.UserName == registerModelView.UserName))
         {
             ModelState.AddModelError("username", "Username is already taken");
@@ -87,6 +107,11 @@ public class AuthenticationController(UserManager<ApplicationUser> userManager, 
         if (await userManager.Users.AnyAsync(x => x.Email == registerModelView.Email))
         {
             ModelState.AddModelError("email", "Email is already taken");
+        }
+
+        if (await userManager.Users.AnyAsync(x => x.PhoneNumber == registerModelView.PhoneNumber))
+        {
+            ModelState.AddModelError("phone", "Phone is already taken");
         }
 
         //Return validation errors if any

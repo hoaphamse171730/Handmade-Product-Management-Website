@@ -14,6 +14,7 @@
   <ItemGroup>
     <ProjectReference Include="..\HandmadeProductManagement.ModelView\HandmadeProductManagement.ModelViews.csproj" />
     <ProjectReference Include="..\HandmadeProductManagement.Repositories\HandmadeProductManagement.Repositories.csproj" />
+    <ProjectReference Include="..\HandmadeProductManagement.Validation\HandmadeProductManagement.Validation.csproj" />
   </ItemGroup>
 
 </Project>

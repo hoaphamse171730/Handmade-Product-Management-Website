@@ -36,6 +36,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\HandmadeProductManagement.Services\HandmadeProductManagement.Services.csproj" />
+    <ProjectReference Include="..\HandmadeProductManagement.Validation\HandmadeProductManagement.Validation.csproj" />
   </ItemGroup>
 
 </Project>
