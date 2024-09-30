@@ -138,7 +138,9 @@ namespace HandmadeProductManagementAPI.Controllers
             {
                 return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
             }
-        [HttpGet("{GetProductDetaills/id}")]
+        }
+
+        [HttpGet("GetProductDetaills/{id}")]
         public async Task<IActionResult> GetProductDetails(string id)
         {
             var response = await _productService.GetProductDetailsByIdAsync(id);
