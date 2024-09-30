@@ -1,4 +1,5 @@
 ﻿using HandmadeProductManagement.ModelViews.ReplyModelViews;
+using HandmadeProductManagement.Repositories.Entity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +16,7 @@ namespace HandmadeProductManagement.ModelViews.ReviewModelViews
         public DateTime? Date { get; set; }
         public string ProductId { get; set; } = string.Empty;
         public Guid UserId { get; set; }
+
         public ReplyModel? Reply { get; set; }
     }
 }
