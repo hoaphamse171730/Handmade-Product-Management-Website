@@ -1,4 +1,4 @@
-﻿using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.Core.Base;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
