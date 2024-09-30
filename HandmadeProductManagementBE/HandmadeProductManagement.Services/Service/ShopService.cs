@@ -2,6 +2,7 @@
 using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.ModelViews.PaymentModelViews;
 using HandmadeProductManagement.ModelViews.ShopModelViews;
 using HandmadeProductManagement.Repositories.Entity;
 using Microsoft.EntityFrameworkCore;
@@ -23,7 +24,7 @@ namespace HandmadeProductManagement.Services.Service
             ValidateShop(createShop);
 
             var userRepository = _unitOfWork.GetRepository<ApplicationUser>();
-            var userExists = await userRepository.Entities.AnyAsync(u => u.Id == createShop.UserId);
+            var userExists = await userRepository.Entities.AnyAsync(u => u.Id.ToString() == createShop.UserId);
             if (!userExists)
             {
                 throw new BaseException.ErrorException(404, "user_not_found", "User not found.");
@@ -32,7 +33,7 @@ namespace HandmadeProductManagement.Services.Service
             var repository = _unitOfWork.GetRepository<Shop>();
 
             var existingShop = await repository.Entities
-                .FirstOrDefaultAsync(s => s.UserId == createShop.UserId);
+                .FirstOrDefaultAsync(s => s.UserId.ToString() == createShop.UserId);
 
             if (existingShop != null)
             {
@@ -45,7 +46,7 @@ namespace HandmadeProductManagement.Services.Service
                 {
                     existingShop.Name = createShop.Name;
                     existingShop.Description = createShop.Description;
-                    existingShop.Rating = createShop.Rating;
+                    existingShop.Rating = 0;
                     existingShop.DeletedBy = null;
                     existingShop.DeletedTime = null;
                     existingShop.LastUpdatedBy = createShop.UserId.ToString();
@@ -70,8 +71,8 @@ namespace HandmadeProductManagement.Services.Service
                 Id = Guid.NewGuid().ToString(),
                 Name = createShop.Name,
                 Description = createShop.Description,
-                Rating = createShop.Rating,
-                UserId = createShop.UserId
+                Rating = 0,
+                UserId = Guid.Parse(createShop.UserId)
             };
 
             shop.CreatedBy = shop.UserId.ToString();
@@ -188,7 +189,6 @@ namespace HandmadeProductManagement.Services.Service
 
             existingShop.Name = shop.Name;
             existingShop.Description = shop.Description;
-            existingShop.Rating = shop.Rating;
             existingShop.LastUpdatedBy = shop.UserId.ToString();
             existingShop.LastUpdatedTime = DateTime.UtcNow;
 
@@ -207,30 +207,36 @@ namespace HandmadeProductManagement.Services.Service
 
         private void ValidateShop(CreateShopDto shop)
         {
-            if (string.IsNullOrEmpty(shop.Name) || string.IsNullOrEmpty(shop.Description))
+            if (string.IsNullOrEmpty(shop.UserId))
             {
-                throw new BaseException.BadRequestException("invalid_input", "Name and Description cannot be null or empty.");
+                throw new BaseException.BadRequestException("invalid_user_id", "Please input user id.");
             }
 
-            if (!Regex.IsMatch(shop.Name, @"^[a-zA-Z\s]+$"))
+            if (!Guid.TryParse(shop.UserId, out _))
             {
-                throw new BaseException.BadRequestException("invalid_name", "Name cannot contain numbers or special characters.");
+                throw new BaseException.BadRequestException("invalid_user_id_format", "User ID format is invalid. Example: 123e4567-e89b-12d3-a456-426614174000.");
             }
 
-            if (!Regex.IsMatch(shop.Description, @"^[a-zA-Z0-9\s]+$"))
+            if (string.IsNullOrEmpty(shop.Name))
             {
-                throw new BaseException.BadRequestException("invalid_description", "Description cannot contain special characters.");
+                throw new BaseException.BadRequestException("invalid_shop_name", "Please input shop name.");
             }
 
-            if (shop.Rating < 0 || shop.Rating > 5)
+            if (Regex.IsMatch(shop.Name, @"[^a-zA-Z\s]"))
             {
-                throw new BaseException.BadRequestException("invalid_rating", "Rating must be between 0 and 5.");
+                throw new BaseException.BadRequestException("invalid_shop_name_format", "Shop name can only contain letters and spaces.");
             }
 
-            if (!Guid.TryParse(shop.UserId.ToString(), out _))
+            if (string.IsNullOrEmpty(shop.Description))
             {
-                throw new BaseException.BadRequestException("invalid_format", "UserId is not in the correct format. Ex: 123e4567-e89b-12d3-a456-426614174000.");
+                throw new BaseException.BadRequestException("invalid_shop_description", "Please input shop description.");
             }
+
+            if (Regex.IsMatch(shop.Description, @"[^a-zA-Z0-9\s]"))
+            {
+                throw new BaseException.BadRequestException("invalid_shop_description_format", "Shop description cannot contain special characters.");
+            }
+
         }
     }
 }

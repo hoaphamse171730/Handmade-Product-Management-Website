@@ -3,6 +3,7 @@ using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.ModelViews.OrderModelViews;
+using HandmadeProductManagement.ModelViews.PaymentModelViews;
 using HandmadeProductManagement.Repositories.Entity;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -28,7 +29,7 @@ namespace HandmadeProductManagement.Services.Service
             ValidateOrder(createOrder);
 
             var userRepository = _unitOfWork.GetRepository<ApplicationUser>();
-            var userExists = await userRepository.Entities.AnyAsync(u => u.Id == createOrder.UserId);
+            var userExists = await userRepository.Entities.AnyAsync(u => u.Id.ToString() == createOrder.UserId);
             if (!userExists)
             {
                 throw new BaseException.ErrorException(404, "user_not_found", "User not found.");
@@ -41,8 +42,8 @@ namespace HandmadeProductManagement.Services.Service
                 Id = Guid.NewGuid().ToString(),
                 TotalPrice = createOrder.TotalPrice,
                 OrderDate = DateTime.UtcNow,
-                Status = createOrder.Status,
-                UserId = createOrder.UserId,
+                Status = "Pending",
+                UserId = Guid.Parse(createOrder.UserId),
                 Address = createOrder.Address,
                 CustomerName = createOrder.CustomerName,
                 Phone = createOrder.Phone,
@@ -75,6 +76,16 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<bool> DeleteOrderAsync(string orderId)
         {
+            if (string.IsNullOrEmpty(orderId))
+            {
+                throw new BaseException.BadRequestException("empty_order_id", "Order ID is required.");
+            }
+
+            if (!Guid.TryParse(orderId, out _))
+            {
+                throw new BaseException.BadRequestException("invalid_order_id_format", "Order ID format is invalid. Example: 123e4567-e89b-12d3-a456-426614174000.");
+            }
+
             var repository = _unitOfWork.GetRepository<Order>();
             var order = await repository.Entities.FirstOrDefaultAsync(o => o.Id == orderId);
             if (order == null)
@@ -113,6 +124,16 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<OrderResponseModel> GetOrderByIdAsync(string orderId)
         {
+            if (string.IsNullOrEmpty(orderId))
+            {
+                throw new BaseException.BadRequestException("empty_order_id", "Order ID is required.");
+            }
+
+            if (!Guid.TryParse(orderId, out _))
+            {
+                throw new BaseException.BadRequestException("invalid_order_id_format", "Order ID format is invalid. Example: 123e4567-e89b-12d3-a456-426614174000.");
+            }
+
             var repository = _unitOfWork.GetRepository<Order>();
             var order = await repository.Entities
                 .FirstOrDefaultAsync(o => o.Id == orderId && o.DeletedBy == null);
@@ -158,7 +179,6 @@ namespace HandmadeProductManagement.Services.Service
             }
 
             existingOrder.TotalPrice = order.TotalPrice;
-            existingOrder.Status = order.Status;
             existingOrder.Address = order.Address;
             existingOrder.CustomerName = order.CustomerName;
             existingOrder.Phone = order.Phone;
@@ -216,6 +236,16 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<OrderResponseModel> UpdateOrderStatusAsync(string orderId, string status)
         {
+            if (string.IsNullOrEmpty(orderId))
+            {
+                throw new BaseException.BadRequestException("invalid_order_id", "Order ID is required.");
+            }
+
+            if (!Guid.TryParse(orderId, out _))
+            {
+                throw new BaseException.BadRequestException("invalid_order_id_format", "Order ID format is invalid. Example: 123e4567-e89b-12d3-a456-426614174000.");
+            }
+
             var repository = _unitOfWork.GetRepository<Order>();
             var existingOrder = await repository.Entities
                 .FirstOrDefaultAsync(o => o.Id == orderId && o.DeletedBy == null);
@@ -250,40 +280,51 @@ namespace HandmadeProductManagement.Services.Service
 
         private void ValidateOrder(CreateOrderDto order)
         {
-            if (order.TotalPrice < 0)
+            if (string.IsNullOrEmpty(order.UserId))
             {
-                throw new BaseException.BadRequestException("invalid_total_price", "Total price cannot be negative.");
+                throw new BaseException.BadRequestException("invalid_user_id", "Please input User id.");
             }
 
-            if (string.IsNullOrWhiteSpace(order.UserId.ToString()) || !Guid.TryParse(order.UserId.ToString(), out _))
+            if (!Guid.TryParse(order.UserId, out _))
             {
-                throw new BaseException.BadRequestException("invalid_user_id", "User ID is not in the correct format. Ex: 123e4567-e89b-12d3-a456-426614174000.");
+                throw new BaseException.BadRequestException("invalid_user_id_format", "User ID format is invalid. Example: 123e4567-e89b-12d3-a456-426614174000.");
             }
 
-            if (string.IsNullOrWhiteSpace(order.Address) || !IsValidText(order.Address))
+            if (order.TotalPrice <= 0)
             {
-                throw new BaseException.BadRequestException("invalid_address", "Address contains invalid characters.");
+                throw new BaseException.BadRequestException("invalid_total_price", "Total price must be greater than zero.");
             }
 
-            if (string.IsNullOrWhiteSpace(order.CustomerName) || !IsValidText(order.CustomerName))
+            if (string.IsNullOrEmpty(order.Address))
             {
-                throw new BaseException.BadRequestException("invalid_customer_name", "Customer name contains invalid characters.");
+                throw new BaseException.BadRequestException("invalid_address", "Address cannot be null or empty.");
             }
 
-            if (string.IsNullOrWhiteSpace(order.Phone) || !Regex.IsMatch(order.Phone, @"^\d+$"))
+            if (Regex.IsMatch(order.Address, @"[^a-zA-Z0-9\s]"))
             {
-                throw new BaseException.BadRequestException("invalid_phone", "Phone number contains invalid characters.");
+                throw new BaseException.BadRequestException("invalid_address_format", "Address cannot contain special characters.");
             }
 
-            if (string.IsNullOrWhiteSpace(order.Status) || !IsValidText(order.Status))
+            if (string.IsNullOrEmpty(order.CustomerName))
             {
-                throw new BaseException.BadRequestException("invalid_status", "Status contains invalid characters.");
+                throw new BaseException.BadRequestException("invalid_customer_name", "Customer name cannot be null or empty.");
             }
-        }
 
-        private bool IsValidText(string text)
-        {
-            return Regex.IsMatch(text, @"^[a-zA-Z0-9\s]+$");
+            if (Regex.IsMatch(order.CustomerName, @"[^a-zA-Z\s]"))
+            {
+                throw new BaseException.BadRequestException("invalid_customer_name_format", "Customer name can only contain letters and spaces.");
+            }
+
+            if (string.IsNullOrEmpty(order.Phone))
+            {
+                throw new BaseException.BadRequestException("invalid_phone", "Phone number cannot be null or empty.");
+            }
+
+            if (!Regex.IsMatch(order.Phone, @"^\d{1,10}$"))
+            {
+                throw new BaseException.BadRequestException("invalid_phone_format", "Phone number must be numeric and up to 10 digits.");
+            }
+
         }
     }
 }

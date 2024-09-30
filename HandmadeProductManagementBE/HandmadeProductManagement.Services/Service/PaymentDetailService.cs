@@ -6,6 +6,7 @@ using HandmadeProductManagement.ModelViews.PaymentDetailModelViews;
 using HandmadeProductManagement.ModelViews.PaymentModelViews;
 using HandmadeProductManagement.Repositories.Entity;
 using Microsoft.EntityFrameworkCore;
+using System.Text.RegularExpressions;
 
 namespace HandmadeProductManagement.Services.Service
 {
@@ -20,8 +21,10 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<PaymentDetailResponseModel> CreatePaymentDetailAsync(CreatePaymentDetailDto createPaymentDetailDto)
         {
+            ValidatePaymentDetail(createPaymentDetailDto);
+
             var userRepository = _unitOfWork.GetRepository<ApplicationUser>();
-            var userExists = await userRepository.Entities.AnyAsync(u => u.Id == createPaymentDetailDto.UserId);
+            var userExists = await userRepository.Entities.AnyAsync(u => u.Id.ToString() == createPaymentDetailDto.UserId);
             if (!userExists)
             {
                 throw new BaseException.ErrorException(404, "user_not_found", "User not found.");
@@ -35,14 +38,10 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.ErrorException(404, "payment_not_found", "Payment not found.");
             }
 
-            if (payment.ExpirationDate < DateTime.UtcNow)
+            var invalidStatuses = new[] { "Completed", "Expired", "Refunded", "Failed", "Closed" };
+            if (invalidStatuses.Contains(payment.Status))
             {
-                throw new BaseException.BadRequestException("payment_expired", "Payment has expired.");
-            }
-
-            if (!decimal.TryParse(createPaymentDetailDto.Amount.ToString(), out decimal amount) || amount <= 0)
-            {
-                throw new BaseException.BadRequestException("invalid_amount", "Amount must be a positive number.");
+                throw new BaseException.BadRequestException("invalid_payment_status", $"Cannot create payment detail for payment with status '{payment.Status}'.");
             }
 
             var paymentDetailRepository = _unitOfWork.GetRepository<PaymentDetail>();
@@ -51,7 +50,7 @@ namespace HandmadeProductManagement.Services.Service
             {
                 PaymentId = createPaymentDetailDto.PaymentId,
                 Status = createPaymentDetailDto.Status,
-                Amount = createPaymentDetailDto.Amount,
+                Amount = payment.TotalAmount,
                 Method = createPaymentDetailDto.Method,
                 ExternalTransaction = createPaymentDetailDto.ExternalTransaction
             };
@@ -68,6 +67,16 @@ namespace HandmadeProductManagement.Services.Service
                 payment.Status = "Completed";
                 payment.LastUpdatedTime = DateTime.UtcNow;
                 paymentRepository.Update(payment);
+
+                var orderRepository = _unitOfWork.GetRepository<Order>();
+                var order = await orderRepository.Entities.FirstOrDefaultAsync(o => o.Id == payment.OrderId);
+                if (order != null)
+                {
+                    order.Status = "Processing";
+                    order.LastUpdatedTime = DateTime.UtcNow;
+                    orderRepository.Update(order);
+                }
+
                 await _unitOfWork.SaveAsync();
             }
 
@@ -84,6 +93,16 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<PaymentDetailResponseModel> GetPaymentDetailByPaymentIdAsync(string paymentId)
         {
+            if (string.IsNullOrEmpty(paymentId))
+            {
+                throw new BaseException.BadRequestException("invalid_payment_id", "Please input payment id.");
+            }
+
+            if (!Guid.TryParse(paymentId, out _))
+            {
+                throw new BaseException.BadRequestException("invalid_payment_id_format", "Payment ID format is invalid. Example: 123e4567-e89b-12d3-a456-426614174000.");
+            }
+
             var paymentRepository = _unitOfWork.GetRepository<Payment>();
             var paymentExists = await paymentRepository.Entities.AnyAsync(p => p.Id == paymentId);
 
@@ -113,6 +132,16 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<PaymentDetailResponseModel> GetPaymentDetailByIdAsync(string id)
         {
+            if (string.IsNullOrEmpty(id))
+            {
+                throw new BaseException.BadRequestException("invalid_id", "Please input id.");
+            }
+
+            if (!Guid.TryParse(id, out _))
+            {
+                throw new BaseException.BadRequestException("invalid_id_format", "ID format is invalid. Example: 123e4567-e89b-12d3-a456-426614174000.");
+            }
+
             var paymentDetailRepository = _unitOfWork.GetRepository<PaymentDetail>();
             var paymentDetail = await paymentDetailRepository.Entities.FirstOrDefaultAsync(pd => pd.Id == id);
 
@@ -130,6 +159,54 @@ namespace HandmadeProductManagement.Services.Service
                 Method = paymentDetail.Method,
                 ExternalTransaction = paymentDetail.ExternalTransaction
             };
+        }
+
+        private void ValidatePaymentDetail(CreatePaymentDetailDto createPaymentDetailDto)
+        {
+            if (string.IsNullOrEmpty(createPaymentDetailDto.PaymentId))
+            {
+                throw new BaseException.BadRequestException("invalid_payment_id", "Please input payment id.");
+            }
+
+            if (!Guid.TryParse(createPaymentDetailDto.PaymentId, out _))
+            {
+                throw new BaseException.BadRequestException("invalid_payment_id_format", "Payment ID format is invalid. Example: 123e4567-e89b-12d3-a456-426614174000.");
+            }
+
+            if (string.IsNullOrEmpty(createPaymentDetailDto.UserId))
+            {
+                throw new BaseException.BadRequestException("invalid_user_id", "Please input user id.");
+            }
+
+            if (!Guid.TryParse(createPaymentDetailDto.UserId, out _))
+            {
+                throw new BaseException.BadRequestException("invalid_user_id_format", "User ID format is invalid. Example: 123e4567-e89b-12d3-a456-426614174000.");
+            }
+
+            if (string.IsNullOrEmpty(createPaymentDetailDto.Status))
+            {
+                throw new BaseException.BadRequestException("invalid_status", "Please input status.");
+            }
+
+            if (Regex.IsMatch(createPaymentDetailDto.Status, @"[^a-zA-Z\s]"))
+            {
+                throw new BaseException.BadRequestException("invalid_status_format", "Status cannot contain numbers or special characters.");
+            }
+
+            if (string.IsNullOrEmpty(createPaymentDetailDto.Method))
+            {
+                throw new BaseException.BadRequestException("invalid_method", "Please input method.");
+            }
+
+            if (Regex.IsMatch(createPaymentDetailDto.Method, @"[^a-zA-Z\s]"))
+            {
+                throw new BaseException.BadRequestException("invalid_method_format", "Method cannot contain numbers or special characters.");
+            }
+
+            if (!string.IsNullOrEmpty(createPaymentDetailDto.ExternalTransaction) && !Regex.IsMatch(createPaymentDetailDto.ExternalTransaction, @"^[a-zA-Z0-9]+$"))
+            {
+                throw new BaseException.BadRequestException("invalid_external_transaction_format", "External transaction can only contain alphanumeric characters.");
+            }
         }
     }
 }
