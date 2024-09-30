@@ -27,6 +27,7 @@ public static class ApplicationServiceExtensions
         services.AddControllers();
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen();
+        services.AddHttpContextAccessor();
         services.AddDbContext<DatabaseContext>(options =>
             options.UseSqlServer(config.GetConnectionString("BloggingDatabase"),
                 b => b.MigrationsAssembly("HandmadeProductManagementAPI")));
@@ -61,6 +62,8 @@ public static class ApplicationServiceExtensions
         services.AddScoped<ICartItemService, CartItemService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IProductService, ProductService>();
+        services.AddScoped<IEmailService, EmailService>();
+        services.AddScoped<IUserAgentService, UserAgentService>();
         return services;
     }
 

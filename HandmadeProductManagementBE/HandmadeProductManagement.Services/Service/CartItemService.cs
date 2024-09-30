@@ -39,7 +39,7 @@ public class CartItemService : ICartItemService
         var cartItem = new CartItem
         {
             ProductItem = productItem,
-            ProductQuantity = createCartItemDto.ProductQuantity,
+            ProductQuantity = createCartItemDto.ProductQuantity ?? 1,
             CreatedTime = CoreHelper.SystemTimeNow,
             LastUpdatedTime = CoreHelper.SystemTimeNow
         };

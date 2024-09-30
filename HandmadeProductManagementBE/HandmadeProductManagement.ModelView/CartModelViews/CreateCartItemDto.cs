@@ -8,7 +8,7 @@ namespace HandmadeProductManagement.ModelViews.CartModelViews
 {
     public class CreateCartItemDto
     {
-        public string ProductItemId { get; set; } // Unique identifier for the product
-        public int ProductQuantity { get; set; } // Quantity of the product in the cart
+        public string? ProductItemId { get; set; } // Unique identifier for the product
+        public int? ProductQuantity { get; set; } // Quantity of the product in the cart
     }
 }
