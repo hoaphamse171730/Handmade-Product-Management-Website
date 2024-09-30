@@ -1,13 +1,16 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using HandmadeProductManagement.Contract.Services.Interface;
+﻿using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.ModelViews.CartModelViews;
-using HandmadeProductManagement.Contract.Services;
 using HandmadeProductManagement.Core.Base;
+using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Threading.Tasks;
+using HandmadeProductManagement.Contract.Services;
+using HandmadeProductManagement.Core.Constants;
 
 namespace HandmadeProductManagementAPI.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     public class CartController : ControllerBase
     {
         private readonly ICartService _cartService;
@@ -20,32 +23,61 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [HttpGet("{userId}")]
-        public async Task<ActionResult<CartModel>> GetCart(Guid userId)
+        public async Task<IActionResult> GetCart(Guid userId)
         {
-            var cart = await _cartService.GetCartByUserId(userId);
-            return Ok(BaseResponse<CartModel>.OkResponse(cart));
+            try
+            {
+                var cart = await _cartService.GetCartByUserId(userId);
+                if (cart == null)
+                {
+                    return NotFound(BaseResponse<CartModel>.FailResponse("No cart found for user ID.",StatusCodeHelper.NotFound));
+                }
+                return Ok(BaseResponse<CartModel>.OkResponse(cart));
+            }
+            catch (BaseException.ErrorException ex)
+            {
+                return StatusCode(ex.StatusCode, new { ex.ErrorDetail.ErrorCode, ex.ErrorDetail.ErrorMessage });
+            }
         }
 
         [HttpPost("item/add/{cartId}")]
-        public async Task<ActionResult<bool>> AddCartItem(string cartId, [FromBody] CreateCartItemDto createCartItemDto)
+        public async Task<IActionResult> AddCartItem(string cartId, [FromBody] CreateCartItemDto createCartItemDto)
         {
-            var result = await _cartItemService.AddCartItem(cartId, createCartItemDto);
-            return Ok(BaseResponse<bool>.OkResponse(result));
+            var response = await _cartItemService.AddCartItem(cartId, createCartItemDto);
+
+            // Assuming 'StatusCode' is of type 'StatusCodeHelper' and checking if the status code indicates success.
+            if (response.StatusCode != StatusCodeHelper.OK)
+            {
+                return StatusCode((int)response.StatusCode, response);
+            }
+            return Ok(response);
         }
 
-        [HttpPut("item/update/{cartItemId}")]
-        public async Task<ActionResult<bool>> UpdateCartItem(string cartItemId, [FromBody] CartItemModel cartItemModel)
+
+
+        [HttpPut("item/updateQuantity/{cartItemId}")]
+        public async Task<IActionResult> UpdateCartItem(string cartItemId, [FromBody] int productQuantity)
         {
-            var result = await _cartItemService.UpdateCartItem(cartItemId, cartItemModel);
-            return Ok(BaseResponse<bool>.OkResponse(result));
+            var response = await _cartItemService.UpdateCartItem(cartItemId, productQuantity);
+            if (response.StatusCode != StatusCodeHelper.OK)
+            {
+                return StatusCode((int)response.StatusCode, response);
+            }
+            return Ok(response);
         }
+
 
 
         [HttpDelete("item/{cartItemId}")]
-        public async Task<ActionResult<bool>> RemoveCartItem(string cartItemId)
+        public async Task<IActionResult> RemoveCartItem(string cartItemId)
         {
-            var result = await _cartItemService.RemoveCartItem(cartItemId);
-            return Ok(BaseResponse<bool>.OkResponse(result));
+            var response = await _cartItemService.RemoveCartItem(cartItemId);
+            if (response.StatusCode != StatusCodeHelper.OK)
+            {
+                return StatusCode((int)response.StatusCode, response);
+            }
+            return Ok(response);
         }
+
     }
 }
