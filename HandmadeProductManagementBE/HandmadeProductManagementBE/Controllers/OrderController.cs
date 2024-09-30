@@ -1,4 +1,5 @@
-﻿using HandmadeProductManagement.Contract.Services.Interface;
+﻿using HandmadeProductManagement.Contract.Repositories.Entity;
+using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.ModelViews.OrderModelViews;
 using Microsoft.AspNetCore.Mvc;
@@ -64,6 +65,34 @@ namespace HandmadeProductManagementAPI.Controllers
             try
             {
                 var updatedOrder = await _orderService.UpdateOrderStatusAsync(orderId, status);
+                return Ok(BaseResponse<OrderResponseModel>.OkResponse(updatedOrder));
+            }
+            catch (BaseException.ErrorException ex)
+            {
+                return StatusCode(ex.StatusCode, new { ex.ErrorDetail.ErrorCode, ex.ErrorDetail.ErrorMessage });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateOrder([FromBody] CreateOrderDto createOrder)
+        {
+            try
+            {
+                var order = await _orderService.CreateOrderAsync(createOrder);
+                return Ok(BaseResponse<OrderResponseModel>.OkResponse(order));
+            }
+            catch (BaseException.ErrorException ex)
+            {
+                return StatusCode(ex.StatusCode, new { ex.ErrorDetail.ErrorCode, ex.ErrorDetail.ErrorMessage });
+            }
+        }
+
+        [HttpPut("{orderId}")]
+        public async Task<IActionResult> UpdateOrder(string orderId, [FromBody] CreateOrderDto order)
+        {
+            try
+            {
+                var updatedOrder = await _orderService.UpdateOrderAsync(orderId, order);
                 return Ok(BaseResponse<OrderResponseModel>.OkResponse(updatedOrder));
             }
             catch (BaseException.ErrorException ex)
