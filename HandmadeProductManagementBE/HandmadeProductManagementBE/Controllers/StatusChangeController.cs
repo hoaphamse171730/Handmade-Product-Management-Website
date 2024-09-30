@@ -20,54 +20,113 @@ namespace HandmadeProductManagementAPI.Controllers
 
         // GET: api/StatusChange
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<StatusChange>>> GetStatusChanges()
+        public async Task<ActionResult<BaseResponse<IList<StatusChange>>>> GetStatusChanges()
         {
-            IList<StatusChange> statusChanges = await _statusChangeService.GetAll();
-            return Ok(BaseResponse<IList<StatusChange>>.OkResponse(statusChanges));
+            try
+            {
+                IList<StatusChange> statusChanges = await _statusChangeService.GetAll();
+                return Ok(BaseResponse<IList<StatusChange>>.OkResponse(statusChanges));
+            }
+            catch (System.Exception ex)
+            {
+                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
+            }
         }
 
         // GET: api/StatusChange/Order/{orderId}
         [HttpGet("Order/{orderId}")]
-        public async Task<ActionResult<IEnumerable<StatusChange>>> GetStatusChangesByOrderId(string orderId)
+        public async Task<ActionResult<BaseResponse<IList<StatusChange>>>> GetStatusChangesByOrderId(string orderId)
         {
-            IList<StatusChange> statusChanges = await _statusChangeService.GetByOrderId(orderId);
-            return Ok(BaseResponse<IList<StatusChange>>.OkResponse(statusChanges));
+            try
+            {
+                IList<StatusChange> statusChanges = await _statusChangeService.GetByOrderId(orderId);
+                return Ok(BaseResponse<IList<StatusChange>>.OkResponse(statusChanges));
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound(BaseResponse<string>.FailResponse("No status changes found for the given OrderId."));
+            }
+            catch (System.Exception ex)
+            {
+                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
+            }
         }
 
         // GET: api/StatusChange/{id}
         [HttpGet("{id}")]
-        public async Task<ActionResult<StatusChange>> GetStatusChange(string id)
+        public async Task<ActionResult<BaseResponse<StatusChange>>> GetStatusChange(string id)
         {
-            StatusChange statusChange = await _statusChangeService.GetById(id);
-            return Ok(BaseResponse<StatusChange>.OkResponse(statusChange));
+            try
+            {
+                StatusChange statusChange = await _statusChangeService.GetById(id);
+                return Ok(BaseResponse<StatusChange>.OkResponse(statusChange));
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound(BaseResponse<string>.FailResponse("Status Change not found"));
+            }
+            catch (System.Exception ex)
+            {
+                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
+            }
         }
 
         // POST: api/StatusChange
         [HttpPost]
-        public async Task<ActionResult<StatusChange>> CreateStatusChange(StatusChange statusChange)
+        public async Task<ActionResult<BaseResponse<StatusChange>>> CreateStatusChange(StatusChange statusChange)
         {
-            StatusChange createdStatusChange = await _statusChangeService.Create(statusChange);
-            return CreatedAtAction(nameof(GetStatusChange), new { id = createdStatusChange.Id }, createdStatusChange);
+            try
+            {
+                StatusChange createdStatusChange = await _statusChangeService.Create(statusChange);
+                return CreatedAtAction(nameof(GetStatusChange), new { id = createdStatusChange.Id }, 
+                       BaseResponse<StatusChange>.OkResponse(createdStatusChange));
+            }
+            catch (System.Exception ex)
+            {
+                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
+            }
         }
 
         // PUT: api/StatusChange/{id}
         [HttpPut("{id}")]
-        public async Task<ActionResult<StatusChange>> UpdateStatusChange(string id, StatusChange updatedStatusChange)
+        public async Task<ActionResult<BaseResponse<StatusChange>>> UpdateStatusChange(string id, StatusChange updatedStatusChange)
         {
-            StatusChange statusChange = await _statusChangeService.Update(id, updatedStatusChange);
-            return Ok(BaseResponse<StatusChange>.OkResponse(statusChange));
+            try
+            {
+                StatusChange statusChange = await _statusChangeService.Update(id, updatedStatusChange);
+                return Ok(BaseResponse<StatusChange>.OkResponse(statusChange));
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound(BaseResponse<string>.FailResponse("Status Change not found"));
+            }
+            catch (System.Exception ex)
+            {
+                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
+            }
         }
 
         // DELETE: api/StatusChange/{id}
         [HttpDelete("{id}")]
-        public async Task<ActionResult> DeleteStatusChange(string id)
+        public async Task<ActionResult<BaseResponse<string>>> DeleteStatusChange(string id)
         {
-            bool success = await _statusChangeService.Delete(id);
-            if (!success)
+            try
             {
-                return NotFound();
+                bool success = await _statusChangeService.Delete(id);
+                if (!success)
+                {
+                    return NotFound(BaseResponse<string>.FailResponse("Status Change not found"));
+                }
+                return Ok(BaseResponse<string>.OkResponse("Status Change deleted successfully."));
             }
-            return NoContent();
+            catch (KeyNotFoundException)
+            {
+                return NotFound(BaseResponse<string>.FailResponse("Status Change not found"));
+            }
+            catch (System.Exception ex)
+            {
+                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
+            }
         }
     }
 }

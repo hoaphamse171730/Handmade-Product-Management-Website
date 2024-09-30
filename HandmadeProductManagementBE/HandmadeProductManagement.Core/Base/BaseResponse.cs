@@ -9,6 +9,11 @@ namespace HandmadeProductManagement.Core.Base
         public string? Message { get; set; }
         public StatusCodeHelper StatusCode { get; set; }
         public string? Code { get; set; }
+
+        public BaseResponse()
+        {
+            
+        }
         public BaseResponse(StatusCodeHelper statusCode, string code, T? data, string? message)
         {
             Data = data;
@@ -39,7 +44,6 @@ namespace HandmadeProductManagement.Core.Base
         {
             return new BaseResponse<T>(StatusCodeHelper.OK, StatusCodeHelper.OK.Name(), mess);
         }
-        
         public static BaseResponse<T> FailResponse(string? message, StatusCodeHelper statusCode = StatusCodeHelper.BadRequest)
         {
             return new BaseResponse<T>(statusCode, statusCode.Name(), message);
@@ -49,7 +53,5 @@ namespace HandmadeProductManagement.Core.Base
         {
             return new BaseResponse<T>(statusCode, code, message);
         }
-        
-        
     }
 }

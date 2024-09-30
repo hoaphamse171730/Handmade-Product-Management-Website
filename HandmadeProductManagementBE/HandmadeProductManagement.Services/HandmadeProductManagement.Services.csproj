@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\HandmadeProductManagement.Contract.Services\HandmadeProductManagement.Contract.Services.csproj" />
+    <ProjectReference Include="..\HandmadeProductManagement.Validation\HandmadeProductManagement.Validation.csproj" />
   </ItemGroup>
 
 </Project>

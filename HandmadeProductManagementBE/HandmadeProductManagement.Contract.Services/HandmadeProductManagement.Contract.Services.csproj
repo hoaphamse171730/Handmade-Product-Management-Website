@@ -7,12 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\HandmadeProductManagement.ModelView\HandmadeProductManagement.ModelViews.csproj" />
-    <ProjectReference Include="..\HandmadeProductManagement.Repositories\HandmadeProductManagement.Repositories.csproj" />
+    <PackageReference Include="AutoMapper" Version="13.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.8" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="AutoMapper" Version="13.0.1" />
+    <ProjectReference Include="..\HandmadeProductManagement.ModelView\HandmadeProductManagement.ModelViews.csproj" />
+    <ProjectReference Include="..\HandmadeProductManagement.Repositories\HandmadeProductManagement.Repositories.csproj" />
+    <ProjectReference Include="..\HandmadeProductManagement.Validation\HandmadeProductManagement.Validation.csproj" />
   </ItemGroup>
 
 </Project>

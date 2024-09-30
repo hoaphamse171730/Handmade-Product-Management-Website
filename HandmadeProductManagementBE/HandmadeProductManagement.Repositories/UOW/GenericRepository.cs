@@ -82,6 +82,7 @@ namespace HandmadeProductManagement.Repositories.UOW
             await _context.SaveChangesAsync();
         }
 
+        public async Task<T?> FindAsync(params object[] keyValues) => await _dbSet.FindAsync(keyValues);
         public void Update(T obj)
         {
             _dbSet.Entry(obj).State = EntityState.Modified;
