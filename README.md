@@ -1,2 +1,0 @@
-# Handmade-Product-Management-Website
- 
