@@ -1,4 +1,5 @@
 ﻿using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.ModelViews.ProductDetailModelViews;
 using HandmadeProductManagement.ModelViews.ProductModelViews;
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,6 @@ namespace HandmadeProductManagement.Contract.Services.Interface
     {
         Task<BaseResponse<IEnumerable<ProductResponseModel>>> SearchProductsAsync(ProductSearchModel searchModel);
         Task<BaseResponse<IEnumerable<ProductResponseModel>>> SortProductsAsync(ProductSortModel sortModel);
-
+        Task<BaseResponse<ProductDetailResponseModel>> GetProductDetailsByIdAsync(string productId);
     }
 }
