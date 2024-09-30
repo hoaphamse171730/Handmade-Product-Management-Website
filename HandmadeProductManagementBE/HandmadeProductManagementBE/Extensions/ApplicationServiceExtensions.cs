@@ -5,11 +5,13 @@ using HandmadeProductManagement.Contract.Services;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Utils;
 using HandmadeProductManagement.ModelViews.AuthModelViews;
+using HandmadeProductManagement.ModelViews.ProductModelViews;
 using HandmadeProductManagement.ModelViews.PromotionModelViews;
 using HandmadeProductManagement.Repositories.Context;
 using HandmadeProductManagement.Repositories.Entity;
 using HandmadeProductManagement.Repositories.UOW;
 using HandmadeProductManagement.Services.Service;
+using HandmadeProductManagement.Validation.Product;
 using HandmadeProductManagement.Validation.Promotion;
 using HandmadeProductManagementAPI.BackgroundServices;
 using Mapster;
@@ -58,6 +60,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<ICartService, CartService>();
         services.AddScoped<ICartItemService, CartItemService>();
         services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IProductService, ProductService>();
         return services;
     }
 
@@ -65,6 +68,8 @@ public static class ApplicationServiceExtensions
     {
         services.AddScoped<IValidator<PromotionForCreationDto>, PromotionForCreationDtoValidator>();
         services.AddScoped<IValidator<PromotionForUpdateDto>, PromotionForUpdateDtoValidator>();
+        services.AddScoped<IValidator<ProductForCreationDto>, ProductForCreationDtoValidator>();
+        services.AddScoped<IValidator<ProductForUpdateDto>, ProductForUpdateDtoValidator>();
     }
 
     public static void RegisterMapsterConfiguration(this IServiceCollection services)

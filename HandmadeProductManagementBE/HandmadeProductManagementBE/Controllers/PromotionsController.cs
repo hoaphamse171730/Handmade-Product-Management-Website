@@ -1,6 +1,7 @@
 ﻿using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Constants;
+using HandmadeProductManagement.ModelViews.PaymentModelViews;
 using HandmadeProductManagement.ModelViews.PromotionModelViews;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
@@ -57,13 +58,14 @@ namespace HandmadeProductManagementAPI.Controllers
             try
             {
                 PromotionDto createdPromotion = await _promotionService.Create(promotionForCreation);
-                return CreatedAtAction(nameof(GetPromotion), new { id = createdPromotion.Id }, BaseResponse<PromotionDto>.OkResponse(createdPromotion));
+                return Ok(BaseResponse<PromotionDto>.OkResponse(createdPromotion));
             }
             catch (System.Exception ex)
             {
                 return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
             }
         }
+
 
         [HttpPut("{id}")]
         public async Task<ActionResult> UpdatePromotion(string id, PromotionForUpdateDto promotionForUpdate)
