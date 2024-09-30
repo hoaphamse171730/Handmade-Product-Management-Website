@@ -22,6 +22,7 @@ namespace HandmadeProductManagement.Services
         public static void AddServices(this IServiceCollection services)
         {
             services.AddScoped<IProductService, ProductService>();
+            services.AddScoped<IUserService, UserService>();
         }
 
     }

@@ -24,29 +24,69 @@ namespace HandmadeProductManagement.Services.Service
         // Get cancel reason by Id (string)
         public async Task<CancelReason> GetById(string id)
         {
-            return await _unitOfWork.GetRepository<CancelReason>().Entities
-                                     .FirstOrDefaultAsync(cr => cr.Id == id);
+            var cancelReason = await _unitOfWork.GetRepository<CancelReason>().GetByIdAsync(id);
+            return cancelReason ?? throw new KeyNotFoundException("Cancel reason not found");
         }
 
         // Create a new cancel reason
         public async Task<CancelReason> Create(CancelReason cancelReason)
         {
+            // Validate if RefundRate is float
+            float refundRate;
+            if (!float.TryParse(cancelReason.RefundRate.ToString(), out refundRate))
+            {
+                throw new ArgumentException("RefundRate must be a valid float value.");
+            }
+
+            // Validate RefundRate between 0 and 1
+            if (refundRate < 0 || refundRate > 1)
+            {
+                throw new ArgumentException("RefundRate must be between 0 and 1.");
+            }
+
+            // Validate Description null
+            if (cancelReason.Description == null || cancelReason.Description.Trim().Length == 0)
+            {
+                throw new ArgumentException("Description cannot be null or empty.");
+            }
+
             await _unitOfWork.GetRepository<CancelReason>().InsertAsync(cancelReason);
             await _unitOfWork.SaveAsync();
+
             return cancelReason;
         }
+
 
         // Update an existing cancel reason
         public async Task<CancelReason> Update(string id, CancelReason updatedCancelReason)
         {
             var existingCancelReason = await GetById(id);
             if (existingCancelReason == null)
-                return null;
+                throw new KeyNotFoundException("Cancel Reason not found");
+
+            // Validate if RefundRate is float
+            float refundRate;
+            if (!float.TryParse(updatedCancelReason.RefundRate.ToString(), out refundRate))
+            {
+                throw new ArgumentException("RefundRate must be a valid float value.");
+            }
+
+            // Validate RefundRate between 0 and 1
+            if (refundRate < 0 || refundRate > 1)
+            {
+                throw new ArgumentException("RefundRate must be between 0 and 1.");
+            }
+
+            // Validate Description null
+            if (updatedCancelReason.Description == null || updatedCancelReason.Description.Trim().Length == 0)
+            {
+                throw new ArgumentException("Description cannot be null or empty.");
+            }
 
             existingCancelReason.Description = updatedCancelReason.Description;
             existingCancelReason.RefundRate = updatedCancelReason.RefundRate;
 
-            _unitOfWork.GetRepository<CancelReason>().Update(existingCancelReason);
+            await _unitOfWork.GetRepository<CancelReason>().UpdateAsync(existingCancelReason);
             await _unitOfWork.SaveAsync();
             return existingCancelReason;
         }
@@ -54,22 +94,15 @@ namespace HandmadeProductManagement.Services.Service
         // Delete a cancel reason by Id (string)
         public async Task<bool> Delete(string id)
         {
-            var cancelReason = await GetById(id);
+            var cacncelReasonRepo = _unitOfWork.GetRepository<CancelReason>();
+            var cancelReason = await cacncelReasonRepo.GetByIdAsync(id);
             if (cancelReason == null)
-                return false; 
-            // Kiểm tra trước khi xóa (nếu có các ràng buộc)
-            try
-            {
-                _unitOfWork.GetRepository<CancelReason>().Delete(cancelReason.Id);
-                await _unitOfWork.SaveAsync();
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error deleting CancelReason: {ex.Message}");
                 return false;
-            }
+            await cacncelReasonRepo.DeleteAsync(cancelReason.Id);
+            await _unitOfWork.SaveAsync();
+            return true;
         }
+
         // Soft delete 
         public async Task<bool> SoftDelete(string id)
         {
@@ -81,7 +114,7 @@ namespace HandmadeProductManagement.Services.Service
             cancelReason.DeletedTime = DateTimeOffset.UtcNow;
             cancelReason.DeletedBy = "currentUser";
 
-            _unitOfWork.GetRepository<CancelReason>().Update(cancelReason);
+            await _unitOfWork.GetRepository<CancelReason>().UpdateAsync(cancelReason);
             await _unitOfWork.SaveAsync();
             return true;
         }

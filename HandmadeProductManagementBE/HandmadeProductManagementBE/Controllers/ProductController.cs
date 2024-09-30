@@ -1,7 +1,11 @@
-﻿using HandmadeProductManagement.Contract.Services.Interface;
+using HandmadeProductManagement.Contract.Repositories.Entity;
+using HandmadeProductManagement.Contract.Services.Interface;
+using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Constants;
+using HandmadeProductManagement.Core.Utils;
 using HandmadeProductManagement.ModelViews.ProductModelViews;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 
 namespace HandmadeProductManagementAPI.Controllers
 {
@@ -18,12 +22,12 @@ namespace HandmadeProductManagementAPI.Controllers
 
         [HttpGet("search")]
         public async Task<IActionResult> searchProducts([FromQuery] ProductSearchModel searchModel){
+            
             var response = await _productService.SearchProductsAsync(searchModel);
-            if (response.StatusCode == StatusCodeHelper.OK)
+            if (response.Data.IsNullOrEmpty())
             {
-                return Ok(response);
+                return StatusCode(404,new BaseResponse<Product>(StatusCodeHelper.NotFound, StatusCodeHelper.NotFound.Name(), "Product Not Found!"));
             }
-
             return StatusCode((int)response.StatusCode, response);
 
         }
@@ -32,9 +36,9 @@ namespace HandmadeProductManagementAPI.Controllers
         public async Task<IActionResult> SortProducts([FromQuery] ProductSortModel sortModel)
         {
             var response = await _productService.SortProductsAsync(sortModel);
-            if (response.StatusCode == StatusCodeHelper.OK)
+            if (response.Data.IsNullOrEmpty())
             {
-                return Ok(response);
+                return StatusCode(404, new BaseResponse<Product>(StatusCodeHelper.NotFound, StatusCodeHelper.NotFound.Name(), "Product Not Found!"));
             }
             return StatusCode((int)response.StatusCode, response);
         }
