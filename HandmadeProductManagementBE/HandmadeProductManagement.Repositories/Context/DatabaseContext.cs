@@ -190,7 +190,7 @@ namespace HandmadeProductManagement.Repositories.Context
             
             // OrderDetail  
             modelBuilder.Entity<OrderDetail>()  
-                .HasKey(od => od.OrderDetailId); 
+                .HasKey(od => od.Id); 
             modelBuilder.Entity<OrderDetail>()  
                 .HasOne(od => od.Order)  
                 .WithMany(o => o.OrderDetails)  

@@ -1,6 +1,8 @@
 ﻿using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.ModelViews.OrderModelViews;
+using HandmadeProductManagement.ModelViews.PromotionModelViews;
+using HandmadeProductManagement.Services.Service;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HandmadeProductManagementAPI.Controllers
@@ -69,6 +71,21 @@ namespace HandmadeProductManagementAPI.Controllers
             catch (BaseException.ErrorException ex)
             {
                 return StatusCode(ex.StatusCode, new { ex.ErrorDetail.ErrorCode, ex.ErrorDetail.ErrorMessage });
+            }
+        }
+
+
+        [HttpPost] 
+        public async Task<ActionResult<PromotionDto>> CreateOrder(CreateOrderDto orderDto)
+        {
+            try
+            {
+                var order = await _orderService.CreateOrderAsync(orderDto);
+                return Ok(BaseResponse<OrderResponseModel>.OkResponse(order));
+            }
+            catch (System.Exception ex)
+            {
+                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
             }
         }
     }

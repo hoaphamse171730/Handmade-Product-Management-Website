@@ -47,7 +47,7 @@ namespace HandmadeProductManagement.Services.Service
         {
             var result = _creationValidator.ValidateAsync(promotion);
             if (!result.Result.IsValid)
-                throw new ValidationException(result.Result.Errors); 
+                throw new ValidationException(result.Result.Errors);
             var promotionEntity = _mapper.Map<Promotion>(promotion);
             promotionEntity.CreatedTime = DateTime.UtcNow;
             await _unitOfWork.GetRepository<Promotion>().InsertAsync(promotionEntity);
@@ -99,7 +99,6 @@ namespace HandmadeProductManagement.Services.Service
         public async Task<IList<PromotionDto>> GetAll()
         {
             var promotions = await _unitOfWork.GetRepository<Promotion>().Entities
-                .Where(p => p.DeletedBy == null)
                 .ToListAsync();
             var promotionsDto = _mapper.Map<IList<PromotionDto>>(promotions);
             return promotionsDto;

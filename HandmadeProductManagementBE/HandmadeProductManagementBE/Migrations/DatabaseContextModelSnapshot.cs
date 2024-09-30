@@ -412,7 +412,7 @@ namespace HandmadeProductManagementAPI.Migrations
 
                     b.HasIndex("PromotionId");
 
-                    b.ToTable("Category");
+                    b.ToTable("Categories");
                 });
 
             modelBuilder.Entity("HandmadeProductManagement.Contract.Repositories.Entity.Order", b =>
@@ -484,7 +484,7 @@ namespace HandmadeProductManagementAPI.Migrations
 
             modelBuilder.Entity("HandmadeProductManagement.Contract.Repositories.Entity.OrderDetail", b =>
                 {
-                    b.Property<string>("OrderDetailId")
+                    b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("CreatedBy")
@@ -498,9 +498,6 @@ namespace HandmadeProductManagementAPI.Migrations
 
                     b.Property<DateTimeOffset?>("DeletedTime")
                         .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("LastUpdatedBy")
                         .HasColumnType("nvarchar(max)");
@@ -522,7 +519,7 @@ namespace HandmadeProductManagementAPI.Migrations
                     b.Property<float>("UnitPrice")
                         .HasColumnType("real");
 
-                    b.HasKey("OrderDetailId");
+                    b.HasKey("Id");
 
                     b.HasIndex("OrderId");
 
@@ -561,12 +558,18 @@ namespace HandmadeProductManagementAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<float>("TotalAmount")
-                        .HasColumnType("real");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<decimal>("TotalAmount")
+                        .HasColumnType("decimal(18, 2)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("OrderId");
+                    b.HasIndex("OrderId")
+                        .IsUnique();
 
                     b.ToTable("Payment");
                 });
@@ -576,8 +579,8 @@ namespace HandmadeProductManagementAPI.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<float>("Amount")
-                        .HasColumnType("real");
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18, 2)");
 
                     b.Property<string>("CreatedBy")
                         .HasColumnType("nvarchar(max)");
@@ -617,8 +620,7 @@ namespace HandmadeProductManagementAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PaymentId")
-                        .IsUnique();
+                    b.HasIndex("PaymentId");
 
                     b.ToTable("PaymentDetail");
                 });
@@ -645,7 +647,8 @@ namespace HandmadeProductManagementAPI.Migrations
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<string>("LastUpdatedBy")
                         .HasColumnType("nvarchar(max)");
@@ -655,21 +658,27 @@ namespace HandmadeProductManagementAPI.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
-                    b.Property<float>("Rating")
-                        .HasColumnType("real");
+                    b.Property<decimal>("Rating")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("decimal(2, 1)")
+                        .HasDefaultValue(0m);
 
                     b.Property<string>("ShopId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("SoldCount")
-                        .HasColumnType("int");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Id");
 
@@ -677,7 +686,7 @@ namespace HandmadeProductManagementAPI.Migrations
 
                     b.HasIndex("ShopId");
 
-                    b.ToTable("Product");
+                    b.ToTable("Products");
                 });
 
             modelBuilder.Entity("HandmadeProductManagement.Contract.Repositories.Entity.ProductConfiguration", b =>
@@ -810,11 +819,6 @@ namespace HandmadeProductManagementAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("PromotionName")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
 
@@ -832,7 +836,8 @@ namespace HandmadeProductManagementAPI.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Content")
-                        .HasColumnType("text");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<string>("CreatedBy")
                         .HasColumnType("nvarchar(max)");
@@ -840,7 +845,7 @@ namespace HandmadeProductManagementAPI.Migrations
                     b.Property<DateTimeOffset>("CreatedTime")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<DateTime>("Date")
+                    b.Property<DateTime?>("Date")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
                         .HasDefaultValueSql("GETDATE()");
@@ -881,7 +886,8 @@ namespace HandmadeProductManagementAPI.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Content")
-                        .HasColumnType("text");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<string>("CreatedBy")
                         .HasColumnType("nvarchar(max)");
@@ -889,7 +895,7 @@ namespace HandmadeProductManagementAPI.Migrations
                     b.Property<DateTimeOffset>("CreatedTime")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<DateTime>("Date")
+                    b.Property<DateTime?>("Date")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
                         .HasDefaultValueSql("GETDATE()");
@@ -910,7 +916,7 @@ namespace HandmadeProductManagementAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<int>("Rating")
+                    b.Property<int?>("Rating")
                         .HasColumnType("int");
 
                     b.Property<Guid>("UserId")
@@ -1021,13 +1027,20 @@ namespace HandmadeProductManagementAPI.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Bank")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("BankAccount")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("BankAccountName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Bio")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("CreatedBy")
                         .HasColumnType("nvarchar(max)");
@@ -1041,9 +1054,14 @@ namespace HandmadeProductManagementAPI.Migrations
                     b.Property<DateTimeOffset?>("DeletedTime")
                         .HasColumnType("datetimeoffset");
 
+                    b.Property<string>("DisplayName")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
                     b.Property<string>("FullName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("LastUpdatedBy")
                         .HasColumnType("nvarchar(max)");
@@ -1188,10 +1206,6 @@ namespace HandmadeProductManagementAPI.Migrations
                     b.Property<string>("NormalizedUserName")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("Password")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PasswordHash")
                         .HasColumnType("nvarchar(max)");
@@ -1366,8 +1380,8 @@ namespace HandmadeProductManagementAPI.Migrations
             modelBuilder.Entity("HandmadeProductManagement.Contract.Repositories.Entity.Payment", b =>
                 {
                     b.HasOne("HandmadeProductManagement.Contract.Repositories.Entity.Order", "Order")
-                        .WithMany()
-                        .HasForeignKey("OrderId")
+                        .WithOne("Payment")
+                        .HasForeignKey("HandmadeProductManagement.Contract.Repositories.Entity.Payment", "OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -1377,8 +1391,8 @@ namespace HandmadeProductManagementAPI.Migrations
             modelBuilder.Entity("HandmadeProductManagement.Contract.Repositories.Entity.PaymentDetail", b =>
                 {
                     b.HasOne("HandmadeProductManagement.Contract.Repositories.Entity.Payment", "Payment")
-                        .WithOne()
-                        .HasForeignKey("HandmadeProductManagement.Contract.Repositories.Entity.PaymentDetail", "PaymentId")
+                        .WithMany("PaymentDetails")
+                        .HasForeignKey("PaymentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -1390,13 +1404,13 @@ namespace HandmadeProductManagementAPI.Migrations
                     b.HasOne("HandmadeProductManagement.Contract.Repositories.Entity.Category", "Category")
                         .WithMany("Products")
                         .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("HandmadeProductManagement.Contract.Repositories.Entity.Shop", "Shop")
                         .WithMany()
                         .HasForeignKey("ShopId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Category");
@@ -1448,13 +1462,13 @@ namespace HandmadeProductManagementAPI.Migrations
                     b.HasOne("HandmadeProductManagement.Contract.Repositories.Entity.Review", "Review")
                         .WithOne("Reply")
                         .HasForeignKey("HandmadeProductManagement.Contract.Repositories.Entity.Reply", "ReviewId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("HandmadeProductManagement.Contract.Repositories.Entity.Shop", "Shop")
                         .WithMany()
                         .HasForeignKey("ShopId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Review");
@@ -1467,13 +1481,13 @@ namespace HandmadeProductManagementAPI.Migrations
                     b.HasOne("HandmadeProductManagement.Contract.Repositories.Entity.Product", "Product")
                         .WithMany("Reviews")
                         .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("HandmadeProductManagement.Repositories.Entity.ApplicationUser", "User")
                         .WithMany("Reviews")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Product");
@@ -1555,7 +1569,14 @@ namespace HandmadeProductManagementAPI.Migrations
                 {
                     b.Navigation("OrderDetails");
 
+                    b.Navigation("Payment");
+
                     b.Navigation("StatusChanges");
+                });
+
+            modelBuilder.Entity("HandmadeProductManagement.Contract.Repositories.Entity.Payment", b =>
+                {
+                    b.Navigation("PaymentDetails");
                 });
 
             modelBuilder.Entity("HandmadeProductManagement.Contract.Repositories.Entity.Product", b =>
