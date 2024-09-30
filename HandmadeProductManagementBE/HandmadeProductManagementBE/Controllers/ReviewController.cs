@@ -90,6 +90,7 @@ namespace HandmadeProductManagementAPI.Controllers
 
                 var updatedReview = await _reviewService.UpdateAsync(reviewId, existingReview);
                 return Ok(new BaseResponse<ReviewModel>(StatusCodeHelper.OK, "Review updated successfully.", updatedReview));
+
             }
             catch (ArgumentException ex)
             {
@@ -113,6 +114,29 @@ namespace HandmadeProductManagementAPI.Controllers
                 }
 
                 return Ok(new BaseResponse<bool>(StatusCodeHelper.OK, "Review deleted successfully.", true));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new BaseResponse<bool>(StatusCodeHelper.ServerError, "An unexpected error occurred.", string.Empty));
+            }
+        }
+
+        [HttpDelete("{reviewId}/softdelete")]
+        public async Task<ActionResult<BaseResponse<bool>>> SoftDelete([Required] string reviewId)
+        {
+            try
+            {
+                var isSoftDeleted = await _reviewService.SoftDeleteAsync(reviewId);
+                if (!isSoftDeleted)
+                {
+                    return NotFound(new BaseResponse<bool>(StatusCodeHelper.BadRequest, "Review not found.", "Review is empty."));
+                }
+
+                return Ok(new BaseResponse<bool>(StatusCodeHelper.OK, "Review soft deleted successfully.", true));
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new BaseResponse<bool>(StatusCodeHelper.BadRequest, ex.Message, "Please input again a correct value."));
             }
             catch (Exception ex)
             {

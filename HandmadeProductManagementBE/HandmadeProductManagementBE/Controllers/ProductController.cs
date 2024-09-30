@@ -3,6 +3,7 @@ using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.Core.Utils;
+using HandmadeProductManagement.ModelViews.ProductDetailModelViews;
 using HandmadeProductManagement.ModelViews.ProductModelViews;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -137,6 +138,15 @@ namespace HandmadeProductManagementAPI.Controllers
             {
                 return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
             }
+        [HttpGet("{GetProductDetaills/id}")]
+        public async Task<IActionResult> GetProductDetails(string id)
+        {
+            var response = await _productService.GetProductDetailsByIdAsync(id);
+            if (response.Data == null)
+            {
+                return StatusCode(404, new BaseResponse<ProductDetailResponseModel>(StatusCodeHelper.NotFound, StatusCodeHelper.NotFound.Name(), "Product Not Found!"));
+            }
+            return StatusCode((int)response.StatusCode, response);
         }
     }
 }

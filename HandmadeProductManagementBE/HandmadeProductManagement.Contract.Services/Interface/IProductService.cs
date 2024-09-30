@@ -1,4 +1,5 @@
 ﻿using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.ModelViews.ProductDetailModelViews;
 using HandmadeProductManagement.ModelViews.ProductModelViews;
 using HandmadeProductManagement.ModelViews.PromotionModelViews;
 using System;
@@ -20,5 +21,6 @@ namespace HandmadeProductManagement.Contract.Services.Interface
         Task Delete(string id);
         Task SoftDelete(string id);
 
+        Task<BaseResponse<ProductDetailResponseModel>> GetProductDetailsByIdAsync(string productId);
     }
 }
