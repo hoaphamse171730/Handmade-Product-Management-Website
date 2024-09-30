@@ -10,5 +10,6 @@ namespace HandmadeProductManagement.Contract.Services.Interface
         Task<StatusChange> Create(StatusChange statusChange);
         Task<StatusChange> Update(string id, StatusChange statusChange);
         Task<bool> Delete(string id);
+        Task<IList<StatusChange>> GetByPage(int page, int pageSize);
     }
 }

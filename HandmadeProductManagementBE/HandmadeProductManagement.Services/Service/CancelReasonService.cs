@@ -21,6 +21,23 @@ namespace HandmadeProductManagement.Services.Service
             return await query.ToListAsync();
         }
 
+        // Get cancel reasons by page with validation
+        public async Task<IList<CancelReason>> GetByPage(int page, int pageSize)
+        {
+            if (page <= 0)
+                throw new ArgumentException("Page number must be greater than 0.");
+
+            if (pageSize <= 0)
+                throw new ArgumentException("Page size must be greater than 0.");
+
+            IQueryable<CancelReason> query = _unitOfWork.GetRepository<CancelReason>().Entities;
+
+            return await query
+                        .Skip((page - 1) * pageSize)
+                        .Take(pageSize)
+                        .ToListAsync();
+        }
+
         // Get cancel reason by Id (string)
         public async Task<CancelReason> GetById(string id)
         {

@@ -3,6 +3,7 @@ using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Contract.Repositories.Entity;
 using Microsoft.AspNetCore.Mvc;
 using HandmadeProductManagement.Core.Constants;
+using HandmadeProductManagement.Services.Service;
 
 namespace HandmadeProductManagementAPI.Controllers
 {
@@ -29,6 +30,34 @@ namespace HandmadeProductManagementAPI.Controllers
             catch (System.Exception ex)
             {
                 return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message, StatusCodeHelper.ServerError));
+            }
+        }
+
+        // GET: api/cancelreason/page?page=1&pageSize=10
+        [HttpGet("page")]
+        public async Task<IActionResult> GetByPage([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        {
+            // Validate page and pageSize
+            if (page <= 0)
+            {
+                return BadRequest(BaseResponse<string>.FailResponse("Page number must be greater than 0."));
+            }
+
+            if (pageSize <= 0)
+            {
+                return BadRequest(BaseResponse<string>.FailResponse("Page size must be greater than 0."));
+            }
+
+            try
+            {
+                var paginatedResult = await _statusChangeService.GetByPage(page, pageSize);
+                // Wrap result in BaseResponse
+                return Ok(BaseResponse<IList<StatusChange>>.OkResponse(paginatedResult));
+            }
+            catch (Exception ex)
+            {
+                // Handle exceptions and return appropriate response
+                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
             }
         }
 

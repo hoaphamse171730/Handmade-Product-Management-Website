@@ -32,6 +32,35 @@ namespace HandmadeProductManagementAPI.Controllers
             }
         }
 
+        // GET: api/cancelreason/page?page=1&pageSize=10
+        [HttpGet("page")]
+        public async Task<IActionResult> GetByPage([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        {
+            // Validate page and pageSize
+            if (page <= 0)
+            {
+                return BadRequest(BaseResponse<string>.FailResponse("Page number must be greater than 0."));
+            }
+
+            if (pageSize <= 0)
+            {
+                return BadRequest(BaseResponse<string>.FailResponse("Page size must be greater than 0."));
+            }
+
+            try
+            {
+                var paginatedResult = await _cancelReasonService.GetByPage(page, pageSize);
+                // Wrap result in BaseResponse
+                return Ok(BaseResponse<IList<CancelReason>>.OkResponse(paginatedResult));
+            }
+            catch (Exception ex)
+            {
+                // Handle exceptions and return appropriate response
+                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
+            }
+        }
+
+
         // GET: api/CancelReason/{id} (string id)
         [HttpGet("{id}")]
         public async Task<ActionResult<CancelReason>> GetCancelReason(string id)
