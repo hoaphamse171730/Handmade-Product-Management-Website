@@ -159,37 +159,13 @@ namespace HandmadeProductManagementAPI.Controllers
             }
         }
 
-
-        // DELETE: api/CancelReason/{id} (string id)
-        [HttpDelete("{id}")]
-        public async Task<ActionResult> DeleteCancelReason(string id)
-        {
-            try
-            {
-                bool success = await _cancelReasonService.Delete(id);
-                if (!success)
-                {
-                    return NotFound(BaseResponse<string>.FailResponse($"Cancel Reason with ID {id} not found.", StatusCodeHelper.NotFound));
-                }
-                return Ok(BaseResponse<string>.OkResponse($"Cancel Reason with ID {id} has been successfully deleted."));
-            }
-            catch (KeyNotFoundException)
-            {
-                return NotFound(BaseResponse<string>.FailResponse("Cancel Reason not found", StatusCodeHelper.NotFound));
-            }
-            catch (System.Exception ex)
-            {
-                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message, StatusCodeHelper.ServerError));
-            }
-        }
-
         // PUT: api/CancelReason/{id}/soft-delete
-        [HttpPut("{id}/soft-delete")]
+        [HttpDelete("{id}")]
         public async Task<ActionResult> SoftDeleteCancelReason(string id)
         {
             try
             {
-                bool success = await _cancelReasonService.SoftDelete(id);
+                bool success = await _cancelReasonService.Delete(id);
                 if (!success)
                 {
                     return NotFound(BaseResponse<string>.FailResponse($"Cancel Reason with ID {id} not found.", StatusCodeHelper.NotFound));

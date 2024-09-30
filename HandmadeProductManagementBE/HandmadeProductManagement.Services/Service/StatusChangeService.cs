@@ -143,24 +143,20 @@ namespace HandmadeProductManagement.Services.Service
             return existingStatusChange;
         }
 
-        // Delete a status change by Id
+        //  Soft delete
         public async Task<bool> Delete(string id)
         {
             var statusChange = await GetById(id);
             if (statusChange == null)
                 return false;
 
-            try
-            {
-                _unitOfWork.GetRepository<StatusChange>().Delete(statusChange.Id);
-                await _unitOfWork.SaveAsync();
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error deleting StatusChange: {ex.Message}");
-                return false;
-            }
+            // Set DeletedTime to current time and update the DeletedBy field
+            statusChange.DeletedTime = DateTimeOffset.UtcNow;
+            statusChange.DeletedBy = "currentUser";
+
+            await _unitOfWork.GetRepository<StatusChange>().UpdateAsync(statusChange);
+            await _unitOfWork.SaveAsync();
+            return true;
         }
     }
 }

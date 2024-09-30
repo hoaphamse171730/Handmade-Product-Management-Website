@@ -108,20 +108,8 @@ namespace HandmadeProductManagement.Services.Service
             return existingCancelReason;
         }
 
-        // Delete a cancel reason by Id (string)
-        public async Task<bool> Delete(string id)
-        {
-            var cacncelReasonRepo = _unitOfWork.GetRepository<CancelReason>();
-            var cancelReason = await cacncelReasonRepo.GetByIdAsync(id);
-            if (cancelReason == null)
-                return false;
-            await cacncelReasonRepo.DeleteAsync(cancelReason.Id);
-            await _unitOfWork.SaveAsync();
-            return true;
-        }
-
         // Soft delete 
-        public async Task<bool> SoftDelete(string id)
+        public async Task<bool> Delete(string id)
         {
             var cancelReason = await GetById(id);
             if (cancelReason == null)
