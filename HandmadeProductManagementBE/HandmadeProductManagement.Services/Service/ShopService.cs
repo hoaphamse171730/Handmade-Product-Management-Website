@@ -5,12 +5,7 @@ using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.ModelViews.ShopModelViews;
 using HandmadeProductManagement.Repositories.Entity;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static HandmadeProductManagement.Core.Base.BaseException;
+using System.Text.RegularExpressions;
 
 namespace HandmadeProductManagement.Services.Service
 {
@@ -25,15 +20,7 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<ShopResponseModel> CreateShopAsync(CreateShopDto createShop)
         {
-            if (string.IsNullOrEmpty(createShop.Name) || string.IsNullOrEmpty(createShop.Description))
-            {
-                throw new BaseException.BadRequestException("invalid_input", "Name and Description cannot be null or empty.");
-            }
-
-            if (createShop.Rating < 0 || createShop.Rating > 5)
-            {
-                throw new BaseException.BadRequestException("invalid_rating", "Rating must be between 0 and 5.");
-            }
+            ValidateShop(createShop);
 
             var userRepository = _unitOfWork.GetRepository<ApplicationUser>();
             var userExists = await userRepository.Entities.AnyAsync(u => u.Id == createShop.UserId);
@@ -49,7 +36,7 @@ namespace HandmadeProductManagement.Services.Service
 
             if (existingShop != null)
             {
-                if (existingShop.DeletedBy == null)
+                if (existingShop.DeletedTime == null)
                 {
                     throw new BaseException.ErrorException(
                         400, "user_active_shop", "User already has an active shop.");
@@ -107,6 +94,11 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<bool> DeleteShopAsync(Guid userId, string id)
         {
+            if (!Guid.TryParse(userId.ToString(), out _) || !Guid.TryParse(id, out _))
+            {
+                throw new BaseException.BadRequestException("invalid_format", "UserId or Id is not in the correct format. Ex: 123e4567-e89b-12d3-a456-426614174000.");
+            }
+
             var userRepository = _unitOfWork.GetRepository<ApplicationUser>();
             var userExists = await userRepository.Entities.AnyAsync(u => u.Id == userId);
             if (!userExists)
@@ -132,7 +124,7 @@ namespace HandmadeProductManagement.Services.Service
         public async Task<IList<ShopResponseModel>> GetAllShopsAsync()
         {
             IQueryable<Shop> query = _unitOfWork.GetRepository<Shop>().Entities
-                .Where(shop => shop.DeletedBy == null);
+                .Where(shop => shop.DeletedTime == null);
             var result = await query.Select(shop => new ShopResponseModel
             {
                 Id = shop.Id.ToString(),
@@ -156,7 +148,7 @@ namespace HandmadeProductManagement.Services.Service
 
             var repository = _unitOfWork.GetRepository<Shop>();
             var shop = await repository.Entities
-                .FirstOrDefaultAsync(s => s.UserId == userId && s.DeletedBy == null);
+                .FirstOrDefaultAsync(s => s.UserId == userId && s.DeletedTime == null);
 
             if (shop == null)
             {
@@ -176,19 +168,17 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<ShopResponseModel> UpdateShopAsync(string id, CreateShopDto shop)
         {
-            if (string.IsNullOrEmpty(shop.Name) || string.IsNullOrEmpty(shop.Description))
-            {
-                throw new BaseException.BadRequestException("invalid_input", "Name and Description cannot be null or empty.");
-            }
+            ValidateShop(shop);
 
-            if (shop.Rating < 0 || shop.Rating > 5)
+            if (string.IsNullOrWhiteSpace(id) || !Guid.TryParse(id, out _))
             {
-                throw new BaseException.BadRequestException("invalid_rating", "Rating must be between 0 and 5.");
+                throw new BaseException.BadRequestException("invalid_format", "Id is not in the correct format. " +
+                    "Ex: 123e4567-e89b-12d3-a456-426614174000.");
             }
 
             var repository = _unitOfWork.GetRepository<Shop>();
             var existingShop = await repository.Entities
-                .FirstOrDefaultAsync(s => s.Id == id && s.DeletedBy == null);
+                .FirstOrDefaultAsync(s => s.Id == id && s.DeletedTime == null);
 
             if (existingShop == null)
             {
@@ -213,6 +203,34 @@ namespace HandmadeProductManagement.Services.Service
                 Rating = existingShop.Rating,
                 UserId = existingShop.UserId
             };
+        }
+
+        private void ValidateShop(CreateShopDto shop)
+        {
+            if (string.IsNullOrEmpty(shop.Name) || string.IsNullOrEmpty(shop.Description))
+            {
+                throw new BaseException.BadRequestException("invalid_input", "Name and Description cannot be null or empty.");
+            }
+
+            if (!Regex.IsMatch(shop.Name, @"^[a-zA-Z\s]+$"))
+            {
+                throw new BaseException.BadRequestException("invalid_name", "Name cannot contain numbers or special characters.");
+            }
+
+            if (!Regex.IsMatch(shop.Description, @"^[a-zA-Z0-9\s]+$"))
+            {
+                throw new BaseException.BadRequestException("invalid_description", "Description cannot contain special characters.");
+            }
+
+            if (shop.Rating < 0 || shop.Rating > 5)
+            {
+                throw new BaseException.BadRequestException("invalid_rating", "Rating must be between 0 and 5.");
+            }
+
+            if (!Guid.TryParse(shop.UserId.ToString(), out _))
+            {
+                throw new BaseException.BadRequestException("invalid_format", "UserId is not in the correct format. Ex: 123e4567-e89b-12d3-a456-426614174000.");
+            }
         }
     }
 }
