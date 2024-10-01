@@ -1,7 +1,9 @@
 ﻿using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.ModelViews.CartModelViews;
 using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.Core.Constants;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 using HandmadeProductManagement.Contract.Services;
 
 namespace HandmadeProductManagementAPI.Controllers
@@ -20,36 +22,138 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [HttpGet("{userId}")]
-        public async Task<IActionResult> GetCart(Guid userId)
+        public async Task<IActionResult> GetCart([Required] Guid userId)
         {
+            try
+            {
                 var cart = await _cartService.GetCartByUserId(userId);
-                return Ok(BaseResponse<CartModel>.OkResponse(cart))
+                var response = new BaseResponse<CartModel>
+                {
+                    Code = "Success",
+                    StatusCode = StatusCodeHelper.OK,
+                    Message = "Cart retrieved successfully.",
+                    Data = cart
+                };
+                return Ok(response);
+            }
+            catch (ArgumentException ex)
+            {
+                var response = new BaseResponse<CartModel>
+                {
+                    Code = "NotFound",
+                    StatusCode = StatusCodeHelper.NotFound,
+                    Message = ex.Message,
+                    Data = null
+                };
+                return NotFound(response);
+            }
+            catch (Exception)
+            {
+                var response = new BaseResponse<CartModel>
+                {
+                    Code = "ServerError",
+                    StatusCode = StatusCodeHelper.ServerError,
+                    Message = "An unexpected error occurred.",
+                    Data = null
+                };
+                return StatusCode(500, response);
+            }
         }
 
         [HttpPost("item/add/{cartId}")]
-        public async Task<IActionResult> AddCartItem(string cartId, [FromBody] CreateCartItemDto createCartItemDto)
+        public async Task<IActionResult> AddCartItem([Required] string cartId, [FromBody] CreateCartItemDto createCartItemDto)
         {
-            var response = await _cartItemService.AddCartItem(cartId, createCartItemDto);
-            return Ok(response);
+            try
+            {
+                var response = await _cartItemService.AddCartItem(cartId, createCartItemDto);
+                return Ok(response);
+            }
+            catch (ArgumentException ex)
+            {
+                var response = new BaseResponse<bool>
+                {
+                    Code = "BadRequest",
+                    StatusCode = StatusCodeHelper.BadRequest,
+                    Message = ex.Message,
+                    Data = false
+                };
+                return BadRequest(response);
+            }
+            catch (Exception)
+            {
+                var response = new BaseResponse<bool>
+                {
+                    Code = "ServerError",
+                    StatusCode = StatusCodeHelper.ServerError,
+                    Message = "An unexpected error occurred.",
+                    Data = false
+                };
+                return StatusCode(500, response);
+            }
         }
-
-
 
         [HttpPut("item/updateQuantity/{cartItemId}")]
-        public async Task<IActionResult> UpdateCartItem(string cartItemId, [FromBody] int productQuantity)
+        public async Task<IActionResult> UpdateCartItem([Required] string cartItemId, [Required] int productQuantity)
         {
-            var response = await _cartItemService.UpdateCartItem(cartItemId, productQuantity);
-            return Ok(response);
+            try
+            {
+                var response = await _cartItemService.UpdateCartItem(cartItemId, productQuantity);
+                return Ok(response);
+            }
+            catch (ArgumentException ex)
+            {
+                var response = new BaseResponse<bool>
+                {
+                    Code = "BadRequest",
+                    StatusCode = StatusCodeHelper.BadRequest,
+                    Message = ex.Message,
+                    Data = false
+                };
+                return BadRequest(response);
+            }
+            catch (Exception)
+            {
+                var response = new BaseResponse<bool>
+                {
+                    Code = "ServerError",
+                    StatusCode = StatusCodeHelper.ServerError,
+                    Message = "An unexpected error occurred.",
+                    Data = false
+                };
+                return StatusCode(500, response);
+            }
         }
-
-
 
         [HttpDelete("item/{cartItemId}")]
-        public async Task<IActionResult> RemoveCartItem(string cartItemId)
+        public async Task<IActionResult> RemoveCartItem([Required] string cartItemId)
         {
-            var response = await _cartItemService.RemoveCartItem(cartItemId);
-            return Ok(response);
+            try
+            {
+                var response = await _cartItemService.RemoveCartItem(cartItemId);
+                return Ok(response);
+            }
+            catch (ArgumentException ex)
+            {
+                var response = new BaseResponse<bool>
+                {
+                    Code = "BadRequest",
+                    StatusCode = StatusCodeHelper.BadRequest,
+                    Message = ex.Message,
+                    Data = false
+                };
+                return BadRequest(response);
+            }
+            catch (Exception)
+            {
+                var response = new BaseResponse<bool>
+                {
+                    Code = "ServerError",
+                    StatusCode = StatusCodeHelper.ServerError,
+                    Message = "An unexpected error occurred.",
+                    Data = false
+                };
+                return StatusCode(500, response);
+            }
         }
-
     }
 }
