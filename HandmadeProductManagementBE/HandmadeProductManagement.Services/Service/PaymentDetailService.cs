@@ -24,14 +24,16 @@ namespace HandmadeProductManagement.Services.Service
             ValidatePaymentDetail(createPaymentDetailDto);
 
             var userRepository = _unitOfWork.GetRepository<ApplicationUser>();
-            var userExists = await userRepository.Entities.AnyAsync(u => u.Id.ToString() == createPaymentDetailDto.UserId);
+            var userExists = await userRepository.Entities
+                .AnyAsync(u => u.Id.ToString() == createPaymentDetailDto.UserId && !u.DeletedTime.HasValue);
             if (!userExists)
             {
                 throw new BaseException.ErrorException(404, "user_not_found", "User not found.");
             }
 
             var paymentRepository = _unitOfWork.GetRepository<Payment>();
-            var payment = await paymentRepository.Entities.FirstOrDefaultAsync(p => p.Id == createPaymentDetailDto.PaymentId);
+            var payment = await paymentRepository.Entities
+                .FirstOrDefaultAsync(p => p.Id == createPaymentDetailDto.PaymentId && !p.DeletedTime.HasValue);
 
             if (payment == null)
             {
@@ -55,10 +57,6 @@ namespace HandmadeProductManagement.Services.Service
                 ExternalTransaction = createPaymentDetailDto.ExternalTransaction
             };
 
-            payment.CreatedBy = createPaymentDetailDto.UserId.ToString();
-            payment.CreatedTime = DateTime.UtcNow;
-            payment.LastUpdatedBy = createPaymentDetailDto.UserId.ToString();
-            payment.LastUpdatedTime = DateTime.UtcNow;
             await paymentDetailRepository.InsertAsync(paymentDetail);
             await _unitOfWork.SaveAsync();
 
@@ -69,7 +67,8 @@ namespace HandmadeProductManagement.Services.Service
                 paymentRepository.Update(payment);
 
                 var orderRepository = _unitOfWork.GetRepository<Order>();
-                var order = await orderRepository.Entities.FirstOrDefaultAsync(o => o.Id == payment.OrderId);
+                var order = await orderRepository.Entities
+                    .FirstOrDefaultAsync(o => o.Id == payment.OrderId && !o.DeletedTime.HasValue);
                 if (order != null)
                 {
                     order.Status = "Processing";
@@ -93,7 +92,7 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<PaymentDetailResponseModel> GetPaymentDetailByPaymentIdAsync(string paymentId)
         {
-            if (string.IsNullOrEmpty(paymentId))
+            if (string.IsNullOrWhiteSpace(paymentId))
             {
                 throw new BaseException.BadRequestException("invalid_payment_id", "Please input payment id.");
             }
@@ -104,7 +103,8 @@ namespace HandmadeProductManagement.Services.Service
             }
 
             var paymentRepository = _unitOfWork.GetRepository<Payment>();
-            var paymentExists = await paymentRepository.Entities.AnyAsync(p => p.Id == paymentId);
+            var paymentExists = await paymentRepository.Entities
+                .AnyAsync(p => p.Id == paymentId && !p.DeletedTime.HasValue);
 
             if (!paymentExists)
             {
@@ -112,7 +112,8 @@ namespace HandmadeProductManagement.Services.Service
             }
 
             var paymentDetailRepository = _unitOfWork.GetRepository<PaymentDetail>();
-            var paymentDetail = await paymentDetailRepository.Entities.FirstOrDefaultAsync(pd => pd.PaymentId == paymentId);
+            var paymentDetail = await paymentDetailRepository.Entities
+                .FirstOrDefaultAsync(pd => pd.PaymentId == paymentId && !pd.DeletedTime.HasValue);
 
             if (paymentDetail == null)
             {
@@ -132,7 +133,7 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<PaymentDetailResponseModel> GetPaymentDetailByIdAsync(string id)
         {
-            if (string.IsNullOrEmpty(id))
+            if (string.IsNullOrWhiteSpace(id))
             {
                 throw new BaseException.BadRequestException("invalid_id", "Please input id.");
             }
@@ -143,7 +144,8 @@ namespace HandmadeProductManagement.Services.Service
             }
 
             var paymentDetailRepository = _unitOfWork.GetRepository<PaymentDetail>();
-            var paymentDetail = await paymentDetailRepository.Entities.FirstOrDefaultAsync(pd => pd.Id == id);
+            var paymentDetail = await paymentDetailRepository.Entities
+                .FirstOrDefaultAsync(pd => pd.Id == id && !pd.DeletedTime.HasValue);
 
             if (paymentDetail == null)
             {
@@ -163,7 +165,7 @@ namespace HandmadeProductManagement.Services.Service
 
         private void ValidatePaymentDetail(CreatePaymentDetailDto createPaymentDetailDto)
         {
-            if (string.IsNullOrEmpty(createPaymentDetailDto.PaymentId))
+            if (string.IsNullOrWhiteSpace(createPaymentDetailDto.PaymentId))
             {
                 throw new BaseException.BadRequestException("invalid_payment_id", "Please input payment id.");
             }
@@ -173,7 +175,7 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.BadRequestException("invalid_payment_id_format", "Payment ID format is invalid. Example: 123e4567-e89b-12d3-a456-426614174000.");
             }
 
-            if (string.IsNullOrEmpty(createPaymentDetailDto.UserId))
+            if (string.IsNullOrWhiteSpace(createPaymentDetailDto.UserId))
             {
                 throw new BaseException.BadRequestException("invalid_user_id", "Please input user id.");
             }
@@ -183,7 +185,7 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.BadRequestException("invalid_user_id_format", "User ID format is invalid. Example: 123e4567-e89b-12d3-a456-426614174000.");
             }
 
-            if (string.IsNullOrEmpty(createPaymentDetailDto.Status))
+            if (string.IsNullOrWhiteSpace(createPaymentDetailDto.Status))
             {
                 throw new BaseException.BadRequestException("invalid_status", "Please input status.");
             }
@@ -193,7 +195,7 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.BadRequestException("invalid_status_format", "Status cannot contain numbers or special characters.");
             }
 
-            if (string.IsNullOrEmpty(createPaymentDetailDto.Method))
+            if (string.IsNullOrWhiteSpace(createPaymentDetailDto.Method))
             {
                 throw new BaseException.BadRequestException("invalid_method", "Please input method.");
             }
@@ -203,7 +205,7 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.BadRequestException("invalid_method_format", "Method cannot contain numbers or special characters.");
             }
 
-            if (!string.IsNullOrEmpty(createPaymentDetailDto.ExternalTransaction) && !Regex.IsMatch(createPaymentDetailDto.ExternalTransaction, @"^[a-zA-Z0-9]+$"))
+            if (!string.IsNullOrWhiteSpace(createPaymentDetailDto.ExternalTransaction) && !Regex.IsMatch(createPaymentDetailDto.ExternalTransaction, @"^[a-zA-Z0-9]+$"))
             {
                 throw new BaseException.BadRequestException("invalid_external_transaction_format", "External transaction can only contain alphanumeric characters.");
             }

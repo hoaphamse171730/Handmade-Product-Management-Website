@@ -29,7 +29,8 @@ namespace HandmadeProductManagement.Services.Service
             ValidateOrder(createOrder);
 
             var userRepository = _unitOfWork.GetRepository<ApplicationUser>();
-            var userExists = await userRepository.Entities.AnyAsync(u => u.Id.ToString() == createOrder.UserId);
+            var userExists = await userRepository.Entities
+                .AnyAsync(u => u.Id.ToString() == createOrder.UserId && !u.DeletedTime.HasValue);
             if (!userExists)
             {
                 throw new BaseException.ErrorException(404, "user_not_found", "User not found.");
@@ -39,7 +40,6 @@ namespace HandmadeProductManagement.Services.Service
 
             var order = new Order
             {
-                Id = Guid.NewGuid().ToString(),
                 TotalPrice = createOrder.TotalPrice,
                 OrderDate = DateTime.UtcNow,
                 Status = "Pending",
@@ -52,9 +52,7 @@ namespace HandmadeProductManagement.Services.Service
             };
 
             order.CreatedBy = order.UserId.ToString();
-            order.CreatedTime = DateTime.UtcNow;
             order.LastUpdatedBy = order.UserId.ToString();
-            order.LastUpdatedTime = DateTime.UtcNow;
 
             await repository.InsertAsync(order);
             await _unitOfWork.SaveAsync();
@@ -76,7 +74,7 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<bool> DeleteOrderAsync(string orderId)
         {
-            if (string.IsNullOrEmpty(orderId))
+            if (string.IsNullOrWhiteSpace(orderId))
             {
                 throw new BaseException.BadRequestException("empty_order_id", "Order ID is required.");
             }
@@ -87,7 +85,8 @@ namespace HandmadeProductManagement.Services.Service
             }
 
             var repository = _unitOfWork.GetRepository<Order>();
-            var order = await repository.Entities.FirstOrDefaultAsync(o => o.Id == orderId);
+            var order = await repository.Entities
+                .FirstOrDefaultAsync(o => o.Id == orderId && !o.DeletedTime.HasValue);
             if (order == null)
             {
                 return false;
@@ -104,7 +103,7 @@ namespace HandmadeProductManagement.Services.Service
         public async Task<IList<OrderResponseModel>> GetAllOrdersAsync()
         {
             IQueryable<Order> query = _unitOfWork.GetRepository<Order>().Entities
-                .Where(order => order.DeletedBy == null);
+                .Where(order => !order.DeletedTime.HasValue);
             var result = await query.Select(order => new OrderResponseModel
             {
                 Id = order.Id,
@@ -124,7 +123,7 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<OrderResponseModel> GetOrderByIdAsync(string orderId)
         {
-            if (string.IsNullOrEmpty(orderId))
+            if (string.IsNullOrWhiteSpace(orderId))
             {
                 throw new BaseException.BadRequestException("empty_order_id", "Order ID is required.");
             }
@@ -136,7 +135,7 @@ namespace HandmadeProductManagement.Services.Service
 
             var repository = _unitOfWork.GetRepository<Order>();
             var order = await repository.Entities
-                .FirstOrDefaultAsync(o => o.Id == orderId && o.DeletedBy == null);
+                .FirstOrDefaultAsync(o => o.Id == orderId && !o.DeletedTime.HasValue);
 
             if (order == null)
             {
@@ -170,7 +169,7 @@ namespace HandmadeProductManagement.Services.Service
 
             var repository = _unitOfWork.GetRepository<Order>();
             var existingOrder = await repository.Entities
-                .FirstOrDefaultAsync(o => o.Id == orderId && o.DeletedBy == null);
+                .FirstOrDefaultAsync(o => o.Id == orderId && !o.DeletedTime.HasValue);
 
             if (existingOrder == null)
             {
@@ -208,7 +207,8 @@ namespace HandmadeProductManagement.Services.Service
         public async Task<IList<OrderResponseModel>> GetOrderByUserIdAsync(Guid userId)
         {
             var userRepository = _unitOfWork.GetRepository<ApplicationUser>();
-            var userExists = await userRepository.Entities.AnyAsync(u => u.Id == userId);
+            var userExists = await userRepository.Entities
+                .AnyAsync(u => u.Id == userId && !u.DeletedTime.HasValue);
             if (!userExists)
             {
                 throw new BaseException.ErrorException(404, "user_not_found", "User not found.");
@@ -216,7 +216,7 @@ namespace HandmadeProductManagement.Services.Service
 
             var repository = _unitOfWork.GetRepository<Order>();
             var orders = await repository.Entities
-                .Where(o => o.UserId == userId && o.DeletedBy == null)
+                .Where(o => o.UserId == userId && !o.DeletedTime.HasValue)
                 .Select(order => new OrderResponseModel
                 {
                     Id = order.Id,
@@ -236,7 +236,7 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<OrderResponseModel> UpdateOrderStatusAsync(string orderId, string status)
         {
-            if (string.IsNullOrEmpty(orderId))
+            if (string.IsNullOrWhiteSpace(orderId))
             {
                 throw new BaseException.BadRequestException("invalid_order_id", "Order ID is required.");
             }
@@ -248,7 +248,7 @@ namespace HandmadeProductManagement.Services.Service
 
             var repository = _unitOfWork.GetRepository<Order>();
             var existingOrder = await repository.Entities
-                .FirstOrDefaultAsync(o => o.Id == orderId && o.DeletedBy == null);
+                .FirstOrDefaultAsync(o => o.Id == orderId && !o.DeletedTime.HasValue);
 
             if (existingOrder == null)
             {
@@ -280,7 +280,7 @@ namespace HandmadeProductManagement.Services.Service
 
         private void ValidateOrder(CreateOrderDto order)
         {
-            if (string.IsNullOrEmpty(order.UserId))
+            if (string.IsNullOrWhiteSpace(order.UserId))
             {
                 throw new BaseException.BadRequestException("invalid_user_id", "Please input User id.");
             }
@@ -295,7 +295,7 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.BadRequestException("invalid_total_price", "Total price must be greater than zero.");
             }
 
-            if (string.IsNullOrEmpty(order.Address))
+            if (string.IsNullOrWhiteSpace(order.Address))
             {
                 throw new BaseException.BadRequestException("invalid_address", "Address cannot be null or empty.");
             }
@@ -305,7 +305,7 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.BadRequestException("invalid_address_format", "Address cannot contain special characters.");
             }
 
-            if (string.IsNullOrEmpty(order.CustomerName))
+            if (string.IsNullOrWhiteSpace(order.CustomerName))
             {
                 throw new BaseException.BadRequestException("invalid_customer_name", "Customer name cannot be null or empty.");
             }
@@ -315,7 +315,7 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.BadRequestException("invalid_customer_name_format", "Customer name can only contain letters and spaces.");
             }
 
-            if (string.IsNullOrEmpty(order.Phone))
+            if (string.IsNullOrWhiteSpace(order.Phone))
             {
                 throw new BaseException.BadRequestException("invalid_phone", "Phone number cannot be null or empty.");
             }
