@@ -1,6 +1,7 @@
 ﻿using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.ShopModelViews;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -26,11 +27,25 @@ namespace HandmadeProductManagementAPI.Controllers
             try
             {
                 var createdShop = await _shopService.CreateShopAsync(shop);
-                return Ok(BaseResponse<ShopResponseModel>.OkResponse(createdShop));
+                var response = new BaseResponse<ShopResponseModel>
+                {
+                    Code = "Success",
+                    StatusCode = StatusCodeHelper.OK,
+                    Message = "Shop created successfully",
+                    Data = createdShop
+                };
+                return Ok(response);
             }
             catch (BaseException.ErrorException ex)
             {
-                return StatusCode(ex.StatusCode, new { ex.ErrorDetail.ErrorCode, ex.ErrorDetail.ErrorMessage });
+                var response = new BaseResponse<object>
+                {
+                    Code = ex.ErrorDetail.ErrorCode,
+                    StatusCode = (StatusCodeHelper)ex.StatusCode, 
+                    Message = ex.ErrorDetail.ErrorMessage?.ToString(), 
+                    Data = null
+                };
+                return StatusCode(ex.StatusCode, response);
             }
         }
 
@@ -40,11 +55,25 @@ namespace HandmadeProductManagementAPI.Controllers
             try
             {
                 var result = await _shopService.DeleteShopAsync(userId, id);
-                return Ok(BaseResponse<bool>.OkResponse(result));
+                var response = new BaseResponse<bool>
+                {
+                    Code = "Success",
+                    StatusCode = StatusCodeHelper.OK,
+                    Message = "Shop deleted successfully",
+                    Data = result
+                };
+                return Ok(response);
             }
             catch (BaseException.ErrorException ex)
             {
-                return StatusCode(ex.StatusCode, new { ex.ErrorDetail.ErrorCode, ex.ErrorDetail.ErrorMessage });
+                var response = new BaseResponse<object>
+                {
+                    Code = ex.ErrorDetail.ErrorCode,
+                    StatusCode = (StatusCodeHelper)ex.StatusCode, 
+                    Message = ex.ErrorDetail.ErrorMessage?.ToString(), 
+                    Data = null
+                };
+                return StatusCode(ex.StatusCode, response);
             }
         }
 
@@ -54,11 +83,25 @@ namespace HandmadeProductManagementAPI.Controllers
             try
             {
                 var shops = await _shopService.GetAllShopsAsync();
-                return Ok(BaseResponse<IList<ShopResponseModel>>.OkResponse(shops));
+                var response = new BaseResponse<IList<ShopResponseModel>>
+                {
+                    Code = "Success",
+                    StatusCode = StatusCodeHelper.OK,
+                    Message = "Shops retrieved successfully",
+                    Data = shops
+                };
+                return Ok(response);
             }
             catch (BaseException.ErrorException ex)
             {
-                return StatusCode(ex.StatusCode, new { ex.ErrorDetail.ErrorCode, ex.ErrorDetail.ErrorMessage });
+                var response = new BaseResponse<object>
+                {
+                    Code = ex.ErrorDetail.ErrorCode,
+                    StatusCode = (StatusCodeHelper)ex.StatusCode, 
+                    Message = ex.ErrorDetail.ErrorMessage?.ToString(), 
+                    Data = null
+                };
+                return StatusCode(ex.StatusCode, response);
             }
         }
 
@@ -68,11 +111,25 @@ namespace HandmadeProductManagementAPI.Controllers
             try
             {
                 var shop = await _shopService.GetShopByUserIdAsync(userId);
-                return Ok(BaseResponse<ShopResponseModel>.OkResponse(shop));
+                var response = new BaseResponse<ShopResponseModel>
+                {
+                    Code = "Success",
+                    StatusCode = StatusCodeHelper.OK,
+                    Message = "Shop retrieved successfully",
+                    Data = shop
+                };
+                return Ok(response);
             }
             catch (BaseException.ErrorException ex)
             {
-                return StatusCode(ex.StatusCode, new { ex.ErrorDetail.ErrorCode, ex.ErrorDetail.ErrorMessage });
+                var response = new BaseResponse<object>
+                {
+                    Code = ex.ErrorDetail.ErrorCode,
+                    StatusCode = (StatusCodeHelper)ex.StatusCode, 
+                    Message = ex.ErrorDetail.ErrorMessage?.ToString(), 
+                    Data = null
+                };
+                return StatusCode(ex.StatusCode, response);
             }
         }
 
@@ -82,11 +139,25 @@ namespace HandmadeProductManagementAPI.Controllers
             try
             {
                 var updatedShop = await _shopService.UpdateShopAsync(id, shop);
-                return Ok(BaseResponse<ShopResponseModel>.OkResponse(updatedShop));
+                var response = new BaseResponse<ShopResponseModel>
+                {
+                    Code = "Success",
+                    StatusCode = StatusCodeHelper.OK,
+                    Message = "Shop updated successfully",
+                    Data = updatedShop
+                };
+                return Ok(response);
             }
             catch (BaseException.ErrorException ex)
             {
-                return StatusCode(ex.StatusCode, new { ex.ErrorDetail.ErrorCode, ex.ErrorDetail.ErrorMessage });
+                var response = new BaseResponse<object>
+                {
+                    Code = ex.ErrorDetail.ErrorCode,
+                    StatusCode = (StatusCodeHelper)ex.StatusCode, 
+                    Message = ex.ErrorDetail.ErrorMessage?.ToString(),
+                    Data = null
+                };
+                return StatusCode(ex.StatusCode, response);
             }
         }
     }
