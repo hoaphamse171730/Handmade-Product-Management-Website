@@ -166,43 +166,15 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpGet("GetProductDetails/{id}")]
         public async Task<IActionResult> GetProductDetails([Required] string id)
         {
-            try
+            var productDetails = await _productService.GetProductDetailsByIdAsync(id);
+            var response = new BaseResponse<ProductDetailResponseModel>
             {
-                var response = await _productService.GetProductDetailsByIdAsync(id);
-
-                // Check the status code in the response from the service
-                if (response.StatusCode == StatusCodeHelper.OK)
-                {
-                    return Ok(new BaseResponse<ProductDetailResponseModel>
-                    {
-                        Code = "Success",
-                        StatusCode = response.StatusCode,
-                        Message = "Product details retrieved successfully.",
-                        Data = response.Data
-                    });
-                }
-                else
-                {
-                    return StatusCode((int)response.StatusCode, new BaseResponse<ProductDetailResponseModel>
-                    {
-                        Code = response.Code,
-                        StatusCode = response.StatusCode,
-                        Message = response.Message,
-                        Data = null
-                    });
-                }
-            }
-            catch (Exception)
-            {
-                var errorResponse = new BaseResponse<ProductDetailResponseModel>
-                {
-                    Code = "ServerError",
-                    StatusCode = StatusCodeHelper.ServerError,
-                    Message = "An unexpected error occurred.",
-                    Data = null
-                };
-                return StatusCode(500, errorResponse);
-            }
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Product details retrieved successfully.",
+                Data = productDetails
+            };
+            return Ok(response);
         }
     }
 }

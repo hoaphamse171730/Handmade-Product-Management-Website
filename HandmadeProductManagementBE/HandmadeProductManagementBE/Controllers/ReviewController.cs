@@ -21,240 +21,94 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll(int pageNumber = 1, int pageSize = 10)
         {
-            try
+            var reviews = await _reviewService.GetAllAsync(pageNumber, pageSize);
+            var response = new BaseResponse<IList<ReviewModel>>
             {
-                var reviews = await _reviewService.GetAllAsync(pageNumber, pageSize);
-                var response = new BaseResponse<IList<ReviewModel>>
-                {
-                    Code = "Success",
-                    StatusCode = StatusCodeHelper.OK,
-                    Message = "Reviews retrieved successfully.",
-                    Data = reviews
-                };
-                return Ok(response);
-            }
-            catch (ArgumentException ex)
-            {
-                var response = new BaseResponse<IList<ReviewModel>>
-                {
-                    Code = "BadRequest",
-                    StatusCode = StatusCodeHelper.BadRequest,
-                    Message = ex.Message,
-                    Data = null
-                };
-                return BadRequest(response);
-            }
-            catch (Exception)
-            {
-                var response = new BaseResponse<IList<ReviewModel>>
-                {
-                    Code = "ServerError",
-                    StatusCode = StatusCodeHelper.ServerError,
-                    Message = "An unexpected error occurred.",
-                    Data = null
-                };
-                return StatusCode(500, response);
-            }
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Reviews retrieved successfully.",
+                Data = reviews
+            };
+            return Ok(response);
         }
 
         [HttpGet("{reviewId}")]
         public async Task<IActionResult> GetById([Required] string reviewId)
         {
-            try
+            var review = await _reviewService.GetByIdAsync(reviewId);
+            var response = new BaseResponse<ReviewModel>
             {
-                var review = await _reviewService.GetByIdAsync(reviewId);
-                var response = new BaseResponse<ReviewModel>
-                {
-                    Code = "Success",
-                    StatusCode = StatusCodeHelper.OK,
-                    Message = "Review retrieved successfully.",
-                    Data = review
-                };
-                return Ok(response);
-            }
-            catch (ArgumentException ex)
-            {
-                var response = new BaseResponse<ReviewModel>
-                {
-                    Code = "NotFound",
-                    StatusCode = StatusCodeHelper.NotFound,
-                    Message = ex.Message,
-                    Data = null
-                };
-                return NotFound(response);
-            }
-            catch (Exception)
-            {
-                var response = new BaseResponse<ReviewModel>
-                {
-                    Code = "ServerError",
-                    StatusCode = StatusCodeHelper.ServerError,
-                    Message = "An unexpected error occurred.",
-                    Data = null
-                };
-                return StatusCode(500, response);
-            }
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Review retrieved successfully.",
+                Data = review
+            };
+            return Ok(response);
         }
 
         [HttpPost]
         public async Task<IActionResult> Create(string? content, [Required] int rating, [Required] string productId, [Required] Guid userId)
         {
-            try
+            var reviewModel = new ReviewModel
             {
-                var reviewModel = new ReviewModel
-                {
-                    Content = content,
-                    Rating = rating,
-                    ProductId = productId,
-                    UserId = userId
-                };
+                Content = content,
+                Rating = rating,
+                ProductId = productId,
+                UserId = userId
+            };
 
-                var createdReview = await _reviewService.CreateAsync(reviewModel);
-                var response = new BaseResponse<ReviewModel>
-                {
-                    Code = "Success",
-                    StatusCode = StatusCodeHelper.OK,
-                    Message = "Review created successfully.",
-                    Data = createdReview
-                };
-                return Ok(response);
-            }
-            catch (ArgumentException ex)
+            var createdReview = await _reviewService.CreateAsync(reviewModel);
+            var response = new BaseResponse<ReviewModel>
             {
-                var response = new BaseResponse<ReviewModel>
-                {
-                    Code = "BadRequest",
-                    StatusCode = StatusCodeHelper.BadRequest,
-                    Message = ex.Message,
-                    Data = null
-                };
-                return BadRequest(response);
-            }
-            catch (Exception)
-            {
-                var response = new BaseResponse<ReviewModel>
-                {
-                    Code = "ServerError",
-                    StatusCode = StatusCodeHelper.ServerError,
-                    Message = "An unexpected error occurred.",
-                    Data = null
-                };
-                return StatusCode(500, response);
-            }
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Review created successfully.",
+                Data = createdReview
+            };
+            return Ok(response);
         }
 
         [HttpPut("{reviewId}")]
         public async Task<IActionResult> Update([Required] string reviewId, string? content, int? rating)
         {
-            try
-            {
-                var existingReview = await _reviewService.GetByIdAsync(reviewId);
-                existingReview.Content = content;
-                existingReview.Rating = rating;
+            var existingReview = await _reviewService.GetByIdAsync(reviewId);
+            existingReview.Content = content;
+            existingReview.Rating = rating;
 
-                var updatedReview = await _reviewService.UpdateAsync(reviewId, existingReview);
-                var response = new BaseResponse<ReviewModel>
-                {
-                    Code = "Success",
-                    StatusCode = StatusCodeHelper.OK,
-                    Message = "Review updated successfully."
-                };
-                return Ok(response);
-            }
-            catch (ArgumentException ex)
+            var updatedReview = await _reviewService.UpdateAsync(reviewId, existingReview);
+            var response = new BaseResponse<ReviewModel>
             {
-                var response = new BaseResponse<ReviewModel>
-                {
-                    Code = "BadRequest",
-                    StatusCode = StatusCodeHelper.BadRequest,
-                    Message = ex.Message,
-                    Data = null
-                };
-                return BadRequest(response);
-            }
-            catch (Exception)
-            {
-                var response = new BaseResponse<ReviewModel>
-                {
-                    Code = "ServerError",
-                    StatusCode = StatusCodeHelper.ServerError,
-                    Message = "An unexpected error occurred.",
-                    Data = null
-                };
-                return StatusCode(500, response);
-            }
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Review updated successfully."
+            };
+            return Ok(response);
         }
 
         [HttpDelete("{reviewId}")]
         public async Task<IActionResult> Delete([Required] string reviewId)
         {
-            try
+            var result = await _reviewService.DeleteAsync(reviewId);
+            var response = new BaseResponse<bool>
             {
-                var result = await _reviewService.DeleteAsync(reviewId);
-                var response = new BaseResponse<bool>
-                {
-                    Code = "Success",
-                    StatusCode = StatusCodeHelper.OK,
-                    Message = "Review deleted successfully."
-                };
-                return Ok(response);
-            }
-            catch (ArgumentException ex)
-            {
-                var response = new BaseResponse<bool>
-                {
-                    Code = "BadRequest",
-                    StatusCode = StatusCodeHelper.BadRequest,
-                    Message = ex.Message
-                };
-                return BadRequest(response);
-            }
-            catch (Exception)
-            {
-                var response = new BaseResponse<bool>
-                {
-                    Code = "ServerError",
-                    StatusCode = StatusCodeHelper.ServerError,
-                    Message = "An unexpected error occurred."
-                };
-                return StatusCode(500, response);
-            }
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Review deleted successfully."
+            };
+            return Ok(response);
         }
 
         [HttpDelete("{reviewId}/softdelete")]
         public async Task<IActionResult> SoftDelete([Required] string reviewId)
         {
-            try
+            var result = await _reviewService.SoftDeleteAsync(reviewId);
+            var response = new BaseResponse<bool>
             {
-                var result = await _reviewService.SoftDeleteAsync(reviewId);
-                var response = new BaseResponse<bool>
-                {
-                    Code = "Success",
-                    StatusCode = StatusCodeHelper.OK,
-                    Message = "Review soft deleted successfully."
-                };
-                return Ok(response);
-            }
-            catch (ArgumentException ex)
-            {
-                var response = new BaseResponse<bool>
-                {
-                    Code = "BadRequest",
-                    StatusCode = StatusCodeHelper.BadRequest,
-                    Message = ex.Message
-                };
-                return BadRequest(response);
-            }
-            catch (Exception)
-            {
-                var response = new BaseResponse<bool>
-                {
-                    Code = "ServerError",
-                    StatusCode = StatusCodeHelper.ServerError,
-                    Message = "An unexpected error occurred."
-                };
-                return StatusCode(500, response);
-            }
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Review soft deleted successfully."
+            };
+            return Ok(response);
         }
     }
 }

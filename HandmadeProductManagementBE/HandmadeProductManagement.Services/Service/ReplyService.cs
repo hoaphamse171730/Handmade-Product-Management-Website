@@ -1,6 +1,7 @@
 ﻿using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
+using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.ModelViews.ReplyModelViews;
 using HandmadeProductManagement.ModelViews.ReviewModelViews;
 using HandmadeProductManagement.ModelViews.ShopModelViews;
@@ -28,11 +29,11 @@ namespace HandmadeProductManagement.Services.Service
         {
             if (pageNumber <= 0)
             {
-                throw new ArgumentException("Page Number must be greater than zero.");
+                throw new BaseException.BadRequestException("invalid_page_number", "Page Number must be greater than zero.");
             }
             if (pageSize <= 0)
             {
-                throw new ArgumentException("Page Size must be greater than zero.");
+                throw new BaseException.BadRequestException("invalid_page_size", "Page Size must be greater than zero.");
             }
 
             var replies = await _unitOfWork.GetRepository<Reply>().GetAllAsync();
@@ -52,13 +53,13 @@ namespace HandmadeProductManagement.Services.Service
         {
             if (string.IsNullOrWhiteSpace(replyId))
             {
-                throw new ArgumentException("Reply ID cannot be null or empty.");
+                throw new BaseException.BadRequestException("invalid_reply_id", "Reply ID cannot be null or empty.");
             }
 
             var reply = await _unitOfWork.GetRepository<Reply>().GetByIdAsync(replyId);
             if (reply == null)
             {
-                throw new ArgumentException("Reply not found.");
+                throw new BaseException.NotFoundException("reply_not_found", "Reply not found.");
             }
 
             return new ReplyModel
@@ -75,23 +76,23 @@ namespace HandmadeProductManagement.Services.Service
         {
             if (replyModel == null)
             {
-                throw new ArgumentException("Reply model cannot be null.");
+                throw new BaseException.BadRequestException("null_reply_model", "Reply model cannot be null.");
             }
 
             if (string.IsNullOrWhiteSpace(replyModel.ReviewId) || !Guid.TryParse(replyModel.ReviewId, out _))
             {
-                throw new ArgumentException("Invalid reviewId format.");
+                throw new BaseException.BadRequestException("invalid_review_id_format", "Invalid reviewId format.");
             }
 
             var review = await _unitOfWork.GetRepository<Review>().GetByIdAsync(replyModel.ReviewId);
             if (review == null)
             {
-                throw new ArgumentException("Review not found.");
+                throw new BaseException.NotFoundException("review_not_found", "Review not found.");
             }
 
             if (string.IsNullOrWhiteSpace(replyModel.ShopId) || !Guid.TryParse(replyModel.ShopId, out _))
             {
-                throw new ArgumentException("Invalid shopId format.");
+                throw new BaseException.BadRequestException("invalid_shop_id_format", "Invalid shopId format.");
             }
 
             var shop = await _unitOfWork.GetRepository<Shop>()
@@ -99,7 +100,7 @@ namespace HandmadeProductManagement.Services.Service
                                  .FirstOrDefaultAsync(s => s.Id == replyModel.ShopId);
             if (shop == null)
             {
-                throw new ArgumentException("Shop not found.");
+                throw new BaseException.NotFoundException("shop_not_found", "Shop not found.");
             }
 
             var product = await _unitOfWork.GetRepository<Product>()
@@ -107,7 +108,7 @@ namespace HandmadeProductManagement.Services.Service
                                            .FirstOrDefaultAsync(p => p.Id == review.ProductId && p.ShopId == shop.Id);
             if (product == null)
             {
-                throw new ArgumentException("The specified shop cannot reply to this review.");
+                throw new BaseException.BadRequestException("shop_cannot_reply", "The specified shop cannot reply to this review.");
             }
 
             var existingReply = await _unitOfWork.GetRepository<Reply>()
@@ -115,7 +116,7 @@ namespace HandmadeProductManagement.Services.Service
                                        .FirstOrDefaultAsync(r => r.ReviewId == replyModel.ReviewId);
             if (existingReply != null)
             {
-                throw new ArgumentException("This review already has a reply.");
+                throw new BaseException.BadRequestException("reply_already_exists", "This review already has a reply.");
             }
 
             var reply = new Reply
@@ -141,18 +142,18 @@ namespace HandmadeProductManagement.Services.Service
         {
             if (string.IsNullOrWhiteSpace(replyId))
             {
-                throw new ArgumentException("Reply ID cannot be null or empty.");
+                throw new BaseException.BadRequestException("invalid_reply_id", "Reply ID cannot be null or empty.");
             }
 
             var existingReply = await _unitOfWork.GetRepository<Reply>().GetByIdAsync(replyId);
             if (existingReply == null)
             {
-                throw new ArgumentException("Reply not found.");
+                throw new BaseException.NotFoundException("reply_not_found", "Reply not found.");
             }
 
             if (string.IsNullOrWhiteSpace(updatedReply.ShopId) || !Guid.TryParse(updatedReply.ShopId, out _))
             {
-                throw new ArgumentException("Invalid shopId format.");
+                throw new BaseException.BadRequestException("invalid_shop_id_format", "Invalid shopId format.");
             }
 
             var shop = await _unitOfWork.GetRepository<Shop>()
@@ -160,7 +161,7 @@ namespace HandmadeProductManagement.Services.Service
                          .FirstOrDefaultAsync(s => s.Id == updatedReply.ShopId);
             if (shop == null)
             {
-                throw new ArgumentException("Shop not found.");
+                throw new BaseException.NotFoundException("shop_not_found", "Shop not found.");
             }
 
             if (!string.IsNullOrWhiteSpace(updatedReply.Content))
@@ -181,13 +182,13 @@ namespace HandmadeProductManagement.Services.Service
         {
             if (string.IsNullOrWhiteSpace(replyId))
             {
-                throw new ArgumentException("Reply ID cannot be null or empty.");
+                throw new BaseException.BadRequestException("invalid_reply_id", "Reply ID cannot be null or empty.");
             }
 
             var existingReply = await _unitOfWork.GetRepository<Reply>().GetByIdAsync(replyId);
             if (existingReply == null)
             {
-                throw new ArgumentException("Reply not found.");
+                throw new BaseException.NotFoundException("reply_not_found", "Reply not found.");
             }
 
             existingReply.DeletedTime = DateTimeOffset.UtcNow;
@@ -201,13 +202,13 @@ namespace HandmadeProductManagement.Services.Service
         {
             if (string.IsNullOrWhiteSpace(replyId))
             {
-                throw new ArgumentException("Reply ID cannot be null or empty.");
+                throw new BaseException.BadRequestException("invalid_reply_id", "Reply ID cannot be null or empty.");
             }
 
             var existingReply = await _unitOfWork.GetRepository<Reply>().GetByIdAsync(replyId);
             if (existingReply == null)
             {
-                throw new ArgumentException("Reply not found.");
+                throw new BaseException.NotFoundException("reply_not_found", "Reply not found.");
             }
 
             var shop = await _unitOfWork.GetRepository<Shop>()
@@ -215,7 +216,7 @@ namespace HandmadeProductManagement.Services.Service
                                  .FirstOrDefaultAsync(s => s.Id == existingReply.ShopId);
             if (shop == null)
             {
-                throw new ArgumentException("Shop not found.");
+                throw new BaseException.NotFoundException("shop_not_found", "Shop not found.");
             }
 
             existingReply.DeletedTime = DateTimeOffset.UtcNow;
@@ -226,6 +227,5 @@ namespace HandmadeProductManagement.Services.Service
 
             return true;
         }
-
     }
 }
