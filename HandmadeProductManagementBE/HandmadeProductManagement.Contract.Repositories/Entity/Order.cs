@@ -12,7 +12,7 @@ namespace HandmadeProductManagement.Contract.Repositories.Entity
 {
     public class Order : BaseEntity
     {
-        public int TotalPrice { get; set; } 
+        public decimal TotalPrice { get; set; } 
         public DateTime OrderDate { get; set; }
         public string Status { get; set; } = string.Empty;
         public Guid UserId { get; set; }

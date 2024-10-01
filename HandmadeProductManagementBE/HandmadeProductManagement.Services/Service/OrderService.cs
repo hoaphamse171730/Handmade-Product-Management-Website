@@ -2,6 +2,7 @@
 using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.ModelViews.OrderDetailModelViews;
 using HandmadeProductManagement.ModelViews.OrderModelViews;
 using HandmadeProductManagement.ModelViews.PaymentModelViews;
 using HandmadeProductManagement.Repositories.Entity;
@@ -24,23 +25,25 @@ namespace HandmadeProductManagement.Services.Service
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<OrderResponseModel> CreateOrderAsync(CreateOrderDto createOrder)
+        public async Task<bool> CreateOrderAsync(CreateOrderDto createOrder)
         {
             ValidateOrder(createOrder);
 
             var userRepository = _unitOfWork.GetRepository<ApplicationUser>();
-            var userExists = await userRepository.Entities.AnyAsync(u => u.Id.ToString() == createOrder.UserId.ToString());
+            var userExists = await userRepository.Entities
+                .AnyAsync(u => u.Id.ToString() == createOrder.UserId && !u.DeletedTime.HasValue);
             if (!userExists)
             {
-                throw new BaseException.ErrorException(404, "user_not_found", "User not found.");
+                throw new BaseException.NotFoundException("user_not_found", "User not found.");
             }
 
-            var repository = _unitOfWork.GetRepository<Order>();
+            var orderRepository = _unitOfWork.GetRepository<Order>();
+            var orderDetailRepository = _unitOfWork.GetRepository<OrderDetail>();
+            var totalPrice = createOrder.OrderDetails.Sum(detail => detail.UnitPrice * detail.ProductQuantity);
 
             var order = new Order
             {
-                Id = Guid.NewGuid().ToString(),
-                TotalPrice = createOrder.TotalPrice,
+                TotalPrice = (decimal)totalPrice,
                 OrderDate = DateTime.UtcNow,
                 Status = "Pending",
                 UserId = Guid.Parse(createOrder.UserId.ToString()),
@@ -48,35 +51,37 @@ namespace HandmadeProductManagement.Services.Service
                 CustomerName = createOrder.CustomerName,
                 Phone = createOrder.Phone,
                 Note = createOrder.Note,
-                CancelReasonId = createOrder.CancelReasonId
+                CancelReasonId = createOrder.CancelReasonId,
+                CreatedBy = createOrder.UserId,
+                LastUpdatedBy = createOrder.UserId
             };
 
-            order.CreatedBy = order.UserId.ToString();
-            order.CreatedTime = DateTime.UtcNow;
-            order.LastUpdatedBy = order.UserId.ToString();
-            order.LastUpdatedTime = DateTime.UtcNow;
+            foreach (var detail in createOrder.OrderDetails)
+            {
 
-            await repository.InsertAsync(order);
+                ValidateOrderDetail(detail);
+
+                var orderDetail = new OrderDetail
+                {
+                    ProductId = detail.ProductId,
+                    ProductQuantity = detail.ProductQuantity,
+                    UnitPrice = detail.UnitPrice,
+                    OrderId = order.Id,
+                    CreatedBy = createOrder.UserId,
+                    LastUpdatedBy = createOrder.UserId
+                };
+                order.OrderDetails.Add(orderDetail);
+            }
+
+            await orderRepository.InsertAsync(order);
             await _unitOfWork.SaveAsync();
 
-            return new OrderResponseModel
-            {
-                Id = order.Id,
-                TotalPrice = order.TotalPrice,
-                OrderDate = order.OrderDate,
-                Status = order.Status,
-                UserId = order.UserId,
-                Address = order.Address,
-                CustomerName = order.CustomerName,
-                Phone = order.Phone,
-                Note = order.Note,
-                CancelReasonId = order.CancelReasonId
-            };
+            return true;
         }
 
         public async Task<bool> DeleteOrderAsync(string orderId)
         {
-            if (string.IsNullOrEmpty(orderId))
+            if (string.IsNullOrWhiteSpace(orderId))
             {
                 throw new BaseException.BadRequestException("empty_order_id", "Order ID is required.");
             }
@@ -87,10 +92,11 @@ namespace HandmadeProductManagement.Services.Service
             }
 
             var repository = _unitOfWork.GetRepository<Order>();
-            var order = await repository.Entities.FirstOrDefaultAsync(o => o.Id == orderId);
+            var order = await repository.Entities
+                .FirstOrDefaultAsync(o => o.Id == orderId && !o.DeletedTime.HasValue);
             if (order == null)
             {
-                return false;
+                throw new BaseException.NotFoundException("order_not_found", "Order not found.");
             }
 
             order.DeletedBy = order.UserId.ToString();
@@ -104,7 +110,7 @@ namespace HandmadeProductManagement.Services.Service
         public async Task<IList<OrderResponseModel>> GetAllOrdersAsync()
         {
             IQueryable<Order> query = _unitOfWork.GetRepository<Order>().Entities
-                .Where(order => order.DeletedBy == null);
+                .Where(order => !order.DeletedTime.HasValue);
             var result = await query.Select(order => new OrderResponseModel
             {
                 Id = order.Id,
@@ -124,7 +130,7 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<OrderResponseModel> GetOrderByIdAsync(string orderId)
         {
-            if (string.IsNullOrEmpty(orderId))
+            if (string.IsNullOrWhiteSpace(orderId))
             {
                 throw new BaseException.BadRequestException("empty_order_id", "Order ID is required.");
             }
@@ -136,12 +142,11 @@ namespace HandmadeProductManagement.Services.Service
 
             var repository = _unitOfWork.GetRepository<Order>();
             var order = await repository.Entities
-                .FirstOrDefaultAsync(o => o.Id == orderId && o.DeletedBy == null);
+                .FirstOrDefaultAsync(o => o.Id == orderId && !o.DeletedTime.HasValue);
 
             if (order == null)
             {
-                throw new BaseException.ErrorException(
-                    404, "order_not_found", "Order not found.");
+                throw new BaseException.NotFoundException("order_not_found", "Order not found.");
             }
 
             return new OrderResponseModel
@@ -159,7 +164,7 @@ namespace HandmadeProductManagement.Services.Service
             };
         }
 
-        public async Task<OrderResponseModel> UpdateOrderAsync(string orderId, CreateOrderDto order)
+        public async Task<bool> UpdateOrderAsync(string orderId, CreateOrderDto order)
         {
             if (string.IsNullOrWhiteSpace(orderId) || !Guid.TryParse(orderId, out _))
             {
@@ -170,15 +175,12 @@ namespace HandmadeProductManagement.Services.Service
 
             var repository = _unitOfWork.GetRepository<Order>();
             var existingOrder = await repository.Entities
-                .FirstOrDefaultAsync(o => o.Id == orderId && o.DeletedBy == null);
+                .FirstOrDefaultAsync(o => o.Id == orderId && !o.DeletedTime.HasValue);
 
             if (existingOrder == null)
             {
-                throw new BaseException.ErrorException(
-                    404, "order_not_found", "Order not found.");
+                throw new BaseException.NotFoundException("order_not_found", "Order not found.");
             }
-
-            existingOrder.TotalPrice = order.TotalPrice;
             existingOrder.Address = order.Address;
             existingOrder.CustomerName = order.CustomerName;
             existingOrder.Phone = order.Phone;
@@ -190,33 +192,22 @@ namespace HandmadeProductManagement.Services.Service
             repository.Update(existingOrder);
             await _unitOfWork.SaveAsync();
 
-            return new OrderResponseModel
-            {
-                Id = existingOrder.Id,
-                TotalPrice = existingOrder.TotalPrice,
-                OrderDate = existingOrder.OrderDate,
-                Status = existingOrder.Status,
-                UserId = existingOrder.UserId,
-                Address = existingOrder.Address,
-                CustomerName = existingOrder.CustomerName,
-                Phone = existingOrder.Phone,
-                Note = existingOrder.Note,
-                CancelReasonId = existingOrder.CancelReasonId
-            };
+            return true;
         }
 
         public async Task<IList<OrderResponseModel>> GetOrderByUserIdAsync(Guid userId)
         {
             var userRepository = _unitOfWork.GetRepository<ApplicationUser>();
-            var userExists = await userRepository.Entities.AnyAsync(u => u.Id == userId);
+            var userExists = await userRepository.Entities
+                .AnyAsync(u => u.Id == userId && !u.DeletedTime.HasValue);
             if (!userExists)
             {
-                throw new BaseException.ErrorException(404, "user_not_found", "User not found.");
+                throw new BaseException.NotFoundException("user_not_found", "User not found.");
             }
 
             var repository = _unitOfWork.GetRepository<Order>();
             var orders = await repository.Entities
-                .Where(o => o.UserId == userId && o.DeletedBy == null)
+                .Where(o => o.UserId == userId && !o.DeletedTime.HasValue)
                 .Select(order => new OrderResponseModel
                 {
                     Id = order.Id,
@@ -234,9 +225,9 @@ namespace HandmadeProductManagement.Services.Service
             return orders;
         }
 
-        public async Task<OrderResponseModel> UpdateOrderStatusAsync(string orderId, string status)
+        public async Task<bool> UpdateOrderStatusAsync(string orderId, string status)
         {
-            if (string.IsNullOrEmpty(orderId))
+            if (string.IsNullOrWhiteSpace(orderId))
             {
                 throw new BaseException.BadRequestException("invalid_order_id", "Order ID is required.");
             }
@@ -248,12 +239,11 @@ namespace HandmadeProductManagement.Services.Service
 
             var repository = _unitOfWork.GetRepository<Order>();
             var existingOrder = await repository.Entities
-                .FirstOrDefaultAsync(o => o.Id == orderId && o.DeletedBy == null);
+                .FirstOrDefaultAsync(o => o.Id == orderId && !o.DeletedTime.HasValue);
 
             if (existingOrder == null)
             {
-                throw new BaseException.ErrorException(
-                    404, "order_not_found", "Order not found.");
+                throw new BaseException.NotFoundException("order_not_found", "Order not found.");
             }
 
             existingOrder.Status = status;
@@ -263,39 +253,22 @@ namespace HandmadeProductManagement.Services.Service
             repository.Update(existingOrder);
             await _unitOfWork.SaveAsync();
 
-            return new OrderResponseModel
-            {
-                Id = existingOrder.Id,
-                TotalPrice = existingOrder.TotalPrice,
-                OrderDate = existingOrder.OrderDate,
-                Status = existingOrder.Status,
-                UserId = existingOrder.UserId,
-                Address = existingOrder.Address,
-                CustomerName = existingOrder.CustomerName,
-                Phone = existingOrder.Phone,
-                Note = existingOrder.Note,
-                CancelReasonId = existingOrder.CancelReasonId
-            };
+            return true;
         }
 
         private void ValidateOrder(CreateOrderDto order)
         {
-            if (string.IsNullOrEmpty(order.UserId.ToString()))
+            if (string.IsNullOrWhiteSpace(order.UserId))
             {
                 throw new BaseException.BadRequestException("invalid_user_id", "Please input User id.");
             }
 
-            if (!Guid.TryParse(order.UserId.ToString(), out _))
+            if (!Guid.TryParse(order.UserId, out _))
             {
                 throw new BaseException.BadRequestException("invalid_user_id_format", "User ID format is invalid. Example: 123e4567-e89b-12d3-a456-426614174000.");
             }
 
-            if (order.TotalPrice <= 0)
-            {
-                throw new BaseException.BadRequestException("invalid_total_price", "Total price must be greater than zero.");
-            }
-
-            if (string.IsNullOrEmpty(order.Address))
+            if (string.IsNullOrWhiteSpace(order.Address))
             {
                 throw new BaseException.BadRequestException("invalid_address", "Address cannot be null or empty.");
             }
@@ -305,7 +278,7 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.BadRequestException("invalid_address_format", "Address cannot contain special characters.");
             }
 
-            if (string.IsNullOrEmpty(order.CustomerName))
+            if (string.IsNullOrWhiteSpace(order.CustomerName))
             {
                 throw new BaseException.BadRequestException("invalid_customer_name", "Customer name cannot be null or empty.");
             }
@@ -315,7 +288,7 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.BadRequestException("invalid_customer_name_format", "Customer name can only contain letters and spaces.");
             }
 
-            if (string.IsNullOrEmpty(order.Phone))
+            if (string.IsNullOrWhiteSpace(order.Phone))
             {
                 throw new BaseException.BadRequestException("invalid_phone", "Phone number cannot be null or empty.");
             }
@@ -324,7 +297,39 @@ namespace HandmadeProductManagement.Services.Service
             {
                 throw new BaseException.BadRequestException("invalid_phone_format", "Phone number must be numeric and up to 10 digits.");
             }
+        }
 
+        private void ValidateOrderDetail(OrderDetailForCreationDto detail)
+        {
+            if (string.IsNullOrWhiteSpace(detail.ProductId))
+            {
+                throw new BaseException.BadRequestException("invalid_product_id", "Please input Product id.");
+            }
+
+            if (!Guid.TryParse(detail.ProductId, out _))
+            {
+                throw new BaseException.BadRequestException("invalid_product_id_format", "Product ID format is invalid. Example: 123e4567-e89b-12d3-a456-426614174000.");
+            }
+
+            if (string.IsNullOrWhiteSpace(detail.OrderId))
+            {
+                throw new BaseException.BadRequestException("invalid_order_id", "Please input Order id.");
+            }
+
+            if (!Guid.TryParse(detail.OrderId, out _))
+            {
+                throw new BaseException.BadRequestException("invalid_order_id_format", "Order ID format is invalid. Example: 123e4567-e89b-12d3-a456-426614174000.");
+            }
+
+            if (detail.ProductQuantity == null || detail.ProductQuantity <= 0)
+            {
+                throw new BaseException.BadRequestException("invalid_product_quantity", "Product quantity must be greater than zero and not null.");
+            }
+
+            if (detail.UnitPrice == null || detail.UnitPrice <= 0)
+            {
+                throw new BaseException.BadRequestException("invalid_unit_price", "Unit price must be greater than zero and not null.");
+            }
         }
     }
 }
