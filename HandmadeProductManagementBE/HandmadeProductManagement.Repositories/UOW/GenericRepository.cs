@@ -97,6 +97,10 @@ namespace HandmadeProductManagement.Repositories.UOW
         {
             return await _dbSet.Where(filter).ToListAsync();
         }
-
+    
+        public async Task<int> CountAsync()
+        {
+            return await _context.Set<T>().CountAsync();
+        }
     }
 }

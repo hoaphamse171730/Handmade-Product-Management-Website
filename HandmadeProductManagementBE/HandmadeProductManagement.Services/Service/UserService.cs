@@ -1,15 +1,9 @@
 ﻿using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
-using HandmadeProductManagement.Core.Base;
-using HandmadeProductManagement.Core.Constants;
-using HandmadeProductManagement.Core.Utils;
+
 using HandmadeProductManagement.ModelViews.UserModelViews;
 using HandmadeProductManagement.Repositories.Entity;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text.RegularExpressions;
 
 namespace HandmadeProductManagement.Services.Service
 {
