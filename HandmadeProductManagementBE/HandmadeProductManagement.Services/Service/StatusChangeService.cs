@@ -82,10 +82,10 @@ namespace HandmadeProductManagement.Services.Service
         }
 
         // Create a new status change
-        public async Task<StatusChangeResponseModel> Create(CreateStatusChangeDto statusChangeDto)
+        public async Task<StatusChangeResponseModel> Create(CreateStatusChangeDto createStatusChange)
         {
             // Check if OrderId exists
-            var orderExists = await _unitOfWork.GetRepository<Order>().GetByIdAsync(statusChangeDto.OrderId);
+            var orderExists = await _unitOfWork.GetRepository<Order>().GetByIdAsync(createStatusChange.OrderId);
             if (orderExists == null)
             {
                 throw new ArgumentException("OrderId does not exist.");
@@ -93,11 +93,14 @@ namespace HandmadeProductManagement.Services.Service
 
             var statusChange = new StatusChange
             {
-                OrderId = statusChangeDto.OrderId,
-                Status = statusChangeDto.Status,
-                ChangeTime = statusChangeDto.ChangeTime,
-                CreatedBy = "currentUser" // Update with actual user info
+                OrderId = createStatusChange.OrderId,
+                Status = createStatusChange.Status,
+                ChangeTime = createStatusChange.ChangeTime
             };
+
+            // Set metadata
+            statusChange.CreatedBy = "currentUser"; // Update with actual user info
+            statusChange.LastUpdatedBy = "currentUser"; // Update with actual user info
 
             await _unitOfWork.GetRepository<StatusChange>().InsertAsync(statusChange);
             await _unitOfWork.SaveAsync();

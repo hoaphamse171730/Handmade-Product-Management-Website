@@ -80,8 +80,6 @@ namespace HandmadeProductManagement.Services.Service
             // Set metadata
             cancelReason.CreatedBy = "currentUser"; // Update with actual user info
             cancelReason.LastUpdatedBy = "currentUser"; // Update with actual user info
-            cancelReason.CreatedTime = DateTimeOffset.UtcNow;
-            cancelReason.LastUpdatedTime = DateTimeOffset.UtcNow;
 
             await _unitOfWork.GetRepository<CancelReason>().InsertAsync(cancelReason);
             await _unitOfWork.SaveAsync();
