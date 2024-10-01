@@ -1,13 +1,12 @@
 ﻿
 using Microsoft.AspNetCore.Mvc;
-using HandmadeProductManagement.Repositories.Entity;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.ModelViews.UserModelViews;
 using System.Security.Claims;
 using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
-
+using HandmadeProductManagement.Core.Constants;
 namespace HandmadeProductManagementAPI.Controllers
 {
     [Route("api/[controller]")]
@@ -22,37 +21,45 @@ namespace HandmadeProductManagementAPI.Controllers
 
         // GET: api/Users
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ApplicationUser>>> GetApplicationUsers()
+        public async Task<IActionResult> GetApplicationUsers()
         {
-            IList<UserResponseModel> a = await _userService.GetAll();
 
-                if (a == null)
+            var response = new BaseResponse<IList<UserResponseModel>>
             {
-                return StatusCode(404,BaseResponse<String>.FailResponse("No user found"));
-            }
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Success",
+                Data = await _userService.GetAll()
+            };
+            return Ok(response);
 
 
-            return Ok(BaseResponse<IList<UserResponseModel>>.OkResponse(a));
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<UserResponseByIdModel>> GetApplicationUsersById(String id)
+        public async Task<IActionResult> GetApplicationUsersById(String id)
         {
-            UserResponseByIdModel userResponse = await _userService.GetById(id);
-
-            if (userResponse == null)
+            var response = new BaseResponse<UserResponseByIdModel>
             {
-                return StatusCode(404, BaseResponse<String>.FailResponse("User not found"));
-            }
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Success",
+                Data = await _userService.GetById(id)
+        };
+            return Ok(response);
 
-            return Ok(BaseResponse<UserResponseByIdModel>.OkResponse(userResponse));
+            /*   if (userResponse == null)
+               {
+                   return StatusCode(404, BaseResponse<String>.FailResponse("User not found"));
+               }*/
+
         }
 
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateUser(string id,  UpdateUserDTO updateUserDTO)
         {
-            if (id == null || updateUserDTO == null)
+            /*if (id == null || updateUserDTO == null)
             {
                 return StatusCode(400, BaseResponse<String>.FailResponse("Bad Request"));
             }
@@ -70,44 +77,60 @@ namespace HandmadeProductManagementAPI.Controllers
                 return StatusCode(400, BaseResponse<string>.FailResponse("Phone number is not valid"));
             }
 
-            var updatedUser = await _userService.UpdateUser(id, updateUserDTO);
-
             if (updatedUser == null)
             {
                 return StatusCode(404, BaseResponse<String>.FailResponse("User not found"));
-            }
-
-            // Return the updated user in the response
-            return Ok(BaseResponse<UpdateUserResponseModel>.OkResponse(updatedUser));
+            }*/
+            var response = new BaseResponse<UpdateUserResponseModel>
+            {
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Success",
+                Data = await _userService.UpdateUser(id, updateUserDTO)
+            };
+            return Ok(response);
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(string id)
         {
-            // Assume you have a way to get the current user's ID or username
-            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier); // Adjust as needed
 
-            var result = await _userService.DeleteUser(id);
 
-            if (!result)
+            /*   var result = await _userService.DeleteUser(id);
+
+               if (!result)
+               {
+                   return StatusCode(404, BaseResponse<String>.FailResponse("User not found"));
+               }*/
+
+            var response = new BaseResponse<bool>
             {
-                return StatusCode(404, BaseResponse<String>.FailResponse("User not found"));
-            }
-
-            return Ok(BaseResponse<UpdateUserResponseModel>.OkResponse("Deleted successfuly")); // Return a 204 No Content response on successful deletion
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Success",
+                Data = await _userService.DeleteUser(id)
+            };
+            return Ok(response);
         }
 
         [HttpPost("{id}/restore")] // Assuming you want to use a POST request to restore
         public async Task<IActionResult> ReverseDeleteUser(string id)
         {
-            var result = await _userService.ReverseDeleteUser(id);
+            /*var result = await _userService.ReverseDeleteUser(id);
 
             if (!result)
             {
                 return StatusCode(404, BaseResponse<String>.FailResponse("User not found or already active"));
-            }
+            }*/
 
-            return Ok(BaseResponse<UpdateUserResponseModel>.OkResponse(" Undo deleted successfuly"));
+            var response = new BaseResponse<bool>
+            {
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Success",
+                Data = await _userService.DeleteUser(id)
+            };
+            return Ok(response);
         }
 
         // POST: api/Users

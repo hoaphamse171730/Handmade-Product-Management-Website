@@ -1,6 +1,7 @@
 ﻿using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
-
+using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.UserModelViews;
 using HandmadeProductManagement.Repositories.Entity;
 using Microsoft.EntityFrameworkCore;
@@ -17,29 +18,38 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<IList<UserResponseModel>> GetAll()
         {
-            IQueryable<ApplicationUser> query = _unitOfWork.GetRepository<ApplicationUser>().Entities;
+            try
+            {
+                var users = await _unitOfWork.GetRepository<ApplicationUser>()
+                    .Entities
+                    .Select(user => new UserResponseModel
+                    {
+                        Id = user.Id,
+                        UserName = user.UserName,
+                        Email = user.Email,
+                        PhoneNumber = user.PhoneNumber,
+                        CreatedBy = user.CreatedBy,
+                        LastUpdatedBy = user.LastUpdatedBy,
+                        DeletedBy = user.DeletedBy,
+                        CreatedTime = user.CreatedTime,
+                        LastUpdatedTime = user.LastUpdatedTime,
+                        DeletedTime = user.DeletedTime,
+                        Status = user.Status,
+                        CartId = user.CartId,
+                    })
+                    .ToListAsync();
 
-            // Map ApplicationUser to UserResponseModel
-
-            var user = await _unitOfWork.GetRepository<ApplicationUser>()
-                .Entities
-                .Select(user => new UserResponseModel
+                if (users == null || !users.Any())
                 {
-                    Id = user.Id,
-                    UserName = user.UserName,
-                    Email = user.Email,
-                    PhoneNumber = user.PhoneNumber,
-                    CreatedBy = user.CreatedBy,
-                    LastUpdatedBy = user.LastUpdatedBy,
-                    DeletedBy = user.DeletedBy,
-                    CreatedTime = user.CreatedTime,
-                    LastUpdatedTime = user.LastUpdatedTime, 
-                    DeletedTime = user.DeletedTime,
-                    Status = user.Status,
-                    CartId = user.CartId,
-                }).ToListAsync();
+                    throw new BaseException.BadRequestException("No User Found","Please check UserID");
+                }
 
-            return user as IList<UserResponseModel>;  // Cast List to IList
+                return users;
+            }
+            catch (Exception ex)
+            {
+                throw new BaseException.ErrorException(400,StatusCodeHelper.ServerError.ToString(),"Error");
+            }
         }
 
         public async Task<UserResponseByIdModel> GetById(string Id)
