@@ -58,6 +58,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<ICartService, CartService>();
         services.AddScoped<ICartItemService, CartItemService>();
         services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IDashboardService, DashboardService>();
         return services;
     }
 
