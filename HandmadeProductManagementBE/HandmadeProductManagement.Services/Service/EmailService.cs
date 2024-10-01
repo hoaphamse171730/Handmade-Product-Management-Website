@@ -38,7 +38,7 @@ public class EmailService(
     {
         var user = await userManager.Users
             .Include(u => u.UserInfo)
-            .SingleOrDefaultAsync(u => u.Email == destMail);
+            .SingleOrDefaultAsync(u => u.Email == destMail && !u.DeletedTime.HasValue && u.DeletedBy == null);
 
         // var fromAddress = new MailAddress(_hostMail, _companyName);
         // var toAddress = new MailAddress(destMail, "Customer");

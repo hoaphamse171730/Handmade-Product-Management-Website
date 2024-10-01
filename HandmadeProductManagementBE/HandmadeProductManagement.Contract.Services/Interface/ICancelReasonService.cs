@@ -5,8 +5,8 @@ namespace HandmadeProductManagement.Contract.Services.Interface
 {
     public interface ICancelReasonService
     {
-        Task<CancelReasonResponseModel> Create(CancelReasonForCreationDto cancelReason);
-        Task<CancelReasonResponseModel> Update(string id, CancelReasonForCreationDto cancelReason);
+        Task<CancelReasonResponseModel> Create(CreateCancelReasonDto cancelReason);
+        Task<CancelReasonResponseModel> Update(string id, CreateCancelReasonDto cancelReason);
         Task<bool> Delete(string id);
         Task<IList<CancelReasonResponseModel>> GetByPage(int page, int pageSize);
     }
