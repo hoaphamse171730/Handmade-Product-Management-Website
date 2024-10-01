@@ -25,7 +25,7 @@ namespace HandmadeProductManagementAPI.Controllers
             {
                 Code = "Success",
                 StatusCode = StatusCodeHelper.OK,
-                Message = "Get Cancel Reason sucessfully!",
+                Message = "Get Cancel Reason sucessfully.",
                 Data = await _cancelReasonService.GetByPage(page, pageSize)
             };
             return Ok(response);
@@ -40,7 +40,7 @@ namespace HandmadeProductManagementAPI.Controllers
             {
                 Code = "Success",
                 StatusCode = StatusCodeHelper.OK,
-                Message = "Created Cancel Reason successfully!",
+                Message = "Created Cancel Reason successfully.",
                 Data = null
             };
             return Ok(response);
@@ -55,7 +55,7 @@ namespace HandmadeProductManagementAPI.Controllers
             {
                 Code = "Success",
                 StatusCode = StatusCodeHelper.OK,
-                Message = "Updated Cancel Reason successfully!",
+                Message = "Updated Cancel Reason successfully.",
                 Data = null
             };
             return Ok(response);
