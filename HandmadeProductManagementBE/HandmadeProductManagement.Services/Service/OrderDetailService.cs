@@ -26,7 +26,8 @@ namespace HandmadeProductManagement.Services.Service
         public async Task<IList<OrderDetailDto>> GetAll()
         {
             var orderDetails = await _unitOfWork.GetRepository<OrderDetail>().Entities
-                .ToListAsync();
+                      .Where(od => !od.DeletedTime.HasValue && od.DeletedBy == null)
+                      .ToListAsync();
             var orderDetailsDto = _mapper.Map<IList<OrderDetailDto>>(orderDetails);
             return orderDetailsDto;
         }
@@ -34,7 +35,7 @@ namespace HandmadeProductManagement.Services.Service
         public async Task<OrderDetailDto> GetById(string id)
         {
             var orderDetail = await _unitOfWork.GetRepository<OrderDetail>().Entities
-                .FirstOrDefaultAsync(p => p.Id == id);
+                .FirstOrDefaultAsync(p => p.Id == id && !p.DeletedTime.HasValue && p.DeletedBy == null);
 
             if (orderDetail == null)
                 throw new KeyNotFoundException("Order Detail not found");
@@ -55,7 +56,7 @@ namespace HandmadeProductManagement.Services.Service
         public async Task Update(string id, OrderDetailForUpdateDto orderDetailForUpdate)
         {
             var orderDetailEntity = await _unitOfWork.GetRepository<OrderDetail>().Entities
-                .FirstOrDefaultAsync(p => p.Id == id);
+                    .FirstOrDefaultAsync(p => p.Id == id && !p.DeletedTime.HasValue && p.DeletedBy == null);
 
             if (orderDetailEntity == null)
                 throw new KeyNotFoundException("Order detail not found");
@@ -70,15 +71,19 @@ namespace HandmadeProductManagement.Services.Service
         public async Task Delete(string id)
         {
             var repo = _unitOfWork.GetRepository<OrderDetail>();
-            var orderDetailEntity = repo.Entities
-                .FirstOrDefault(p => p.Id == id);
+            var orderDetailEntity = await repo.Entities
+                .FirstOrDefaultAsync(p => p.Id == id && !p.DeletedTime.HasValue && p.DeletedBy == null);
+
             if (orderDetailEntity == null)
-                throw new KeyNotFoundException("Order Detail not found");
-            // orderDetailEntity.DeletedBy = userId.ToString();
+                throw new KeyNotFoundException("Order Detail not found or has already been deleted");
+
+            orderDetailEntity.DeletedBy = "System"; // update with actual user context later
             orderDetailEntity.DeletedTime = DateTime.UtcNow;
-            repo.Delete(orderDetailEntity);
+
+            await repo.UpdateAsync(orderDetailEntity); // Use UpdateAsync to keep object in soft delete
             await _unitOfWork.SaveAsync();
         }
+
 
         public async Task SoftDelete(string id)
         {

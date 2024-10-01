@@ -30,7 +30,8 @@ namespace HandmadeProductManagement.Services.Service
             ValidatePayment(createPaymentDto);
 
             var userRepository = _unitOfWork.GetRepository<ApplicationUser>();
-            var userExists = await userRepository.Entities.AnyAsync(u => u.Id.ToString() == createPaymentDto.UserId);
+            var userExists = await userRepository.Entities
+                        .AnyAsync(u => u.Id.ToString() == createPaymentDto.UserId && !u.DeletedTime.HasValue && u.DeletedBy == null);
             if (!userExists)
             {
                 throw new BaseException.ErrorException(404, "user_not_found", "User not found.");
@@ -87,7 +88,8 @@ namespace HandmadeProductManagement.Services.Service
             ValidatePaymentStatus(paymentId, status);
 
             var paymentRepository = _unitOfWork.GetRepository<Payment>();
-            var payment = await paymentRepository.Entities.FirstOrDefaultAsync(p => p.Id == paymentId);
+            var payment = await paymentRepository.Entities
+                        .FirstOrDefaultAsync(p => p.Id == paymentId && !p.DeletedTime.HasValue && p.DeletedBy == null);
 
             if (payment == null)
             {
@@ -123,7 +125,8 @@ namespace HandmadeProductManagement.Services.Service
             }
 
             var orderRepository = _unitOfWork.GetRepository<Order>();
-            var orderExists = await orderRepository.Entities.AnyAsync(o => o.Id == orderId);
+            var orderExists = await orderRepository.Entities
+                        .AnyAsync(o => o.Id == orderId && !o.DeletedTime.HasValue && o.DeletedBy == null);
             if (!orderExists)
             {
                 throw new BaseException.ErrorException(404, "order_not_found", "Order not found.");
@@ -132,7 +135,7 @@ namespace HandmadeProductManagement.Services.Service
             var paymentRepository = _unitOfWork.GetRepository<Payment>();
             var payment = await paymentRepository.Entities
                 .Include(p => p.PaymentDetails)
-                .FirstOrDefaultAsync(p => p.OrderId == orderId);
+                .FirstOrDefaultAsync(p => p.OrderId == orderId && !p.DeletedTime.HasValue && p.DeletedBy == null);
 
             if (payment == null)
             {
@@ -155,7 +158,8 @@ namespace HandmadeProductManagement.Services.Service
             var orderRepository = _unitOfWork.GetRepository<Order>();
             var today = DateTime.UtcNow.Date;
             var expiredPayments = await paymentRepository.Entities
-                .Where(p => p.ExpirationDate.Date == today && p.Status != "Expired" && p.Status != "Completed")
+                .Where(p => p.ExpirationDate.Date == today && p.Status != "Expired" && p.Status != "Completed"
+                    && !p.DeletedTime.HasValue && p.DeletedBy == null)
                 .ToListAsync();
 
             foreach (var payment in expiredPayments)
@@ -164,7 +168,8 @@ namespace HandmadeProductManagement.Services.Service
                 payment.LastUpdatedTime = DateTime.UtcNow;
                 paymentRepository.Update(payment);
 
-                var order = await orderRepository.Entities.FirstOrDefaultAsync(o => o.Id == payment.OrderId);
+                var order = await orderRepository.Entities
+                                .FirstOrDefaultAsync(o => o.Id == payment.OrderId && !o.DeletedTime.HasValue && o.DeletedBy == null);
                 if (order != null)
                 {
                     order.Status = "Payment Failed";

@@ -29,7 +29,8 @@ namespace HandmadeProductManagement.Services.Service
             ValidateOrder(createOrder);
 
             var userRepository = _unitOfWork.GetRepository<ApplicationUser>();
-            var userExists = await userRepository.Entities.AnyAsync(u => u.Id.ToString() == createOrder.UserId);
+            var userExists = await userRepository.Entities
+                        .AnyAsync(u => u.Id.ToString() == createOrder.UserId && !u.DeletedTime.HasValue && u.DeletedBy == null);
             if (!userExists)
             {
                 throw new BaseException.ErrorException(404, "user_not_found", "User not found.");
@@ -135,8 +136,7 @@ namespace HandmadeProductManagement.Services.Service
             }
 
             var repository = _unitOfWork.GetRepository<Order>();
-            var order = await repository.Entities
-                .FirstOrDefaultAsync(o => o.Id == orderId && o.DeletedBy == null);
+            var order = await repository.Entities.FirstOrDefaultAsync(o => o.Id == orderId && (!o.DeletedTime.HasValue || o.DeletedBy == null));
 
             if (order == null)
             {
@@ -216,7 +216,7 @@ namespace HandmadeProductManagement.Services.Service
 
             var repository = _unitOfWork.GetRepository<Order>();
             var orders = await repository.Entities
-                .Where(o => o.UserId == userId && o.DeletedBy == null)
+                .Where(o => o.UserId == userId && o.DeletedBy == null && !o.DeletedTime.HasValue)
                 .Select(order => new OrderResponseModel
                 {
                     Id = order.Id,
@@ -248,7 +248,7 @@ namespace HandmadeProductManagement.Services.Service
 
             var repository = _unitOfWork.GetRepository<Order>();
             var existingOrder = await repository.Entities
-                .FirstOrDefaultAsync(o => o.Id == orderId && o.DeletedBy == null);
+                .FirstOrDefaultAsync(o => o.Id == orderId && !o.DeletedTime.HasValue && o.DeletedBy == null);
 
             if (existingOrder == null)
             {
