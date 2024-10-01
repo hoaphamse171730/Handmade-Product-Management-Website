@@ -56,7 +56,7 @@ namespace HandmadeProductManagementAPI.Controllers
             {
                 Code = "Success",
                 StatusCode = StatusCodeHelper.OK,
-                Message = "Search Product Successfully",
+                Message = "Sort Product Successfully",
                 Data = products
             };
             return Ok(response);

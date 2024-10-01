@@ -15,6 +15,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using FluentValidation;
 using HandmadeProductManagement.ModelViews.PromotionModelViews;
+using HandmadeProductManagement.Core.Utils;
 
 namespace HandmadeProductManagement.Services.Service
 {
@@ -39,7 +40,7 @@ namespace HandmadeProductManagement.Services.Service
             // Validate CategoryId and ShopId datatype (Guid)
             if (!string.IsNullOrEmpty(searchModel.CategoryId) && !IsValidGuid(searchModel.CategoryId))
             {
-                //return BaseResponse<IEnumerable<ProductResponseModel>>.OkResponse("Invalid Category ID");
+                //throw new BaseException.BadRequestException("bad_request","Invalid Category Id");
             }
 
             if (!string.IsNullOrEmpty(searchModel.ShopId) && !IsValidGuid(searchModel.ShopId))
