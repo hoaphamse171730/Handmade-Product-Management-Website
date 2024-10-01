@@ -1,9 +1,7 @@
 ﻿using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
-using HandmadeProductManagement.Contract.Repositories.Entity;
 using Microsoft.AspNetCore.Mvc;
 using HandmadeProductManagement.Core.Constants;
-using HandmadeProductManagement.Services.Service;
 using HandmadeProductManagement.ModelViews.StatusChangeModelViews;
 
 namespace HandmadeProductManagementAPI.Controllers
@@ -23,95 +21,74 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpGet("page")]
         public async Task<IActionResult> GetByPage([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
-            try
+            var response = new BaseResponse<IList<StatusChangeResponseModel>>
             {
-                var paginatedResult = await _statusChangeService.GetByPage(page, pageSize);
-                return Ok(BaseResponse<IList<StatusChangeResponseModel>>.OkResponse(paginatedResult));
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message, StatusCodeHelper.ServerError));
-            }
+                Code = "OK",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Success",
+                Data = await _statusChangeService.GetByPage(page, pageSize)
+            };
+            return Ok(response);
         }
 
         // GET: api/StatusChange/Order/{orderId}
         [HttpGet("Order/{orderId}")]
         public async Task<IActionResult> GetStatusChangesByOrderId(string orderId)
         {
-            try
+            var response = new BaseResponse<IList<StatusChangeResponseModel>>
             {
-                IList<StatusChangeResponseModel> statusChanges = await _statusChangeService.GetByOrderId(orderId);
-                return Ok(BaseResponse<IList<StatusChangeResponseModel>>.OkResponse(statusChanges));
-            }
-            catch (KeyNotFoundException)
-            {
-                return NotFound(BaseResponse<string>.FailResponse("No status changes found for the given OrderId.", StatusCodeHelper.NotFound));
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message, StatusCodeHelper.ServerError));
-            }
+                Code = "OK",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Success",
+                Data = await _statusChangeService.GetByOrderId(orderId)
+            };
+            return Ok(response);
         }
 
         // POST: api/statuschange
         [HttpPost]
         public async Task<IActionResult> CreateStatusChange([FromBody] CreateStatusChangeDto statusChange)
         {
-            try
+            await _statusChangeService.Create(statusChange);
+            var response = new BaseResponse<StatusChangeResponseModel>
             {
-                var createdStatusChange = await _statusChangeService.Create(statusChange);
-                return Ok(BaseResponse<StatusChangeResponseModel>.OkResponse("Created Status Change successfully!"));
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(BaseResponse<string>.FailResponse(ex.Message));
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message, StatusCodeHelper.ServerError));
-            }
+                Code = "OK",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Created Status Change successfully!",
+                Data = null
+            };
+            return Ok(response);
         }
 
         // PUT: api/statuschange/{id}
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateStatusChange(string id, [FromBody] CreateStatusChangeDto updatedStatusChange)
         {
-            try
+            await _statusChangeService.Update(id, updatedStatusChange);
+            var response = new BaseResponse<StatusChangeResponseModel>
             {
-                var statusChange = await _statusChangeService.Update(id, updatedStatusChange);
-                return Ok(BaseResponse<StatusChangeResponseModel>.OkResponse("Updated Status Change successfully!"));
-            }
-            catch (KeyNotFoundException)
-            {
-                return NotFound(BaseResponse<string>.FailResponse("Status Change not found", StatusCodeHelper.NotFound));
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(BaseResponse<string>.FailResponse(ex.Message));
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message, StatusCodeHelper.ServerError));
-            }
+                Code = "OK",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Updated Status Change successfully!",
+                Data = null
+            };
+            return Ok(response);
         }
 
         // DELETE: api/statuschange/{id}
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteStatusChange(string id)
         {
-            try
+            await _statusChangeService.Delete(id);
+
+            var response = new BaseResponse<string>
             {
-                bool success = await _statusChangeService.Delete(id);
-                if (!success)
-                {
-                    return NotFound(BaseResponse<string>.FailResponse($"Status Change with ID {id} not found.", StatusCodeHelper.NotFound));
-                }
-                return Ok(BaseResponse<string>.OkResponse($"Status Change with ID {id} has been successfully deleted."));
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message, StatusCodeHelper.ServerError));
-            }
+                Code = "OK",
+                StatusCode = StatusCodeHelper.OK,
+                Message = $"Status Change with ID {id} has been successfully deleted.",
+                Data = null
+            };
+            return Ok(response);
         }
     }
 }
