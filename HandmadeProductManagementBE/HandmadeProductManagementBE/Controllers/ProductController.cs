@@ -7,6 +7,7 @@ using HandmadeProductManagement.ModelViews.ProductDetailModelViews;
 using HandmadeProductManagement.ModelViews.ProductModelViews;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using System.Runtime.InteropServices;
 
 namespace HandmadeProductManagementAPI.Controllers
 {
@@ -19,14 +20,17 @@ namespace HandmadeProductManagementAPI.Controllers
         public ProductController(IProductService productService) => _productService = productService;
 
         [HttpGet("search")]
-        public async Task<IActionResult> SearchProducts([FromQuery] ProductSearchModel searchModel)
+        public async Task<IActionResult> SearchProducts([FromQuery] ProductSearchFilter searchFilter)
         {
-            var response = await _productService.SearchProductsAsync(searchModel);
-            if (response.Data.IsNullOrEmpty())
+            var products = await _productService.SearchProductsAsync(searchFilter);
+            var response = new BaseResponse<IEnumerable<ProductSearchVM>>
             {
-                return StatusCode(404, new BaseResponse<Product>(StatusCodeHelper.NotFound, StatusCodeHelper.NotFound.Name(), "Product Not Found!"));
-            }
-            return StatusCode((int)response.StatusCode, response);
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Search Product Successfully",
+                Data = products
+            };
+            return Ok(response);
         }
 
 
@@ -44,7 +48,7 @@ namespace HandmadeProductManagementAPI.Controllers
         //}
 
         [HttpGet("sort")]
-        public async Task<IActionResult> SortProducts([FromQuery] ProductSortModel sortModel)
+        public async Task<IActionResult> SortProducts([FromQuery] ProductSortFilter sortModel)
         {
             var response = await _productService.SortProductsAsync(sortModel);
             if (response.Data.IsNullOrEmpty())
