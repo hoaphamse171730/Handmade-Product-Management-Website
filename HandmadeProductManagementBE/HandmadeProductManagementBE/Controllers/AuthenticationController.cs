@@ -1,3 +1,5 @@
+using System.Web;
+using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Common;
 using HandmadeProductManagement.Core.Constants;
@@ -16,7 +18,11 @@ namespace HandmadeProductManagementAPI.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class AuthenticationController(UserManager<ApplicationUser> userManager, TokenService tokenService)
+public class AuthenticationController(
+    UserManager<ApplicationUser> userManager,
+    TokenService tokenService,
+    IEmailService emailService
+)
     : ControllerBase
 {
     [AllowAnonymous]
@@ -60,7 +66,7 @@ public class AuthenticationController(UserManager<ApplicationUser> userManager, 
                 Message = "This account has been disabled."
             };
         }
-        
+
         var success = await userManager.CheckPasswordAsync(user, loginModelView.Password);
 
         if (success)
@@ -88,12 +94,12 @@ public class AuthenticationController(UserManager<ApplicationUser> userManager, 
 
     [AllowAnonymous]
     [HttpPost("register")]
-    public async Task<ActionResult<BaseResponse<UserResponseModel>>> Register(RegisterModelView registerModelView)
+    public async Task<ActionResult<BaseResponse<string>>> Register(RegisterModelView registerModelView)
     {
         if (!ValidationHelper.IsValidNames(CustomRegex.UsernameRegex, registerModelView.UserName) ||
             !ValidationHelper.IsValidNames(CustomRegex.FullNameRegex, registerModelView.FullName)
            )
-            return new BaseResponse<UserResponseModel>()
+            return new BaseResponse<string>()
             {
                 StatusCode = StatusCodeHelper.Unauthorized,
                 Message = "Username or Full Name contains invalid characters.",
@@ -122,7 +128,7 @@ public class AuthenticationController(UserManager<ApplicationUser> userManager, 
                 .Select(e => e.ErrorMessage)
                 .ToList();
 
-            return new BaseResponse<UserResponseModel>
+            return new BaseResponse<string>
             {
                 StatusCode = StatusCodeHelper.BadRequest,
                 Message = "Validation failed: " + string.Join("; ", errors),
@@ -136,13 +142,107 @@ public class AuthenticationController(UserManager<ApplicationUser> userManager, 
 
         if (result.Succeeded)
         {
-            return BaseResponse<UserResponseModel>.OkResponse(user.Adapt<UserResponseModel>());
+            await emailService.SendEmailConfirmationAsync(user.Email!, registerModelView.ClientUri);
+            return BaseResponse<string>.OkResponse(user.Id.ToString());
         }
 
-        return new BaseResponse<UserResponseModel>()
+        return new BaseResponse<string>()
         {
             StatusCode = StatusCodeHelper.BadRequest,
             Message = result.Errors.ToString(),
         };
+    }
+
+    [AllowAnonymous]
+    [HttpPost("forgot-password")]
+    public async Task<ActionResult<BaseResponse<string>>> ForgotPassword(ForgotPasswordModelView forgotPasswordModelView)
+    {
+        var user = await userManager.FindByEmailAsync(forgotPasswordModelView.Email);
+        if (user == null
+            // || !user.EmailConfirmed
+           )
+        {
+            return new BaseResponse<string>()
+            {
+                StatusCode = StatusCodeHelper.BadRequest,
+                Message = "Email is invalid or not confirmed."
+            };
+        }
+
+        var resetToken = await userManager.GeneratePasswordResetTokenAsync(user);
+        var encodedToken = HttpUtility.UrlEncode(resetToken); //encode the token for URL safety
+
+        var passwordResetLink = $"{forgotPasswordModelView.ClientUri}?email={user.Email}&token={encodedToken}";
+
+        await emailService.SendPasswordRecoveryEmailAsync(user.Email!, passwordResetLink);
+
+        return new BaseResponse<string>()
+        {
+            StatusCode = StatusCodeHelper.OK,
+            Message = "Password reset link has been sent to your email."
+        };
+    }
+
+    [AllowAnonymous]
+    [HttpPost("reset-password")]
+    public async Task<ActionResult<BaseResponse<string>>> ResetPassword(ResetPasswordModelView resetPasswordModelView)
+    {
+        var user = await userManager.FindByEmailAsync(resetPasswordModelView.Email);
+        if (user == null)
+        {
+            return new BaseResponse<string>()
+            {
+                StatusCode = StatusCodeHelper.BadRequest,
+                Message = "Invalid request."
+            };
+        }
+
+        var decodedToken = HttpUtility.UrlDecode(resetPasswordModelView.Token); //decode the token from the request
+        var result = await userManager.ResetPasswordAsync(user, decodedToken, resetPasswordModelView.NewPassword);
+
+        if (result.Succeeded)
+        {
+            return new BaseResponse<string>()
+            {
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Password has been reset successfully."
+            };
+        }
+
+        return new BaseResponse<string>()
+        {
+            StatusCode = StatusCodeHelper.BadRequest,
+            Message = "Error resetting the password.",
+        };
+    }
+
+    [AllowAnonymous]
+    [HttpPost("confirm-email")]
+    public async Task<BaseResponse<string>> ConfirmEmail(ConfirmEmailModelView confirmEmailModelView)
+    {
+        var user = await userManager.FindByEmailAsync(confirmEmailModelView.Email);
+        if (user is null)
+        {
+            return new BaseResponse<string>()
+            {
+                StatusCode = StatusCodeHelper.BadRequest,
+                Message = "User not found."
+            };
+        }
+
+        var decodedToken = HttpUtility.UrlDecode(confirmEmailModelView.Token);
+        var result = await userManager.ConfirmEmailAsync(user, decodedToken);
+
+        if (result.Succeeded)
+        {
+            return new BaseResponse<string>()
+            {
+                StatusCode = StatusCodeHelper.OK,
+                Message = StatusCodeHelper.OK.Name()
+            };
+        }
+
+        return BaseResponse<string>.FailResponse(statusCode: StatusCodeHelper.BadRequest, 
+            message: "Error confirming the email.");
     }
 }

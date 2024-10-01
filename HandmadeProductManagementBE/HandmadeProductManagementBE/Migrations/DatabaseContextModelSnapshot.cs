@@ -484,7 +484,7 @@ namespace HandmadeProductManagementAPI.Migrations
 
             modelBuilder.Entity("HandmadeProductManagement.Contract.Repositories.Entity.OrderDetail", b =>
                 {
-                    b.Property<string>("OrderDetailId")
+                    b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("CreatedBy")
@@ -498,9 +498,6 @@ namespace HandmadeProductManagementAPI.Migrations
 
                     b.Property<DateTimeOffset?>("DeletedTime")
                         .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("LastUpdatedBy")
                         .HasColumnType("nvarchar(max)");
@@ -522,7 +519,7 @@ namespace HandmadeProductManagementAPI.Migrations
                     b.Property<float>("UnitPrice")
                         .HasColumnType("real");
 
-                    b.HasKey("OrderDetailId");
+                    b.HasKey("Id");
 
                     b.HasIndex("OrderId");
 

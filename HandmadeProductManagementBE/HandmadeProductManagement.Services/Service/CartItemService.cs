@@ -5,6 +5,8 @@ using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Utils;
 using HandmadeProductManagement.Contract.Services.Security;
+using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.Core.Constants;
 
 public class CartItemService : ICartItemService
 {
@@ -15,31 +17,41 @@ public class CartItemService : ICartItemService
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<bool> AddCartItem(string cartId, CreateCartItemDto createCartItemDto)
+    public async Task<BaseResponse<bool>> AddCartItem(string cartId, CreateCartItemDto createCartItemDto)
     {
         Console.WriteLine($"Attempting to add item to cart: {cartId}, ProductItem: {createCartItemDto.ProductItemId}");
+
+        if (string.IsNullOrEmpty(createCartItemDto.ProductItemId))
+        {
+            return BaseResponse<bool>.FailResponse("Product item ID is required.", StatusCodeHelper.BadRequest);
+        }
+
+        if (!int.TryParse(createCartItemDto.ProductQuantity.ToString(), out int quantity) || quantity < 0)
+        {
+            return BaseResponse<bool>.FailResponse("Invalid product quantity. Quantity must be a non-negative integer.", StatusCodeHelper.BadRequest);
+        }
 
         var cartRepo = _unitOfWork.GetRepository<Cart>();
         var cart = await cartRepo.Entities
             .Include(c => c.CartItems)
             .SingleOrDefaultAsync(c => c.Id == cartId);
-        if (cart is null)
+        if (cart == null)
         {
-            throw new ArgumentException($"Cart {cartId} not found");
+            return BaseResponse<bool>.FailResponse($"Cart {cartId} not found", StatusCodeHelper.NotFound);
         }
 
         var productItemRepo = _unitOfWork.GetRepository<ProductItem>();
         var productItem = await productItemRepo.Entities
             .SingleOrDefaultAsync(pi => pi.Id == createCartItemDto.ProductItemId);
-        if (productItem is null)
+        if (productItem == null)
         {
-            throw new ArgumentException($"ProductItem {createCartItemDto.ProductItemId} not found");
+            return BaseResponse<bool>.FailResponse($"ProductItem {createCartItemDto.ProductItemId} not found", StatusCodeHelper.NotFound);
         }
 
         var cartItem = new CartItem
         {
             ProductItem = productItem,
-            ProductQuantity = createCartItemDto.ProductQuantity,
+            ProductQuantity = quantity,
             CreatedTime = CoreHelper.SystemTimeNow,
             LastUpdatedTime = CoreHelper.SystemTimeNow
         };
@@ -49,44 +61,73 @@ public class CartItemService : ICartItemService
         try
         {
             await _unitOfWork.SaveAsync();
-            return true;
+            return BaseResponse<bool>.OkResponse(true);
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error adding cart item to Cart {cartId} with ProductItem {createCartItemDto.ProductItemId}: {ex.Message}");
-            return false;
+            return BaseResponse<bool>.FailResponse("Error adding cart item. Please try again.", StatusCodeHelper.ServerError);
         }
     }
 
 
-    public async Task<bool> UpdateCartItem(string cartItemId, CartItemModel cartItemModel)
+
+
+    public async Task<BaseResponse<bool>> UpdateCartItem(string cartItemId, int productQuantity)
+    {
+        if (productQuantity < 0)
+        {
+            return BaseResponse<bool>.FailResponse("Product quantity must be non-negative", StatusCodeHelper.BadRequest);
+        }
+
+        var cartItemRepo = _unitOfWork.GetRepository<CartItem>();
+        var cartItem = await cartItemRepo.Entities
+            .Where(ci => ci.Id == cartItemId && ci.DeletedTime == null)
+            .FirstOrDefaultAsync();
+
+        if (cartItem == null)
+        {
+            return BaseResponse<bool>.FailResponse("Cart item not found", StatusCodeHelper.NotFound);
+        }
+
+        cartItem.ProductQuantity = productQuantity;
+        cartItem.LastUpdatedTime = CoreHelper.SystemTimeNow;
+
+        try
+        {
+            await _unitOfWork.SaveAsync();
+            return BaseResponse<bool>.OkResponse(true);
+        }
+        catch (Exception ex)
+        {
+            return BaseResponse<bool>.FailResponse("Internal server error: " + ex.Message, StatusCodeHelper.ServerError);
+        }
+    }
+
+
+
+    public async Task<BaseResponse<bool>> RemoveCartItem(string cartItemId)
     {
         var cartItemRepo = _unitOfWork.GetRepository<CartItem>();
         var cartItem = await cartItemRepo.Entities
-                           .Where(ci => ci.Id == cartItemId.ToString() && ci.DeletedTime == null)
-                           .FirstOrDefaultAsync();
+                         .FirstOrDefaultAsync(ci => ci.Id == cartItemId && ci.DeletedTime == null);
 
         if (cartItem == null)
-            throw new InvalidOperationException("Cart item not found.");
-
-        cartItem.ProductQuantity = cartItemModel.ProductQuantity;
-        cartItem.LastUpdatedTime = CoreHelper.SystemTimeNow;
-        await _unitOfWork.SaveAsync();
-        return true;
-    }
-
-    public async Task<bool> RemoveCartItem(string cartItemId)
-    {
-        var cartItem = await _unitOfWork.GetRepository<CartItem>().Entities
-                         .FirstOrDefaultAsync(ci => ci.Id == cartItemId.ToString() && ci.DeletedTime == null);
-
-        if (cartItem != null)
         {
-            cartItem.DeletedTime = CoreHelper.SystemTimeNow;
-            cartItem.DeletedBy = "System";//update later after have context accessor
-            await _unitOfWork.SaveAsync();
-            return true;
+            return BaseResponse<bool>.FailResponse("Cart item not found", StatusCodeHelper.NotFound);
         }
-        return false;
+
+        cartItem.DeletedTime = CoreHelper.SystemTimeNow;
+        cartItem.DeletedBy = "System"; // Update later after having context accessor
+        try
+        {
+            await _unitOfWork.SaveAsync();
+            return BaseResponse<bool>.OkResponse(true);
+        }
+        catch (Exception ex)
+        {
+            return BaseResponse<bool>.FailResponse("Internal server error: " + ex.Message, StatusCodeHelper.ServerError);
+        }
     }
+
 }

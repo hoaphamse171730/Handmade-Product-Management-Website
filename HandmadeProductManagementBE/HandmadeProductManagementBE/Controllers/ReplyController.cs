@@ -50,7 +50,7 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<BaseResponse<ReplyModel>>> Create(string? content, [Required] string reviewId, [Required] string shopId)
+        public async Task<ActionResult<BaseResponse<ReplyModel>>> Create([Required] string content, [Required] string reviewId, [Required] string shopId)
         {
             try
             {
@@ -109,5 +109,29 @@ namespace HandmadeProductManagementAPI.Controllers
 
             return Ok(new BaseResponse<bool>(StatusCodeHelper.OK, "Reply deleted successfully.", true));
         }
+
+        [HttpDelete("{replyId}/softdelete")]
+        public async Task<ActionResult<BaseResponse<bool>>> SoftDelete([Required] string replyId)
+        {
+            try
+            {
+                var isSoftDeleted = await _replyService.SoftDeleteAsync(replyId);
+                if (!isSoftDeleted)
+                {
+                    return NotFound(new BaseResponse<bool>(StatusCodeHelper.BadRequest, "Reply not found.", "Reply is empty."));
+                }
+
+                return Ok(new BaseResponse<bool>(StatusCodeHelper.OK, "Reply soft deleted successfully.", true));
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new BaseResponse<bool>(StatusCodeHelper.BadRequest, ex.Message, "Please input a correct value."));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new BaseResponse<bool>(StatusCodeHelper.ServerError, "An unexpected error occurred.", string.Empty));
+            }
+        }
+
     }
 }

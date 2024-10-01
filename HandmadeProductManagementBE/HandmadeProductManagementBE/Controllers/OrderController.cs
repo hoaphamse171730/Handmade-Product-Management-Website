@@ -2,6 +2,8 @@
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.ModelViews.OrderModelViews;
+using HandmadeProductManagement.ModelViews.PromotionModelViews;
+using HandmadeProductManagement.Services.Service;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HandmadeProductManagementAPI.Controllers

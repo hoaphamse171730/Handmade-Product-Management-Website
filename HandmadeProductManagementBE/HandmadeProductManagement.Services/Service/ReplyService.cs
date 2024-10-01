@@ -5,6 +5,7 @@ using HandmadeProductManagement.ModelViews.ReplyModelViews;
 using HandmadeProductManagement.ModelViews.ReviewModelViews;
 using HandmadeProductManagement.ModelViews.ShopModelViews;
 using HandmadeProductManagement.Repositories.Entity;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -64,26 +65,47 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<ReplyModel> CreateAsync(ReplyModel replyModel)
         {
-            // Check if reviewId and shopId exist
+            // Check if reviewId is valid
+            if (string.IsNullOrWhiteSpace(replyModel.ReviewId) || !Guid.TryParse(replyModel.ReviewId, out _))
+            {
+                throw new ArgumentException("Invalid reviewId format.");
+            }
+
+            // Check if the reviewId exists in the database
             var review = await _unitOfWork.GetRepository<Review>().GetByIdAsync(replyModel.ReviewId);
             if (review == null)
             {
                 throw new ArgumentException("Review not found.");
             }
 
+            // Check if shopId is valid
+            if (string.IsNullOrWhiteSpace(replyModel.ShopId) || !Guid.TryParse(replyModel.ShopId, out _))
+            {
+                throw new ArgumentException("Invalid shopId format.");
+            }
+
+            // Check if the shopId exists in the database
             var shop = await _unitOfWork.GetRepository<Shop>()
                                  .Entities
                                  .FirstOrDefaultAsync(s => s.Id == replyModel.ShopId);
-
             if (shop == null)
             {
                 throw new ArgumentException("Shop not found.");
             }
 
+            // Ensure that the shop is associated with the product of the review
+            var product = await _unitOfWork.GetRepository<Product>()
+                                           .Entities
+                                           .FirstOrDefaultAsync(p => p.Id == review.ProductId && p.ShopId == shop.Id);
+            if (product == null)
+            {
+                throw new ArgumentException("The specified shop cannot reply to this review.");
+            }
+
             // Ensure that each review has only one reply
             var existingReply = await _unitOfWork.GetRepository<Reply>()
-                                   .Entities
-                                   .FirstOrDefaultAsync(r => r.ReviewId == replyModel.ReviewId);
+                                       .Entities
+                                       .FirstOrDefaultAsync(r => r.ReviewId == replyModel.ReviewId);
             if (existingReply != null)
             {
                 throw new ArgumentException("This review already has a reply.");
@@ -94,14 +116,10 @@ namespace HandmadeProductManagement.Services.Service
                 Content = replyModel.Content,
                 ReviewId = replyModel.ReviewId,
                 ShopId = replyModel.ShopId,
-                Date = DateTime.UtcNow
+                Date = DateTime.UtcNow,
+                CreatedBy = shop.Name,
+                LastUpdatedBy = shop.Name
             };
-
-            reply.CreatedBy = shop.Name;
-            reply.LastUpdatedBy = shop.Name;
-
-            //reply.CreatedTime = DateTimeOffset.UtcNow;
-            //reply.LastUpdatedTime = DateTimeOffset.UtcNow;
 
             await _unitOfWork.GetRepository<Reply>().InsertAsync(reply);
             await _unitOfWork.SaveAsync();
@@ -152,9 +170,34 @@ namespace HandmadeProductManagement.Services.Service
 
             existingReply.DeletedTime = DateTimeOffset.UtcNow;
 
-            _unitOfWork.GetRepository<Reply>().Update(existingReply);
+            _unitOfWork.GetRepository<Reply>().Delete(replyId);
             await _unitOfWork.SaveAsync();
             return true;
         }
+
+        public async Task<bool> SoftDeleteAsync(string replyId)
+        {
+            var existingReply = await _unitOfWork.GetRepository<Reply>().GetByIdAsync(replyId);
+            if (existingReply == null) return false;
+
+            // Get the shop details
+            var shop = await _unitOfWork.GetRepository<Shop>()
+                             .Entities
+                             .FirstOrDefaultAsync(s => s.Id == existingReply.ShopId);
+
+            if (shop == null)
+            {
+                throw new ArgumentException("Shop not found.");
+            }
+
+            existingReply.DeletedTime = DateTimeOffset.UtcNow;
+            existingReply.DeletedBy = shop.Name;
+
+            _unitOfWork.GetRepository<Reply>().Update(existingReply);
+            await _unitOfWork.SaveAsync();
+
+            return true;
+        }
+
     }
 }

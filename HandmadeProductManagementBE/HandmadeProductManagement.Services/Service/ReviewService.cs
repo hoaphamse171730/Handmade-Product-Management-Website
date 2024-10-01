@@ -1,6 +1,7 @@
 ﻿using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
+using HandmadeProductManagement.Core.Utils;
 using HandmadeProductManagement.ModelViews.ReviewModelViews;
 using HandmadeProductManagement.Repositories.Entity;
 using Microsoft.EntityFrameworkCore;
@@ -64,6 +65,18 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<ReviewModel> CreateAsync(ReviewModel reviewModel)
         {
+            if (string.IsNullOrWhiteSpace(reviewModel.ProductId) || !Guid.TryParse(reviewModel.ProductId, out _))
+            {
+                throw new ArgumentException("Invalid productId format.");
+            }
+
+            // Check if the productId exists in the database
+            var productExists = await _unitOfWork.GetRepository<Product>().GetByIdAsync(reviewModel.ProductId);
+            if (productExists == null)
+            {
+                throw new ArgumentException("Product not found.");
+            }
+
             if (reviewModel.Rating < 1 || reviewModel.Rating > 5)
             {
                 throw new ArgumentException("Invalid rating. It must be between 1 and 5.");
@@ -116,13 +129,13 @@ namespace HandmadeProductManagement.Services.Service
             }
 
             // Update Rating only if it's within valid range
-            if (updatedReview.Rating.HasValue && updatedReview.Rating >= 1 && updatedReview.Rating <= 5)
+            if (updatedReview.Rating.HasValue)
             {
+                if (updatedReview.Rating < 1 || updatedReview.Rating > 5)
+                {
+                    throw new ArgumentException("Rating must be between 1 and 5.");
+                }
                 existingReview.Rating = updatedReview.Rating;
-            }
-            else
-            {
-                throw new ArgumentException("Invalid rating. It must be between 1 and 5.");
             }
 
             var user = await _unitOfWork.GetRepository<ApplicationUser>()
@@ -155,6 +168,33 @@ namespace HandmadeProductManagement.Services.Service
             if (existingReview == null) return false;
 
             existingReview.DeletedTime = DateTime.UtcNow; 
+
+            _unitOfWork.GetRepository<Review>().Delete(reviewId);
+            await _unitOfWork.SaveAsync();
+
+            return true;
+        }
+
+        public async Task<bool> SoftDeleteAsync(string reviewId)
+        {
+            var existingReview = await _unitOfWork.GetRepository<Review>().GetByIdAsync(reviewId);
+            if (existingReview == null) return false;
+
+            // Get the user who is performing the soft delete
+            var user = await _unitOfWork.GetRepository<ApplicationUser>()
+                             .Entities
+                             .Include(u => u.UserInfo)
+                             .FirstOrDefaultAsync(u => u.Id == existingReview.UserId);
+
+            if (user == null)
+            {
+                throw new ArgumentException("User not found.");
+            }
+
+            var userFullName = user.UserInfo.FullName;
+
+            existingReview.DeletedTime = CoreHelper.SystemTimeNow;
+            existingReview.DeletedBy = userFullName;
 
             _unitOfWork.GetRepository<Review>().Update(existingReview);
             await _unitOfWork.SaveAsync();

@@ -14,4 +14,6 @@ public class RegisterModelView
         ErrorMessage = "Password must be complex")]
     public string Password { get; set; } = default!;
 
+    public string ClientUri { get; set; } = "https://localhost:7159/api/confirm-email";
+
 }

@@ -1,5 +1,7 @@
 ﻿using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.ModelViews.ProductDetailModelViews;
 using HandmadeProductManagement.ModelViews.ProductModelViews;
+using HandmadeProductManagement.ModelViews.PromotionModelViews;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +14,13 @@ namespace HandmadeProductManagement.Contract.Services.Interface
     {
         Task<BaseResponse<IEnumerable<ProductResponseModel>>> SearchProductsAsync(ProductSearchModel searchModel);
         Task<BaseResponse<IEnumerable<ProductResponseModel>>> SortProductsAsync(ProductSortModel sortModel);
+        Task<IList<ProductDto>> GetAll();
+        Task<ProductDto> GetById(string id);
+        Task<ProductDto> Create(ProductForCreationDto promotion);
+        Task Update(string id, ProductForUpdateDto promotion);
+        Task Delete(string id);
+        Task SoftDelete(string id);
 
+        Task<BaseResponse<ProductDetailResponseModel>> GetProductDetailsByIdAsync(string productId);
     }
 }
