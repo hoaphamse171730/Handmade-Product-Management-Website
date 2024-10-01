@@ -1,14 +1,13 @@
 ﻿using HandmadeProductManagement.Contract.Repositories.Entity;
+using HandmadeProductManagement.ModelViews.CancelReasonModelViews;
 
 namespace HandmadeProductManagement.Contract.Services.Interface
 {
     public interface ICancelReasonService
     {
-        Task<IList<CancelReason>> GetAll();
-        Task<CancelReason> GetById(string id);
-        Task<CancelReason> Create(CancelReason cancelReason);
-        Task<CancelReason> Update(string id, CancelReason cancelReason);
+        Task<CancelReasonResponseModel> Create(CreateCancelReasonDto cancelReason);
+        Task<CancelReasonResponseModel> Update(string id, CreateCancelReasonDto cancelReason);
         Task<bool> Delete(string id);
-        Task<IList<CancelReason>> GetByPage(int page, int pageSize);
+        Task<IList<CancelReasonResponseModel>> GetByPage(int page, int pageSize);
     }
 }

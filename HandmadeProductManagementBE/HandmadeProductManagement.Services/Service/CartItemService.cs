@@ -4,7 +4,6 @@ using HandmadeProductManagement.ModelViews.CartModelViews;
 using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Utils;
-using HandmadeProductManagement.Contract.Services.Security;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Constants;
 
@@ -23,12 +22,12 @@ public class CartItemService : ICartItemService
 
         if (string.IsNullOrEmpty(createCartItemDto.ProductItemId))
         {
-            return BaseResponse<bool>.FailResponse("Product item ID is required.", StatusCodeHelper.BadRequest);
+            throw new BaseException.BadRequestException("required_product_item_id", "Product item ID is required.");
         }
 
         if (!int.TryParse(createCartItemDto.ProductQuantity.ToString(), out int quantity) || quantity < 0)
         {
-            return BaseResponse<bool>.FailResponse("Invalid product quantity. Quantity must be a non-negative integer.", StatusCodeHelper.BadRequest);
+            throw new BaseException.BadRequestException("invalid_quantity", "Invalid product quantity. Quantity must be a non-negative integer.");
         }
 
         var cartRepo = _unitOfWork.GetRepository<Cart>();
@@ -37,7 +36,7 @@ public class CartItemService : ICartItemService
             .SingleOrDefaultAsync(c => c.Id == cartId);
         if (cart == null)
         {
-            return BaseResponse<bool>.FailResponse($"Cart {cartId} not found", StatusCodeHelper.NotFound);
+            throw new BaseException.BadRequestException("cart_not_found", $"Cart {cartId} not found.");
         }
 
         var productItemRepo = _unitOfWork.GetRepository<ProductItem>();
@@ -45,7 +44,7 @@ public class CartItemService : ICartItemService
             .SingleOrDefaultAsync(pi => pi.Id == createCartItemDto.ProductItemId);
         if (productItem == null)
         {
-            return BaseResponse<bool>.FailResponse($"ProductItem {createCartItemDto.ProductItemId} not found", StatusCodeHelper.NotFound);
+            throw new BaseException.BadRequestException("product_item_not_found", $"ProductItem {createCartItemDto.ProductItemId} not found.");
         }
 
         var cartItem = new CartItem
@@ -65,19 +64,15 @@ public class CartItemService : ICartItemService
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error adding cart item to Cart {cartId} with ProductItem {createCartItemDto.ProductItemId}: {ex.Message}");
-            return BaseResponse<bool>.FailResponse("Error adding cart item. Please try again.", StatusCodeHelper.ServerError);
+            throw new BaseException.CoreException("server_error", "Error adding cart item. Please try again.", (int)StatusCodeHelper.ServerError);
         }
     }
-
-
-
 
     public async Task<BaseResponse<bool>> UpdateCartItem(string cartItemId, int productQuantity)
     {
         if (productQuantity < 0)
         {
-            return BaseResponse<bool>.FailResponse("Product quantity must be non-negative", StatusCodeHelper.BadRequest);
+            throw new BaseException.BadRequestException("non_negative_quantity", "Product quantity must be non-negative.");
         }
 
         var cartItemRepo = _unitOfWork.GetRepository<CartItem>();
@@ -87,7 +82,7 @@ public class CartItemService : ICartItemService
 
         if (cartItem == null)
         {
-            return BaseResponse<bool>.FailResponse("Cart item not found", StatusCodeHelper.NotFound);
+            throw new BaseException.BadRequestException("cart_item_not_found", "Cart item not found.");
         }
 
         cartItem.ProductQuantity = productQuantity;
@@ -100,11 +95,9 @@ public class CartItemService : ICartItemService
         }
         catch (Exception ex)
         {
-            return BaseResponse<bool>.FailResponse("Internal server error: " + ex.Message, StatusCodeHelper.ServerError);
+            throw new BaseException.CoreException("server_error", "Internal server error updating cart item.", (int)StatusCodeHelper.ServerError);
         }
     }
-
-
 
     public async Task<BaseResponse<bool>> RemoveCartItem(string cartItemId)
     {
@@ -114,11 +107,12 @@ public class CartItemService : ICartItemService
 
         if (cartItem == null)
         {
-            return BaseResponse<bool>.FailResponse("Cart item not found", StatusCodeHelper.NotFound);
+            throw new BaseException.BadRequestException("cart_item_not_found", "Cart item not found.");
         }
 
         cartItem.DeletedTime = CoreHelper.SystemTimeNow;
         cartItem.DeletedBy = "System"; // Update later after having context accessor
+
         try
         {
             await _unitOfWork.SaveAsync();
@@ -126,7 +120,7 @@ public class CartItemService : ICartItemService
         }
         catch (Exception ex)
         {
-            return BaseResponse<bool>.FailResponse("Internal server error: " + ex.Message, StatusCodeHelper.ServerError);
+            throw new BaseException.CoreException("server_error", "Internal server error removing cart item.", (int)StatusCodeHelper.ServerError);
         }
     }
 

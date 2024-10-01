@@ -3,7 +3,8 @@ using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.ModelViews.CartModelViews;
 using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Contract.Services;
-using HandmadeProductManagement.Core.Utils;
+using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.Core.Constants;
 
 public class CartService : ICartService
 {
@@ -23,7 +24,7 @@ public class CartService : ICartService
 
         if (cart == null)
         {
-            return null;  // Return null when no cart is found
+            throw new BaseException.CoreException("cart_not_found", $"Cart not found for user ID {userId}", (int)StatusCodeHelper.NotFound);
         }
 
         return new CartModel
@@ -39,50 +40,4 @@ public class CartService : ICartService
         };
     }
 
-
-
-    //public async Task<CartModel> CreateCart(Guid userId)
-    //{
-    //    var cartRepo = _unitOfWork.GetRepository<Cart>();
-    //    var cartExists = await cartRepo.Entities
-    //                           .AnyAsync(c => c.UserId == userId && c.DeletedTime == null);
-
-    //    if (cartExists)
-    //    {
-    //        throw new InvalidOperationException($"A cart already exists for user ID {userId}.");
-    //    }
-
-    //    var newCart = new Cart
-    //    {
-    //        UserId = userId,
-    //        CreatedTime = CoreHelper.SystemTimeNow,
-    //        LastUpdatedTime = CoreHelper.SystemTimeNow
-    //    };
-
-    //    cartRepo.Insert(newCart);
-    //    await _unitOfWork.SaveAsync();
-
-    //    return new CartModel
-    //    {
-    //        CartId = newCart.Id,
-    //        UserId = newCart.UserId,
-    //    };
-    //}
-
-
-    //public async Task<bool> DeleteCart(Guid userId)
-    //{
-    //    var cart = await _unitOfWork.GetRepository<Cart>().Entities
-    //               .FirstOrDefaultAsync(c => c.UserId == userId && c.DeletedTime == null);
-
-    //    if (cart != null)
-    //    {
-    //        cart.DeletedTime = CoreHelper.SystemTimeNow;
-    //        cart.DeletedBy = userId.ToString();
-    //        await _unitOfWork.SaveAsync();
-    //        return true;
-    //    }
-
-    //    return false;
-    //}
 }

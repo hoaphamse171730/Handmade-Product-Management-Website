@@ -1,7 +1,9 @@
 ﻿using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.PaymentDetailModelViews;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace HandmadeProductManagementAPI.Controllers
 {
@@ -22,15 +24,36 @@ namespace HandmadeProductManagementAPI.Controllers
             try
             {
                 var createdPaymentDetail = await _paymentDetailService.CreatePaymentDetailAsync(createPaymentDetailDto);
-                return Ok(BaseResponse<PaymentDetailResponseModel>.OkResponse(createdPaymentDetail));
+                var response = new BaseResponse<PaymentDetailResponseModel>
+                {
+                    Code = "Success",
+                    StatusCode = StatusCodeHelper.OK,
+                    Message = "Payment detail created successfully",
+                    Data = createdPaymentDetail
+                };
+                return Ok(response);
             }
             catch (BaseException.BadRequestException ex)
             {
-                return BadRequest(new { ex.ErrorDetail.ErrorCode, ex.ErrorDetail.ErrorMessage });
+                var response = new BaseResponse<object>
+                {
+                    Code = ex.ErrorDetail.ErrorCode,
+                    StatusCode = StatusCodeHelper.BadRequest,
+                    Message = ex.ErrorDetail.ErrorMessage?.ToString(),
+                    Data = null
+                };
+                return BadRequest(response);
             }
             catch (BaseException.ErrorException ex)
             {
-                return StatusCode(ex.StatusCode, new { ex.ErrorDetail.ErrorCode, ex.ErrorDetail.ErrorMessage });
+                var response = new BaseResponse<object>
+                {
+                    Code = ex.ErrorDetail.ErrorCode,
+                    StatusCode = (StatusCodeHelper)ex.StatusCode,
+                    Message = ex.ErrorDetail.ErrorMessage?.ToString(),
+                    Data = null
+                };
+                return StatusCode(ex.StatusCode, response);
             }
         }
 
@@ -40,11 +63,25 @@ namespace HandmadeProductManagementAPI.Controllers
             try
             {
                 var paymentDetail = await _paymentDetailService.GetPaymentDetailByPaymentIdAsync(paymentId);
-                return Ok(BaseResponse<PaymentDetailResponseModel>.OkResponse(paymentDetail));
+                var response = new BaseResponse<PaymentDetailResponseModel>
+                {
+                    Code = "Success",
+                    StatusCode = StatusCodeHelper.OK,
+                    Message = "Payment detail retrieved successfully",
+                    Data = paymentDetail
+                };
+                return Ok(response);
             }
             catch (BaseException.ErrorException ex)
             {
-                return StatusCode(ex.StatusCode, new { ex.ErrorDetail.ErrorCode, ex.ErrorDetail.ErrorMessage });
+                var response = new BaseResponse<object>
+                {
+                    Code = ex.ErrorDetail.ErrorCode,
+                    StatusCode = (StatusCodeHelper)ex.StatusCode,
+                    Message = ex.ErrorDetail.ErrorMessage?.ToString(),
+                    Data = null
+                };
+                return StatusCode(ex.StatusCode, response);
             }
         }
 
@@ -54,11 +91,25 @@ namespace HandmadeProductManagementAPI.Controllers
             try
             {
                 var paymentDetail = await _paymentDetailService.GetPaymentDetailByIdAsync(id);
-                return Ok(BaseResponse<PaymentDetailResponseModel>.OkResponse(paymentDetail));
+                var response = new BaseResponse<PaymentDetailResponseModel>
+                {
+                    Code = "Success",
+                    StatusCode = StatusCodeHelper.OK,
+                    Message = "Payment detail retrieved successfully",
+                    Data = paymentDetail
+                };
+                return Ok(response);
             }
             catch (BaseException.ErrorException ex)
             {
-                return StatusCode(ex.StatusCode, new { ex.ErrorDetail.ErrorCode, ex.ErrorDetail.ErrorMessage });
+                var response = new BaseResponse<object>
+                {
+                    Code = ex.ErrorDetail.ErrorCode,
+                    StatusCode = (StatusCodeHelper)ex.StatusCode,
+                    Message = ex.ErrorDetail.ErrorMessage?.ToString(),
+                    Data = null
+                };
+                return StatusCode(ex.StatusCode, response);
             }
         }
     }
