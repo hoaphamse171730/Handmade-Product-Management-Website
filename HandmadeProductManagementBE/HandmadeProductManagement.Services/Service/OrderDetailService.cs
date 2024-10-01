@@ -8,6 +8,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using FluentValidation;
+using HandmadeProductManagement.ModelViews.ProductModelViews;
 
 
 namespace HandmadeProductManagement.Services.Service
@@ -16,11 +18,15 @@ namespace HandmadeProductManagement.Services.Service
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IValidator<OrderDetailForCreationDto> _creationValidator;
+        private readonly IValidator<OrderDetailForUpdateDto> _updateValidator;
 
-        public OrderDetailService(IUnitOfWork unitOfWork, IMapper mapper)
+        public OrderDetailService(IUnitOfWork unitOfWork, IMapper mapper, IValidator<OrderDetailForCreationDto> creationValidator, IValidator<OrderDetailForUpdateDto> updateValidator)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _creationValidator = creationValidator;
+            _updateValidator = updateValidator;
         }
 
         public async Task<IList<OrderDetailDto>> GetAll()
@@ -45,6 +51,9 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<OrderDetailDto> Create(OrderDetailForCreationDto orderDetailForCreation)
         {
+            var validationResult = await _creationValidator.ValidateAsync(orderDetailForCreation);
+            if (!validationResult.IsValid)
+                throw new ValidationException(validationResult.Errors);
             var orderDetailEntity = _mapper.Map<OrderDetail>(orderDetailForCreation);
             await _unitOfWork.GetRepository<OrderDetail>().InsertAsync(orderDetailEntity);
             await _unitOfWork.SaveAsync();
@@ -52,10 +61,14 @@ namespace HandmadeProductManagement.Services.Service
             return orderDetailToReturn;
         }
 
-        public async Task Update(string id, OrderDetailForUpdateDto orderDetailForUpdate)
+        public async Task Update(string orderId, string productId, OrderDetailForUpdateDto orderDetailForUpdate)
         {
+            var validationResult = await _updateValidator.ValidateAsync(orderDetailForUpdate);
+            if (!validationResult.IsValid)
+                throw new ValidationException(validationResult.Errors);
+
             var orderDetailEntity = await _unitOfWork.GetRepository<OrderDetail>().Entities
-                .FirstOrDefaultAsync(p => p.Id == id);
+                .FirstOrDefaultAsync(p => p.OrderId == orderId && p.ProductId == productId);
 
             if (orderDetailEntity == null)
                 throw new KeyNotFoundException("Order detail not found");
@@ -67,16 +80,17 @@ namespace HandmadeProductManagement.Services.Service
             await _unitOfWork.SaveAsync();
         }
 
+
         public async Task Delete(string id)
         {
-            var repo = _unitOfWork.GetRepository<OrderDetail>();
-            var orderDetailEntity = repo.Entities
-                .FirstOrDefault(p => p.Id == id);
+            var repository = _unitOfWork.GetRepository<OrderDetail>();
+            var orderDetailEntity = await repository.Entities.FirstOrDefaultAsync(x => x.Id == id);
             if (orderDetailEntity == null)
-                throw new KeyNotFoundException("Order Detail not found");
-            // orderDetailEntity.DeletedBy = userId.ToString();
+            {
+                throw new KeyNotFoundException("orderDetailEntity not found");
+            }
             orderDetailEntity.DeletedTime = DateTime.UtcNow;
-            repo.Delete(orderDetailEntity);
+            await repository.DeleteAsync(id);
             await _unitOfWork.SaveAsync();
         }
 
