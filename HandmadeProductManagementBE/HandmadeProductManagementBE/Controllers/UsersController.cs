@@ -1,17 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+﻿
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using HandmadeProductManagement.Repositories.Context;
 using HandmadeProductManagement.Repositories.Entity;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.ModelViews.UserModelViews;
 using System.Security.Claims;
-using HandmadeProductManagement.Core.Constants;
 using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
 
@@ -22,7 +15,6 @@ namespace HandmadeProductManagementAPI.Controllers
     public class UsersController : ControllerBase
     {
         private readonly IUserService _userService;
-        private readonly StatusCodeHelper statusCodeHelper;
         public UsersController(IUserService userService)
         {
             _userService = userService;
