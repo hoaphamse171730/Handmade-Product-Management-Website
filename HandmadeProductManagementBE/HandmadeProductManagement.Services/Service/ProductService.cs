@@ -16,6 +16,7 @@ using AutoMapper;
 using FluentValidation;
 using HandmadeProductManagement.ModelViews.PromotionModelViews;
 using HandmadeProductManagement.Core.Utils;
+using Microsoft.IdentityModel.Tokens;
 
 namespace HandmadeProductManagement.Services.Service
 {
@@ -38,20 +39,20 @@ namespace HandmadeProductManagement.Services.Service
         public async Task<IEnumerable<ProductSearchVM>> SearchProductsAsync(ProductSearchFilter searchModel)
         {
             // Validate CategoryId and ShopId datatype (Guid)
-            if (!string.IsNullOrEmpty(searchModel.CategoryId) && !IsValidGuid(searchModel.CategoryId))
+            if (!string.IsNullOrWhiteSpace(searchModel.CategoryId) && !IsValidGuid(searchModel.CategoryId))
             {
-                //throw new BaseException.BadRequestException("bad_request","Invalid Category Id");
+                throw new BaseException.BadRequestException("bad_request","Invalid Category Id");
             }
 
-            if (!string.IsNullOrEmpty(searchModel.ShopId) && !IsValidGuid(searchModel.ShopId))
+            if (!string.IsNullOrWhiteSpace(searchModel.ShopId) && !IsValidGuid(searchModel.ShopId))
             {
-                //return BaseResponse<IEnumerable<ProductResponseModel>>.OkResponse("Invalid Shop ID");
+                throw new BaseException.BadRequestException("bad_request","Invalid Shop ID");
             }
 
             // Validate MinRating limit (from 0 to 5)
             if (searchModel.MinRating.HasValue && (searchModel.MinRating < 0 || searchModel.MinRating > 5))
             {
-                //return BaseResponse<IEnumerable<ProductResponseModel>>.OkResponse("MinRating must be between 0 and 5.");
+                throw new BaseException.BadRequestException("bad_request", "MinRating must be between 0 and 5.");
             }
 
 
@@ -63,17 +64,17 @@ namespace HandmadeProductManagement.Services.Service
                 query = query.Where(p => p.Name.Contains(searchModel.Name));
             }
 
-            if (!string.IsNullOrEmpty(searchModel.CategoryId))
+            if (!string.IsNullOrWhiteSpace(searchModel.CategoryId))
             {
                 query = query.Where(p => p.CategoryId == searchModel.CategoryId);
             }
 
-            if (!string.IsNullOrEmpty(searchModel.ShopId))
+            if (!string.IsNullOrWhiteSpace(searchModel.ShopId))
             {
                 query = query.Where(p => p.ShopId == searchModel.ShopId);
             }
 
-            if (!string.IsNullOrEmpty(searchModel.Status))
+            if (!string.IsNullOrWhiteSpace(searchModel.Status))
             {
                 query = query.Where(p => p.Status == searchModel.Status);
             }
@@ -130,6 +131,10 @@ namespace HandmadeProductManagement.Services.Service
                     : (searchModel.SortDescending ? -pr.Rating : pr.Rating)) // Sort by rating ascending or descending
                 .ToListAsync();
 
+            if (productSearchVMs.IsNullOrEmpty())
+            {
+                throw new BaseException.NotFoundException("not_found", "Product Not Found");
+            }
             return productSearchVMs;
 
         }
@@ -174,7 +179,10 @@ namespace HandmadeProductManagement.Services.Service
                 SoldCount = p.SoldCount,
                 Price = p.ProductItems.Any() ? p.ProductItems.Min(pi => pi.Price) : 0
             });
-
+            if (productSearchVMs.IsNullOrEmpty())
+            {
+                throw new BaseException.NotFoundException("not_found", "Product Not Found");
+            }
             return productSearchVMs;
 
         }
