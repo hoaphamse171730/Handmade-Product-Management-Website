@@ -29,7 +29,7 @@ namespace HandmadeProductManagement.Services.Service
             ValidateOrder(createOrder);
 
             var userRepository = _unitOfWork.GetRepository<ApplicationUser>();
-            var userExists = await userRepository.Entities.AnyAsync(u => u.Id.ToString() == createOrder.UserId);
+            var userExists = await userRepository.Entities.AnyAsync(u => u.Id.ToString() == createOrder.UserId.ToString());
             if (!userExists)
             {
                 throw new BaseException.ErrorException(404, "user_not_found", "User not found.");
@@ -43,7 +43,7 @@ namespace HandmadeProductManagement.Services.Service
                 TotalPrice = createOrder.TotalPrice,
                 OrderDate = DateTime.UtcNow,
                 Status = "Pending",
-                UserId = Guid.Parse(createOrder.UserId),
+                UserId = Guid.Parse(createOrder.UserId.ToString()),
                 Address = createOrder.Address,
                 CustomerName = createOrder.CustomerName,
                 Phone = createOrder.Phone,
@@ -280,12 +280,12 @@ namespace HandmadeProductManagement.Services.Service
 
         private void ValidateOrder(CreateOrderDto order)
         {
-            if (string.IsNullOrEmpty(order.UserId))
+            if (string.IsNullOrEmpty(order.UserId.ToString()))
             {
                 throw new BaseException.BadRequestException("invalid_user_id", "Please input User id.");
             }
 
-            if (!Guid.TryParse(order.UserId, out _))
+            if (!Guid.TryParse(order.UserId.ToString(), out _))
             {
                 throw new BaseException.BadRequestException("invalid_user_id_format", "User ID format is invalid. Example: 123e4567-e89b-12d3-a456-426614174000.");
             }
