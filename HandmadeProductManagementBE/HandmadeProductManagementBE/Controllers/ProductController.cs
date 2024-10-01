@@ -1,3 +1,4 @@
+using Azure;
 using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
@@ -50,12 +51,15 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpGet("sort")]
         public async Task<IActionResult> SortProducts([FromQuery] ProductSortFilter sortModel)
         {
-            var response = await _productService.SortProductsAsync(sortModel);
-            if (response.Data.IsNullOrEmpty())
+            var products = await _productService.SortProductsAsync(sortModel);
+            var response = new BaseResponse<IEnumerable<ProductSearchVM>>
             {
-                return StatusCode(404, new BaseResponse<Product>(StatusCodeHelper.NotFound, StatusCodeHelper.NotFound.Name(), "Product Not Found!"));
-            }
-            return StatusCode((int)response.StatusCode, response);
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Search Product Successfully",
+                Data = products
+            };
+            return Ok(response);
         }
 
         [HttpGet]

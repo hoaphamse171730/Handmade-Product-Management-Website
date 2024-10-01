@@ -136,7 +136,7 @@ namespace HandmadeProductManagement.Services.Service
 
         // Sort Function
 
-        public async Task<BaseResponse<IEnumerable<ProductResponseModel>>> SortProductsAsync(ProductSortFilter sortModel)
+        public async Task<IEnumerable<ProductSearchVM>> SortProductsAsync(ProductSortFilter sortFilter)
         {
             var query = _unitOfWork.GetRepository<Product>().Entities
                 .Include(p => p.ProductItems)
@@ -144,24 +144,24 @@ namespace HandmadeProductManagement.Services.Service
                 .AsQueryable();
 
             // Sort by Price
-            if (sortModel.SortByPrice)
+            if (sortFilter.SortByPrice)
             {
-                query = sortModel.SortDescending
+                query = sortFilter.SortDescending
                     ? query.OrderByDescending(p => p.ProductItems.Min(pi => pi.Price))
                     : query.OrderBy(p => p.ProductItems.Min(pi => pi.Price));
             }
 
             // Sort by Rating
-            else if (sortModel.SortByRating)
+            else if (sortFilter.SortByRating)
             {
-                query = sortModel.SortDescending
+                query = sortFilter.SortDescending
                     ? query.OrderByDescending(p => p.Rating)
                     : query.OrderBy(p => p.Rating);
             }
 
             var products = await query.ToListAsync();
 
-            var productResponseModels = products.Select(p => new ProductResponseModel
+            var productSearchVMs = products.Select(p => new ProductSearchVM
             {
                 Id = p.Id,
                 Name = p.Name,
@@ -174,7 +174,7 @@ namespace HandmadeProductManagement.Services.Service
                 Price = p.ProductItems.Any() ? p.ProductItems.Min(pi => pi.Price) : 0
             });
 
-            return BaseResponse<IEnumerable<ProductResponseModel>>.OkResponse(productResponseModels);
+            return productSearchVMs;
 
         }
 
