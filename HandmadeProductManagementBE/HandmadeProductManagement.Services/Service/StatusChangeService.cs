@@ -1,6 +1,7 @@
 ﻿using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
+using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.ModelViews.StatusChangeModelViews;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,31 +16,18 @@ namespace HandmadeProductManagement.Services.Service
             _unitOfWork = unitOfWork;
         }
 
-        // Get all status changes (only active records)
-        public async Task<IList<StatusChangeResponseModel>> GetAll()
-        {
-            IQueryable<StatusChange> query = _unitOfWork.GetRepository<StatusChange>().Entities
-                .Where(sc => !sc.DeletedTime.HasValue || sc.DeletedBy == null);
-
-            var result = await query.Select(statusChange => new StatusChangeResponseModel
-            {
-                Id = statusChange.Id.ToString(),
-                OrderId = statusChange.OrderId,
-                Status = statusChange.Status,
-                ChangeTime = statusChange.ChangeTime
-            }).ToListAsync();
-
-            return result;
-        }
-
         // Get status changes by page (only active records)
         public async Task<IList<StatusChangeResponseModel>> GetByPage(int page, int pageSize)
         {
             if (page <= 0)
-                throw new ArgumentException("Page number must be greater than 0.");
+            { 
+                throw new BaseException.BadRequestException("invalid_input", "Page must be greater than 0."); 
+            }
 
             if (pageSize <= 0)
-                throw new ArgumentException("Page size must be greater than 0.");
+            {
+                throw new BaseException.BadRequestException("invalid_input", "Page size must be greater than 0."); 
+            }
 
             IQueryable<StatusChange> query = _unitOfWork.GetRepository<StatusChange>().Entities
                 .Where(sc => !sc.DeletedTime.HasValue || sc.DeletedBy == null);
@@ -75,7 +63,7 @@ namespace HandmadeProductManagement.Services.Service
 
             if (!statusChanges.Any())
             {
-                throw new KeyNotFoundException("No status changes found for the given OrderId.");
+                throw new BaseException.NotFoundException("not_found", "No status changes found for the given OrderId.");
             }
 
             return statusChanges;
@@ -88,7 +76,7 @@ namespace HandmadeProductManagement.Services.Service
             var orderExists = await _unitOfWork.GetRepository<Order>().GetByIdAsync(createStatusChange.OrderId);
             if (orderExists == null)
             {
-                throw new ArgumentException("OrderId does not exist.");
+                throw new BaseException.BadRequestException("non_exist_orderId","OrderId does not exist.");
             }
 
             var statusChange = new StatusChange
@@ -99,8 +87,8 @@ namespace HandmadeProductManagement.Services.Service
             };
 
             // Set metadata
-            statusChange.CreatedBy = "currentUser"; // Update with actual user info
-            statusChange.LastUpdatedBy = "currentUser"; // Update with actual user info
+            //statusChange.CreatedBy = "currentUser";
+            //statusChange.LastUpdatedBy = "currentUser";
 
             await _unitOfWork.GetRepository<StatusChange>().InsertAsync(statusChange);
             await _unitOfWork.SaveAsync();
@@ -119,19 +107,21 @@ namespace HandmadeProductManagement.Services.Service
         {
             var existingStatusChange = await _unitOfWork.GetRepository<StatusChange>().GetByIdAsync(id);
             if (existingStatusChange == null)
-                throw new KeyNotFoundException("Status change not found");
+            { 
+                throw new BaseException.NotFoundException("not_found", "Status change not found"); 
+            }
 
             // Check if OrderId exists
             var orderExists = await _unitOfWork.GetRepository<Order>().GetByIdAsync(updatedStatusChange.OrderId);
             if (orderExists == null)
             {
-                throw new ArgumentException("OrderId does not exist.");
+                throw new BaseException.BadRequestException("non_exist_orderId", "OrderId does not exist.");
             }
 
             existingStatusChange.OrderId = updatedStatusChange.OrderId;
             existingStatusChange.Status = updatedStatusChange.Status;
             existingStatusChange.ChangeTime = updatedStatusChange.ChangeTime;
-            existingStatusChange.LastUpdatedBy = "currentUser"; // Update with actual user info
+            //existingStatusChange.LastUpdatedBy = "currentUser";
             existingStatusChange.LastUpdatedTime = DateTimeOffset.UtcNow;
 
             await _unitOfWork.GetRepository<StatusChange>().UpdateAsync(existingStatusChange);
@@ -150,11 +140,14 @@ namespace HandmadeProductManagement.Services.Service
         public async Task<bool> Delete(string id)
         {
             var statusChange = await _unitOfWork.GetRepository<StatusChange>().GetByIdAsync(id);
-            if (statusChange == null)
-                return false;
+
+            if (statusChange == null || statusChange.DeletedTime.HasValue || statusChange.DeletedBy != null)
+            {
+                throw new BaseException.NotFoundException("not_found", "Status change not found");
+            }
 
             statusChange.DeletedTime = DateTimeOffset.UtcNow;
-            statusChange.DeletedBy = "currentUser"; // Update with actual user info
+            statusChange.DeletedBy = "currentUser";
 
             await _unitOfWork.GetRepository<StatusChange>().UpdateAsync(statusChange);
             await _unitOfWork.SaveAsync();
