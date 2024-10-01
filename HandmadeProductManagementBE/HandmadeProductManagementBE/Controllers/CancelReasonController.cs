@@ -25,7 +25,7 @@ namespace HandmadeProductManagementAPI.Controllers
             {
                 Code = "Success",
                 StatusCode = StatusCodeHelper.OK,
-                Message = "Get Cancel Reason sucessfully.",
+                Message = "Get Cancel Reason sucessfully!",
                 Data = await _cancelReasonService.GetByPage(page, pageSize)
             };
             return Ok(response);
@@ -33,14 +33,14 @@ namespace HandmadeProductManagementAPI.Controllers
 
         // POST: api/CancelReason
         [HttpPost]
-        public async Task<IActionResult> CreateCancelReason([FromBody] CreateCancelReasonDto reason)
+        public async Task<IActionResult> CreateCancelReason([FromBody] CancelReasonForCreationDto reason)
         {
             await _cancelReasonService.Create(reason);
             var response = new BaseResponse<CancelReasonResponseModel>
             {
                 Code = "Success",
                 StatusCode = StatusCodeHelper.OK,
-                Message = "Created Cancel Reason successfully.",
+                Message = "Created Cancel Reason successfully!",
                 Data = null
             };
             return Ok(response);
@@ -48,14 +48,14 @@ namespace HandmadeProductManagementAPI.Controllers
 
         // PUT: api/CancelReason/{id} (string id)
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateCancelReason(string id, CreateCancelReasonDto updatedReason)
+        public async Task<IActionResult> UpdateCancelReason(string id, CancelReasonForCreationDto updatedReason)
         {
             await _cancelReasonService.Update(id, updatedReason);
             var response = new BaseResponse<CancelReasonResponseModel>
             {
                 Code = "Success",
                 StatusCode = StatusCodeHelper.OK,
-                Message = "Updated Cancel Reason successfully.",
+                Message = "Updated Cancel Reason successfully!",
                 Data = null
             };
             return Ok(response);
