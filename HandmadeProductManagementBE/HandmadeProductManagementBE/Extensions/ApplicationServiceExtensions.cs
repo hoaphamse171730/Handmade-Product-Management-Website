@@ -6,12 +6,14 @@ using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Exceptions.Handler;
 using HandmadeProductManagement.Core.Utils;
 using HandmadeProductManagement.ModelViews.AuthModelViews;
+using HandmadeProductManagement.ModelViews.OrderDetailModelViews;
 using HandmadeProductManagement.ModelViews.ProductModelViews;
 using HandmadeProductManagement.ModelViews.PromotionModelViews;
 using HandmadeProductManagement.Repositories.Context;
 using HandmadeProductManagement.Repositories.Entity;
 using HandmadeProductManagement.Repositories.UOW;
 using HandmadeProductManagement.Services.Service;
+using HandmadeProductManagement.Validation.OrderDetail;
 using HandmadeProductManagement.Validation.Product;
 using HandmadeProductManagement.Validation.Promotion;
 using HandmadeProductManagementAPI.BackgroundServices;
@@ -72,10 +74,22 @@ public static class ApplicationServiceExtensions
 
     public static void ConfigureFluentValidation(this IServiceCollection services)
     {
+        #region Promotion
         services.AddScoped<IValidator<PromotionForCreationDto>, PromotionForCreationDtoValidator>();
         services.AddScoped<IValidator<PromotionForUpdateDto>, PromotionForUpdateDtoValidator>();
+        #endregion
+
+        #region Product
         services.AddScoped<IValidator<ProductForCreationDto>, ProductForCreationDtoValidator>();
         services.AddScoped<IValidator<ProductForUpdateDto>, ProductForUpdateDtoValidator>();
+        #endregion
+
+        #region OrderDetail
+        services.AddScoped<IValidator<OrderDetailForCreationDto>, OrderDetailForCreationDtoValidator>();
+        services.AddScoped<IValidator<OrderDetailForUpdateDto>, OrderDetailForUpdateDtoValidator>();
+        #endregion
+
+
     }
 
     public static void RegisterMapsterConfiguration(this IServiceCollection services)
