@@ -1,10 +1,9 @@
-using System.Reflection;
 using FluentValidation;
+using FluentValidation.AspNetCore;
 using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Exceptions.Handler;
-using HandmadeProductManagement.Core.Utils;
 using HandmadeProductManagement.ModelViews.AuthModelViews;
 using HandmadeProductManagement.ModelViews.OrderDetailModelViews;
 using HandmadeProductManagement.ModelViews.ProductModelViews;
@@ -14,6 +13,7 @@ using HandmadeProductManagement.Repositories.Entity;
 using HandmadeProductManagement.Repositories.UOW;
 using HandmadeProductManagement.Services.Service;
 using HandmadeProductManagement.Validation.OrderDetail;
+using HandmadeProductManagement.Validation.Authentication;
 using HandmadeProductManagement.Validation.Product;
 using HandmadeProductManagement.Validation.Promotion;
 using HandmadeProductManagementAPI.BackgroundServices;
@@ -48,7 +48,12 @@ public static class ApplicationServiceExtensions
                 });
         });
         
-        services.AddExceptionHandler<CustomExceptionHandler>();
+        services.AddExceptionHandler<CustomExceptionHandler>(); //NA
+        
+        services.AddFluentValidationAutoValidation();
+        
+        services.AddValidatorsFromAssemblyContaining<RegisterModelViewValidator>();
+        
         services.AddScoped<ICancelReasonService, CancelReasonService>();
         services.AddScoped<IStatusChangeService, StatusChangeService>();
         services.AddScoped<IProductService, ProductService>();
@@ -69,6 +74,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IUserAgentService, UserAgentService>();
         services.AddScoped<IDashboardService, DashboardService>();
+        services.AddScoped<AuthenticationService>();
         return services;
     }
 
@@ -90,6 +96,8 @@ public static class ApplicationServiceExtensions
         #endregion
 
 
+
+        services.AddScoped<IValidator<RegisterModelView>, RegisterModelViewValidator>();
     }
 
     public static void RegisterMapsterConfiguration(this IServiceCollection services)
