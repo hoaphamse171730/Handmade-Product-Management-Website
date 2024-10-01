@@ -1,10 +1,14 @@
 ﻿using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.OrderModelViews;
 using HandmadeProductManagement.ModelViews.PromotionModelViews;
 using HandmadeProductManagement.Services.Service;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace HandmadeProductManagementAPI.Controllers
 {
@@ -25,11 +29,25 @@ namespace HandmadeProductManagementAPI.Controllers
             try
             {
                 var orders = await _orderService.GetAllOrdersAsync();
-                return Ok(BaseResponse<IList<OrderResponseModel>>.OkResponse(orders));
+                var response = new BaseResponse<IList<OrderResponseModel>>
+                {
+                    Code = "Success",
+                    StatusCode = StatusCodeHelper.OK,
+                    Message = "Orders retrieved successfully",
+                    Data = orders
+                };
+                return Ok(response);
             }
             catch (BaseException.ErrorException ex)
             {
-                return StatusCode(ex.StatusCode, new { ex.ErrorDetail.ErrorCode, ex.ErrorDetail.ErrorMessage });
+                var response = new BaseResponse<object>
+                {
+                    Code = ex.ErrorDetail.ErrorCode,
+                    StatusCode = (StatusCodeHelper)ex.StatusCode,
+                    Message = ex.ErrorDetail.ErrorMessage?.ToString(),
+                    Data = null
+                };
+                return StatusCode(ex.StatusCode, response);
             }
         }
 
@@ -39,11 +57,25 @@ namespace HandmadeProductManagementAPI.Controllers
             try
             {
                 var order = await _orderService.GetOrderByIdAsync(orderId);
-                return Ok(BaseResponse<OrderResponseModel>.OkResponse(order));
+                var response = new BaseResponse<OrderResponseModel>
+                {
+                    Code = "Success",
+                    StatusCode = StatusCodeHelper.OK,
+                    Message = "Order retrieved successfully",
+                    Data = order
+                };
+                return Ok(response);
             }
             catch (BaseException.ErrorException ex)
             {
-                return StatusCode(ex.StatusCode, new { ex.ErrorDetail.ErrorCode, ex.ErrorDetail.ErrorMessage });
+                var response = new BaseResponse<object>
+                {
+                    Code = ex.ErrorDetail.ErrorCode,
+                    StatusCode = (StatusCodeHelper)ex.StatusCode,
+                    Message = ex.ErrorDetail.ErrorMessage?.ToString(),
+                    Data = null
+                };
+                return StatusCode(ex.StatusCode, response);
             }
         }
 
@@ -53,11 +85,25 @@ namespace HandmadeProductManagementAPI.Controllers
             try
             {
                 var orders = await _orderService.GetOrderByUserIdAsync(userId);
-                return Ok(BaseResponse<IList<OrderResponseModel>>.OkResponse(orders));
+                var response = new BaseResponse<IList<OrderResponseModel>>
+                {
+                    Code = "Success",
+                    StatusCode = StatusCodeHelper.OK,
+                    Message = "Orders retrieved successfully",
+                    Data = orders
+                };
+                return Ok(response);
             }
             catch (BaseException.ErrorException ex)
             {
-                return StatusCode(ex.StatusCode, new { ex.ErrorDetail.ErrorCode, ex.ErrorDetail.ErrorMessage });
+                var response = new BaseResponse<object>
+                {
+                    Code = ex.ErrorDetail.ErrorCode,
+                    StatusCode = (StatusCodeHelper)ex.StatusCode,
+                    Message = ex.ErrorDetail.ErrorMessage?.ToString(),
+                    Data = null
+                };
+                return StatusCode(ex.StatusCode, response);
             }
         }
 
@@ -67,11 +113,25 @@ namespace HandmadeProductManagementAPI.Controllers
             try
             {
                 var updatedOrder = await _orderService.UpdateOrderStatusAsync(orderId, status);
-                return Ok(BaseResponse<OrderResponseModel>.OkResponse(updatedOrder));
+                var response = new BaseResponse<OrderResponseModel>
+                {
+                    Code = "Success",
+                    StatusCode = StatusCodeHelper.OK,
+                    Message = "Order status updated successfully",
+                    Data = updatedOrder
+                };
+                return Ok(response);
             }
             catch (BaseException.ErrorException ex)
             {
-                return StatusCode(ex.StatusCode, new { ex.ErrorDetail.ErrorCode, ex.ErrorDetail.ErrorMessage });
+                var response = new BaseResponse<object>
+                {
+                    Code = ex.ErrorDetail.ErrorCode,
+                    StatusCode = (StatusCodeHelper)ex.StatusCode,
+                    Message = ex.ErrorDetail.ErrorMessage?.ToString(),
+                    Data = null
+                };
+                return StatusCode(ex.StatusCode, response);
             }
         }
 
@@ -81,11 +141,25 @@ namespace HandmadeProductManagementAPI.Controllers
             try
             {
                 var order = await _orderService.CreateOrderAsync(createOrder);
-                return Ok(BaseResponse<OrderResponseModel>.OkResponse(order));
+                var response = new BaseResponse<OrderResponseModel>
+                {
+                    Code = "Success",
+                    StatusCode = StatusCodeHelper.OK,
+                    Message = "Order created successfully",
+                    Data = order
+                };
+                return Ok(response);
             }
             catch (BaseException.ErrorException ex)
             {
-                return StatusCode(ex.StatusCode, new { ex.ErrorDetail.ErrorCode, ex.ErrorDetail.ErrorMessage });
+                var response = new BaseResponse<object>
+                {
+                    Code = ex.ErrorDetail.ErrorCode,
+                    StatusCode = (StatusCodeHelper)ex.StatusCode,
+                    Message = ex.ErrorDetail.ErrorMessage?.ToString(),
+                    Data = null
+                };
+                return StatusCode(ex.StatusCode, response);
             }
         }
 
@@ -95,11 +169,25 @@ namespace HandmadeProductManagementAPI.Controllers
             try
             {
                 var updatedOrder = await _orderService.UpdateOrderAsync(orderId, order);
-                return Ok(BaseResponse<OrderResponseModel>.OkResponse(updatedOrder));
+                var response = new BaseResponse<OrderResponseModel>
+                {
+                    Code = "Success",
+                    StatusCode = StatusCodeHelper.OK,
+                    Message = "Order updated successfully",
+                    Data = updatedOrder
+                };
+                return Ok(response);
             }
             catch (BaseException.ErrorException ex)
             {
-                return StatusCode(ex.StatusCode, new { ex.ErrorDetail.ErrorCode, ex.ErrorDetail.ErrorMessage });
+                var response = new BaseResponse<object>
+                {
+                    Code = ex.ErrorDetail.ErrorCode,
+                    StatusCode = (StatusCodeHelper)ex.StatusCode,
+                    Message = ex.ErrorDetail.ErrorMessage?.ToString(),
+                    Data = null
+                };
+                return StatusCode(ex.StatusCode, response);
             }
         }
     }

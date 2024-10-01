@@ -9,7 +9,7 @@ namespace HandmadeProductManagement.ModelViews.OrderModelViews
     public class OrderResponseModel
     {
         public string Id { get; set; } = string.Empty;
-        public decimal TotalPrice { get; set; }
+        public int TotalPrice { get; set; }
         public DateTime OrderDate { get; set; }
         public string Status { get; set; } = string.Empty;
         public Guid UserId { get; set; }
