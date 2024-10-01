@@ -1,6 +1,7 @@
 ﻿using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
+using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.ModelViews.CancelReasonModelViews;
 using Microsoft.EntityFrameworkCore;
 
@@ -34,10 +35,10 @@ namespace HandmadeProductManagement.Services.Service
         public async Task<IList<CancelReasonResponseModel>> GetByPage(int page, int pageSize)
         {
             if (page <= 0)
-                throw new ArgumentException("Page number must be greater than 0.");
+                throw new BaseException.BadRequestException("invalid_input", "Page must be greater than 0.");
 
             if (pageSize <= 0)
-                throw new ArgumentException("Page size must be greater than 0.");
+                throw new BaseException.BadRequestException("invalid_input", "Page size must be greater than 0.");
 
             IQueryable<CancelReason> query = _unitOfWork.GetRepository<CancelReason>().Entities
                 .Where(cr => !cr.DeletedTime.HasValue || cr.DeletedBy == null);
@@ -62,13 +63,13 @@ namespace HandmadeProductManagement.Services.Service
             // Validate RefundRate is between 0 and 1
             if (createCancelReason.RefundRate < 0 || createCancelReason.RefundRate > 1)
             {
-                throw new ArgumentException("RefundRate must be between 0 and 1.");
+                throw new BaseException.BadRequestException("out_of_ranged_input", "RefundRate must be between 0 and 1.");
             }
 
             // Validate Description is not null or empty
             if (string.IsNullOrWhiteSpace(createCancelReason.Description))
             {
-                throw new ArgumentException("Description cannot be null or empty.");
+                throw new BaseException.BadRequestException("missing_required_field", "Description cannot be null or empty.");
             }
 
             var cancelReason = new CancelReason
@@ -102,13 +103,13 @@ namespace HandmadeProductManagement.Services.Service
             // Validate RefundRate is between 0 and 1
             if (updatedCancelReason.RefundRate < 0 || updatedCancelReason.RefundRate > 1)
             {
-                throw new ArgumentException("RefundRate must be between 0 and 1.");
+                throw new BaseException.BadRequestException("out_of_ranged_input", "RefundRate must be between 0 and 1.");
             }
 
             // Validate Description is not null or empty
             if (string.IsNullOrWhiteSpace(updatedCancelReason.Description))
             {
-                throw new ArgumentException("Description cannot be null or empty.");
+                throw new BaseException.BadRequestException("missing_required_field", "Description cannot be null or empty.");
             }
 
             // Update fields
@@ -133,7 +134,9 @@ namespace HandmadeProductManagement.Services.Service
         {
             var cancelReason = await _unitOfWork.GetRepository<CancelReason>().GetByIdAsync(id);
             if (cancelReason == null)
-                return false;
+            {
+
+            }
 
             // Set DeletedTime and DeletedBy
             cancelReason.DeletedTime = DateTimeOffset.UtcNow;

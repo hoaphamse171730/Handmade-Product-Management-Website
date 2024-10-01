@@ -23,9 +23,9 @@ namespace HandmadeProductManagementAPI.Controllers
         {
             var response = new BaseResponse<IList<CancelReasonResponseModel>>
             {
-                Code = "OK",
+                Code = "Success",
                 StatusCode = StatusCodeHelper.OK,
-                Message = "Success",
+                Message = "Get Cancel Reason sucessfully!",
                 Data = await _cancelReasonService.GetByPage(page, pageSize)
             };
             return Ok(response);
@@ -38,7 +38,7 @@ namespace HandmadeProductManagementAPI.Controllers
             await _cancelReasonService.Create(reason);
             var response = new BaseResponse<CancelReasonResponseModel>
             {
-                Code = "OK",
+                Code = "Success",
                 StatusCode = StatusCodeHelper.OK,
                 Message = "Created Cancel Reason successfully!",
                 Data = null
@@ -53,7 +53,7 @@ namespace HandmadeProductManagementAPI.Controllers
             await _cancelReasonService.Update(id, updatedReason);
             var response = new BaseResponse<CancelReasonResponseModel>
             {
-                Code = "OK",
+                Code = "Success",
                 StatusCode = StatusCodeHelper.OK,
                 Message = "Updated Cancel Reason successfully!",
                 Data = null
@@ -69,7 +69,7 @@ namespace HandmadeProductManagementAPI.Controllers
 
             var response = new BaseResponse<string>
             {
-                Code = "OK",
+                Code = "Success",
                 StatusCode = StatusCodeHelper.OK,
                 Message = $"Cancel Reason with ID {id} has been successfully deleted.",
                 Data = null
