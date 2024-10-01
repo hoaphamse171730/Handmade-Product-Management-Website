@@ -9,7 +9,7 @@ public interface IOrderDetailService
     Task<OrderDetailDto> GetById(string id);
     Task<OrderDetailDto> Create(OrderDetailForCreationDto promotion);
     Task Update(string id, OrderDetailForUpdateDto promotion);
-    Task Delete(string id);
+    //Task Delete(string id);
     Task SoftDelete(string id);
     Task<IList<OrderDetailDto>> GetByOrderId(string orderId);
     
