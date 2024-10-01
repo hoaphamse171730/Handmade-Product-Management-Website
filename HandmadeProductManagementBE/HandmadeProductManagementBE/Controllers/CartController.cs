@@ -23,7 +23,7 @@ namespace HandmadeProductManagementAPI.Controllers
         public async Task<IActionResult> GetCart(Guid userId)
         {
                 var cart = await _cartService.GetCartByUserId(userId);
-                return Ok(BaseResponse<CartModel>.OkResponse(cart))
+            return Ok(BaseResponse<CartModel>.OkResponse(cart));
         }
 
         [HttpPost("item/add/{cartId}")]
