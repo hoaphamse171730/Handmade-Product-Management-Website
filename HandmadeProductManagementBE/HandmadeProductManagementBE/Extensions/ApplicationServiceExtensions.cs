@@ -1,10 +1,9 @@
-using System.Reflection;
 using FluentValidation;
+using FluentValidation.AspNetCore;
 using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Exceptions.Handler;
-using HandmadeProductManagement.Core.Utils;
 using HandmadeProductManagement.ModelViews.AuthModelViews;
 using HandmadeProductManagement.ModelViews.ProductModelViews;
 using HandmadeProductManagement.ModelViews.PromotionModelViews;
@@ -12,6 +11,7 @@ using HandmadeProductManagement.Repositories.Context;
 using HandmadeProductManagement.Repositories.Entity;
 using HandmadeProductManagement.Repositories.UOW;
 using HandmadeProductManagement.Services.Service;
+using HandmadeProductManagement.Validation.Authentication;
 using HandmadeProductManagement.Validation.Product;
 using HandmadeProductManagement.Validation.Promotion;
 using HandmadeProductManagementAPI.BackgroundServices;
@@ -46,7 +46,12 @@ public static class ApplicationServiceExtensions
                 });
         });
         
-        services.AddExceptionHandler<CustomExceptionHandler>();
+        services.AddExceptionHandler<CustomExceptionHandler>(); //NA
+        
+        services.AddFluentValidationAutoValidation();
+        
+        services.AddValidatorsFromAssemblyContaining<RegisterModelViewValidator>();
+        
         services.AddScoped<ICancelReasonService, CancelReasonService>();
         services.AddScoped<IStatusChangeService, StatusChangeService>();
         services.AddScoped<IProductService, ProductService>();
@@ -66,6 +71,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IProductService, ProductService>();
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IUserAgentService, UserAgentService>();
+        services.AddScoped<AuthenticationService>();
         return services;
     }
 
@@ -75,6 +81,8 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IValidator<PromotionForUpdateDto>, PromotionForUpdateDtoValidator>();
         services.AddScoped<IValidator<ProductForCreationDto>, ProductForCreationDtoValidator>();
         services.AddScoped<IValidator<ProductForUpdateDto>, ProductForUpdateDtoValidator>();
+
+        services.AddScoped<IValidator<RegisterModelView>, RegisterModelViewValidator>();
     }
 
     public static void RegisterMapsterConfiguration(this IServiceCollection services)

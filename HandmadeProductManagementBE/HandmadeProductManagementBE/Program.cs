@@ -25,7 +25,7 @@ builder.Services.AddControllers(
 
 //All extra services must be contained in ApplicationServiceExtensions & IdentityServiceExtensions
 builder.Services.AddApplicationServices(builder.Configuration);
-builder.Services.AddIdentityServices(builder.Configuration);
+builder.Services.AddIdentityServices(builder.Configuration); //NA
 builder.Services.AddConfig(builder.Configuration);
 builder.Services.RegisterMapsterConfiguration();
 builder.Services.ConfigureFluentValidation();
@@ -44,7 +44,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-app.UseMiddleware<RequestLoggingMiddleware>();
+app.UseMiddleware<RequestLoggingMiddleware>(); //NA
+
 //configure the app to use Custom Exception Handler globally
 app.UseExceptionHandler(options => { });
 

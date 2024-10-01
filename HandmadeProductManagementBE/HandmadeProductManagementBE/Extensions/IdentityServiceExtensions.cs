@@ -9,7 +9,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace HandmadeProductManagementAPI.Extensions;
 
-public static class IdentityServiceExtensions
+public static class IdentityServiceExtensions //NA
 {
     public static IServiceCollection AddIdentityServices(this IServiceCollection services,
         IConfiguration config)
