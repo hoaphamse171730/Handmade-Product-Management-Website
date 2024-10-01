@@ -29,6 +29,20 @@ namespace HandmadeProductManagementAPI.Controllers
             return StatusCode((int)response.StatusCode, response);
         }
 
+
+        //[HttpGet("search")]
+        //public async Task<IActionResult> SearchProducts(ProductSearchModel searchModel)
+        //{
+        //    var response = new BaseResponse<ProductSearchVM>
+        //    {
+        //        Code = ,
+        //        StatusCode = StatusCodeHelper.OK,
+        //        Message = "Success",
+        //        Data = _productService.SearchProductsAsync(searchModel)
+        //    };
+        //    return Ok(response);
+        //}
+
         [HttpGet("sort")]
         public async Task<IActionResult> SortProducts([FromQuery] ProductSortModel sortModel)
         {
