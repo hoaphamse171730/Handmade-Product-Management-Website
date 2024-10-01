@@ -48,10 +48,18 @@ namespace HandmadeProductManagement.Services.Service
                           }).ToList();
         }
 
-        public async Task<ReplyModel?> GetByIdAsync(string replyId)
+        public async Task<ReplyModel> GetByIdAsync(string replyId)
         {
+            if (string.IsNullOrWhiteSpace(replyId))
+            {
+                throw new ArgumentException("Reply ID cannot be null or empty.");
+            }
+
             var reply = await _unitOfWork.GetRepository<Reply>().GetByIdAsync(replyId);
-            if (reply == null) return null;
+            if (reply == null)
+            {
+                throw new ArgumentException("Reply not found.");
+            }
 
             return new ReplyModel
             {
@@ -65,26 +73,27 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<ReplyModel> CreateAsync(ReplyModel replyModel)
         {
-            // Check if reviewId is valid
+            if (replyModel == null)
+            {
+                throw new ArgumentException("Reply model cannot be null.");
+            }
+
             if (string.IsNullOrWhiteSpace(replyModel.ReviewId) || !Guid.TryParse(replyModel.ReviewId, out _))
             {
                 throw new ArgumentException("Invalid reviewId format.");
             }
 
-            // Check if the reviewId exists in the database
             var review = await _unitOfWork.GetRepository<Review>().GetByIdAsync(replyModel.ReviewId);
             if (review == null)
             {
                 throw new ArgumentException("Review not found.");
             }
 
-            // Check if shopId is valid
             if (string.IsNullOrWhiteSpace(replyModel.ShopId) || !Guid.TryParse(replyModel.ShopId, out _))
             {
                 throw new ArgumentException("Invalid shopId format.");
             }
 
-            // Check if the shopId exists in the database
             var shop = await _unitOfWork.GetRepository<Shop>()
                                  .Entities
                                  .FirstOrDefaultAsync(s => s.Id == replyModel.ShopId);
@@ -93,7 +102,6 @@ namespace HandmadeProductManagement.Services.Service
                 throw new ArgumentException("Shop not found.");
             }
 
-            // Ensure that the shop is associated with the product of the review
             var product = await _unitOfWork.GetRepository<Product>()
                                            .Entities
                                            .FirstOrDefaultAsync(p => p.Id == review.ProductId && p.ShopId == shop.Id);
@@ -102,7 +110,6 @@ namespace HandmadeProductManagement.Services.Service
                 throw new ArgumentException("The specified shop cannot reply to this review.");
             }
 
-            // Ensure that each review has only one reply
             var existingReply = await _unitOfWork.GetRepository<Reply>()
                                        .Entities
                                        .FirstOrDefaultAsync(r => r.ReviewId == replyModel.ReviewId);
@@ -132,18 +139,25 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<ReplyModel> UpdateAsync(string replyId, ReplyModel updatedReply)
         {
-            var existingReply = await _unitOfWork.GetRepository<Reply>().GetByIdAsync(replyId);
-            if (existingReply == null) throw new ArgumentException("Reply not found.");
-
-            if (!string.IsNullOrWhiteSpace(updatedReply.Content))
+            if (string.IsNullOrWhiteSpace(replyId))
             {
-                existingReply.Content = updatedReply.Content;
+                throw new ArgumentException("Reply ID cannot be null or empty.");
+            }
+
+            var existingReply = await _unitOfWork.GetRepository<Reply>().GetByIdAsync(replyId);
+            if (existingReply == null)
+            {
+                throw new ArgumentException("Reply not found.");
+            }
+
+            if (string.IsNullOrWhiteSpace(updatedReply.ShopId) || !Guid.TryParse(updatedReply.ShopId, out _))
+            {
+                throw new ArgumentException("Invalid shopId format.");
             }
 
             var shop = await _unitOfWork.GetRepository<Shop>()
-                     .Entities
-                     .FirstOrDefaultAsync(s => s.Id == updatedReply.ShopId);
-
+                         .Entities
+                         .FirstOrDefaultAsync(s => s.Id == updatedReply.ShopId);
             if (shop == null)
             {
                 throw new ArgumentException("Shop not found.");
@@ -165,8 +179,16 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<bool> DeleteAsync(string replyId)
         {
+            if (string.IsNullOrWhiteSpace(replyId))
+            {
+                throw new ArgumentException("Reply ID cannot be null or empty.");
+            }
+
             var existingReply = await _unitOfWork.GetRepository<Reply>().GetByIdAsync(replyId);
-            if (existingReply == null) return false;
+            if (existingReply == null)
+            {
+                throw new ArgumentException("Reply not found.");
+            }
 
             existingReply.DeletedTime = DateTimeOffset.UtcNow;
 
@@ -177,14 +199,20 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<bool> SoftDeleteAsync(string replyId)
         {
+            if (string.IsNullOrWhiteSpace(replyId))
+            {
+                throw new ArgumentException("Reply ID cannot be null or empty.");
+            }
+
             var existingReply = await _unitOfWork.GetRepository<Reply>().GetByIdAsync(replyId);
-            if (existingReply == null) return false;
+            if (existingReply == null)
+            {
+                throw new ArgumentException("Reply not found.");
+            }
 
-            // Get the shop details
             var shop = await _unitOfWork.GetRepository<Shop>()
-                             .Entities
-                             .FirstOrDefaultAsync(s => s.Id == existingReply.ShopId);
-
+                                 .Entities
+                                 .FirstOrDefaultAsync(s => s.Id == existingReply.ShopId);
             if (shop == null)
             {
                 throw new ArgumentException("Shop not found.");
