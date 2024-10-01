@@ -19,7 +19,7 @@ namespace HandmadeProductManagement.Services.Service
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<ShopResponseModel> CreateShopAsync(CreateShopDto createShop)
+        public async Task<bool> CreateShopAsync(CreateShopDto createShop)
         {
             ValidateShop(createShop);
 
@@ -28,7 +28,7 @@ namespace HandmadeProductManagement.Services.Service
                 u => u.Id.ToString() == createShop.UserId && !u.DeletedTime.HasValue);
             if (!userExists)
             {
-                throw new BaseException.ErrorException(404, "user_not_found", "User not found.");
+                throw new BaseException.NotFoundException("user_not_found", "User not found.");
             }
 
             var repository = _unitOfWork.GetRepository<Shop>();
@@ -40,8 +40,8 @@ namespace HandmadeProductManagement.Services.Service
             {
                 if (existingShop.DeletedTime == null)
                 {
-                    throw new BaseException.ErrorException(
-                        400, "user_active_shop", "User already has an active shop.");
+                    throw new BaseException.BadRequestException(
+                        "user_active_shop", "User already has an active shop.");
                 }
                 else
                 {
@@ -56,14 +56,7 @@ namespace HandmadeProductManagement.Services.Service
                     repository.Update(existingShop);
                     await _unitOfWork.SaveAsync();
 
-                    return new ShopResponseModel
-                    {
-                        Id = existingShop.Id.ToString(),
-                        Name = existingShop.Name,
-                        Description = existingShop.Description,
-                        Rating = existingShop.Rating,
-                        UserId = existingShop.UserId
-                    };
+                    return true;
                 }
             }
 
@@ -78,14 +71,7 @@ namespace HandmadeProductManagement.Services.Service
             await repository.InsertAsync(shop);
             await _unitOfWork.SaveAsync();
 
-            return new ShopResponseModel
-            {
-                Id = shop.Id.ToString(),
-                Name = shop.Name,
-                Description = shop.Description,
-                Rating = shop.Rating,
-                UserId = shop.UserId
-            };
+            return true;
         }
 
         public async Task<bool> DeleteShopAsync(Guid userId, string id)
@@ -99,14 +85,14 @@ namespace HandmadeProductManagement.Services.Service
             var userExists = await userRepository.Entities.AnyAsync(u => u.Id == userId && !u.DeletedTime.HasValue);
             if (!userExists)
             {
-                throw new BaseException.ErrorException(404, "user_not_found", "User not found.");
+                throw new BaseException.NotFoundException("user_not_found", "User not found.");
             }
 
             var repository = _unitOfWork.GetRepository<Shop>();
             var shop = await repository.Entities.FirstOrDefaultAsync(s => s.Id == id && !s.DeletedTime.HasValue);
             if (shop == null)
             {
-                throw new BaseException.ErrorException(404, "shop_not_found", "Shop not found.");
+                throw new BaseException.NotFoundException("shop_not_found", "Shop not found.");
             }
 
             shop.DeletedBy = userId.ToString();
@@ -139,7 +125,7 @@ namespace HandmadeProductManagement.Services.Service
             var userExists = await userRepository.Entities.AnyAsync(u => u.Id == userId && !u.DeletedTime.HasValue);
             if (!userExists)
             {
-                throw new BaseException.ErrorException(404, "user_not_found", "User not found.");
+                throw new BaseException.NotFoundException("user_not_found", "User not found.");
             }
 
             var repository = _unitOfWork.GetRepository<Shop>();
@@ -148,8 +134,8 @@ namespace HandmadeProductManagement.Services.Service
 
             if (shop == null)
             {
-                throw new BaseException.ErrorException(
-                    404, "shop_not_found", "Shop not found for the given user.");
+                throw new BaseException.NotFoundException(
+                    "shop_not_found", "Shop not found for the given user.");
             }
 
             return new ShopResponseModel
@@ -162,7 +148,7 @@ namespace HandmadeProductManagement.Services.Service
             };
         }
 
-        public async Task<ShopResponseModel> UpdateShopAsync(string id, CreateShopDto shop)
+        public async Task<bool> UpdateShopAsync(string id, CreateShopDto shop)
         {
             ValidateShop(shop);
 
@@ -178,8 +164,8 @@ namespace HandmadeProductManagement.Services.Service
 
             if (existingShop == null)
             {
-                throw new BaseException.ErrorException(
-                    404, "shop_not_found", "Shop not found.");
+                throw new BaseException.NotFoundException(
+                    "shop_not_found", "Shop not found.");
             }
 
             existingShop.Name = shop.Name;
@@ -190,14 +176,7 @@ namespace HandmadeProductManagement.Services.Service
             repository.Update(existingShop);
             await _unitOfWork.SaveAsync();
 
-            return new ShopResponseModel
-            {
-                Id = existingShop.Id.ToString(),
-                Name = existingShop.Name,
-                Description = existingShop.Description,
-                Rating = existingShop.Rating,
-                UserId = existingShop.UserId
-            };
+            return true;
         }
 
         private void ValidateShop(CreateShopDto shop)

@@ -3,6 +3,7 @@ using FluentValidation;
 using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services;
 using HandmadeProductManagement.Contract.Services.Interface;
+using HandmadeProductManagement.Core.Exceptions.Handler;
 using HandmadeProductManagement.Core.Utils;
 using HandmadeProductManagement.ModelViews.AuthModelViews;
 using HandmadeProductManagement.ModelViews.ProductModelViews;
@@ -44,7 +45,8 @@ public static class ApplicationServiceExtensions
                         .WithOrigins("https://localhost:7159");
                 });
         });
-
+        
+        services.AddExceptionHandler<CustomExceptionHandler>();
         services.AddScoped<ICancelReasonService, CancelReasonService>();
         services.AddScoped<IStatusChangeService, StatusChangeService>();
         services.AddScoped<IProductService, ProductService>();
@@ -64,6 +66,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IProductService, ProductService>();
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IUserAgentService, UserAgentService>();
+        services.AddScoped<IDashboardService, DashboardService>();
         return services;
     }
 

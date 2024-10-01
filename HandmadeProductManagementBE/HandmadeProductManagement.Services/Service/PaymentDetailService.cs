@@ -19,7 +19,7 @@ namespace HandmadeProductManagement.Services.Service
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<PaymentDetailResponseModel> CreatePaymentDetailAsync(CreatePaymentDetailDto createPaymentDetailDto)
+        public async Task<bool> CreatePaymentDetailAsync(CreatePaymentDetailDto createPaymentDetailDto)
         {
             ValidatePaymentDetail(createPaymentDetailDto);
 
@@ -28,7 +28,7 @@ namespace HandmadeProductManagement.Services.Service
                 .AnyAsync(u => u.Id.ToString() == createPaymentDetailDto.UserId && !u.DeletedTime.HasValue);
             if (!userExists)
             {
-                throw new BaseException.ErrorException(404, "user_not_found", "User not found.");
+                throw new BaseException.NotFoundException("user_not_found", "User not found.");
             }
 
             var paymentRepository = _unitOfWork.GetRepository<Payment>();
@@ -37,7 +37,7 @@ namespace HandmadeProductManagement.Services.Service
 
             if (payment == null)
             {
-                throw new BaseException.ErrorException(404, "payment_not_found", "Payment not found.");
+                throw new BaseException.NotFoundException("payment_not_found", "Payment not found.");
             }
 
             var invalidStatuses = new[] { "Completed", "Expired", "Refunded", "Failed", "Closed" };
@@ -79,15 +79,7 @@ namespace HandmadeProductManagement.Services.Service
                 await _unitOfWork.SaveAsync();
             }
 
-            return new PaymentDetailResponseModel
-            {
-                Id = paymentDetail.Id,
-                PaymentId = paymentDetail.PaymentId,
-                Status = paymentDetail.Status,
-                Amount = paymentDetail.Amount,
-                Method = paymentDetail.Method,
-                ExternalTransaction = paymentDetail.ExternalTransaction
-            };
+            return true;
         }
 
         public async Task<PaymentDetailResponseModel> GetPaymentDetailByPaymentIdAsync(string paymentId)
@@ -108,7 +100,7 @@ namespace HandmadeProductManagement.Services.Service
 
             if (!paymentExists)
             {
-                throw new BaseException.ErrorException(404, "payment_not_found", "Payment not found.");
+                throw new BaseException.NotFoundException("payment_not_found", "Payment not found.");
             }
 
             var paymentDetailRepository = _unitOfWork.GetRepository<PaymentDetail>();
@@ -117,7 +109,7 @@ namespace HandmadeProductManagement.Services.Service
 
             if (paymentDetail == null)
             {
-                throw new BaseException.ErrorException(404, "payment_detail_not_found", "Payment detail not found.");
+                throw new BaseException.NotFoundException("payment_detail_not_found", "Payment detail not found.");
             }
 
             return new PaymentDetailResponseModel
@@ -149,7 +141,7 @@ namespace HandmadeProductManagement.Services.Service
 
             if (paymentDetail == null)
             {
-                throw new BaseException.ErrorException(404, "payment_detail_not_found", "Payment detail not found.");
+                throw new BaseException.NotFoundException("payment_detail_not_found", "Payment detail not found.");
             }
 
             return new PaymentDetailResponseModel

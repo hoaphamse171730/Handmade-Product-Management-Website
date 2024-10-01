@@ -26,5 +26,7 @@ namespace HandmadeProductManagement.Contract.Repositories.Interface
         Task SaveAsync();
         Task<T?> FindAsync(params object[] keyValues);
 
+        Task<int> CountAsync();
+
     }
 }

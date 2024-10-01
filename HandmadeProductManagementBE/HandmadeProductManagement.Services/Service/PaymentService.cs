@@ -25,7 +25,7 @@ namespace HandmadeProductManagement.Services.Service
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<PaymentResponseModel> CreatePaymentAsync(CreatePaymentDto createPaymentDto)
+        public async Task<bool> CreatePaymentAsync(CreatePaymentDto createPaymentDto)
         {
             ValidatePayment(createPaymentDto);
 
@@ -34,7 +34,7 @@ namespace HandmadeProductManagement.Services.Service
                 .AnyAsync(u => u.Id.ToString() == createPaymentDto.UserId && !u.DeletedTime.HasValue);
             if (!userExists)
             {
-                throw new BaseException.ErrorException(404, "user_not_found", "User not found.");
+                throw new BaseException.NotFoundException("user_not_found", "User not found.");
             }
 
             var orderRepository = _unitOfWork.GetRepository<Order>();
@@ -42,7 +42,7 @@ namespace HandmadeProductManagement.Services.Service
                 .FirstOrDefaultAsync(o => o.Id == createPaymentDto.OrderId && !o.DeletedTime.HasValue);
             if (order == null)
             {
-                throw new BaseException.ErrorException(404, "order_not_found", "Order not found.");
+                throw new BaseException.NotFoundException("order_not_found", "Order not found.");
             }
 
             if (order.Status != "Awaiting Payment")
@@ -71,17 +71,10 @@ namespace HandmadeProductManagement.Services.Service
             await paymentRepository.InsertAsync(payment);
             await _unitOfWork.SaveAsync();
 
-            return new PaymentResponseModel
-            {
-                Id = payment.Id,
-                OrderId = payment.OrderId,
-                TotalAmount = payment.TotalAmount,
-                Status = payment.Status,
-                ExpirationDate = payment.ExpirationDate,
-            };
+            return true;
         }
 
-        public async Task<PaymentResponseModel> UpdatePaymentStatusAsync(string paymentId, string status)
+        public async Task<bool> UpdatePaymentStatusAsync(string paymentId, string status)
         {
             ValidatePaymentStatus(paymentId, status);
 
@@ -91,7 +84,7 @@ namespace HandmadeProductManagement.Services.Service
 
             if (payment == null)
             {
-                throw new BaseException.ErrorException(404, "payment_not_found", "Payment not found.");
+                throw new BaseException.NotFoundException("payment_not_found", "Payment not found.");
             }
 
             payment.Status = status;
@@ -100,14 +93,7 @@ namespace HandmadeProductManagement.Services.Service
             paymentRepository.Update(payment);
             await _unitOfWork.SaveAsync();
 
-            return new PaymentResponseModel
-            {
-                Id = payment.Id,
-                OrderId = payment.OrderId,
-                TotalAmount = payment.TotalAmount,
-                Status = payment.Status,
-                ExpirationDate = payment.ExpirationDate,
-            };
+            return true;
         }
 
         public async Task<PaymentResponseModel> GetPaymentByOrderIdAsync(string orderId)
@@ -127,7 +113,7 @@ namespace HandmadeProductManagement.Services.Service
                 .AnyAsync(o => o.Id == orderId && !o.DeletedTime.HasValue);
             if (!orderExists)
             {
-                throw new BaseException.ErrorException(404, "order_not_found", "Order not found.");
+                throw new BaseException.NotFoundException("order_not_found", "Order not found.");
             }
 
             var paymentRepository = _unitOfWork.GetRepository<Payment>();
@@ -137,7 +123,7 @@ namespace HandmadeProductManagement.Services.Service
 
             if (payment == null)
             {
-                throw new BaseException.ErrorException(404, "payment_not_found", "Payment not found.");
+                throw new BaseException.NotFoundException("payment_not_found", "Payment not found.");
             }
 
             return new PaymentResponseModel
