@@ -96,6 +96,7 @@ public class AuthenticationController(
     [HttpPost("register")]
     public async Task<ActionResult<BaseResponse<string>>> Register(RegisterModelView registerModelView)
     {
+        throw new BaseException.BadRequestException("bad_request", "this is a very bad request");
         if (!ValidationHelper.IsValidNames(CustomRegex.UsernameRegex, registerModelView.UserName) ||
             !ValidationHelper.IsValidNames(CustomRegex.FullNameRegex, registerModelView.FullName)
            )
