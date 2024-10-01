@@ -7,6 +7,7 @@ using HandmadeProductManagement.ModelViews.ProductDetailModelViews;
 using HandmadeProductManagement.ModelViews.ProductModelViews;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using System.ComponentModel.DataAnnotations;
 
 namespace HandmadeProductManagementAPI.Controllers
 {
@@ -30,17 +31,17 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
 
-        //[HttpGet("search")]
-        //public async Task<IActionResult> SearchProducts(ProductSearchModel searchModel)
+        //[httpget("search")]
+        //public async task<iactionresult> searchproducts(productsearchmodel searchmodel)
         //{
-        //    var response = new BaseResponse<ProductSearchVM>
+        //    var response = new baseresponse<productsearchvm>
         //    {
-        //        Code = ,
-        //        StatusCode = StatusCodeHelper.OK,
-        //        Message = "Success",
-        //        Data = _productService.SearchProductsAsync(searchModel)
+        //        code = ,
+        //        statuscode = statuscodehelper.ok,
+        //        message = "success",
+        //        data = _productservice.searchproductsasync(searchmodel)
         //    };
-        //    return Ok(response);
+        //    return ok(response);
         //}
 
         [HttpGet("sort")]
@@ -154,15 +155,46 @@ namespace HandmadeProductManagementAPI.Controllers
             }
         }
 
-        [HttpGet("GetProductDetaills/{id}")]
-        public async Task<IActionResult> GetProductDetails(string id)
+        [HttpGet("GetProductDetails/{id}")]
+        public async Task<IActionResult> GetProductDetails([Required] string id)
         {
-            var response = await _productService.GetProductDetailsByIdAsync(id);
-            if (response.Data == null)
+            try
             {
-                return StatusCode(404, new BaseResponse<ProductDetailResponseModel>(StatusCodeHelper.NotFound, StatusCodeHelper.NotFound.Name(), "Product Not Found!"));
+                var response = await _productService.GetProductDetailsByIdAsync(id);
+
+                // Check the status code in the response from the service
+                if (response.StatusCode == StatusCodeHelper.OK)
+                {
+                    return Ok(new BaseResponse<ProductDetailResponseModel>
+                    {
+                        Code = "Success",
+                        StatusCode = response.StatusCode,
+                        Message = "Product details retrieved successfully.",
+                        Data = response.Data
+                    });
+                }
+                else
+                {
+                    return StatusCode((int)response.StatusCode, new BaseResponse<ProductDetailResponseModel>
+                    {
+                        Code = response.Code,
+                        StatusCode = response.StatusCode,
+                        Message = response.Message,
+                        Data = null
+                    });
+                }
             }
-            return StatusCode((int)response.StatusCode, response);
+            catch (Exception)
+            {
+                var errorResponse = new BaseResponse<ProductDetailResponseModel>
+                {
+                    Code = "ServerError",
+                    StatusCode = StatusCodeHelper.ServerError,
+                    Message = "An unexpected error occurred.",
+                    Data = null
+                };
+                return StatusCode(500, errorResponse);
+            }
         }
     }
 }

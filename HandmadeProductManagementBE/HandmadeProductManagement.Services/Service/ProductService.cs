@@ -282,8 +282,8 @@ namespace HandmadeProductManagement.Services.Service
 
             var promotion = await _unitOfWork.GetRepository<Promotion>().Entities
                 .FirstOrDefaultAsync(p => p.Categories.Any(c => c.Id == product.CategoryId) &&
-                                          p.StartDate <= DateTime.UtcNow &&
-                                          p.EndDate >= DateTime.UtcNow);
+                                           p.StartDate <= DateTime.UtcNow &&
+                                           p.EndDate >= DateTime.UtcNow);
 
             var response = new ProductDetailResponseModel
             {

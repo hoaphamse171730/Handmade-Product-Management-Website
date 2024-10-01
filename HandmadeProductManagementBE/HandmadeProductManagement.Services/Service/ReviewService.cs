@@ -49,8 +49,16 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<ReviewModel?> GetByIdAsync(string reviewId)
         {
+            if (string.IsNullOrWhiteSpace(reviewId) || !Guid.TryParse(reviewId, out _))
+            {
+                throw new ArgumentException("Invalid reviewId format.");
+            }
+
             var review = await _unitOfWork.GetRepository<Review>().GetByIdAsync(reviewId);
-            if (review == null) return null;
+            if (review == null)
+            {
+                throw new ArgumentException("Review not found.");
+            }
 
             return new ReviewModel
             {
@@ -118,9 +126,16 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<ReviewModel> UpdateAsync(string reviewId, ReviewModel updatedReview)
         {
-            var existingReview = await _unitOfWork.GetRepository<Review>().GetByIdAsync(reviewId);
+            if (string.IsNullOrWhiteSpace(reviewId) || !Guid.TryParse(reviewId, out _))
+            {
+                throw new ArgumentException("Invalid reviewId format.");
+            }
 
-            if (existingReview == null) throw new ArgumentException("Review not found.");
+            var existingReview = await _unitOfWork.GetRepository<Review>().GetByIdAsync(reviewId);
+            if (existingReview == null)
+            {
+                throw new ArgumentException("Review not found.");
+            }
 
             // Update Content only if it's provided
             if (!string.IsNullOrWhiteSpace(updatedReview.Content))
@@ -139,9 +154,9 @@ namespace HandmadeProductManagement.Services.Service
             }
 
             var user = await _unitOfWork.GetRepository<ApplicationUser>()
-                             .Entities
-                             .Include(u => u.UserInfo)
-                             .FirstOrDefaultAsync(u => u.Id == updatedReview.UserId);
+                                .Entities
+                                .Include(u => u.UserInfo)
+                                .FirstOrDefaultAsync(u => u.Id == updatedReview.UserId);
 
             if (user == null)
             {
@@ -164,10 +179,18 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<bool> DeleteAsync(string reviewId)
         {
-            var existingReview = await _unitOfWork.GetRepository<Review>().GetByIdAsync(reviewId);
-            if (existingReview == null) return false;
+            if (string.IsNullOrWhiteSpace(reviewId) || !Guid.TryParse(reviewId, out _))
+            {
+                throw new ArgumentException("Invalid reviewId format.");
+            }
 
-            existingReview.DeletedTime = DateTime.UtcNow; 
+            var existingReview = await _unitOfWork.GetRepository<Review>().GetByIdAsync(reviewId);
+            if (existingReview == null)
+            {
+                throw new ArgumentException("Review not found.");
+            }
+
+            existingReview.DeletedTime = DateTime.UtcNow;
 
             _unitOfWork.GetRepository<Review>().Delete(reviewId);
             await _unitOfWork.SaveAsync();
@@ -177,14 +200,21 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<bool> SoftDeleteAsync(string reviewId)
         {
-            var existingReview = await _unitOfWork.GetRepository<Review>().GetByIdAsync(reviewId);
-            if (existingReview == null) return false;
+            if (string.IsNullOrWhiteSpace(reviewId) || !Guid.TryParse(reviewId, out _))
+            {
+                throw new ArgumentException("Invalid reviewId format.");
+            }
 
-            // Get the user who is performing the soft delete
+            var existingReview = await _unitOfWork.GetRepository<Review>().GetByIdAsync(reviewId);
+            if (existingReview == null)
+            {
+                throw new ArgumentException("Review not found.");
+            }
+
             var user = await _unitOfWork.GetRepository<ApplicationUser>()
-                             .Entities
-                             .Include(u => u.UserInfo)
-                             .FirstOrDefaultAsync(u => u.Id == existingReview.UserId);
+                                .Entities
+                                .Include(u => u.UserInfo)
+                                .FirstOrDefaultAsync(u => u.Id == existingReview.UserId);
 
             if (user == null)
             {
