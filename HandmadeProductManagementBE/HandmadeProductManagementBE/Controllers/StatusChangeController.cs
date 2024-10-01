@@ -25,7 +25,7 @@ namespace HandmadeProductManagementAPI.Controllers
             {
                 Code = "Success",
                 StatusCode = StatusCodeHelper.OK,
-                Message = "Get Status Change sucessfully.",
+                Message = "Get Status Change sucessfully!",
                 Data = await _statusChangeService.GetByPage(page, pageSize)
             };
             return Ok(response);
@@ -39,7 +39,7 @@ namespace HandmadeProductManagementAPI.Controllers
             {
                 Code = "Success",
                 StatusCode = StatusCodeHelper.OK,
-                Message = "Get Status Change sucessfully.",
+                Message = "Get Status Change sucessfully!",
                 Data = await _statusChangeService.GetByOrderId(orderId)
             };
             return Ok(response);
@@ -54,7 +54,7 @@ namespace HandmadeProductManagementAPI.Controllers
             {
                 Code = "Success",
                 StatusCode = StatusCodeHelper.OK,
-                Message = "Created Status Change successfully.",
+                Message = "Created Status Change successfully!",
                 Data = null
             };
             return Ok(response);
@@ -69,7 +69,7 @@ namespace HandmadeProductManagementAPI.Controllers
             {
                 Code = "Success",
                 StatusCode = StatusCodeHelper.OK,
-                Message = "Updated Status Change successfully.",
+                Message = "Updated Status Change successfully!",
                 Data = null
             };
             return Ok(response);
