@@ -3,7 +3,6 @@ using HandmadeProductManagement.ModelViews.CartModelViews;
 using HandmadeProductManagement.Core.Base;
 using Microsoft.AspNetCore.Mvc;
 using HandmadeProductManagement.Contract.Services;
-using HandmadeProductManagement.Contract.Repositories.Entity;
 
 namespace HandmadeProductManagementAPI.Controllers
 {
@@ -23,27 +22,14 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpGet("{userId}")]
         public async Task<IActionResult> GetCart(Guid userId)
         {
-            var cart = await _cartService.GetCartByUserId(userId);
-            var response = new BaseResponse<CartModel>
-            {
-                Code = "Success",
-                StatusCode = StatusCodeHelper.OK,
-                Message = "Cart retrieved successfully.",
-                Data = cart
-            };
-            return Ok(response);
+                var cart = await _cartService.GetCartByUserId(userId);
+            return Ok(BaseResponse<CartModel>.OkResponse(cart));
         }
 
         [HttpPost("item/add/{cartId}")]
         public async Task<IActionResult> AddCartItem(string cartId, [FromBody] CreateCartItemDto createCartItemDto)
         {
-            var response = new BaseResponse<bool>
-            {
-                Code = "Success",
-                StatusCode = StatusCodeHelper.OK,
-                Message = "Add Cart Item successfully.",
-                Data = await _cartItemService.AddCartItem(cartId, createCartItemDto);
-            };
+            var response = await _cartItemService.AddCartItem(cartId, createCartItemDto);
             return Ok(response);
         }
 
@@ -52,14 +38,7 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpPut("item/updateQuantity/{cartItemId}")]
         public async Task<IActionResult> UpdateCartItem(string cartItemId, [FromBody] int productQuantity)
         {
-
-            var response = new BaseResponse<bool>
-            {
-                Code = "Success",
-                StatusCode = StatusCodeHelper.OK,
-                Message = "Update Cart Item successfully.",
-                Data = await _cartItemService.UpdateCartItem(cartItemId, productQuantity);
-            };
+            var response = await _cartItemService.UpdateCartItem(cartItemId, productQuantity);
             return Ok(response);
         }
 
@@ -68,13 +47,7 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpDelete("item/{cartItemId}")]
         public async Task<IActionResult> RemoveCartItem(string cartItemId)
         {
-            var response = new BaseResponse<bool>
-            {
-                Code = "Success",
-                StatusCode = StatusCodeHelper.OK,
-                Message = "Remove Cart Item successfully.",
-                Data = await _cartItemService.RemoveCartItem(cartItemId);
-            };
+            var response = await _cartItemService.RemoveCartItem(cartItemId);
             return Ok(response);
         }
 
