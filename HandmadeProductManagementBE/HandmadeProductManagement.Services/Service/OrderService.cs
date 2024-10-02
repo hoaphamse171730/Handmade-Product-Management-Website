@@ -50,9 +50,11 @@ namespace HandmadeProductManagement.Services.Service
                 LastUpdatedBy = createOrder.UserId
             };
 
+            await orderRepository.InsertAsync(order);
+            await _unitOfWork.SaveAsync();
+
             foreach (var detail in createOrder.OrderDetails)
             {
-
                 ValidateOrderDetail(detail);
 
                 var orderDetail = new OrderDetail
@@ -64,10 +66,9 @@ namespace HandmadeProductManagement.Services.Service
                     CreatedBy = createOrder.UserId,
                     LastUpdatedBy = createOrder.UserId
                 };
-                order.OrderDetails.Add(orderDetail);
+                await orderDetailRepository.InsertAsync(orderDetail);
             }
 
-            await orderRepository.InsertAsync(order);
             await _unitOfWork.SaveAsync();
 
             return true;
