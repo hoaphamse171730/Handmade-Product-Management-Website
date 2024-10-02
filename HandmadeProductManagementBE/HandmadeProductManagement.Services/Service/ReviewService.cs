@@ -97,7 +97,7 @@ namespace HandmadeProductManagement.Services.Service
             };
         }
 
-        public async Task<ReviewModel> CreateAsync(ReviewModel reviewModel)
+        public async Task<ReviewModel> CreateAsync(ReviewModel reviewModel, string orderId)
         {
             if (string.IsNullOrWhiteSpace(reviewModel.ProductId) || !Guid.TryParse(reviewModel.ProductId, out _))
             {
@@ -109,6 +109,32 @@ namespace HandmadeProductManagement.Services.Service
             if (productExists == null)
             {
                 throw new BaseException.NotFoundException("product_not_found", "Product not found.");
+            }
+
+            // Check if the order exists, is "Shipped", and contains the product
+            var order = await _unitOfWork.GetRepository<Order>()
+                                          .Entities
+                                          .Include(o => o.OrderDetails)
+                                          .FirstOrDefaultAsync(o => o.Id == orderId && o.UserId == reviewModel.UserId);
+
+            if (order == null || order.Status != "Shipped")
+            {
+                throw new BaseException.BadRequestException("order_not_found", "Review can only be created if the order is 'Shipped'.");
+            }
+
+            // Check if the order contains the specific product
+            if (!order.OrderDetails.Any(od => od.ProductId == reviewModel.ProductId))
+            {
+                throw new BaseException.BadRequestException("product_not_in_order", "User can only review products that have been purchased in a 'Shipped' order.");
+            }
+
+            // Check if a review already exists for this product by this user
+            var existingReview = await _unitOfWork.GetRepository<Review>()
+                                                  .Entities
+                                                  .FirstOrDefaultAsync(r => r.ProductId == reviewModel.ProductId && r.UserId == reviewModel.UserId);
+            if (existingReview != null)
+            {
+                throw new BaseException.BadRequestException("review_already_exists", "User has already reviewed this product.");
             }
 
             if (reviewModel.Rating < 1 || reviewModel.Rating > 5)
@@ -127,16 +153,6 @@ namespace HandmadeProductManagement.Services.Service
             }
 
             var userFullName = user.UserInfo.FullName;
-
-            // Check if the order exists and the status is "Delivered"
-            var order = await _unitOfWork.GetRepository<Order>()
-                                          .Entities
-                                          .FirstOrDefaultAsync(o => o.UserId == reviewModel.UserId && o.Status == "Shipped");
-
-            if (order == null)
-            {
-                throw new BaseException.BadRequestException("order_not_delivered", "Review can only be created if the order status is 'Shipped'.");
-            }
 
             var review = new Review
             {
@@ -159,17 +175,20 @@ namespace HandmadeProductManagement.Services.Service
             return reviewModel;
         }
 
-        public async Task<ReviewModel> UpdateAsync(string reviewId, ReviewModel updatedReview)
+        public async Task<ReviewModel> UpdateAsync(string reviewId, Guid userId, ReviewModel updatedReview)
         {
             if (string.IsNullOrWhiteSpace(reviewId) || !Guid.TryParse(reviewId, out _))
             {
                 throw new BaseException.BadRequestException("invalid_review_id_format", "Invalid reviewId format.");
             }
 
-            var existingReview = await _unitOfWork.GetRepository<Review>().GetByIdAsync(reviewId);
+            var existingReview = await _unitOfWork.GetRepository<Review>()
+                                                  .Entities
+                                                  .FirstOrDefaultAsync(r => r.Id == reviewId && r.UserId == userId);
+
             if (existingReview == null)
             {
-                throw new BaseException.NotFoundException("review_not_found", "Review not found.");
+                throw new BaseException.NotFoundException("review_not_found", "Review not found or user does not have permission to update.");
             }
 
             // Update Content only if it's provided
@@ -188,19 +207,7 @@ namespace HandmadeProductManagement.Services.Service
                 existingReview.Rating = updatedReview.Rating;
             }
 
-            var user = await _unitOfWork.GetRepository<ApplicationUser>()
-                                .Entities
-                                .Include(u => u.UserInfo)
-                                .FirstOrDefaultAsync(u => u.Id == updatedReview.UserId);
-
-            if (user == null)
-            {
-                throw new BaseException.NotFoundException("user_not_found", "User not found.");
-            }
-
-            var userFullName = user.UserInfo.FullName;
-
-            existingReview.LastUpdatedBy = userFullName;
+            existingReview.LastUpdatedBy = existingReview.User.UserInfo.FullName;
             existingReview.LastUpdatedTime = DateTime.UtcNow;
 
             _unitOfWork.GetRepository<Review>().Update(existingReview);
@@ -212,54 +219,48 @@ namespace HandmadeProductManagement.Services.Service
             return updatedReview;
         }
 
-        public async Task<bool> DeleteAsync(string reviewId)
+        public async Task<bool> DeleteAsync(string reviewId, Guid userId)
         {
             if (string.IsNullOrWhiteSpace(reviewId) || !Guid.TryParse(reviewId, out _))
             {
                 throw new BaseException.BadRequestException("invalid_review_id_format", "Invalid reviewId format.");
             }
 
-            var existingReview = await _unitOfWork.GetRepository<Review>().GetByIdAsync(reviewId);
+            var existingReview = await _unitOfWork.GetRepository<Review>()
+                                                  .Entities
+                                                  .FirstOrDefaultAsync(r => r.Id == reviewId && r.UserId == userId);
+
             if (existingReview == null)
             {
-                throw new BaseException.NotFoundException("review_not_found", "Review not found.");
+                return false; // Return false if the review is not found or user is unauthorized to delete it.
             }
 
             existingReview.DeletedTime = DateTime.UtcNow;
 
-            _unitOfWork.GetRepository<Review>().Delete(reviewId);
+            _unitOfWork.GetRepository<Review>().Delete(existingReview);
             await _unitOfWork.SaveAsync();
 
             return true;
         }
 
-        public async Task<bool> SoftDeleteAsync(string reviewId)
+        public async Task<bool> SoftDeleteAsync(string reviewId, Guid userId)
         {
             if (string.IsNullOrWhiteSpace(reviewId) || !Guid.TryParse(reviewId, out _))
             {
                 throw new BaseException.BadRequestException("invalid_review_id_format", "Invalid reviewId format.");
             }
 
-            var existingReview = await _unitOfWork.GetRepository<Review>().GetByIdAsync(reviewId);
+            var existingReview = await _unitOfWork.GetRepository<Review>()
+                                                  .Entities
+                                                  .FirstOrDefaultAsync(r => r.Id == reviewId && r.UserId == userId);
+
             if (existingReview == null)
             {
-                throw new BaseException.NotFoundException("review_not_found", "Review not found.");
+                return false; // Return false if the review is not found or user is unauthorized to delete it.
             }
-
-            var user = await _unitOfWork.GetRepository<ApplicationUser>()
-                                .Entities
-                                .Include(u => u.UserInfo)
-                                .FirstOrDefaultAsync(u => u.Id == existingReview.UserId);
-
-            if (user == null)
-            {
-                throw new BaseException.NotFoundException("user_not_found", "User not found.");
-            }
-
-            var userFullName = user.UserInfo.FullName;
 
             existingReview.DeletedTime = CoreHelper.SystemTimeNow;
-            existingReview.DeletedBy = userFullName;
+            existingReview.DeletedBy = existingReview.User.UserInfo.FullName;
 
             _unitOfWork.GetRepository<Review>().Update(existingReview);
             await _unitOfWork.SaveAsync();
