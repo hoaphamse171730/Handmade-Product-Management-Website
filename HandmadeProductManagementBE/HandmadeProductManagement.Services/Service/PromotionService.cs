@@ -106,5 +106,30 @@ namespace HandmadeProductManagement.Services.Service
             var promotions = await _unitOfWork.GetRepository<Promotion>().Entities.ToListAsync();
             return _mapper.Map<IList<PromotionDto>>(promotions);
         }
+
+        // Thêm phương thức update khuyến mãi hết hạn 
+        public async Task<bool> updatePromotionStatusByRealtime(string id)
+        {
+            // Lấy khuyến mãi theo ID
+            var promotion = await _unitOfWork.GetRepository<Promotion>().Entities
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            // Kiểm tra xem promotion có giá trị null không
+            if (promotion == null)
+            {
+                throw new BaseException.NotFoundException("not_found", "Promotion Not Found!");
+            }
+
+            // Update nếu promotion hết hạn
+            if(DateTime.UtcNow > promotion.EndDate)
+            {
+                promotion.Status = "inactive";
+                await _unitOfWork.GetRepository<Promotion>().UpdateAsync(promotion);
+                await _unitOfWork.SaveAsync();
+            }
+
+            return true; // Trả về true nếu hoạt động bình thường
+        }
+
     }
 }
