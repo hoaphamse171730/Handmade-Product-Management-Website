@@ -120,5 +120,20 @@ namespace HandmadeProductManagementAPI.Controllers
                 return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
             }
         }
+
+        [HttpGet("Expired/{id}")]
+        public async Task<ActionResult> ExpiredPromotion(string id)
+        {
+            var isExpired = await _promotionService.IsExpiredPromotionAsync(id);
+
+            var response = new BaseResponse<bool>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "...",
+                Data = isExpired
+            };
+            return Ok(response);
+        }
     }
 }
