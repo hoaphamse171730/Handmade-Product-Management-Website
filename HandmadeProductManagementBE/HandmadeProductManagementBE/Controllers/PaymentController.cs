@@ -25,7 +25,7 @@ namespace HandmadeProductManagementAPI.Controllers
             try
             {
                 var createdPayment = await _paymentService.CreatePaymentAsync(createPaymentDto);
-                var response = new BaseResponse<PaymentResponseModel>
+                var response = new BaseResponse<bool>
                 {
                     Code = "Success",
                     StatusCode = StatusCodeHelper.OK,
@@ -64,7 +64,7 @@ namespace HandmadeProductManagementAPI.Controllers
             try
             {
                 var updatedPayment = await _paymentService.UpdatePaymentStatusAsync(paymentId, status);
-                var response = new BaseResponse<PaymentResponseModel>
+                var response = new BaseResponse<bool>
                 {
                     Code = "Success",
                     StatusCode = StatusCodeHelper.OK,

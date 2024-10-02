@@ -12,9 +12,9 @@ namespace HandmadeProductManagement.Contract.Services.Interface
     {
         Task<IList<OrderResponseModel>> GetAllOrdersAsync();
         Task<OrderResponseModel> GetOrderByIdAsync(string orderId);
-        Task<OrderResponseModel> CreateOrderAsync(CreateOrderDto createOrder);
-        Task<OrderResponseModel> UpdateOrderAsync(string orderId, CreateOrderDto order);
-        Task<OrderResponseModel> UpdateOrderStatusAsync(string orderId, string status);
+        Task<bool> CreateOrderAsync(CreateOrderDto createOrder);
+        Task<bool> UpdateOrderAsync(string orderId, CreateOrderDto order);
+        Task<bool> UpdateOrderStatusAsync(string orderId, string status);
         Task<bool> DeleteOrderAsync(string orderId);
         Task<IList<OrderResponseModel>> GetOrderByUserIdAsync(Guid userId);
     }

@@ -9,7 +9,7 @@ namespace HandmadeProductManagement.Contract.Services.Interface
 {
     public interface IPaymentDetailService
     {
-        Task<PaymentDetailResponseModel> CreatePaymentDetailAsync(CreatePaymentDetailDto createPaymentDetailDto);
+        Task<bool> CreatePaymentDetailAsync(CreatePaymentDetailDto createPaymentDetailDto);
         Task<PaymentDetailResponseModel> GetPaymentDetailByPaymentIdAsync(string paymentId);
         Task<PaymentDetailResponseModel> GetPaymentDetailByIdAsync(string id);
     }

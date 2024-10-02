@@ -225,7 +225,7 @@ namespace HandmadeProductManagement.Services.Service
 
         }
 
-        public async Task Update(string id, ProductForUpdateDto product)
+        public async Task<ProductDto> Update(string id, ProductForUpdateDto product)
         {
             var result = _updateValidator.ValidateAsync(product);
             if (!result.Result.IsValid)
@@ -238,9 +238,11 @@ namespace HandmadeProductManagement.Services.Service
             productEntity.LastUpdatedTime = DateTime.UtcNow;
             await _unitOfWork.GetRepository<Product>().UpdateAsync(productEntity);
             await _unitOfWork.SaveAsync();
+            var productToReturn = _mapper.Map<ProductDto>(productEntity);
+            return productToReturn;
         }
 
-        public async Task Delete(string id)
+        public async Task<bool> Delete(string id)
         {
             var productRepo = _unitOfWork.GetRepository<Product>();
             var productEntity = await productRepo.Entities.FirstOrDefaultAsync(x => x.Id == id);
@@ -249,9 +251,10 @@ namespace HandmadeProductManagement.Services.Service
             productEntity.DeletedTime = DateTime.UtcNow;
             await productRepo.DeleteAsync(id);
             await _unitOfWork.SaveAsync();
+            return true;
         }
 
-        public async Task SoftDelete(string id)
+        public async Task<bool> SoftDelete(string id)
         {
             var productRepo = _unitOfWork.GetRepository<Product>();
             var productEntity = await productRepo.Entities.FirstOrDefaultAsync(x => x.Id == id.ToString());
@@ -260,6 +263,7 @@ namespace HandmadeProductManagement.Services.Service
             productEntity.DeletedTime = DateTime.UtcNow;
             await productRepo.UpdateAsync(productEntity);
             await _unitOfWork.SaveAsync();
+            return true;
         }
 
         private bool IsValidGuid(string input)
@@ -267,11 +271,11 @@ namespace HandmadeProductManagement.Services.Service
             return Guid.TryParse(input, out _);
         }
 
-        public async Task<BaseResponse<ProductDetailResponseModel>> GetProductDetailsByIdAsync(string productId)
+        public async Task<ProductDetailResponseModel> GetProductDetailsByIdAsync(string productId)
         {
             if (string.IsNullOrEmpty(productId) || !IsValidGuid(productId))
             {
-                return BaseResponse<ProductDetailResponseModel>.FailResponse("Invalid product ID", StatusCodeHelper.BadRequest);
+                throw new BaseException.BadRequestException("invalid_product_id", "Product ID is invalid or empty.");
             }
 
             var product = await _unitOfWork.GetRepository<Product>().Entities
@@ -286,13 +290,13 @@ namespace HandmadeProductManagement.Services.Service
 
             if (product == null)
             {
-                return BaseResponse<ProductDetailResponseModel>.FailResponse("Product not found", StatusCodeHelper.NotFound);
+                throw new BaseException.NotFoundException("product_not_found", "Product not found.");
             }
 
             var promotion = await _unitOfWork.GetRepository<Promotion>().Entities
                 .FirstOrDefaultAsync(p => p.Categories.Any(c => c.Id == product.CategoryId) &&
-                                          p.StartDate <= DateTime.UtcNow &&
-                                          p.EndDate >= DateTime.UtcNow);
+                                           p.StartDate <= DateTime.UtcNow &&
+                                           p.EndDate >= DateTime.UtcNow);
 
             var response = new ProductDetailResponseModel
             {
@@ -331,7 +335,7 @@ namespace HandmadeProductManagement.Services.Service
                 } : null
             };
 
-            return BaseResponse<ProductDetailResponseModel>.OkResponse(response);
+            return response;
         }
     }
 }

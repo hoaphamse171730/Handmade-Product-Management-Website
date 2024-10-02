@@ -113,7 +113,7 @@ namespace HandmadeProductManagementAPI.Controllers
             try
             {
                 var updatedOrder = await _orderService.UpdateOrderStatusAsync(orderId, status);
-                var response = new BaseResponse<OrderResponseModel>
+                var response = new BaseResponse<bool>
                 {
                     Code = "Success",
                     StatusCode = StatusCodeHelper.OK,
@@ -141,7 +141,7 @@ namespace HandmadeProductManagementAPI.Controllers
             try
             {
                 var order = await _orderService.CreateOrderAsync(createOrder);
-                var response = new BaseResponse<OrderResponseModel>
+                var response = new BaseResponse<bool>
                 {
                     Code = "Success",
                     StatusCode = StatusCodeHelper.OK,
@@ -169,7 +169,7 @@ namespace HandmadeProductManagementAPI.Controllers
             try
             {
                 var updatedOrder = await _orderService.UpdateOrderAsync(orderId, order);
-                var response = new BaseResponse<OrderResponseModel>
+                var response = new BaseResponse<bool>
                 {
                     Code = "Success",
                     StatusCode = StatusCodeHelper.OK,

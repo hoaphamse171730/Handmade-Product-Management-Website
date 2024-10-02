@@ -23,9 +23,9 @@ namespace HandmadeProductManagementAPI.Controllers
         {
             var response = new BaseResponse<IList<StatusChangeResponseModel>>
             {
-                Code = "OK",
+                Code = "Success",
                 StatusCode = StatusCodeHelper.OK,
-                Message = "Success",
+                Message = "Get Status Change sucessfully.",
                 Data = await _statusChangeService.GetByPage(page, pageSize)
             };
             return Ok(response);
@@ -37,9 +37,9 @@ namespace HandmadeProductManagementAPI.Controllers
         {
             var response = new BaseResponse<IList<StatusChangeResponseModel>>
             {
-                Code = "OK",
+                Code = "Success",
                 StatusCode = StatusCodeHelper.OK,
-                Message = "Success",
+                Message = "Get Status Change sucessfully.",
                 Data = await _statusChangeService.GetByOrderId(orderId)
             };
             return Ok(response);
@@ -52,9 +52,9 @@ namespace HandmadeProductManagementAPI.Controllers
             await _statusChangeService.Create(statusChange);
             var response = new BaseResponse<StatusChangeResponseModel>
             {
-                Code = "OK",
+                Code = "Success",
                 StatusCode = StatusCodeHelper.OK,
-                Message = "Created Status Change successfully!",
+                Message = "Created Status Change successfully.",
                 Data = null
             };
             return Ok(response);
@@ -67,9 +67,9 @@ namespace HandmadeProductManagementAPI.Controllers
             await _statusChangeService.Update(id, updatedStatusChange);
             var response = new BaseResponse<StatusChangeResponseModel>
             {
-                Code = "OK",
+                Code = "Success",
                 StatusCode = StatusCodeHelper.OK,
-                Message = "Updated Status Change successfully!",
+                Message = "Updated Status Change successfully.",
                 Data = null
             };
             return Ok(response);
@@ -83,7 +83,7 @@ namespace HandmadeProductManagementAPI.Controllers
 
             var response = new BaseResponse<string>
             {
-                Code = "OK",
+                Code = "Success",
                 StatusCode = StatusCodeHelper.OK,
                 Message = $"Status Change with ID {id} has been successfully deleted.",
                 Data = null

@@ -1,6 +1,8 @@
-﻿using HandmadeProductManagement.Contract.Services.Interface;
+﻿using HandmadeProductManagement.Contract.Repositories.Entity;
+using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.ModelViews.OrderDetailModelViews;
+using HandmadeProductManagement.ModelViews.OrderModelViews;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -50,14 +52,14 @@ namespace HandmadeProductManagementAPI.Controllers
                 return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
             }
         }
-
         [HttpPost]
         public async Task<ActionResult<OrderDetailDto>> CreateOrderDetail(OrderDetailForCreationDto orderDetailForCreation)
         {
             try
             {
                 var createdOrderDetail = await _orderDetailService.Create(orderDetailForCreation);
-                return CreatedAtAction(nameof(GetOrderDetail), new { id = createdOrderDetail.OrderId }, BaseResponse<OrderDetailDto>.OkResponse(createdOrderDetail));
+                return Ok(BaseResponse<OrderDetailDto>.OkResponse(createdOrderDetail));
+
             }
             catch (System.Exception ex)
             {
@@ -65,12 +67,13 @@ namespace HandmadeProductManagementAPI.Controllers
             }
         }
 
-        [HttpPut("{id}")]
-        public async Task<ActionResult<OrderDetailDto>> UpdateOrderDetail(string id, OrderDetailForUpdateDto orderDetailForUpdate)
+
+        [HttpPut("{orderId}/{productId}")]
+        public async Task<ActionResult<OrderDetailDto>> UpdateOrderDetail(string orderId, OrderDetailForUpdateDto orderDetailForUpdate)
         {
             try
             {
-                await _orderDetailService.Update(id, orderDetailForUpdate);
+                await _orderDetailService.Update(orderId,  orderDetailForUpdate);
                 return Ok(BaseResponse<string>.OkResponse("OrderDetail updated successfully"));
             }
             catch (KeyNotFoundException)
@@ -83,12 +86,13 @@ namespace HandmadeProductManagementAPI.Controllers
             }
         }
 
+
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteOrderDetail(string id)
         {
             try
             {
-                await _orderDetailService.Delete(id);
+                await _orderDetailService.SoftDelete(id);
                 return NoContent();
             }
             catch (KeyNotFoundException)
