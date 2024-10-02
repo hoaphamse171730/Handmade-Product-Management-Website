@@ -1,6 +1,4 @@
-﻿
-
-namespace HandmadeProductManagement.ModelViews.CancelReasonModelViews
+﻿namespace HandmadeProductManagement.ModelViews.CancelReasonModelViews
 {
     public class CancelReasonForManipulation
     {

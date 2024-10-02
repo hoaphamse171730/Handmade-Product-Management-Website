@@ -4,6 +4,7 @@ using HandmadeProductManagement.ModelViews.CancelReasonModelViews;
 using HandmadeProductManagement.ModelViews.OrderDetailModelViews;
 using HandmadeProductManagement.ModelViews.ProductModelViews;
 using HandmadeProductManagement.ModelViews.PromotionModelViews;
+using HandmadeProductManagement.ModelViews.StatusChangeModelViews;
 
 namespace HandmadeProductManagementAPI;
 
@@ -35,6 +36,12 @@ public class MappingProfile : Profile
         CreateMap<CancelReasonForUpdateDto, CancelReason>();
         #endregion
 
+
+        #region StatusChange
+        CreateMap<StatusChange, StatusChangeResponseModel>();
+        CreateMap<StatusChangeForCreationDto, StatusChange>();
+        CreateMap<StatusChangeForUpdateDto, StatusChange>();
+        #endregion
     }
 
 }

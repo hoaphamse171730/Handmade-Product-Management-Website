@@ -10,6 +10,7 @@ using HandmadeProductManagement.ModelViews.CancelReasonModelViews;
 using HandmadeProductManagement.ModelViews.OrderDetailModelViews;
 using HandmadeProductManagement.ModelViews.ProductModelViews;
 using HandmadeProductManagement.ModelViews.PromotionModelViews;
+using HandmadeProductManagement.ModelViews.StatusChangeModelViews;
 using HandmadeProductManagement.Repositories.Context;
 using HandmadeProductManagement.Repositories.Entity;
 using HandmadeProductManagement.Repositories.UOW;
@@ -18,6 +19,7 @@ using HandmadeProductManagement.Validation.CancelReason;
 using HandmadeProductManagement.Validation.OrderDetail;
 using HandmadeProductManagement.Validation.Product;
 using HandmadeProductManagement.Validation.Promotion;
+using HandmadeProductManagement.Validation.StatusChange;
 using HandmadeProductManagementAPI.BackgroundServices;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
@@ -94,6 +96,11 @@ public static class ApplicationServiceExtensions
         #region CancelReason
         services.AddScoped<IValidator<CancelReasonForCreationDto>, CancelReasonForCreationDtoValidator>();
         services.AddScoped<IValidator<CancelReasonForUpdateDto>, CancelReasonForUpdateDtoValidator>();
+        #endregion
+
+        #region StatusChange
+        services.AddScoped<IValidator<StatusChangeForCreationDto>, StatusChangeForCreationDtoValidator>();
+        services.AddScoped<IValidator<StatusChangeForUpdateDto>, StatusChangeForUpdateDtoValidator>();
         #endregion
     }
 

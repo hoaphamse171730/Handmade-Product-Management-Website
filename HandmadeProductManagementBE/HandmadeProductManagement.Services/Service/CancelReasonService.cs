@@ -24,6 +24,19 @@ namespace HandmadeProductManagement.Services.Service
             _updateValidator = updateValidator;
         }
 
+        public async Task<CancelReasonResponseModel> GetById(string id)
+        {
+            var cancelReason = await _unitOfWork.GetRepository<CancelReason>().Entities.FirstOrDefaultAsync(cr => cr.Id == id);
+            if (cancelReason == null)
+            {
+                throw new BaseException.NotFoundException("cancel_reason_not_found", "Cancel Reason not found.");
+            }
+
+            var cancelReasonDto = _mapper.Map<CancelReasonResponseModel>(cancelReason);
+            return cancelReasonDto;
+        }
+
+
         // Get cancel reasons by page (only active records)
         public async Task<IList<CancelReasonResponseModel>> GetByPage(int page, int pageSize)
         {
@@ -56,7 +69,7 @@ namespace HandmadeProductManagement.Services.Service
         }
 
         // Create a new cancel reason
-        public async Task<CancelReasonResponseModel> Create(CancelReasonForCreationDto cancelReason)
+        public async Task<bool> Create(CancelReasonForCreationDto cancelReason)
         {
             // Validate
             var result = _creationValidator.ValidateAsync(cancelReason);
@@ -74,13 +87,11 @@ namespace HandmadeProductManagement.Services.Service
             await _unitOfWork.GetRepository<CancelReason>().InsertAsync(cancelReasonEntity);
             await _unitOfWork.SaveAsync();
 
-            var cancelReasonToReturn = _mapper.Map<CancelReasonResponseModel>(cancelReasonEntity);
-
-            return cancelReasonToReturn;
+            return true;
         }
 
         // Update an existing cancel reason
-        public async Task<CancelReasonResponseModel> Update(string id, CancelReasonForUpdateDto cancelReason)
+        public async Task<bool> Update(string id, CancelReasonForUpdateDto cancelReason)
         {
             var result = _updateValidator.ValidateAsync(cancelReason);
             if (!result.Result.IsValid)
@@ -100,8 +111,8 @@ namespace HandmadeProductManagement.Services.Service
 
             await _unitOfWork.GetRepository<CancelReason>().UpdateAsync(cancelReasonEntity);
             await _unitOfWork.SaveAsync();
-            var cancelReasonToReturn = _mapper.Map<CancelReasonResponseModel>(cancelReasonEntity);
-            return cancelReasonToReturn;
+
+            return true;
         }
 
         // Soft delete 

@@ -35,13 +35,13 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateCancelReason([FromBody] CancelReasonForCreationDto reason)
         {
-            await _cancelReasonService.Create(reason);
-            var response = new BaseResponse<CancelReasonResponseModel>
+            var result = await _cancelReasonService.Create(reason);
+            var response = new BaseResponse<bool>
             {
                 Code = "Success",
                 StatusCode = StatusCodeHelper.OK,
                 Message = "Created Cancel Reason successfully!",
-                Data = null
+                Data = result
             };
             return Ok(response);
         }
@@ -50,13 +50,13 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateCancelReason(string id, CancelReasonForUpdateDto updatedReason)
         {
-            await _cancelReasonService.Update(id, updatedReason);
-            var response = new BaseResponse<CancelReasonResponseModel>
+            var result = await _cancelReasonService.Update(id, updatedReason);
+            var response = new BaseResponse<bool>
             {
                 Code = "Success",
                 StatusCode = StatusCodeHelper.OK,
                 Message = "Updated Cancel Reason successfully!",
-                Data = null
+                Data = result
             };
             return Ok(response);
         }

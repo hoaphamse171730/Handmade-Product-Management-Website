@@ -47,30 +47,30 @@ namespace HandmadeProductManagementAPI.Controllers
 
         // POST: api/statuschange
         [HttpPost]
-        public async Task<IActionResult> CreateStatusChange([FromBody] CreateStatusChangeDto statusChange)
+        public async Task<IActionResult> CreateStatusChange([FromBody] StatusChangeForCreationDto statusChange)
         {
-            await _statusChangeService.Create(statusChange);
-            var response = new BaseResponse<StatusChangeResponseModel>
+            var result = await _statusChangeService.Create(statusChange);
+            var response = new BaseResponse<bool>
             {
                 Code = "Success",
                 StatusCode = StatusCodeHelper.OK,
                 Message = "Created Status Change successfully!",
-                Data = null
+                Data = result
             };
             return Ok(response);
         }
 
         // PUT: api/statuschange/{id}
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateStatusChange(string id, [FromBody] CreateStatusChangeDto updatedStatusChange)
+        public async Task<IActionResult> UpdateStatusChange(string id, [FromBody] StatusChangeForUpdateDto updatedStatusChange)
         {
-            await _statusChangeService.Update(id, updatedStatusChange);
-            var response = new BaseResponse<StatusChangeResponseModel>
+            var result = await _statusChangeService.Update(id, updatedStatusChange);
+            var response = new BaseResponse<bool>
             {
                 Code = "Success",
                 StatusCode = StatusCodeHelper.OK,
                 Message = "Updated Status Change successfully!",
-                Data = null
+                Data = result
             };
             return Ok(response);
         }
