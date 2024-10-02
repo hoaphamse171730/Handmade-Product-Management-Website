@@ -60,9 +60,9 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [HttpPatch("{orderId}/status")]
-        public async Task<IActionResult> UpdateOrderStatus(string orderId, [FromBody] string status)
+        public async Task<IActionResult> UpdateOrderStatus(string orderId, [FromBody] CreateOrderDto updateOrderStatusDto)
         {
-            var updatedOrder = await _orderService.UpdateOrderStatusAsync(orderId, status);
+            var updatedOrder = await _orderService.UpdateOrderStatusAsync(orderId, updateOrderStatusDto.Status, updateOrderStatusDto.CancelReasonId);
             var response = new BaseResponse<bool>
             {
                 Code = "Success",
@@ -85,6 +85,32 @@ namespace HandmadeProductManagementAPI.Controllers
                 Data = order
             };
             return Ok(response);
+        }
+
+        [HttpPut("{orderId}")]
+        public async Task<IActionResult> UpdateOrder(string orderId, [FromBody] CreateOrderDto order)
+        {
+            var updatedOrder = await _orderService.UpdateOrderAsync(orderId, order, order.CancelReasonId);
+            var response = new BaseResponse<bool>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Order updated successfully",
+                Data = updatedOrder
+            };
+            return Ok(response);
+        }
+
+        private IActionResult HandleErrorResponse(BaseException.ErrorException ex)
+        {
+            var response = new BaseResponse<object>
+            {
+                Code = ex.ErrorDetail.ErrorCode,
+                StatusCode = (StatusCodeHelper)ex.StatusCode,
+                Message = ex.ErrorDetail.ErrorMessage?.ToString(),
+                Data = null
+            };
+            return StatusCode(ex.StatusCode, response);
         }
     }
 }

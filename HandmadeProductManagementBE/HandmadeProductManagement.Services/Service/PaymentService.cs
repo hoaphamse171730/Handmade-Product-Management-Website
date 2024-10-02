@@ -124,7 +124,7 @@ namespace HandmadeProductManagement.Services.Service
             var paymentRepository = _unitOfWork.GetRepository<Payment>();
             var payment = await paymentRepository.Entities
                 .Include(p => p.PaymentDetails)
-                .FirstOrDefaultAsync(p => p.OrderId == orderId && !p.DeletedTime.HasValue && p.DeletedBy == null);
+                .FirstOrDefaultAsync(p => p.OrderId == orderId && !p.DeletedTime.HasValue);
 
             if (payment == null)
             {
@@ -147,8 +147,7 @@ namespace HandmadeProductManagement.Services.Service
             var orderRepository = _unitOfWork.GetRepository<Order>();
             var today = DateTime.UtcNow.Date;
             var expiredPayments = await paymentRepository.Entities
-                .Where(p => p.ExpirationDate.Date == today && p.Status != "Expired" && p.Status != "Completed"
-                    && !p.DeletedTime.HasValue && p.DeletedBy == null)
+                .Where(p => p.ExpirationDate.Date == today && p.Status != "Expired" && p.Status != "Completed" && !p.DeletedTime.HasValue)
                 .ToListAsync();
 
             foreach (var payment in expiredPayments)

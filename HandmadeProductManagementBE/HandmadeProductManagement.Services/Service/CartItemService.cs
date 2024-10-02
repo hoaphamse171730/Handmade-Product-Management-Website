@@ -16,7 +16,7 @@ public class CartItemService : ICartItemService
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<bool> AddCartItem(string cartId, CreateCartItemDto createCartItemDto)
+    public async Task<BaseResponse<bool>> AddCartItem(string cartId, CreateCartItemDto createCartItemDto)
     {
         Console.WriteLine($"Attempting to add item to cart: {cartId}, ProductItem: {createCartItemDto.ProductItemId}");
 
@@ -32,8 +32,8 @@ public class CartItemService : ICartItemService
 
         var cartRepo = _unitOfWork.GetRepository<Cart>();
         var cart = await cartRepo.Entities
-       .Include(c => c.CartItems)
-       .SingleOrDefaultAsync(c => c.Id == cartId && c.DeletedTime == null && c.DeletedBy == null);
+            .Include(c => c.CartItems)
+            .SingleOrDefaultAsync(c => c.Id == cartId);
         if (cart == null)
         {
             throw new BaseException.NotFoundException("cart_not_found", $"Cart {cartId} not found.");
@@ -41,8 +41,7 @@ public class CartItemService : ICartItemService
 
         var productItemRepo = _unitOfWork.GetRepository<ProductItem>();
         var productItem = await productItemRepo.Entities
-        .SingleOrDefaultAsync(pi => pi.Id == createCartItemDto.ProductItemId && pi.DeletedTime == null);
-
+            .SingleOrDefaultAsync(pi => pi.Id == createCartItemDto.ProductItemId);
         if (productItem == null)
         {
             throw new BaseException.NotFoundException("product_item_not_found", $"ProductItem {createCartItemDto.ProductItemId} not found.");
@@ -66,7 +65,7 @@ public class CartItemService : ICartItemService
         try
         {
             await _unitOfWork.SaveAsync();
-            return true;
+            return BaseResponse<bool>.OkResponse(true);
         }
         catch (Exception ex)
         {
@@ -74,7 +73,7 @@ public class CartItemService : ICartItemService
         }
     }
 
-    public async Task<bool> UpdateCartItem(string cartItemId, int productQuantity)
+    public async Task<BaseResponse<bool>> UpdateCartItem(string cartItemId, int productQuantity)
     {
         if (productQuantity < 0)
         {
@@ -84,8 +83,8 @@ public class CartItemService : ICartItemService
 
         var cartItemRepo = _unitOfWork.GetRepository<CartItem>();
         var cartItem = await cartItemRepo.Entities
-        .Where(ci => ci.Id == cartItemId && ci.DeletedTime == null && ci.DeletedBy == null)
-        .FirstOrDefaultAsync();
+            .Where(ci => ci.Id == cartItemId && ci.DeletedTime == null)
+            .FirstOrDefaultAsync();
 
         if (cartItem == null)
         {
@@ -113,7 +112,7 @@ public class CartItemService : ICartItemService
         try
         {
             await _unitOfWork.SaveAsync();
-            return true;
+            return BaseResponse<bool>.OkResponse(true);
         }
         catch (Exception ex)
         {
@@ -121,11 +120,12 @@ public class CartItemService : ICartItemService
         }
     }
 
-    public async Task<bool> RemoveCartItem(string cartItemId)
+    public async Task<BaseResponse<bool>> RemoveCartItem(string cartItemId)
     {
         var cartItemRepo = _unitOfWork.GetRepository<CartItem>();
         var cartItem = await cartItemRepo.Entities
-                   .FirstOrDefaultAsync(ci => ci.Id == cartItemId && ci.DeletedTime == null && ci.DeletedBy == null);
+                         .FirstOrDefaultAsync(ci => ci.Id == cartItemId && ci.DeletedTime == null);
+
         if (cartItem == null)
         {
             throw new BaseException.BadRequestException("cart_item_not_found", "Cart item not found.");
@@ -137,7 +137,7 @@ public class CartItemService : ICartItemService
         try
         {
             await _unitOfWork.SaveAsync();
-            return true;
+            return BaseResponse<bool>.OkResponse(true);
         }
         catch (Exception ex)
         {

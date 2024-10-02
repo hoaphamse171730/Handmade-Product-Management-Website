@@ -25,7 +25,7 @@ namespace HandmadeProductManagementAPI.Controllers
             {
                 Code = "Success",
                 StatusCode = StatusCodeHelper.OK,
-                Message = "Get Status Change sucessfully.",
+                Message = "Get Status Change sucessfully!",
                 Data = await _statusChangeService.GetByPage(page, pageSize)
             };
             return Ok(response);
@@ -39,7 +39,7 @@ namespace HandmadeProductManagementAPI.Controllers
             {
                 Code = "Success",
                 StatusCode = StatusCodeHelper.OK,
-                Message = "Get Status Change sucessfully.",
+                Message = "Get Status Change sucessfully!",
                 Data = await _statusChangeService.GetByOrderId(orderId)
             };
             return Ok(response);
@@ -47,30 +47,30 @@ namespace HandmadeProductManagementAPI.Controllers
 
         // POST: api/statuschange
         [HttpPost]
-        public async Task<IActionResult> CreateStatusChange([FromBody] CreateStatusChangeDto statusChange)
+        public async Task<IActionResult> CreateStatusChange([FromBody] StatusChangeForCreationDto statusChange)
         {
-            await _statusChangeService.Create(statusChange);
-            var response = new BaseResponse<StatusChangeResponseModel>
+            var result = await _statusChangeService.Create(statusChange);
+            var response = new BaseResponse<bool>
             {
                 Code = "Success",
                 StatusCode = StatusCodeHelper.OK,
-                Message = "Created Status Change successfully.",
-                Data = null
+                Message = "Created Status Change successfully!",
+                Data = result
             };
             return Ok(response);
         }
 
         // PUT: api/statuschange/{id}
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateStatusChange(string id, [FromBody] CreateStatusChangeDto updatedStatusChange)
+        public async Task<IActionResult> UpdateStatusChange(string id, [FromBody] StatusChangeForUpdateDto updatedStatusChange)
         {
-            await _statusChangeService.Update(id, updatedStatusChange);
-            var response = new BaseResponse<StatusChangeResponseModel>
+            var result = await _statusChangeService.Update(id, updatedStatusChange);
+            var response = new BaseResponse<bool>
             {
                 Code = "Success",
                 StatusCode = StatusCodeHelper.OK,
-                Message = "Updated Status Change successfully.",
-                Data = null
+                Message = "Updated Status Change successfully!",
+                Data = result
             };
             return Ok(response);
         }
