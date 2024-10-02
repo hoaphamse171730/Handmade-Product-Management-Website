@@ -48,6 +48,11 @@ public class CartItemService : ICartItemService
             throw new BaseException.BadRequestException("product_item_not_found", $"ProductItem {createCartItemDto.ProductItemId} not found.");
         }
 
+        if (quantity > productItem.QuantityInStock)
+        {
+            throw new BaseException.BadRequestException("invalid_quantity", $"Only {productItem.QuantityInStock} items available.");
+        }
+
         var cartItem = new CartItem
         {
             ProductItem = productItem,
