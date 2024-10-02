@@ -47,7 +47,7 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(string? content, [Required] int rating, [Required] string productId, [Required] Guid userId)
+        public async Task<IActionResult> Create(string? content, [Required] int rating, [Required] string productId, [Required] Guid userId, [Required] string orderId)
         {
             var reviewModel = new ReviewModel
             {
@@ -57,7 +57,8 @@ namespace HandmadeProductManagementAPI.Controllers
                 UserId = userId
             };
 
-            var createdReview = await _reviewService.CreateAsync(reviewModel);
+            var createdReview = await _reviewService.CreateAsync(reviewModel,orderId);
+
             var response = new BaseResponse<ReviewModel>
             {
                 Code = "Success",
@@ -69,13 +70,13 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [HttpPut("{reviewId}")]
-        public async Task<IActionResult> Update([Required] string reviewId, string? content, int? rating)
+        public async Task<IActionResult> Update([Required] string reviewId, [Required] Guid userId, string? content, int? rating)
         {
             var existingReview = await _reviewService.GetByIdAsync(reviewId);
             existingReview.Content = content;
             existingReview.Rating = rating;
 
-            var updatedReview = await _reviewService.UpdateAsync(reviewId, existingReview);
+            var updatedReview = await _reviewService.UpdateAsync(reviewId, userId, existingReview);
             var response = new BaseResponse<ReviewModel>
             {
                 Code = "Success",
@@ -86,9 +87,9 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [HttpDelete("{reviewId}")]
-        public async Task<IActionResult> Delete([Required] string reviewId)
+        public async Task<IActionResult> Delete([Required] string reviewId, [Required] Guid userId)
         {
-            var result = await _reviewService.DeleteAsync(reviewId);
+            var result = await _reviewService.DeleteAsync(reviewId, userId);
             var response = new BaseResponse<bool>
             {
                 Code = "Success",
@@ -99,9 +100,9 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [HttpDelete("{reviewId}/softdelete")]
-        public async Task<IActionResult> SoftDelete([Required] string reviewId)
+        public async Task<IActionResult> SoftDelete([Required] string reviewId, [Required] Guid userId)
         {
-            var result = await _reviewService.SoftDeleteAsync(reviewId);
+            var result = await _reviewService.SoftDeleteAsync(reviewId, userId);
             var response = new BaseResponse<bool>
             {
                 Code = "Success",
