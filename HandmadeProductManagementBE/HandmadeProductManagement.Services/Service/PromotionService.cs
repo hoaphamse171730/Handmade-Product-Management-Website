@@ -110,8 +110,8 @@ namespace HandmadeProductManagement.Services.Service
             return _mapper.Map<IList<PromotionDto>>(promotions);
         }
 
-        // Thêm phương thức kiểm tra xem khuyến mãi có hết hạn không
-        public async Task<bool> IsExpiredPromotionAsync(string id)
+        // Thêm phương thức update khuyến mãi hết hạn 
+        public async Task<bool> updatePromotionStatusByRealtime(string id)
         {
             // Lấy khuyến mãi theo ID
             var promotion = await _unitOfWork.GetRepository<Promotion>().Entities
@@ -120,11 +120,19 @@ namespace HandmadeProductManagement.Services.Service
             // Kiểm tra xem promotion có giá trị null không
             if (promotion == null)
             {
-                throw new BaseException.NotFoundException("not_found", "Not Found ...!");
+                throw new BaseException.NotFoundException("not_found", "Promotion Not Found!");
             }
 
-            // Kiểm tra ngày hết hạn
-            return DateTime.UtcNow > promotion.EndDate; // Trả về true nếu đã hết hạn
+            // Update nếu promotion hết hạn
+            if(DateTime.UtcNow > promotion.EndDate)
+            {
+                promotion.Status = "inactive";
+                await _unitOfWork.GetRepository<Promotion>().UpdateAsync(promotion);
+                await _unitOfWork.SaveAsync();
+            }
+
+            return true; // Trả về true nếu hoạt động bình thường
         }
+
     }
 }

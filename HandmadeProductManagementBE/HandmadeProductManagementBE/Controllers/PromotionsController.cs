@@ -124,13 +124,13 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpGet("Expired/{id}")]
         public async Task<ActionResult> ExpiredPromotion(string id)
         {
-            var isExpired = await _promotionService.IsExpiredPromotionAsync(id);
+            var isExpired = await _promotionService.updatePromotionStatusByRealtime(id);
 
             var response = new BaseResponse<bool>
             {
                 Code = "Success",
                 StatusCode = StatusCodeHelper.OK,
-                Message = "...",
+                Message = "Promotion Status Updated Successfully!",
                 Data = isExpired
             };
             return Ok(response);
