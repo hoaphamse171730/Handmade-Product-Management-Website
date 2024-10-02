@@ -11,7 +11,7 @@ namespace HandmadeProductManagement.Validation.CancelReason
                 .NotEmpty().WithMessage("Description is required!")
                 .MaximumLength(500).WithMessage("Description can not exceed 500 characters!");
             RuleFor(x => x.RefundRate)
-                .ExclusiveBetween(0,1);
+                .InclusiveBetween(0,1);
         }
     }
 }

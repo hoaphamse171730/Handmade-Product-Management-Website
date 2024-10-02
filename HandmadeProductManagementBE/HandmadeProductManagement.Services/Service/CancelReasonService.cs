@@ -5,7 +5,6 @@ using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.ModelViews.CancelReasonModelViews;
-using HandmadeProductManagement.ModelViews.ProductModelViews;
 using Microsoft.EntityFrameworkCore;
 
 namespace HandmadeProductManagement.Services.Service
@@ -23,21 +22,6 @@ namespace HandmadeProductManagement.Services.Service
             _mapper = mapper;
             _creationValidator = creationValidator;
             _updateValidator = updateValidator;
-        }
-
-        // Get all cancel reasons (only active records)
-        public async Task<IList<CancelReasonResponseModel>> GetAll()
-        {
-            IQueryable<CancelReason> query = _unitOfWork.GetRepository<CancelReason>().Entities
-                .Where(cr => !cr.DeletedTime.HasValue || cr.DeletedBy == null);
-
-            var result = await query.Select(cancelReason => new CancelReasonResponseModel
-            {
-                Id = cancelReason.Id.ToString(),
-                Description = cancelReason.Description, 
-                RefundRate = cancelReason.RefundRate,
-            }).ToListAsync();
-            return result;
         }
 
         // Get cancel reasons by page (only active records)
@@ -84,8 +68,8 @@ namespace HandmadeProductManagement.Services.Service
             var cancelReasonEntity = _mapper.Map<CancelReason>(cancelReason);
 
             // Set metadata
-            cancelReason.CreatedBy = "currentUser"; // Update with actual user info
-            cancelReason.LastUpdatedBy = "currentUser"; // Update with actual user info
+            cancelReasonEntity.CreatedBy = "currentUser"; // Update with actual user info
+            cancelReasonEntity.LastUpdatedBy = "currentUser"; // Update with actual user info
 
             await _unitOfWork.GetRepository<CancelReason>().InsertAsync(cancelReasonEntity);
             await _unitOfWork.SaveAsync();
@@ -96,9 +80,9 @@ namespace HandmadeProductManagement.Services.Service
         }
 
         // Update an existing cancel reason
-        public async Task<CancelReasonResponseModel> Update(string id, CancelReasonForCreationDto updatedCancelReason)
+        public async Task<CancelReasonResponseModel> Update(string id, CancelReasonForUpdateDto cancelReason)
         {
-            var result = _updateValidator.ValidateAsync(updatedCancelReason);
+            var result = _updateValidator.ValidateAsync(cancelReason);
             if (!result.Result.IsValid)
             {
                 throw new ValidationException(result.Result.Errors); 
@@ -107,9 +91,9 @@ namespace HandmadeProductManagement.Services.Service
                 .FirstOrDefaultAsync(p => p.Id == id);
             if (cancelReasonEntity == null)
             {
-                throw new BaseException.NotFountException("Cancel Reason not found");
+                throw new BaseException.NotFoundException("not_found", "Cancel Reason not found");
             }
-            _mapper.Map(updatedCancelReason, cancelReasonEntity);
+            _mapper.Map(cancelReason, cancelReasonEntity);
 
             cancelReasonEntity.LastUpdatedTime = DateTime.UtcNow;
             cancelReasonEntity.LastUpdatedBy = "user";
@@ -125,11 +109,13 @@ namespace HandmadeProductManagement.Services.Service
         {
             var cancelReasonRepo = _unitOfWork.GetRepository<CancelReason>();
             var cancelReasonEntity = await cancelReasonRepo.Entities.FirstOrDefaultAsync(x => x.Id == id);
-            if (cancelReasonEntity == null)
+            if (cancelReasonEntity == null || cancelReasonEntity.DeletedTime.HasValue || cancelReasonEntity.DeletedBy != null)
             {
-                throw new BaseException.NotFountException("Cancel Reason not found");
+                throw new BaseException.NotFoundException("not_found", "Cancel Reason not found");
             }
             cancelReasonEntity.DeletedTime = DateTime.UtcNow;
+            cancelReasonEntity.DeletedBy = "user";
+
             await cancelReasonRepo.UpdateAsync(cancelReasonEntity);
             await _unitOfWork.SaveAsync();
             return true;

@@ -48,7 +48,7 @@ namespace HandmadeProductManagementAPI.Controllers
 
         // PUT: api/CancelReason/{id} (string id)
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateCancelReason(string id, CancelReasonForCreationDto updatedReason)
+        public async Task<IActionResult> UpdateCancelReason(string id, CancelReasonForUpdateDto updatedReason)
         {
             await _cancelReasonService.Update(id, updatedReason);
             var response = new BaseResponse<CancelReasonResponseModel>

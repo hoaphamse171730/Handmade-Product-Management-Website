@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using HandmadeProductManagement.Contract.Repositories.Entity;
+using HandmadeProductManagement.ModelViews.CancelReasonModelViews;
 using HandmadeProductManagement.ModelViews.OrderDetailModelViews;
 using HandmadeProductManagement.ModelViews.ProductModelViews;
 using HandmadeProductManagement.ModelViews.PromotionModelViews;
@@ -26,6 +27,12 @@ public class MappingProfile : Profile
         CreateMap<Product, ProductDto>();
         CreateMap<ProductForCreationDto, Product>();
         CreateMap<ProductForUpdateDto, Product>();
+        #endregion
+
+        #region CancelReason
+        CreateMap<CancelReason, CancelReasonResponseModel>();
+        CreateMap<CancelReasonForCreationDto, CancelReason>();
+        CreateMap<CancelReasonForUpdateDto, CancelReason>();
         #endregion
 
     }

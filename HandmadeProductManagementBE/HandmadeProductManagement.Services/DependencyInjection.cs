@@ -23,6 +23,7 @@ namespace HandmadeProductManagement.Services
         {
             services.AddScoped<IProductService, ProductService>();
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<ICancelReasonService, CancelReasonService>();
         }
 
     }
