@@ -4,15 +4,9 @@ using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.ModelViews.OrderDetailModelViews;
 using HandmadeProductManagement.ModelViews.OrderModelViews;
-using HandmadeProductManagement.ModelViews.PaymentModelViews;
 using HandmadeProductManagement.Repositories.Entity;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace HandmadeProductManagement.Services.Service
 {
@@ -31,7 +25,7 @@ namespace HandmadeProductManagement.Services.Service
 
             var userRepository = _unitOfWork.GetRepository<ApplicationUser>();
             var userExists = await userRepository.Entities
-                        .AnyAsync(u => u.Id.ToString() == createOrder.UserId && !u.DeletedTime.HasValue && u.DeletedBy == null);
+                        .AnyAsync(u => u.Id.ToString() == createOrder.UserId && !u.DeletedTime.HasValue);
             if (!userExists)
             {
                 throw new BaseException.NotFoundException("user_not_found", "User not found.");
@@ -79,34 +73,6 @@ namespace HandmadeProductManagement.Services.Service
             return true;
         }
 
-        public async Task<bool> DeleteOrderAsync(string orderId)
-        {
-            if (string.IsNullOrWhiteSpace(orderId))
-            {
-                throw new BaseException.BadRequestException("empty_order_id", "Order ID is required.");
-            }
-
-            if (!Guid.TryParse(orderId, out _))
-            {
-                throw new BaseException.BadRequestException("invalid_order_id_format", "Order ID format is invalid. Example: 123e4567-e89b-12d3-a456-426614174000.");
-            }
-
-            var repository = _unitOfWork.GetRepository<Order>();
-            var order = await repository.Entities
-                .FirstOrDefaultAsync(o => o.Id == orderId && !o.DeletedTime.HasValue);
-            if (order == null)
-            {
-                throw new BaseException.NotFoundException("order_not_found", "Order not found.");
-            }
-
-            order.DeletedBy = order.UserId.ToString();
-            order.DeletedTime = DateTime.UtcNow;
-
-            repository.Update(order);
-            await _unitOfWork.SaveAsync();
-            return true;
-        }
-
         public async Task<IList<OrderResponseModel>> GetAllOrdersAsync()
         {
             IQueryable<Order> query = _unitOfWork.GetRepository<Order>().Entities
@@ -141,7 +107,7 @@ namespace HandmadeProductManagement.Services.Service
             }
 
             var repository = _unitOfWork.GetRepository<Order>();
-            var order = await repository.Entities.FirstOrDefaultAsync(o => o.Id == orderId && (!o.DeletedTime.HasValue || o.DeletedBy == null));
+            var order = await repository.Entities.FirstOrDefaultAsync(o => o.Id == orderId && (!o.DeletedTime.HasValue));
 
             if (order == null)
             {
@@ -161,37 +127,6 @@ namespace HandmadeProductManagement.Services.Service
                 Note = order.Note,
                 CancelReasonId = order.CancelReasonId
             };
-        }
-
-        public async Task<bool> UpdateOrderAsync(string orderId, CreateOrderDto order)
-        {
-            if (string.IsNullOrWhiteSpace(orderId) || !Guid.TryParse(orderId, out _))
-            {
-                throw new BaseException.BadRequestException("invalid_order_id", "Order ID is not in the correct format. Ex: 123e4567-e89b-12d3-a456-426614174000.");
-            }
-
-            ValidateOrder(order);
-
-            var repository = _unitOfWork.GetRepository<Order>();
-            var existingOrder = await repository.Entities
-                .FirstOrDefaultAsync(o => o.Id == orderId && !o.DeletedTime.HasValue);
-
-            if (existingOrder == null)
-            {
-                throw new BaseException.NotFoundException("order_not_found", "Order not found.");
-            }
-            existingOrder.Address = order.Address;
-            existingOrder.CustomerName = order.CustomerName;
-            existingOrder.Phone = order.Phone;
-            existingOrder.Note = order.Note;
-            existingOrder.CancelReasonId = order.CancelReasonId;
-            existingOrder.LastUpdatedBy = order.UserId.ToString();
-            existingOrder.LastUpdatedTime = DateTime.UtcNow;
-
-            repository.Update(existingOrder);
-            await _unitOfWork.SaveAsync();
-
-            return true;
         }
 
         public async Task<IList<OrderResponseModel>> GetOrderByUserIdAsync(Guid userId)
@@ -238,11 +173,44 @@ namespace HandmadeProductManagement.Services.Service
 
             var repository = _unitOfWork.GetRepository<Order>();
             var existingOrder = await repository.Entities
-                .FirstOrDefaultAsync(o => o.Id == orderId && !o.DeletedTime.HasValue && o.DeletedBy == null);
+                .FirstOrDefaultAsync(o => o.Id == orderId && !o.DeletedTime.HasValue);
 
             if (existingOrder == null)
             {
                 throw new BaseException.NotFoundException("order_not_found", "Order not found.");
+            }
+
+            var validStatusTransitions = new Dictionary<string, List<string>>
+                {
+                    { "Pending", new List<string> { "Canceled", "Awaiting Payment" } },
+                    { "Awaiting Payment", new List<string> { "Canceled", "Processing" } },
+                    { "Processing", new List<string> { "Delivering" } },
+                    { "Delivering", new List<string> { "Shipped", "Delivery Failed" } },
+                    { "Delivery Failed", new List<string> { "On Hold" } },
+                    { "On Hold", new List<string> { "Delivering Retry", "Refund Requested" } },
+                    { "Refund Requested", new List<string> { "Refund Denied", "Refund Approve" } },
+                    { "Refund Approve", new List<string> { "Returning" } },
+                    { "Returning", new List<string> { "Return Failed", "Returned" } },
+                    { "Return Failed", new List<string> { "On Hold" } },
+                    { "Returned", new List<string> { "Refunded" } },
+                    { "Refunded", new List<string> { "Closed" } },
+                    { "Canceled", new List<string> { "Closed" } }
+                };
+
+            var allValidStatuses = validStatusTransitions.Keys
+                .Concat(validStatusTransitions.Values.SelectMany(v => v))
+                .Distinct()
+                .ToList();
+
+            if (!allValidStatuses.Contains(status))
+            {
+                throw new BaseException.BadRequestException("invalid_status", $"Status {status} is not a valid status.");
+            }
+
+            if (!validStatusTransitions.ContainsKey(existingOrder.Status) ||
+                !validStatusTransitions[existingOrder.Status].Contains(status))
+            {
+                throw new BaseException.ErrorException(400, "invalid_status_transition", $"Cannot transition from {existingOrder.Status} to {status}.");
             }
 
             existingOrder.Status = status;
@@ -320,12 +288,12 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.BadRequestException("invalid_order_id_format", "Order ID format is invalid. Example: 123e4567-e89b-12d3-a456-426614174000.");
             }
 
-            if (detail.ProductQuantity == null || detail.ProductQuantity <= 0)
+            if (detail.ProductQuantity <= 0)
             {
                 throw new BaseException.BadRequestException("invalid_product_quantity", "Product quantity must be greater than zero and not null.");
             }
 
-            if (detail.UnitPrice == null || detail.UnitPrice <= 0)
+            if (detail.UnitPrice <= 0)
             {
                 throw new BaseException.BadRequestException("invalid_unit_price", "Unit price must be greater than zero and not null.");
             }
