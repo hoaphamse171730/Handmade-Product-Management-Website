@@ -3,6 +3,9 @@ using HandmadeProductManagement.ModelViews.CartModelViews;
 using HandmadeProductManagement.Core.Base;
 using Microsoft.AspNetCore.Mvc;
 using HandmadeProductManagement.Contract.Services;
+using HandmadeProductManagement.Core.Constants;
+using HandmadeProductManagement.ModelViews.UserModelViews;
+using HandmadeProductManagement.Services.Service;
 
 namespace HandmadeProductManagementAPI.Controllers
 {
@@ -50,6 +53,18 @@ namespace HandmadeProductManagementAPI.Controllers
             var response = await _cartItemService.RemoveCartItem(cartItemId);
             return Ok(response);
         }
+
+       /* public async Task<IActionResult> GetTotalCartPrice(String cartId)
+        {
+            var response = new BaseResponse<IList<UserResponseModel>>
+            {
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Success",
+                Data = await 
+            };
+            return Ok(response);
+        }*/
 
     }
 }
