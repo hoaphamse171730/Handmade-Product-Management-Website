@@ -24,7 +24,7 @@ namespace HandmadeProductManagementAPI.Controllers
             try
             {
                 var createdPaymentDetail = await _paymentDetailService.CreatePaymentDetailAsync(createPaymentDetailDto);
-                var response = new BaseResponse<PaymentDetailResponseModel>
+                var response = new BaseResponse<bool>
                 {
                     Code = "Success",
                     StatusCode = StatusCodeHelper.OK,

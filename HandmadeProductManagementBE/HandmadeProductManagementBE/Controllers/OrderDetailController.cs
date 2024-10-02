@@ -69,11 +69,11 @@ namespace HandmadeProductManagementAPI.Controllers
 
 
         [HttpPut("{orderId}/{productId}")]
-        public async Task<ActionResult<OrderDetailDto>> UpdateOrderDetail(string orderId, string productId, OrderDetailForUpdateDto orderDetailForUpdate)
+        public async Task<ActionResult<OrderDetailDto>> UpdateOrderDetail(string orderId, OrderDetailForUpdateDto orderDetailForUpdate)
         {
             try
             {
-                await _orderDetailService.Update(orderId, productId, orderDetailForUpdate);
+                await _orderDetailService.Update(orderId,  orderDetailForUpdate);
                 return Ok(BaseResponse<string>.OkResponse("OrderDetail updated successfully"));
             }
             catch (KeyNotFoundException)
@@ -92,7 +92,7 @@ namespace HandmadeProductManagementAPI.Controllers
         {
             try
             {
-                await _orderDetailService.Delete(id);
+                await _orderDetailService.SoftDelete(id);
                 return NoContent();
             }
             catch (KeyNotFoundException)
