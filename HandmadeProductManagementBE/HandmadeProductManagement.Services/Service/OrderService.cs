@@ -260,6 +260,7 @@ namespace HandmadeProductManagement.Services.Service
                 !validStatusTransitions[existingOrder.Status].Contains(status))
             {
                 throw new BaseException.ErrorException(400, "invalid_status_transition", $"Cannot transition from {existingOrder.Status} to {status}.");
+            }
             // Validate order status and cancel reason ID
             if (status == "Canceled")
             {
@@ -296,6 +297,33 @@ namespace HandmadeProductManagement.Services.Service
 
             await _statusChangeService.Create(statusChangeDto);
 
+            return true;
+        }
+        public async Task<bool> DeleteOrderAsync(string orderId)
+        {
+            if (string.IsNullOrWhiteSpace(orderId))
+            {
+                throw new BaseException.BadRequestException("empty_order_id", "Order ID is required.");
+            }
+
+            if (!Guid.TryParse(orderId, out _))
+            {
+                throw new BaseException.BadRequestException("invalid_order_id_format", "Order ID format is invalid. Example: 123e4567-e89b-12d3-a456-426614174000.");
+            }
+
+            var repository = _unitOfWork.GetRepository<Order>();
+            var order = await repository.Entities
+                .FirstOrDefaultAsync(o => o.Id == orderId && !o.DeletedTime.HasValue);
+            if (order == null)
+            {
+                throw new BaseException.NotFoundException("order_not_found", "Order not found.");
+            }
+
+            order.DeletedBy = order.UserId.ToString();
+            order.DeletedTime = DateTime.UtcNow;
+
+            repository.Update(order);
+            await _unitOfWork.SaveAsync();
             return true;
         }
 

@@ -96,7 +96,8 @@ public static class ApplicationServiceExtensions
         #endregion
 
         #region User
-        services.AddScoped<IValidator<UpdateUserDTO>, UpdateUserDTOValidator>();     
+        services.AddScoped<IValidator<UpdateUserDTO>, UpdateUserDTOValidator>();
+        #endregion
         #region CancelReason
         services.AddScoped<IValidator<CancelReasonForCreationDto>, CancelReasonForCreationDtoValidator>();
         services.AddScoped<IValidator<CancelReasonForUpdateDto>, CancelReasonForUpdateDtoValidator>();
