@@ -118,5 +118,17 @@ namespace HandmadeProductManagementAPI.Controllers
             };
             return Ok(response);
         }
+
+
+
+        [HttpPut("{productId}/promotion/{promotionId}")]
+        public async Task<IActionResult> UpdateProductWithPromotion(string productId, string promotionId)
+        {
+
+            var updatedProduct = await _productService.UpdateProductWithPromotion(productId, promotionId);
+            return Ok(updatedProduct);
+        }
     }
 }
+
+

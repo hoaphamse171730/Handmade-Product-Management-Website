@@ -42,6 +42,7 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpPut("{orderId}/{productId}")]
         public async Task<ActionResult<OrderDetailDto>> UpdateOrderDetail(string orderId, string productId, OrderDetailForUpdateDto orderDetailForUpdate)
         {
+
             var result = await _orderDetailService.Update(orderId, productId, orderDetailForUpdate);
             return Ok(result);
         }
@@ -50,6 +51,7 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteOrderDetail(string id)
         {
+
             var result = await _orderDetailService.Delete(id);
             return Ok(result);
         }

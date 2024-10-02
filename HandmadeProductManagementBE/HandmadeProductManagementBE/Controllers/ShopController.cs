@@ -27,7 +27,7 @@ namespace HandmadeProductManagementAPI.Controllers
             try
             {
                 var createdShop = await _shopService.CreateShopAsync(shop);
-                var response = new BaseResponse<ShopResponseModel>
+                var response = new BaseResponse<bool>
                 {
                     Code = "Success",
                     StatusCode = StatusCodeHelper.OK,
@@ -139,7 +139,7 @@ namespace HandmadeProductManagementAPI.Controllers
             try
             {
                 var updatedShop = await _shopService.UpdateShopAsync(id, shop);
-                var response = new BaseResponse<ShopResponseModel>
+                var response = new BaseResponse<bool>
                 {
                     Code = "Success",
                     StatusCode = StatusCodeHelper.OK,

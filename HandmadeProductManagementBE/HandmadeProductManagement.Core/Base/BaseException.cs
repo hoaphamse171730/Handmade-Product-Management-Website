@@ -52,7 +52,13 @@ namespace HandmadeProductManagement.Core.Base
             {
             }
         }
-
+        public class UnauthorizedException : ErrorException
+        {
+            public UnauthorizedException(string errorCode, string message)
+                : base(401, errorCode, message)
+            {
+            }
+        }
         public class ErrorException : Exception
         {
             public int StatusCode { get; }

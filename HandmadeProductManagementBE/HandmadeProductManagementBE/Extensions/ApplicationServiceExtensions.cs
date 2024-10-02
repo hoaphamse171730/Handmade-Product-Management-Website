@@ -69,6 +69,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IUserAgentService, UserAgentService>();
         services.AddScoped<IDashboardService, DashboardService>();
+    
         return services;
     }
 
