@@ -12,7 +12,7 @@ namespace HandmadeProductManagement.Validation.OrderDetail
     {
         public OrderDetailForCreationDtoValidator()
         {
-            RuleFor(x => x.ProductId)
+            RuleFor(x => x.ProductItemId)
                 .NotNull().WithMessage("Product ID must not be null.");
 
             RuleFor(x => x.OrderId)

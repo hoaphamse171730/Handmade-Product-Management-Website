@@ -4,15 +4,9 @@ using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.ModelViews.OrderDetailModelViews;
 using HandmadeProductManagement.ModelViews.OrderModelViews;
-using HandmadeProductManagement.ModelViews.PaymentModelViews;
 using HandmadeProductManagement.Repositories.Entity;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace HandmadeProductManagement.Services.Service
 {
@@ -63,7 +57,7 @@ namespace HandmadeProductManagement.Services.Service
 
                 var orderDetail = new OrderDetail
                 {
-                    ProductId = detail.ProductId,
+                    ProductItemId = detail.ProductItemId,
                     ProductQuantity = detail.ProductQuantity,
                     UnitPrice = detail.UnitPrice,
                     OrderId = order.Id,
@@ -164,7 +158,7 @@ namespace HandmadeProductManagement.Services.Service
             };
         }
 
-        public async Task<bool> UpdateOrderAsync(string orderId, CreateOrderDto order)
+        public async Task<bool> UpdateOrderAsync(string orderId, CreateOrderDto order, string cancelReasonId)
         {
             if (string.IsNullOrWhiteSpace(orderId) || !Guid.TryParse(orderId, out _))
             {
@@ -181,6 +175,7 @@ namespace HandmadeProductManagement.Services.Service
             {
                 throw new BaseException.NotFoundException("order_not_found", "Order not found.");
             }
+
             existingOrder.Address = order.Address;
             existingOrder.CustomerName = order.CustomerName;
             existingOrder.Phone = order.Phone;
@@ -225,7 +220,7 @@ namespace HandmadeProductManagement.Services.Service
             return orders;
         }
 
-        public async Task<bool> UpdateOrderStatusAsync(string orderId, string status)
+        public async Task<bool> UpdateOrderStatusAsync(string orderId, string status, string cancelReasonId)
         {
             if (string.IsNullOrWhiteSpace(orderId))
             {
@@ -244,6 +239,25 @@ namespace HandmadeProductManagement.Services.Service
             if (existingOrder == null)
             {
                 throw new BaseException.NotFoundException("order_not_found", "Order not found.");
+            }
+
+            // Validate order status and cancel reason ID
+            if (status == "Canceled")
+            {
+                if (string.IsNullOrWhiteSpace(cancelReasonId))
+                {
+                    throw new BaseException.BadRequestException("validation_failed", "CancelReasonId is required when updating status to {Canceled}.");
+                }
+
+                var cancelReason = await _unitOfWork.GetRepository<CancelReason>().GetByIdAsync(cancelReasonId);
+
+                // Ensure cancelReason is not null
+                if (cancelReason == null)
+                {
+                    throw new BaseException.NotFoundException("not_found", "Cancel Reason not found.");
+                }
+
+                existingOrder.CancelReasonId = cancelReasonId;
             }
 
             existingOrder.Status = status;
@@ -301,12 +315,12 @@ namespace HandmadeProductManagement.Services.Service
 
         private void ValidateOrderDetail(OrderDetailForCreationDto detail)
         {
-            if (string.IsNullOrWhiteSpace(detail.ProductId))
+            if (string.IsNullOrWhiteSpace(detail.ProductItemId))
             {
                 throw new BaseException.BadRequestException("invalid_product_id", "Please input Product id.");
             }
 
-            if (!Guid.TryParse(detail.ProductId, out _))
+            if (!Guid.TryParse(detail.ProductItemId, out _))
             {
                 throw new BaseException.BadRequestException("invalid_product_id_format", "Product ID format is invalid. Example: 123e4567-e89b-12d3-a456-426614174000.");
             }

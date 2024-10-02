@@ -1,5 +1,4 @@
-﻿
-using FluentValidation;
+﻿using FluentValidation;
 using HandmadeProductManagement.ModelViews.CancelReasonModelViews;
 
 namespace HandmadeProductManagement.Validation.CancelReason
