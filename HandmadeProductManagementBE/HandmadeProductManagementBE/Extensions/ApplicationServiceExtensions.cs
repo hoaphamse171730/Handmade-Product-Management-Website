@@ -9,6 +9,7 @@ using HandmadeProductManagement.ModelViews.AuthModelViews;
 using HandmadeProductManagement.ModelViews.OrderDetailModelViews;
 using HandmadeProductManagement.ModelViews.ProductModelViews;
 using HandmadeProductManagement.ModelViews.PromotionModelViews;
+using HandmadeProductManagement.ModelViews.UserModelViews;
 using HandmadeProductManagement.Repositories.Context;
 using HandmadeProductManagement.Repositories.Entity;
 using HandmadeProductManagement.Repositories.UOW;
@@ -16,6 +17,7 @@ using HandmadeProductManagement.Services.Service;
 using HandmadeProductManagement.Validation.OrderDetail;
 using HandmadeProductManagement.Validation.Product;
 using HandmadeProductManagement.Validation.Promotion;
+using HandmadeProductManagement.Validation.User;
 using HandmadeProductManagementAPI.BackgroundServices;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
@@ -89,6 +91,9 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IValidator<OrderDetailForUpdateDto>, OrderDetailForUpdateDtoValidator>();
         #endregion
 
+        #region User
+        services.AddScoped<IValidator<UpdateUserDTO>, UpdateUserDTOValidator>();     
+        #endregion
 
     }
 
