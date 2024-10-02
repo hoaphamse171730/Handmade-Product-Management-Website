@@ -56,13 +56,18 @@ namespace HandmadeProductManagement.Services.Service
             }
 
             var paymentRepository = _unitOfWork.GetRepository<Payment>();
+            var expirationDate = DateTime.UtcNow.AddDays(1);
+            expirationDate = new DateTime(expirationDate.Year, 
+                                        expirationDate.Month, 
+                                        expirationDate.Day, 
+                                        expirationDate.Hour, 0, 0);
 
             var payment = new Payment
             {
                 OrderId = createPaymentDto.OrderId,
                 TotalAmount = createPaymentDto.TotalAmount,
                 Status = "Pending",
-                ExpirationDate = DateTime.UtcNow.AddDays(1)
+                ExpirationDate = expirationDate
             };
 
             payment.CreatedBy = createPaymentDto.UserId;
@@ -155,7 +160,7 @@ namespace HandmadeProductManagement.Services.Service
                     .FirstOrDefaultAsync(o => o.Id == payment.OrderId && !o.DeletedTime.HasValue);
                 if (order != null)
                 {
-                    order.Status = "Payment Failed";
+                    order.Status = "Canceled";
                     order.LastUpdatedTime = DateTime.UtcNow;
                     orderRepository.Update(order);
                 }
