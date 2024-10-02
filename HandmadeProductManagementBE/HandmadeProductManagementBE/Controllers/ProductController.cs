@@ -64,103 +64,45 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ProductDto>>> GetProducts()
+        public async Task<IActionResult> GetProducts()
         {
-            try
-            {
-                IList<ProductDto> products = await _productService.GetAll();
-                return Ok(BaseResponse<IList<ProductDto>>.OkResponse(products));
-            }
-            catch (System.Exception ex)
-            {
-                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
-            }
+            var result = await _productService.GetAll();
+            return Ok(result);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<ProductDto>> GetProduct(string id)
+        public async Task<IActionResult> GetProduct(string id)
         {
-            try
-            {
-                ProductDto product = await _productService.GetById(id);
-                return Ok(BaseResponse<ProductDto>.OkResponse(product));
-            }
-            catch (KeyNotFoundException)
-            {
-                return NotFound(BaseResponse<string>.FailResponse("Product not found"));
-            }
-            catch (System.Exception ex)
-            {
-                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
-            }
+            var result = await _productService.GetById(id);
+            return Ok(result);
         }
 
         [HttpPost]
-        public async Task<ActionResult<ProductDto>> CreateProduct(ProductForCreationDto productForCreation)
+        public async Task<IActionResult> CreateProduct(ProductForCreationDto productForCreation)
         {
-            try
-            {
-                ProductDto createdProduct = await _productService.Create(productForCreation);
-                return Ok(BaseResponse<ProductDto>.OkResponse(createdProduct));
-            }
-            catch (System.Exception ex)
-            {
-                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
-            }
+            var product = await _productService.Create(productForCreation);
+            return Ok(product);
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult> UpdateProduct(string id, ProductForUpdateDto productForUpdate)
+        public async Task<IActionResult> UpdateProduct(string id, ProductForUpdateDto productForUpdate)
         {
-            try
-            {
-                await _productService.Update(id, productForUpdate);
-                return Ok(BaseResponse<string>.OkResponse("Product updated successfully"));
-            }
-            catch (KeyNotFoundException)
-            {
-                return NotFound(BaseResponse<string>.FailResponse("Product not found"));
-            }
-            catch (System.Exception ex)
-            {
-                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
-            }
+            var product = await _productService.Update(id, productForUpdate);
+            return Ok(product);
         }
 
         [HttpDelete("{id}")]
-        public async Task<ActionResult> DeleteProduct(string id)
+        public async Task<IActionResult> DeleteProduct(string id)
         {
-            try
-            {
-                await _productService.Delete(id);
-                return Ok(new BaseResponse<bool>(StatusCodeHelper.OK, "Product deleted successfully.", true));
-            }
-            catch (KeyNotFoundException)
-            {
-                return NotFound(BaseResponse<string>.FailResponse("Product not found"));
-            }
-            catch (System.Exception ex)
-            {
-                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
-            }
+            var result = await _productService.Delete(id);
+            return Ok(result);
         }
 
         [HttpDelete("soft-delete/{id}")]
-        public async Task<ActionResult> SoftDeleteProduct(string id)
+        public async Task<IActionResult> SoftDeleteProduct(string id)
         {
-            try
-            {
-                await _productService.SoftDelete(id);
-                return Ok(BaseResponse<string>.OkResponse("Product soft-deleted successfully"));
-            }
-            catch (KeyNotFoundException)
-            {
-                return NotFound(BaseResponse<string>.FailResponse("Product not found"));
-            }
-            catch (System.Exception ex)
-            {
-                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
-            }
+            var result = await _productService.SoftDelete(id);
+            return Ok(result);
         }
 
         [HttpGet("GetProductDetails/{id}")]
