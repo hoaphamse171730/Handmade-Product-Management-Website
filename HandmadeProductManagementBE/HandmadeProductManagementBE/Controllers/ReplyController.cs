@@ -45,7 +45,6 @@ namespace HandmadeProductManagementAPI.Controllers
             {
                 return NotFound(new BaseResponse<ReplyModel>(StatusCodeHelper.BadRequest, "Reply not found.", string.Empty));
             }
-
             return Ok(new BaseResponse<ReplyModel>(StatusCodeHelper.OK, "Success", reply));
         }
 
