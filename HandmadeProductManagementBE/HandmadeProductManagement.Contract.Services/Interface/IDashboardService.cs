@@ -10,11 +10,11 @@ namespace HandmadeProductManagement.Contract.Services.Interface
 
         Task<int> GetTotalProducts();
 
-        Task<int> GetTotalSales();
+        Task<decimal> GetTotalSales();
 
         Task<List<Shop>> GetTop10Shops();
 
-        Task<int> GetTotalSaleByShopId(string Id, DashboardDTO dashboardDTO);
+        Task<decimal> GetTotalSaleByShopId(string Id, DashboardDTO dashboardDTO);
 
         Task<List<Product>> GetTopSellingProducts();
     }

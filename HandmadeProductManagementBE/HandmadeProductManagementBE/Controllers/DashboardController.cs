@@ -37,9 +37,9 @@ using Microsoft.AspNetCore.Mvc;
         [HttpGet("total-sales")]
         public async Task<IActionResult> GetTotalSales()
         {
-            float totalSales = await _dashboardService.GetTotalSales();
+            decimal totalSales = await _dashboardService.GetTotalSales();
 
-            return Ok(BaseResponse<float>.OkResponse(totalSales)); ;
+            return Ok(BaseResponse<decimal>.OkResponse(totalSales)); ;
         }
 
         [HttpGet("top10-shops")]
@@ -53,9 +53,9 @@ using Microsoft.AspNetCore.Mvc;
         [HttpPost("TotalSaleById")]
         public async Task<IActionResult> TotalSaleByShopId(string Id, DashboardDTO dashboardDTO)
         {
-            int totalSale = await _dashboardService.GetTotalSaleByShopId(Id, dashboardDTO);
+            decimal totalSale = await _dashboardService.GetTotalSaleByShopId(Id, dashboardDTO);
 
-            return Ok(BaseResponse<float>.OkResponse(totalSale)); 
+            return Ok(BaseResponse<decimal>.OkResponse(totalSale)); 
         }
         [HttpPost("TopSellingProducts")]
         public async Task<IActionResult> TopSellingProducts()

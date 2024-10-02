@@ -27,9 +27,9 @@ namespace HandmadeProductManagement.Services.Service
             return await _unitOfWork.GetRepository<Product>().CountAsync();
         }
 
-        public async Task<int> GetTotalSales()
+        public async Task<decimal> GetTotalSales()
         {
-            int totalSales = await _unitOfWork.GetRepository<Order>().Entities
+            decimal totalSales = await _unitOfWork.GetRepository<Order>().Entities
                                      .Where(o => o.Status == "Shipped") 
                                      .SumAsync(o => o.TotalPrice); 
 
@@ -46,9 +46,9 @@ namespace HandmadeProductManagement.Services.Service
         }
 
 
-       public async Task<int> GetTotalSaleByShopId(string Id, DashboardDTO dashboardDTO)
+       public async Task<decimal> GetTotalSaleByShopId(string Id, DashboardDTO dashboardDTO)
         {
-            int totalSales = await _unitOfWork.GetRepository<Order>()
+            decimal totalSales = await _unitOfWork.GetRepository<Order>()
        .Entities
        .Where(order => order.OrderDetails
            .Any(od => od.Product.ShopId == Id) 
