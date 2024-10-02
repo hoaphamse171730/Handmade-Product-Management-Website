@@ -36,7 +36,7 @@ public class CartItemService : ICartItemService
        .SingleOrDefaultAsync(c => c.Id == cartId && c.DeletedTime == null && c.DeletedBy == null);
         if (cart == null)
         {
-            throw new BaseException.BadRequestException("cart_not_found", $"Cart {cartId} not found.");
+            throw new BaseException.NotFoundException("cart_not_found", $"Cart {cartId} not found.");
         }
 
         var productItemRepo = _unitOfWork.GetRepository<ProductItem>();
@@ -45,7 +45,12 @@ public class CartItemService : ICartItemService
 
         if (productItem == null)
         {
-            throw new BaseException.BadRequestException("product_item_not_found", $"ProductItem {createCartItemDto.ProductItemId} not found.");
+            throw new BaseException.NotFoundException("product_item_not_found", $"ProductItem {createCartItemDto.ProductItemId} not found.");
+        }
+
+        if (quantity > productItem.QuantityInStock)
+        {
+            throw new BaseException.BadRequestException("invalid_quantity", $"Only {productItem.QuantityInStock} items available.");
         }
 
         var cartItem = new CartItem
