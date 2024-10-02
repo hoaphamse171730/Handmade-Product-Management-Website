@@ -4,7 +4,9 @@ using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.ModelViews.OrderDetailModelViews;
 using HandmadeProductManagement.ModelViews.OrderModelViews;
+using HandmadeProductManagement.ModelViews.StatusChangeModelViews;
 using HandmadeProductManagement.Repositories.Entity;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using System.Text.RegularExpressions;
 
@@ -13,10 +15,12 @@ namespace HandmadeProductManagement.Services.Service
     public class OrderService : IOrderService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IStatusChangeService _statusChangeService;
 
-        public OrderService(IUnitOfWork unitOfWork)
+        public OrderService(IUnitOfWork unitOfWork, IStatusChangeService statusChangeService)
         {
             _unitOfWork = unitOfWork;
+            _statusChangeService = statusChangeService;
         }
 
         public async Task<bool> CreateOrderAsync(CreateOrderDto createOrder)
@@ -26,6 +30,7 @@ namespace HandmadeProductManagement.Services.Service
             var userRepository = _unitOfWork.GetRepository<ApplicationUser>();
             var userExists = await userRepository.Entities
                 .AnyAsync(u => u.Id.ToString() == createOrder.UserId && !u.DeletedTime.HasValue);
+
             if (!userExists)
             {
                 throw new BaseException.NotFoundException("user_not_found", "User not found.");
@@ -57,7 +62,7 @@ namespace HandmadeProductManagement.Services.Service
 
                 var orderDetail = new OrderDetail
                 {
-                    ProductItemId = detail.ProductItemId,
+                    ProductId = detail.ProductId,
                     ProductQuantity = detail.ProductQuantity,
                     UnitPrice = detail.UnitPrice,
                     OrderId = order.Id,
@@ -69,6 +74,16 @@ namespace HandmadeProductManagement.Services.Service
 
             await orderRepository.InsertAsync(order);
             await _unitOfWork.SaveAsync();
+
+            // Create an initial status change after the order is created
+            var statusChangeDto = new StatusChangeForCreationDto
+            {
+                OrderId = order.Id.ToString(),
+                Status = order.Status,
+                ChangeTime = DateTime.UtcNow
+            };
+
+            await _statusChangeService.Create(statusChangeDto);
 
             return true;
         }
@@ -267,6 +282,16 @@ namespace HandmadeProductManagement.Services.Service
             repository.Update(existingOrder);
             await _unitOfWork.SaveAsync();
 
+            // Create a new status change record after updating the order status
+            var statusChangeDto = new StatusChangeForCreationDto
+            {
+                OrderId = orderId,
+                Status = status,
+                ChangeTime = DateTime.UtcNow
+            };
+
+            await _statusChangeService.Create(statusChangeDto);
+
             return true;
         }
 
@@ -315,12 +340,12 @@ namespace HandmadeProductManagement.Services.Service
 
         private void ValidateOrderDetail(OrderDetailForCreationDto detail)
         {
-            if (string.IsNullOrWhiteSpace(detail.ProductItemId))
+            if (string.IsNullOrWhiteSpace(detail.ProductId))
             {
                 throw new BaseException.BadRequestException("invalid_product_id", "Please input Product id.");
             }
 
-            if (!Guid.TryParse(detail.ProductItemId, out _))
+            if (!Guid.TryParse(detail.ProductId, out _))
             {
                 throw new BaseException.BadRequestException("invalid_product_id_format", "Product ID format is invalid. Example: 123e4567-e89b-12d3-a456-426614174000.");
             }
