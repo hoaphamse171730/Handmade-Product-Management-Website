@@ -127,8 +127,8 @@ namespace HandmadeProductManagement.Services.Service
                     // Avoid duplicates
                     Price = g.SelectMany(p => p.ProductItems).Any() ? g.SelectMany(p => p.ProductItems).Min(pi => pi.Price) : 0
                 }).OrderBy(pr => searchModel.SortByPrice
-                    ? (searchModel.SortDescending ? -pr.Price : pr.Price) // Sort by price ascending or descending
-                    : (searchModel.SortDescending ? -pr.Rating : pr.Rating)) // Sort by rating ascending or descending
+                    ? (searchModel.SortDescending ? (decimal)-pr.Price : (decimal)pr.Price) // Sort by price ascending or descending
+                    : (searchModel.SortDescending ? (decimal) -pr.Rating : (decimal)pr.Rating)) // Sort by rating ascending or descending
                 .ToListAsync();
 
             if (productSearchVMs.IsNullOrEmpty())

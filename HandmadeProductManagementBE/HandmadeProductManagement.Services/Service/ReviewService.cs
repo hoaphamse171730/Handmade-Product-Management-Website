@@ -3,6 +3,7 @@ using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Utils;
+using HandmadeProductManagement.ModelViews.ReplyModelViews;
 using HandmadeProductManagement.ModelViews.ReviewModelViews;
 using HandmadeProductManagement.Repositories.Entity;
 using Microsoft.EntityFrameworkCore;
@@ -34,18 +35,30 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.BadRequestException("invalid_page_size", "Page Size must be greater than zero.");
             }
 
-            var reviews = await _unitOfWork.GetRepository<Review>().GetAllAsync();
-            return reviews.Skip((pageNumber - 1) * pageSize)
-                          .Take(pageSize)
-                          .Select(r => new ReviewModel
-                          {
-                              Id = r.Id,
-                              Content = r.Content,
-                              Rating = r.Rating,
-                              Date = r.Date,
-                              ProductId = r.ProductId,
-                              UserId = r.UserId
-                          }).ToList();
+            var reviews = await _unitOfWork.GetRepository<Review>()
+                                           .Entities
+                                           .Include(r => r.Reply) // Include the Reply
+                                           .Skip((pageNumber - 1) * pageSize)
+                                           .Take(pageSize)
+                                           .ToListAsync();
+
+            return reviews.Select(r => new ReviewModel
+            {
+                Id = r.Id,
+                Content = r.Content,
+                Rating = r.Rating,
+                Date = r.Date,
+                ProductId = r.ProductId,
+                UserId = r.UserId,
+                Reply = r.Reply == null ? null : new ReplyModel
+                {
+                    Id = r.Reply.Id,
+                    Content = r.Reply.Content,
+                    Date = r.Reply.Date,
+                    ReviewId = r.Reply.ReviewId,
+                    ShopId = r.Reply.ShopId
+                }
+            }).ToList();
         }
 
         public async Task<ReviewModel> GetByIdAsync(string reviewId)
@@ -55,7 +68,11 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.BadRequestException("invalid_review_id_format", "Invalid reviewId format.");
             }
 
-            var review = await _unitOfWork.GetRepository<Review>().GetByIdAsync(reviewId);
+            var review = await _unitOfWork.GetRepository<Review>()
+                                          .Entities
+                                          .Include(r => r.Reply) // Include the Reply
+                                          .FirstOrDefaultAsync(r => r.Id == reviewId);
+
             if (review == null)
             {
                 throw new BaseException.NotFoundException("review_not_found", "Review not found.");
@@ -68,7 +85,15 @@ namespace HandmadeProductManagement.Services.Service
                 Rating = review.Rating,
                 Date = review.Date,
                 ProductId = review.ProductId,
-                UserId = review.UserId
+                UserId = review.UserId,
+                Reply = review.Reply == null ? null : new ReplyModel
+                {
+                    Id = review.Reply.Id,
+                    Content = review.Reply.Content,
+                    Date = review.Reply.Date,
+                    ReviewId = review.Reply.ReviewId,
+                    ShopId = review.Reply.ShopId
+                }
             };
         }
 
@@ -102,6 +127,16 @@ namespace HandmadeProductManagement.Services.Service
             }
 
             var userFullName = user.UserInfo.FullName;
+
+            // Check if the order exists and the status is "Delivered"
+            var order = await _unitOfWork.GetRepository<Order>()
+                                          .Entities
+                                          .FirstOrDefaultAsync(o => o.UserId == reviewModel.UserId && o.Status == "Shipped");
+
+            if (order == null)
+            {
+                throw new BaseException.BadRequestException("order_not_delivered", "Review can only be created if the order status is 'Shipped'.");
+            }
 
             var review = new Review
             {
