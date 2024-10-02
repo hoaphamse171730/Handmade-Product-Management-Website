@@ -15,7 +15,7 @@ namespace HandmadeProductManagement.ModelViews.ProductDetailModelViews
         public string CategoryName { get; set; }
         public string ShopId { get; set; }
         public string ShopName { get; set; }
-        public float Rating { get; set; }
+        public decimal Rating { get; set; }
         public string Status { get; set; }
         public int SoldCount { get; set; }
         public List<string> ProductImageUrls { get; set; }

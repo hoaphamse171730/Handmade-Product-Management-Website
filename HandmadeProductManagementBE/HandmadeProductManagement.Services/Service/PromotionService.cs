@@ -7,6 +7,7 @@ using FluentValidation;
 using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
+using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.ModelViews.PromotionModelViews;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,6 +19,7 @@ namespace HandmadeProductManagement.Services.Service
         private readonly IMapper _mapper;
         private readonly IValidator<PromotionForCreationDto> _creationValidator;
         private readonly IValidator<PromotionForUpdateDto> _updateValidator;
+
 
         public PromotionService(IUnitOfWork unitOfWork, IMapper mapper, IValidator<PromotionForCreationDto> creationValidator, IValidator<PromotionForUpdateDto> updateValidator)
         {
@@ -100,11 +102,29 @@ namespace HandmadeProductManagement.Services.Service
 
             return true;
         }
+        
 
         public async Task<IList<PromotionDto>> GetAll()
         {
             var promotions = await _unitOfWork.GetRepository<Promotion>().Entities.ToListAsync();
             return _mapper.Map<IList<PromotionDto>>(promotions);
+        }
+
+        // Thêm phương thức kiểm tra xem khuyến mãi có hết hạn không
+        public async Task<bool> IsExpiredPromotionAsync(string id)
+        {
+            // Lấy khuyến mãi theo ID
+            var promotion = await _unitOfWork.GetRepository<Promotion>().Entities
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            // Kiểm tra xem promotion có giá trị null không
+            if (promotion == null)
+            {
+                throw new BaseException.NotFoundException("not_found", "Not Found ...!");
+            }
+
+            // Kiểm tra ngày hết hạn
+            return DateTime.UtcNow > promotion.EndDate; // Trả về true nếu đã hết hạn
         }
     }
 }

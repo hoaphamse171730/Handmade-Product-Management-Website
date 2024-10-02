@@ -1,10 +1,4 @@
-﻿using HandmadeProductManagement.Contract.Repositories.Entity;
-using HandmadeProductManagement.ModelViews.OrderModelViews;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using HandmadeProductManagement.ModelViews.OrderModelViews;
 
 namespace HandmadeProductManagement.Contract.Services.Interface
 {
@@ -13,8 +7,8 @@ namespace HandmadeProductManagement.Contract.Services.Interface
         Task<IList<OrderResponseModel>> GetAllOrdersAsync();
         Task<OrderResponseModel> GetOrderByIdAsync(string orderId);
         Task<bool> CreateOrderAsync(CreateOrderDto createOrder);
-        Task<bool> UpdateOrderAsync(string orderId, CreateOrderDto order);
-        Task<bool> UpdateOrderStatusAsync(string orderId, string status);
+        Task<bool> UpdateOrderAsync(string orderId, CreateOrderDto order, string cancelReasonId);
+        Task<bool> UpdateOrderStatusAsync(string orderId, string status, string cancelReasonId);
         Task<bool> DeleteOrderAsync(string orderId);
         Task<IList<OrderResponseModel>> GetOrderByUserIdAsync(Guid userId);
     }
