@@ -14,7 +14,7 @@ namespace HandmadeProductManagement.Contract.Repositories.Entity
         public string? Description { get; set; }
         public string CategoryId { get; set; } = string.Empty;
         public string ShopId { get; set; } = string.Empty ;
-        public decimal Rating { get; set; } 
+        public float Rating { get; set; } 
         public string Status { get; set; } = string.Empty;  
         public int SoldCount { get; set; }
 
