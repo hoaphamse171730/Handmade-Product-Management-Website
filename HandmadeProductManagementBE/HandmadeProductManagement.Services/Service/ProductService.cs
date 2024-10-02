@@ -271,11 +271,11 @@ namespace HandmadeProductManagement.Services.Service
             return Guid.TryParse(input, out _);
         }
 
-        public async Task<BaseResponse<ProductDetailResponseModel>> GetProductDetailsByIdAsync(string productId)
+        public async Task<ProductDetailResponseModel> GetProductDetailsByIdAsync(string productId)
         {
             if (string.IsNullOrEmpty(productId) || !IsValidGuid(productId))
             {
-                return BaseResponse<ProductDetailResponseModel>.FailResponse("Invalid product ID", StatusCodeHelper.BadRequest);
+                throw new BaseException.BadRequestException("invalid_product_id", "Product ID is invalid or empty.");
             }
 
             var product = await _unitOfWork.GetRepository<Product>().Entities
@@ -290,13 +290,13 @@ namespace HandmadeProductManagement.Services.Service
 
             if (product == null)
             {
-                return BaseResponse<ProductDetailResponseModel>.FailResponse("Product not found", StatusCodeHelper.NotFound);
+                throw new BaseException.NotFoundException("product_not_found", "Product not found.");
             }
 
             var promotion = await _unitOfWork.GetRepository<Promotion>().Entities
                 .FirstOrDefaultAsync(p => p.Categories.Any(c => c.Id == product.CategoryId) &&
-                                          p.StartDate <= DateTime.UtcNow &&
-                                          p.EndDate >= DateTime.UtcNow);
+                                           p.StartDate <= DateTime.UtcNow &&
+                                           p.EndDate >= DateTime.UtcNow);
 
             var response = new ProductDetailResponseModel
             {
@@ -335,7 +335,7 @@ namespace HandmadeProductManagement.Services.Service
                 } : null
             };
 
-            return BaseResponse<ProductDetailResponseModel>.OkResponse(response);
+            return response;
         }
     }
 }

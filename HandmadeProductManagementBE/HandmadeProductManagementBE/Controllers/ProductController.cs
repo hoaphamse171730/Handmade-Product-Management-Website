@@ -9,6 +9,7 @@ using HandmadeProductManagement.ModelViews.ProductModelViews;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.Runtime.InteropServices;
+using System.ComponentModel.DataAnnotations;
 
 namespace HandmadeProductManagementAPI.Controllers
 {
@@ -35,17 +36,17 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
 
-        //[HttpGet("search")]
-        //public async Task<IActionResult> SearchProducts(ProductSearchModel searchModel)
+        //[httpget("search")]
+        //public async task<iactionresult> searchproducts(productsearchmodel searchmodel)
         //{
-        //    var response = new BaseResponse<ProductSearchVM>
+        //    var response = new baseresponse<productsearchvm>
         //    {
-        //        Code = ,
-        //        StatusCode = StatusCodeHelper.OK,
-        //        Message = "Success",
-        //        Data = _productService.SearchProductsAsync(searchModel)
+        //        code = ,
+        //        statuscode = statuscodehelper.ok,
+        //        message = "success",
+        //        data = _productservice.searchproductsasync(searchmodel)
         //    };
-        //    return Ok(response);
+        //    return ok(response);
         //}
 
         [HttpGet("sort")]
@@ -63,56 +64,117 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetProducts()
+        public async Task<ActionResult<IEnumerable<ProductDto>>> GetProducts()
         {
-            var products = await _productService.GetAll();
-            return Ok(products);
+            try
+            {
+                IList<ProductDto> products = await _productService.GetAll();
+                return Ok(BaseResponse<IList<ProductDto>>.OkResponse(products));
+            }
+            catch (System.Exception ex)
+            {
+                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
+            }
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetProduct(string id)
+        public async Task<ActionResult<ProductDto>> GetProduct(string id)
         {
-            var product = await _productService.GetById(id);
-            return Ok(product);
+            try
+            {
+                ProductDto product = await _productService.GetById(id);
+                return Ok(BaseResponse<ProductDto>.OkResponse(product));
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound(BaseResponse<string>.FailResponse("Product not found"));
+            }
+            catch (System.Exception ex)
+            {
+                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
+            }
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateProduct(ProductForCreationDto productForCreation)
+        public async Task<ActionResult<ProductDto>> CreateProduct(ProductForCreationDto productForCreation)
         {
-            var result = await _productService.Create(productForCreation);
-            return Ok(result);
+            try
+            {
+                ProductDto createdProduct = await _productService.Create(productForCreation);
+                return Ok(BaseResponse<ProductDto>.OkResponse(createdProduct));
+            }
+            catch (System.Exception ex)
+            {
+                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
+            }
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateProduct(string id, ProductForUpdateDto productForUpdate)
+        public async Task<ActionResult> UpdateProduct(string id, ProductForUpdateDto productForUpdate)
         {
-            var result = await _productService.Update(id, productForUpdate);
-            return Ok(result);
+            try
+            {
+                await _productService.Update(id, productForUpdate);
+                return Ok(BaseResponse<string>.OkResponse("Product updated successfully"));
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound(BaseResponse<string>.FailResponse("Product not found"));
+            }
+            catch (System.Exception ex)
+            {
+                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
+            }
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteProduct(string id)
+        public async Task<ActionResult> DeleteProduct(string id)
         {
-            var result = await _productService.Delete(id);
-            return Ok(result);
+            try
+            {
+                await _productService.Delete(id);
+                return Ok(new BaseResponse<bool>(StatusCodeHelper.OK, "Product deleted successfully.", true));
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound(BaseResponse<string>.FailResponse("Product not found"));
+            }
+            catch (System.Exception ex)
+            {
+                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
+            }
         }
 
         [HttpDelete("soft-delete/{id}")]
-        public async Task<IActionResult> SoftDeleteProduct(string id)
+        public async Task<ActionResult> SoftDeleteProduct(string id)
         {
-            var result = await _productService.SoftDelete(id);
-            return Ok(result);
+            try
+            {
+                await _productService.SoftDelete(id);
+                return Ok(BaseResponse<string>.OkResponse("Product soft-deleted successfully"));
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound(BaseResponse<string>.FailResponse("Product not found"));
+            }
+            catch (System.Exception ex)
+            {
+                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
+            }
         }
 
-        [HttpGet("GetProductDetaills/{id}")]
-        public async Task<IActionResult> GetProductDetails(string id)
+        [HttpGet("GetProductDetails/{id}")]
+        public async Task<IActionResult> GetProductDetails([Required] string id)
         {
-            var response = await _productService.GetProductDetailsByIdAsync(id);
-            if (response.Data == null)
+            var productDetails = await _productService.GetProductDetailsByIdAsync(id);
+            var response = new BaseResponse<ProductDetailResponseModel>
             {
-                return StatusCode(404, new BaseResponse<ProductDetailResponseModel>(StatusCodeHelper.NotFound, StatusCodeHelper.NotFound.Name(), "Product Not Found!"));
-            }
-            return StatusCode((int)response.StatusCode, response);
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Product details retrieved successfully.",
+                Data = productDetails
+            };
+            return Ok(response);
         }
     }
 }
