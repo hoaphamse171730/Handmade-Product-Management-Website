@@ -36,9 +36,15 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpGet("{replyId}")]
         public async Task<IActionResult> GetById([Required] string replyId)
         {
-            var reply = await _replyService.GetByIdAsync(replyId); 
-            return Ok(new BaseResponse<ReplyModel>(StatusCodeHelper.OK, "Success", reply));
-
+            var reply = await _replyService.GetByIdAsync(replyId);
+            var response = new BaseResponse<ReplyModel>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Reply retrieved successfully.",
+                Data = reply
+            };
+            return Ok(response);
         }
 
         [HttpPost]

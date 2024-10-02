@@ -21,8 +21,6 @@ namespace HandmadeProductManagement.Contract.Services.Interface
         Task<bool> Delete(string id);
         Task<bool> SoftDelete(string id);
 
-        Task<ProductDto> UpdateProductWithPromotion(string promotionId, string productId);
-
         Task<ProductDetailResponseModel> GetProductDetailsByIdAsync(string productId);
     }
 }

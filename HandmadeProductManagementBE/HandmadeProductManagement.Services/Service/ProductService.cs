@@ -41,12 +41,12 @@ namespace HandmadeProductManagement.Services.Service
             // Validate CategoryId and ShopId datatype (Guid)
             if (!string.IsNullOrWhiteSpace(searchModel.CategoryId) && !IsValidGuid(searchModel.CategoryId))
             {
-                throw new BaseException.BadRequestException("bad_request", "Invalid Category Id");
+                throw new BaseException.BadRequestException("bad_request","Invalid Category Id");
             }
 
             if (!string.IsNullOrWhiteSpace(searchModel.ShopId) && !IsValidGuid(searchModel.ShopId))
             {
-                throw new BaseException.BadRequestException("bad_request", "Invalid Shop ID");
+                throw new BaseException.BadRequestException("bad_request","Invalid Shop ID");
             }
 
             // Validate MinRating limit (from 0 to 5)
@@ -266,27 +266,6 @@ namespace HandmadeProductManagement.Services.Service
             return true;
         }
 
-        public async Task<ProductDto> UpdateProductWithPromotion(string productId, string promotionId)
-        {
-            var productRepo = _unitOfWork.GetRepository<Product>();
-            var productEntity = await productRepo.Entities.FirstOrDefaultAsync(p => p.Id == productId);
-            if (productEntity == null)
-                throw new KeyNotFoundException("Product not found.");
-            var promotionRepo = _unitOfWork.GetRepository<Promotion>();
-            var promotionEntity = await promotionRepo.Entities.FirstOrDefaultAsync(p => p.Id == promotionId);
-            if (promotionEntity == null)
-                throw new KeyNotFoundException("Promotion not found.");
-            var currentDate = DateTime.UtcNow;
-            if (promotionEntity.StartDate > currentDate || promotionEntity.EndDate < currentDate)
-                throw new InvalidOperationException("Promotion is not active.");
-            productEntity.Id = promotionId;
-            productEntity.Discount = productEntity.Price * (1 - promotionEntity.DiscountRate);
-            productEntity.LastUpdatedTime = DateTime.UtcNow;
-            await productRepo.UpdateAsync(productEntity);
-            await _unitOfWork.SaveAsync();
-            return _mapper.Map<ProductDto>(productEntity);
-        }
-
         private bool IsValidGuid(string input)
         {
             return Guid.TryParse(input, out _);
@@ -355,12 +334,8 @@ namespace HandmadeProductManagement.Services.Service
                     Status = promotion.Status
                 } : null
             };
+
             return response;
         }
-
-        public async
-
-
-
     }
 }

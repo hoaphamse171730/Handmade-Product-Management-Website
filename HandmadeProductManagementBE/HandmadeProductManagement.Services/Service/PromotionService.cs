@@ -31,8 +31,10 @@ namespace HandmadeProductManagement.Services.Service
         {
             var promotion = await _unitOfWork.GetRepository<Promotion>().Entities
                 .FirstOrDefaultAsync(p => p.Id == id);
+
             if (promotion == null)
                 throw new KeyNotFoundException("Promotion not found");
+
             return _mapper.Map<PromotionDto>(promotion);
         }
 
@@ -41,10 +43,13 @@ namespace HandmadeProductManagement.Services.Service
             var validationResult = await _creationValidator.ValidateAsync(promotion);
             if (!validationResult.IsValid)
                 throw new ValidationException(validationResult.Errors);
+
             var promotionEntity = _mapper.Map<Promotion>(promotion);
             promotionEntity.CreatedTime = DateTime.UtcNow;
+
             await _unitOfWork.GetRepository<Promotion>().InsertAsync(promotionEntity);
             await _unitOfWork.SaveAsync();
+
             return _mapper.Map<PromotionDto>(promotionEntity);
         }
 
@@ -53,14 +58,19 @@ namespace HandmadeProductManagement.Services.Service
             var validationResult = await _updateValidator.ValidateAsync(promotion);
             if (!validationResult.IsValid)
                 throw new ValidationException(validationResult.Errors);
+
             var promotionEntity = await _unitOfWork.GetRepository<Promotion>().Entities
                 .FirstOrDefaultAsync(p => p.Id == id);
+
             if (promotionEntity == null)
                 throw new KeyNotFoundException("Promotion not found");
+
             _mapper.Map(promotion, promotionEntity);
             promotionEntity.LastUpdatedTime = DateTime.UtcNow;
+
             await _unitOfWork.GetRepository<Promotion>().UpdateAsync(promotionEntity);
             await _unitOfWork.SaveAsync();
+
             return _mapper.Map<PromotionDto>(promotionEntity);
         }
 
@@ -70,9 +80,11 @@ namespace HandmadeProductManagement.Services.Service
             var promotionEntity = await promotionRepo.Entities.FirstOrDefaultAsync(p => p.Id == id);
             if (promotionEntity == null)
                 throw new KeyNotFoundException("Promotion not found");
+
             await promotionRepo.DeleteAsync(id);
             await _unitOfWork.SaveAsync();
-            return true; 
+
+            return true;  // Return success/failure as a boolean
         }
 
         public async Task<bool> SoftDelete(string id)
@@ -81,9 +93,11 @@ namespace HandmadeProductManagement.Services.Service
             var promotionEntity = await promotionRepo.Entities.FirstOrDefaultAsync(p => p.Id == id);
             if (promotionEntity == null)
                 throw new KeyNotFoundException("Promotion not found");
+
             promotionEntity.DeletedTime = DateTime.UtcNow;
             await promotionRepo.UpdateAsync(promotionEntity);
             await _unitOfWork.SaveAsync();
+
             return true;
         }
 

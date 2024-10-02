@@ -17,8 +17,6 @@ namespace HandmadeProductManagement.Contract.Repositories.Entity
         public decimal Rating { get; set; } 
         public string Status { get; set; } = string.Empty;  
         public int SoldCount { get; set; }
-        public float Price { get; set; }
-        public float Discount { get; set; }
 
         public ICollection<ProductImage> ProductImages { get; set; } = []; 
         public ICollection<ProductItem> ProductItems { get; set; } = [];
