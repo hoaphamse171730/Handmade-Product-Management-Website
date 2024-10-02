@@ -48,10 +48,6 @@ namespace HandmadeProductManagementAPI.Controllers
         };
             return Ok(response);
 
-            /*   if (userResponse == null)
-               {
-                   return StatusCode(404, BaseResponse<String>.FailResponse("User not found"));
-               }*/
 
         }
 
@@ -59,10 +55,7 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateUser(string id,  UpdateUserDTO updateUserDTO)
         {
-            /*if (id == null || updateUserDTO == null)
-            {
-                return StatusCode(400, BaseResponse<String>.FailResponse("Bad Request"));
-            }
+            /*
 
 
             if (!new EmailAddressAttribute().IsValid(updateUserDTO.Email))
@@ -77,9 +70,7 @@ namespace HandmadeProductManagementAPI.Controllers
                 return StatusCode(400, BaseResponse<string>.FailResponse("Phone number is not valid"));
             }
 
-            if (updatedUser == null)
-            {
-                return StatusCode(404, BaseResponse<String>.FailResponse("User not found"));
+
             }*/
             var response = new BaseResponse<UpdateUserResponseModel>
             {
@@ -96,12 +87,7 @@ namespace HandmadeProductManagementAPI.Controllers
         {
 
 
-            /*   var result = await _userService.DeleteUser(id);
 
-               if (!result)
-               {
-                   return StatusCode(404, BaseResponse<String>.FailResponse("User not found"));
-               }*/
 
             var response = new BaseResponse<bool>
             {
@@ -113,22 +99,16 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
-        [HttpPost("{id}/restore")] // Assuming you want to use a POST request to restore
+        [HttpPost("{id}/restore")] 
         public async Task<IActionResult> ReverseDeleteUser(string id)
         {
-            /*var result = await _userService.ReverseDeleteUser(id);
-
-            if (!result)
-            {
-                return StatusCode(404, BaseResponse<String>.FailResponse("User not found or already active"));
-            }*/
 
             var response = new BaseResponse<bool>
             {
                 Code = "200",
                 StatusCode = StatusCodeHelper.OK,
                 Message = "Success",
-                Data = await _userService.DeleteUser(id)
+                Data = await _userService.ReverseDeleteUser(id)
             };
             return Ok(response);
         }
