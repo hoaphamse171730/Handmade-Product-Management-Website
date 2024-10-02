@@ -1,5 +1,6 @@
 using FluentValidation;
 using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.Core.Constants;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -34,12 +35,6 @@ public class CustomExceptionHandler(ILogger<CustomExceptionHandler> logger) : IE
                 context.Response.StatusCode = StatusCodes.Status404NotFound
             ),
 
-            BaseException.UnauthorizedException unauthorizedException => (
-                unauthorizedException.ErrorDetail.ErrorMessage?.ToString() ?? exception.Message,
-                unauthorizedException.GetType().Name,
-                context.Response.StatusCode = StatusCodes.Status401Unauthorized
-            ),
-            
             _ => (
                 exception.Message,
                 exception.GetType().Name,
@@ -50,7 +45,7 @@ public class CustomExceptionHandler(ILogger<CustomExceptionHandler> logger) : IE
         var problemDetails = new ProblemDetails()
         {
             Title = details.Title,
-            Detail = details.Detail, //Here we pass the correct custom error message
+            Detail = details.Detail, // Here we pass the correct custom error message
             Status = details.StatusCode,
             Instance = context.Request.Path
         };

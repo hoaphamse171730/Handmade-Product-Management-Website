@@ -60,14 +60,14 @@ namespace HandmadeProductManagement.Services.Service
             return _mapper.Map<OrderDetailDto>(orderDetailEntity);
         }
 
-        public async Task<OrderDetailDto> Update(string orderId, string productId, OrderDetailForUpdateDto orderDetailForUpdate)
+        public async Task<OrderDetailDto> Update(string orderId, OrderDetailForUpdateDto orderDetailForUpdate)
         {
             var validationResult = await _updateValidator.ValidateAsync(orderDetailForUpdate);
             if (!validationResult.IsValid)
                 throw new ValidationException(validationResult.Errors);
 
             var orderDetailEntity = await _unitOfWork.GetRepository<OrderDetail>().Entities
-                    .FirstOrDefaultAsync(p => p.Id == id && !p.DeletedTime.HasValue && p.DeletedBy == null);
+                    .FirstOrDefaultAsync(p => p.Id == orderId && !p.DeletedTime.HasValue && p.DeletedBy == null);
 
             if (orderDetailEntity == null)
                 throw new KeyNotFoundException("Order detail not found");
@@ -99,7 +99,7 @@ namespace HandmadeProductManagement.Services.Service
         }
 
 
-        public async Task SoftDelete(string id)
+        public async Task<bool> SoftDelete(string id)
         {
             var orderDetailEntity = await _unitOfWork.GetRepository<OrderDetail>().Entities.FirstOrDefaultAsync(p => p.Id == id);
             if (orderDetailEntity == null)

@@ -21,76 +21,68 @@ namespace HandmadeProductManagementAPI.Controllers;
 public class AuthenticationController(
     UserManager<ApplicationUser> userManager,
     TokenService tokenService,
-    IEmailService emailService,
-    AuthenticationService authenticationService
-    ) : ControllerBase
+    IEmailService emailService
+)
+    : ControllerBase
 {
-    // [AllowAnonymous]
-    // [HttpPost("login")]
-    // public async Task<ActionResult<BaseResponse<UserLoginResponseModel>>> Login(LoginModelView loginModelView)
-    // {
-    //     if (string.IsNullOrWhiteSpace(loginModelView.PhoneNumber) &&
-    //         string.IsNullOrWhiteSpace(loginModelView.Email) &&
-    //         string.IsNullOrWhiteSpace(loginModelView.UserName)
-    //        )
-    //     {
-    //         return new BaseResponse<UserLoginResponseModel>()
-    //         {
-    //             StatusCode = StatusCodeHelper.Unauthorized,
-    //             Message = "At least one of Phone Number, Email, or Username is required for login.",
-    //         };
-    //     }
-    //
-    //     var user = await userManager.Users
-    //         .Include(u => u.UserInfo)
-    //         .Include(u => u.Cart)
-    //         .FirstOrDefaultAsync(u => u.Email == loginModelView.Email
-    //                                   || u.PhoneNumber == loginModelView.PhoneNumber
-    //                                   || u.UserName == loginModelView.UserName);
-    //
-    //     if (user is null)
-    //     {
-    //         return new BaseResponse<UserLoginResponseModel>()
-    //         {
-    //             StatusCode = StatusCodeHelper.Unauthorized,
-    //             Message = "Incorrect user login credentials"
-    //         };
-    //     }
-    //
-    //     if (user.Status != Constants.UserActiveStatus)
-    //     {
-    //         return new BaseResponse<UserLoginResponseModel>()
-    //         {
-    //             StatusCode = StatusCodeHelper.Unauthorized,
-    //             Message = "This account has been disabled."
-    //         };
-    //     }
-    //
-    //     var success = await userManager.CheckPasswordAsync(user, loginModelView.Password);
-    //
-    //     if (success)
-    //     {
-    //         return BaseResponse<UserLoginResponseModel>.OkResponse(CreateUserResponse(user));
-    //     }
-    //
-    //     return new BaseResponse<UserLoginResponseModel>()
-    //     {
-    //         StatusCode = StatusCodeHelper.Unauthorized,
-    //         Message = "Incorrect password",
-    //     };
-    // }
-    
     [AllowAnonymous]
     [HttpPost("login")]
-    public async Task<IActionResult> Login(LoginModelView loginModelView)
+    public async Task<ActionResult<BaseResponse<UserLoginResponseModel>>> Login(LoginModelView loginModelView)
     {
-        var result = await authenticationService.AuthenticateUser(loginModelView);
-        return Ok(BaseResponse<UserLoginResponseModel>.OkResponse(result));
+        if (string.IsNullOrWhiteSpace(loginModelView.PhoneNumber) &&
+            string.IsNullOrWhiteSpace(loginModelView.Email) &&
+            string.IsNullOrWhiteSpace(loginModelView.UserName) ||
+            string.IsNullOrWhiteSpace(loginModelView.Password)
+           )
+        {
+            return new BaseResponse<UserLoginResponseModel>()
+            {
+                StatusCode = StatusCodeHelper.Unauthorized,
+                Message = "At least one of Phone Number, Email, or Username is required for login.",
+            };
+        }
+
+        var user = await userManager.Users
+            .Include(u => u.UserInfo)
+            .Include(u => u.Cart)
+            .FirstOrDefaultAsync(u => u.Email == loginModelView.Email
+                                      || u.PhoneNumber == loginModelView.PhoneNumber
+                                      || u.UserName == loginModelView.UserName);
+
+        if (user is null)
+        {
+            return new BaseResponse<UserLoginResponseModel>()
+            {
+                StatusCode = StatusCodeHelper.Unauthorized,
+                Message = "Incorrect user login credentials"
+            };
+        }
+
+        if (user.Status != Constants.UserActiveStatus)
+        {
+            return new BaseResponse<UserLoginResponseModel>()
+            {
+                StatusCode = StatusCodeHelper.Unauthorized,
+                Message = "This account has been disabled."
+            };
+        }
+
+        var success = await userManager.CheckPasswordAsync(user, loginModelView.Password);
+
+        if (success)
+        {
+            return BaseResponse<UserLoginResponseModel>.OkResponse(CreateUserResponse(user));
+        }
+
+        return new BaseResponse<UserLoginResponseModel>()
+        {
+            StatusCode = StatusCodeHelper.Unauthorized,
+            Message = "Incorrect password",
+        };
     }
 
     private UserLoginResponseModel CreateUserResponse(ApplicationUser user)
     {
-        
         return new UserLoginResponseModel()
         {
             FullName = user.UserInfo.FullName,
@@ -104,6 +96,7 @@ public class AuthenticationController(
     [HttpPost("register")]
     public async Task<ActionResult<BaseResponse<string>>> Register(RegisterModelView registerModelView)
     {
+        throw new BaseException.BadRequestException("bad_request", "this is a very bad request");
         if (!ValidationHelper.IsValidNames(CustomRegex.UsernameRegex, registerModelView.UserName) ||
             !ValidationHelper.IsValidNames(CustomRegex.FullNameRegex, registerModelView.FullName)
            )
@@ -157,7 +150,7 @@ public class AuthenticationController(
         return new BaseResponse<string>()
         {
             StatusCode = StatusCodeHelper.BadRequest,
-            Message = string.Join(", ", result.Errors)
+            Message = result.Errors.ToString(),
         };
     }
 
@@ -166,7 +159,9 @@ public class AuthenticationController(
     public async Task<ActionResult<BaseResponse<string>>> ForgotPassword(ForgotPasswordModelView forgotPasswordModelView)
     {
         var user = await userManager.FindByEmailAsync(forgotPasswordModelView.Email);
-        if (user == null || !user.EmailConfirmed)
+        if (user == null
+            // || !user.EmailConfirmed
+           )
         {
             return new BaseResponse<string>()
             {
@@ -248,7 +243,7 @@ public class AuthenticationController(
             };
         }
 
-        return BaseResponse<string>.FailResponse(statusCode: StatusCodeHelper.BadRequest,
+        return BaseResponse<string>.FailResponse(statusCode: StatusCodeHelper.BadRequest, 
             message: "Error confirming the email.");
     }
 }
