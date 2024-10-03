@@ -138,7 +138,7 @@ namespace HandmadeProductManagement.Services.Service
             return replyModel;
         }
 
-        public async Task<ReplyModel> UpdateAsync(string replyId, ReplyModel updatedReply)
+        public async Task<ReplyModel> UpdateAsync(string replyId, string shopId, ReplyModel updatedReply)
         {
             if (string.IsNullOrWhiteSpace(replyId))
             {
@@ -156,12 +156,33 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.BadRequestException("invalid_shop_id_format", "Invalid shopId format.");
             }
 
+            // Validate that only the shop that created the reply can update it
+            if (existingReply.ShopId != updatedReply.ShopId)
+            {
+                throw new BaseException.BadRequestException("unauthorized_update", "Only the shop that created this reply can update it.");
+            }
+
             var shop = await _unitOfWork.GetRepository<Shop>()
                          .Entities
                          .FirstOrDefaultAsync(s => s.Id == updatedReply.ShopId);
             if (shop == null)
             {
                 throw new BaseException.NotFoundException("shop_not_found", "Shop not found.");
+            }
+
+            // Validate that the reply belongs to the product associated with the review
+            var review = await _unitOfWork.GetRepository<Review>().GetByIdAsync(existingReply.ReviewId);
+            if (review == null)
+            {
+                throw new BaseException.NotFoundException("review_not_found", "Review not found.");
+            }
+
+            var product = await _unitOfWork.GetRepository<Product>()
+                                           .Entities
+                                           .FirstOrDefaultAsync(p => p.Id == review.ProductId && p.ShopId == shop.Id);
+            if (product == null)
+            {
+                throw new BaseException.BadRequestException("unauthorized_update", "The specified shop cannot update this reply as it doesn't belong to the product of the review.");
             }
 
             if (!string.IsNullOrWhiteSpace(updatedReply.Content))
@@ -172,13 +193,13 @@ namespace HandmadeProductManagement.Services.Service
             existingReply.LastUpdatedBy = shop.Name;
             existingReply.LastUpdatedTime = DateTimeOffset.UtcNow;
 
-            _unitOfWork.GetRepository<Reply>().Update(existingReply);
+            _unitOfWork.GetRepository<Reply>().UpdateAsync(existingReply);
             await _unitOfWork.SaveAsync();
 
             return updatedReply;
         }
 
-        public async Task<bool> DeleteAsync(string replyId)
+        public async Task<bool> DeleteAsync(string replyId, string shopId)
         {
             if (string.IsNullOrWhiteSpace(replyId))
             {
@@ -189,16 +210,25 @@ namespace HandmadeProductManagement.Services.Service
             if (existingReply == null)
             {
                 throw new BaseException.NotFoundException("reply_not_found", "Reply not found.");
+            }
+
+            // Validate that only the shop that created the reply can delete it
+            var shop = await _unitOfWork.GetRepository<Shop>()
+                                         .Entities
+                                         .FirstOrDefaultAsync(s => s.Id == existingReply.ShopId);
+            if (shop == null)
+            {
+                throw new BaseException.NotFoundException("shop_not_found", "Shop not found.");
             }
 
             existingReply.DeletedTime = DateTimeOffset.UtcNow;
 
-            _unitOfWork.GetRepository<Reply>().Delete(replyId);
+            _unitOfWork.GetRepository<Reply>().DeleteAsync(replyId);
             await _unitOfWork.SaveAsync();
             return true;
         }
 
-        public async Task<bool> SoftDeleteAsync(string replyId)
+        public async Task<bool> SoftDeleteAsync(string replyId, string shopId)
         {
             if (string.IsNullOrWhiteSpace(replyId))
             {
@@ -211,6 +241,7 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.NotFoundException("reply_not_found", "Reply not found.");
             }
 
+            // Validate that only the shop that created the reply can soft delete it
             var shop = await _unitOfWork.GetRepository<Shop>()
                                  .Entities
                                  .FirstOrDefaultAsync(s => s.Id == existingReply.ShopId);
@@ -219,10 +250,11 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.NotFoundException("shop_not_found", "Shop not found.");
             }
 
+
             existingReply.DeletedTime = DateTimeOffset.UtcNow;
             existingReply.DeletedBy = shop.Name;
 
-            _unitOfWork.GetRepository<Reply>().Update(existingReply);
+            _unitOfWork.GetRepository<Reply>().UpdateAsync(existingReply);
             await _unitOfWork.SaveAsync();
 
             return true;
