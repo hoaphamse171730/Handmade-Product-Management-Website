@@ -32,7 +32,7 @@ namespace HandmadeProductManagement.Services.Service
 
             var reviews = await _unitOfWork.GetRepository<Review>()
                                            .Entities
-                                           .Include(r => r.Reply) // Include the Reply
+                                           .Include(r => r.Reply)
                                            .Skip((pageNumber - 1) * pageSize)
                                            .Take(pageSize)
                                            .ToListAsync();
@@ -65,7 +65,7 @@ namespace HandmadeProductManagement.Services.Service
 
             var review = await _unitOfWork.GetRepository<Review>()
                                           .Entities
-                                          .Include(r => r.Reply) // Include the Reply
+                                          .Include(r => r.Reply)
                                           .FirstOrDefaultAsync(r => r.Id == reviewId);
 
             if (review == null)
@@ -129,10 +129,10 @@ namespace HandmadeProductManagement.Services.Service
             }
 
             // Check if the order contains the specific product
-            //if (!order.OrderDetails.Any(od => od.ProductItemId == reviewModel.ProductId))
-            //{
-            //    throw new BaseException.BadRequestException("product_not_in_order", "User can only review products that have been purchased in a 'Shipped' order.");
-            //}
+            if (!order.OrderDetails.Any(od => od.ProductId == reviewModel.ProductId))
+            {
+                throw new BaseException.BadRequestException("product_not_in_order", "User can only review products that have been purchased in a 'Shipped' order.");
+            }
 
             // Check if a review already exists for this product by this user
             var existingReview = await _unitOfWork.GetRepository<Review>()
