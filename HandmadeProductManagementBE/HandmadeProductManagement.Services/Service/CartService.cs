@@ -46,7 +46,6 @@ public class CartService : ICartService
 
     public async Task<Decimal> GetTotalCartPrice(string cartId)
     {
-        var update = _promotionService.updatePromotionStatusByRealtime(cartId);
 
         if (!Guid.TryParse(cartId, out Guid cardId))
         {
@@ -79,9 +78,12 @@ public class CartService : ICartService
             var promotion = cartItem.ProductItem.Product.Category.Promotion;
             decimal discountRate = 1; 
 
-            if (promotion != null && promotion.Status == "active")
+            if (promotion != null)
             {
-                discountRate = 1 - (decimal)promotion.DiscountRate;
+                await _promotionService.updatePromotionStatusByRealtime(promotion.Id);
+                if(promotion.Status == "active"){
+                    discountRate = 1 - (decimal)promotion.DiscountRate;
+                }            
             }
 
             totalPrice += productItemPrice * productQuantity * discountRate;
