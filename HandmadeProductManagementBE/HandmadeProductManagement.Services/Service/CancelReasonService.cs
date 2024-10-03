@@ -1,6 +1,10 @@
-﻿using HandmadeProductManagement.Contract.Repositories.Entity;
+﻿using AutoMapper;
+using FluentValidation;
+using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
+using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.ModelViews.CancelReasonModelViews;
 using Microsoft.EntityFrameworkCore;
 
 namespace HandmadeProductManagement.Services.Service
@@ -8,80 +12,122 @@ namespace HandmadeProductManagement.Services.Service
     public class CancelReasonService : ICancelReasonService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
+        private readonly IValidator<CancelReasonForCreationDto> _creationValidator;
+        private readonly IValidator<CancelReasonForUpdateDto> _updateValidator;
 
-        public CancelReasonService(IUnitOfWork unitOfWork)
+        public CancelReasonService(IUnitOfWork unitOfWork, IMapper mapper, IValidator<CancelReasonForCreationDto> creationValidator, IValidator<CancelReasonForUpdateDto> updateValidator)
         {
             _unitOfWork = unitOfWork;
+            _mapper = mapper;
+            _creationValidator = creationValidator;
+            _updateValidator = updateValidator;
         }
 
-        // Get all cancel reasons
-        public async Task<IList<CancelReason>> GetAll()
+        public async Task<CancelReasonResponseModel> GetById(string id)
         {
-            IQueryable<CancelReason> query = _unitOfWork.GetRepository<CancelReason>().Entities;
-            return await query.ToListAsync();
+            var cancelReason = await _unitOfWork.GetRepository<CancelReason>().Entities.FirstOrDefaultAsync(cr => cr.Id == id);
+            if (cancelReason == null)
+            {
+                throw new BaseException.NotFoundException("cancel_reason_not_found", "Cancel Reason not found.");
+            }
+
+            var cancelReasonDto = _mapper.Map<CancelReasonResponseModel>(cancelReason);
+            return cancelReasonDto;
         }
 
-        // Get cancel reason by Id (string)
-        public async Task<CancelReason> GetById(string id)
+
+        // Get cancel reasons by page (only active records)
+        public async Task<IList<CancelReasonResponseModel>> GetByPage(int page, int pageSize)
         {
-            return await _unitOfWork.GetRepository<CancelReason>().Entities
-                                     .FirstOrDefaultAsync(cr => cr.Id == id);
+            if (page <= 0)
+            {
+                throw new BaseException.BadRequestException("invalid_input", "Page must be greater than 0.");
+            }
+
+            if (pageSize <= 0)
+            {
+                throw new BaseException.BadRequestException("invalid_input", "Page size must be greater than 0.");
+            }
+
+            IQueryable<CancelReason> query = _unitOfWork.GetRepository<CancelReason>().Entities
+                .Where(cr => !cr.DeletedTime.HasValue || cr.DeletedBy == null);
+
+            var cancelReasons = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(cancelReason => new CancelReasonResponseModel
+                {
+                    Id = cancelReason.Id.ToString(),
+                    Description = cancelReason.Description,
+                    RefundRate = cancelReason.RefundRate,
+                })
+                .ToListAsync();
+
+            var cancelReasonDto = _mapper.Map<IList<CancelReasonResponseModel>>(cancelReasons);
+            return cancelReasonDto;
         }
 
         // Create a new cancel reason
-        public async Task<CancelReason> Create(CancelReason cancelReason)
+        public async Task<bool> Create(CancelReasonForCreationDto cancelReason)
         {
-            await _unitOfWork.GetRepository<CancelReason>().InsertAsync(cancelReason);
+            // Validate
+            var result = _creationValidator.ValidateAsync(cancelReason);
+            if (!result.Result.IsValid)
+            {
+                throw new ValidationException(result.Result.Errors);
+            }
+
+            var cancelReasonEntity = _mapper.Map<CancelReason>(cancelReason);
+
+            // Set metadata
+            cancelReasonEntity.CreatedBy = "currentUser"; // Update with actual user info
+            cancelReasonEntity.LastUpdatedBy = "currentUser"; // Update with actual user info
+
+            await _unitOfWork.GetRepository<CancelReason>().InsertAsync(cancelReasonEntity);
             await _unitOfWork.SaveAsync();
-            return cancelReason;
+
+            return true;
         }
 
         // Update an existing cancel reason
-        public async Task<CancelReason> Update(string id, CancelReason updatedCancelReason)
+        public async Task<bool> Update(string id, CancelReasonForUpdateDto cancelReason)
         {
-            var existingCancelReason = await GetById(id);
-            if (existingCancelReason == null)
-                return null;
+            var result = _updateValidator.ValidateAsync(cancelReason);
+            if (!result.Result.IsValid)
+            {
+                throw new ValidationException(result.Result.Errors); 
+            }
+            var cancelReasonEntity = await _unitOfWork.GetRepository<CancelReason>().Entities
+                .FirstOrDefaultAsync(p => p.Id == id);
+            if (cancelReasonEntity == null)
+            {
+                throw new BaseException.NotFoundException("not_found", "Cancel Reason not found");
+            }
+            _mapper.Map(cancelReason, cancelReasonEntity);
 
-            existingCancelReason.Description = updatedCancelReason.Description;
-            existingCancelReason.RefundRate = updatedCancelReason.RefundRate;
+            cancelReasonEntity.LastUpdatedTime = DateTime.UtcNow;
+            cancelReasonEntity.LastUpdatedBy = "user";
 
-            _unitOfWork.GetRepository<CancelReason>().Update(existingCancelReason);
+            await _unitOfWork.GetRepository<CancelReason>().UpdateAsync(cancelReasonEntity);
             await _unitOfWork.SaveAsync();
-            return existingCancelReason;
+
+            return true;
         }
 
-        // Delete a cancel reason by Id (string)
+        // Soft delete 
         public async Task<bool> Delete(string id)
         {
-            var cancelReason = await GetById(id);
-            if (cancelReason == null)
-                return false; 
-            // Kiểm tra trước khi xóa (nếu có các ràng buộc)
-            try
+            var cancelReasonRepo = _unitOfWork.GetRepository<CancelReason>();
+            var cancelReasonEntity = await cancelReasonRepo.Entities.FirstOrDefaultAsync(x => x.Id == id);
+            if (cancelReasonEntity == null || cancelReasonEntity.DeletedTime.HasValue || cancelReasonEntity.DeletedBy != null)
             {
-                _unitOfWork.GetRepository<CancelReason>().Delete(cancelReason.Id);
-                await _unitOfWork.SaveAsync();
-                return true;
+                throw new BaseException.NotFoundException("not_found", "Cancel Reason not found");
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error deleting CancelReason: {ex.Message}");
-                return false;
-            }
-        }
-        // Soft delete 
-        public async Task<bool> SoftDelete(string id)
-        {
-            var cancelReason = await GetById(id);
-            if (cancelReason == null)
-                return false;
+            cancelReasonEntity.DeletedTime = DateTime.UtcNow;
+            cancelReasonEntity.DeletedBy = "user";
 
-            // Set DeletedTime to current time and update the DeletedBy field
-            cancelReason.DeletedTime = DateTimeOffset.UtcNow;
-            cancelReason.DeletedBy = "currentUser";
-
-            _unitOfWork.GetRepository<CancelReason>().Update(cancelReason);
+            await cancelReasonRepo.UpdateAsync(cancelReasonEntity);
             await _unitOfWork.SaveAsync();
             return true;
         }

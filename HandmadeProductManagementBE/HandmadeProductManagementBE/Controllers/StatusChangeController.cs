@@ -1,9 +1,8 @@
 ﻿using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
-using HandmadeProductManagement.Contract.Repositories.Entity;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using HandmadeProductManagement.Core.Constants;
+using HandmadeProductManagement.ModelViews.StatusChangeModelViews;
 
 namespace HandmadeProductManagementAPI.Controllers
 {
@@ -18,56 +17,78 @@ namespace HandmadeProductManagementAPI.Controllers
             _statusChangeService = statusChangeService;
         }
 
-        // GET: api/StatusChange
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<StatusChange>>> GetStatusChanges()
+        // GET: api/statuschange/page?page=1&pageSize=10
+        [HttpGet("page")]
+        public async Task<IActionResult> GetByPage([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
-            IList<StatusChange> statusChanges = await _statusChangeService.GetAll();
-            return Ok(BaseResponse<IList<StatusChange>>.OkResponse(statusChanges));
+            var response = new BaseResponse<IList<StatusChangeResponseModel>>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Get Status Change sucessfully!",
+                Data = await _statusChangeService.GetByPage(page, pageSize)
+            };
+            return Ok(response);
         }
 
         // GET: api/StatusChange/Order/{orderId}
         [HttpGet("Order/{orderId}")]
-        public async Task<ActionResult<IEnumerable<StatusChange>>> GetStatusChangesByOrderId(string orderId)
+        public async Task<IActionResult> GetStatusChangesByOrderId(string orderId)
         {
-            IList<StatusChange> statusChanges = await _statusChangeService.GetByOrderId(orderId);
-            return Ok(BaseResponse<IList<StatusChange>>.OkResponse(statusChanges));
-        }
-
-        // GET: api/StatusChange/{id}
-        [HttpGet("{id}")]
-        public async Task<ActionResult<StatusChange>> GetStatusChange(string id)
-        {
-            StatusChange statusChange = await _statusChangeService.GetById(id);
-            return Ok(BaseResponse<StatusChange>.OkResponse(statusChange));
-        }
-
-        // POST: api/StatusChange
-        [HttpPost]
-        public async Task<ActionResult<StatusChange>> CreateStatusChange(StatusChange statusChange)
-        {
-            StatusChange createdStatusChange = await _statusChangeService.Create(statusChange);
-            return CreatedAtAction(nameof(GetStatusChange), new { id = createdStatusChange.Id }, createdStatusChange);
-        }
-
-        // PUT: api/StatusChange/{id}
-        [HttpPut("{id}")]
-        public async Task<ActionResult<StatusChange>> UpdateStatusChange(string id, StatusChange updatedStatusChange)
-        {
-            StatusChange statusChange = await _statusChangeService.Update(id, updatedStatusChange);
-            return Ok(BaseResponse<StatusChange>.OkResponse(statusChange));
-        }
-
-        // DELETE: api/StatusChange/{id}
-        [HttpDelete("{id}")]
-        public async Task<ActionResult> DeleteStatusChange(string id)
-        {
-            bool success = await _statusChangeService.Delete(id);
-            if (!success)
+            var response = new BaseResponse<IList<StatusChangeResponseModel>>
             {
-                return NotFound();
-            }
-            return NoContent();
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Get Status Change sucessfully!",
+                Data = await _statusChangeService.GetByOrderId(orderId)
+            };
+            return Ok(response);
+        }
+
+        // POST: api/statuschange
+        [HttpPost]
+        public async Task<IActionResult> CreateStatusChange([FromBody] StatusChangeForCreationDto statusChange)
+        {
+            var result = await _statusChangeService.Create(statusChange);
+            var response = new BaseResponse<bool>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Created Status Change successfully!",
+                Data = result
+            };
+            return Ok(response);
+        }
+
+        // PUT: api/statuschange/{id}
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateStatusChange(string id, [FromBody] StatusChangeForUpdateDto updatedStatusChange)
+        {
+            var result = await _statusChangeService.Update(id, updatedStatusChange);
+            var response = new BaseResponse<bool>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Updated Status Change successfully!",
+                Data = result
+            };
+            return Ok(response);
+        }
+
+        // DELETE: api/statuschange/{id}
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteStatusChange(string id)
+        {
+            await _statusChangeService.Delete(id);
+
+            var response = new BaseResponse<string>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = $"Status Change with ID {id} has been successfully deleted.",
+                Data = null
+            };
+            return Ok(response);
         }
     }
 }

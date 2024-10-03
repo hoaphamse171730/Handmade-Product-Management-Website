@@ -1,5 +1,6 @@
 ﻿using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.OrderModelViews;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,57 +20,97 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllOrders()
         {
-            try
+            var orders = await _orderService.GetAllOrdersAsync();
+            var response = new BaseResponse<IList<OrderResponseModel>>
             {
-                var orders = await _orderService.GetAllOrdersAsync();
-                return Ok(BaseResponse<IList<OrderResponseModel>>.OkResponse(orders));
-            }
-            catch (BaseException.ErrorException ex)
-            {
-                return StatusCode(ex.StatusCode, new { ex.ErrorDetail.ErrorCode, ex.ErrorDetail.ErrorMessage });
-            }
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Orders retrieved successfully",
+                Data = orders
+            };
+            return Ok(response);
         }
 
         [HttpGet("{orderId}")]
         public async Task<IActionResult> GetOrderById(string orderId)
         {
-            try
+            var order = await _orderService.GetOrderByIdAsync(orderId);
+            var response = new BaseResponse<OrderResponseModel>
             {
-                var order = await _orderService.GetOrderByIdAsync(orderId);
-                return Ok(BaseResponse<OrderResponseModel>.OkResponse(order));
-            }
-            catch (BaseException.ErrorException ex)
-            {
-                return StatusCode(ex.StatusCode, new { ex.ErrorDetail.ErrorCode, ex.ErrorDetail.ErrorMessage });
-            }
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Order retrieved successfully",
+                Data = order
+            };
+            return Ok(response);
         }
 
         [HttpGet("user/{userId}")]
         public async Task<IActionResult> GetOrderByUserId(Guid userId)
         {
-            try
+            var orders = await _orderService.GetOrderByUserIdAsync(userId);
+            var response = new BaseResponse<IList<OrderResponseModel>>
             {
-                var orders = await _orderService.GetOrderByUserIdAsync(userId);
-                return Ok(BaseResponse<IList<OrderResponseModel>>.OkResponse(orders));
-            }
-            catch (BaseException.ErrorException ex)
-            {
-                return StatusCode(ex.StatusCode, new { ex.ErrorDetail.ErrorCode, ex.ErrorDetail.ErrorMessage });
-            }
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Orders retrieved successfully",
+                Data = orders
+            };
+            return Ok(response);
         }
 
         [HttpPatch("{orderId}/status")]
-        public async Task<IActionResult> UpdateOrderStatus(string orderId, [FromBody] string status)
+        public async Task<IActionResult> UpdateOrderStatus(string orderId, [FromBody] CreateOrderDto updateOrderStatusDto)
         {
-            try
+            var updatedOrder = await _orderService.UpdateOrderStatusAsync(orderId, updateOrderStatusDto.Status, updateOrderStatusDto.CancelReasonId);
+            var response = new BaseResponse<bool>
             {
-                var updatedOrder = await _orderService.UpdateOrderStatusAsync(orderId, status);
-                return Ok(BaseResponse<OrderResponseModel>.OkResponse(updatedOrder));
-            }
-            catch (BaseException.ErrorException ex)
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Order status updated successfully",
+                Data = updatedOrder
+            };
+            return Ok(response);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateOrder([FromBody] CreateOrderDto createOrder)
+        {
+            var order = await _orderService.CreateOrderAsync(createOrder);
+            var response = new BaseResponse<bool>
             {
-                return StatusCode(ex.StatusCode, new { ex.ErrorDetail.ErrorCode, ex.ErrorDetail.ErrorMessage });
-            }
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Order created successfully",
+                Data = order
+            };
+            return Ok(response);
+        }
+
+        [HttpPut("{orderId}")]
+        public async Task<IActionResult> UpdateOrder(string orderId, [FromBody] CreateOrderDto order)
+        {
+            var updatedOrder = await _orderService.UpdateOrderAsync(orderId, order, order.CancelReasonId);
+            var response = new BaseResponse<bool>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Order updated successfully",
+                Data = updatedOrder
+            };
+            return Ok(response);
+        }
+
+        private IActionResult HandleErrorResponse(BaseException.ErrorException ex)
+        {
+            var response = new BaseResponse<object>
+            {
+                Code = ex.ErrorDetail.ErrorCode,
+                StatusCode = (StatusCodeHelper)ex.StatusCode,
+                Message = ex.ErrorDetail.ErrorMessage?.ToString(),
+                Data = null
+            };
+            return StatusCode(ex.StatusCode, response);
         }
     }
 }

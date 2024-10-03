@@ -1,7 +1,8 @@
 ﻿using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
-using HandmadeProductManagement.Contract.Repositories.Entity;
 using Microsoft.AspNetCore.Mvc;
+using HandmadeProductManagement.Core.Constants;
+using HandmadeProductManagement.ModelViews.CancelReasonModelViews;
 
 namespace HandmadeProductManagementAPI.Controllers
 {
@@ -16,62 +17,64 @@ namespace HandmadeProductManagementAPI.Controllers
             _cancelReasonService = cancelReasonService;
         }
 
-        // GET: api/CancelReason
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<CancelReason>>> GetCancelReasons()
+        // GET: api/cancelreason/page?page=1&pageSize=10
+        [HttpGet("page")]
+        public async Task<IActionResult> GetByPage([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
-            IList<CancelReason> reasons = await _cancelReasonService.GetAll();
-            return Ok(BaseResponse<IList<CancelReason>>.OkResponse(reasons));
-        }
-
-        // GET: api/CancelReason/{id} (string id)
-        [HttpGet("{id}")]
-        public async Task<ActionResult<CancelReason>> GetCancelReason(string id)
-        {
-            CancelReason reason = await _cancelReasonService.GetById(id);
-            return Ok(BaseResponse<CancelReason>.OkResponse(reason));
+            var response = new BaseResponse<IList<CancelReasonResponseModel>>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Get Cancel Reason sucessfully!",
+                Data = await _cancelReasonService.GetByPage(page, pageSize)
+            };
+            return Ok(response);
         }
 
         // POST: api/CancelReason
         [HttpPost]
-        public async Task<ActionResult<CancelReason>> CreateCancelReason(CancelReason reason)
+        public async Task<IActionResult> CreateCancelReason([FromBody] CancelReasonForCreationDto reason)
         {
-            CancelReason createdReason = await _cancelReasonService.Create(reason);
-            return CreatedAtAction(nameof(GetCancelReason), new { id = createdReason.Id }, createdReason);
+            var result = await _cancelReasonService.Create(reason);
+            var response = new BaseResponse<bool>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Created Cancel Reason successfully!",
+                Data = result
+            };
+            return Ok(response);
         }
 
         // PUT: api/CancelReason/{id} (string id)
         [HttpPut("{id}")]
-        public async Task<ActionResult<CancelReason>> UpdateCancelReason(string id, CancelReason updatedReason)
+        public async Task<IActionResult> UpdateCancelReason(string id, CancelReasonForUpdateDto updatedReason)
         {
-            CancelReason reason = await _cancelReasonService.Update(id, updatedReason);
-            return Ok(BaseResponse<CancelReason>.OkResponse(reason));
-        }
-
-        // DELETE: api/CancelReason/{id} (string id)
-        [HttpDelete("{id}")]
-        public async Task<ActionResult> DeleteCancelReason(string id)
-        {
-            bool success = await _cancelReasonService.Delete(id);
-            if (!success)
+            var result = await _cancelReasonService.Update(id, updatedReason);
+            var response = new BaseResponse<bool>
             {
-                return NotFound();
-            }
-            return NoContent();
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Updated Cancel Reason successfully!",
+                Data = result
+            };
+            return Ok(response);
         }
 
-        // PUT: api/CancelReason/{id}/soft-delete
-        [HttpPut("{id}/soft-delete")]
+        // DELETE: api/CancelReason/{id}
+        [HttpDelete("{id}")]
         public async Task<ActionResult> SoftDeleteCancelReason(string id)
         {
-            bool success = await _cancelReasonService.SoftDelete(id);
-            if (!success)
+            await _cancelReasonService.Delete(id);
+
+            var response = new BaseResponse<string>
             {
-                return NotFound();
-            }
-            return NoContent();
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = $"Cancel Reason with ID {id} has been successfully deleted.",
+                Data = null
+            };
+            return Ok(response);
         }
-
-
     }
 }

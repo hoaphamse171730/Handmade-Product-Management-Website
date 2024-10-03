@@ -2,7 +2,9 @@
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.ReplyModelViews;
+using HandmadeProductManagement.ModelViews.ReviewModelViews;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 
 namespace HandmadeProductManagementAPI.Controllers
 {
@@ -18,32 +20,36 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<BaseResponse<IList<ReplyModel>>>> GetAll(int pageNumber = 1, int pageSize = 10)
+        public async Task<IActionResult> GetAll(int pageNumber = 1, int pageSize = 10)
         {
             var replies = await _replyService.GetAllAsync(pageNumber, pageSize);
-            return Ok(BaseResponse<IList<ReplyModel>>.OkResponse(replies));
+            var response = new BaseResponse<IList<ReplyModel>>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Replies retrieved successfully.",
+                Data = replies
+            };
+            return Ok(response);
         }
 
         [HttpGet("{replyId}")]
-        public async Task<ActionResult<BaseResponse<ReplyModel>>> GetById(string replyId)
+        public async Task<IActionResult> GetById([Required] string replyId)
         {
             var reply = await _replyService.GetByIdAsync(replyId);
-            if (reply == null)
+            var response = new BaseResponse<ReplyModel>
             {
-                return NotFound(new BaseResponse<ReplyModel>(StatusCodeHelper.BadRequest, "Reply not found.", string.Empty));
-            }
-
-            return Ok(new BaseResponse<ReplyModel>(StatusCodeHelper.OK, "Success", reply));
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Reply retrieved successfully.",
+                Data = reply
+            };
+            return Ok(response);
         }
 
         [HttpPost]
-        public async Task<ActionResult<BaseResponse<ReplyModel>>> Create(string content, string reviewId, string shopId)
+        public async Task<IActionResult> Create([Required] string content, [Required] string reviewId, [Required] string shopId)
         {
-            if (string.IsNullOrWhiteSpace(content))
-            {
-                return BadRequest(new BaseResponse<ReplyModel>(StatusCodeHelper.BadRequest, "Invalid reply data.", string.Empty));
-            }
-
             var replyModel = new ReplyModel
             {
                 Content = content,
@@ -52,31 +58,59 @@ namespace HandmadeProductManagementAPI.Controllers
             };
 
             var createdReply = await _replyService.CreateAsync(replyModel);
-            return Ok(new BaseResponse<ReplyModel>(StatusCodeHelper.OK, "Reply created successfully.", createdReply));
+            var response = new BaseResponse<ReplyModel>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Reply created successfully.",
+                Data = createdReply
+            };
+            return Ok(response);
         }
 
         [HttpPut("{replyId}")]
-        public async Task<ActionResult<BaseResponse<ReplyModel>>> Update(string replyId, string? content)
+        public async Task<IActionResult> Update([Required] string replyId, [Required] string content, [Required] string shopId)
         {
-            var existingReply = await _replyService.GetByIdAsync(replyId);
-            if (existingReply == null) return NotFound(new BaseResponse<ReplyModel>(StatusCodeHelper.BadRequest, "Reply not found.", string.Empty));
+            var replyModel = new ReplyModel
+            {
+                Content = content,
+                ShopId = shopId
+            };
 
-            existingReply.Content = content;
-
-            var updatedReply = await _replyService.UpdateAsync(replyId, existingReply);
-            return Ok(new BaseResponse<ReplyModel>(StatusCodeHelper.OK, "Reply updated successfully.", updatedReply));
+            var updatedReply = await _replyService.UpdateAsync(replyId, replyModel);
+            var response = new BaseResponse<ReplyModel>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Reply updated successfully."
+            };
+            return Ok(response);
         }
 
         [HttpDelete("{replyId}")]
-        public async Task<ActionResult<BaseResponse<bool>>> Delete(string replyId)
+        public async Task<IActionResult> Delete([Required] string replyId)
         {
-            var isDeleted = await _replyService.DeleteAsync(replyId);
-            if (!isDeleted)
+            var result = await _replyService.DeleteAsync(replyId);
+            var response = new BaseResponse<bool>
             {
-                return NotFound(new BaseResponse<bool>(StatusCodeHelper.BadRequest, "Reply not found.", string.Empty));
-            }
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Reply deleted successfully."
+            };
+            return Ok(response);
+        }
 
-            return Ok(new BaseResponse<bool>(StatusCodeHelper.OK, "Reply deleted successfully.", true));
+        [HttpDelete("{replyId}/soft-delete")]
+        public async Task<IActionResult> SoftDelete(string replyId)
+        {
+            var result = await _replyService.SoftDeleteAsync(replyId);
+            var response = new BaseResponse<bool>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Reply soft-deleted successfully."
+            };
+            return Ok(response);
         }
     }
 }

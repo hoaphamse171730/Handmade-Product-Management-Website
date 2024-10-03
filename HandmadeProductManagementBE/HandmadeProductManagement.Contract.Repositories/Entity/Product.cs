@@ -14,7 +14,7 @@ namespace HandmadeProductManagement.Contract.Repositories.Entity
         public string? Description { get; set; }
         public string CategoryId { get; set; } = string.Empty;
         public string ShopId { get; set; } = string.Empty ;
-        public float Rating { get; set; } 
+        public decimal Rating { get; set; } 
         public string Status { get; set; } = string.Empty;  
         public int SoldCount { get; set; }
 
@@ -24,7 +24,6 @@ namespace HandmadeProductManagement.Contract.Repositories.Entity
         [JsonIgnore]
         public Category Category { get; set; }
         public Shop Shop { get; set; }
-        public virtual ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
         public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
     }
 }

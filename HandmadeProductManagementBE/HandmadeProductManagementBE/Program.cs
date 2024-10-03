@@ -1,12 +1,12 @@
-using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagementAPI.Extensions;
-using HandmadeProductManagement.Services.Service;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc.Authorization;
+using HandmadeProductManagementAPI.Middlewares;
+using HandmadeProductManagementBE.API;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// config appsettings by env
+builder.Host.UseSerilog((context, config) => config.ReadFrom.Configuration(context.Configuration));
+//
 builder.Configuration
     .SetBasePath(Directory.GetCurrentDirectory())
     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
@@ -23,11 +23,16 @@ builder.Services.AddControllers(
 //}
 );
 
-//All extra services must be contained in ApplicationServiceExtentions & IdentityServiceExtensions
+//All extra services must be contained in ApplicationServiceExtensions & IdentityServiceExtensions
 builder.Services.AddApplicationServices(builder.Configuration);
 builder.Services.AddIdentityServices(builder.Configuration);
-builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddConfig(builder.Configuration);
+builder.Services.RegisterMapsterConfiguration();
+builder.Services.ConfigureFluentValidation();
+
+
 var app = builder.Build();
+
 
 // Configure the HTTP request pipeline.
 app.UseSwagger();
@@ -39,5 +44,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.UseMiddleware<RequestLoggingMiddleware>();
+//configure the app to use Custom Exception Handler globally
+app.UseExceptionHandler(options => { });
 
 app.Run();

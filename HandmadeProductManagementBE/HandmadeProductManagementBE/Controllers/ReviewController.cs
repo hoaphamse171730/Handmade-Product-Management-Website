@@ -3,6 +3,7 @@ using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.ReviewModelViews;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 
 namespace HandmadeProductManagementAPI.Controllers
 {
@@ -18,32 +19,36 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<BaseResponse<IList<ReviewModel>>>> GetAll(int pageNumber = 1, int pageSize = 10)
+        public async Task<IActionResult> GetAll(int pageNumber = 1, int pageSize = 10)
         {
             var reviews = await _reviewService.GetAllAsync(pageNumber, pageSize);
-            return Ok(BaseResponse<IList<ReviewModel>>.OkResponse(reviews));
+            var response = new BaseResponse<IList<ReviewModel>>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Reviews retrieved successfully.",
+                Data = reviews
+            };
+            return Ok(response);
         }
 
         [HttpGet("{reviewId}")]
-        public async Task<ActionResult<BaseResponse<ReviewModel>>> GetById(string reviewId)
+        public async Task<IActionResult> GetById([Required] string reviewId)
         {
             var review = await _reviewService.GetByIdAsync(reviewId);
-            if (review == null)
+            var response = new BaseResponse<ReviewModel>
             {
-                return NotFound(new BaseResponse<ReviewModel>(StatusCodeHelper.BadRequest, "Review not found.", string.Empty));
-            }
-
-            return Ok(new BaseResponse<ReviewModel>(StatusCodeHelper.OK, "Success", review));
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Review retrieved successfully.",
+                Data = review
+            };
+            return Ok(response);
         }
 
         [HttpPost]
-        public async Task<ActionResult<BaseResponse<ReviewModel>>> Create(string content, int rating, string productId, Guid userId)
+        public async Task<IActionResult> Create(string? content, [Required] int rating, [Required] string productId, [Required] Guid userId, [Required] string orderId)
         {
-            if (string.IsNullOrWhiteSpace(content) || rating < 1 || rating > 5)
-            {
-                return BadRequest(new BaseResponse<ReviewModel>(StatusCodeHelper.BadRequest, "Invalid review data.", string.Empty));
-            }
-
             var reviewModel = new ReviewModel
             {
                 Content = content,
@@ -52,33 +57,59 @@ namespace HandmadeProductManagementAPI.Controllers
                 UserId = userId
             };
 
-            var createdReview = await _reviewService.CreateAsync(reviewModel);
-            return Ok(new BaseResponse<ReviewModel>(StatusCodeHelper.OK, "Review created successfully.", createdReview));
+            var createdReview = await _reviewService.CreateAsync(reviewModel,orderId);
+
+            var response = new BaseResponse<ReviewModel>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Review created successfully.",
+                Data = createdReview
+            };
+            return Ok(response);
         }
 
         [HttpPut("{reviewId}")]
-        public async Task<ActionResult<BaseResponse<ReviewModel>>> Update(string reviewId, string? content, int? rating)
+        public async Task<IActionResult> Update([Required] string reviewId, [Required] Guid userId, string? content, int? rating)
         {
             var existingReview = await _reviewService.GetByIdAsync(reviewId);
-            if (existingReview == null) return NotFound(new BaseResponse<ReviewModel>(StatusCodeHelper.BadRequest, "Review not found.", string.Empty));
-
             existingReview.Content = content;
             existingReview.Rating = rating;
 
-            var updatedReview = await _reviewService.UpdateAsync(reviewId, existingReview);
-            return Ok(new BaseResponse<ReviewModel>(StatusCodeHelper.OK, "Review updated successfully.", updatedReview));
+            var updatedReview = await _reviewService.UpdateAsync(reviewId, userId, existingReview);
+            var response = new BaseResponse<ReviewModel>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Review updated successfully."
+            };
+            return Ok(response);
         }
 
         [HttpDelete("{reviewId}")]
-        public async Task<ActionResult<BaseResponse<bool>>> Delete(string reviewId)
+        public async Task<IActionResult> Delete([Required] string reviewId, [Required] Guid userId)
         {
-            var isDeleted = await _reviewService.DeleteAsync(reviewId);
-            if (!isDeleted)
+            var result = await _reviewService.DeleteAsync(reviewId, userId);
+            var response = new BaseResponse<bool>
             {
-                return NotFound(new BaseResponse<bool>(StatusCodeHelper.BadRequest, "Review not found.", string.Empty));
-            }
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Review deleted successfully."
+            };
+            return Ok(response);
+        }
 
-            return Ok(new BaseResponse<bool>(StatusCodeHelper.OK, "Review deleted successfully.", true));
+        [HttpDelete("{reviewId}/softdelete")]
+        public async Task<IActionResult> SoftDelete([Required] string reviewId, [Required] Guid userId)
+        {
+            var result = await _reviewService.SoftDeleteAsync(reviewId, userId);
+            var response = new BaseResponse<bool>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Review soft deleted successfully."
+            };
+            return Ok(response);
         }
     }
 }

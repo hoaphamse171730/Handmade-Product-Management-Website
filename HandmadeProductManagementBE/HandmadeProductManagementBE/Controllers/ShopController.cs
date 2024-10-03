@@ -1,6 +1,7 @@
 ﻿using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.ShopModelViews;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -23,71 +24,71 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateShop([FromBody] CreateShopDto shop)
         {
-            try
+            var createdShop = await _shopService.CreateShopAsync(shop);
+            var response = new BaseResponse<bool>
             {
-                var createdShop = await _shopService.CreateShopAsync(shop);
-                return Ok(BaseResponse<ShopResponseModel>.OkResponse(createdShop));
-            }
-            catch (BaseException.ErrorException ex)
-            {
-                return StatusCode(ex.StatusCode, new { ex.ErrorDetail.ErrorCode, ex.ErrorDetail.ErrorMessage });
-            }
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Shop created successfully",
+                Data = createdShop
+            };
+            return Ok(response);
         }
 
         [HttpDelete("{userId}/{id}")]
         public async Task<IActionResult> DeleteShop(Guid userId, string id)
         {
-            try
+            var result = await _shopService.DeleteShopAsync(userId, id);
+            var response = new BaseResponse<bool>
             {
-                var result = await _shopService.DeleteShopAsync(userId, id);
-                return Ok(BaseResponse<bool>.OkResponse(result));
-            }
-            catch (BaseException.ErrorException ex)
-            {
-                return StatusCode(ex.StatusCode, new { ex.ErrorDetail.ErrorCode, ex.ErrorDetail.ErrorMessage });
-            }
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Shop deleted successfully",
+                Data = result
+            };
+            return Ok(response);
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAllShops()
         {
-            try
+            var shops = await _shopService.GetAllShopsAsync();
+            var response = new BaseResponse<IList<ShopResponseModel>>
             {
-                var shops = await _shopService.GetAllShopsAsync();
-                return Ok(BaseResponse<IList<ShopResponseModel>>.OkResponse(shops));
-            }
-            catch (BaseException.ErrorException ex)
-            {
-                return StatusCode(ex.StatusCode, new { ex.ErrorDetail.ErrorCode, ex.ErrorDetail.ErrorMessage });
-            }
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Shops retrieved successfully",
+                Data = shops
+            };
+            return Ok(response);
         }
 
         [HttpGet("{userId}")]
         public async Task<IActionResult> GetShopByUserId(Guid userId)
         {
-            try
+            var shop = await _shopService.GetShopByUserIdAsync(userId);
+            var response = new BaseResponse<ShopResponseModel>
             {
-                var shop = await _shopService.GetShopByUserIdAsync(userId);
-                return Ok(BaseResponse<ShopResponseModel>.OkResponse(shop));
-            }
-            catch (BaseException.ErrorException ex)
-            {
-                return StatusCode(ex.StatusCode, new { ex.ErrorDetail.ErrorCode, ex.ErrorDetail.ErrorMessage });
-            }
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Shop retrieved successfully",
+                Data = shop
+            };
+            return Ok(response);
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateShop(string id, [FromBody] CreateShopDto shop)
         {
-            try
+            var updatedShop = await _shopService.UpdateShopAsync(id, shop);
+            var response = new BaseResponse<bool>
             {
-                var updatedShop = await _shopService.UpdateShopAsync(id, shop);
-                return Ok(BaseResponse<ShopResponseModel>.OkResponse(updatedShop));
-            }
-            catch (BaseException.ErrorException ex)
-            {
-                return StatusCode(ex.StatusCode, new { ex.ErrorDetail.ErrorCode, ex.ErrorDetail.ErrorMessage });
-            }
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Shop updated successfully",
+                Data = updatedShop
+            };
+            return Ok(response);
         }
     }
 }

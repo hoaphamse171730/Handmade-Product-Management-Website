@@ -1,33 +1,54 @@
 ﻿using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
-using HandmadeProductManagement.Core.Utils;
+using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.UserModelViews;
 using HandmadeProductManagement.Repositories.Entity;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
-
+using FluentValidation;
+using HandmadeProductManagement.Contract.Repositories.Entity;
+using HandmadeProductManagement.ModelViews.ProductModelViews;
 namespace HandmadeProductManagement.Services.Service
 {
     public class UserService : IUserService
     {
         private readonly IUnitOfWork _unitOfWork;
-        public UserService(IUnitOfWork unitOfWork)
+        private readonly IValidator<UpdateUserDTO> _updateValidator;
+        public UserService(IUnitOfWork unitOfWork, IValidator<UpdateUserDTO> updateValidator)
         {
             _unitOfWork = unitOfWork;
+            _updateValidator = updateValidator;
         }
 
         public async Task<IList<UserResponseModel>> GetAll()
         {
-            IQueryable<ApplicationUser> query = _unitOfWork.GetRepository<ApplicationUser>().Entities;
 
-            // Map ApplicationUser to UserResponseModel
-            var result = await query.Select(user => new UserResponseModel
+            var users = await _unitOfWork.GetRepository<ApplicationUser>()
+                .Entities
+                .Select(user => new UserResponseModel
+                {
+                    Id = user.Id,
+                    UserName = user.UserName,
+                    Email = user.Email,
+                    PhoneNumber = user.PhoneNumber,
+                    CreatedBy = user.CreatedBy,
+                    LastUpdatedBy = user.LastUpdatedBy,
+                    DeletedBy = user.DeletedBy,
+                    CreatedTime = user.CreatedTime,
+                    LastUpdatedTime = user.LastUpdatedTime,
+                    DeletedTime = user.DeletedTime,
+                    Status = user.Status,
+                    CartId = user.CartId,
+                })
+                .ToListAsync();
+
+            if (users == null || !users.Any())
             {
-                Id = user.Id.ToString()   // Convert Guid to string to match UserResponseModel
-            }).ToListAsync();
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Please check UserID");
+            }
 
-            return result as IList<UserResponseModel>;  // Cast List to IList
+            return users;
+
         }
 
         public async Task<UserResponseByIdModel> GetById(string Id)
@@ -35,9 +56,8 @@ namespace HandmadeProductManagement.Services.Service
             // Ensure the id is a valid Guid
             if (!Guid.TryParse(Id, out Guid userId))
             {
-                return null; 
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Invalid userID");
             }
-
             var user = await _unitOfWork.GetRepository<ApplicationUser>()
                 .Entities
                 .Where(u => u.Id == userId)
@@ -56,32 +76,42 @@ namespace HandmadeProductManagement.Services.Service
                     LockoutEnabled = user.LockoutEnabled,
                     AccessFailedCount = user.AccessFailedCount,
                     CartId = user.CartId,
-                    
+
                 })
-                .FirstOrDefaultAsync(); // Get the first or default user
-
-            return user;
-        }
-
-        public async Task<UpdateUserResponseModel?> UpdateUser(string id, UpdateUserDTO updateUserDTO)
-        {
-
-            // Ensure the id is a valid Guid
-            if (!Guid.TryParse(id, out Guid userId))
-            {
-                return null; 
-            }
-
-            // Get the user by ID using LINQ
-            var user = await _unitOfWork.GetRepository<ApplicationUser>()
-                .Entities
-                .Where(u => u.Id == userId)
-                .FirstOrDefaultAsync(); 
+                .FirstOrDefaultAsync();
 
             if (user == null)
             {
-                return null; 
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "user not found");
             }
+            return user;
+
+        }
+        public async Task<UpdateUserResponseModel?> UpdateUser(string id, UpdateUserDTO updateUserDTO)
+        {
+
+
+            if (!Guid.TryParse(id, out Guid userId))
+            {
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Invalid userID");
+            }
+
+            var user = await _unitOfWork.GetRepository<ApplicationUser>()
+                .Entities
+                .Where(u => u.Id == userId)
+                .FirstOrDefaultAsync();
+
+            if (user == null)
+            {
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "user not found");
+            }
+
+            var updateValidation = _updateValidator.Validate(updateUserDTO);
+            if (!updateValidation.IsValid)
+            {
+                throw new ValidationException(updateValidation.Errors);
+            }
+
 
             user.UserName = updateUserDTO.UserName;
             user.Email = updateUserDTO.Email;
@@ -110,7 +140,7 @@ namespace HandmadeProductManagement.Services.Service
         {
             if (!Guid.TryParse(Id, out Guid userId))
             {
-                return false;
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Invalid userID");
             }
 
             var user = await _unitOfWork.GetRepository<ApplicationUser>()
@@ -119,16 +149,16 @@ namespace HandmadeProductManagement.Services.Service
                .FirstOrDefaultAsync();
 
 
-            if (user == null)
+            if (user == null || user.Status == "inactive")
             {
-                return false;
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "User not found");
             }
 
-            user.status = "inactive";
+            user.Status = "inactive";
             user.DeletedBy = "admin";
             user.DeletedTime = DateTime.UtcNow;
 
-            // Update the user in the repository
+
             _unitOfWork.GetRepository<ApplicationUser>().Update(user);
             await _unitOfWork.SaveAsync();
 
@@ -140,7 +170,7 @@ namespace HandmadeProductManagement.Services.Service
         {
             if (!Guid.TryParse(Id, out Guid userId))
             {
-                return false;
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Invalid userID");
             }
 
             var user = await _unitOfWork.GetRepository<ApplicationUser>()
@@ -148,13 +178,13 @@ namespace HandmadeProductManagement.Services.Service
                .Where(u => u.Id == userId)
                .FirstOrDefaultAsync();
 
-            if (user == null || user.status == "active")
+            if (user == null || user.Status == "active")
             {
-                return false;
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "User not found or already active");
             }
 
 
-            user.status = "active";
+            user.Status = "active";
             user.DeletedBy = null;
             user.DeletedTime = null;
 
@@ -163,6 +193,33 @@ namespace HandmadeProductManagement.Services.Service
 
             return true;
         }
+
+
+        public async Task<ProductDto> UpdateProductPromotionAsync(string productId, string promotionId)
+        {
+            
+            var product = await _unitOfWork.GetRepository<Product>().Entities
+                .Include(p => p.ProductItems)
+                .FirstOrDefaultAsync(p => p.Id == productId);
+            if (product == null)
+                throw new BaseException.NotFoundException("product_not_found", "Product not found");
+            var promotion = await _unitOfWork.GetRepository<Promotion>().Entities
+                .FirstOrDefaultAsync(p => p.Id == promotionId && p.StartDate <= DateTime.UtcNow && p.EndDate >= DateTime.UtcNow);
+            if (promotion == null)
+                throw new BaseException.BadRequestException("invalid_promotion", "Promotion is invalid or expired.");
+            product.Id = promotion.Id;
+            foreach (var productItem in product.ProductItems)
+            {
+                var originalPrice = productItem.Price;
+                productItem.DiscountedPrice = originalPrice * (1 - promotion.DiscountRate);
+            }
+            product.LastUpdatedTime = DateTime.UtcNow;
+            await _unitOfWork.GetRepository<Product>().UpdateAsync(product);
+            await _unitOfWork.SaveAsync();
+            var productToReturn = _mapper.Map<ProductDto>(product);
+            return productToReturn;
+        }
+
 
 
     }

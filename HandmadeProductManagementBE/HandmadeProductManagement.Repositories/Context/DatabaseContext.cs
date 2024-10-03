@@ -179,10 +179,6 @@ namespace HandmadeProductManagement.Repositories.Context
             modelBuilder.Entity<Promotion>()  
                 .HasKey(p => p.Id);
             modelBuilder.Entity<Promotion>()  
-                .Property(p => p.PromotionName)  
-                .IsRequired() 
-                .HasMaxLength(255);
-            modelBuilder.Entity<Promotion>()  
                 .Property(p => p.Description)  
                 .HasMaxLength(500);
             modelBuilder.Entity<Promotion>()  
@@ -194,17 +190,17 @@ namespace HandmadeProductManagement.Repositories.Context
             
             // OrderDetail  
             modelBuilder.Entity<OrderDetail>()  
-                .HasKey(od => od.OrderDetailId); 
+                .HasKey(od => od.Id); 
             modelBuilder.Entity<OrderDetail>()  
                 .HasOne(od => od.Order)  
                 .WithMany(o => o.OrderDetails)  
                 .HasForeignKey(od => od.OrderId) 
                 .OnDelete(DeleteBehavior.Cascade);
-            modelBuilder.Entity<OrderDetail>()  
-                .HasOne(od => od.Product)  
-                .WithMany(p => p.OrderDetails)  
-                .HasForeignKey(od => od.ProductId) 
-                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<OrderDetail>()
+                .HasOne(od => od.ProductItem)
+                .WithMany(p => p.OrderDetails)
+                .HasForeignKey(od => od.ProductItemId)
+                .OnDelete(DeleteBehavior.NoAction);
             //....
 
             // Configurations for StatusChange
@@ -233,14 +229,11 @@ namespace HandmadeProductManagement.Repositories.Context
             {
                 // Primary key
                 entity.HasKey(e => e.Id);
-
                 // Attribute
                 entity.Property(e => e.Description)
                       .HasMaxLength(150); 
-
                 entity.Property(e => e.RefundRate)
                       .IsRequired();
-
                 // One-to-many relationship with Order
                 entity.HasMany(cr => cr.Orders)
                     .WithOne(o => o.CancelReason) // Each Order has one CancelReason
@@ -250,24 +243,22 @@ namespace HandmadeProductManagement.Repositories.Context
             modelBuilder.Entity<Payment>(entity =>
             {
                 entity.HasKey(e => e.Id);
-
                 entity.Property(e => e.OrderId)
                       .IsRequired();
-
                 entity.Property(e => e.ExpirationDate)
                       .IsRequired();
-
                 entity.Property(e => e.TotalAmount)
-                      .IsRequired();
-
+                      .IsRequired()
+                      .HasColumnType("decimal(18, 2)");
+                entity.Property(e => e.Status)
+                      .IsRequired()
+                      .HasMaxLength(20);
                 entity.HasOne(e => e.Order)
-                      .WithMany()
-                      .HasForeignKey(e => e.OrderId);
-
-                // One-to-one relationship with PaymentDetail
-                entity.HasOne<PaymentDetail>()
+                      .WithOne(o => o.Payment)
+                      .HasForeignKey<Payment>(e => e.OrderId);
+                entity.HasMany(e => e.PaymentDetails)
                       .WithOne(pd => pd.Payment)
-                      .HasForeignKey<PaymentDetail>(pd => pd.PaymentId);
+                      .HasForeignKey(pd => pd.PaymentId);
             });
 
             // PaymentDetail Entity Configuration
@@ -283,7 +274,8 @@ namespace HandmadeProductManagement.Repositories.Context
                       .HasMaxLength(15);
 
                 entity.Property(e => e.Amount)
-                      .IsRequired();
+                      .IsRequired()
+                      .HasColumnType("decimal(18, 2)"); 
 
                 entity.Property(e => e.Method)
                       .IsRequired()

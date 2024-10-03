@@ -180,7 +180,7 @@
               "RelativeDocumentMoniker": "HandmadeProductManagement.Services\\Service\\OrderService.cs",
               "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\Service\\OrderService.cs",
               "RelativeToolTip": "HandmadeProductManagement.Services\\Service\\OrderService.cs",
-              "ViewState": "AgIAAO8AAAAAAAAAAAAAAPMAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAEABAAAAAAAAAAAAALABAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-10-03T01:26:51.296Z",
               "EditorCaption": ""
@@ -191,9 +191,9 @@
               "Title": "PromotionService.cs",
               "DocumentMoniker": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\Service\\PromotionService.cs",
               "RelativeDocumentMoniker": "HandmadeProductManagement.Services\\Service\\PromotionService.cs",
-              "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\Service\\PromotionService.cs*",
-              "RelativeToolTip": "HandmadeProductManagement.Services\\Service\\PromotionService.cs*",
-              "ViewState": "AgIAAB8AAAAAAAAAAAAQwA4AAAAkAAAAAAAAAA==",
+              "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\Service\\PromotionService.cs",
+              "RelativeToolTip": "HandmadeProductManagement.Services\\Service\\PromotionService.cs",
+              "ViewState": "AgIAADAAAAAAAAAAAAAYwA8AAAAkAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-10-03T01:21:46.2Z",
               "EditorCaption": ""
@@ -219,7 +219,7 @@
               "RelativeDocumentMoniker": "HandmadeProductManagementBE\\Controllers\\PromotionsController.cs",
               "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\Controllers\\PromotionsController.cs",
               "RelativeToolTip": "HandmadeProductManagementBE\\Controllers\\PromotionsController.cs",
-              "ViewState": "AgIAAE4AAAAAAAAAAAAuwFkAAAA2AAAAAAAAAA==",
+              "ViewState": "AgIAAC8AAAAAAAAAAAAuwDgAAAA2AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-10-03T01:22:21.647Z",
               "EditorCaption": ""
@@ -232,7 +232,7 @@
               "RelativeDocumentMoniker": "HandmadeProductManagementBE\\Controllers\\OrderDetailController.cs",
               "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\Controllers\\OrderDetailController.cs",
               "RelativeToolTip": "HandmadeProductManagementBE\\Controllers\\OrderDetailController.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAHkAAAAnAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAADwAAAAnAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-10-03T01:38:56.357Z",
               "EditorCaption": ""
@@ -258,7 +258,7 @@
               "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Services\\Interface\\IOrderService.cs",
               "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Services\\Interface\\IOrderService.cs",
               "RelativeToolTip": "HandmadeProductManagement.Contract.Services\\Interface\\IOrderService.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-10-03T01:26:48.863Z",
               "EditorCaption": ""
@@ -271,7 +271,7 @@
               "RelativeDocumentMoniker": "HandmadeProductManagementBE\\Controllers\\UsersController.cs",
               "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\Controllers\\UsersController.cs",
               "RelativeToolTip": "HandmadeProductManagementBE\\Controllers\\UsersController.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAgAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-10-03T07:09:02.528Z",
               "EditorCaption": ""
@@ -284,7 +284,7 @@
               "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Services\\Interface\\IProductService.cs",
               "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Services\\Interface\\IProductService.cs",
               "RelativeToolTip": "HandmadeProductManagement.Contract.Services\\Interface\\IProductService.cs",
-              "ViewState": "AgIAAAYAAAAAAAAAAAAawBAAAAABAAAAAAAAAA==",
+              "ViewState": "AgIAAAgAAAAAAAAAAAAawBkAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-10-03T01:26:10.112Z",
               "EditorCaption": ""
@@ -310,7 +310,7 @@
               "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Services\\Interface\\IOrderDetailService.cs",
               "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Services\\Interface\\IOrderDetailService.cs",
               "RelativeToolTip": "HandmadeProductManagement.Contract.Services\\Interface\\IOrderDetailService.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAABAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-10-03T01:54:31.11Z",
               "EditorCaption": ""
@@ -323,7 +323,7 @@
               "RelativeDocumentMoniker": "HandmadeProductManagement.Services\\Service\\ProductService.cs",
               "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\Service\\ProductService.cs",
               "RelativeToolTip": "HandmadeProductManagement.Services\\Service\\ProductService.cs",
-              "ViewState": "AgIAAK0AAAAAAAAAAAAQwK0AAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAFABAAAAAAAAAAAQwGgBAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-10-03T01:21:22.16Z",
               "EditorCaption": ""
@@ -336,7 +336,7 @@
               "RelativeDocumentMoniker": "HandmadeProductManagementBE\\Controllers\\ProductController.cs",
               "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\Controllers\\ProductController.cs",
               "RelativeToolTip": "HandmadeProductManagementBE\\Controllers\\ProductController.cs",
-              "ViewState": "AgIAAB0AAAAAAAAAAAAswCwAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAIAAAAAAAAAAAAAswLwAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-10-03T01:34:50.344Z",
               "EditorCaption": ""
@@ -349,7 +349,7 @@
               "RelativeDocumentMoniker": "HandmadeProductManagement.Services\\Service\\UserService.cs",
               "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\Service\\UserService.cs",
               "RelativeToolTip": "HandmadeProductManagement.Services\\Service\\UserService.cs",
-              "ViewState": "AgIAAJkAAAAAAAAAAAAuwKUAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAALcAAAAAAAAAAAAuwN0AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-10-03T02:25:30.638Z",
               "EditorCaption": ""
@@ -362,7 +362,7 @@
               "RelativeDocumentMoniker": "HandmadeProductManagement.Services\\Service\\StatusChangeService.cs",
               "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\Service\\StatusChangeService.cs",
               "RelativeToolTip": "HandmadeProductManagement.Services\\Service\\StatusChangeService.cs",
-              "ViewState": "AgIAADQAAAAAAAAAAAAowAAAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAG8AAAAAAAAAAAAowAIAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-10-03T01:21:33.667Z",
               "EditorCaption": ""
@@ -388,7 +388,7 @@
               "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Repositories\\Entity\\ProductItem.cs",
               "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\ProductItem.cs",
               "RelativeToolTip": "HandmadeProductManagement.Contract.Repositories\\Entity\\ProductItem.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAADwvw0AAAAPAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAADwvw4AAAAXAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-10-03T01:44:09.067Z",
               "EditorCaption": ""
@@ -401,7 +401,7 @@
               "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Repositories\\Entity\\Promotion.cs",
               "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\Promotion.cs",
               "RelativeToolTip": "HandmadeProductManagement.Contract.Repositories\\Entity\\Promotion.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAAVAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAXAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-10-03T03:06:50.248Z",
               "EditorCaption": ""
@@ -427,7 +427,7 @@
               "RelativeDocumentMoniker": "HandmadeProductManagement.Services\\Service\\CancelReasonService.cs",
               "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\Service\\CancelReasonService.cs",
               "RelativeToolTip": "HandmadeProductManagement.Services\\Service\\CancelReasonService.cs",
-              "ViewState": "AgIAAAoAAAAAAAAAAAAAwAAAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAA4AAAAAAAAAAAAAwAIAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-10-03T04:56:09.612Z",
               "EditorCaption": ""
@@ -440,7 +440,7 @@
               "RelativeDocumentMoniker": "HandmadeProductManagement.Services\\Service\\OrderDetailService.cs",
               "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\Service\\OrderDetailService.cs",
               "RelativeToolTip": "HandmadeProductManagement.Services\\Service\\OrderDetailService.cs",
-              "ViewState": "AgIAACwAAAAAAAAAAAAqwDUAAAAaAAAAAAAAAA==",
+              "ViewState": "AgIAACsAAAAAAAAAAAAqwDYAAAAqAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-10-03T01:53:48.646Z",
               "EditorCaption": ""
@@ -466,7 +466,7 @@
               "RelativeDocumentMoniker": "HandmadeProductManagement.Services\\Service\\ReplyService.cs",
               "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\Service\\ReplyService.cs",
               "RelativeToolTip": "HandmadeProductManagement.Services\\Service\\ReplyService.cs",
-              "ViewState": "AgIAAF0AAAAAAAAAAAAwwBUAAAAtAAAAAAAAAA==",
+              "ViewState": "AgIAAMUAAAAAAAAAAAAwwBsAAAAtAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-10-03T01:21:43.79Z",
               "EditorCaption": ""
@@ -479,7 +479,7 @@
               "RelativeDocumentMoniker": "HandmadeProductManagement.Services\\Service\\ReviewService.cs",
               "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\Service\\ReviewService.cs",
               "RelativeToolTip": "HandmadeProductManagement.Services\\Service\\ReviewService.cs",
-              "ViewState": "AgIAADcAAAAAAAAAAAAAADgAAAA1AAAAAAAAAA==",
+              "ViewState": "AgIAAGUAAAAAAAAAAAAAAJoAAAAeAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-10-03T02:33:57.773Z",
               "EditorCaption": ""
@@ -531,7 +531,7 @@
               "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Repositories\\Entity\\OrderDetail.cs",
               "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\OrderDetail.cs",
               "RelativeToolTip": "HandmadeProductManagement.Contract.Repositories\\Entity\\OrderDetail.cs",
-              "ViewState": "AgIAAAcAAAAAAAAAAAAIwBkAAAAQAAAAAAAAAA==",
+              "ViewState": "AgIAAAcAAAAAAAAAAAAIwBQAAAAGAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-10-03T01:17:17.374Z",
               "EditorCaption": ""
@@ -544,7 +544,7 @@
               "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Services\\Interface\\IUserService.cs",
               "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Services\\Interface\\IUserService.cs",
               "RelativeToolTip": "HandmadeProductManagement.Contract.Services\\Interface\\IUserService.cs",
-              "ViewState": "AgIAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-10-03T02:25:27.138Z",
               "EditorCaption": ""
@@ -570,7 +570,7 @@
               "RelativeDocumentMoniker": "HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj",
               "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj",
               "RelativeToolTip": "HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAACgAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAC0AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
               "WhenOpened": "2024-10-03T02:19:17.013Z",
               "EditorCaption": ""
@@ -596,7 +596,7 @@
               "RelativeDocumentMoniker": "HandmadeProductManagement.ModelView\\OrderDetailModelViews\\OrderDetailDto.cs",
               "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.ModelView\\OrderDetailModelViews\\OrderDetailDto.cs",
               "RelativeToolTip": "HandmadeProductManagement.ModelView\\OrderDetailModelViews\\OrderDetailDto.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAACAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAjAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-10-03T02:01:06.854Z",
               "EditorCaption": ""
@@ -648,7 +648,7 @@
               "RelativeDocumentMoniker": "HandmadeProductManagement.Repositories\\Context\\DatabaseContext.cs",
               "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Repositories\\Context\\DatabaseContext.cs",
               "RelativeToolTip": "HandmadeProductManagement.Repositories\\Context\\DatabaseContext.cs",
-              "ViewState": "AgIAAFAAAAAAAAAAAAAgwMEAAAAMAAAAAAAAAA==",
+              "ViewState": "AgIAAFAAAAAAAAAAAAAgwL0AAAAMAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-10-03T01:09:51.608Z",
               "EditorCaption": ""
@@ -674,7 +674,7 @@
               "RelativeDocumentMoniker": "HandmadeProductManagement.Services\\Service\\ShopService.cs",
               "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\Service\\ShopService.cs",
               "RelativeToolTip": "HandmadeProductManagement.Services\\Service\\ShopService.cs",
-              "ViewState": "AgIAAA8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-10-03T01:21:31.457Z",
               "EditorCaption": ""

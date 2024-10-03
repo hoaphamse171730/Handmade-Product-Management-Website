@@ -1,14 +1,14 @@
-﻿using HandmadeProductManagement.Contract.Repositories.Entity;
+﻿using HandmadeProductManagement.ModelViews.StatusChangeModelViews;
 
 namespace HandmadeProductManagement.Contract.Services.Interface
 {
     public interface IStatusChangeService
     {
-        Task<IList<StatusChange>> GetAll();
-        Task<IList<StatusChange>> GetByOrderId(string orderId);
-        Task<StatusChange> GetById(string id);
-        Task<StatusChange> Create(StatusChange statusChange);
-        Task<StatusChange> Update(string id, StatusChange statusChange);
+        Task<IList<StatusChangeResponseModel>> GetByPage(int page, int pageSize);
+        Task<IList<StatusChangeResponseModel>> GetByOrderId(string orderId);
+        Task<bool> Create(StatusChangeForCreationDto statusChange);
+        Task<bool> Update(string id, StatusChangeForUpdateDto statusChange);
         Task<bool> Delete(string id);
+        
     }
 }

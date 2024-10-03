@@ -6,69 +6,7 @@
 *.user
 *.sln.docstates
 
-# Ignore user-specific files for other IDEs
-.idea/
-*.iml
-
-# Ignore package management directories
-node_modules/
-bower_components/
-jspm_packages/
-vendor/
-
-# Ignore log files
-*.log
-
-# Ignore environment variables and secret keys
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# Ignore coverage directories
-coverage/
-*.lcov
-
-# Ignore temporary files
-*.tmp
-*.temp
-*.bak
-*.swp
-
-# Ignore MacOS specific files
-.AppleDouble
-.LSOverride
-.DS_Store
-.DS_Store?
-._*
-
-# Ignore Windows specific files
-Thumbs.db
-ehthumbs.db
-Desktop.ini
-$RECYCLE.BIN/
-
-# Ignore build output directories
-dist/
-build/
-out/
-
-# Ignore documentation files
-*.md~  # Backup markdown files
-
-# Ignore generated files from various tools
-*.generated.cs
-*.generated.h
-
-# Ignore IntelliJ IDEA files
-*.idea/
-*.ipr
-*.iws
-
-
 # Build results
-
 [Dd]ebug/
 [Rr]elease/
 x64/
@@ -134,10 +72,6 @@ publish/
 *.pubxml
 *.azurePubxml
 
-# Ignore appsettings.json
-appsettings.json
-appsettings.*.json
-
 # NuGet Packages Directory
 ## TODO: If you have NuGet Package Restore enabled, uncomment the next line
 packages/
@@ -151,8 +85,6 @@ csx/
 # Windows Store app package directory
 AppPackages/
 
-
-
 # Others
 sql/
 *.cache
@@ -163,7 +95,6 @@ ClientBin/
 *~
 *.dbmdl
 *.[Pp]ublish.xml
-
 *.publishsettings
 
 # RIA/Silverlight projects
@@ -200,14 +131,25 @@ $RECYCLE.BIN/
 _NCrunch*
 *.cache
 *.vsidx
+
+# Ignore specific files and directories
 HandmadeProductManagementBE/HandmadeProductManagement.Contract.Services/obj/Debug/net8.0/HandmadeProductManagement.Contract.Services.AssemblyInfo.cs
 /HandmadeProductManagementBE/.vs/HandmadeProductManagementBE/FileContentIndex
 /HandmadeProductManagementBE/.vs/HandmadeProductManagementBE/v17
-/HandmadeProductManagementBE/.vs/HandmadeProductManagementBE/FileContentIndex
 /HandmadeProductManagementBE/HandmadeProductManagement.Contract.Repositories/bin/Debug/net8.0
 /HandmadeProductManagementBE/HandmadeProductManagement.Contract.Repositories/obj
 /HandmadeProductManagementBE/HandmadeProductManagement.ModelView/obj
-/HandmadeProductManagementBE/.vs/HandmadeProductManagementBE/FileContentIndex
-/HandmadeProductManagementBE/.vs/HandmadeProductManagementBE/v17
-/HandmadeProductManagementBE/HandmadeProductManagement.Contract.Repositories/obj
 /HandmadeProductManagementBE/HandmadeProductManagement.Services/bin
+/Handmade-Product-Management/.vs/
+/HandmadeProductManagementBE/.vs/
+/HandmadeProductManagementBE/HandmadeProductManagement.Contract.Repositories/obj/
+/HandmadeProductManagementBE/HandmadeProductManagement.Contract.Services/obj/
+/HandmadeProductManagementBE/HandmadeProductManagement.Core/obj/
+/HandmadeProductManagementBE/HandmadeProductManagement.ModelView/obj/
+/HandmadeProductManagementBE/HandmadeProductManagement.Repositories/obj/
+/HandmadeProductManagementBE/HandmadeProductManagement.Services/obj/
+/HandmadeProductManagementBE/HandmadeProductManagementBE/obj/
+/HandmadeProductManagementBE/HandmadeProductManagementBE/appsettings.Development.json
+/HandmadeProductManagementBE/Migrations/
+/.vs
+

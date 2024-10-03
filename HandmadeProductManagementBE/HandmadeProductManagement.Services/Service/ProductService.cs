@@ -2,13 +2,21 @@
 using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.Core.Constants;
+using HandmadeProductManagement.ModelViews.ProductDetailModelViews;
 using HandmadeProductManagement.ModelViews.ProductModelViews;
+using HandmadeProductManagement.ModelViews.ReviewModelViews;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AutoMapper;
+using FluentValidation;
+using HandmadeProductManagement.ModelViews.PromotionModelViews;
+using HandmadeProductManagement.Core.Utils;
+using Microsoft.IdentityModel.Tokens;
 
 namespace HandmadeProductManagement.Services.Service
 {
@@ -16,29 +24,35 @@ namespace HandmadeProductManagement.Services.Service
     {
 
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
+        private readonly IValidator<ProductForCreationDto> _creationValidator;
+        private readonly IValidator<ProductForUpdateDto> _updateValidator;
 
-        public ProductService(IUnitOfWork unitOfWork)
+        public ProductService(IUnitOfWork unitOfWork, IMapper mapper, IValidator<ProductForCreationDto> creationValidator, IValidator<ProductForUpdateDto> updateValidator)
         {
             _unitOfWork = unitOfWork;
+            _mapper = mapper;
+            _creationValidator = creationValidator;
+            _updateValidator = updateValidator;
         }
 
-        public async Task<BaseResponse<IEnumerable<ProductResponseModel>>> SearchProductsAsync(ProductSearchModel searchModel)
+        public async Task<IEnumerable<ProductSearchVM>> SearchProductsAsync(ProductSearchFilter searchModel)
         {
             // Validate CategoryId and ShopId datatype (Guid)
-            if (!string.IsNullOrEmpty(searchModel.CategoryId) && !IsValidGuid(searchModel.CategoryId))
+            if (!string.IsNullOrWhiteSpace(searchModel.CategoryId) && !IsValidGuid(searchModel.CategoryId))
             {
-                return BaseResponse<IEnumerable<ProductResponseModel>>.OkResponse("Invalid Category ID");
+                throw new BaseException.BadRequestException("bad_request", "Invalid Category Id");
             }
 
-            if (!string.IsNullOrEmpty(searchModel.ShopId) && !IsValidGuid(searchModel.ShopId))
+            if (!string.IsNullOrWhiteSpace(searchModel.ShopId) && !IsValidGuid(searchModel.ShopId))
             {
-                return BaseResponse<IEnumerable<ProductResponseModel>>.OkResponse("Invalid Shop ID");
+                throw new BaseException.BadRequestException("bad_request", "Invalid Shop ID");
             }
 
             // Validate MinRating limit (from 0 to 5)
             if (searchModel.MinRating.HasValue && (searchModel.MinRating < 0 || searchModel.MinRating > 5))
             {
-                return BaseResponse<IEnumerable<ProductResponseModel>>.OkResponse("MinRating must be between 0 and 5.");
+                throw new BaseException.BadRequestException("bad_request", "MinRating must be between 0 and 5.");
             }
 
 
@@ -50,17 +64,17 @@ namespace HandmadeProductManagement.Services.Service
                 query = query.Where(p => p.Name.Contains(searchModel.Name));
             }
 
-            if (!string.IsNullOrEmpty(searchModel.CategoryId))
+            if (!string.IsNullOrWhiteSpace(searchModel.CategoryId))
             {
                 query = query.Where(p => p.CategoryId == searchModel.CategoryId);
             }
 
-            if (!string.IsNullOrEmpty(searchModel.ShopId))
+            if (!string.IsNullOrWhiteSpace(searchModel.ShopId))
             {
                 query = query.Where(p => p.ShopId == searchModel.ShopId);
             }
 
-            if (!string.IsNullOrEmpty(searchModel.Status))
+            if (!string.IsNullOrWhiteSpace(searchModel.Status))
             {
                 query = query.Where(p => p.Status == searchModel.Status);
             }
@@ -88,7 +102,7 @@ namespace HandmadeProductManagement.Services.Service
 
 
 
-            var productResponseModels = await query
+            var productSearchVMs = await query
                 .GroupBy(p => new
                 {
                     p.Id,
@@ -100,7 +114,7 @@ namespace HandmadeProductManagement.Services.Service
                     p.Status,
                     p.SoldCount
                 })
-                .Select(g => new ProductResponseModel
+                .Select(g => new ProductSearchVM
                 {
                     Id = g.Key.Id,
                     Name = g.Key.Name,
@@ -113,18 +127,22 @@ namespace HandmadeProductManagement.Services.Service
                     // Avoid duplicates
                     Price = g.SelectMany(p => p.ProductItems).Any() ? g.SelectMany(p => p.ProductItems).Min(pi => pi.Price) : 0
                 }).OrderBy(pr => searchModel.SortByPrice
-                    ? (searchModel.SortDescending ? -pr.Price : pr.Price) // Sort by price ascending or descending
-                    : (searchModel.SortDescending ? -pr.Rating : pr.Rating)) // Sort by rating ascending or descending
+                    ? (searchModel.SortDescending ? (decimal)-pr.Price : (decimal)pr.Price) // Sort by price ascending or descending
+                    : (searchModel.SortDescending ? (decimal)-pr.Rating : (decimal)pr.Rating)) // Sort by rating ascending or descending
                 .ToListAsync();
 
-            return BaseResponse<IEnumerable<ProductResponseModel>>.OkResponse(productResponseModels);
+            if (productSearchVMs.IsNullOrEmpty())
+            {
+                throw new BaseException.NotFoundException("not_found", "Product Not Found");
+            }
+            return productSearchVMs;
 
         }
 
 
         // Sort Function
 
-        public async Task<BaseResponse<IEnumerable<ProductResponseModel>>> SortProductsAsync(ProductSortModel sortModel)
+        public async Task<IEnumerable<ProductSearchVM>> SortProductsAsync(ProductSortFilter sortFilter)
         {
             var query = _unitOfWork.GetRepository<Product>().Entities
                 .Include(p => p.ProductItems)
@@ -132,24 +150,24 @@ namespace HandmadeProductManagement.Services.Service
                 .AsQueryable();
 
             // Sort by Price
-            if (sortModel.SortByPrice)
+            if (sortFilter.SortByPrice)
             {
-                query = sortModel.SortDescending
+                query = sortFilter.SortDescending
                     ? query.OrderByDescending(p => p.ProductItems.Min(pi => pi.Price))
                     : query.OrderBy(p => p.ProductItems.Min(pi => pi.Price));
             }
 
             // Sort by Rating
-            else if (sortModel.SortByRating)
+            else if (sortFilter.SortByRating)
             {
-                query = sortModel.SortDescending
+                query = sortFilter.SortDescending
                     ? query.OrderByDescending(p => p.Rating)
                     : query.OrderBy(p => p.Rating);
             }
 
             var products = await query.ToListAsync();
 
-            var productResponseModels = products.Select(p => new ProductResponseModel
+            var productSearchVMs = products.Select(p => new ProductSearchVM
             {
                 Id = p.Id,
                 Name = p.Name,
@@ -161,14 +179,209 @@ namespace HandmadeProductManagement.Services.Service
                 SoldCount = p.SoldCount,
                 Price = p.ProductItems.Any() ? p.ProductItems.Min(pi => pi.Price) : 0
             });
-
-            return BaseResponse<IEnumerable<ProductResponseModel>>.OkResponse(productResponseModels);
+            if (productSearchVMs.IsNullOrEmpty())
+            {
+                throw new BaseException.NotFoundException("not_found", "Product Not Found");
+            }
+            return productSearchVMs;
 
         }
 
-        private bool IsValidGuid(string input)
+        public async Task<IList<ProductDto>> GetAll()
         {
-            return Guid.TryParse(input, out _);
+            var productRepo = _unitOfWork.GetRepository<Product>();
+            var products = await productRepo.Entities
+                .ToListAsync();
+            var productsDto = _mapper.Map<IList<ProductDto>>(products);
+            return productsDto;
+        }
+
+        public async Task<ProductDto> GetById(string id)
+        {
+            var product = await _unitOfWork.GetRepository<Product>().Entities
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (product == null)
+                throw new KeyNotFoundException("Product not found");
+
+            var productToReturn = _mapper.Map<ProductDto>(product);
+            return productToReturn;
+
+        }
+
+
+
+        public async Task<ProductDto> Create(ProductForCreationDto product)
+        {
+            var result = _creationValidator.ValidateAsync(product);
+            if (!result.Result.IsValid)
+                throw new ValidationException(result.Result.Errors);
+            var productEntity = _mapper.Map<Product>(product);
+            productEntity.CreatedTime = DateTime.UtcNow;
+            await _unitOfWork.GetRepository<Product>().InsertAsync(productEntity);
+            await _unitOfWork.SaveAsync();
+            var productToReturn = _mapper.Map<ProductDto>(productEntity);
+            return productToReturn;
+
+        }
+
+        public async Task<ProductDto> Update(string id, ProductForUpdateDto product)
+        {
+            var result = _updateValidator.ValidateAsync(product);
+            if (!result.Result.IsValid)
+                throw new ValidationException(result.Result.Errors);
+            var productEntity = await _unitOfWork.GetRepository<Product>().Entities
+                .FirstOrDefaultAsync(p => p.Id == id);
+            if (productEntity == null)
+                throw new KeyNotFoundException("Product not found");
+            _mapper.Map(product, productEntity);
+            productEntity.LastUpdatedTime = DateTime.UtcNow;
+            await _unitOfWork.GetRepository<Product>().UpdateAsync(productEntity);
+            await _unitOfWork.SaveAsync();
+            var productToReturn = _mapper.Map<ProductDto>(productEntity);
+            return productToReturn;
+        }
+
+        public async Task<bool> Delete(string id)
+        {
+            var productRepo = _unitOfWork.GetRepository<Product>();
+            var productEntity = await productRepo.Entities.FirstOrDefaultAsync(x => x.Id == id);
+            if (productEntity == null)
+                throw new KeyNotFoundException("Product not found");
+            productEntity.DeletedTime = DateTime.UtcNow;
+            await productRepo.DeleteAsync(id);
+            await _unitOfWork.SaveAsync();
+            return true;
+        }
+
+        public async Task<bool> SoftDelete(string id)
+        {
+            var productRepo = _unitOfWork.GetRepository<Product>();
+            var productEntity = await productRepo.Entities.FirstOrDefaultAsync(x => x.Id == id.ToString());
+            if (productEntity == null)
+                throw new KeyNotFoundException("Product not found");
+            productEntity.DeletedTime = DateTime.UtcNow;
+            await productRepo.UpdateAsync(productEntity);
+            await _unitOfWork.SaveAsync();
+            return true;
+        }
+
+        private bool IsValidGuid(string input) => Guid.TryParse(input, out _);
+        
+        public async Task<ProductDetailResponseModel> GetProductDetailsByIdAsync(string productId)
+        {
+            if (string.IsNullOrEmpty(productId) || !IsValidGuid(productId))
+            {
+                throw new BaseException.BadRequestException("invalid_product_id", "Product ID is invalid or empty.");
+            }
+
+            var product = await _unitOfWork.GetRepository<Product>().Entities
+                .Include(p => p.Category)
+                .Include(p => p.Shop)
+                .Include(p => p.ProductImages)
+                .Include(p => p.ProductItems)
+                    .ThenInclude(pi => pi.ProductConfiguration)
+                        .ThenInclude(pc => pc.VariationOption)
+                            .ThenInclude(vo => vo.Variation)
+                .FirstOrDefaultAsync(p => p.Id == productId);
+
+            if (product == null)
+            {
+                throw new BaseException.NotFoundException("product_not_found", "Product not found.");
+            }
+
+            var promotion = await _unitOfWork.GetRepository<Promotion>().Entities
+                .FirstOrDefaultAsync(p => p.Categories.Any(c => c.Id == product.CategoryId) &&
+                                           p.StartDate <= DateTime.UtcNow &&
+                                           p.EndDate >= DateTime.UtcNow);
+
+            var response = new ProductDetailResponseModel
+            {
+                Id = product.Id,
+                Name = product.Name,
+                Description = product.Description,
+                CategoryId = product.CategoryId,
+                CategoryName = product.Category.Name,
+                ShopId = product.ShopId,
+                ShopName = product.Shop.Name,
+                Rating = product.Rating,
+                Status = product.Status,
+                SoldCount = product.SoldCount,
+                ProductImageUrls = product.ProductImages.Select(pi => pi.Url).ToList(),
+                ProductItems = product.ProductItems.Select(pi => new ProductItemDetailModel
+                {
+                    Id = pi.Id,
+                    QuantityInStock = pi.QuantityInStock,
+                    Price = pi.Price,
+                    DiscountedPrice = promotion != null ? (int)(pi.Price * (1 - promotion.DiscountRate)) : (int?)null,
+                    Configurations = pi.ProductConfiguration.Select(pc => new ProductConfigurationDetailModel
+                    {
+                        VariationName = pc.VariationOption.Variation.Name,
+                        OptionName = pc.VariationOption.Value
+                    }).ToList()
+                }).ToList(),
+                Promotion = promotion != null ? new PromotionDetailModel
+                {
+                    Id = promotion.Id,
+                    Name = promotion.Name,
+                    Description = promotion.Description,
+                    DiscountRate = promotion.DiscountRate,
+                    StartDate = promotion.StartDate,
+                    EndDate = promotion.EndDate,
+                    Status = promotion.Status
+                } : null
+            };
+            return response;
+        }
+
+
+        public async Task<ProductDto> UpdateProductPromotionAsync(string productId, string promotionId)
+        {
+            var product = await _unitOfWork.GetRepository<Product>().Entities
+                .Include(p => p.ProductItems)
+                .FirstOrDefaultAsync(p => p.Id == productId);
+            if (product == null)
+                throw new BaseException.NotFoundException("product_not_found", "Product not found");
+            var promotion = await _unitOfWork.GetRepository<Promotion>().Entities
+                .FirstOrDefaultAsync(p => p.Id == promotionId && p.StartDate <= DateTime.UtcNow && p.EndDate >= DateTime.UtcNow);
+            if (promotion == null)
+                throw new BaseException.BadRequestException("invalid_promotion", "Promotion is invalid or expired.");
+            product.Id = promotion.Id;
+            foreach (var productItem in product.ProductItems)
+            {
+                var originalPrice = productItem.Price;
+                productItem.DiscountRate = originalPrice * (1 - promotion.DiscountRate);
+            }
+            product.LastUpdatedTime = DateTime.UtcNow;
+            await _unitOfWork.GetRepository<Product>().UpdateAsync(product);
+            await _unitOfWork.SaveAsync();
+            var productToReturn = _mapper.Map<ProductDto>(product);
+            return productToReturn;
+        }
+
+        public async Task<ProductDto> UpdateProductPromotionAsync(string productId, string promotionId)
+        {
+
+            var product = await _unitOfWork.GetRepository<Product>().Entities
+                .Include(p => p.ProductItems)
+                .FirstOrDefaultAsync(p => p.Id == productId);
+            if (product == null)
+                throw new BaseException.NotFoundException("product_not_found", "Product not found");
+            var promotion = await _unitOfWork.GetRepository<Promotion>().Entities
+                .FirstOrDefaultAsync(p => p.Id == promotionId && p.StartDate <= DateTime.UtcNow && p.EndDate >= DateTime.UtcNow);
+            if (promotion == null)
+                throw new BaseException.BadRequestException("invalid_promotion", "Promotion is invalid or expired.");
+            product.Id = promotion.Id;
+            foreach (var productItem in product.ProductItems)
+            {
+                var originalPrice = productItem.Price;
+                productItem.DiscountedPrice = originalPrice * (1 - promotion.DiscountRate);
+            }
+            product.LastUpdatedTime = DateTime.UtcNow;
+            await _unitOfWork.GetRepository<Product>().UpdateAsync(product);
+            await _unitOfWork.SaveAsync();
+            var productToReturn = _mapper.Map<ProductDto>(product);
+            return productToReturn;
         }
 
     }

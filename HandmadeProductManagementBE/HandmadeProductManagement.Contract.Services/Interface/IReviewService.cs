@@ -11,8 +11,9 @@ namespace HandmadeProductManagement.Contract.Services.Interface
     {
         Task<IList<ReviewModel>> GetAllAsync(int pageNumber, int pageSize);
         Task<ReviewModel?> GetByIdAsync(string reviewId);
-        Task<ReviewModel> CreateAsync(ReviewModel review);
-        Task<ReviewModel> UpdateAsync(string reviewId, ReviewModel updatedReview);
-        Task<bool> DeleteAsync(string reviewId);
+        Task<ReviewModel> CreateAsync(ReviewModel review, string order);
+        Task<ReviewModel> UpdateAsync(string reviewId, Guid userId, ReviewModel updatedReview);
+        Task<bool> DeleteAsync(string reviewId, Guid userId);
+        Task<bool> SoftDeleteAsync(string reviewId, Guid userId);
     }
 }

@@ -82,6 +82,7 @@ namespace HandmadeProductManagement.Repositories.UOW
             await _context.SaveChangesAsync();
         }
 
+        public async Task<T?> FindAsync(params object[] keyValues) => await _dbSet.FindAsync(keyValues);
         public void Update(T obj)
         {
             _dbSet.Entry(obj).State = EntityState.Modified;
@@ -96,6 +97,10 @@ namespace HandmadeProductManagement.Repositories.UOW
         {
             return await _dbSet.Where(filter).ToListAsync();
         }
-
+    
+        public async Task<int> CountAsync()
+        {
+            return await _context.Set<T>().CountAsync();
+        }
     }
 }

@@ -6,7 +6,7 @@ namespace HandmadeProductManagement.Core.Base
     {
         public class CoreException : Exception
         {
-            public CoreException(string code, string message, int statusCode =(int) StatusCodeHelper.ServerError)
+            public CoreException(string code, string message, int statusCode = (int)StatusCodeHelper.ServerError)
                 : base(message)
             {
                 Code = code;
@@ -27,6 +27,7 @@ namespace HandmadeProductManagement.Core.Base
                 : base(400, errorCode, message)
             {
             }
+
             public BadRequestException(ICollection<KeyValuePair<string, ICollection<string>>> errors)
                 : base(400, new ErrorDetail
                 {
@@ -37,6 +38,27 @@ namespace HandmadeProductManagement.Core.Base
             }
         }
 
+        public class NotFoundException : ErrorException
+        {
+            public NotFoundException(string errorCode, string message) : base(404, errorCode, message)
+            {
+            }
+
+            public NotFoundException(ICollection<KeyValuePair<string, ICollection<string>>> errors) : base(404, new ErrorDetail
+            {
+                ErrorCode = "not_found",
+                ErrorMessage = errors
+            })
+            {
+            }
+        }
+        public class UnauthorizedException : ErrorException
+        {
+            public UnauthorizedException(string errorCode, string message)
+                : base(401, errorCode, message)
+            {
+            }
+        }
         public class ErrorException : Exception
         {
             public int StatusCode { get; }
@@ -59,6 +81,7 @@ namespace HandmadeProductManagement.Core.Base
                 ErrorDetail = errorDetail;
             }
         }
+
         public class ErrorDetail
         {
             public string? ErrorCode { get; set; }

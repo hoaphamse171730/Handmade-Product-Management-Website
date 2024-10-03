@@ -1,6 +1,6 @@
 ﻿using HandmadeProductManagement.Contract.Repositories.Interface;
+using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.ModelViews.UserModelViews;
-using HandmadeProductManagement.Repositories.Entity;
 
 namespace HandmadeProductManagement.Contract.Services.Interface
 {

@@ -25,6 +25,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HandmadeProductManagement.C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HandmadeProductManagement.Services", "HandmadeProductManagement.Services\HandmadeProductManagement.Services.csproj", "{B48678A4-822E-4A18-9F58-32C525718D88}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Validation", "Validation", "{4B44ADB4-25D2-4FDC-AE65-06AE9AEC9A3D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HandmadeProductManagement.Validation", "HandmadeProductManagement.Validation\HandmadeProductManagement.Validation.csproj", "{EDFEF7CA-48D6-4617-8803-E478A59D732F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -59,6 +63,10 @@ Global
 		{B48678A4-822E-4A18-9F58-32C525718D88}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B48678A4-822E-4A18-9F58-32C525718D88}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B48678A4-822E-4A18-9F58-32C525718D88}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EDFEF7CA-48D6-4617-8803-E478A59D732F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EDFEF7CA-48D6-4617-8803-E478A59D732F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EDFEF7CA-48D6-4617-8803-E478A59D732F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EDFEF7CA-48D6-4617-8803-E478A59D732F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -71,6 +79,7 @@ Global
 		{EA9CF239-AA84-4A09-957A-646C14A6F04B} = {438BFBC4-C093-45A3-9210-261740644F51}
 		{5ECD79B2-DBFD-424D-B888-3C9BBB2FA09D} = {EFE8E0BE-C60E-4270-86DD-58836A087FD5}
 		{B48678A4-822E-4A18-9F58-32C525718D88} = {EFE8E0BE-C60E-4270-86DD-58836A087FD5}
+		{EDFEF7CA-48D6-4617-8803-E478A59D732F} = {4B44ADB4-25D2-4FDC-AE65-06AE9AEC9A3D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0145BCBD-535D-4BC5-ACDE-30E00043F846}
