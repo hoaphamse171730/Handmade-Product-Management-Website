@@ -212,7 +212,7 @@ namespace HandmadeProductManagement.Repositories.Context
                 // Attributes
                 entity.Property(e => e.Status)
                       .IsRequired()
-                      .HasMaxLength(15); 
+                      .HasMaxLength(30); 
 
                 entity.Property(e => e.ChangeTime)
                       .IsRequired();
