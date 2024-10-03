@@ -16,13 +16,11 @@ namespace HandmadeProductManagement.Services.Service
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IStatusChangeService _statusChangeService;
-        private readonly IOrderDetailService _orderDetailService;
 
-        public OrderService(IUnitOfWork unitOfWork, IStatusChangeService statusChangeService, IOrderDetailService orderDetailService)
+        public OrderService(IUnitOfWork unitOfWork, IStatusChangeService statusChangeService)
         {
             _unitOfWork = unitOfWork;
             _statusChangeService = statusChangeService;
-            _orderDetailService = orderDetailService;
         }
 
         public async Task<bool> CreateOrderAsync(CreateOrderDto createOrder)
@@ -39,7 +37,9 @@ namespace HandmadeProductManagement.Services.Service
             }
 
             var orderRepository = _unitOfWork.GetRepository<Order>();
+            var orderDetailRepository = _unitOfWork.GetRepository<OrderDetail>();
             var cartItemRepository = _unitOfWork.GetRepository<CartItem>();
+
             var totalPrice = createOrder.OrderDetails.Sum(detail => detail.UnitPrice * detail.ProductQuantity);
 
             var order = new Order
@@ -52,6 +52,7 @@ namespace HandmadeProductManagement.Services.Service
                 CustomerName = createOrder.CustomerName,
                 Phone = createOrder.Phone,
                 Note = createOrder.Note,
+                CancelReasonId = createOrder.CancelReasonId,
                 CreatedBy = createOrder.UserId,
                 LastUpdatedBy = createOrder.UserId
             };
@@ -61,18 +62,28 @@ namespace HandmadeProductManagement.Services.Service
 
             foreach (var detail in createOrder.OrderDetails)
             {
-                detail.OrderId = order.Id;
-                await _orderDetailService.Create(detail);
+                ValidateOrderDetail(detail);
 
-                //var cartItems = await cartItemRepository.Entities
-                //    .Where(ci => ci.ProductItemId == detail.ProductItemId && ci.Cart.UserId == order.UserId)
-                //    .ToListAsync();
+                var orderDetail = new OrderDetail
+                {
+                    ProductId = detail.ProductId,
+                    ProductQuantity = detail.ProductQuantity,
+                    UnitPrice = detail.UnitPrice,
+                    OrderId = order.Id,
+                    CreatedBy = createOrder.UserId,
+                    LastUpdatedBy = createOrder.UserId
+                };
+                await orderDetailRepository.InsertAsync(orderDetail);
 
-                //foreach (var cartItem in cartItems)
-                //{
-                //    cartItemRepository.Delete(cartItem);
-                //}
+                //    var cartItemToRemove = await cartItemRepository.Entities
+                //.FirstOrDefaultAsync(ci => ci.ProductItemId == detail.ProductItemId);
+
+                //    if (cartItemToRemove != null)
+                //    {
+                //        cartItemRepository.Delete(cartItemToRemove);
+                //    }
             }
+
             await _unitOfWork.SaveAsync();
 
             // Create an initial status change after the order is created
@@ -145,7 +156,7 @@ namespace HandmadeProductManagement.Services.Service
             };
         }
 
-        public async Task<bool> UpdateOrderAsync(string orderId, CreateOrderDto order)
+        public async Task<bool> UpdateOrderAsync(string orderId, CreateOrderDto order, string cancelReasonId)
         {
             if (string.IsNullOrWhiteSpace(orderId) || !Guid.TryParse(orderId, out _))
             {
@@ -167,6 +178,7 @@ namespace HandmadeProductManagement.Services.Service
             existingOrder.CustomerName = order.CustomerName;
             existingOrder.Phone = order.Phone;
             existingOrder.Note = order.Note;
+            existingOrder.CancelReasonId = order.CancelReasonId;
             existingOrder.LastUpdatedBy = order.UserId.ToString();
             existingOrder.LastUpdatedTime = DateTime.UtcNow;
 
@@ -260,27 +272,24 @@ namespace HandmadeProductManagement.Services.Service
             {
                 throw new BaseException.ErrorException(400, "invalid_status_transition", $"Cannot transition from {existingOrder.Status} to {status}.");
             }
-
-            //will update when the CancelReason table has data
             // Validate order status and cancel reason ID
-            //if (status == "Canceled")
-            //{
-            //    if (string.IsNullOrWhiteSpace(cancelReasonId))
-            //    {
-            //        throw new BaseException.BadRequestException("validation_failed", "CancelReasonId is required when updating status to {Canceled}.");
-            //    }
+            if (status == "Canceled")
+            {
+                if (string.IsNullOrWhiteSpace(cancelReasonId))
+                {
+                    throw new BaseException.BadRequestException("validation_failed", "CancelReasonId is required when updating status to {Canceled}.");
+                }
 
-            //    var cancelReason = await _unitOfWork.GetRepository<CancelReason>().GetByIdAsync(cancelReasonId);
+                var cancelReason = await _unitOfWork.GetRepository<CancelReason>().GetByIdAsync(cancelReasonId);
 
-            //    // Ensure cancelReason is not null
-            //    if (cancelReason == null)
-            //    {
-            //        throw new BaseException.NotFoundException("not_found", "Cancel Reason not found.");
-            //    }
+                // Ensure cancelReason is not null
+                if (cancelReason == null)
+                {
+                    throw new BaseException.NotFoundException("not_found", "Cancel Reason not found.");
+                }
 
-            //    existingOrder.CancelReasonId = cancelReasonId;
-            //}
-
+                existingOrder.CancelReasonId = cancelReasonId;
+            }
 
             existingOrder.Status = status;
             existingOrder.LastUpdatedBy = existingOrder.UserId.ToString();
@@ -299,6 +308,33 @@ namespace HandmadeProductManagement.Services.Service
 
             await _statusChangeService.Create(statusChangeDto);
 
+            return true;
+        }
+        public async Task<bool> DeleteOrderAsync(string orderId)
+        {
+            if (string.IsNullOrWhiteSpace(orderId))
+            {
+                throw new BaseException.BadRequestException("empty_order_id", "Order ID is required.");
+            }
+
+            if (!Guid.TryParse(orderId, out _))
+            {
+                throw new BaseException.BadRequestException("invalid_order_id_format", "Order ID format is invalid. Example: 123e4567-e89b-12d3-a456-426614174000.");
+            }
+
+            var repository = _unitOfWork.GetRepository<Order>();
+            var order = await repository.Entities
+                .FirstOrDefaultAsync(o => o.Id == orderId && !o.DeletedTime.HasValue);
+            if (order == null)
+            {
+                throw new BaseException.NotFoundException("order_not_found", "Order not found.");
+            }
+
+            order.DeletedBy = order.UserId.ToString();
+            order.DeletedTime = DateTime.UtcNow;
+
+            repository.Update(order);
+            await _unitOfWork.SaveAsync();
             return true;
         }
 
@@ -345,5 +381,37 @@ namespace HandmadeProductManagement.Services.Service
             }
         }
 
+        private void ValidateOrderDetail(OrderDetailForCreationDto detail)
+        {
+            if (string.IsNullOrWhiteSpace(detail.ProductId))
+            {
+                throw new BaseException.BadRequestException("invalid_product_id", "Please input Product id.");
+            }
+
+            if (!Guid.TryParse(detail.ProductId, out _))
+            {
+                throw new BaseException.BadRequestException("invalid_product_id_format", "Product ID format is invalid. Example: 123e4567-e89b-12d3-a456-426614174000.");
+            }
+
+            if (string.IsNullOrWhiteSpace(detail.OrderId))
+            {
+                throw new BaseException.BadRequestException("invalid_order_id", "Please input Order id.");
+            }
+
+            if (!Guid.TryParse(detail.OrderId, out _))
+            {
+                throw new BaseException.BadRequestException("invalid_order_id_format", "Order ID format is invalid. Example: 123e4567-e89b-12d3-a456-426614174000.");
+            }
+
+            if (detail.ProductQuantity <= 0)
+            {
+                throw new BaseException.BadRequestException("invalid_product_quantity", "Product quantity must be greater than zero and not null.");
+            }
+
+            if (detail.UnitPrice <= 0)
+            {
+                throw new BaseException.BadRequestException("invalid_unit_price", "Unit price must be greater than zero and not null.");
+            }
+        }
     }
 }

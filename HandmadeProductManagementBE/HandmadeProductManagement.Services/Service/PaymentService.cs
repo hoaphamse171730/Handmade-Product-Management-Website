@@ -19,12 +19,10 @@ namespace HandmadeProductManagement.Services.Service
     public class PaymentService : IPaymentService
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IOrderService _orderService;
 
-        public PaymentService(IUnitOfWork unitOfWork, IOrderService orderService)
+        public PaymentService(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
-            _orderService = orderService;
         }
 
         public async Task<bool> CreatePaymentAsync(CreatePaymentDto createPaymentDto)
@@ -94,17 +92,6 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.NotFoundException("payment_not_found", "Payment not found.");
             }
 
-            if (status == "Completed")
-            {
-                await _orderService.UpdateOrderStatusAsync(payment.OrderId, "Processing", "");
-            }
-
-            //will update when the CancelReason table has data
-            if (status == "Expired")
-            {
-                await _orderService.UpdateOrderStatusAsync(payment.OrderId, "Canceled", "");
-            }
-
             payment.Status = status;
             payment.LastUpdatedTime = DateTime.UtcNow;
 
@@ -165,7 +152,18 @@ namespace HandmadeProductManagement.Services.Service
 
             foreach (var payment in expiredPayments)
             {
-                await UpdatePaymentStatusAsync(payment.Id.ToString(), "Expired");
+                payment.Status = "Expired";
+                payment.LastUpdatedTime = DateTime.UtcNow;
+                paymentRepository.Update(payment);
+
+                var order = await orderRepository.Entities
+                                .FirstOrDefaultAsync(o => o.Id == payment.OrderId && !o.DeletedTime.HasValue);
+                if (order != null)
+                {
+                    order.Status = "Canceled";
+                    order.LastUpdatedTime = DateTime.UtcNow;
+                    orderRepository.Update(order);
+                }
             }
 
             await _unitOfWork.SaveAsync();
