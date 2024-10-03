@@ -8,7 +8,7 @@ namespace HandmadeProductManagement.Contract.Services.Interface
         Task<OrderResponseModel> GetOrderByIdAsync(string orderId);
         Task<bool> CreateOrderAsync(CreateOrderDto createOrder);
         Task<bool> UpdateOrderAsync(string orderId, CreateOrderDto order);
-        Task<bool> UpdateOrderStatusAsync(string orderId, string status, string cancelReasonId);
+        Task<bool> UpdateOrderStatusAsync(UpdateStatusOrderDto updateStatusOrderDto);
         Task<IList<OrderResponseModel>> GetOrderByUserIdAsync(Guid userId);
     }
 }
