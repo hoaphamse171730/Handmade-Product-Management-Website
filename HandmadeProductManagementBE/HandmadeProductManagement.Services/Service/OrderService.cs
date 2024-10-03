@@ -37,6 +37,8 @@ namespace HandmadeProductManagement.Services.Service
 
             var orderRepository = _unitOfWork.GetRepository<Order>();
             var orderDetailRepository = _unitOfWork.GetRepository<OrderDetail>();
+            var productItemRepository = _unitOfWork.GetRepository<ProductItem>();
+
             var totalPrice = createOrder.OrderDetails.Sum(detail => detail.UnitPrice * detail.ProductQuantity);
 
             var order = new Order
@@ -53,37 +55,59 @@ namespace HandmadeProductManagement.Services.Service
                 CreatedBy = createOrder.UserId,
                 LastUpdatedBy = createOrder.UserId
             };
-
-            await orderRepository.InsertAsync(order);
-            await _unitOfWork.SaveAsync();
-
-            foreach (var detail in createOrder.OrderDetails)
+            try
             {
-                ValidateOrderDetail(detail);
+                // Insert the order
+                await orderRepository.InsertAsync(order);
+                await _unitOfWork.SaveAsync();
 
-                var orderDetail = new OrderDetail
+                // Iterate through each order detail, validate, and decrease stock
+                foreach (var detail in createOrder.OrderDetails)
                 {
-                    ProductId = detail.ProductId,
-                    ProductQuantity = detail.ProductQuantity,
-                    UnitPrice = detail.UnitPrice,
-                    OrderId = order.Id,
-                    CreatedBy = createOrder.UserId,
-                    LastUpdatedBy = createOrder.UserId
+                    ValidateOrderDetail(detail);
+                    var productItem = await productItemRepository.Entities
+                        .FirstOrDefaultAsync(p => p.Id == detail.ProductItemId && !p.DeletedTime.HasValue);
+
+                    if (productItem == null)
+                    {
+                        throw new BaseException.NotFoundException("product_item_not_found", $"Product Item {detail.ProductItemId} not found.");
+                    }
+                    if (productItem.QuantityInStock < detail.ProductQuantity)
+                    {
+                        throw new BaseException.ErrorException(400, "insufficient_stock", $"Product {productItem.Id} has insufficient stock.");
+                    }
+                    productItem.QuantityInStock -= detail.ProductQuantity;
+                    productItemRepository.Update(productItem);
+                    var orderDetail = new OrderDetail
+                    {
+                        ProductItemId = detail.ProductItemId,
+                        ProductQuantity = detail.ProductQuantity,
+                        UnitPrice = detail.UnitPrice,
+                        OrderId = order.Id,
+                        CreatedBy = createOrder.UserId,
+                        LastUpdatedBy = createOrder.UserId
+                    };
+                    await orderDetailRepository.InsertAsync(orderDetail);
+                }
+
+                // Save changes for stock decrease and order details
+                await _unitOfWork.SaveAsync();
+
+                // Create an initial status change after the order is created
+                var statusChangeDto = new StatusChangeForCreationDto
+                {
+                    OrderId = order.Id.ToString(),
+                    Status = order.Status,
+                    ChangeTime = DateTime.UtcNow
                 };
-                await orderDetailRepository.InsertAsync(orderDetail);
+
+                await _statusChangeService.Create(statusChangeDto);
+                await _unitOfWork.SaveAsync();
             }
-
-            await _unitOfWork.SaveAsync();
-
-            // Create an initial status change after the order is created
-            var statusChangeDto = new StatusChangeForCreationDto
+            catch (Exception ex)
             {
-                OrderId = order.Id.ToString(),
-                Status = order.Status,
-                ChangeTime = DateTime.UtcNow
-            };
-
-            await _statusChangeService.Create(statusChangeDto);
+                throw;
+            }
 
             return true;
         }
@@ -378,14 +402,14 @@ namespace HandmadeProductManagement.Services.Service
 
         private void ValidateOrderDetail(OrderDetailForCreationDto detail)
         {
-            if (string.IsNullOrWhiteSpace(detail.ProductId))
+            if (string.IsNullOrWhiteSpace(detail.ProductItemId))
             {
-                throw new BaseException.BadRequestException("invalid_product_id", "Please input Product id.");
+                throw new BaseException.BadRequestException("invalid_product_id", "Please input Product Item id.");
             }
 
-            if (!Guid.TryParse(detail.ProductId, out _))
+            if (!Guid.TryParse(detail.ProductItemId, out _))
             {
-                throw new BaseException.BadRequestException("invalid_product_id_format", "Product ID format is invalid. Example: 123e4567-e89b-12d3-a456-426614174000.");
+                throw new BaseException.BadRequestException("invalid_product_id_format", "Product Item id format is invalid. Example: 123e4567-e89b-12d3-a456-426614174000.");
             }
 
             if (string.IsNullOrWhiteSpace(detail.OrderId))
