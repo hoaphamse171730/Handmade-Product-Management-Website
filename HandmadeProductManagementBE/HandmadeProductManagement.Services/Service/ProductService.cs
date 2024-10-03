@@ -17,6 +17,7 @@ using FluentValidation;
 using HandmadeProductManagement.ModelViews.PromotionModelViews;
 using HandmadeProductManagement.Core.Utils;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
 
 namespace HandmadeProductManagement.Services.Service
 {
@@ -336,6 +337,42 @@ namespace HandmadeProductManagement.Services.Service
             };
 
             return response;
+        }
+
+        public async Task<decimal> CalculateAverageRatingAsync(string productId)
+        {
+            if (string.IsNullOrEmpty(productId))
+            {
+                throw new BaseException.BadRequestException("invalid_product_id", "Product ID cannot be null or empty.");
+            }
+
+            if (!IsValidGuid(productId))
+            {
+                throw new BaseException.BadRequestException("invalid_product_id", "Product ID is not a valid GUID.");
+            }
+
+            var product = await _unitOfWork.GetRepository<Product>().Entities
+                                           .Include(p => p.Reviews)
+                                           .FirstOrDefaultAsync(p => p.Id == productId);
+
+            if (product == null)
+            {
+                throw new BaseException.NotFoundException("product_not_found", "Product not found.");
+            }
+
+            if (product.Reviews == null || !product.Reviews.Any())
+            {
+                return 0m;
+            }
+
+            decimal averageRating = Math.Round((decimal) product.Reviews.Average(r => r.Rating),1);
+
+            // Update the product's rating
+            product.Rating = averageRating;
+            await _unitOfWork.GetRepository<Product>().UpdateAsync(product);
+            await _unitOfWork.SaveAsync();
+
+            return averageRating;
         }
     }
 }

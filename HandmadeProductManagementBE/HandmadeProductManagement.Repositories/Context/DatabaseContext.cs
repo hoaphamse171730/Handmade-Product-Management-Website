@@ -273,10 +273,6 @@ namespace HandmadeProductManagement.Repositories.Context
                       .IsRequired()
                       .HasMaxLength(15);
 
-                entity.Property(e => e.Amount)
-                      .IsRequired()
-                      .HasColumnType("decimal(18, 2)"); 
-
                 entity.Property(e => e.Method)
                       .IsRequired()
                       .HasMaxLength(30);
@@ -344,7 +340,7 @@ namespace HandmadeProductManagement.Repositories.Context
                     .OnDelete(DeleteBehavior.Restrict);
 
                 entity.HasOne(e => e.Shop)
-                    .WithMany()
+                    .WithMany(s => s.Products)
                     .HasForeignKey(e => e.ShopId)
                     .OnDelete(DeleteBehavior.Restrict);
             });

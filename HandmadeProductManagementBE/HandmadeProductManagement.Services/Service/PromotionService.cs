@@ -95,13 +95,19 @@ namespace HandmadeProductManagement.Services.Service
             {
                 throw new BaseException.NotFoundException("not_found", "Promotion Not Found!");
             }
-            if (DateTime.UtcNow > promotion.EndDate)
+
+            promotion.Status = "active";
+
+            // Update nếu promotion hết hạn hoặc chưa tới thời gian active
+            if (DateTime.UtcNow > promotion.EndDate || DateTime.UtcNow < promotion.StartDate)
             {
                 promotion.Status = "inactive";
-                await _unitOfWork.GetRepository<Promotion>().UpdateAsync(promotion);
-                await _unitOfWork.SaveAsync();
             }
-            return true;
+
+            await _unitOfWork.GetRepository<Promotion>().UpdateAsync(promotion);
+            await _unitOfWork.SaveAsync();
+
+            return true; // Trả về true nếu hoạt động bình thường
         }
 
     }

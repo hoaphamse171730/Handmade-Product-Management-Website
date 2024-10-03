@@ -22,5 +22,6 @@ namespace HandmadeProductManagement.Contract.Services.Interface
         Task<bool> SoftDelete(string id);
 
         Task<ProductDetailResponseModel> GetProductDetailsByIdAsync(string productId);
+        Task<decimal> CalculateAverageRatingAsync(string productId);
     }
 }

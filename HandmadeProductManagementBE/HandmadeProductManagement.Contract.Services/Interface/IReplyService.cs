@@ -9,11 +9,11 @@ namespace HandmadeProductManagement.Contract.Services.Interface
 {
     public interface IReplyService
     {
-        Task<IList<ReplyModel>> GetAllAsync(int pageNumber, int pageSize);
+        Task<IList<ReplyModel>> GetByPageAsync(int pageNumber, int pageSize);
         Task<ReplyModel?> GetByIdAsync(string replyId);
-        Task<ReplyModel> CreateAsync(ReplyModel reply);
-        Task<ReplyModel> UpdateAsync(string replyId, ReplyModel updatedReply);
-        Task<bool> DeleteAsync(string replyId);
-        Task<bool> SoftDeleteAsync(string reviewId);
+        Task<bool> CreateAsync(ReplyModel reply);
+        Task<bool> UpdateAsync(string replyId, string shopId, ReplyModel updatedReply);
+        Task<bool> DeleteAsync(string replyId, string shopId);
+        Task<bool> SoftDeleteAsync(string reviewId, string shopId);
     }
 }
