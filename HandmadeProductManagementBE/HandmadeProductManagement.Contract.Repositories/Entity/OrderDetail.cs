@@ -10,7 +10,7 @@ namespace HandmadeProductManagement.Contract.Repositories.Entity
 {
     public class OrderDetail : BaseEntity
     {
-        public string ProductId { get; set; }
+        public string ProductItemId { get; set; }
         public string OrderId { get; set; }
         public int ProductQuantity { get; set; }
         public decimal UnitPrice { get; set; }
