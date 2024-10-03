@@ -13,10 +13,12 @@ namespace HandmadeProductManagement.Services.Service
     public class PaymentDetailService : IPaymentDetailService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IPaymentService _paymentService;
 
-        public PaymentDetailService(IUnitOfWork unitOfWork)
+        public PaymentDetailService(IUnitOfWork unitOfWork, IPaymentService paymentService)
         {
             _unitOfWork = unitOfWork;
+            _paymentService = paymentService;
         }
 
         public async Task<bool> CreatePaymentDetailAsync(CreatePaymentDetailDto createPaymentDetailDto)
@@ -38,7 +40,9 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.NotFoundException("payment_not_found", "Payment not found.");
             }
 
-            var invalidStatuses = new[] { "Completed", "Expired", "Refunded", "Failed", "Closed" };
+            await _paymentService.UpdatePaymentStatusAsync(createPaymentDetailDto.PaymentId, "Processing");
+
+            var invalidStatuses = new[] { "Completed", "Expired", "Refunded", "Closed" };
             if (invalidStatuses.Contains(payment.Status))
             {
                 throw new BaseException.BadRequestException("invalid_payment_status", $"Cannot create payment detail for payment with status '{payment.Status}'.");
@@ -59,21 +63,7 @@ namespace HandmadeProductManagement.Services.Service
 
             if (createPaymentDetailDto.Status == "Success")
             {
-                payment.Status = "Completed";
-                payment.LastUpdatedTime = DateTime.UtcNow;
-                paymentRepository.Update(payment);
-
-                var orderRepository = _unitOfWork.GetRepository<Order>();
-                var order = await orderRepository.Entities
-                                .FirstOrDefaultAsync(o => o.Id == payment.OrderId && !o.DeletedTime.HasValue);
-                if (order != null)
-                {
-                    order.Status = "Processing";
-                    order.LastUpdatedTime = DateTime.UtcNow;
-                    orderRepository.Update(order);
-                }
-
-                await _unitOfWork.SaveAsync();
+                await _paymentService.UpdatePaymentStatusAsync(createPaymentDetailDto.PaymentId, "Completed");
             }
 
             return true;
