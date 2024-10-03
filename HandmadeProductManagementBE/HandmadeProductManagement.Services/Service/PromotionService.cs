@@ -87,7 +87,7 @@ namespace HandmadeProductManagement.Services.Service
         }
 
 
-        public async Task<bool> updatePromotionStatusByRealtime(string id)
+        public async Task<bool> UpdatePromotionStatusByRealtime(string id)
         {
             var promotion = await _unitOfWork.GetRepository<Promotion>().Entities
                 .FirstOrDefaultAsync(p => p.Id == id && p.DeletedTime == null);
@@ -103,6 +103,5 @@ namespace HandmadeProductManagement.Services.Service
             }
             return true;
         }
-
     }
 }

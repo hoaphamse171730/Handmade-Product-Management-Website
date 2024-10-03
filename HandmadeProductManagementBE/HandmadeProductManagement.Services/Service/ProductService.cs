@@ -41,12 +41,12 @@ namespace HandmadeProductManagement.Services.Service
             // Validate CategoryId and ShopId datatype (Guid)
             if (!string.IsNullOrWhiteSpace(searchModel.CategoryId) && !IsValidGuid(searchModel.CategoryId))
             {
-                throw new BaseException.BadRequestException("bad_request","Invalid Category Id");
+                throw new BaseException.BadRequestException("bad_request", "Invalid Category Id");
             }
 
             if (!string.IsNullOrWhiteSpace(searchModel.ShopId) && !IsValidGuid(searchModel.ShopId))
             {
-                throw new BaseException.BadRequestException("bad_request","Invalid Shop ID");
+                throw new BaseException.BadRequestException("bad_request", "Invalid Shop ID");
             }
 
             // Validate MinRating limit (from 0 to 5)
@@ -128,7 +128,7 @@ namespace HandmadeProductManagement.Services.Service
                     Price = g.SelectMany(p => p.ProductItems).Any() ? g.SelectMany(p => p.ProductItems).Min(pi => pi.Price) : 0
                 }).OrderBy(pr => searchModel.SortByPrice
                     ? (searchModel.SortDescending ? (decimal)-pr.Price : (decimal)pr.Price) // Sort by price ascending or descending
-                    : (searchModel.SortDescending ? (decimal) -pr.Rating : (decimal)pr.Rating)) // Sort by rating ascending or descending
+                    : (searchModel.SortDescending ? (decimal)-pr.Rating : (decimal)pr.Rating)) // Sort by rating ascending or descending
                 .ToListAsync();
 
             if (productSearchVMs.IsNullOrEmpty())
@@ -266,11 +266,8 @@ namespace HandmadeProductManagement.Services.Service
             return true;
         }
 
-        private bool IsValidGuid(string input)
-        {
-            return Guid.TryParse(input, out _);
-        }
-
+        private bool IsValidGuid(string input) => Guid.TryParse(input, out _);
+        
         public async Task<ProductDetailResponseModel> GetProductDetailsByIdAsync(string productId)
         {
             if (string.IsNullOrEmpty(productId) || !IsValidGuid(productId))
@@ -334,8 +331,32 @@ namespace HandmadeProductManagement.Services.Service
                     Status = promotion.Status
                 } : null
             };
-
             return response;
+        }
+
+
+        public async Task<ProductDto> UpdateProductPromotionAsync(string productId, string promotionId)
+        {
+            var product = await _unitOfWork.GetRepository<Product>().Entities
+                .Include(p => p.ProductItems)
+                .FirstOrDefaultAsync(p => p.Id == productId);
+            if (product == null)
+                throw new BaseException.NotFoundException("product_not_found", "Product not found");
+            var promotion = await _unitOfWork.GetRepository<Promotion>().Entities
+                .FirstOrDefaultAsync(p => p.Id == promotionId && p.StartDate <= DateTime.UtcNow && p.EndDate >= DateTime.UtcNow);
+            if (promotion == null)
+                throw new BaseException.BadRequestException("invalid_promotion", "Promotion is invalid or expired.");
+            product.Id = promotion.Id;
+            foreach (var productItem in product.ProductItems)
+            {
+                var originalPrice = productItem.Price;
+                productItem.DiscountRate = originalPrice * (1 - promotion.DiscountRate);
+            }
+            product.LastUpdatedTime = DateTime.UtcNow;
+            await _unitOfWork.GetRepository<Product>().UpdateAsync(product);
+            await _unitOfWork.SaveAsync();
+            var productToReturn = _mapper.Map<ProductDto>(product);
+            return productToReturn;
         }
     }
 }

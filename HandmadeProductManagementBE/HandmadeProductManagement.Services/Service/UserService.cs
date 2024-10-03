@@ -6,6 +6,8 @@ using HandmadeProductManagement.ModelViews.UserModelViews;
 using HandmadeProductManagement.Repositories.Entity;
 using Microsoft.EntityFrameworkCore;
 using FluentValidation;
+using HandmadeProductManagement.Contract.Repositories.Entity;
+using HandmadeProductManagement.ModelViews.ProductModelViews;
 namespace HandmadeProductManagement.Services.Service
 {
     public class UserService : IUserService
@@ -20,33 +22,33 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<IList<UserResponseModel>> GetAll()
         {
-            
-                var users = await _unitOfWork.GetRepository<ApplicationUser>()
-                    .Entities
-                    .Select(user => new UserResponseModel
-                    {
-                        Id = user.Id,
-                        UserName = user.UserName,
-                        Email = user.Email,
-                        PhoneNumber = user.PhoneNumber,
-                        CreatedBy = user.CreatedBy,
-                        LastUpdatedBy = user.LastUpdatedBy,
-                        DeletedBy = user.DeletedBy,
-                        CreatedTime = user.CreatedTime,
-                        LastUpdatedTime = user.LastUpdatedTime,
-                        DeletedTime = user.DeletedTime,
-                        Status = user.Status,
-                        CartId = user.CartId,
-                    })
-                    .ToListAsync();
 
-                if (users == null || !users.Any())
+            var users = await _unitOfWork.GetRepository<ApplicationUser>()
+                .Entities
+                .Select(user => new UserResponseModel
                 {
-                    throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(),"Please check UserID");
-                }
+                    Id = user.Id,
+                    UserName = user.UserName,
+                    Email = user.Email,
+                    PhoneNumber = user.PhoneNumber,
+                    CreatedBy = user.CreatedBy,
+                    LastUpdatedBy = user.LastUpdatedBy,
+                    DeletedBy = user.DeletedBy,
+                    CreatedTime = user.CreatedTime,
+                    LastUpdatedTime = user.LastUpdatedTime,
+                    DeletedTime = user.DeletedTime,
+                    Status = user.Status,
+                    CartId = user.CartId,
+                })
+                .ToListAsync();
 
-                return users;
-          
+            if (users == null || !users.Any())
+            {
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Please check UserID");
+            }
+
+            return users;
+
         }
 
         public async Task<UserResponseByIdModel> GetById(string Id)
@@ -56,38 +58,38 @@ namespace HandmadeProductManagement.Services.Service
             {
                 throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Invalid userID");
             }
-                var user = await _unitOfWork.GetRepository<ApplicationUser>()
-                    .Entities
-                    .Where(u => u.Id == userId)
-                    .Select(user => new UserResponseByIdModel
-                    {
-                        Id = user.Id,
-                        UserName = user.UserName,
-                        NormalizedUserName = user.NormalizedUserName,
-                        Email = user.Email,
-                        NormalizedEmail = user.NormalizedEmail,
-                        EmailConfirmed = user.EmailConfirmed,
-                        PhoneNumber = user.PhoneNumber,
-                        PhoneNumberConfirmed = user.PhoneNumberConfirmed,
-                        TwoFactorEnabled = user.TwoFactorEnabled,
-                        LockoutEnd = user.LockoutEnd,
-                        LockoutEnabled = user.LockoutEnabled,
-                        AccessFailedCount = user.AccessFailedCount,
-                        CartId = user.CartId,
-
-                    })
-                    .FirstOrDefaultAsync();
-
-                if (user == null)
+            var user = await _unitOfWork.GetRepository<ApplicationUser>()
+                .Entities
+                .Where(u => u.Id == userId)
+                .Select(user => new UserResponseByIdModel
                 {
-                    throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "user not found");
-                }
-                return user;
-            
+                    Id = user.Id,
+                    UserName = user.UserName,
+                    NormalizedUserName = user.NormalizedUserName,
+                    Email = user.Email,
+                    NormalizedEmail = user.NormalizedEmail,
+                    EmailConfirmed = user.EmailConfirmed,
+                    PhoneNumber = user.PhoneNumber,
+                    PhoneNumberConfirmed = user.PhoneNumberConfirmed,
+                    TwoFactorEnabled = user.TwoFactorEnabled,
+                    LockoutEnd = user.LockoutEnd,
+                    LockoutEnabled = user.LockoutEnabled,
+                    AccessFailedCount = user.AccessFailedCount,
+                    CartId = user.CartId,
+
+                })
+                .FirstOrDefaultAsync();
+
+            if (user == null)
+            {
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "user not found");
+            }
+            return user;
+
         }
         public async Task<UpdateUserResponseModel?> UpdateUser(string id, UpdateUserDTO updateUserDTO)
         {
-          
+
 
             if (!Guid.TryParse(id, out Guid userId))
             {
@@ -97,7 +99,7 @@ namespace HandmadeProductManagement.Services.Service
             var user = await _unitOfWork.GetRepository<ApplicationUser>()
                 .Entities
                 .Where(u => u.Id == userId)
-                .FirstOrDefaultAsync(); 
+                .FirstOrDefaultAsync();
 
             if (user == null)
             {
@@ -191,6 +193,33 @@ namespace HandmadeProductManagement.Services.Service
 
             return true;
         }
+
+
+        public async Task<ProductDto> UpdateProductPromotionAsync(string productId, string promotionId)
+        {
+            
+            var product = await _unitOfWork.GetRepository<Product>().Entities
+                .Include(p => p.ProductItems)
+                .FirstOrDefaultAsync(p => p.Id == productId);
+            if (product == null)
+                throw new BaseException.NotFoundException("product_not_found", "Product not found");
+            var promotion = await _unitOfWork.GetRepository<Promotion>().Entities
+                .FirstOrDefaultAsync(p => p.Id == promotionId && p.StartDate <= DateTime.UtcNow && p.EndDate >= DateTime.UtcNow);
+            if (promotion == null)
+                throw new BaseException.BadRequestException("invalid_promotion", "Promotion is invalid or expired.");
+            product.Id = promotion.Id;
+            foreach (var productItem in product.ProductItems)
+            {
+                var originalPrice = productItem.Price;
+                productItem.DiscountedPrice = originalPrice * (1 - promotion.DiscountRate);
+            }
+            product.LastUpdatedTime = DateTime.UtcNow;
+            await _unitOfWork.GetRepository<Product>().UpdateAsync(product);
+            await _unitOfWork.SaveAsync();
+            var productToReturn = _mapper.Map<ProductDto>(product);
+            return productToReturn;
+        }
+
 
 
     }

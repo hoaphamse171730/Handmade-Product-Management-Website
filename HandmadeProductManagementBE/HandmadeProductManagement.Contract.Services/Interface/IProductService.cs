@@ -20,7 +20,7 @@ namespace HandmadeProductManagement.Contract.Services.Interface
         Task<ProductDto> Update(string id, ProductForUpdateDto promotion);
         Task<bool> Delete(string id);
         Task<bool> SoftDelete(string id);
-
+        Task<ProductDto> UpdateProductPromotionAsync(string productId, string promotionId);
         Task<ProductDetailResponseModel> GetProductDetailsByIdAsync(string productId);
     }
 }

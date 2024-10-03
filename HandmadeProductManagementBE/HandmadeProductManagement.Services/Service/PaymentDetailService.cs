@@ -62,7 +62,7 @@ namespace HandmadeProductManagement.Services.Service
             {
                 payment.Status = "Completed";
                 payment.LastUpdatedTime = DateTime.UtcNow;
-                paymentRepository.Update(payment);
+                await paymentRepository.UpdateAsync(payment);
 
                 var orderRepository = _unitOfWork.GetRepository<Order>();
                 var order = await orderRepository.Entities
@@ -71,9 +71,8 @@ namespace HandmadeProductManagement.Services.Service
                 {
                     order.Status = "Processing";
                     order.LastUpdatedTime = DateTime.UtcNow;
-                    orderRepository.Update(order);
+                    await orderRepository.UpdateAsync(order);
                 }
-
                 await _unitOfWork.SaveAsync();
             }
 
