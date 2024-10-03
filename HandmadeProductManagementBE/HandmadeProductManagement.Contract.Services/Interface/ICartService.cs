@@ -14,6 +14,6 @@ namespace HandmadeProductManagement.Contract.Services
         //Task<CartModel> CreateCart(Guid userId);
         //Task<bool> DeleteCart(Guid userId);
 
-        //Task<Decimal> GetTotalCartPrice(Guid cartId);
+        Task<Decimal> GetTotalCartPrice(string cartId);
     }
 }

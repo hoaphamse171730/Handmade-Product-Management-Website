@@ -54,17 +54,18 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
-       /* public async Task<IActionResult> GetTotalCartPrice(String cartId)
+        [HttpGet("getTotalPrice")]
+        public async Task<IActionResult> GetTotalCartPrice(string cartId)
         {
-            var response = new BaseResponse<IList<UserResponseModel>>
+            var response = new BaseResponse<Decimal>
             {
                 Code = "200",
                 StatusCode = StatusCodeHelper.OK,
                 Message = "Success",
-                Data = await 
+                Data = await _cartService.GetTotalCartPrice(cartId),
             };
             return Ok(response);
-        }*/
+        }
 
     }
 }
