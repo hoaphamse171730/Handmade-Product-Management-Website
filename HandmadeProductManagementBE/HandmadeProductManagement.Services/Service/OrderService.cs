@@ -66,7 +66,6 @@ namespace HandmadeProductManagement.Services.Service
 
                 foreach (var detail in createOrder.OrderDetails)
                 {
-                    ValidateOrderDetail(detail);
 
                     var productItem = await productItemRepository.Entities
                         .FirstOrDefaultAsync(p => p.Id == detail.ProductItemId && !p.DeletedTime.HasValue);
