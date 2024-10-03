@@ -58,13 +58,13 @@ namespace HandmadeProductManagementAPI.Controllers
 
         }
 
-        [HttpGet("by-order/{orderId}")]
-        public async Task<IActionResult> GetOrderDetailsByOrderId(string orderId)
-        {
+        //[HttpGet("by-order/{orderId}")] // fix sau
+        //public async Task<IActionResult> GetOrderDetailsByOrderId(string orderId)
+        //{
 
-            var result = await _orderDetailService.GetByOrderId(orderId);
-            return Ok(BaseResponse<IList<OrderDetailDto>>.OkResponse(result));
+        //    var result = await _orderDetailService.GetByOrderId(orderId);
+        //    return Ok(BaseResponse<IList<OrderDetailDto>>.OkResponse(result));
 
-        }
+        //}
     }
 }

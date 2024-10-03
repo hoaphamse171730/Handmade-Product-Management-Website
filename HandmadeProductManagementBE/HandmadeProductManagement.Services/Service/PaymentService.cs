@@ -20,9 +20,9 @@ namespace HandmadeProductManagement.Services.Service
     {
         private readonly IUnitOfWork _unitOfWork;
 
-        public PaymentService(IUnitOfWork unitOfWork)
+        public PaymentService(IUnitOfWork unitOfWork) => _unitOfWork = unitOfWork;
         {
-            _unitOfWork = unitOfWork;
+           
         }
 
         public async Task<bool> CreatePaymentAsync(CreatePaymentDto createPaymentDto)
