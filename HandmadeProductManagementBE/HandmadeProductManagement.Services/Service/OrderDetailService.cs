@@ -101,11 +101,9 @@ namespace HandmadeProductManagement.Services.Service
             var repo = _unitOfWork.GetRepository<OrderDetail>();
             var orderDetailEntity = await repo.Entities
                 .FirstOrDefaultAsync(p => p.Id == id && !p.DeletedTime.HasValue && p.DeletedBy == null);
-
             if (orderDetailEntity == null)
                 throw new KeyNotFoundException("Order Detail not found or has already been deleted");
-
-            orderDetailEntity.DeletedBy = "System"; // update with actual user context later
+            orderDetailEntity.DeletedBy = "System"; 
             orderDetailEntity.DeletedTime = DateTime.UtcNow;
             await repo.UpdateAsync(orderDetailEntity); 
             await _unitOfWork.SaveAsync();
