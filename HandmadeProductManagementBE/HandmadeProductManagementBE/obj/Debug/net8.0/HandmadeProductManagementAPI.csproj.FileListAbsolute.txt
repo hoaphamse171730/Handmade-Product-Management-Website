@@ -477,7 +477,6 @@ D:\FPT\2024\sem6\Handmade-Product-Management-Website\HandmadeProductManagementBE
 D:\FPT\2024\sem6\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\obj\Debug\net8.0\ref\HandmadeProductManagementAPI.dll
 D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\bin\Debug\net8.0\appsettings.Development.json
 D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\bin\Debug\net8.0\appsettings.json
-D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\bin\Debug\net8.0\HandmadeProductManagementAPI.staticwebassets.endpoints.json
 D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\bin\Debug\net8.0\HandmadeProductManagementAPI.exe
 D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\bin\Debug\net8.0\HandmadeProductManagementAPI.deps.json
 D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\bin\Debug\net8.0\HandmadeProductManagementAPI.runtimeconfig.json
@@ -538,7 +537,6 @@ D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\
 D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\bin\Debug\net8.0\System.Runtime.Caching.dll
 D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\bin\Debug\net8.0\System.Security.Cryptography.ProtectedData.dll
 D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\bin\Debug\net8.0\System.Security.Permissions.dll
-D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\bin\Debug\net8.0\System.Text.Json.dll
 D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\bin\Debug\net8.0\System.Windows.Extensions.dll
 D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\bin\Debug\net8.0\cs\Microsoft.CodeAnalysis.resources.dll
 D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\bin\Debug\net8.0\de\Microsoft.CodeAnalysis.resources.dll
@@ -627,9 +625,7 @@ D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\
 D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\obj\Debug\net8.0\scopedcss\bundle\HandmadeProductManagementAPI.styles.css
 D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\obj\Debug\net8.0\staticwebassets.build.json
 D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\obj\Debug\net8.0\staticwebassets.development.json
-D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\obj\Debug\net8.0\staticwebassets.build.endpoints.json
 D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\obj\Debug\net8.0\staticwebassets\msbuild.HandmadeProductManagementAPI.Microsoft.AspNetCore.StaticWebAssets.props
-D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\obj\Debug\net8.0\staticwebassets\msbuild.HandmadeProductManagementAPI.Microsoft.AspNetCore.StaticWebAssetEndpoints.props
 D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\obj\Debug\net8.0\staticwebassets\msbuild.build.HandmadeProductManagementAPI.props
 D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\obj\Debug\net8.0\staticwebassets\msbuild.buildMultiTargeting.HandmadeProductManagementAPI.props
 D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\obj\Debug\net8.0\staticwebassets\msbuild.buildTransitive.HandmadeProductManagementAPI.props

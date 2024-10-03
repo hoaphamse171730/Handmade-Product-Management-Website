@@ -1,217 +1,162 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\",
+  "WorkspaceRootPath": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{B48678A4-822E-4A18-9F58-32C525718D88}|HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj|d:\\fpt\\2024\\sem6\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.services\\service\\userservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{B48678A4-822E-4A18-9F58-32C525718D88}|HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj|solutionrelative:handmadeproductmanagement.services\\service\\userservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\handmadeproductmanagement.contract.repositories\\entity\\applicationuser.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|solutionrelative:handmadeproductmanagement.contract.repositories\\entity\\applicationuser.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{B48678A4-822E-4A18-9F58-32C525718D88}|HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj|D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\handmadeproductmanagement.services\\dependencyinjection.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{B48678A4-822E-4A18-9F58-32C525718D88}|HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj|solutionrelative:handmadeproductmanagement.services\\dependencyinjection.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{5ECD79B2-DBFD-424D-B888-3C9BBB2FA09D}|HandmadeProductManagement.Contract.Services\\HandmadeProductManagement.Contract.Services.csproj|D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\handmadeproductmanagement.contract.services\\interface\\iuserservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{5ECD79B2-DBFD-424D-B888-3C9BBB2FA09D}|HandmadeProductManagement.Contract.Services\\HandmadeProductManagement.Contract.Services.csproj|solutionrelative:handmadeproductmanagement.contract.services\\interface\\iuserservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\handmadeproductmanagementbe\\controllers\\userscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|solutionrelative:handmadeproductmanagementbe\\controllers\\userscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|d:\\fpt\\2024\\sem6\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagementbe\\dependencyinjection.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|solutionrelative:handmadeproductmanagementbe\\dependencyinjection.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\handmadeproductmanagementbe\\controllers\\weatherforecastcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|solutionrelative:handmadeproductmanagementbe\\controllers\\weatherforecastcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{5ECD79B2-DBFD-424D-B888-3C9BBB2FA09D}|HandmadeProductManagement.Contract.Services\\HandmadeProductManagement.Contract.Services.csproj|D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\handmadeproductmanagement.contract.services\\interface\\istatuschangeservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{5ECD79B2-DBFD-424D-B888-3C9BBB2FA09D}|HandmadeProductManagement.Contract.Services\\HandmadeProductManagement.Contract.Services.csproj|solutionrelative:handmadeproductmanagement.contract.services\\interface\\istatuschangeservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{B48678A4-822E-4A18-9F58-32C525718D88}|HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj|D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\handmadeproductmanagement.services\\service\\statuschangeservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{B48678A4-822E-4A18-9F58-32C525718D88}|HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj|solutionrelative:handmadeproductmanagement.services\\service\\statuschangeservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{B48678A4-822E-4A18-9F58-32C525718D88}|HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj|D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\handmadeproductmanagement.services\\service\\productservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{B48678A4-822E-4A18-9F58-32C525718D88}|HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj|solutionrelative:handmadeproductmanagement.services\\service\\productservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|d:\\fpt\\2024\\sem6\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagementbe\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|solutionrelative:handmadeproductmanagementbe\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|d:\\fpt\\2024\\sem6\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagementbe\\handmadeproductmanagementbe.http||{5703B403-55E7-4C63-8C88-A8F52C7A45C5}",
-      "RelativeMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|solutionrelative:handmadeproductmanagementbe\\handmadeproductmanagementbe.http||{5703B403-55E7-4C63-8C88-A8F52C7A45C5}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|d:\\fpt\\2024\\sem6\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.contract.repositories\\entity\\applicationroleclaims.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|solutionrelative:handmadeproductmanagement.contract.repositories\\entity\\applicationroleclaims.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\handmadeproductmanagement.contract.repositories\\iuow\\igenericrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|solutionrelative:handmadeproductmanagement.contract.repositories\\iuow\\igenericrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|d:\\fpt\\2024\\sem6\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.contract.repositories\\entity\\orderdetail.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|solutionrelative:handmadeproductmanagement.contract.repositories\\entity\\orderdetail.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|d:\\fpt\\2024\\sem6\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.contract.repositories\\entity\\payment.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|solutionrelative:handmadeproductmanagement.contract.repositories\\entity\\payment.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{B48678A4-822E-4A18-9F58-32C525718D88}|HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj|D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\handmadeproductmanagement.services\\service\\shopservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{B48678A4-822E-4A18-9F58-32C525718D88}|HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj|solutionrelative:handmadeproductmanagement.services\\service\\shopservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{B48678A4-822E-4A18-9F58-32C525718D88}|HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj|d:\\fpt\\2024\\sem6\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.services\\service\\promotionservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{B48678A4-822E-4A18-9F58-32C525718D88}|HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj|d:\\amazing_tech\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.services\\service\\promotionservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{B48678A4-822E-4A18-9F58-32C525718D88}|HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj|solutionrelative:handmadeproductmanagement.services\\service\\promotionservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{B48678A4-822E-4A18-9F58-32C525718D88}|HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj|D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\handmadeproductmanagement.services\\service\\cancelreasonservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{B48678A4-822E-4A18-9F58-32C525718D88}|HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj|solutionrelative:handmadeproductmanagement.services\\service\\cancelreasonservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{5ECD79B2-DBFD-424D-B888-3C9BBB2FA09D}|HandmadeProductManagement.Contract.Services\\HandmadeProductManagement.Contract.Services.csproj|d:\\fpt\\2024\\sem6\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.contract.services\\interface\\icancelreasonservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{5ECD79B2-DBFD-424D-B888-3C9BBB2FA09D}|HandmadeProductManagement.Contract.Services\\HandmadeProductManagement.Contract.Services.csproj|solutionrelative:handmadeproductmanagement.contract.services\\interface\\icancelreasonservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{B48678A4-822E-4A18-9F58-32C525718D88}|HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj|d:\\fpt\\2024\\sem6\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.services\\service\\orderservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{B48678A4-822E-4A18-9F58-32C525718D88}|HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj|solutionrelative:handmadeproductmanagement.services\\service\\orderservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{EA9CF239-AA84-4A09-957A-646C14A6F04B}|HandmadeProductManagement.Repositories\\HandmadeProductManagement.Repositories.csproj|d:\\fpt\\2024\\sem6\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.repositories\\uow\\genericrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{EA9CF239-AA84-4A09-957A-646C14A6F04B}|HandmadeProductManagement.Repositories\\HandmadeProductManagement.Repositories.csproj|solutionrelative:handmadeproductmanagement.repositories\\uow\\genericrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{EA9CF239-AA84-4A09-957A-646C14A6F04B}|HandmadeProductManagement.Repositories\\HandmadeProductManagement.Repositories.csproj|d:\\fpt\\2024\\sem6\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.repositories\\uow\\unitofwork.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{EA9CF239-AA84-4A09-957A-646C14A6F04B}|HandmadeProductManagement.Repositories\\HandmadeProductManagement.Repositories.csproj|solutionrelative:handmadeproductmanagement.repositories\\uow\\unitofwork.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|d:\\fpt\\2024\\sem6\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.contract.repositories\\entity\\applicationuserclaims.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|solutionrelative:handmadeproductmanagement.contract.repositories\\entity\\applicationuserclaims.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|d:\\fpt\\2024\\sem6\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.contract.repositories\\entity\\applicationuserlogins.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|solutionrelative:handmadeproductmanagement.contract.repositories\\entity\\applicationuserlogins.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|d:\\fpt\\2024\\sem6\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.contract.repositories\\entity\\applicationuserroles.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|solutionrelative:handmadeproductmanagement.contract.repositories\\entity\\applicationuserroles.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|d:\\fpt\\2024\\sem6\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.contract.repositories\\entity\\applicationusertokens.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|solutionrelative:handmadeproductmanagement.contract.repositories\\entity\\applicationusertokens.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|d:\\fpt\\2024\\sem6\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.contract.repositories\\entity\\applicationrole.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|solutionrelative:handmadeproductmanagement.contract.repositories\\entity\\applicationrole.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{29FDA659-8E8E-460D-8CF9-0F992D752ECA}|HandmadeProductManagement.ModelView\\HandmadeProductManagement.ModelViews.csproj|d:\\fpt\\2024\\sem6\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.modelview\\usermodelviews\\updateuserresponsemodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{29FDA659-8E8E-460D-8CF9-0F992D752ECA}|HandmadeProductManagement.ModelView\\HandmadeProductManagement.ModelViews.csproj|solutionrelative:handmadeproductmanagement.modelview\\usermodelviews\\updateuserresponsemodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{29FDA659-8E8E-460D-8CF9-0F992D752ECA}|HandmadeProductManagement.ModelView\\HandmadeProductManagement.ModelViews.csproj|d:\\fpt\\2024\\sem6\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.modelview\\usermodelviews\\updateuserdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{29FDA659-8E8E-460D-8CF9-0F992D752ECA}|HandmadeProductManagement.ModelView\\HandmadeProductManagement.ModelViews.csproj|solutionrelative:handmadeproductmanagement.modelview\\usermodelviews\\updateuserdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{5ECD79B2-DBFD-424D-B888-3C9BBB2FA09D}|HandmadeProductManagement.Contract.Services\\HandmadeProductManagement.Contract.Services.csproj|d:\\fpt\\2024\\sem6\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.contract.services\\interface\\ishopservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{5ECD79B2-DBFD-424D-B888-3C9BBB2FA09D}|HandmadeProductManagement.Contract.Services\\HandmadeProductManagement.Contract.Services.csproj|solutionrelative:handmadeproductmanagement.contract.services\\interface\\ishopservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|d:\\fpt\\2024\\sem6\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagementbe\\weatherforecast.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|solutionrelative:handmadeproductmanagementbe\\weatherforecast.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\handmadeproductmanagementbe\\appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
-      "RelativeMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|solutionrelative:handmadeproductmanagementbe\\appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{29FDA659-8E8E-460D-8CF9-0F992D752ECA}|HandmadeProductManagement.ModelView\\HandmadeProductManagement.ModelViews.csproj|d:\\fpt\\2024\\sem6\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.modelview\\usermodelviews\\userresponsemodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{29FDA659-8E8E-460D-8CF9-0F992D752ECA}|HandmadeProductManagement.ModelView\\HandmadeProductManagement.ModelViews.csproj|solutionrelative:handmadeproductmanagement.modelview\\usermodelviews\\userresponsemodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{29FDA659-8E8E-460D-8CF9-0F992D752ECA}|HandmadeProductManagement.ModelView\\HandmadeProductManagement.ModelViews.csproj|d:\\fpt\\2024\\sem6\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.modelview\\usermodelviews\\userresponsebyidmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{29FDA659-8E8E-460D-8CF9-0F992D752ECA}|HandmadeProductManagement.ModelView\\HandmadeProductManagement.ModelViews.csproj|solutionrelative:handmadeproductmanagement.modelview\\usermodelviews\\userresponsebyidmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{5ECD79B2-DBFD-424D-B888-3C9BBB2FA09D}|HandmadeProductManagement.Contract.Services\\HandmadeProductManagement.Contract.Services.csproj|d:\\fpt\\2024\\sem6\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.contract.services\\interface\\ipromotionservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{5ECD79B2-DBFD-424D-B888-3C9BBB2FA09D}|HandmadeProductManagement.Contract.Services\\HandmadeProductManagement.Contract.Services.csproj|solutionrelative:handmadeproductmanagement.contract.services\\interface\\ipromotionservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{B48678A4-822E-4A18-9F58-32C525718D88}|HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj|d:\\fpt\\2024\\sem6\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.services\\handmadeproductmanagement.services.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
-      "RelativeMoniker": "D:0:0:{B48678A4-822E-4A18-9F58-32C525718D88}|HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj|solutionrelative:handmadeproductmanagement.services\\handmadeproductmanagement.services.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{29FDA659-8E8E-460D-8CF9-0F992D752ECA}|HandmadeProductManagement.ModelView\\HandmadeProductManagement.ModelViews.csproj|D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\handmadeproductmanagement.modelview\\productmodelviews\\productresponsemodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{29FDA659-8E8E-460D-8CF9-0F992D752ECA}|HandmadeProductManagement.ModelView\\HandmadeProductManagement.ModelViews.csproj|solutionrelative:handmadeproductmanagement.modelview\\productmodelviews\\productresponsemodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\handmadeproductmanagementbe\\extensions\\identityserviceextensions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|solutionrelative:handmadeproductmanagementbe\\extensions\\identityserviceextensions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\handmadeproductmanagementbe\\extensions\\applicationserviceextenstions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|solutionrelative:handmadeproductmanagementbe\\extensions\\applicationserviceextenstions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\FPT\\2024\\sem6\\Handmade(backup)\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\appsettings.Development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\handmadeproductmanagement.contract.repositories\\iuow\\iunitofwork.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|solutionrelative:handmadeproductmanagement.contract.repositories\\iuow\\iunitofwork.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\handmadeproductmanagementbe\\controllers\\cancelreasoncontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|solutionrelative:handmadeproductmanagementbe\\controllers\\cancelreasoncontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{C1EB3DE5-152E-4663-BD84-2D1155B125D8}|HandmadeProductManagement.Core\\HandmadeProductManagement.Core.csproj|D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\handmadeproductmanagement.core\\base\\basepaginatedlist.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{C1EB3DE5-152E-4663-BD84-2D1155B125D8}|HandmadeProductManagement.Core\\HandmadeProductManagement.Core.csproj|solutionrelative:handmadeproductmanagement.core\\base\\basepaginatedlist.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\handmadeproductmanagementbe\\controllers\\statuschangecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|solutionrelative:handmadeproductmanagementbe\\controllers\\statuschangecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\handmadeproductmanagementbe\\controllers\\shopcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|solutionrelative:handmadeproductmanagementbe\\controllers\\shopcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\handmadeproductmanagementbe\\controllers\\promotionscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|d:\\amazing_tech\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagementbe\\controllers\\promotionscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|solutionrelative:handmadeproductmanagementbe\\controllers\\promotionscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\handmadeproductmanagementbe\\controllers\\productcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|solutionrelative:handmadeproductmanagementbe\\controllers\\productcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{5ECD79B2-DBFD-424D-B888-3C9BBB2FA09D}|HandmadeProductManagement.Contract.Services\\HandmadeProductManagement.Contract.Services.csproj|d:\\amazing_tech\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.contract.services\\interface\\ipromotionservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5ECD79B2-DBFD-424D-B888-3C9BBB2FA09D}|HandmadeProductManagement.Contract.Services\\HandmadeProductManagement.Contract.Services.csproj|solutionrelative:handmadeproductmanagement.contract.services\\interface\\ipromotionservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\handmadeproductmanagementbe\\controllers\\ordercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{B48678A4-822E-4A18-9F58-32C525718D88}|HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj|d:\\amazing_tech\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.services\\service\\orderservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B48678A4-822E-4A18-9F58-32C525718D88}|HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj|solutionrelative:handmadeproductmanagement.services\\service\\orderservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|d:\\amazing_tech\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagementbe\\controllers\\orderdetailcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|solutionrelative:handmadeproductmanagementbe\\controllers\\orderdetailcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|d:\\amazing_tech\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagementbe\\controllers\\ordercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|solutionrelative:handmadeproductmanagementbe\\controllers\\ordercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\handmadeproductmanagement.contract.repositories\\entity\\product.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{5ECD79B2-DBFD-424D-B888-3C9BBB2FA09D}|HandmadeProductManagement.Contract.Services\\HandmadeProductManagement.Contract.Services.csproj|d:\\amazing_tech\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.contract.services\\interface\\iorderservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5ECD79B2-DBFD-424D-B888-3C9BBB2FA09D}|HandmadeProductManagement.Contract.Services\\HandmadeProductManagement.Contract.Services.csproj|solutionrelative:handmadeproductmanagement.contract.services\\interface\\iorderservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|d:\\amazing_tech\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagementbe\\controllers\\userscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|solutionrelative:handmadeproductmanagementbe\\controllers\\userscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5ECD79B2-DBFD-424D-B888-3C9BBB2FA09D}|HandmadeProductManagement.Contract.Services\\HandmadeProductManagement.Contract.Services.csproj|d:\\amazing_tech\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.contract.services\\interface\\iproductservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5ECD79B2-DBFD-424D-B888-3C9BBB2FA09D}|HandmadeProductManagement.Contract.Services\\HandmadeProductManagement.Contract.Services.csproj|solutionrelative:handmadeproductmanagement.contract.services\\interface\\iproductservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|d:\\amazing_tech\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagementbe\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|solutionrelative:handmadeproductmanagementbe\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5ECD79B2-DBFD-424D-B888-3C9BBB2FA09D}|HandmadeProductManagement.Contract.Services\\HandmadeProductManagement.Contract.Services.csproj|d:\\amazing_tech\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.contract.services\\interface\\iorderdetailservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5ECD79B2-DBFD-424D-B888-3C9BBB2FA09D}|HandmadeProductManagement.Contract.Services\\HandmadeProductManagement.Contract.Services.csproj|solutionrelative:handmadeproductmanagement.contract.services\\interface\\iorderdetailservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B48678A4-822E-4A18-9F58-32C525718D88}|HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj|d:\\amazing_tech\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.services\\service\\productservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B48678A4-822E-4A18-9F58-32C525718D88}|HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj|solutionrelative:handmadeproductmanagement.services\\service\\productservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|d:\\amazing_tech\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagementbe\\controllers\\productcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|solutionrelative:handmadeproductmanagementbe\\controllers\\productcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B48678A4-822E-4A18-9F58-32C525718D88}|HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj|d:\\amazing_tech\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.services\\service\\userservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B48678A4-822E-4A18-9F58-32C525718D88}|HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj|solutionrelative:handmadeproductmanagement.services\\service\\userservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B48678A4-822E-4A18-9F58-32C525718D88}|HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj|d:\\amazing_tech\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.services\\service\\statuschangeservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B48678A4-822E-4A18-9F58-32C525718D88}|HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj|solutionrelative:handmadeproductmanagement.services\\service\\statuschangeservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|d:\\amazing_tech\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagementbe\\controllers\\replycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|solutionrelative:handmadeproductmanagementbe\\controllers\\replycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|d:\\amazing_tech\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.contract.repositories\\entity\\productitem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|solutionrelative:handmadeproductmanagement.contract.repositories\\entity\\productitem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|d:\\amazing_tech\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.contract.repositories\\entity\\promotion.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|solutionrelative:handmadeproductmanagement.contract.repositories\\entity\\promotion.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|d:\\amazing_tech\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.contract.repositories\\entity\\product.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|solutionrelative:handmadeproductmanagement.contract.repositories\\entity\\product.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{29FDA659-8E8E-460D-8CF9-0F992D752ECA}|HandmadeProductManagement.ModelView\\HandmadeProductManagement.ModelViews.csproj|D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\handmadeproductmanagement.modelview\\productmodelviews\\productsortmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{29FDA659-8E8E-460D-8CF9-0F992D752ECA}|HandmadeProductManagement.ModelView\\HandmadeProductManagement.ModelViews.csproj|solutionrelative:handmadeproductmanagement.modelview\\productmodelviews\\productsortmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{B48678A4-822E-4A18-9F58-32C525718D88}|HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj|d:\\amazing_tech\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.services\\service\\cancelreasonservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B48678A4-822E-4A18-9F58-32C525718D88}|HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj|solutionrelative:handmadeproductmanagement.services\\service\\cancelreasonservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{29FDA659-8E8E-460D-8CF9-0F992D752ECA}|HandmadeProductManagement.ModelView\\HandmadeProductManagement.ModelViews.csproj|D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\handmadeproductmanagement.modelview\\productmodelviews\\productsearchmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{29FDA659-8E8E-460D-8CF9-0F992D752ECA}|HandmadeProductManagement.ModelView\\HandmadeProductManagement.ModelViews.csproj|solutionrelative:handmadeproductmanagement.modelview\\productmodelviews\\productsearchmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{B48678A4-822E-4A18-9F58-32C525718D88}|HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj|d:\\amazing_tech\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.services\\service\\orderdetailservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B48678A4-822E-4A18-9F58-32C525718D88}|HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj|solutionrelative:handmadeproductmanagement.services\\service\\orderdetailservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{C1EB3DE5-152E-4663-BD84-2D1155B125D8}|HandmadeProductManagement.Core\\HandmadeProductManagement.Core.csproj|D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\handmadeproductmanagement.core\\base\\baseentity.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{C1EB3DE5-152E-4663-BD84-2D1155B125D8}|HandmadeProductManagement.Core\\HandmadeProductManagement.Core.csproj|solutionrelative:handmadeproductmanagement.core\\base\\baseentity.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|d:\\amazing_tech\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.contract.repositories\\entity\\order.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|solutionrelative:handmadeproductmanagement.contract.repositories\\entity\\order.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B48678A4-822E-4A18-9F58-32C525718D88}|HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj|d:\\amazing_tech\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.services\\service\\replyservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B48678A4-822E-4A18-9F58-32C525718D88}|HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj|solutionrelative:handmadeproductmanagement.services\\service\\replyservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B48678A4-822E-4A18-9F58-32C525718D88}|HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj|d:\\amazing_tech\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.services\\service\\reviewservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B48678A4-822E-4A18-9F58-32C525718D88}|HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj|solutionrelative:handmadeproductmanagement.services\\service\\reviewservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|d:\\amazing_tech\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.contract.repositories\\entity\\orderdetail.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|solutionrelative:handmadeproductmanagement.contract.repositories\\entity\\orderdetail.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|d:\\amazing_tech\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.contract.repositories\\entity\\payment.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|solutionrelative:handmadeproductmanagement.contract.repositories\\entity\\payment.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|d:\\amazing_tech\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.contract.repositories\\entity\\productimage.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|solutionrelative:handmadeproductmanagement.contract.repositories\\entity\\productimage.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|d:\\amazing_tech\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.contract.repositories\\entity\\productconfiguration.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|solutionrelative:handmadeproductmanagement.contract.repositories\\entity\\productconfiguration.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5ECD79B2-DBFD-424D-B888-3C9BBB2FA09D}|HandmadeProductManagement.Contract.Services\\HandmadeProductManagement.Contract.Services.csproj|d:\\amazing_tech\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.contract.services\\interface\\iuserservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5ECD79B2-DBFD-424D-B888-3C9BBB2FA09D}|HandmadeProductManagement.Contract.Services\\HandmadeProductManagement.Contract.Services.csproj|solutionrelative:handmadeproductmanagement.contract.services\\interface\\iuserservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|d:\\amazing_tech\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagementbe\\handmadeproductmanagementapi.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{EE1372D7-C3D8-4427-8DD7-AA740B6900C2}|HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj|solutionrelative:handmadeproductmanagementbe\\handmadeproductmanagementapi.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{29FDA659-8E8E-460D-8CF9-0F992D752ECA}|HandmadeProductManagement.ModelView\\HandmadeProductManagement.ModelViews.csproj|d:\\amazing_tech\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.modelview\\handmadeproductmanagement.modelviews.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{29FDA659-8E8E-460D-8CF9-0F992D752ECA}|HandmadeProductManagement.ModelView\\HandmadeProductManagement.ModelViews.csproj|solutionrelative:handmadeproductmanagement.modelview\\handmadeproductmanagement.modelviews.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|d:\\amazing_tech\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.contract.repositories\\handmadeproductmanagement.contract.repositories.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{CE7EDF5C-2BF3-4DEC-A44E-2B48360A1C08}|HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj|solutionrelative:handmadeproductmanagement.contract.repositories\\handmadeproductmanagement.contract.repositories.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{29FDA659-8E8E-460D-8CF9-0F992D752ECA}|HandmadeProductManagement.ModelView\\HandmadeProductManagement.ModelViews.csproj|d:\\amazing_tech\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.modelview\\orderdetailmodelviews\\orderdetailformanipulationdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{29FDA659-8E8E-460D-8CF9-0F992D752ECA}|HandmadeProductManagement.ModelView\\HandmadeProductManagement.ModelViews.csproj|solutionrelative:handmadeproductmanagement.modelview\\orderdetailmodelviews\\orderdetailformanipulationdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{29FDA659-8E8E-460D-8CF9-0F992D752ECA}|HandmadeProductManagement.ModelView\\HandmadeProductManagement.ModelViews.csproj|d:\\amazing_tech\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.modelview\\orderdetailmodelviews\\orderdetaildto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{29FDA659-8E8E-460D-8CF9-0F992D752ECA}|HandmadeProductManagement.ModelView\\HandmadeProductManagement.ModelViews.csproj|solutionrelative:handmadeproductmanagement.modelview\\orderdetailmodelviews\\orderdetaildto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{29FDA659-8E8E-460D-8CF9-0F992D752ECA}|HandmadeProductManagement.ModelView\\HandmadeProductManagement.ModelViews.csproj|d:\\amazing_tech\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.modelview\\orderdetailmodelviews\\orderdetailforcreationdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{29FDA659-8E8E-460D-8CF9-0F992D752ECA}|HandmadeProductManagement.ModelView\\HandmadeProductManagement.ModelViews.csproj|solutionrelative:handmadeproductmanagement.modelview\\orderdetailmodelviews\\orderdetailforcreationdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{29FDA659-8E8E-460D-8CF9-0F992D752ECA}|HandmadeProductManagement.ModelView\\HandmadeProductManagement.ModelViews.csproj|d:\\amazing_tech\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.modelview\\orderdetailmodelviews\\orderdetailforupdatedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{29FDA659-8E8E-460D-8CF9-0F992D752ECA}|HandmadeProductManagement.ModelView\\HandmadeProductManagement.ModelViews.csproj|solutionrelative:handmadeproductmanagement.modelview\\orderdetailmodelviews\\orderdetailforupdatedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EA9CF239-AA84-4A09-957A-646C14A6F04B}|HandmadeProductManagement.Repositories\\HandmadeProductManagement.Repositories.csproj|d:\\amazing_tech\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.repositories\\context\\databasecontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EA9CF239-AA84-4A09-957A-646C14A6F04B}|HandmadeProductManagement.Repositories\\HandmadeProductManagement.Repositories.csproj|solutionrelative:handmadeproductmanagement.repositories\\context\\databasecontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5ECD79B2-DBFD-424D-B888-3C9BBB2FA09D}|HandmadeProductManagement.Contract.Services\\HandmadeProductManagement.Contract.Services.csproj|d:\\amazing_tech\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.contract.services\\interface\\ireplyservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5ECD79B2-DBFD-424D-B888-3C9BBB2FA09D}|HandmadeProductManagement.Contract.Services\\HandmadeProductManagement.Contract.Services.csproj|solutionrelative:handmadeproductmanagement.contract.services\\interface\\ireplyservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B48678A4-822E-4A18-9F58-32C525718D88}|HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj|d:\\amazing_tech\\handmade-product-management-website\\handmadeproductmanagementbe\\handmadeproductmanagement.services\\service\\shopservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B48678A4-822E-4A18-9F58-32C525718D88}|HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj|solutionrelative:handmadeproductmanagement.services\\service\\shopservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -221,36 +166,8 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 9,
+          "SelectedChildIndex": 2,
           "Children": [
-            {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
-            },
-            {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{74946827-37a0-11d2-a273-00c04f8ef4ff}"
-            },
-            {
-              "$type": "Bookmark",
-              "Name": "ST:128:0:{75188d03-9892-4ae2-abf1-207126247ce5}"
-            },
-            {
-              "$type": "Bookmark",
-              "Name": "ST:129:0:{75188d03-9892-4ae2-abf1-207126247ce5}"
-            },
-            {
-              "$type": "Bookmark",
-              "Name": "ST:129:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
-            },
-            {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{5da8d69b-058a-4294-a87a-f4f7ae2983b3}"
-            },
-            {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{34e76e81-ee4a-11d0-ae2e-00a0c90fffc3}"
-            },
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
@@ -258,693 +175,509 @@
             {
               "$type": "Document",
               "DocumentIndex": 3,
-              "Title": "IUserService.cs",
-              "DocumentMoniker": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Services\\Interface\\IUserService.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Services\\Interface\\IUserService.cs",
-              "ToolTip": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Services\\Interface\\IUserService.cs",
-              "RelativeToolTip": "HandmadeProductManagement.Contract.Services\\Interface\\IUserService.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAABEAAAAFAAAA",
+              "Title": "OrderService.cs",
+              "DocumentMoniker": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\Service\\OrderService.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagement.Services\\Service\\OrderService.cs",
+              "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\Service\\OrderService.cs",
+              "RelativeToolTip": "HandmadeProductManagement.Services\\Service\\OrderService.cs",
+              "ViewState": "AgIAAO8AAAAAAAAAAAAAAPMAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-25T18:31:17.198Z",
+              "WhenOpened": "2024-10-03T01:26:51.296Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "UserService.cs",
-              "DocumentMoniker": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\Service\\UserService.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagement.Services\\Service\\UserService.cs",
-              "ToolTip": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\Service\\UserService.cs*",
-              "RelativeToolTip": "HandmadeProductManagement.Services\\Service\\UserService.cs*",
-              "ViewState": "AQIAAIIAAAAAAAAAAAAQwJkAAAANAAAA",
+              "Title": "PromotionService.cs",
+              "DocumentMoniker": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\Service\\PromotionService.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagement.Services\\Service\\PromotionService.cs",
+              "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\Service\\PromotionService.cs*",
+              "RelativeToolTip": "HandmadeProductManagement.Services\\Service\\PromotionService.cs*",
+              "ViewState": "AgIAAB8AAAAAAAAAAAAQwA4AAAAkAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-26T01:59:55.518Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "UsersController.cs",
-              "DocumentMoniker": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\Controllers\\UsersController.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagementBE\\Controllers\\UsersController.cs",
-              "ToolTip": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\Controllers\\UsersController.cs",
-              "RelativeToolTip": "HandmadeProductManagementBE\\Controllers\\UsersController.cs",
-              "ViewState": "AQIAAE0AAAAAAAAAAAAhwFwAAABXAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-25T18:18:48.728Z",
+              "WhenOpened": "2024-10-03T01:21:46.2Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 2,
-              "Title": "DependencyInjection.cs",
-              "DocumentMoniker": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\DependencyInjection.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagement.Services\\DependencyInjection.cs",
-              "ToolTip": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\DependencyInjection.cs",
-              "RelativeToolTip": "HandmadeProductManagement.Services\\DependencyInjection.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAuwAkAAAArAAAA",
+              "Title": "IPromotionService.cs",
+              "DocumentMoniker": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Services\\Interface\\IPromotionService.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Services\\Interface\\IPromotionService.cs",
+              "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Services\\Interface\\IPromotionService.cs",
+              "RelativeToolTip": "HandmadeProductManagement.Contract.Services\\Interface\\IPromotionService.cs",
+              "ViewState": "AgIAAAUAAAAAAAAAAAAAABEAAAAIAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-25T18:24:52.639Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "WeatherForecastController.cs",
-              "DocumentMoniker": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\Controllers\\WeatherForecastController.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagementBE\\Controllers\\WeatherForecastController.cs",
-              "ToolTip": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\Controllers\\WeatherForecastController.cs",
-              "RelativeToolTip": "HandmadeProductManagementBE\\Controllers\\WeatherForecastController.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-25T18:26:57.252Z",
+              "WhenOpened": "2024-10-03T01:22:05.928Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "ApplicationUser.cs",
-              "DocumentMoniker": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationUser.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationUser.cs",
-              "ToolTip": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationUser.cs",
-              "RelativeToolTip": "HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationUser.cs",
-              "ViewState": "AQIAAA0AAAAAAAAAAAAAwBQAAAAAAAAA",
+              "Title": "PromotionsController.cs",
+              "DocumentMoniker": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\Controllers\\PromotionsController.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagementBE\\Controllers\\PromotionsController.cs",
+              "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\Controllers\\PromotionsController.cs",
+              "RelativeToolTip": "HandmadeProductManagementBE\\Controllers\\PromotionsController.cs",
+              "ViewState": "AgIAAE4AAAAAAAAAAAAuwFkAAAA2AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-25T07:46:36.19Z",
+              "WhenOpened": "2024-10-03T01:22:21.647Z",
               "EditorCaption": ""
             },
             {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{269a02dc-6af8-11d3-bdc4-00c04f688e50}"
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "OrderDetailController.cs",
+              "DocumentMoniker": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\Controllers\\OrderDetailController.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagementBE\\Controllers\\OrderDetailController.cs",
+              "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\Controllers\\OrderDetailController.cs",
+              "RelativeToolTip": "HandmadeProductManagementBE\\Controllers\\OrderDetailController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAHkAAAAnAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-10-03T01:38:56.357Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 5,
-              "Title": "DependencyInjection.cs",
-              "DocumentMoniker": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\DependencyInjection.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagementBE\\DependencyInjection.cs",
-              "ToolTip": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\DependencyInjection.cs",
-              "RelativeToolTip": "HandmadeProductManagementBE\\DependencyInjection.cs",
-              "ViewState": "AQIAAB0AAAAAAAAAAAAgwC8AAAARAAAA",
+              "Title": "OrderController.cs",
+              "DocumentMoniker": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\Controllers\\OrderController.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagementBE\\Controllers\\OrderController.cs",
+              "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\Controllers\\OrderController.cs",
+              "RelativeToolTip": "HandmadeProductManagementBE\\Controllers\\OrderController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-26T02:38:14.657Z",
+              "WhenOpened": "2024-10-03T03:53:40.305Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "IOrderService.cs",
+              "DocumentMoniker": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Services\\Interface\\IOrderService.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Services\\Interface\\IOrderService.cs",
+              "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Services\\Interface\\IOrderService.cs",
+              "RelativeToolTip": "HandmadeProductManagement.Contract.Services\\Interface\\IOrderService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-10-03T01:26:48.863Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 7,
-              "Title": "IStatusChangeService.cs",
-              "DocumentMoniker": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Services\\Interface\\IStatusChangeService.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Services\\Interface\\IStatusChangeService.cs",
-              "ToolTip": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Services\\Interface\\IStatusChangeService.cs",
-              "RelativeToolTip": "HandmadeProductManagement.Contract.Services\\Interface\\IStatusChangeService.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Title": "UsersController.cs",
+              "DocumentMoniker": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\Controllers\\UsersController.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagementBE\\Controllers\\UsersController.cs",
+              "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\Controllers\\UsersController.cs",
+              "RelativeToolTip": "HandmadeProductManagementBE\\Controllers\\UsersController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAgAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-25T18:31:16.36Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 9,
-              "Title": "ProductService.cs",
-              "DocumentMoniker": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\Service\\ProductService.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagement.Services\\Service\\ProductService.cs",
-              "ToolTip": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\Service\\ProductService.cs",
-              "RelativeToolTip": "HandmadeProductManagement.Services\\Service\\ProductService.cs",
-              "ViewState": "AQIAAHQAAAAAAAAAAAAgwAAAAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-25T07:40:56.929Z",
+              "WhenOpened": "2024-10-03T07:09:02.528Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 8,
-              "Title": "StatusChangeService.cs",
-              "DocumentMoniker": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\Service\\StatusChangeService.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagement.Services\\Service\\StatusChangeService.cs",
-              "ToolTip": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\Service\\StatusChangeService.cs",
-              "RelativeToolTip": "HandmadeProductManagement.Services\\Service\\StatusChangeService.cs",
-              "ViewState": "AQIAAD4AAAAAAAAAAAAswAAAAAAAAAAA",
+              "Title": "IProductService.cs",
+              "DocumentMoniker": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Services\\Interface\\IProductService.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Services\\Interface\\IProductService.cs",
+              "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Services\\Interface\\IProductService.cs",
+              "RelativeToolTip": "HandmadeProductManagement.Contract.Services\\Interface\\IProductService.cs",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAawBAAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-25T18:31:29.319Z",
+              "WhenOpened": "2024-10-03T01:26:10.112Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\appsettings.json",
+              "RelativeDocumentMoniker": "HandmadeProductManagementBE\\appsettings.json",
+              "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\appsettings.json",
+              "RelativeToolTip": "HandmadeProductManagementBE\\appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2024-10-03T06:43:48.304Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 10,
-              "Title": "Program.cs",
-              "DocumentMoniker": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\Program.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagementBE\\Program.cs",
-              "ToolTip": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\Program.cs",
-              "RelativeToolTip": "HandmadeProductManagementBE\\Program.cs",
-              "ViewState": "AQIAAAYAAAAAAAAAAAAAAAoAAAAxAAAA",
+              "Title": "IOrderDetailService.cs",
+              "DocumentMoniker": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Services\\Interface\\IOrderDetailService.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Services\\Interface\\IOrderDetailService.cs",
+              "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Services\\Interface\\IOrderDetailService.cs",
+              "RelativeToolTip": "HandmadeProductManagement.Contract.Services\\Interface\\IOrderDetailService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-26T02:37:11.556Z",
+              "WhenOpened": "2024-10-03T01:54:31.11Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 11,
-              "Title": "HandmadeProductManagementBE.http",
-              "DocumentMoniker": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\HandmadeProductManagementBE.http",
-              "RelativeDocumentMoniker": "HandmadeProductManagementBE\\HandmadeProductManagementBE.http",
-              "ToolTip": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\HandmadeProductManagementBE.http",
-              "RelativeToolTip": "HandmadeProductManagementBE\\HandmadeProductManagementBE.http",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003502|",
-              "WhenOpened": "2024-09-26T02:44:34.127Z",
+              "Title": "ProductService.cs",
+              "DocumentMoniker": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\Service\\ProductService.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagement.Services\\Service\\ProductService.cs",
+              "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\Service\\ProductService.cs",
+              "RelativeToolTip": "HandmadeProductManagement.Services\\Service\\ProductService.cs",
+              "ViewState": "AgIAAK0AAAAAAAAAAAAQwK0AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-10-03T01:21:22.16Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 12,
-              "Title": "ApplicationRoleClaims.cs",
-              "DocumentMoniker": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationRoleClaims.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationRoleClaims.cs",
-              "ToolTip": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationRoleClaims.cs",
-              "RelativeToolTip": "HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationRoleClaims.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Title": "ProductController.cs",
+              "DocumentMoniker": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\Controllers\\ProductController.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagementBE\\Controllers\\ProductController.cs",
+              "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\Controllers\\ProductController.cs",
+              "RelativeToolTip": "HandmadeProductManagementBE\\Controllers\\ProductController.cs",
+              "ViewState": "AgIAAB0AAAAAAAAAAAAswCwAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-26T04:08:41.526Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 14,
-              "Title": "OrderDetail.cs",
-              "DocumentMoniker": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\OrderDetail.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Repositories\\Entity\\OrderDetail.cs",
-              "ToolTip": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\OrderDetail.cs",
-              "RelativeToolTip": "HandmadeProductManagement.Contract.Repositories\\Entity\\OrderDetail.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-26T04:00:51.367Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 15,
-              "Title": "Payment.cs",
-              "DocumentMoniker": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\Payment.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Repositories\\Entity\\Payment.cs",
-              "ToolTip": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\Payment.cs",
-              "RelativeToolTip": "HandmadeProductManagement.Contract.Repositories\\Entity\\Payment.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-26T04:00:53.514Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 16,
-              "Title": "ShopService.cs",
-              "DocumentMoniker": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\Service\\ShopService.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagement.Services\\Service\\ShopService.cs",
-              "ToolTip": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\Service\\ShopService.cs",
-              "RelativeToolTip": "HandmadeProductManagement.Services\\Service\\ShopService.cs",
-              "ViewState": "AQIAAA8AAAAAAAAAAAAAAFwAAAAkAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-25T18:31:28.581Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 17,
-              "Title": "PromotionService.cs",
-              "DocumentMoniker": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\Service\\PromotionService.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagement.Services\\Service\\PromotionService.cs",
-              "ToolTip": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\Service\\PromotionService.cs",
-              "RelativeToolTip": "HandmadeProductManagement.Services\\Service\\PromotionService.cs",
-              "ViewState": "AQIAAAYAAAAAAAAAAAAAAAAAAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-26T03:49:44.311Z",
+              "WhenOpened": "2024-10-03T01:34:50.344Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 13,
-              "Title": "IGenericRepository.cs",
-              "DocumentMoniker": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\IUOW\\IGenericRepository.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Repositories\\IUOW\\IGenericRepository.cs",
-              "ToolTip": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\IUOW\\IGenericRepository.cs",
-              "RelativeToolTip": "HandmadeProductManagement.Contract.Repositories\\IUOW\\IGenericRepository.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Title": "UserService.cs",
+              "DocumentMoniker": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\Service\\UserService.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagement.Services\\Service\\UserService.cs",
+              "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\Service\\UserService.cs",
+              "RelativeToolTip": "HandmadeProductManagement.Services\\Service\\UserService.cs",
+              "ViewState": "AgIAAJkAAAAAAAAAAAAuwKUAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-25T18:24:34.141Z",
+              "WhenOpened": "2024-10-03T02:25:30.638Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "StatusChangeService.cs",
+              "DocumentMoniker": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\Service\\StatusChangeService.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagement.Services\\Service\\StatusChangeService.cs",
+              "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\Service\\StatusChangeService.cs",
+              "RelativeToolTip": "HandmadeProductManagement.Services\\Service\\StatusChangeService.cs",
+              "ViewState": "AgIAADQAAAAAAAAAAAAowAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-10-03T01:21:33.667Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "ReplyController.cs",
+              "DocumentMoniker": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\Controllers\\ReplyController.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagementBE\\Controllers\\ReplyController.cs",
+              "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\Controllers\\ReplyController.cs",
+              "RelativeToolTip": "HandmadeProductManagementBE\\Controllers\\ReplyController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-10-03T06:33:14.576Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "ProductItem.cs",
+              "DocumentMoniker": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\ProductItem.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Repositories\\Entity\\ProductItem.cs",
+              "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\ProductItem.cs",
+              "RelativeToolTip": "HandmadeProductManagement.Contract.Repositories\\Entity\\ProductItem.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAADwvw0AAAAPAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-10-03T01:44:09.067Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "Promotion.cs",
+              "DocumentMoniker": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\Promotion.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Repositories\\Entity\\Promotion.cs",
+              "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\Promotion.cs",
+              "RelativeToolTip": "HandmadeProductManagement.Contract.Repositories\\Entity\\Promotion.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAAVAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-10-03T03:06:50.248Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 18,
-              "Title": "CancelReasonService.cs",
-              "DocumentMoniker": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\Service\\CancelReasonService.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagement.Services\\Service\\CancelReasonService.cs",
-              "ToolTip": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\Service\\CancelReasonService.cs",
-              "RelativeToolTip": "HandmadeProductManagement.Services\\Service\\CancelReasonService.cs",
-              "ViewState": "AQIAAEEAAAAAAAAAAAAswEsAAAAxAAAA",
+              "Title": "Product.cs",
+              "DocumentMoniker": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\Product.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Repositories\\Entity\\Product.cs",
+              "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\Product.cs",
+              "RelativeToolTip": "HandmadeProductManagement.Contract.Repositories\\Entity\\Product.cs",
+              "ViewState": "AgIAAAcAAAAAAAAAAAAgwBEAAAA8AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-25T18:28:05.904Z",
+              "WhenOpened": "2024-10-03T01:53:19.923Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 19,
-              "Title": "ICancelReasonService.cs",
-              "DocumentMoniker": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Services\\Interface\\ICancelReasonService.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Services\\Interface\\ICancelReasonService.cs",
-              "ToolTip": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Services\\Interface\\ICancelReasonService.cs",
-              "RelativeToolTip": "HandmadeProductManagement.Contract.Services\\Interface\\ICancelReasonService.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Title": "CancelReasonService.cs",
+              "DocumentMoniker": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\Service\\CancelReasonService.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagement.Services\\Service\\CancelReasonService.cs",
+              "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\Service\\CancelReasonService.cs",
+              "RelativeToolTip": "HandmadeProductManagement.Services\\Service\\CancelReasonService.cs",
+              "ViewState": "AgIAAAoAAAAAAAAAAAAAwAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-26T03:50:07.831Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 21,
-              "Title": "GenericRepository.cs",
-              "DocumentMoniker": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Repositories\\UOW\\GenericRepository.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagement.Repositories\\UOW\\GenericRepository.cs",
-              "ToolTip": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Repositories\\UOW\\GenericRepository.cs",
-              "RelativeToolTip": "HandmadeProductManagement.Repositories\\UOW\\GenericRepository.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAABcAAAAJAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-26T03:48:45.641Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 22,
-              "Title": "UnitOfWork.cs",
-              "DocumentMoniker": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Repositories\\UOW\\UnitOfWork.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagement.Repositories\\UOW\\UnitOfWork.cs",
-              "ToolTip": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Repositories\\UOW\\UnitOfWork.cs",
-              "RelativeToolTip": "HandmadeProductManagement.Repositories\\UOW\\UnitOfWork.cs",
-              "ViewState": "AQIAABQAAAAAAAAAAAAgwAAAAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-26T03:48:46.619Z",
+              "WhenOpened": "2024-10-03T04:56:09.612Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 20,
-              "Title": "OrderService.cs",
-              "DocumentMoniker": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\Service\\OrderService.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagement.Services\\Service\\OrderService.cs",
-              "ToolTip": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\Service\\OrderService.cs",
-              "RelativeToolTip": "HandmadeProductManagement.Services\\Service\\OrderService.cs",
-              "ViewState": "AQIAADMAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Title": "OrderDetailService.cs",
+              "DocumentMoniker": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\Service\\OrderDetailService.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagement.Services\\Service\\OrderDetailService.cs",
+              "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\Service\\OrderDetailService.cs",
+              "RelativeToolTip": "HandmadeProductManagement.Services\\Service\\OrderDetailService.cs",
+              "ViewState": "AgIAACwAAAAAAAAAAAAqwDUAAAAaAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-26T02:16:47.866Z",
+              "WhenOpened": "2024-10-03T01:53:48.646Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 21,
+              "Title": "Order.cs",
+              "DocumentMoniker": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\Order.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Repositories\\Entity\\Order.cs",
+              "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\Order.cs",
+              "RelativeToolTip": "HandmadeProductManagement.Contract.Repositories\\Entity\\Order.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-10-03T02:40:30.594Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 22,
+              "Title": "ReplyService.cs",
+              "DocumentMoniker": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\Service\\ReplyService.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagement.Services\\Service\\ReplyService.cs",
+              "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\Service\\ReplyService.cs",
+              "RelativeToolTip": "HandmadeProductManagement.Services\\Service\\ReplyService.cs",
+              "ViewState": "AgIAAF0AAAAAAAAAAAAwwBUAAAAtAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-10-03T01:21:43.79Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 23,
-              "Title": "ApplicationUserClaims.cs",
-              "DocumentMoniker": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationUserClaims.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationUserClaims.cs",
-              "ToolTip": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationUserClaims.cs",
-              "RelativeToolTip": "HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationUserClaims.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Title": "ReviewService.cs",
+              "DocumentMoniker": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\Service\\ReviewService.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagement.Services\\Service\\ReviewService.cs",
+              "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\Service\\ReviewService.cs",
+              "RelativeToolTip": "HandmadeProductManagement.Services\\Service\\ReviewService.cs",
+              "ViewState": "AgIAADcAAAAAAAAAAAAAADgAAAA1AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-26T03:43:12.295Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 24,
-              "Title": "ApplicationUserLogins.cs",
-              "DocumentMoniker": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationUserLogins.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationUserLogins.cs",
-              "ToolTip": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationUserLogins.cs",
-              "RelativeToolTip": "HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationUserLogins.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-26T03:43:42.375Z",
+              "WhenOpened": "2024-10-03T02:33:57.773Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 25,
-              "Title": "ApplicationUserRoles.cs",
-              "DocumentMoniker": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationUserRoles.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationUserRoles.cs",
-              "ToolTip": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationUserRoles.cs",
-              "RelativeToolTip": "HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationUserRoles.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Title": "Payment.cs",
+              "DocumentMoniker": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\Payment.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Repositories\\Entity\\Payment.cs",
+              "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\Payment.cs",
+              "RelativeToolTip": "HandmadeProductManagement.Contract.Repositories\\Entity\\Payment.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-26T03:43:45.608Z",
+              "WhenOpened": "2024-10-03T02:39:52.403Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 26,
-              "Title": "ApplicationUserTokens.cs",
-              "DocumentMoniker": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationUserTokens.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationUserTokens.cs",
-              "ToolTip": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationUserTokens.cs",
-              "RelativeToolTip": "HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationUserTokens.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Title": "ProductImage.cs",
+              "DocumentMoniker": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\ProductImage.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Repositories\\Entity\\ProductImage.cs",
+              "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\ProductImage.cs",
+              "RelativeToolTip": "HandmadeProductManagement.Contract.Repositories\\Entity\\ProductImage.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-26T03:43:49.5Z",
+              "WhenOpened": "2024-10-03T02:39:49.751Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 27,
-              "Title": "ApplicationRole.cs",
-              "DocumentMoniker": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationRole.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationRole.cs",
-              "ToolTip": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationRole.cs",
-              "RelativeToolTip": "HandmadeProductManagement.Contract.Repositories\\Entity\\ApplicationRole.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Title": "ProductConfiguration.cs",
+              "DocumentMoniker": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\ProductConfiguration.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Repositories\\Entity\\ProductConfiguration.cs",
+              "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\ProductConfiguration.cs",
+              "RelativeToolTip": "HandmadeProductManagement.Contract.Repositories\\Entity\\ProductConfiguration.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-26T03:43:32.871Z",
+              "WhenOpened": "2024-10-03T02:34:45.423Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 29,
-              "Title": "UpdateUserDTO.cs",
-              "DocumentMoniker": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.ModelView\\UserModelViews\\UpdateUserDTO.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagement.ModelView\\UserModelViews\\UpdateUserDTO.cs",
-              "ToolTip": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.ModelView\\UserModelViews\\UpdateUserDTO.cs",
-              "RelativeToolTip": "HandmadeProductManagement.ModelView\\UserModelViews\\UpdateUserDTO.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAsAAAAqAAAA",
+              "DocumentIndex": 24,
+              "Title": "OrderDetail.cs",
+              "DocumentMoniker": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\OrderDetail.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Repositories\\Entity\\OrderDetail.cs",
+              "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\OrderDetail.cs",
+              "RelativeToolTip": "HandmadeProductManagement.Contract.Repositories\\Entity\\OrderDetail.cs",
+              "ViewState": "AgIAAAcAAAAAAAAAAAAIwBkAAAAQAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-26T02:53:31.3Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 30,
-              "Title": "IShopService.cs",
-              "DocumentMoniker": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Services\\Interface\\IShopService.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Services\\Interface\\IShopService.cs",
-              "ToolTip": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Services\\Interface\\IShopService.cs",
-              "RelativeToolTip": "HandmadeProductManagement.Contract.Services\\Interface\\IShopService.cs",
-              "ViewState": "AQIAAAYAAAAAAAAAAAAgwBAAAAAvAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-26T02:59:30.768Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 31,
-              "Title": "WeatherForecast.cs",
-              "DocumentMoniker": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\WeatherForecast.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagementBE\\WeatherForecast.cs",
-              "ToolTip": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\WeatherForecast.cs",
-              "RelativeToolTip": "HandmadeProductManagementBE\\WeatherForecast.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-26T03:08:28.759Z",
+              "WhenOpened": "2024-10-03T01:17:17.374Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 28,
-              "Title": "UpdateUserResponseModel.cs",
-              "DocumentMoniker": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.ModelView\\UserModelViews\\UpdateUserResponseModel.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagement.ModelView\\UserModelViews\\UpdateUserResponseModel.cs",
-              "ToolTip": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.ModelView\\UserModelViews\\UpdateUserResponseModel.cs",
-              "RelativeToolTip": "HandmadeProductManagement.ModelView\\UserModelViews\\UpdateUserResponseModel.cs",
-              "ViewState": "AQIAAAMAAAAAAAAAAAAgwA0AAAAWAAAA",
+              "Title": "IUserService.cs",
+              "DocumentMoniker": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Services\\Interface\\IUserService.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Services\\Interface\\IUserService.cs",
+              "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Services\\Interface\\IUserService.cs",
+              "RelativeToolTip": "HandmadeProductManagement.Contract.Services\\Interface\\IUserService.cs",
+              "ViewState": "AgIAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-26T03:07:37.413Z",
+              "WhenOpened": "2024-10-03T02:25:27.138Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 30,
+              "Title": "HandmadeProductManagement.ModelViews",
+              "DocumentMoniker": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.ModelView\\HandmadeProductManagement.ModelViews.csproj",
+              "RelativeDocumentMoniker": "HandmadeProductManagement.ModelView\\HandmadeProductManagement.ModelViews.csproj",
+              "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.ModelView\\HandmadeProductManagement.ModelViews.csproj",
+              "RelativeToolTip": "HandmadeProductManagement.ModelView\\HandmadeProductManagement.ModelViews.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2024-10-03T02:19:36.241Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 29,
+              "Title": "HandmadeProductManagementAPI",
+              "DocumentMoniker": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj",
+              "RelativeDocumentMoniker": "HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj",
+              "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj",
+              "RelativeToolTip": "HandmadeProductManagementBE\\HandmadeProductManagementAPI.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACgAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2024-10-03T02:19:17.013Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 31,
+              "Title": "HandmadeProductManagement.Contract.Repositories",
+              "DocumentMoniker": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj",
+              "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj",
+              "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj",
+              "RelativeToolTip": "HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2024-10-03T02:19:34.89Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 33,
-              "Title": "UserResponseModel.cs",
-              "DocumentMoniker": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.ModelView\\UserModelViews\\UserResponseModel.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagement.ModelView\\UserModelViews\\UserResponseModel.cs",
-              "ToolTip": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.ModelView\\UserModelViews\\UserResponseModel.cs",
-              "RelativeToolTip": "HandmadeProductManagement.ModelView\\UserModelViews\\UserResponseModel.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAcAAAAAAAAA",
+              "Title": "OrderDetailDto.cs",
+              "DocumentMoniker": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.ModelView\\OrderDetailModelViews\\OrderDetailDto.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagement.ModelView\\OrderDetailModelViews\\OrderDetailDto.cs",
+              "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.ModelView\\OrderDetailModelViews\\OrderDetailDto.cs",
+              "RelativeToolTip": "HandmadeProductManagement.ModelView\\OrderDetailModelViews\\OrderDetailDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAACAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-26T02:18:50.261Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 34,
-              "Title": "UserResponseByIdModel.cs",
-              "DocumentMoniker": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.ModelView\\UserModelViews\\UserResponseByIdModel.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagement.ModelView\\UserModelViews\\UserResponseByIdModel.cs",
-              "ToolTip": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.ModelView\\UserModelViews\\UserResponseByIdModel.cs",
-              "RelativeToolTip": "HandmadeProductManagement.ModelView\\UserModelViews\\UserResponseByIdModel.cs",
-              "ViewState": "AQIAAAgAAAAAAAAAAAAxwBYAAAAoAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-26T02:20:22.568Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 32,
-              "Title": "appsettings.Development.json",
-              "DocumentMoniker": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\appsettings.Development.json",
-              "RelativeDocumentMoniker": "HandmadeProductManagementBE\\appsettings.Development.json",
-              "ToolTip": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\appsettings.Development.json",
-              "RelativeToolTip": "HandmadeProductManagementBE\\appsettings.Development.json",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAoAAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2024-09-25T08:26:20.014Z",
+              "WhenOpened": "2024-10-03T02:01:06.854Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 35,
-              "Title": "IPromotionService.cs",
-              "DocumentMoniker": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Services\\Interface\\IPromotionService.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Services\\Interface\\IPromotionService.cs",
-              "ToolTip": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Services\\Interface\\IPromotionService.cs",
-              "RelativeToolTip": "HandmadeProductManagement.Contract.Services\\Interface\\IPromotionService.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Title": "OrderDetailForUpdateDto.cs",
+              "DocumentMoniker": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.ModelView\\OrderDetailModelViews\\OrderDetailForUpdateDto.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagement.ModelView\\OrderDetailModelViews\\OrderDetailForUpdateDto.cs",
+              "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.ModelView\\OrderDetailModelViews\\OrderDetailForUpdateDto.cs",
+              "RelativeToolTip": "HandmadeProductManagement.ModelView\\OrderDetailModelViews\\OrderDetailForUpdateDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAAANAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-26T02:59:29.059Z",
+              "WhenOpened": "2024-10-03T02:01:32.355Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 34,
+              "Title": "OrderDetailForCreationDto.cs",
+              "DocumentMoniker": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.ModelView\\OrderDetailModelViews\\OrderDetailForCreationDto.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagement.ModelView\\OrderDetailModelViews\\OrderDetailForCreationDto.cs",
+              "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.ModelView\\OrderDetailModelViews\\OrderDetailForCreationDto.cs",
+              "RelativeToolTip": "HandmadeProductManagement.ModelView\\OrderDetailModelViews\\OrderDetailForCreationDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-10-03T02:01:26.849Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 32,
+              "Title": "OrderDetailForManipulationDto.cs",
+              "DocumentMoniker": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.ModelView\\OrderDetailModelViews\\OrderDetailForManipulationDto.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagement.ModelView\\OrderDetailModelViews\\OrderDetailForManipulationDto.cs",
+              "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.ModelView\\OrderDetailModelViews\\OrderDetailForManipulationDto.cs",
+              "RelativeToolTip": "HandmadeProductManagement.ModelView\\OrderDetailModelViews\\OrderDetailForManipulationDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-10-03T02:01:07.436Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 36,
-              "Title": "HandmadeProductManagement.Services",
-              "DocumentMoniker": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj",
-              "RelativeDocumentMoniker": "HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj",
-              "ToolTip": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj",
-              "RelativeToolTip": "HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2024-09-26T02:25:33.296Z",
+              "Title": "DatabaseContext.cs",
+              "DocumentMoniker": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Repositories\\Context\\DatabaseContext.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagement.Repositories\\Context\\DatabaseContext.cs",
+              "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Repositories\\Context\\DatabaseContext.cs",
+              "RelativeToolTip": "HandmadeProductManagement.Repositories\\Context\\DatabaseContext.cs",
+              "ViewState": "AgIAAFAAAAAAAAAAAAAgwMEAAAAMAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-10-03T01:09:51.608Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 37,
-              "Title": "ProductResponseModel.cs",
-              "DocumentMoniker": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.ModelView\\ProductModelViews\\ProductResponseModel.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagement.ModelView\\ProductModelViews\\ProductResponseModel.cs",
-              "ToolTip": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.ModelView\\ProductModelViews\\ProductResponseModel.cs",
-              "RelativeToolTip": "HandmadeProductManagement.ModelView\\ProductModelViews\\ProductResponseModel.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Title": "IReplyService.cs",
+              "DocumentMoniker": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Services\\Interface\\IReplyService.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Services\\Interface\\IReplyService.cs",
+              "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Services\\Interface\\IReplyService.cs",
+              "RelativeToolTip": "HandmadeProductManagement.Contract.Services\\Interface\\IReplyService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-25T08:22:57.967Z",
+              "WhenOpened": "2024-10-03T01:26:24.207Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 38,
-              "Title": "IdentityServiceExtensions.cs",
-              "DocumentMoniker": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\Extensions\\IdentityServiceExtensions.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagementBE\\Extensions\\IdentityServiceExtensions.cs",
-              "ToolTip": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\Extensions\\IdentityServiceExtensions.cs",
-              "RelativeToolTip": "HandmadeProductManagementBE\\Extensions\\IdentityServiceExtensions.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Title": "ShopService.cs",
+              "DocumentMoniker": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\Service\\ShopService.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagement.Services\\Service\\ShopService.cs",
+              "ToolTip": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\Service\\ShopService.cs",
+              "RelativeToolTip": "HandmadeProductManagement.Services\\Service\\ShopService.cs",
+              "ViewState": "AgIAAA8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-25T18:27:29.9Z",
+              "WhenOpened": "2024-10-03T01:21:31.457Z",
               "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 39,
-              "Title": "ApplicationServiceExtenstions.cs",
-              "DocumentMoniker": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\Extensions\\ApplicationServiceExtenstions.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagementBE\\Extensions\\ApplicationServiceExtenstions.cs",
-              "ToolTip": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\Extensions\\ApplicationServiceExtenstions.cs",
-              "RelativeToolTip": "HandmadeProductManagementBE\\Extensions\\ApplicationServiceExtenstions.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-25T18:27:37.141Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 40,
-              "Title": "appsettings.Development.json",
-              "DocumentMoniker": "D:\\FPT\\2024\\sem6\\Handmade(backup)\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\appsettings.Development.json",
-              "RelativeDocumentMoniker": "..\\..\\Handmade(backup)\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\appsettings.Development.json",
-              "ToolTip": "D:\\FPT\\2024\\sem6\\Handmade(backup)\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\appsettings.Development.json",
-              "RelativeToolTip": "..\\..\\Handmade(backup)\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\appsettings.Development.json",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAoAAADWAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2024-09-26T02:08:52.525Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 41,
-              "Title": "IUnitOfWork.cs",
-              "DocumentMoniker": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\IUOW\\IUnitOfWork.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Repositories\\IUOW\\IUnitOfWork.cs",
-              "ToolTip": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\IUOW\\IUnitOfWork.cs",
-              "RelativeToolTip": "HandmadeProductManagement.Contract.Repositories\\IUOW\\IUnitOfWork.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-25T18:31:06.317Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 42,
-              "Title": "CancelReasonController.cs",
-              "DocumentMoniker": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\Controllers\\CancelReasonController.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagementBE\\Controllers\\CancelReasonController.cs",
-              "ToolTip": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\Controllers\\CancelReasonController.cs",
-              "RelativeToolTip": "HandmadeProductManagementBE\\Controllers\\CancelReasonController.cs",
-              "ViewState": "AQIAAA0AAAAAAAAAAAAzwAAAAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-25T18:25:09.293Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 43,
-              "Title": "BasePaginatedList.cs",
-              "DocumentMoniker": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Core\\Base\\BasePaginatedList.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagement.Core\\Base\\BasePaginatedList.cs",
-              "ToolTip": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Core\\Base\\BasePaginatedList.cs",
-              "RelativeToolTip": "HandmadeProductManagement.Core\\Base\\BasePaginatedList.cs",
-              "ViewState": "AQIAAAcAAAAAAAAAAAAQwAAAAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-25T18:27:41.672Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 47,
-              "Title": "ProductController.cs",
-              "DocumentMoniker": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\Controllers\\ProductController.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagementBE\\Controllers\\ProductController.cs",
-              "ToolTip": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\Controllers\\ProductController.cs",
-              "RelativeToolTip": "HandmadeProductManagementBE\\Controllers\\ProductController.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-25T18:27:02.851Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 46,
-              "Title": "PromotionsController.cs",
-              "DocumentMoniker": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\Controllers\\PromotionsController.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagementBE\\Controllers\\PromotionsController.cs",
-              "ToolTip": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\Controllers\\PromotionsController.cs",
-              "RelativeToolTip": "HandmadeProductManagementBE\\Controllers\\PromotionsController.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-25T18:27:02.182Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 48,
-              "Title": "OrderController.cs",
-              "DocumentMoniker": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\Controllers\\OrderController.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagementBE\\Controllers\\OrderController.cs",
-              "ToolTip": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\Controllers\\OrderController.cs",
-              "RelativeToolTip": "HandmadeProductManagementBE\\Controllers\\OrderController.cs",
-              "ViewState": "AQIAACkAAAAAAAAAAAAgwAAAAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-25T18:25:53.698Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 45,
-              "Title": "ShopController.cs",
-              "DocumentMoniker": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\Controllers\\ShopController.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagementBE\\Controllers\\ShopController.cs",
-              "ToolTip": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\Controllers\\ShopController.cs",
-              "RelativeToolTip": "HandmadeProductManagementBE\\Controllers\\ShopController.cs",
-              "ViewState": "AQIAAEIAAAAAAAAAAAAowAAAAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-25T18:26:07.603Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 44,
-              "Title": "StatusChangeController.cs",
-              "DocumentMoniker": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\Controllers\\StatusChangeController.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagementBE\\Controllers\\StatusChangeController.cs",
-              "ToolTip": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\Controllers\\StatusChangeController.cs",
-              "RelativeToolTip": "HandmadeProductManagementBE\\Controllers\\StatusChangeController.cs",
-              "ViewState": "AQIAACgAAAAAAAAAAAAkwAAAAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-25T18:26:23.631Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 49,
-              "Title": "Product.cs",
-              "DocumentMoniker": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\Product.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Repositories\\Entity\\Product.cs",
-              "ToolTip": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\Entity\\Product.cs",
-              "RelativeToolTip": "HandmadeProductManagement.Contract.Repositories\\Entity\\Product.cs",
-              "ViewState": "AgIAAAYAAAAAAAAAAAAkwBAAAAAUAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-25T08:24:13.765Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 51,
-              "Title": "ProductSearchModel.cs",
-              "DocumentMoniker": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.ModelView\\ProductModelViews\\ProductSearchModel.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagement.ModelView\\ProductModelViews\\ProductSearchModel.cs",
-              "ToolTip": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.ModelView\\ProductModelViews\\ProductSearchModel.cs",
-              "RelativeToolTip": "HandmadeProductManagement.ModelView\\ProductModelViews\\ProductSearchModel.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAUAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-25T08:22:39.851Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 50,
-              "Title": "ProductSortModel.cs",
-              "DocumentMoniker": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.ModelView\\ProductModelViews\\ProductSortModel.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagement.ModelView\\ProductModelViews\\ProductSortModel.cs",
-              "ToolTip": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.ModelView\\ProductModelViews\\ProductSortModel.cs",
-              "RelativeToolTip": "HandmadeProductManagement.ModelView\\ProductModelViews\\ProductSortModel.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-25T08:20:18.616Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 52,
-              "Title": "BaseEntity.cs",
-              "DocumentMoniker": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Core\\Base\\BaseEntity.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagement.Core\\Base\\BaseEntity.cs",
-              "ToolTip": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Core\\Base\\BaseEntity.cs",
-              "RelativeToolTip": "HandmadeProductManagement.Core\\Base\\BaseEntity.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAmAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-25T07:45:41.552Z"
-            }
-          ]
-        },
-        {
-          "DockedWidth": 200,
-          "SelectedChildIndex": -1,
-          "Children": [
-            {
-              "$type": "Bookmark",
-              "Name": "ST:1:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
             }
           ]
         }

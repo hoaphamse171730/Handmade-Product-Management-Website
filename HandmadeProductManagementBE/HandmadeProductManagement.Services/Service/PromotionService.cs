@@ -45,6 +45,11 @@ namespace HandmadeProductManagement.Services.Service
             return promotionToReturn;
         }
 
+        async Task<PromotionDto> IPromotionService.Update(string id, PromotionForUpdateDto promotion)
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task Update(string id, PromotionForUpdateDto promotion)
         {
             var promotionEntity = await _unitOfWork.GetRepository<Promotion>().Entities
@@ -70,17 +75,22 @@ namespace HandmadeProductManagement.Services.Service
            await _unitOfWork.SaveAsync();
         }
 
-        public async Task SoftDelete(string id)
+        public async Task<bool> SoftDelete(string id)
         {
             var promotionRepo = _unitOfWork.GetRepository<Promotion>();
             var promotionEntity = await promotionRepo.Entities
                 .FirstOrDefaultAsync(p => p.Id == id && p.DeletedBy == null);
             if (promotionEntity == null)
                 throw new KeyNotFoundException("Promotion not found");
-            // promotionEntity.DeletedBy = userId.ToString();
             promotionEntity.DeletedTime = DateTime.UtcNow;
             await promotionRepo.UpdateAsync(promotionEntity);
             await _unitOfWork.SaveAsync();
+            return true;
+        }
+
+        public async Task<bool> UpdatePromotionStatusByRealtime(string id)
+        {
+            throw new NotImplementedException();
         }
 
         public async Task<IList<PromotionDto>> GetAll()

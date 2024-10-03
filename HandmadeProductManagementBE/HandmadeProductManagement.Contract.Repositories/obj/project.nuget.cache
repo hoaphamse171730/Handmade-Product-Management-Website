@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "DRA5wP9L+aM=",
+  "dgSpecHash": "ib1EG9ov0d8=",
   "success": true,
   "projectFilePath": "D:\\amazing_tech\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\HandmadeProductManagement.Contract.Repositories.csproj",
   "expectedPackageFiles": [
@@ -23,10 +23,7 @@
     "C:\\Users\\luan.tran\\.nuget\\packages\\microsoft.extensions.logging\\8.0.0\\microsoft.extensions.logging.8.0.0.nupkg.sha512",
     "C:\\Users\\luan.tran\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\8.0.0\\microsoft.extensions.logging.abstractions.8.0.0.nupkg.sha512",
     "C:\\Users\\luan.tran\\.nuget\\packages\\microsoft.extensions.options\\8.0.2\\microsoft.extensions.options.8.0.2.nupkg.sha512",
-    "C:\\Users\\luan.tran\\.nuget\\packages\\microsoft.extensions.primitives\\8.0.0\\microsoft.extensions.primitives.8.0.0.nupkg.sha512",
-    "C:\\Users\\luan.tran\\.nuget\\packages\\microsoft.netcore.app.ref\\8.0.4\\microsoft.netcore.app.ref.8.0.4.nupkg.sha512",
-    "C:\\Users\\luan.tran\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\8.0.4\\microsoft.windowsdesktop.app.ref.8.0.4.nupkg.sha512",
-    "C:\\Users\\luan.tran\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\8.0.4\\microsoft.aspnetcore.app.ref.8.0.4.nupkg.sha512"
+    "C:\\Users\\luan.tran\\.nuget\\packages\\microsoft.extensions.primitives\\8.0.0\\microsoft.extensions.primitives.8.0.0.nupkg.sha512"
   ],
   "logs": []
 }

@@ -87,7 +87,7 @@ namespace HandmadeProductManagementAPI.Controllers
         {
             try
             {
-                await _promotionService.Delete(id);
+                await _promotionService.SoftDelete(id);
                 return NoContent();
             }
             catch (KeyNotFoundException)
