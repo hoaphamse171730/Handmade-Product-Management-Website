@@ -6,6 +6,13 @@ using HandmadeProductManagement.ModelViews.UserModelViews;
 using HandmadeProductManagement.Repositories.Entity;
 using Microsoft.EntityFrameworkCore;
 using FluentValidation;
+using HandmadeProductManagement.ModelViews.NotificationModelViews;
+using HandmadeProductManagement.ModelViews.ReviewModelViews;
+using HandmadeProductManagement.ModelViews.ReplyModelViews;
+using HandmadeProductManagement.ModelViews.ShopModelViews;
+using HandmadeProductManagement.Contract.Repositories.Entity;
+using static System.Formats.Asn1.AsnWriter;
+using HandmadeProductManagement.Core.Utils;
 namespace HandmadeProductManagement.Services.Service
 {
     public class UserService : IUserService
@@ -162,6 +169,37 @@ namespace HandmadeProductManagement.Services.Service
 
 
             return true;
+        }
+
+        public async Task<List<NotificationModel>> GetNotificationList(string Id)
+        {
+            if (!Guid.TryParse(Id, out Guid userId))
+            {
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Invalid userID");
+            }
+           
+            var shop = await _unitOfWork.GetRepository<Shop>()
+                .Entities
+                .Where(shop => shop.UserId == userId)
+                .Select(shop => shop.Id)
+                .ToListAsync();
+          
+            var reviews = await _unitOfWork.GetRepository<Review>()
+                .Entities
+                .Include(r => r.User) 
+                .Where(review => shop.Contains(review.ProductId) && review.Reply == null)
+                .ToListAsync();
+
+            var notifications = reviews.Select(review => new NotificationModel
+            {
+                Id = review.Id,
+                Message = $"Sản phẩm của bạn đã được {review.User.UserName} review",
+                Tag = "Review",
+                URL = $"api/review/{review.Id}"
+            }).ToList();
+
+            return notifications;
+
         }
 
         public async Task<bool> ReverseDeleteUser(string Id)

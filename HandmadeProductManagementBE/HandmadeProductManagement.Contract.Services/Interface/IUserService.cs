@@ -1,5 +1,6 @@
 ﻿using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.ModelViews.NotificationModelViews;
 using HandmadeProductManagement.ModelViews.UserModelViews;
 
 namespace HandmadeProductManagement.Contract.Services.Interface
@@ -15,6 +16,8 @@ namespace HandmadeProductManagement.Contract.Services.Interface
         Task<bool> DeleteUser(string Id);
 
         Task<bool> ReverseDeleteUser(string Id);
+
+        Task<List<NotificationModel>> GetNotificationList(string Id);
     }
 }
 
