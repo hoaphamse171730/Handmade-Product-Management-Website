@@ -314,7 +314,7 @@ namespace HandmadeProductManagement.Services.Service
                 { "Refunded", new List<string> { "Closed" } },
                 { "Canceled", new List<string> { "Closed" } }
             };
-
+            //
             var allValidStatuses = validStatusTransitions.Keys
                 .Concat(validStatusTransitions.Values.SelectMany(v => v))
                 .Distinct()
