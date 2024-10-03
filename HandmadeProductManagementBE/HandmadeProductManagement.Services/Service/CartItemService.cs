@@ -80,6 +80,7 @@ public class CartItemService : ICartItemService
             throw new BaseException.BadRequestException("non_negative_quantity", "Product quantity must be non-negative.");
         }
 
+
         var cartItemRepo = _unitOfWork.GetRepository<CartItem>();
         var cartItem = await cartItemRepo.Entities
             .Where(ci => ci.Id == cartItemId && ci.DeletedTime == null)
@@ -89,6 +90,21 @@ public class CartItemService : ICartItemService
         {
             throw new BaseException.BadRequestException("cart_item_not_found", "Cart item not found.");
         }
+
+        var productItemRepo = _unitOfWork.GetRepository<ProductItem>();
+        var productItem = await productItemRepo.Entities
+        .SingleOrDefaultAsync(pi => pi.Id == cartItem.ProductItemId && pi.DeletedTime == null);
+
+        if (productItem == null)
+        {
+            throw new BaseException.NotFoundException("product_item_not_found", $"ProductItem {cartItem.ProductItemId} not found.");
+        }
+
+        if (productQuantity > productItem.QuantityInStock)
+        {
+            throw new BaseException.BadRequestException("invalid_quantity", $"Only {productItem.QuantityInStock} items available.");
+        }
+
 
         cartItem.ProductQuantity = productQuantity;
         cartItem.LastUpdatedTime = CoreHelper.SystemTimeNow;
