@@ -15,11 +15,9 @@ namespace HandmadeProductManagement.Contract.Repositories.Entity
         public int ProductQuantity { get; set; }
         public decimal UnitPrice { get; set; }
 
-
-        // Navigation properties
+        
         public virtual Order? Order { get; set; }
-        public virtual Product? Product { get; set; }
-
-        //public Product Product { get; set; } = new Product();
+        public virtual ProductItem? ProductItem { get; set; }
+      
     }
 }
