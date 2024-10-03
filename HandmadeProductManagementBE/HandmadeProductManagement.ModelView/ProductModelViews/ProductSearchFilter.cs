@@ -12,7 +12,7 @@ namespace HandmadeProductManagement.ModelViews.ProductModelViews
         public string? CategoryId { get; set; }
         public string? ShopId { get; set; }
         public string? Status { get; set; }
-        public float? MinRating { get; set; }
+        public decimal? MinRating { get; set; }
 
         public bool SortByPrice { get; set; }
         public bool SortByRating { get; set; } = true; // Default sorting by Rating

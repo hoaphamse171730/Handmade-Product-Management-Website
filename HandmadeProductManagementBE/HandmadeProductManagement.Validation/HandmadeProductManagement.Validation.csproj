@@ -14,9 +14,4 @@
       <ProjectReference Include="..\HandmadeProductManagement.ModelView\HandmadeProductManagement.ModelViews.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="CancelReason\" />
-      <Folder Include="StatusChange\" />
-    </ItemGroup>
-
 </Project>

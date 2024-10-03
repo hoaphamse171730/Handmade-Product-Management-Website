@@ -18,7 +18,7 @@ public class CartService : ICartService
     public async Task<CartModel?> GetCartByUserId(Guid userId)
     {
         var cart = await _unitOfWork.GetRepository<Cart>().Entities
-                   .Where(x => x.UserId == userId && !x.DeletedTime.HasValue && x.DeletedBy == null)
+                   .Where(x => x.UserId == userId && x.DeletedTime == null)
                    .Include(c => c.CartItems)
                    .FirstOrDefaultAsync();
 

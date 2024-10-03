@@ -1,4 +1,6 @@
-﻿using HandmadeProductManagement.Contract.Repositories.Entity;
+﻿using AutoMapper;
+using FluentValidation;
+using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
@@ -10,11 +12,30 @@ namespace HandmadeProductManagement.Services.Service
     public class CancelReasonService : ICancelReasonService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
+        private readonly IValidator<CancelReasonForCreationDto> _creationValidator;
+        private readonly IValidator<CancelReasonForUpdateDto> _updateValidator;
 
-        public CancelReasonService(IUnitOfWork unitOfWork)
+        public CancelReasonService(IUnitOfWork unitOfWork, IMapper mapper, IValidator<CancelReasonForCreationDto> creationValidator, IValidator<CancelReasonForUpdateDto> updateValidator)
         {
             _unitOfWork = unitOfWork;
+            _mapper = mapper;
+            _creationValidator = creationValidator;
+            _updateValidator = updateValidator;
         }
+
+        public async Task<CancelReasonResponseModel> GetById(string id)
+        {
+            var cancelReason = await _unitOfWork.GetRepository<CancelReason>().Entities.FirstOrDefaultAsync(cr => cr.Id == id);
+            if (cancelReason == null)
+            {
+                throw new BaseException.NotFoundException("cancel_reason_not_found", "Cancel Reason not found.");
+            }
+
+            var cancelReasonDto = _mapper.Map<CancelReasonResponseModel>(cancelReason);
+            return cancelReasonDto;
+        }
+
 
         // Get cancel reasons by page (only active records)
         public async Task<IList<CancelReasonResponseModel>> GetByPage(int page, int pageSize)
@@ -32,7 +53,7 @@ namespace HandmadeProductManagement.Services.Service
             IQueryable<CancelReason> query = _unitOfWork.GetRepository<CancelReason>().Entities
                 .Where(cr => !cr.DeletedTime.HasValue || cr.DeletedBy == null);
 
-            var result = await query
+            var cancelReasons = await query
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .Select(cancelReason => new CancelReasonResponseModel
@@ -43,97 +64,70 @@ namespace HandmadeProductManagement.Services.Service
                 })
                 .ToListAsync();
 
-            return result;
+            var cancelReasonDto = _mapper.Map<IList<CancelReasonResponseModel>>(cancelReasons);
+            return cancelReasonDto;
         }
 
         // Create a new cancel reason
-        public async Task<CancelReasonResponseModel> Create(CreateCancelReasonDto createCancelReason)
+        public async Task<bool> Create(CancelReasonForCreationDto cancelReason)
         {
-            // Validate RefundRate is between 0 and 1
-            if (createCancelReason.RefundRate < 0 || createCancelReason.RefundRate > 1)
+            // Validate
+            var result = _creationValidator.ValidateAsync(cancelReason);
+            if (!result.Result.IsValid)
             {
-                throw new BaseException.BadRequestException("out_of_ranged_input", "RefundRate must be between 0 and 1.");
+                throw new ValidationException(result.Result.Errors);
             }
 
-            // Validate Description is not null or empty
-            if (string.IsNullOrWhiteSpace(createCancelReason.Description))
-            {
-                throw new BaseException.BadRequestException("missing_required_field", "Description cannot be null or empty.");
-            }
-
-            var cancelReason = new CancelReason
-            {
-                Description = createCancelReason.Description,
-                RefundRate = createCancelReason.RefundRate,
-            };
+            var cancelReasonEntity = _mapper.Map<CancelReason>(cancelReason);
 
             // Set metadata
-            //cancelReason.CreatedBy = "currentUser";
-            //cancelReason.LastUpdatedBy = "currentUser";
+            cancelReasonEntity.CreatedBy = "currentUser"; // Update with actual user info
+            cancelReasonEntity.LastUpdatedBy = "currentUser"; // Update with actual user info
 
-            await _unitOfWork.GetRepository<CancelReason>().InsertAsync(cancelReason);
+            await _unitOfWork.GetRepository<CancelReason>().InsertAsync(cancelReasonEntity);
             await _unitOfWork.SaveAsync();
 
-            return new CancelReasonResponseModel { 
-                Id = cancelReason.Id.ToString(),
-                Description = cancelReason.Description, 
-                RefundRate = cancelReason.RefundRate
-            };
+            return true;
         }
 
         // Update an existing cancel reason
-        public async Task<CancelReasonResponseModel> Update(string id, CreateCancelReasonDto updatedCancelReason)
+        public async Task<bool> Update(string id, CancelReasonForUpdateDto cancelReason)
         {
-            var existingCancelReason = await _unitOfWork.GetRepository<CancelReason>().GetByIdAsync(id);
-
-            if (existingCancelReason == null)
+            var result = _updateValidator.ValidateAsync(cancelReason);
+            if (!result.Result.IsValid)
+            {
+                throw new ValidationException(result.Result.Errors); 
+            }
+            var cancelReasonEntity = await _unitOfWork.GetRepository<CancelReason>().Entities
+                .FirstOrDefaultAsync(p => p.Id == id);
+            if (cancelReasonEntity == null)
             {
                 throw new BaseException.NotFoundException("not_found", "Cancel Reason not found");
             }
+            _mapper.Map(cancelReason, cancelReasonEntity);
 
-            // Validate RefundRate is between 0 and 1
-            if (updatedCancelReason.RefundRate < 0 || updatedCancelReason.RefundRate > 1)
-            {
-                throw new BaseException.BadRequestException("out_of_ranged_input", "RefundRate must be between 0 and 1.");
-            }
+            cancelReasonEntity.LastUpdatedTime = DateTime.UtcNow;
+            cancelReasonEntity.LastUpdatedBy = "user";
 
-            // Validate Description is not null or empty
-            if (string.IsNullOrWhiteSpace(updatedCancelReason.Description))
-            {
-                throw new BaseException.BadRequestException("missing_required_field", "Description cannot be null or empty.");
-            }
-
-            // Update fields
-            existingCancelReason.Description = updatedCancelReason.Description;
-            existingCancelReason.RefundRate = updatedCancelReason.RefundRate;
-            //existingCancelReason.LastUpdatedBy = "currentUser";
-            existingCancelReason.LastUpdatedTime = DateTimeOffset.UtcNow;
-
-            await _unitOfWork.GetRepository<CancelReason>().UpdateAsync(existingCancelReason);
+            await _unitOfWork.GetRepository<CancelReason>().UpdateAsync(cancelReasonEntity);
             await _unitOfWork.SaveAsync();
 
-            return new CancelReasonResponseModel 
-            { 
-                Id = existingCancelReason.Id.ToString(),
-                Description = existingCancelReason.Description,
-                RefundRate = existingCancelReason.RefundRate
-            };
+            return true;
         }
 
         // Soft delete 
         public async Task<bool> Delete(string id)
         {
-            var cancelReason = await _unitOfWork.GetRepository<CancelReason>().GetByIdAsync(id);
-            if (cancelReason == null || cancelReason.DeletedTime.HasValue || cancelReason.DeletedBy != null)
+            var cancelReasonRepo = _unitOfWork.GetRepository<CancelReason>();
+            var cancelReasonEntity = await cancelReasonRepo.Entities.FirstOrDefaultAsync(x => x.Id == id);
+            if (cancelReasonEntity == null || cancelReasonEntity.DeletedTime.HasValue || cancelReasonEntity.DeletedBy != null)
             {
                 throw new BaseException.NotFoundException("not_found", "Cancel Reason not found");
             }
+            cancelReasonEntity.DeletedTime = DateTime.UtcNow;
+            cancelReasonEntity.DeletedBy = "user";
 
-            // Set DeletedTime and DeletedBy
-            cancelReason.DeletedTime = DateTimeOffset.UtcNow;
-            cancelReason.DeletedBy = "currentUser";
-
-            await _unitOfWork.GetRepository<CancelReason>().UpdateAsync(cancelReason);
+            await cancelReasonRepo.UpdateAsync(cancelReasonEntity);
             await _unitOfWork.SaveAsync();
             return true;
         }

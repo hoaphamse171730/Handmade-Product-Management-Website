@@ -15,48 +15,124 @@ namespace HandmadeProductManagementAPI.Controllers
     {
         private readonly IPromotionService _promotionService;
 
-        public PromotionsController(IPromotionService promotionService) => _promotionService = promotionService;
+        public PromotionsController(IPromotionService promotionService)
+        {
+            _promotionService = promotionService;
+        }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<PromotionDto>>> GetPromotions()
         {
-            var promotion = await _promotionService.GetAll();
-            return Ok(promotion);
+            try
+            {
+                IList<PromotionDto> promotions = await _promotionService.GetAll();
+                return Ok(BaseResponse<IList<PromotionDto>>.OkResponse(promotions));
+            }
+            catch (System.Exception ex)
+            {
+                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
+            }
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetPromotion(string id)
+        public async Task<ActionResult<PromotionDto>> GetPromotion(string id)
         {
-            var promotion = await _promotionService.GetById(id);
-            return Ok(promotion);
+            try
+            {
+                PromotionDto promotion = await _promotionService.GetById(id);
+                return Ok(BaseResponse<PromotionDto>.OkResponse(promotion));
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound(BaseResponse<string>.FailResponse("Promotion not found"));
+            }
+            catch (System.Exception ex)
+            {
+                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
+            }
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreatePromotion(PromotionForCreationDto promotionForCreation)
+        public async Task<ActionResult<PromotionDto>> CreatePromotion(PromotionForCreationDto promotionForCreation)
         {
-            var response = await _promotionService.Create(promotionForCreation);
-            return Ok(response);
+            try
+            {
+                PromotionDto createdPromotion = await _promotionService.Create(promotionForCreation);
+                return Ok(BaseResponse<PromotionDto>.OkResponse(createdPromotion));
+            }
+            catch (System.Exception ex)
+            {
+                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
+            }
         }
 
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdatePromotion(string id, PromotionForUpdateDto promotionForUpdate)
+        public async Task<ActionResult> UpdatePromotion(string id, PromotionForUpdateDto promotionForUpdate)
         {
-            var response = await _promotionService.Update(id, promotionForUpdate);
-            return Ok(response);
+            try
+            {
+                await _promotionService.Update(id, promotionForUpdate);
+                return Ok(BaseResponse<string>.OkResponse("Promotion updated successfully"));
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound(BaseResponse<string>.FailResponse("Promotion not found"));
+            }
+            catch (System.Exception ex)
+            {
+                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
+            }
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeletePromotion(string id)
+        public async Task<ActionResult> DeletePromotion(string id)
         {
-            var response = await _promotionService.Delete(id);
-            return Ok(response);
+            try
+            {
+                await _promotionService.Delete(id);
+                return Ok(new BaseResponse<bool>(StatusCodeHelper.OK, "Promotion deleted successfully.", true));
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound(BaseResponse<string>.FailResponse("Promotion not found"));
+            }
+            catch (System.Exception ex)
+            {
+                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
+            }
         }
 
         [HttpDelete("soft-delete/{id}")]
-        public async Task<IActionResult> SoftDeletePromotion(string id)
+        public async Task<ActionResult> SoftDeletePromotion(string id)
         {
-            var response = await _promotionService.SoftDelete(id);
+            try
+            {
+                await _promotionService.SoftDelete(id);
+                return Ok(BaseResponse<string>.OkResponse("Promotion soft-deleted successfully"));
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound(BaseResponse<string>.FailResponse("Promotion not found"));
+            }
+            catch (System.Exception ex)
+            {
+                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
+            }
+        }
+
+        [HttpGet("Expired/{id}")]
+        public async Task<ActionResult> ExpiredPromotion(string id)
+        {
+            var isExpired = await _promotionService.updatePromotionStatusByRealtime(id);
+
+            var response = new BaseResponse<bool>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Promotion Status Updated Successfully!",
+                Data = isExpired
+            };
             return Ok(response);
         }
     }
