@@ -20,44 +20,51 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetOrderDetails()
         {
-            var result = _orderDetailService.GetAll();
-            return Ok(result);
+            var result = await _orderDetailService.GetAll();
+            return Ok(BaseResponse<IList<OrderDetailDto>>.OkResponse(result));
         }
+
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetOrderDetail(string id)
         {
             var result = await _orderDetailService.GetById(id);
-            return Ok(result);
+            return Ok(BaseResponse<OrderDetailDto>.OkResponse(result));
         }
 
         [HttpPost]
         public async Task<IActionResult> CreateOrderDetail(OrderDetailForCreationDto orderDetailForCreation)
         {
-            var result = await _orderDetailService.Create(orderDetailForCreation);
-            return Ok(result);
-        }
 
+            var result = await _orderDetailService.Create(orderDetailForCreation);
+            return Ok(BaseResponse<OrderDetailDto>.OkResponse(result));
+        }
 
         [HttpPut("{orderDetailId}")]
         public async Task<IActionResult> UpdateOrderDetail(string orderDetailId, OrderDetailForUpdateDto orderDetailForUpdate)
         {
+
             var result = await _orderDetailService.Update(orderDetailId, orderDetailForUpdate);
-            return Ok(result);
+            return Ok(BaseResponse<OrderDetailDto>.OkResponse(result));
+
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteOrderDetail(string id)
         {
+
             var result = await _orderDetailService.SoftDelete(id);
-            return Ok(result);
+            return Ok(BaseResponse<bool>.OkResponse(result));
+
         }
 
         [HttpGet("by-order/{orderId}")]
         public async Task<IActionResult> GetOrderDetailsByOrderId(string orderId)
         {
-            var result = _orderDetailService.GetById(orderId);
-            return Ok(result);
+
+            var result = await _orderDetailService.GetByOrderId(orderId);
+            return Ok(BaseResponse<IList<OrderDetailDto>>.OkResponse(result));
+
         }
     }
 }
