@@ -15,11 +15,13 @@ namespace HandmadeProductManagement.Services.Service
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IStatusChangeService _statusChangeService;
+        private readonly IOrderDetailService _orderDetailService;
 
-        public OrderService(IUnitOfWork unitOfWork, IStatusChangeService statusChangeService)
+        public OrderService(IUnitOfWork unitOfWork, IStatusChangeService statusChangeService, IOrderDetailService orderDetailService)
         {
             _unitOfWork = unitOfWork;
             _statusChangeService = statusChangeService;
+            _orderDetailService = orderDetailService;
         }
 
         public async Task<bool> CreateOrderAsync(CreateOrderDto createOrder)
@@ -36,7 +38,6 @@ namespace HandmadeProductManagement.Services.Service
             }
 
             var orderRepository = _unitOfWork.GetRepository<Order>();
-            var orderDetailRepository = _unitOfWork.GetRepository<OrderDetail>();
             var productItemRepository = _unitOfWork.GetRepository<ProductItem>();
 
             var totalPrice = createOrder.OrderDetails.Sum(detail => detail.UnitPrice * detail.ProductQuantity);
@@ -55,16 +56,18 @@ namespace HandmadeProductManagement.Services.Service
                 CreatedBy = createOrder.UserId,
                 LastUpdatedBy = createOrder.UserId
             };
+
+            _unitOfWork.BeginTransaction();
+
             try
             {
-                // Insert the order
                 await orderRepository.InsertAsync(order);
                 await _unitOfWork.SaveAsync();
 
-                // Iterate through each order detail, validate, and decrease stock
                 foreach (var detail in createOrder.OrderDetails)
                 {
                     ValidateOrderDetail(detail);
+
                     var productItem = await productItemRepository.Entities
                         .FirstOrDefaultAsync(p => p.Id == detail.ProductItemId && !p.DeletedTime.HasValue);
 
@@ -72,28 +75,29 @@ namespace HandmadeProductManagement.Services.Service
                     {
                         throw new BaseException.NotFoundException("product_item_not_found", $"Product Item {detail.ProductItemId} not found.");
                     }
-                    if (productItem.QuantityInStock < detail.ProductQuantity)
+
+                    // Validate if stock after deduction is non-negative
+                    if (productItem.QuantityInStock - detail.ProductQuantity < 0)
                     {
-                        throw new BaseException.ErrorException(400, "insufficient_stock", $"Product {productItem.Id} has insufficient stock.");
+                        throw new BaseException.BadRequestException("insufficient_stock", $"Product {productItem.Id} has insufficient stock. Current stock: {productItem.QuantityInStock}, Requested: {detail.ProductQuantity}");
                     }
+
                     productItem.QuantityInStock -= detail.ProductQuantity;
                     productItemRepository.Update(productItem);
-                    var orderDetail = new OrderDetail
+
+                    var orderDetailForCreation = new OrderDetailForCreationDto
                     {
                         ProductItemId = detail.ProductItemId,
                         ProductQuantity = detail.ProductQuantity,
                         UnitPrice = detail.UnitPrice,
-                        OrderId = order.Id,
-                        CreatedBy = createOrder.UserId,
-                        LastUpdatedBy = createOrder.UserId
+                        OrderId = order.Id.ToString()
                     };
-                    await orderDetailRepository.InsertAsync(orderDetail);
+
+                    await _orderDetailService.Create(orderDetailForCreation);
                 }
 
-                // Save changes for stock decrease and order details
                 await _unitOfWork.SaveAsync();
 
-                // Create an initial status change after the order is created
                 var statusChangeDto = new StatusChangeForCreationDto
                 {
                     OrderId = order.Id.ToString(),
@@ -103,13 +107,16 @@ namespace HandmadeProductManagement.Services.Service
 
                 await _statusChangeService.Create(statusChangeDto);
                 await _unitOfWork.SaveAsync();
+
+                _unitOfWork.CommitTransaction();
+
+                return true;
             }
             catch (Exception ex)
             {
+                _unitOfWork.RollBack();
                 throw;
             }
-
-            return true;
         }
 
         public async Task<IList<OrderResponseModel>> GetAllOrdersAsync()
@@ -276,6 +283,11 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.BadRequestException("invalid_status", "Status cannot be null or empty.");
             }
 
+            if (status != "Canceled" && cancelReasonId != null)
+            {
+                throw new BaseException.BadRequestException("invalid_input", "CancelReasonId must be null when status is not {Canceled}");
+            }
+
             var repository = _unitOfWork.GetRepository<Order>();
             var existingOrder = await repository.Entities
                 .FirstOrDefaultAsync(o => o.Id == orderId && !o.DeletedTime.HasValue);
@@ -287,21 +299,21 @@ namespace HandmadeProductManagement.Services.Service
 
             // Validate Status Flow
             var validStatusTransitions = new Dictionary<string, List<string>>
-                {
-                    { "Pending", new List<string> { "Canceled", "Awaiting Payment" } },
-                    { "Awaiting Payment", new List<string> { "Canceled", "Processing" } },
-                    { "Processing", new List<string> { "Delivering" } },
-                    { "Delivering", new List<string> { "Shipped", "Delivery Failed" } },
-                    { "Delivery Failed", new List<string> { "On Hold" } },
-                    { "On Hold", new List<string> { "Delivering Retry", "Refund Requested" } },
-                    { "Refund Requested", new List<string> { "Refund Denied", "Refund Approve" } },
-                    { "Refund Approve", new List<string> { "Returning" } },
-                    { "Returning", new List<string> { "Return Failed", "Returned" } },
-                    { "Return Failed", new List<string> { "On Hold" } },
-                    { "Returned", new List<string> { "Refunded" } },
-                    { "Refunded", new List<string> { "Closed" } },
-                    { "Canceled", new List<string> { "Closed" } }
-                };
+            {
+                { "Pending", new List<string> { "Canceled", "Awaiting Payment" } },
+                { "Awaiting Payment", new List<string> { "Canceled", "Processing" } },
+                { "Processing", new List<string> { "Delivering" } },
+                { "Delivering", new List<string> { "Shipped", "Delivery Failed" } },
+                { "Delivery Failed", new List<string> { "On Hold" } },
+                { "On Hold", new List<string> { "Delivering Retry", "Refund Requested" } },
+                { "Refund Requested", new List<string> { "Refund Denied", "Refund Approve" } },
+                { "Refund Approve", new List<string> { "Returning" } },
+                { "Returning", new List<string> { "Return Failed", "Returned" } },
+                { "Return Failed", new List<string> { "On Hold" } },
+                { "Returned", new List<string> { "Refunded" } },
+                { "Refunded", new List<string> { "Closed" } },
+                { "Canceled", new List<string> { "Closed" } }
+            };
 
             var allValidStatuses = validStatusTransitions.Keys
                 .Concat(validStatusTransitions.Values.SelectMany(v => v))
@@ -319,42 +331,78 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.BadRequestException("invalid_status_transition", $"Cannot transition from {existingOrder.Status} to {status}.");
             }
 
-            // Validate if updatedStatus is Canceled
-            if (status == "Canceled")
+            _unitOfWork.BeginTransaction();
+
+            try
             {
-                if (string.IsNullOrWhiteSpace(cancelReasonId))
+                // Validate if updatedStatus is Canceled
+                if (status == "Canceled")
                 {
-                    throw new BaseException.BadRequestException("validation_failed", "CancelReasonId is required when updating status to {Canceled}.");
+                    if (string.IsNullOrWhiteSpace(cancelReasonId))
+                    {
+                        throw new BaseException.BadRequestException("validation_failed", "CancelReasonId is required when updating status to {Canceled}.");
+                    }
+
+                    var cancelReason = await _unitOfWork.GetRepository<CancelReason>().GetByIdAsync(cancelReasonId);
+
+                    if (cancelReason == null)
+                    {
+                        throw new BaseException.NotFoundException("not_found", $"Cancel Reason not found. {existingOrder.CancelReasonId}");
+                    }
+
+                    existingOrder.CancelReasonId = cancelReasonId;
+
+                    // Retrieve the order details to update product stock
+                    var orderDetailRepository = _unitOfWork.GetRepository<OrderDetail>();
+                    var orderDetails = await orderDetailRepository.Entities
+                        .Where(od => od.OrderId == orderId && !od.DeletedTime.HasValue)
+                        .ToListAsync();
+
+                    var productItemRepository = _unitOfWork.GetRepository<ProductItem>();
+
+                    // Add back the product quantities to the stock
+                    foreach (var detail in orderDetails)
+                    {
+                        var productItem = await productItemRepository.Entities
+                            .FirstOrDefaultAsync(p => p.Id == detail.ProductItemId && !p.DeletedTime.HasValue);
+
+                        if (productItem == null)
+                        {
+                            throw new BaseException.NotFoundException("product_item_not_found", $"Product Item {detail.ProductItemId} not found.");
+                        }
+
+                        productItem.QuantityInStock += detail.ProductQuantity;
+
+                        productItemRepository.Update(productItem);
+                    }
                 }
 
-                var cancelReason = await _unitOfWork.GetRepository<CancelReason>().GetByIdAsync(cancelReasonId);
+                // Update order status
+                existingOrder.Status = status;
+                existingOrder.LastUpdatedBy = existingOrder.UserId.ToString();
+                existingOrder.LastUpdatedTime = DateTime.UtcNow;
 
-                if (cancelReason == null)
+                // Create a new status change record after updating the order status
+                var statusChangeDto = new StatusChangeForCreationDto
                 {
-                    throw new BaseException.NotFoundException("not_found", $"Cancel Reason not found. {existingOrder.CancelReasonId}");
-                }
+                    OrderId = orderId,
+                    Status = status,
+                    ChangeTime = DateTime.UtcNow
+                };
 
-                existingOrder.CancelReasonId = cancelReasonId;
+                repository.Update(existingOrder);
+                await _statusChangeService.Create(statusChangeDto);
+
+                await _unitOfWork.SaveAsync();
+                _unitOfWork.CommitTransaction();
+
+                return true;
             }
-
-
-            existingOrder.Status = status;
-            existingOrder.LastUpdatedBy = existingOrder.UserId.ToString();
-            existingOrder.LastUpdatedTime = DateTime.UtcNow;
-
-            // Create a new status change record after updating the order status
-            var statusChangeDto = new StatusChangeForCreationDto
+            catch (Exception ex)
             {
-                OrderId = orderId,
-                Status = status,
-                ChangeTime = DateTime.UtcNow
-            };
-
-            repository.Update(existingOrder);
-            await _statusChangeService.Create(statusChangeDto);
-            await _unitOfWork.SaveAsync();
-
-            return true;
+                _unitOfWork.RollBack();
+                throw;
+            }
         }
 
         private void ValidateOrder(CreateOrderDto order)
@@ -412,15 +460,15 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.BadRequestException("invalid_product_id_format", "Product Item id format is invalid. Example: 123e4567-e89b-12d3-a456-426614174000.");
             }
 
-            if (string.IsNullOrWhiteSpace(detail.OrderId))
-            {
-                throw new BaseException.BadRequestException("invalid_order_id", "Please input Order id.");
-            }
+            //if (string.IsNullOrWhiteSpace(detail.OrderId))
+            //{
+            //    throw new BaseException.BadRequestException("invalid_order_id", "Please input Order id.");
+            //}
 
-            if (!Guid.TryParse(detail.OrderId, out _))
-            {
-                throw new BaseException.BadRequestException("invalid_order_id_format", "Order ID format is invalid. Example: 123e4567-e89b-12d3-a456-426614174000.");
-            }
+            //if (!Guid.TryParse(detail.OrderId, out _))
+            //{
+            //    throw new BaseException.BadRequestException("invalid_order_id_format", "Order ID format is invalid. Example: 123e4567-e89b-12d3-a456-426614174000.");
+            //}
 
             if (detail.ProductQuantity <= 0)
             {

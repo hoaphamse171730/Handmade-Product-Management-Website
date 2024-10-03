@@ -47,6 +47,8 @@ namespace HandmadeProductManagement.Services.Service
             if (!validationResult.IsValid)
                 throw new ValidationException(validationResult.Errors);
             var orderDetailEntity = _mapper.Map<OrderDetail>(orderDetailForCreation);
+            orderDetailEntity.CreatedBy = "user";
+            orderDetailEntity.LastUpdatedBy = "user";
             await _unitOfWork.GetRepository<OrderDetail>().InsertAsync(orderDetailEntity);
             await _unitOfWork.SaveAsync();
             return _mapper.Map<OrderDetailDto>(orderDetailEntity);

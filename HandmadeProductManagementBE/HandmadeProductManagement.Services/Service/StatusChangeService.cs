@@ -173,10 +173,10 @@ namespace HandmadeProductManagement.Services.Service
             }
 
             // If status is 'Pending', ChangeTime must match the order creation time
-            if (newStatus == "Pending" && changeTime != order.CreatedTime)
-            {
-                throw new BaseException.BadRequestException("invalid_pending_time", "For Pending status, ChangeTime must match the order creation time.");
-            }
+            //if (newStatus == "Pending" && changeTime != order.CreatedTime)
+            //{
+            //    throw new BaseException.BadRequestException("invalid_pending_time", "For Pending status, ChangeTime must match the order creation time.");
+            //}
 
             // Get the latest status change for the given order
             var lastStatusChange = await _unitOfWork.GetRepository<StatusChange>().Entities
