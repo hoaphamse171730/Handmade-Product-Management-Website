@@ -67,8 +67,8 @@ public class CartItemService : ICartItemService
             await _unitOfWork.SaveAsync();
             return BaseResponse<bool>.OkResponse(true);
         }
-        catch (Exception ex)
-        {
+        catch
+        { 
             throw new BaseException.CoreException("server_error", "Error adding cart item. Please try again.", (int)StatusCodeHelper.ServerError);
         }
     }
@@ -114,7 +114,7 @@ public class CartItemService : ICartItemService
             await _unitOfWork.SaveAsync();
             return BaseResponse<bool>.OkResponse(true);
         }
-        catch (Exception ex)
+        catch 
         {
             throw new BaseException.CoreException("server_error", "Internal server error updating cart item.", (int)StatusCodeHelper.ServerError);
         }
@@ -139,7 +139,7 @@ public class CartItemService : ICartItemService
             await _unitOfWork.SaveAsync();
             return BaseResponse<bool>.OkResponse(true);
         }
-        catch (Exception ex)
+        catch 
         {
             throw new BaseException.CoreException("server_error", "Internal server error removing cart item.", (int)StatusCodeHelper.ServerError);
         }
