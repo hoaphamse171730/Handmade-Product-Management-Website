@@ -33,6 +33,8 @@ namespace HandmadeProductManagement.Services.Service
 
             var orderRepository = _unitOfWork.GetRepository<Order>();
             var orderDetailRepository = _unitOfWork.GetRepository<OrderDetail>();
+            var cartItemRepository = _unitOfWork.GetRepository<CartItem>();
+
             var totalPrice = createOrder.OrderDetails.Sum(detail => detail.UnitPrice * detail.ProductQuantity);
 
             var order = new Order
@@ -67,6 +69,14 @@ namespace HandmadeProductManagement.Services.Service
                     LastUpdatedBy = createOrder.UserId
                 };
                 await orderDetailRepository.InsertAsync(orderDetail);
+
+                //    var cartItemToRemove = await cartItemRepository.Entities
+                //.FirstOrDefaultAsync(ci => ci.ProductItemId == detail.ProductItemId);
+
+                //    if (cartItemToRemove != null)
+                //    {
+                //        cartItemRepository.Delete(cartItemToRemove);
+                //    }
             }
 
             await _unitOfWork.SaveAsync();
@@ -195,7 +205,8 @@ namespace HandmadeProductManagement.Services.Service
                     { "Return Failed", new List<string> { "On Hold" } },
                     { "Returned", new List<string> { "Refunded" } },
                     { "Refunded", new List<string> { "Closed" } },
-                    { "Canceled", new List<string> { "Closed" } }
+                    { "Canceled", new List<string> { "Closed" } },
+                    { "Delivering Retry", new List<string> { "Delivering" } }
                 };
 
             var allValidStatuses = validStatusTransitions.Keys

@@ -282,10 +282,6 @@ namespace HandmadeProductManagement.Repositories.Context
                       .IsRequired()
                       .HasMaxLength(15);
 
-                entity.Property(e => e.Amount)
-                      .IsRequired()
-                      .HasColumnType("decimal(18, 2)"); 
-
                 entity.Property(e => e.Method)
                       .IsRequired()
                       .HasMaxLength(30);
