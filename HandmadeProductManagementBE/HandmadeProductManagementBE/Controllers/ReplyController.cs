@@ -58,7 +58,7 @@ namespace HandmadeProductManagementAPI.Controllers
             };
 
             var createdReply = await _replyService.CreateAsync(replyModel);
-            var response = new BaseResponse<ReplyModel>
+            var response = new BaseResponse<bool>
             {
                 Code = "Success",
                 StatusCode = StatusCodeHelper.OK,

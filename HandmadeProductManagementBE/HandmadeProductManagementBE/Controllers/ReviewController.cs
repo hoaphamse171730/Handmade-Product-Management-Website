@@ -59,7 +59,7 @@ namespace HandmadeProductManagementAPI.Controllers
 
             var createdReview = await _reviewService.CreateAsync(reviewModel,orderId);
 
-            var response = new BaseResponse<ReviewModel>
+            var response = new BaseResponse<bool>
             {
                 Code = "Success",
                 StatusCode = StatusCodeHelper.OK,
