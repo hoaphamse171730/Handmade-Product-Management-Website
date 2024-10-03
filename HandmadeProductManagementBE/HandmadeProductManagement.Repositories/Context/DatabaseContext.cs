@@ -349,7 +349,7 @@ namespace HandmadeProductManagement.Repositories.Context
                     .OnDelete(DeleteBehavior.Restrict);
 
                 entity.HasOne(e => e.Shop)
-                    .WithMany()
+                    .WithMany(s => s.Products)
                     .HasForeignKey(e => e.ShopId)
                     .OnDelete(DeleteBehavior.Restrict);
             });

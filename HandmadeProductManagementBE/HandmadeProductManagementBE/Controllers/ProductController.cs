@@ -176,5 +176,19 @@ namespace HandmadeProductManagementAPI.Controllers
             };
             return Ok(response);
         }
+
+        [HttpGet("CalculateAverageRating/{id}")]
+        public async Task<IActionResult> CalculateAverageRating([Required] string id)
+        {
+            var averageRating = await _productService.CalculateAverageRatingAsync(id);
+            var response = new BaseResponse<decimal>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Average rating calculated successfully.",
+                Data = averageRating
+            };
+            return Ok(response);
+        }
     }
 }

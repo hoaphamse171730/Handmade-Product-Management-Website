@@ -77,7 +77,7 @@ namespace HandmadeProductManagementAPI.Controllers
                 ShopId = shopId
             };
 
-            var updatedReply = await _replyService.UpdateAsync(replyId, replyModel);
+            var updatedReply = await _replyService.UpdateAsync(replyId, shopId, replyModel);
             var response = new BaseResponse<ReplyModel>
             {
                 Code = "Success",
@@ -88,9 +88,9 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [HttpDelete("{replyId}")]
-        public async Task<IActionResult> Delete([Required] string replyId)
+        public async Task<IActionResult> Delete([Required] string replyId, [Required] string shopId)
         {
-            var result = await _replyService.DeleteAsync(replyId);
+            var result = await _replyService.DeleteAsync(replyId, shopId);
             var response = new BaseResponse<bool>
             {
                 Code = "Success",
@@ -101,9 +101,9 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [HttpDelete("{replyId}/soft-delete")]
-        public async Task<IActionResult> SoftDelete(string replyId)
+        public async Task<IActionResult> SoftDelete(string replyId, [Required] string shopId)
         {
-            var result = await _replyService.SoftDeleteAsync(replyId);
+            var result = await _replyService.SoftDeleteAsync(replyId, shopId);
             var response = new BaseResponse<bool>
             {
                 Code = "Success",
