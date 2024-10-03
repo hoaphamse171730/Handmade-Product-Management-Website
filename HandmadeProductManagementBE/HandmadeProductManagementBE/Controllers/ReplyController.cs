@@ -22,7 +22,7 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll(int pageNumber = 1, int pageSize = 10)
         {
-            var replies = await _replyService.GetAllAsync(pageNumber, pageSize);
+            var replies = await _replyService.GetByPageAsync(pageNumber, pageSize);
             var response = new BaseResponse<IList<ReplyModel>>
             {
                 Code = "Success",

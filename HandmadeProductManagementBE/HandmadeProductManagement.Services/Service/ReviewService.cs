@@ -7,11 +7,6 @@ using HandmadeProductManagement.ModelViews.ReplyModelViews;
 using HandmadeProductManagement.ModelViews.ReviewModelViews;
 using HandmadeProductManagement.Repositories.Entity;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HandmadeProductManagement.Services.Service
 {
@@ -24,7 +19,7 @@ namespace HandmadeProductManagement.Services.Service
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<IList<ReviewModel>> GetAllAsync(int pageNumber, int pageSize)
+        public async Task<IList<ReviewModel>> GetByPageAsync(int pageNumber, int pageSize)
         {
             if (pageNumber <= 0)
             {
@@ -97,7 +92,7 @@ namespace HandmadeProductManagement.Services.Service
             };
         }
 
-        public async Task<ReviewModel> CreateAsync(ReviewModel reviewModel, string orderId)
+        public async Task<bool> CreateAsync(ReviewModel reviewModel, string orderId)
         {
             if (string.IsNullOrWhiteSpace(reviewModel.ProductId) || !Guid.TryParse(reviewModel.ProductId, out _))
             {
@@ -179,14 +174,10 @@ namespace HandmadeProductManagement.Services.Service
             await _unitOfWork.GetRepository<Review>().InsertAsync(review);
             await _unitOfWork.SaveAsync();
 
-            // Populate the reviewModel with the created review's properties
-            reviewModel.Id = review.Id;
-            reviewModel.Date = review.Date;
-
-            return reviewModel;
+            return true;
         }
 
-        public async Task<ReviewModel> UpdateAsync(string reviewId, Guid userId, ReviewModel updatedReview)
+        public async Task<bool> UpdateAsync(string reviewId, Guid userId, ReviewModel updatedReview)
         {
             if (string.IsNullOrWhiteSpace(reviewId) || !Guid.TryParse(reviewId, out _))
             {
@@ -231,10 +222,7 @@ namespace HandmadeProductManagement.Services.Service
             _unitOfWork.GetRepository<Review>().UpdateAsync(existingReview);
             await _unitOfWork.SaveAsync();
 
-            updatedReview.Content = existingReview.Content;
-            updatedReview.Rating = existingReview.Rating;
-
-            return updatedReview;
+            return true;
         }
 
         public async Task<bool> DeleteAsync(string reviewId, Guid userId)
@@ -261,7 +249,7 @@ namespace HandmadeProductManagement.Services.Service
 
             existingReview.DeletedTime = DateTime.UtcNow;
 
-            _unitOfWork.GetRepository<Review>().DeleteAsync(existingReview.Id);
+            await _unitOfWork.GetRepository<Review>().DeleteAsync(existingReview.Id);
             await _unitOfWork.SaveAsync();
 
             return true;
@@ -292,7 +280,7 @@ namespace HandmadeProductManagement.Services.Service
             existingReview.DeletedTime = CoreHelper.SystemTimeNow;
             existingReview.DeletedBy = existingReview.User.UserInfo.FullName;
 
-            _unitOfWork.GetRepository<Review>().UpdateAsync(existingReview);
+            await _unitOfWork.GetRepository<Review>().UpdateAsync(existingReview);
             await _unitOfWork.SaveAsync();
 
             return true;

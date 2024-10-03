@@ -21,7 +21,7 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll(int pageNumber = 1, int pageSize = 10)
         {
-            var reviews = await _reviewService.GetAllAsync(pageNumber, pageSize);
+            var reviews = await _reviewService.GetByPageAsync(pageNumber, pageSize);
             var response = new BaseResponse<IList<ReviewModel>>
             {
                 Code = "Success",

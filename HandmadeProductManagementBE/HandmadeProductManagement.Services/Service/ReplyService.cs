@@ -25,7 +25,7 @@ namespace HandmadeProductManagement.Services.Service
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<IList<ReplyModel>> GetAllAsync(int pageNumber, int pageSize)
+        public async Task<IList<ReplyModel>> GetByPageAsync(int pageNumber, int pageSize)
         {
             if (pageNumber <= 0)
             {
@@ -72,7 +72,7 @@ namespace HandmadeProductManagement.Services.Service
             };
         }
 
-        public async Task<ReplyModel> CreateAsync(ReplyModel replyModel)
+        public async Task<bool> CreateAsync(ReplyModel replyModel)
         {
             if (replyModel == null)
             {
@@ -132,13 +132,10 @@ namespace HandmadeProductManagement.Services.Service
             await _unitOfWork.GetRepository<Reply>().InsertAsync(reply);
             await _unitOfWork.SaveAsync();
 
-            replyModel.Id = reply.Id;
-            replyModel.Date = reply.Date;
-
-            return replyModel;
+            return true;
         }
 
-        public async Task<ReplyModel> UpdateAsync(string replyId, string shopId, ReplyModel updatedReply)
+        public async Task<bool> UpdateAsync(string replyId, string shopId, ReplyModel updatedReply)
         {
             if (string.IsNullOrWhiteSpace(replyId))
             {
@@ -193,10 +190,10 @@ namespace HandmadeProductManagement.Services.Service
             existingReply.LastUpdatedBy = shop.Name;
             existingReply.LastUpdatedTime = DateTimeOffset.UtcNow;
 
-            _unitOfWork.GetRepository<Reply>().UpdateAsync(existingReply);
+            await _unitOfWork.GetRepository<Reply>().UpdateAsync(existingReply);
             await _unitOfWork.SaveAsync();
 
-            return updatedReply;
+            return true;
         }
 
         public async Task<bool> DeleteAsync(string replyId, string shopId)
@@ -223,7 +220,7 @@ namespace HandmadeProductManagement.Services.Service
 
             existingReply.DeletedTime = DateTimeOffset.UtcNow;
 
-            _unitOfWork.GetRepository<Reply>().DeleteAsync(replyId);
+            await _unitOfWork.GetRepository<Reply>().DeleteAsync(replyId);
             await _unitOfWork.SaveAsync();
             return true;
         }
@@ -254,7 +251,7 @@ namespace HandmadeProductManagement.Services.Service
             existingReply.DeletedTime = DateTimeOffset.UtcNow;
             existingReply.DeletedBy = shop.Name;
 
-            _unitOfWork.GetRepository<Reply>().UpdateAsync(existingReply);
+            await _unitOfWork.GetRepository<Reply>().UpdateAsync(existingReply);
             await _unitOfWork.SaveAsync();
 
             return true;
