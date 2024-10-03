@@ -2,7 +2,6 @@
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.ReplyModelViews;
-using HandmadeProductManagement.ModelViews.ReviewModelViews;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 
@@ -22,7 +21,7 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll(int pageNumber = 1, int pageSize = 10)
         {
-            var replies = await _replyService.GetAllAsync(pageNumber, pageSize);
+            var replies = await _replyService.GetByPageAsync(pageNumber, pageSize);
             var response = new BaseResponse<IList<ReplyModel>>
             {
                 Code = "Success",
@@ -58,7 +57,7 @@ namespace HandmadeProductManagementAPI.Controllers
             };
 
             var createdReply = await _replyService.CreateAsync(replyModel);
-            var response = new BaseResponse<ReplyModel>
+            var response = new BaseResponse<bool>
             {
                 Code = "Success",
                 StatusCode = StatusCodeHelper.OK,

@@ -83,7 +83,7 @@ namespace HandmadeProductManagement.Services.Service
 
             var paymentRepository = _unitOfWork.GetRepository<Payment>();
             var paymentExists = await paymentRepository.Entities
-                        .AnyAsync(p => p.Id == paymentId && !p.DeletedTime.HasValue);
+                .AnyAsync(p => p.Id == paymentId && !p.DeletedTime.HasValue);
 
             if (!paymentExists)
             {
@@ -92,7 +92,8 @@ namespace HandmadeProductManagement.Services.Service
 
             var paymentDetailRepository = _unitOfWork.GetRepository<PaymentDetail>();
             var paymentDetail = await paymentDetailRepository.Entities
-                        .FirstOrDefaultAsync(pd => pd.PaymentId == paymentId && !pd.DeletedTime.HasValue);
+                .FirstOrDefaultAsync(pd => pd.PaymentId == paymentId && !pd.DeletedTime.HasValue);
+
             if (paymentDetail == null)
             {
                 throw new BaseException.NotFoundException("payment_detail_not_found", "Payment detail not found.");
@@ -122,7 +123,8 @@ namespace HandmadeProductManagement.Services.Service
 
             var paymentDetailRepository = _unitOfWork.GetRepository<PaymentDetail>();
             var paymentDetail = await paymentDetailRepository.Entities
-                        .FirstOrDefaultAsync(pd => pd.Id == id && !pd.DeletedTime.HasValue);
+                .FirstOrDefaultAsync(pd => pd.Id == id && !pd.DeletedTime.HasValue);
+
             if (paymentDetail == null)
             {
                 throw new BaseException.NotFoundException("payment_detail_not_found", "Payment detail not found.");
