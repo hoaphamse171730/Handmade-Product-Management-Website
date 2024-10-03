@@ -475,7 +475,6 @@ D:\FPT\2024\sem6\Handmade-Product-Management-Website\HandmadeProductManagementBE
 D:\FPT\2024\sem6\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\obj\Debug\net8.0\HandmadeProductManagementAPI.pdb
 D:\FPT\2024\sem6\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\obj\Debug\net8.0\HandmadeProductManagementAPI.genruntimeconfig.cache
 D:\FPT\2024\sem6\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\obj\Debug\net8.0\ref\HandmadeProductManagementAPI.dll
-D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\bin\Debug\net8.0\appsettings.Development.json
 D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\bin\Debug\net8.0\appsettings.json
 D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\bin\Debug\net8.0\HandmadeProductManagementAPI.exe
 D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\bin\Debug\net8.0\HandmadeProductManagementAPI.deps.json
@@ -636,3 +635,18 @@ D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\
 D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\obj\Debug\net8.0\HandmadeProductManagementAPI.pdb
 D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\obj\Debug\net8.0\HandmadeProductManagementAPI.genruntimeconfig.cache
 D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\obj\Debug\net8.0\ref\HandmadeProductManagementAPI.dll
+D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\bin\Debug\net8.0\FluentValidation.dll
+D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\bin\Debug\net8.0\FluentValidation.AspNetCore.dll
+D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\bin\Debug\net8.0\FluentValidation.DependencyInjectionExtensions.dll
+D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\bin\Debug\net8.0\Serilog.dll
+D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\bin\Debug\net8.0\Serilog.AspNetCore.dll
+D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\bin\Debug\net8.0\Serilog.Extensions.Hosting.dll
+D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\bin\Debug\net8.0\Serilog.Extensions.Logging.dll
+D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\bin\Debug\net8.0\Serilog.Formatting.Compact.dll
+D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\bin\Debug\net8.0\Serilog.Settings.Configuration.dll
+D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\bin\Debug\net8.0\Serilog.Sinks.Console.dll
+D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\bin\Debug\net8.0\Serilog.Sinks.Debug.dll
+D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\bin\Debug\net8.0\Serilog.Sinks.File.dll
+D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\bin\Debug\net8.0\HandmadeProductManagement.Validation.dll
+D:\amazing_tech\Handmade-Product-Management-Website\HandmadeProductManagementBE\HandmadeProductManagementBE\bin\Debug\net8.0\HandmadeProductManagement.Validation.pdb

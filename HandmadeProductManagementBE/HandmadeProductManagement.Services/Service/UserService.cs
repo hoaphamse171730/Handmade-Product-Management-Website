@@ -195,31 +195,7 @@ namespace HandmadeProductManagement.Services.Service
         }
 
 
-        public async Task<ProductDto> UpdateProductPromotionAsync(string productId, string promotionId)
-        {
-            
-            var product = await _unitOfWork.GetRepository<Product>().Entities
-                .Include(p => p.ProductItems)
-                .FirstOrDefaultAsync(p => p.Id == productId);
-            if (product == null)
-                throw new BaseException.NotFoundException("product_not_found", "Product not found");
-            var promotion = await _unitOfWork.GetRepository<Promotion>().Entities
-                .FirstOrDefaultAsync(p => p.Id == promotionId && p.StartDate <= DateTime.UtcNow && p.EndDate >= DateTime.UtcNow);
-            if (promotion == null)
-                throw new BaseException.BadRequestException("invalid_promotion", "Promotion is invalid or expired.");
-            product.Id = promotion.Id;
-            foreach (var productItem in product.ProductItems)
-            {
-                var originalPrice = productItem.Price;
-                productItem.DiscountedPrice = originalPrice * (1 - promotion.DiscountRate);
-            }
-            product.LastUpdatedTime = DateTime.UtcNow;
-            await _unitOfWork.GetRepository<Product>().UpdateAsync(product);
-            await _unitOfWork.SaveAsync();
-            var productToReturn = _mapper.Map<ProductDto>(product);
-            return productToReturn;
-        }
-
+     
 
 
     }
