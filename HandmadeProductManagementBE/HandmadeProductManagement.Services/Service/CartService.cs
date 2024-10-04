@@ -47,6 +47,7 @@ public class CartService : ICartService
     public async Task<Decimal> GetTotalCartPrice(string cartId)
     {
 
+        var update = _promotionService.UpdatePromotionStatusByRealtime(cartId); 
         if (!Guid.TryParse(cartId, out Guid cardId))
         {
             throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Invalid cartID");
@@ -80,7 +81,7 @@ public class CartService : ICartService
 
             if (promotion != null)
             {
-                await _promotionService.updatePromotionStatusByRealtime(promotion.Id);
+                await _promotionService.UpdatePromotionStatusByRealtime(promotion.Id);
                 if(promotion.Status == "active"){
                     discountRate = 1 - (decimal)promotion.DiscountRate;
                 }            

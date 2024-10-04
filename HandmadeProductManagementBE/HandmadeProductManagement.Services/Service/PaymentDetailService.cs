@@ -63,7 +63,22 @@ namespace HandmadeProductManagement.Services.Service
 
             if (createPaymentDetailDto.Status == "Success")
             {
+                payment.Status = "Completed";
+                payment.LastUpdatedTime = DateTime.UtcNow;
+                await paymentRepository.UpdateAsync(payment);
+
+                var orderRepository = _unitOfWork.GetRepository<Order>();
+                var order = await orderRepository.Entities
+                                .FirstOrDefaultAsync(o => o.Id == payment.OrderId && !o.DeletedTime.HasValue);
+                if (order != null)
+                {
+                    order.Status = "Processing";
+                    order.LastUpdatedTime = DateTime.UtcNow;
+                    await orderRepository.UpdateAsync(order);
+                }
+                await _unitOfWork.SaveAsync();
                 await _paymentService.UpdatePaymentStatusAsync(createPaymentDetailDto.PaymentId, "Completed");
+
             }
 
             return true;
