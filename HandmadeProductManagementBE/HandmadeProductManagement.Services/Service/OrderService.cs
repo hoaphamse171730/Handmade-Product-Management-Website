@@ -26,6 +26,11 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<bool> CreateOrderAsync(CreateOrderDto createOrder)
         {
+            if (createOrder.OrderDetails == null || !createOrder.OrderDetails.Any())
+            {
+                throw new BaseException.BadRequestException("invalid_order_details", "Order details cannot be null or empty.");
+            }
+
             ValidateOrder(createOrder);
 
             // Check if OrderDetails is empty
