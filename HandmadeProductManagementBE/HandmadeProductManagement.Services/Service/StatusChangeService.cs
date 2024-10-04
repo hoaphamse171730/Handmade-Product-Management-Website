@@ -24,8 +24,29 @@ namespace HandmadeProductManagement.Services.Service
             _updateValidator = updateValidator;
         }
 
+        private readonly List<string> validStatuses = new List<string>
+        {
+            "Pending",
+            "Canceled",
+            "Awaiting Payment",
+            "Processing",
+            "Delivering",
+            "Shipped",
+            "Delivery Failed",
+            "On Hold",
+            "Delivering Retry",
+            "Refund Requested",
+            "Refund Denied",
+            "Refund Approve",
+            "Returning",
+            "Return Failed",
+            "Returned",
+            "Refunded",
+            "Closed"
+        };
+
         // Get status changes by page (only active records)
-        public async Task<IList<StatusChangeResponseModel>> GetByPage(int page, int pageSize)
+        public async Task<IList<StatusChangeDto>> GetByPage(int page, int pageSize)
         {
             if (page <= 0)
             {
@@ -43,7 +64,7 @@ namespace HandmadeProductManagement.Services.Service
             var statusChanges = await query
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
-                .Select(statusChange => new StatusChangeResponseModel
+                .Select(statusChange => new StatusChangeDto
                 {
                     Id = statusChange.Id.ToString(),
                     OrderId = statusChange.OrderId,
@@ -52,12 +73,12 @@ namespace HandmadeProductManagement.Services.Service
                 })
                 .ToListAsync();
 
-            var statusChangeDto = _mapper.Map<IList<StatusChangeResponseModel>>(statusChanges);
+            var statusChangeDto = _mapper.Map<IList<StatusChangeDto>>(statusChanges);
             return statusChangeDto;
         }
 
         // Get status changes by OrderId (only active records)
-        public async Task<IList<StatusChangeResponseModel>> GetByOrderId(string orderId)
+        public async Task<IList<StatusChangeDto>> GetByOrderId(string orderId)
         {
             IQueryable<StatusChange> query = _unitOfWork.GetRepository<StatusChange>().Entities
                 .Where(sc => sc.OrderId == orderId && (!sc.DeletedTime.HasValue || sc.DeletedBy == null));
@@ -69,7 +90,7 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.NotFoundException("not_found", "No status changes found for the given OrderId.");
             }
 
-            var statusChangeDtos = _mapper.Map<IList<StatusChangeResponseModel>>(statusChanges);
+            var statusChangeDtos = _mapper.Map<IList<StatusChangeDto>>(statusChanges);
 
             return statusChangeDtos;
         }
@@ -78,15 +99,20 @@ namespace HandmadeProductManagement.Services.Service
         public async Task<bool> Create(StatusChangeForCreationDto createStatusChange)
         {
             // Validate
-            var result = _creationValidator.ValidateAsync(createStatusChange);
-
-            if (!result.Result.IsValid)
+            var validationResult = await _creationValidator.ValidateAsync(createStatusChange);
+            if (!validationResult.IsValid)
             {
-                throw new ValidationException(result.Result.Errors);
+                throw new BaseException.BadRequestException("validation_failed", validationResult.Errors.Select(e => e.ErrorMessage).FirstOrDefault());
             }
 
             // Validate ChangeTime
             await ValidateChangeTime(createStatusChange.OrderId, createStatusChange.Status, createStatusChange.ChangeTime);
+
+            // Check if the status is valid
+            if (!validStatuses.Contains(createStatusChange.Status))
+            {
+                throw new BaseException.BadRequestException("invalid_status", $"The status '{createStatusChange.Status}' is not valid.");
+            }
 
             var statusChangeEntity = _mapper.Map<StatusChange>(createStatusChange);
 
@@ -103,11 +129,10 @@ namespace HandmadeProductManagement.Services.Service
         // Update an existing status change
         public async Task<bool> Update(string id, StatusChangeForUpdateDto updatedStatusChange)
         {
-            var result = _updateValidator.ValidateAsync(updatedStatusChange);
-
-            if (!result.Result.IsValid)
+            var validationResult = await _updateValidator.ValidateAsync(updatedStatusChange);
+            if (!validationResult.IsValid)
             {
-                throw new ValidationException(result.Result.Errors);
+                throw new BaseException.BadRequestException("validation_failed", validationResult.Errors.Select(e => e.ErrorMessage).FirstOrDefault());
             }
             var statusChangeEntity = await _unitOfWork.GetRepository<StatusChange>().Entities
                 .FirstOrDefaultAsync(p => p.Id == id);
@@ -121,6 +146,12 @@ namespace HandmadeProductManagement.Services.Service
             if (statusChangeEntity.OrderId != updatedStatusChange.OrderId)
             {
                 throw new BaseException.BadRequestException("invalid_order_id_change", "OrderId cannot be changed when updating a status change.");
+            }
+
+            // Check if the status is valid
+            if (!validStatuses.Contains(updatedStatusChange.Status))
+            {
+                throw new BaseException.BadRequestException("invalid_status", $"The status '{updatedStatusChange.Status}' is not valid.");
             }
 
             // Validate ChangeTime
@@ -171,12 +202,6 @@ namespace HandmadeProductManagement.Services.Service
             {
                 throw new BaseException.NotFoundException("order_not_found", "Order not found.");
             }
-
-            // If status is 'Pending', ChangeTime must match the order creation time
-            //if (newStatus == "Pending" && changeTime != order.CreatedTime)
-            //{
-            //    throw new BaseException.BadRequestException("invalid_pending_time", "For Pending status, ChangeTime must match the order creation time.");
-            //}
 
             // Get the latest status change for the given order
             var lastStatusChange = await _unitOfWork.GetRepository<StatusChange>().Entities
