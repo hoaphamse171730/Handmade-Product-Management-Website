@@ -111,7 +111,7 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
-        [HttpGet("{userid}/notification")]
+        [HttpGet("{userId}/notification")]
         public async Task<IActionResult> GetNotifications(string userId)
         {
                 var notifications = await _userService.GetNotificationList(userId);
