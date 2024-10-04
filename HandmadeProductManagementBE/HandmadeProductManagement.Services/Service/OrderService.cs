@@ -80,7 +80,7 @@ namespace HandmadeProductManagement.Services.Service
             {
                 foreach (var shopGroup in groupedByShop)
                 {
-                    var totalPrice = shopGroup.Sum(x => x.Detail.UnitPrice * x.Detail.ProductQuantity);
+                    var totalPrice = shopGroup.Sum(x => x.Detail.DiscountPrice * x.Detail.ProductQuantity);
                     var order = new Order
                     {
                         TotalPrice = (decimal)totalPrice,
@@ -136,8 +136,7 @@ namespace HandmadeProductManagement.Services.Service
                     var statusChangeDto = new StatusChangeForCreationDto
                     {
                         OrderId = order.Id.ToString(),
-                        Status = order.Status,
-                        ChangeTime = DateTime.UtcNow
+                        Status = order.Status
                     };
 
                     await _statusChangeService.Create(statusChangeDto);
