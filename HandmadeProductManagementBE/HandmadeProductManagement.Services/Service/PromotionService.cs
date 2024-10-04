@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using FluentValidation;
 using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Contract.Repositories.Interface;
@@ -21,12 +17,21 @@ namespace HandmadeProductManagement.Services.Service
         private readonly IValidator<PromotionForUpdateDto> _updateValidator;
 
 
-        public PromotionService(IUnitOfWork unitOfWork, IMapper mapper, IValidator<PromotionForCreationDto> creationValidator, IValidator<PromotionForUpdateDto> updateValidator)
+        public PromotionService(IUnitOfWork unitOfWork, IMapper mapper,
+            IValidator<PromotionForCreationDto> creationValidator, IValidator<PromotionForUpdateDto> updateValidator)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _creationValidator = creationValidator;
             _updateValidator = updateValidator;
+        }
+
+        public async Task<IList<PromotionDto>> GetAll()
+        {
+            var promotions = await _unitOfWork.GetRepository<Promotion>().Entities
+                .Where(p => p.DeletedTime == null)
+                .ToListAsync();
+            return _mapper.Map<IList<PromotionDto>>(promotions);
         }
 
         public async Task<PromotionDto> GetById(string id)
@@ -65,6 +70,20 @@ namespace HandmadeProductManagement.Services.Service
             await _unitOfWork.SaveAsync();
             return _mapper.Map<PromotionDto>(promotionEntity);
         }
+
+        public async Task Delete(string id)
+        {
+            var promotionRepo = _unitOfWork.GetRepository<Promotion>();
+            var promotionEntity = promotionRepo.Entities
+                .FirstOrDefault(p => p.Id == id);
+            if (promotionEntity == null)
+                throw new KeyNotFoundException("Promotion not found");
+            // promotionEntity.DeletedBy = userId.ToString();
+            promotionEntity.DeletedTime = DateTime.UtcNow;
+            promotionRepo.Delete(promotionEntity);
+            await _unitOfWork.SaveAsync();
+        }
+
         public async Task<bool> SoftDelete(string id)
         {
             var promotionRepo = _unitOfWork.GetRepository<Promotion>();
@@ -78,14 +97,6 @@ namespace HandmadeProductManagement.Services.Service
         }
 
 
-        public async Task<IList<PromotionDto>> GetAll()
-        {
-            var promotions = await _unitOfWork.GetRepository<Promotion>().Entities
-                .Where(p => p.DeletedTime == null)
-                .ToListAsync();
-            return _mapper.Map<IList<PromotionDto>>(promotions);
-        }
-
 
         public async Task<bool> UpdatePromotionStatusByRealtime(string id)
         {
@@ -95,13 +106,18 @@ namespace HandmadeProductManagement.Services.Service
             {
                 throw new BaseException.NotFoundException("not_found", "Promotion Not Found!");
             }
-            if (DateTime.UtcNow > promotion.EndDate)
+            promotion.Status = "active";
+
+            if (DateTime.UtcNow > promotion.EndDate || DateTime.UtcNow < promotion.StartDate)
             {
                 promotion.Status = "inactive";
                 await _unitOfWork.GetRepository<Promotion>().UpdateAsync(promotion);
                 await _unitOfWork.SaveAsync();
             }
-            return true;
+            await _unitOfWork.GetRepository<Promotion>().UpdateAsync(promotion);
+            await _unitOfWork.SaveAsync();
+            return true; 
+
         }
     }
 }

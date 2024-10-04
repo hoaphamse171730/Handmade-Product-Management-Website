@@ -2,6 +2,7 @@
 using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.ModelViews.OrderModelViews;
 using HandmadeProductManagement.ModelViews.PaymentDetailModelViews;
 using HandmadeProductManagement.ModelViews.PaymentModelViews;
 using HandmadeProductManagement.Repositories.Entity;
@@ -19,11 +20,14 @@ namespace HandmadeProductManagement.Services.Service
     public class PaymentService : IPaymentService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IOrderService _orderService;
 
-        public PaymentService(IUnitOfWork unitOfWork)
+        public PaymentService(IUnitOfWork unitOfWork, IOrderService orderService)
         {
             _unitOfWork = unitOfWork;
+            _orderService = orderService;
         }
+
 
         public async Task<bool> CreatePaymentAsync(CreatePaymentDto createPaymentDto)
         {
@@ -31,7 +35,7 @@ namespace HandmadeProductManagement.Services.Service
 
             var userRepository = _unitOfWork.GetRepository<ApplicationUser>();
             var userExists = await userRepository.Entities
-                        .AnyAsync(u => u.Id.ToString() == createPaymentDto.UserId && !u.DeletedTime.HasValue);
+                .AnyAsync(u => u.Id.ToString() == createPaymentDto.UserId && !u.DeletedTime.HasValue);
             if (!userExists)
             {
                 throw new BaseException.NotFoundException("user_not_found", "User not found.");
@@ -85,11 +89,32 @@ namespace HandmadeProductManagement.Services.Service
 
             var paymentRepository = _unitOfWork.GetRepository<Payment>();
             var payment = await paymentRepository.Entities
-                        .FirstOrDefaultAsync(p => p.Id == paymentId && !p.DeletedTime.HasValue);
+                .FirstOrDefaultAsync(p => p.Id == paymentId && !p.DeletedTime.HasValue);
 
             if (payment == null)
             {
                 throw new BaseException.NotFoundException("payment_not_found", "Payment not found.");
+            }
+
+            if (status == "Completed")
+            {
+                var dto = new UpdateStatusOrderDto
+                {
+                    OrderId = payment.OrderId,
+                    Status = "Processing"
+                };
+                await _orderService.UpdateOrderStatusAsync(dto);
+            }
+
+            //will update when the CancelReason table has data
+            if (status == "Expired")
+            {
+                var dto = new UpdateStatusOrderDto
+                {
+                    OrderId = payment.OrderId,
+                    Status = "Canceled"
+                };
+                await _orderService.UpdateOrderStatusAsync(dto);
             }
 
             payment.Status = status;
@@ -115,7 +140,7 @@ namespace HandmadeProductManagement.Services.Service
 
             var orderRepository = _unitOfWork.GetRepository<Order>();
             var orderExists = await orderRepository.Entities
-                        .AnyAsync(o => o.Id == orderId && !o.DeletedTime.HasValue);
+                .AnyAsync(o => o.Id == orderId && !o.DeletedTime.HasValue);
             if (!orderExists)
             {
                 throw new BaseException.NotFoundException("order_not_found", "Order not found.");
@@ -152,18 +177,7 @@ namespace HandmadeProductManagement.Services.Service
 
             foreach (var payment in expiredPayments)
             {
-                payment.Status = "Expired";
-                payment.LastUpdatedTime = DateTime.UtcNow;
-                paymentRepository.Update(payment);
-
-                var order = await orderRepository.Entities
-                                .FirstOrDefaultAsync(o => o.Id == payment.OrderId && !o.DeletedTime.HasValue);
-                if (order != null)
-                {
-                    order.Status = "Canceled";
-                    order.LastUpdatedTime = DateTime.UtcNow;
-                    orderRepository.Update(order);
-                }
+                await UpdatePaymentStatusAsync(payment.Id.ToString(), "Expired");
             }
 
             await _unitOfWork.SaveAsync();

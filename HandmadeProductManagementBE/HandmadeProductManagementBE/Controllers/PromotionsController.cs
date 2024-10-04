@@ -51,7 +51,6 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> SoftDeletePromotion(string id)
         {
-
             var result = await _promotionService.SoftDelete(id);
             return Ok(BaseResponse<bool>.OkResponse(result));
         }

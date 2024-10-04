@@ -210,7 +210,53 @@ namespace HandmadeProductManagement.Services.Service
             {
                 throw new BaseException.BadRequestException("invalid_shop_description_format", "Shop description cannot contain special characters.");
             }
+        }
 
+        public async Task<decimal> CalculateShopAverageRatingAsync(string shopId)
+        {
+            if (string.IsNullOrEmpty(shopId))
+            {
+                throw new BaseException.BadRequestException("invalid_shop_id", "Shop ID cannot be null or empty.");
+            }
+
+            if (!Guid.TryParse(shopId, out _))
+            {
+                throw new BaseException.BadRequestException("invalid_shop_id", "Shop ID is not a valid GUID.");
+            }
+
+            var shop = await _unitOfWork.GetRepository<Shop>().Entities
+                                        .Include(s => s.Products)
+                                        .FirstOrDefaultAsync(s => s.Id == shopId);
+
+            if (shop == null)
+            {
+                throw new BaseException.NotFoundException("shop_not_found", "Shop not found.");
+            }
+
+            if (shop.Products == null || !shop.Products.Any())
+            {
+                return 0m; // Return 0 as decimal if there are no products
+            }
+
+            var productRepository = _unitOfWork.GetRepository<Product>();
+            var productRatings = await productRepository.Entities
+                .Where(p => p.ShopId == shopId && !p.DeletedTime.HasValue)
+                .Select(p => p.Rating)
+                .ToListAsync();
+
+            if (!productRatings.Any())
+            {
+                return 0m;
+            }
+
+            decimal averageRating = Math.Round(productRatings.Average(), 1);
+
+            // Update the shop's rating
+            shop.Rating = averageRating;
+            await _unitOfWork.GetRepository<Shop>().UpdateAsync(shop);
+            await _unitOfWork.SaveAsync();
+
+            return averageRating;
         }
     }
 }

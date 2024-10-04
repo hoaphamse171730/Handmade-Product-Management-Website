@@ -16,5 +16,7 @@ namespace HandmadeProductManagement.Contract.Services.Interface
         Task<bool> CreateShopAsync(CreateShopDto createShop);
         Task<bool> UpdateShopAsync(string id, CreateShopDto shop);
         Task<bool> DeleteShopAsync(Guid userId, string id);
+        Task<decimal> CalculateShopAverageRatingAsync(string shopId);
+
     }
 }

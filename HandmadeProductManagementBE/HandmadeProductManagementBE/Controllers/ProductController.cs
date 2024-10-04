@@ -36,18 +36,7 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
 
-        //[httpget("search")]
-        //public async task<iactionresult> searchproducts(productsearchmodel searchmodel)
-        //{
-        //    var response = new baseresponse<productsearchvm>
-        //    {
-        //        code = ,
-        //        statuscode = statuscodehelper.ok,
-        //        message = "success",
-        //        data = _productservice.searchproductsasync(searchmodel)
-        //    };
-        //    return ok(response);
-        //}
+
 
         [HttpGet("sort")]
         public async Task<IActionResult> SortProducts([FromQuery] ProductSortFilter sortModel)
@@ -64,103 +53,50 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ProductDto>>> GetProducts()
+        public async Task<IActionResult> GetProducts()
         {
-            try
-            {
-                IList<ProductDto> products = await _productService.GetAll();
-                return Ok(BaseResponse<IList<ProductDto>>.OkResponse(products));
-            }
-            catch (System.Exception ex)
-            {
-                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
-            }
+            var products = await _productService.GetAll();
+            return Ok(BaseResponse<IList<ProductDto>>.OkResponse(products));
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<ProductDto>> GetProduct(string id)
+        public async Task<IActionResult> GetProduct(string id)
         {
-            try
-            {
-                ProductDto product = await _productService.GetById(id);
-                return Ok(BaseResponse<ProductDto>.OkResponse(product));
-            }
-            catch (KeyNotFoundException)
-            {
-                return NotFound(BaseResponse<string>.FailResponse("Product not found"));
-            }
-            catch (System.Exception ex)
-            {
-                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
-            }
+
+            var product = await _productService.GetById(id);
+            return Ok(BaseResponse<ProductDto>.OkResponse(product));
         }
 
         [HttpPost]
-        public async Task<ActionResult<ProductDto>> CreateProduct(ProductForCreationDto productForCreation)
+        public async Task<IActionResult> CreateProduct(ProductForCreationDto productForCreation)
         {
-            try
-            {
-                ProductDto createdProduct = await _productService.Create(productForCreation);
-                return Ok(BaseResponse<ProductDto>.OkResponse(createdProduct));
-            }
-            catch (System.Exception ex)
-            {
-                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
-            }
+
+            var createdProduct = await _productService.Create(productForCreation);
+            return Ok(BaseResponse<ProductDto>.OkResponse(createdProduct));
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult> UpdateProduct(string id, ProductForUpdateDto productForUpdate)
+        public async Task<IActionResult> UpdateProduct(string id, ProductForUpdateDto productForUpdate)
         {
-            try
-            {
-                await _productService.Update(id, productForUpdate);
-                return Ok(BaseResponse<string>.OkResponse("Product updated successfully"));
-            }
-            catch (KeyNotFoundException)
-            {
-                return NotFound(BaseResponse<string>.FailResponse("Product not found"));
-            }
-            catch (System.Exception ex)
-            {
-                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
-            }
+
+            await _productService.Update(id, productForUpdate);
+            return Ok(BaseResponse<string>.OkResponse("Product updated successfully"));
         }
 
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteProduct(string id)
         {
-            try
-            {
-                await _productService.Delete(id);
-                return Ok(new BaseResponse<bool>(StatusCodeHelper.OK, "Product deleted successfully.", true));
-            }
-            catch (KeyNotFoundException)
-            {
-                return NotFound(BaseResponse<string>.FailResponse("Product not found"));
-            }
-            catch (System.Exception ex)
-            {
-                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
-            }
+
+            await _productService.Delete(id);
+            return Ok(new BaseResponse<bool>(StatusCodeHelper.OK, "Product deleted successfully.", true));
         }
 
         [HttpDelete("soft-delete/{id}")]
         public async Task<ActionResult> SoftDeleteProduct(string id)
         {
-            try
-            {
-                await _productService.SoftDelete(id);
-                return Ok(BaseResponse<string>.OkResponse("Product soft-deleted successfully"));
-            }
-            catch (KeyNotFoundException)
-            {
-                return NotFound(BaseResponse<string>.FailResponse("Product not found"));
-            }
-            catch (System.Exception ex)
-            {
-                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
-            }
+
+            await _productService.SoftDelete(id);
+            return Ok(BaseResponse<string>.OkResponse("Product soft-deleted successfully"));
         }
 
         [HttpGet("GetProductDetails/{id}")]
@@ -177,8 +113,6 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
-
-
         [HttpPut("{productId}/promotion/{promotionId}")]
         public async Task<IActionResult> UpdateProductPromotion(string productId, string promotionId)
         {
@@ -186,5 +120,20 @@ namespace HandmadeProductManagementAPI.Controllers
             var updatedProduct = await _productService.UpdateProductPromotionAsync(productId, promotionId);
             return Ok(updatedProduct);
         }
+
+        [HttpGet("CalculateAverageRating/{id}")]
+        public async Task<IActionResult> CalculateAverageRating([Required] string id)
+        {
+            var averageRating = await _productService.CalculateAverageRatingAsync(id);
+            var response = new BaseResponse<decimal>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Average rating calculated successfully.",
+                Data = averageRating
+            };
+            return Ok(response);
+        }
     }
 }
+

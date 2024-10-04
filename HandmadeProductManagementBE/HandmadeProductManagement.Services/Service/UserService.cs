@@ -6,6 +6,13 @@ using HandmadeProductManagement.ModelViews.UserModelViews;
 using HandmadeProductManagement.Repositories.Entity;
 using Microsoft.EntityFrameworkCore;
 using FluentValidation;
+using HandmadeProductManagement.ModelViews.NotificationModelViews;
+using HandmadeProductManagement.ModelViews.ReviewModelViews;
+using HandmadeProductManagement.ModelViews.ReplyModelViews;
+using HandmadeProductManagement.ModelViews.ShopModelViews;
+using HandmadeProductManagement.Contract.Repositories.Entity;
+using static System.Formats.Asn1.AsnWriter;
+using HandmadeProductManagement.Core.Utils;
 using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.ModelViews.ProductModelViews;
 namespace HandmadeProductManagement.Services.Service
@@ -90,27 +97,51 @@ namespace HandmadeProductManagement.Services.Service
         public async Task<UpdateUserResponseModel?> UpdateUser(string id, UpdateUserDTO updateUserDTO)
         {
 
-
             if (!Guid.TryParse(id, out Guid userId))
             {
                 throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Invalid userID");
             }
-
+            //query
             var user = await _unitOfWork.GetRepository<ApplicationUser>()
                 .Entities
                 .Where(u => u.Id == userId)
-                .FirstOrDefaultAsync();
-
+                .FirstOrDefaultAsync(); 
+            //check user found
             if (user == null)
             {
                 throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "user not found");
             }
-
+            // check format DTO by fluent validation
             var updateValidation = _updateValidator.Validate(updateUserDTO);
             if (!updateValidation.IsValid)
             {
                 throw new ValidationException(updateValidation.Errors);
             }
+            // check existing unique fields
+            var existingUsername = await _unitOfWork.GetRepository<ApplicationUser>().Entities
+                .AnyAsync(u => u.UserName == updateUserDTO.UserName && u.Id != userId);
+            if(existingUsername)
+            {
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Username already exists");
+            }
+
+            var existingUserWithSameEmail = await _unitOfWork.GetRepository<ApplicationUser>()
+      .Entities
+      .AnyAsync(u => u.Email == updateUserDTO.Email && u.Id != userId);
+            if (existingUserWithSameEmail)
+            {
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Email already exists");
+            }
+
+            var existingUserWithSamePhoneNumber = await _unitOfWork.GetRepository<ApplicationUser>()
+        .Entities
+        .AnyAsync(u => u.PhoneNumber == updateUserDTO.PhoneNumber && u.Id != userId);
+            if (existingUserWithSamePhoneNumber)
+            {
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Phone number already exists");
+            }
+
+
 
 
             user.UserName = updateUserDTO.UserName;
@@ -166,6 +197,37 @@ namespace HandmadeProductManagement.Services.Service
             return true;
         }
 
+        public async Task<List<NotificationModel>> GetNotificationList(string Id)
+        {
+            if (!Guid.TryParse(Id, out Guid userId))
+            {
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Invalid userID");
+            }
+           
+            var shop = await _unitOfWork.GetRepository<Shop>()
+                .Entities
+                .Where(shop => shop.UserId == userId)
+                .Select(shop => shop.Id)
+                .ToListAsync();
+          
+            var reviews = await _unitOfWork.GetRepository<Review>()
+                .Entities
+                .Include(r => r.User) 
+                .Where(review => shop.Contains(review.ProductId) && review.Reply == null)
+                .ToListAsync();
+
+            var notifications = reviews.Select(review => new NotificationModel
+            {
+                Id = review.Id,
+                Message = $"Sản phẩm của bạn đã được {review.User.UserName} review",
+                Tag = "Review",
+                URL = $"api/review/{review.Id}"
+            }).ToList();
+
+            return notifications;
+
+        }
+
         public async Task<bool> ReverseDeleteUser(string Id)
         {
             if (!Guid.TryParse(Id, out Guid userId))
@@ -195,31 +257,7 @@ namespace HandmadeProductManagement.Services.Service
         }
 
 
-        public async Task<ProductDto> UpdateProductPromotionAsync(string productId, string promotionId)
-        {
-            
-            var product = await _unitOfWork.GetRepository<Product>().Entities
-                .Include(p => p.ProductItems)
-                .FirstOrDefaultAsync(p => p.Id == productId);
-            if (product == null)
-                throw new BaseException.NotFoundException("product_not_found", "Product not found");
-            var promotion = await _unitOfWork.GetRepository<Promotion>().Entities
-                .FirstOrDefaultAsync(p => p.Id == promotionId && p.StartDate <= DateTime.UtcNow && p.EndDate >= DateTime.UtcNow);
-            if (promotion == null)
-                throw new BaseException.BadRequestException("invalid_promotion", "Promotion is invalid or expired.");
-            product.Id = promotion.Id;
-            foreach (var productItem in product.ProductItems)
-            {
-                var originalPrice = productItem.Price;
-                productItem.DiscountedPrice = originalPrice * (1 - promotion.DiscountRate);
-            }
-            product.LastUpdatedTime = DateTime.UtcNow;
-            await _unitOfWork.GetRepository<Product>().UpdateAsync(product);
-            await _unitOfWork.SaveAsync();
-            var productToReturn = _mapper.Map<ProductDto>(product);
-            return productToReturn;
-        }
-
+     
 
 
     }
