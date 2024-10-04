@@ -275,12 +275,13 @@ namespace HandmadeProductManagement.Services.Service
 
             var product = await _unitOfWork.GetRepository<Product>().Entities
                 .Include(p => p.Category)
+                .ThenInclude(p => p.Promotion)
                 .Include(p => p.Shop)
                 .Include(p => p.ProductImages)
                 .Include(p => p.ProductItems)
-                .ThenInclude(pi => pi.ProductConfiguration)
-                .ThenInclude(pc => pc.VariationOption)
-                .ThenInclude(vo => vo.Variation)
+                .ThenInclude(p => p.ProductConfiguration)
+                .ThenInclude(p => p.VariationOption)
+                .ThenInclude(v => v.Variation)
                 .FirstOrDefaultAsync(p => p.Id == productId);
 
             if (product == null)
@@ -311,7 +312,7 @@ namespace HandmadeProductManagement.Services.Service
                     Id = pi.Id,
                     QuantityInStock = pi.QuantityInStock,
                     Price = pi.Price,
-                    DiscountedPrice = promotion != null ? (int)(pi.Price * (1 - promotion.DiscountRate)) : (int?)null,
+                    DiscountedPrice = promotion != null ? (int)(pi.Price * (1 - promotion.DiscountRate/100)) : null,
                     Configurations = pi.ProductConfiguration.Select(pc => new ProductConfigurationDetailModel
                     {
                         VariationName = pc.VariationOption.Variation.Name,
