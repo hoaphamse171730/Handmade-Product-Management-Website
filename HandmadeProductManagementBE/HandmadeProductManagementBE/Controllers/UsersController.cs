@@ -116,12 +116,12 @@ namespace HandmadeProductManagementAPI.Controllers
         {
                 var notifications = await _userService.GetNotificationList(userId);
               
-                var response = new BaseResponse<List<NotificationModel>>
+                var response = new BaseResponse<IList<NotificationModel>>
                 {
                     Code = "200",
                     StatusCode = StatusCodeHelper.OK,
+                    Data = await _userService.GetNotificationList(userId),
                     Message = "Success",
-                    Data = await _userService.GetNotificationList(userId)
                 };
                 return Ok(response);
         }
