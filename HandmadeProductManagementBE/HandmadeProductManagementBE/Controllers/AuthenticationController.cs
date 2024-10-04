@@ -338,7 +338,11 @@ public class AuthenticationController(
     public IActionResult TestClaims()
     {
         var claims = User.Claims.Select(c => new { c.Type, c.Value }).ToList();
-        //var claims = User.Claims.Select(c => c.Type = )
+        //var name = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
+        //var nameIdentifier = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        //var emailAddress = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+        //var role = User.FindFirst("http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
+
         return Ok(claims);
     }
 
