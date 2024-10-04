@@ -26,7 +26,19 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<bool> CreateOrderAsync(CreateOrderDto createOrder)
         {
+            if (createOrder.OrderDetails == null || !createOrder.OrderDetails.Any())
+            {
+                throw new BaseException.BadRequestException("invalid_order_details", "Order details cannot be null or empty.");
+            }
+
             ValidateOrder(createOrder);
+
+            // Check if OrderDetails is empty
+            if (createOrder.OrderDetails == null || !createOrder.OrderDetails.Any())
+            {
+                throw new BaseException.BadRequestException("empty_order_details", "Order details cannot be empty.");
+            }
+
             var userRepository = _unitOfWork.GetRepository<ApplicationUser>();
             var userExists = await userRepository.Entities
                 .AnyAsync(u => u.Id.ToString() == createOrder.UserId && !u.DeletedTime.HasValue);
@@ -170,7 +182,7 @@ namespace HandmadeProductManagement.Services.Service
             };
         }
 
-        public async Task<bool> UpdateOrderAsync(string orderId, CreateOrderDto order)
+        public async Task<bool> UpdateOrderAsync(string orderId, UpdateOrderDto order)
         {
             if (string.IsNullOrWhiteSpace(orderId) || !Guid.TryParse(orderId, out _))
             {
@@ -192,7 +204,7 @@ namespace HandmadeProductManagement.Services.Service
             existingOrder.CustomerName = order.CustomerName;
             existingOrder.Phone = order.Phone;
             existingOrder.Note = order.Note;
-            existingOrder.LastUpdatedBy = order.UserId.ToString();
+            existingOrder.LastUpdatedBy = "currentUser";
             existingOrder.LastUpdatedTime = DateTime.UtcNow;
 
             repository.Update(existingOrder);
@@ -388,9 +400,43 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.BadRequestException("invalid_address", "Address cannot be null or empty.");
             }
 
-            if (Regex.IsMatch(order.Address, @"[^a-zA-Z0-9\s]"))
+            if (Regex.IsMatch(order.Address, @"[^a-zA-Z0-9\s,\.]"))
             {
-                throw new BaseException.BadRequestException("invalid_address_format", "Address cannot contain special characters.");
+                throw new BaseException.BadRequestException("invalid_address_format", "Address cannot contain special characters except commas and periods.");
+            }
+
+            if (string.IsNullOrWhiteSpace(order.CustomerName))
+            {
+                throw new BaseException.BadRequestException("invalid_customer_name", "Customer name cannot be null or empty.");
+            }
+
+            if (Regex.IsMatch(order.CustomerName, @"[^a-zA-Z\s]"))
+            {
+                throw new BaseException.BadRequestException("invalid_customer_name_format", "Customer name can only contain letters and spaces.");
+            }
+
+            if (string.IsNullOrWhiteSpace(order.Phone))
+            {
+                throw new BaseException.BadRequestException("invalid_phone", "Phone number cannot be null or empty.");
+            }
+
+            if (!Regex.IsMatch(order.Phone, @"^\d{1,10}$"))
+            {
+                throw new BaseException.BadRequestException("invalid_phone_format", "Phone number must be numeric and up to 10 digits.");
+            }
+        }
+
+        private void ValidateOrder(UpdateOrderDto order)
+        {
+
+            if (string.IsNullOrWhiteSpace(order.Address))
+            {
+                throw new BaseException.BadRequestException("invalid_address", "Address cannot be null or empty.");
+            }
+
+            if (Regex.IsMatch(order.Address, @"[^a-zA-Z0-9\s,\.]"))
+            {
+                throw new BaseException.BadRequestException("invalid_address_format", "Address cannot contain special characters except commas and periods.");
             }
 
             if (string.IsNullOrWhiteSpace(order.CustomerName))

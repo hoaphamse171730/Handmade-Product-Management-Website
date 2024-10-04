@@ -21,7 +21,8 @@ namespace HandmadeProductManagementAPI.Controllers;
 public class AuthenticationController(
     UserManager<ApplicationUser> userManager,
     TokenService tokenService,
-    IEmailService emailService
+    IEmailService emailService,
+    IAuthenticationService authenticationService
     
 )
     : ControllerBase
@@ -148,7 +149,72 @@ public class AuthenticationController(
         if (result.Succeeded)
         {
             await emailService.SendEmailConfirmationAsync(user.Email!, registerModelView.ClientUri);
-                await userManager.AddToRoleAsync(user, "Seller"); 
+            await authenticationService.AssignRoleToUser(user.Id.ToString(), "Seller");
+
+            return BaseResponse<string>.OkResponse(user.Id.ToString());
+        }
+
+        return new BaseResponse<string>()
+        {
+            StatusCode = StatusCodeHelper.BadRequest,
+            Message = result.Errors.ToString(),
+        };
+    }
+
+    [Authorize(Roles = "Admin")]
+    [AllowAnonymous]
+    [HttpPost("admin/register")]
+    public async Task<ActionResult<BaseResponse<string>>> RegisterForAdmin(RegisterModelView registerModelView)
+    {
+        //throw new BaseException.BadRequestException("bad_request", "this is a very bad request");
+        if (!ValidationHelper.IsValidNames(CustomRegex.UsernameRegex, registerModelView.UserName) ||
+            !ValidationHelper.IsValidNames(CustomRegex.FullNameRegex, registerModelView.FullName)
+           )
+            return new BaseResponse<string>()
+            {
+                StatusCode = StatusCodeHelper.Unauthorized,
+                Message = "Username or Full Name contains invalid characters.",
+            };
+
+        if (await userManager.Users.AnyAsync(x => x.UserName == registerModelView.UserName))
+        {
+            ModelState.AddModelError("username", "Username is already taken");
+        }
+
+        if (await userManager.Users.AnyAsync(x => x.Email == registerModelView.Email))
+        {
+            ModelState.AddModelError("email", "Email is already taken");
+        }
+
+        if (await userManager.Users.AnyAsync(x => x.PhoneNumber == registerModelView.PhoneNumber))
+        {
+            ModelState.AddModelError("phone", "Phone is already taken");
+        }
+
+        //Return validation errors if any
+        if (!ModelState.IsValid)
+        {
+            var errors = ModelState.Values
+                .SelectMany(v => v.Errors)
+                .Select(e => e.ErrorMessage)
+                .ToList();
+
+            return new BaseResponse<string>
+            {
+                StatusCode = StatusCodeHelper.BadRequest,
+                Message = "Validation failed: " + string.Join("; ", errors),
+                Data = null
+            };
+        }
+
+        var user = registerModelView.Adapt<ApplicationUser>();
+
+        var result = await userManager.CreateAsync(user, registerModelView.Password);
+
+        if (result.Succeeded)
+        {
+            await emailService.SendEmailConfirmationAsync(user.Email!, registerModelView.ClientUri);
+            await authenticationService.AssignRoleToUser(user.Id.ToString(), "Admin");
 
             return BaseResponse<string>.OkResponse(user.Id.ToString());
         }

@@ -89,7 +89,7 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [HttpPut("{orderId}")]
-        public async Task<IActionResult> UpdateOrder(string orderId, [FromBody] CreateOrderDto order)
+        public async Task<IActionResult> UpdateOrder(string orderId, [FromBody] UpdateOrderDto order)
         {
             var updatedOrder = await _orderService.UpdateOrderAsync(orderId, order);
             var response = new BaseResponse<bool>
