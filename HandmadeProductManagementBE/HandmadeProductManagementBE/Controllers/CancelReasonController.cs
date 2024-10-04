@@ -21,7 +21,7 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpGet("page")]
         public async Task<IActionResult> GetByPage([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
-            var response = new BaseResponse<IList<CancelReasonResponseModel>>
+            var response = new BaseResponse<IList<CancelReasonDto>>
             {
                 Code = "Success",
                 StatusCode = StatusCodeHelper.OK,

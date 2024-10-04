@@ -11,8 +11,6 @@ namespace HandmadeProductManagement.Repositories.Context
         public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options)
         {
         }
-
-        // user
         public virtual DbSet<ApplicationUser> ApplicationUsers => Set<ApplicationUser>();
         public virtual DbSet<ApplicationRole> ApplicationRoles => Set<ApplicationRole>();
         public virtual DbSet<ApplicationUserClaims> ApplicationUserClaims => Set<ApplicationUserClaims>();
@@ -31,6 +29,8 @@ namespace HandmadeProductManagement.Repositories.Context
         public DbSet<Order> Orders => Set<Order>();
         public DbSet<Product> Products => Set<Product>();
         public DbSet<Category> Categories => Set<Category>();
+        public DbSet<CancelReason> CancelReasons => Set<CancelReason>();
+        public DbSet<StatusChange> StatusChanges => Set<StatusChange>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -147,14 +147,11 @@ namespace HandmadeProductManagement.Repositories.Context
             // Variation Configuration
             modelBuilder.Entity<Variation>(entity =>
             {
-                entity.ToTable("Variation");
-
                 entity.HasOne(v => v.Category)
                     .WithMany(c => c.Variations)
                     .HasForeignKey(v => v.CategoryId);
 
                 entity.Property(v => v.Name)
-                    .HasColumnType("text")
                     .HasMaxLength(150)
                     .IsRequired();
 
@@ -163,10 +160,7 @@ namespace HandmadeProductManagement.Repositories.Context
             // Variation Option Configuration
             modelBuilder.Entity<VariationOption>(entity =>
             {
-                entity.ToTable("VariationOption");
-
                 entity.Property(vo => vo.Value)
-                    .HasColumnType("text")
                     .HasMaxLength(150)
                     .IsRequired();
 
