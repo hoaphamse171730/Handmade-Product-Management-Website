@@ -100,9 +100,9 @@ namespace HandmadeProductManagement.Repositories.Context
 
             // Quan hệ giữa ProductConfiguration và ProductItem (1-N)
             modelBuilder.Entity<ProductConfiguration>()
-                .HasOne(pc => pc.ProductItem)  
-                .WithMany(pi => pi.ProductConfiguration) 
-                .HasForeignKey(pc => pc.ProductItemId)  ;
+                .HasOne(pc => pc.ProductItem)
+                .WithMany(pi => pi.ProductConfiguration)
+                .HasForeignKey(pc => pc.ProductItemId);
 
             // Quan hệ giữa ProductConfiguration và VariationOption (1-N)
             modelBuilder.Entity<ProductConfiguration>()
@@ -148,7 +148,7 @@ namespace HandmadeProductManagement.Repositories.Context
             modelBuilder.Entity<Variation>(entity =>
             {
                 entity.ToTable("Variation");
-                
+
                 entity.HasOne(v => v.Category)
                     .WithMany(c => c.Variations)
                     .HasForeignKey(v => v.CategoryId);
@@ -157,7 +157,7 @@ namespace HandmadeProductManagement.Repositories.Context
                     .HasColumnType("text")
                     .HasMaxLength(150)
                     .IsRequired();
-                
+
             });
 
             // Variation Option Configuration
@@ -174,27 +174,27 @@ namespace HandmadeProductManagement.Repositories.Context
                     .WithMany(v => v.VariationOptions)
                     .HasForeignKey(v => v.VariationId);
             });
-            
+
             // Promotion
-            modelBuilder.Entity<Promotion>()  
+            modelBuilder.Entity<Promotion>()
                 .HasKey(p => p.Id);
-            modelBuilder.Entity<Promotion>()  
-                .Property(p => p.Description)  
+            modelBuilder.Entity<Promotion>()
+                .Property(p => p.Description)
                 .HasMaxLength(500);
-            modelBuilder.Entity<Promotion>()  
-                .HasMany(p => p.Categories) 
-                .WithOne(c => c.Promotion) 
+            modelBuilder.Entity<Promotion>()
+                .HasMany(p => p.Categories)
+                .WithOne(c => c.Promotion)
                 .HasForeignKey(c => c.PromotionId)
                 .OnDelete(DeleteBehavior.NoAction)
                 ;
-            
+
             // OrderDetail  
-            modelBuilder.Entity<OrderDetail>()  
-                .HasKey(od => od.Id); 
-            modelBuilder.Entity<OrderDetail>()  
-                .HasOne(od => od.Order)  
-                .WithMany(o => o.OrderDetails)  
-                .HasForeignKey(od => od.OrderId) 
+            modelBuilder.Entity<OrderDetail>()
+                .HasKey(od => od.Id);
+            modelBuilder.Entity<OrderDetail>()
+                .HasOne(od => od.Order)
+                .WithMany(o => o.OrderDetails)
+                .HasForeignKey(od => od.OrderId)
                 .OnDelete(DeleteBehavior.Cascade);
             modelBuilder.Entity<OrderDetail>()
                 .HasOne(od => od.ProductItem)
@@ -212,7 +212,7 @@ namespace HandmadeProductManagement.Repositories.Context
                 // Attributes
                 entity.Property(e => e.Status)
                       .IsRequired()
-                      .HasMaxLength(30); 
+                      .HasMaxLength(30);
 
                 entity.Property(e => e.ChangeTime)
                       .IsRequired();
@@ -231,7 +231,7 @@ namespace HandmadeProductManagement.Repositories.Context
                 entity.HasKey(e => e.Id);
                 // Attribute
                 entity.Property(e => e.Description)
-                      .HasMaxLength(150); 
+                      .HasMaxLength(150);
                 entity.Property(e => e.RefundRate)
                       .IsRequired();
                 // One-to-many relationship with Order

@@ -71,7 +71,7 @@ namespace HandmadeProductManagement.Services.Service
             return _mapper.Map<PromotionDto>(promotionEntity);
         }
 
-        public async Task Delete(string id)
+        public async Task<bool> Delete(string id)
         {
             var promotionRepo = _unitOfWork.GetRepository<Promotion>();
             var promotionEntity = promotionRepo.Entities
@@ -82,6 +82,8 @@ namespace HandmadeProductManagement.Services.Service
             promotionEntity.DeletedTime = DateTime.UtcNow;
             promotionRepo.Delete(promotionEntity);
             await _unitOfWork.SaveAsync();
+
+            return true;
         }
 
         public async Task<bool> SoftDelete(string id)

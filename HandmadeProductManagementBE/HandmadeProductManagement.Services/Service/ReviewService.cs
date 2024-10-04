@@ -32,7 +32,7 @@ namespace HandmadeProductManagement.Services.Service
 
             var reviews = await _unitOfWork.GetRepository<Review>()
                                            .Entities
-                                           .Include(r => r.Reply) // Include the Reply
+                                           .Include(r => r.Reply)
                                            .Skip((pageNumber - 1) * pageSize)
                                            .Take(pageSize)
                                            .ToListAsync();
@@ -65,7 +65,7 @@ namespace HandmadeProductManagement.Services.Service
 
             var review = await _unitOfWork.GetRepository<Review>()
                                           .Entities
-                                          .Include(r => r.Reply) // Include the Reply
+                                          .Include(r => r.Reply)
                                           .FirstOrDefaultAsync(r => r.Id == reviewId);
 
             if (review == null)
