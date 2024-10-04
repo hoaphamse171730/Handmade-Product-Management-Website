@@ -13,6 +13,7 @@ using HandmadeProductManagement.ModelViews.PromotionModelViews;
 using HandmadeProductManagement.ModelViews.UserModelViews;
 using HandmadeProductManagement.ModelViews.StatusChangeModelViews;
 using HandmadeProductManagement.ModelViews.VariationModelViews;
+using HandmadeProductManagement.ModelViews.VariationOptionModelViews;
 using HandmadeProductManagement.Repositories.Context;
 using HandmadeProductManagement.Repositories.Entity;
 using HandmadeProductManagement.Repositories.UOW;
@@ -24,6 +25,7 @@ using HandmadeProductManagement.Validation.Promotion;
 using HandmadeProductManagement.Validation.User;
 using HandmadeProductManagement.Validation.StatusChange;
 using HandmadeProductManagement.Validation.Variation;
+using HandmadeProductManagement.Validation.VariationOption;
 using HandmadeProductManagementAPI.BackgroundServices;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
@@ -114,6 +116,11 @@ public static class ApplicationServiceExtensions
         #region Variation
         services.AddScoped<IValidator<VariationForCreationDto>, VariationForCreationDtoValidator>();
         services.AddScoped<IValidator<VariationForUpdateDto>, VariationForUpdateDtoValidator>();
+        #endregion
+
+        #region VariationOption
+        services.AddScoped<IValidator<VariationOptionForCreationDto>, VariationOptionForCreationDtoValidator>();
+        services.AddScoped<IValidator<VariationOptionForUpdateDto>, VariationOptionForUpdateDtoValidator>();
         #endregion
     }
 

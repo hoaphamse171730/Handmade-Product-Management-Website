@@ -24,27 +24,6 @@ namespace HandmadeProductManagement.Services.Service
             _updateValidator = updateValidator;
         }
 
-        private readonly List<string> validStatuses = new List<string>
-        {
-            "Pending",
-            "Canceled",
-            "Awaiting Payment",
-            "Processing",
-            "Delivering",
-            "Shipped",
-            "Delivery Failed",
-            "On Hold",
-            "Delivering Retry",
-            "Refund Requested",
-            "Refund Denied",
-            "Refund Approve",
-            "Returning",
-            "Return Failed",
-            "Returned",
-            "Refunded",
-            "Closed"
-        };
-
         // Get status changes by page (only active records)
         public async Task<IList<StatusChangeDto>> GetByPage(int page, int pageSize)
         {
@@ -73,13 +52,28 @@ namespace HandmadeProductManagement.Services.Service
                 })
                 .ToListAsync();
 
-            var statusChangeDto = _mapper.Map<IList<StatusChangeDto>>(statusChanges);
-            return statusChangeDto;
+            if (statusChanges == null || !statusChanges.Any())
+            {
+                throw new BaseException.NotFoundException("not_found", "No status changes found for the specified page.");
+            }
+
+            return _mapper.Map<IList<StatusChangeDto>>(statusChanges);
         }
 
         // Get status changes by OrderId (only active records)
         public async Task<IList<StatusChangeDto>> GetByOrderId(string orderId)
         {
+            // Validate id format
+            if (!Guid.TryParse(orderId, out var guidId))
+            {
+                throw new BaseException.BadRequestException("invalid_input", "ID is not in a valid GUID format.");
+            }
+
+            if (string.IsNullOrWhiteSpace(orderId))
+            {
+                throw new BaseException.BadRequestException("invalid_input", "Order ID cannot be null or empty.");
+            }
+
             IQueryable<StatusChange> query = _unitOfWork.GetRepository<StatusChange>().Entities
                 .Where(sc => sc.OrderId == orderId && (!sc.DeletedTime.HasValue || sc.DeletedBy == null));
 
@@ -90,31 +84,45 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.NotFoundException("not_found", "No status changes found for the given OrderId.");
             }
 
-            var statusChangeDtos = _mapper.Map<IList<StatusChangeDto>>(statusChanges);
-
-            return statusChangeDtos;
+            return _mapper.Map<IList<StatusChangeDto>>(statusChanges);
         }
 
         // Create a new status change
         public async Task<bool> Create(StatusChangeForCreationDto createStatusChange)
         {
+            // Validate id format
+            if (!Guid.TryParse(createStatusChange.OrderId, out var orderGuidId))
+            {
+                throw new BaseException.BadRequestException("invalid_input", "ID is not in a valid GUID format.");
+            }
             // Validate
             var validationResult = await _creationValidator.ValidateAsync(createStatusChange);
+
             if (!validationResult.IsValid)
             {
                 throw new BaseException.BadRequestException("validation_failed", validationResult.Errors.Select(e => e.ErrorMessage).FirstOrDefault());
             }
 
-            // Validate ChangeTime
-            await ValidateChangeTime(createStatusChange.OrderId, createStatusChange.Status, createStatusChange.ChangeTime);
+            // Check if OrderId exists
+            var order = await _unitOfWork.GetRepository<Order>().Entities
+                .FirstOrDefaultAsync(o => o.Id == createStatusChange.OrderId && (!o.DeletedTime.HasValue || o.DeletedBy == null));
 
-            // Check if the status is valid
-            if (!validStatuses.Contains(createStatusChange.Status))
+            if (order == null)
             {
-                throw new BaseException.BadRequestException("invalid_status", $"The status '{createStatusChange.Status}' is not valid.");
+                throw new BaseException.NotFoundException("order_not_found", "Order not found.");
+            }
+
+            // Validate Status Flow
+            var currentStatus = order.Status;
+
+            if (!IsValidStatusTransition(currentStatus, createStatusChange.Status))
+            {
+                throw new BaseException.BadRequestException("invalid_status_transition", $"Cannot transition from {currentStatus} to {createStatusChange.Status}.");
             }
 
             var statusChangeEntity = _mapper.Map<StatusChange>(createStatusChange);
+
+            statusChangeEntity.ChangeTime = DateTime.UtcNow;
 
             // Set metadata
             statusChangeEntity.CreatedBy = "currentUser"; // Update with actual user info
@@ -129,35 +137,57 @@ namespace HandmadeProductManagement.Services.Service
         // Update an existing status change
         public async Task<bool> Update(string id, StatusChangeForUpdateDto updatedStatusChange)
         {
+            // Validate id format
+            if (!Guid.TryParse(id, out var guidId))
+            {
+                throw new BaseException.BadRequestException("invalid_input", "ID is not in a valid GUID format.");
+            }
+
             var validationResult = await _updateValidator.ValidateAsync(updatedStatusChange);
             if (!validationResult.IsValid)
             {
                 throw new BaseException.BadRequestException("validation_failed", validationResult.Errors.Select(e => e.ErrorMessage).FirstOrDefault());
             }
+
             var statusChangeEntity = await _unitOfWork.GetRepository<StatusChange>().Entities
-                .FirstOrDefaultAsync(p => p.Id == id);
+                .FirstOrDefaultAsync(p => p.Id == id && (!p.DeletedTime.HasValue || p.DeletedBy == null));
 
             if (statusChangeEntity == null)
             {
                 throw new BaseException.NotFoundException("not_found", "Status Change not found");
             }
 
-            // Ensure OrderId cannot be changed
-            if (statusChangeEntity.OrderId != updatedStatusChange.OrderId)
+            // Define valid statuses within the method
+            var validStatuses = new List<string>
             {
-                throw new BaseException.BadRequestException("invalid_order_id_change", "OrderId cannot be changed when updating a status change.");
-            }
+                "Pending",
+                "Canceled",
+                "Awaiting Payment",
+                "Processing",
+                "Delivering",
+                "Shipped",
+                "Delivery Failed",
+                "On Hold",
+                "Delivering Retry",
+                "Refund Requested",
+                "Refund Denied",
+                "Refund Approve",
+                "Returning",
+                "Return Failed",
+                "Returned",
+                "Refunded",
+                "Closed"
+            };
 
-            // Check if the status is valid
+            // Check if the new status is valid
             if (!validStatuses.Contains(updatedStatusChange.Status))
             {
                 throw new BaseException.BadRequestException("invalid_status", $"The status '{updatedStatusChange.Status}' is not valid.");
             }
 
-            // Validate ChangeTime
-            await ValidateChangeTime(statusChangeEntity.OrderId, updatedStatusChange.Status, updatedStatusChange.ChangeTime);
-
             _mapper.Map(updatedStatusChange, statusChangeEntity);
+
+            statusChangeEntity.ChangeTime = DateTime.UtcNow;
 
             statusChangeEntity.LastUpdatedTime = DateTime.UtcNow;
             statusChangeEntity.LastUpdatedBy = "user";
@@ -171,49 +201,49 @@ namespace HandmadeProductManagement.Services.Service
         // Soft delete status change
         public async Task<bool> Delete(string id)
         {
+            // Validate id format
+            if (!Guid.TryParse(id, out var guidId))
+            {
+                throw new BaseException.BadRequestException("invalid_input", "ID is not in a valid GUID format.");
+            }
+
             var statusChangeRepo = _unitOfWork.GetRepository<StatusChange>();
             var statusChangeEntity = await statusChangeRepo.Entities.FirstOrDefaultAsync(x => x.Id == id);
             if (statusChangeEntity == null || statusChangeEntity.DeletedTime.HasValue || statusChangeEntity.DeletedBy != null)
             {
                 throw new BaseException.NotFoundException("not_found", "Status Change not found");
             }
+
             statusChangeEntity.DeletedTime = DateTime.UtcNow;
             statusChangeEntity.DeletedBy = "user";
 
             await statusChangeRepo.UpdateAsync(statusChangeEntity);
             await _unitOfWork.SaveAsync();
+
             return true;
         }
 
-        // Validate the ChangeTime based on the order and status
-        private async Task ValidateChangeTime(string orderId, string newStatus, DateTime changeTime)
+        private bool IsValidStatusTransition(string currentStatus, string newStatus)
         {
-            if (changeTime > DateTime.UtcNow)
+            var validStatusTransitions = new Dictionary<string, List<string>>
             {
-                throw new BaseException.BadRequestException("invalid_change_time", "ChangeTime cannot be in the future.");
-            }
+                { "Pending", new List<string> { "Canceled", "Awaiting Payment" } },
+                { "Awaiting Payment", new List<string> { "Canceled", "Processing" } },
+                { "Processing", new List<string> { "Delivering" } },
+                { "Delivering", new List<string> { "Shipped", "Delivery Failed" } },
+                { "Delivery Failed", new List<string> { "On Hold" } },
+                { "On Hold", new List<string> { "Delivering Retry", "Refund Requested" } },
+                { "Refund Requested", new List<string> { "Refund Denied", "Refund Approve" } },
+                { "Refund Approve", new List<string> { "Returning" } },
+                { "Returning", new List<string> { "Return Failed", "Returned" } },
+                { "Return Failed", new List<string> { "On Hold" } },
+                { "Returned", new List<string> { "Refunded" } },
+                { "Refunded", new List<string> { "Closed" } },
+                { "Canceled", new List<string> { "Closed" } },
+                { "Delivering Retry", new List<string> { "Delivering" } }
+            };
 
-            // Retrieve the order and its current status
-            var orderRepo = _unitOfWork.GetRepository<Order>();
-            var order = await orderRepo.Entities
-                .FirstOrDefaultAsync(o => o.Id == orderId && !o.DeletedTime.HasValue);
-
-            if (order == null)
-            {
-                throw new BaseException.NotFoundException("order_not_found", "Order not found.");
-            }
-
-            // Get the latest status change for the given order
-            var lastStatusChange = await _unitOfWork.GetRepository<StatusChange>().Entities
-                .Where(sc => sc.OrderId == orderId && !sc.DeletedTime.HasValue)
-                .OrderByDescending(sc => sc.ChangeTime)
-                .FirstOrDefaultAsync();
-
-            // If there's a previous status change, ChangeTime must be after the last status change
-            if (lastStatusChange != null && changeTime <= lastStatusChange.ChangeTime)
-            {
-                throw new BaseException.BadRequestException("invalid_change_time", "ChangeTime must be after the previous status change.");
-            }
+            return validStatusTransitions.TryGetValue(currentStatus, out var validNextStatuses) && validNextStatuses.Contains(newStatus);
         }
     }
 }

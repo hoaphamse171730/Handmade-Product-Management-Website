@@ -17,6 +17,6 @@ namespace HandmadeProductManagement.Contract.Repositories.Entity
 
         public virtual Order? Order { get; set; }
         public virtual ProductItem? ProductItem { get; set; }
-      
+
     }
 }
