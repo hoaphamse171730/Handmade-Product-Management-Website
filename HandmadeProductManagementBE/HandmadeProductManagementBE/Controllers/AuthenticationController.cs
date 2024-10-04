@@ -21,7 +21,8 @@ namespace HandmadeProductManagementAPI.Controllers;
 public class AuthenticationController(
     UserManager<ApplicationUser> userManager,
     TokenService tokenService,
-    IEmailService emailService
+    IEmailService emailService,
+    IAuthenticationService authenticationService
     
 )
     : ControllerBase
@@ -148,7 +149,7 @@ public class AuthenticationController(
         if (result.Succeeded)
         {
             await emailService.SendEmailConfirmationAsync(user.Email!, registerModelView.ClientUri);
-                await userManager.AddToRoleAsync(user, "Seller"); 
+            await authenticationService.AssignRoleToUser(user.Id.ToString(), "Seller");
 
             return BaseResponse<string>.OkResponse(user.Id.ToString());
         }
@@ -213,7 +214,7 @@ public class AuthenticationController(
         if (result.Succeeded)
         {
             await emailService.SendEmailConfirmationAsync(user.Email!, registerModelView.ClientUri);
-            await userManager.AddToRoleAsync(user, "Admin");
+            await authenticationService.AssignRoleToUser(user.Id.ToString(), "Admin");
 
             return BaseResponse<string>.OkResponse(user.Id.ToString());
         }

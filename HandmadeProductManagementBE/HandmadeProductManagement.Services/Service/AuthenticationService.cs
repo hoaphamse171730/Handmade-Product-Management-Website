@@ -1,3 +1,4 @@
+using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Common;
 using HandmadeProductManagement.ModelViews.AuthModelViews;
@@ -9,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HandmadeProductManagement.Services.Service;
 
-public class AuthenticationService
+public class AuthenticationService : IAuthenticationService
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly TokenService _tokenService;
@@ -59,7 +60,7 @@ public class AuthenticationService
         // return (false, "Incorrect password", null, StatusCodes.Status401Unauthorized);
     }
 
-    private async Task<UserLoginResponseModel> CreateUserResponse(ApplicationUser user)
+    public async Task<UserLoginResponseModel> CreateUserResponse(ApplicationUser user)
     {
         var token = await _tokenService.CreateToken(user); 
         return new UserLoginResponseModel()
