@@ -10,6 +10,8 @@ namespace HandmadeProductManagement.Contract.Repositories.Entity
         public int Price { get; set; }
         public string ProductId { get; set; } = string.Empty;
         public Product Product { get; set; }
+        public float DiscountPrice { get; set; }
+        public decimal DiscountRate { get; set; }
         public virtual ICollection<CartItem> CartItem { get; set; }
         public virtual ICollection<ProductConfiguration> ProductConfiguration { get; set; } 
         public virtual ICollection<OrderDetail> OrderDetails { get; set; }

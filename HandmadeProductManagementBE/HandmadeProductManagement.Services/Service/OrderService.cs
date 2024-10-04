@@ -26,23 +26,23 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<bool> CreateOrderAsync(CreateOrderDto createOrder)
         {
-            ValidateOrder(createOrder);
+            if (createOrder.OrderDetails == null || !createOrder.OrderDetails.Any())
+            {
+                throw new BaseException.BadRequestException("invalid_order_details", "Order details cannot be null or empty.");
+            }
 
+            ValidateOrder(createOrder);
             var userRepository = _unitOfWork.GetRepository<ApplicationUser>();
             var userExists = await userRepository.Entities
                 .AnyAsync(u => u.Id.ToString() == createOrder.UserId && !u.DeletedTime.HasValue);
-
             if (!userExists)
             {
                 throw new BaseException.NotFoundException("user_not_found", "User not found.");
             }
-
             var orderRepository = _unitOfWork.GetRepository<Order>();
             var cartItemRepository = _unitOfWork.GetRepository<CartItem>();
             var productItemRepository = _unitOfWork.GetRepository<ProductItem>();
-
             var totalPrice = createOrder.OrderDetails.Sum(detail => detail.UnitPrice * detail.ProductQuantity);
-
             var order = new Order
             {
                 TotalPrice = (decimal)totalPrice,
@@ -98,9 +98,7 @@ namespace HandmadeProductManagement.Services.Service
                         cartItemRepository.Delete(cartItem);
                     }
                 }
-
                 await _unitOfWork.SaveAsync();
-
                 var statusChangeDto = new StatusChangeForCreationDto
                 {
                     OrderId = order.Id.ToString(),
@@ -110,9 +108,7 @@ namespace HandmadeProductManagement.Services.Service
 
                 await _statusChangeService.Create(statusChangeDto);
                 await _unitOfWork.SaveAsync();
-
                 _unitOfWork.CommitTransaction();
-
                 return true;
             }
             catch (Exception ex)

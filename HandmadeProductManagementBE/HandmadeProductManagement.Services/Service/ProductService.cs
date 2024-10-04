@@ -29,7 +29,8 @@ namespace HandmadeProductManagement.Services.Service
         private readonly IValidator<ProductForCreationDto> _creationValidator;
         private readonly IValidator<ProductForUpdateDto> _updateValidator;
 
-        public ProductService(IUnitOfWork unitOfWork, IMapper mapper, IValidator<ProductForCreationDto> creationValidator, IValidator<ProductForUpdateDto> updateValidator)
+        public ProductService(IUnitOfWork unitOfWork, IMapper mapper,
+            IValidator<ProductForCreationDto> creationValidator, IValidator<ProductForUpdateDto> updateValidator)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
@@ -42,12 +43,12 @@ namespace HandmadeProductManagement.Services.Service
             // Validate CategoryId and ShopId datatype (Guid)
             if (!string.IsNullOrWhiteSpace(searchModel.CategoryId) && !IsValidGuid(searchModel.CategoryId))
             {
-                throw new BaseException.BadRequestException("bad_request","Invalid Category Id");
+                throw new BaseException.BadRequestException("bad_request", "Invalid Category Id");
             }
 
             if (!string.IsNullOrWhiteSpace(searchModel.ShopId) && !IsValidGuid(searchModel.ShopId))
             {
-                throw new BaseException.BadRequestException("bad_request","Invalid Shop ID");
+                throw new BaseException.BadRequestException("bad_request", "Invalid Shop ID");
             }
 
             // Validate MinRating limit (from 0 to 5)
@@ -126,16 +127,23 @@ namespace HandmadeProductManagement.Services.Service
                     Status = g.Key.Status,
                     SoldCount = g.Key.SoldCount,
                     // Avoid duplicates
-                    Price = g.SelectMany(p => p.ProductItems).Any() ? g.SelectMany(p => p.ProductItems).Min(pi => pi.Price) : 0
+                    Price = g.SelectMany(p => p.ProductItems).Any()
+                        ? g.SelectMany(p => p.ProductItems).Min(pi => pi.Price)
+                        : 0
                 }).OrderBy(pr => searchModel.SortByPrice
-                    ? (searchModel.SortDescending ? (decimal)-pr.Price : (decimal)pr.Price) // Sort by price ascending or descending
-                    : (searchModel.SortDescending ? (decimal) -pr.Rating : (decimal)pr.Rating)) // Sort by rating ascending or descending
+                    ? (searchModel.SortDescending
+                        ? (decimal)-pr.Price
+                        : (decimal)pr.Price) // Sort by price ascending or descending
+                    : (searchModel.SortDescending
+                        ? (decimal)-pr.Rating
+                        : (decimal)pr.Rating)) // Sort by rating ascending or descending
                 .ToListAsync();
 
             if (productSearchVMs.IsNullOrEmpty())
             {
                 throw new BaseException.NotFoundException("not_found", "Product Not Found");
             }
+
             return productSearchVMs;
 
         }
@@ -184,6 +192,7 @@ namespace HandmadeProductManagement.Services.Service
             {
                 throw new BaseException.NotFoundException("not_found", "Product Not Found");
             }
+
             return productSearchVMs;
 
         }
@@ -267,10 +276,7 @@ namespace HandmadeProductManagement.Services.Service
             return true;
         }
 
-        private bool IsValidGuid(string input)
-        {
-            return Guid.TryParse(input, out _);
-        }
+        private bool IsValidGuid(string input) => Guid.TryParse(input, out _);
 
         public async Task<ProductDetailResponseModel> GetProductDetailsByIdAsync(string productId)
         {
@@ -284,9 +290,9 @@ namespace HandmadeProductManagement.Services.Service
                 .Include(p => p.Shop)
                 .Include(p => p.ProductImages)
                 .Include(p => p.ProductItems)
-                    .ThenInclude(pi => pi.ProductConfiguration)
-                        .ThenInclude(pc => pc.VariationOption)
-                            .ThenInclude(vo => vo.Variation)
+                .ThenInclude(pi => pi.ProductConfiguration)
+                .ThenInclude(pc => pc.VariationOption)
+                .ThenInclude(vo => vo.Variation)
                 .FirstOrDefaultAsync(p => p.Id == productId);
 
             if (product == null)
@@ -296,8 +302,8 @@ namespace HandmadeProductManagement.Services.Service
 
             var promotion = await _unitOfWork.GetRepository<Promotion>().Entities
                 .FirstOrDefaultAsync(p => p.Categories.Any(c => c.Id == product.CategoryId) &&
-                                           p.StartDate <= DateTime.UtcNow &&
-                                           p.EndDate >= DateTime.UtcNow);
+                                          p.StartDate <= DateTime.UtcNow &&
+                                          p.EndDate >= DateTime.UtcNow);
 
             var response = new ProductDetailResponseModel
             {
@@ -324,36 +330,65 @@ namespace HandmadeProductManagement.Services.Service
                         OptionName = pc.VariationOption.Value
                     }).ToList()
                 }).ToList(),
-                Promotion = promotion != null ? new PromotionDetailModel
-                {
-                    Id = promotion.Id,
-                    Name = promotion.Name,
-                    Description = promotion.Description,
-                    DiscountRate = promotion.DiscountRate,
-                    StartDate = promotion.StartDate,
-                    EndDate = promotion.EndDate,
-                    Status = promotion.Status
-                } : null
+                Promotion = promotion != null
+                    ? new PromotionDetailModel
+                    {
+                        Id = promotion.Id,
+                        Name = promotion.Name,
+                        Description = promotion.Description,
+                        DiscountRate = promotion.DiscountRate,
+                        StartDate = promotion.StartDate,
+                        EndDate = promotion.EndDate,
+                        Status = promotion.Status
+                    }
+                    : null
             };
-
             return response;
+        }
+
+        public async Task<ProductDto> UpdateProductPromotionAsync(string productId, string promotionId)
+        {
+            var product = await _unitOfWork.GetRepository<Product>().Entities
+                .Include(p => p.ProductItems)
+                .FirstOrDefaultAsync(p => p.Id == productId);
+            if (product == null)
+                throw new BaseException.NotFoundException("product_not_found", "Product not found");
+            var promotion = await _unitOfWork.GetRepository<Promotion>().Entities
+                .FirstOrDefaultAsync(p =>
+                    p.Id == promotionId && p.StartDate <= DateTime.UtcNow && p.EndDate >= DateTime.UtcNow);
+            if (promotion == null)
+                throw new BaseException.BadRequestException("invalid_promotion", "Promotion is invalid or expired.");
+            product.Id = promotion.Id;
+            foreach (var productItem in product.ProductItems)
+            {
+                var originalPrice = productItem.Price;
+                productItem.DiscountRate = originalPrice * (1 - promotion.DiscountRate);
+            }
+
+            product.LastUpdatedTime = DateTime.UtcNow;
+            await _unitOfWork.GetRepository<Product>().UpdateAsync(product);
+            await _unitOfWork.SaveAsync();
+            var productToReturn = _mapper.Map<ProductDto>(product);
+            return productToReturn;
         }
 
         public async Task<decimal> CalculateAverageRatingAsync(string productId)
         {
             if (string.IsNullOrEmpty(productId))
             {
-                throw new BaseException.BadRequestException("invalid_product_id", "Product ID cannot be null or empty.");
+                throw new BaseException.BadRequestException("invalid_product_id",
+                    "Product ID cannot be null or empty.");
             }
 
             if (!IsValidGuid(productId))
             {
-                throw new BaseException.BadRequestException("invalid_product_id", "Product ID is not a valid GUID.");
+                throw new BaseException.BadRequestException("invalid_product_id",
+                    "Product ID is not a valid GUID.");
             }
 
             var product = await _unitOfWork.GetRepository<Product>().Entities
-                                           .Include(p => p.Reviews)
-                                           .FirstOrDefaultAsync(p => p.Id == productId);
+                .Include(p => p.Reviews)
+                .FirstOrDefaultAsync(p => p.Id == productId);
 
             if (product == null)
             {
@@ -365,14 +400,14 @@ namespace HandmadeProductManagement.Services.Service
                 return 0m;
             }
 
-            decimal averageRating = Math.Round((decimal) product.Reviews.Average(r => r.Rating),1);
+            decimal averageRating = Math.Round((decimal)product.Reviews.Average(r => r.Rating), 1);
 
             // Update the product's rating
             product.Rating = averageRating;
             await _unitOfWork.GetRepository<Product>().UpdateAsync(product);
             await _unitOfWork.SaveAsync();
-
             return averageRating;
         }
     }
 }
+
