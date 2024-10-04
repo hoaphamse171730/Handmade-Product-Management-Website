@@ -7,6 +7,7 @@ using System.Security.Claims;
 using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
 using HandmadeProductManagement.Core.Constants;
+using HandmadeProductManagement.ModelViews.NotificationModelViews;
 namespace HandmadeProductManagementAPI.Controllers
 {
     [Route("api/[controller]")]
@@ -86,9 +87,6 @@ namespace HandmadeProductManagementAPI.Controllers
         public async Task<IActionResult> DeleteUser(string id)
         {
 
-
-
-
             var response = new BaseResponse<bool>
             {
                 Code = "200",
@@ -111,6 +109,21 @@ namespace HandmadeProductManagementAPI.Controllers
                 Data = await _userService.ReverseDeleteUser(id)
             };
             return Ok(response);
+        }
+
+        [HttpGet("{userId}/notification")]
+        public async Task<IActionResult> GetNotifications(string userId)
+        {
+                var notifications = await _userService.GetNotificationList(userId);
+              
+                var response = new BaseResponse<List<NotificationModel>>
+                {
+                    Code = "200",
+                    StatusCode = StatusCodeHelper.OK,
+                    Message = "Success",
+                    Data = await _userService.GetNotificationList(userId)
+                };
+                return Ok(response);
         }
 
         // POST: api/Users
