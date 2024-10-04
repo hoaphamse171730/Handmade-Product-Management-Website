@@ -38,7 +38,7 @@ namespace HandmadeProductManagement.Services.Service
             return _mapper.Map<PromotionDto>(promotion);
         }
 
-        public async Task<PromotionDto> Create(PromotionForCreationDto promotion)
+        public async Task<bool> Create(PromotionForCreationDto promotion)
         {
             var validationResult = await _creationValidator.ValidateAsync(promotion);
             if (!validationResult.IsValid)
@@ -47,10 +47,10 @@ namespace HandmadeProductManagement.Services.Service
             promotionEntity.CreatedTime = DateTime.UtcNow;
             await _unitOfWork.GetRepository<Promotion>().InsertAsync(promotionEntity);
             await _unitOfWork.SaveAsync();
-            return _mapper.Map<PromotionDto>(promotionEntity);
+            return true;
         }
 
-        public async Task<PromotionDto> Update(string id, PromotionForUpdateDto promotion)
+        public async Task<bool> Update(string id, PromotionForUpdateDto promotion)
         {
             var validationResult = await _updateValidator.ValidateAsync(promotion);
             if (!validationResult.IsValid)
@@ -63,7 +63,7 @@ namespace HandmadeProductManagement.Services.Service
             promotionEntity.LastUpdatedTime = DateTime.UtcNow;
             await _unitOfWork.GetRepository<Promotion>().UpdateAsync(promotionEntity);
             await _unitOfWork.SaveAsync();
-            return _mapper.Map<PromotionDto>(promotionEntity);
+            return true;
         }
         public async Task<bool> SoftDelete(string id)
         {

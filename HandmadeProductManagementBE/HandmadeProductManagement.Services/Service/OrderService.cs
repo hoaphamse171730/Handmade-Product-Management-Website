@@ -47,7 +47,7 @@ namespace HandmadeProductManagement.Services.Service
             var cartItemRepository = _unitOfWork.GetRepository<CartItem>();
             var productItemRepository = _unitOfWork.GetRepository<ProductItem>();
 
-            var totalPrice = createOrder.OrderDetails.Sum(detail => detail.UnitPrice * detail.ProductQuantity);
+            var totalPrice = createOrder.OrderDetails.Sum(detail => detail.DiscountPrice * detail.ProductQuantity);
 
             var order = new Order
             {
@@ -110,8 +110,7 @@ namespace HandmadeProductManagement.Services.Service
                 var statusChangeDto = new StatusChangeForCreationDto
                 {
                     OrderId = order.Id.ToString(),
-                    Status = order.Status,
-                    ChangeTime = DateTime.UtcNow
+                    Status = order.Status
                 };
 
                 await _statusChangeService.Create(statusChangeDto);
@@ -367,8 +366,7 @@ namespace HandmadeProductManagement.Services.Service
                 var statusChangeDto = new StatusChangeForCreationDto
                 {
                     OrderId = updateStatusOrderDto.OrderId,
-                    Status = updateStatusOrderDto.Status,
-                    ChangeTime = DateTime.UtcNow
+                    Status = updateStatusOrderDto.Status
                 };
 
                 repository.Update(existingOrder);

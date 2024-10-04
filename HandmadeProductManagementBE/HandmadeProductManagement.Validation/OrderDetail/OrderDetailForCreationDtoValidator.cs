@@ -21,7 +21,7 @@ namespace HandmadeProductManagement.Validation.OrderDetail
             RuleFor(x => x.ProductQuantity)
                 .GreaterThanOrEqualTo(0).WithMessage("Product quantity must be greater than or equal 0.");
 
-            RuleFor(x => x.UnitPrice)
+            RuleFor(x => x.DiscountPrice)
                 .GreaterThanOrEqualTo(0).WithMessage("Unit price must be greater than or equal 0.");
         }
     }

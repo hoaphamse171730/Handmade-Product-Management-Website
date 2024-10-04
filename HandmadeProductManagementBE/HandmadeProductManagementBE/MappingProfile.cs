@@ -6,6 +6,7 @@ using HandmadeProductManagement.ModelViews.ProductModelViews;
 using HandmadeProductManagement.ModelViews.PromotionModelViews;
 using HandmadeProductManagement.ModelViews.StatusChangeModelViews;
 using HandmadeProductManagement.ModelViews.VariationModelViews;
+using HandmadeProductManagement.ModelViews.VariationOptionModelViews;
 
 namespace HandmadeProductManagementAPI;
 
@@ -47,6 +48,12 @@ public class MappingProfile : Profile
         CreateMap<Variation, VariationDto>();
         CreateMap<VariationForCreationDto, Variation>();
         CreateMap<VariationForUpdateDto, Variation>();
+        #endregion
+
+        #region VariationOption
+        CreateMap<VariationOption, VariationOptionDto>();
+        CreateMap<VariationOptionForCreationDto, VariationOption>();
+        CreateMap<VariationOptionForUpdateDto, VariationOption>();
         #endregion
     }
 

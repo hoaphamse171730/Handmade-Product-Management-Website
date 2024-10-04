@@ -26,15 +26,29 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<IList<VariationDto>> GetByCategoryId(string id)
         {
+            // Validate id format
+            if (!Guid.TryParse(id, out var guidId))
+            {
+                throw new BaseException.BadRequestException("invalid_input", "ID is not in a valid GUID format.");
+            }
+
             var variationRepository = _unitOfWork.GetRepository<Variation>();
+
             var variations = await variationRepository.Entities
-                .Where(v => v.CategoryId == id && !v.DeletedTime.HasValue)
+                .Where(v => v.CategoryId == id && (!v.DeletedTime.HasValue || v.DeletedBy == null))
                 .ToListAsync();
+
+            if (variations.Count == 0)
+            {
+                throw new BaseException.NotFoundException("not_found", "No variations found for the specified category.");
+            }
 
             return _mapper.Map<IList<VariationDto>>(variations);
         }
 
-        // Get cancel reasons by page (only active records)
+
+
+        // Get variations by page (only active records)
         public async Task<IList<VariationDto>> GetByPage(int page, int pageSize)
         {
             if (page <= 0)
@@ -48,7 +62,7 @@ namespace HandmadeProductManagement.Services.Service
             }
 
             IQueryable<Variation> query = _unitOfWork.GetRepository<Variation>().Entities
-                .Where(cr => !cr.DeletedTime.HasValue || cr.DeletedBy == null);
+                .Where(v => !v.DeletedTime.HasValue || v.DeletedBy == null);
 
             var variations = await query
                 .Skip((page - 1) * pageSize)
@@ -61,16 +75,35 @@ namespace HandmadeProductManagement.Services.Service
                 })
                 .ToListAsync();
 
-            var variationDto = _mapper.Map<IList<VariationDto>>(variations);
-            return variationDto;
+            if (variations == null || !variations.Any())
+            {
+                throw new BaseException.NotFoundException("not_found", "No variations found for the specified page.");
+            }
+
+            return _mapper.Map<IList<VariationDto>>(variations);
         }
 
         public async Task<bool> Create(VariationForCreationDto variationForCreation)
         {
+            // Validate id format
+            if (!Guid.TryParse(variationForCreation.CategoryId, out var guidId))
+            {
+                throw new BaseException.BadRequestException("invalid_input", "ID is not in a valid GUID format.");
+            }
+
             var validationResult = await _creationValidator.ValidateAsync(variationForCreation);
             if (!validationResult.IsValid)
             {
                 throw new BaseException.BadRequestException("validation_failed", validationResult.Errors.Select(e => e.ErrorMessage).FirstOrDefault());
+            }
+
+            // Check if the CategoryId exists in the Categories table
+            var categoryExists = await _unitOfWork.GetRepository<Category>()
+                .Entities.AnyAsync(c => c.Id == variationForCreation.CategoryId);
+
+            if (!categoryExists)
+            {
+                throw new BaseException.NotFoundException("category_not_found", "Category does not exist.");
             }
 
             var variationEntity = _mapper.Map<Variation>(variationForCreation);
@@ -86,6 +119,12 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<bool> Update(string id, VariationForUpdateDto variationForUpdate)
         {
+            // Validate id format
+            if (!Guid.TryParse(id, out var guidId))
+            {
+                throw new BaseException.BadRequestException("invalid_input", "ID is not in a valid GUID format.");
+            }
+
             var validationResult = await _updateValidator.ValidateAsync(variationForUpdate);
             if (!validationResult.IsValid)
             {
@@ -93,7 +132,8 @@ namespace HandmadeProductManagement.Services.Service
             }
 
             var repository = _unitOfWork.GetRepository<Variation>();
-            var variation = await repository.GetByIdAsync(id);
+            var variation = await repository.Entities
+                .FirstOrDefaultAsync(v => v.Id == id && (!v.DeletedTime.HasValue || v.DeletedBy == null));
 
             if (variation == null)
             {
@@ -107,16 +147,24 @@ namespace HandmadeProductManagement.Services.Service
             return true;
         }
 
+
         public async Task<bool> Delete(string id)
         {
+            // Validate id format
+            if (!Guid.TryParse(id, out var guidId))
+            {
+                throw new BaseException.BadRequestException("invalid_input", "ID is not in a valid GUID format.");
+            }
+
             var repository = _unitOfWork.GetRepository<Variation>();
             var variation = await repository.GetByIdAsync(id);
 
-            if (variation == null)
+            if (variation == null || variation.DeletedTime.HasValue || variation.DeletedBy != null)
             {
-                throw new BaseException.NotFoundException("variation_not_found", "Variation not found.");
+                throw new BaseException.NotFoundException("not_found", "Variation not found");
             }
 
+            variation.DeletedBy = "currentUser";
             variation.DeletedTime = DateTime.UtcNow;
             repository.Update(variation);
             await _unitOfWork.SaveAsync();

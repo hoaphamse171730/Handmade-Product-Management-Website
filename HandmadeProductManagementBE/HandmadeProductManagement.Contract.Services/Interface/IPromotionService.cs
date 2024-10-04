@@ -1,12 +1,4 @@
-﻿using HandmadeProductManagement.Contract.Repositories.Entity;
-using HandmadeProductManagement.ModelViews.UserModelViews;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using HandmadeProductManagement.ModelViews.PromotionModelViews;
+﻿using HandmadeProductManagement.ModelViews.PromotionModelViews;
 
 namespace HandmadeProductManagement.Contract.Services.Interface
 {
@@ -14,8 +6,8 @@ namespace HandmadeProductManagement.Contract.Services.Interface
     {
         Task<IList<PromotionDto>> GetAll();
         Task<PromotionDto> GetById(string id);
-        Task<PromotionDto> Create(PromotionForCreationDto promotion);
-        Task<PromotionDto> Update(string id, PromotionForUpdateDto promotion);
+        Task<bool> Create(PromotionForCreationDto promotion);
+        Task<bool> Update(string id, PromotionForUpdateDto promotion);
         Task<bool> SoftDelete(string id);
         Task<bool> updatePromotionStatusByRealtime(string id);
     }

@@ -18,20 +18,6 @@ namespace HandmadeProductManagementAPI.Controllers
             _variationService = variationService;
         }
 
-        // GET: api/variation/category/{categoryId}
-        [HttpGet("category/{categoryId}")]
-        public async Task<IActionResult> GetByCategoryId(string categoryId)
-        {
-            var response = new BaseResponse<IList<VariationDto>>
-            {
-                Code = "Success",
-                StatusCode = StatusCodeHelper.OK,
-                Message = "Get Variations by Category successfully.",
-                Data = await _variationService.GetByCategoryId(categoryId)
-            };
-            return Ok(response);
-        }
-
         // GET: api/variation/page?page=1&pageSize=10
         [HttpGet("page")]
         public async Task<IActionResult> GetByPage([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
@@ -42,6 +28,20 @@ namespace HandmadeProductManagementAPI.Controllers
                 StatusCode = StatusCodeHelper.OK,
                 Message = "Get Variations by page successfully.",
                 Data = await _variationService.GetByPage(page, pageSize)
+            };
+            return Ok(response);
+        }
+
+        // GET: api/variation/category/{categoryId}
+        [HttpGet("category/{categoryId}")]
+        public async Task<IActionResult> GetByCategoryId(string categoryId)
+        {
+            var response = new BaseResponse<IList<VariationDto>>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Get Variations by Category successfully.",
+                Data = await _variationService.GetByCategoryId(categoryId)
             };
             return Ok(response);
         }
@@ -65,7 +65,6 @@ namespace HandmadeProductManagementAPI.Controllers
             }
             catch (DbUpdateException ex)
             {
-                // Log the exception (can be added to a logging framework)
                 var innerExceptionMessage = ex.InnerException?.Message ?? ex.Message;
 
                 var errorResponse = new BaseResponse<string>

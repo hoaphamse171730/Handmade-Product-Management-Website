@@ -26,6 +26,7 @@ namespace HandmadeProductManagement.Services
             services.AddScoped<ICancelReasonService, CancelReasonService>();
             services.AddScoped<IStatusChangeService, StatusChangeService>();
             services.AddScoped<IVariationService, VariationService>();
+            services.AddScoped<IVariationOptionService, VariationOptionService>();
         }
 
     }

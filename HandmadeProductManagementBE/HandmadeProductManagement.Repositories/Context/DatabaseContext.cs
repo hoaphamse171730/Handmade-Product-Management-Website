@@ -147,6 +147,8 @@ namespace HandmadeProductManagement.Repositories.Context
             // Variation Configuration
             modelBuilder.Entity<Variation>(entity =>
             {
+                entity.HasKey(e => e.Id);
+
                 entity.HasOne(v => v.Category)
                     .WithMany(c => c.Variations)
                     .HasForeignKey(v => v.CategoryId);
@@ -160,6 +162,8 @@ namespace HandmadeProductManagement.Repositories.Context
             // Variation Option Configuration
             modelBuilder.Entity<VariationOption>(entity =>
             {
+                entity.HasKey(e => e.Id);
+
                 entity.Property(vo => vo.Value)
                     .HasMaxLength(150)
                     .IsRequired();
@@ -230,7 +234,7 @@ namespace HandmadeProductManagement.Repositories.Context
                       .IsRequired();
                 // One-to-many relationship with Order
                 entity.HasMany(cr => cr.Orders)
-                    .WithOne(o => o.CancelReason) // Each Order has one CancelReason
+                    .WithOne(o => o.CancelReason)
                     .HasForeignKey(o => o.CancelReasonId);
             });
             // Payment Entity Configuration

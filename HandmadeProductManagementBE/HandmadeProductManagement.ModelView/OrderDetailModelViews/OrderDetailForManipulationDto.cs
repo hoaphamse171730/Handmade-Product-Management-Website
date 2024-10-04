@@ -8,5 +8,6 @@ public class OrderDetailForManipulationDto
     [JsonIgnore]
     public string? OrderId { get; set; }
     public int ProductQuantity { get; set; }
-    public decimal UnitPrice { get; set; }
+    [JsonIgnore]
+    public decimal DiscountPrice { get; set; }
 }
