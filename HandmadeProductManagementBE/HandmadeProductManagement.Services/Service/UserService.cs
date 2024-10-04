@@ -6,6 +6,8 @@ using HandmadeProductManagement.ModelViews.UserModelViews;
 using HandmadeProductManagement.Repositories.Entity;
 using Microsoft.EntityFrameworkCore;
 using FluentValidation;
+using HandmadeProductManagement.ModelViews.NotificationModelViews;
+using HandmadeProductManagement.Contract.Repositories.Entity;
 namespace HandmadeProductManagement.Services.Service
 {
     public class UserService : IUserService
@@ -20,33 +22,33 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<IList<UserResponseModel>> GetAll()
         {
-            
-                var users = await _unitOfWork.GetRepository<ApplicationUser>()
-                    .Entities
-                    .Select(user => new UserResponseModel
-                    {
-                        Id = user.Id,
-                        UserName = user.UserName,
-                        Email = user.Email,
-                        PhoneNumber = user.PhoneNumber,
-                        CreatedBy = user.CreatedBy,
-                        LastUpdatedBy = user.LastUpdatedBy,
-                        DeletedBy = user.DeletedBy,
-                        CreatedTime = user.CreatedTime,
-                        LastUpdatedTime = user.LastUpdatedTime,
-                        DeletedTime = user.DeletedTime,
-                        Status = user.Status,
-                        CartId = user.CartId,
-                    })
-                    .ToListAsync();
 
-                if (users == null || !users.Any())
+            var users = await _unitOfWork.GetRepository<ApplicationUser>()
+                .Entities
+                .Select(user => new UserResponseModel
                 {
-                    throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(),"Please check UserID");
-                }
+                    Id = user.Id,
+                    UserName = user.UserName,
+                    Email = user.Email,
+                    PhoneNumber = user.PhoneNumber,
+                    CreatedBy = user.CreatedBy,
+                    LastUpdatedBy = user.LastUpdatedBy,
+                    DeletedBy = user.DeletedBy,
+                    CreatedTime = user.CreatedTime,
+                    LastUpdatedTime = user.LastUpdatedTime,
+                    DeletedTime = user.DeletedTime,
+                    Status = user.Status,
+                    CartId = user.CartId,
+                })
+                .ToListAsync();
 
-                return users;
-          
+            if (users == null || !users.Any())
+            {
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Please check UserID");
+            }
+
+            return users;
+
         }
 
         public async Task<UserResponseByIdModel> GetById(string Id)
@@ -56,38 +58,37 @@ namespace HandmadeProductManagement.Services.Service
             {
                 throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Invalid userID");
             }
-                var user = await _unitOfWork.GetRepository<ApplicationUser>()
-                    .Entities
-                    .Where(u => u.Id == userId)
-                    .Select(user => new UserResponseByIdModel
-                    {
-                        Id = user.Id,
-                        UserName = user.UserName,
-                        NormalizedUserName = user.NormalizedUserName,
-                        Email = user.Email,
-                        NormalizedEmail = user.NormalizedEmail,
-                        EmailConfirmed = user.EmailConfirmed,
-                        PhoneNumber = user.PhoneNumber,
-                        PhoneNumberConfirmed = user.PhoneNumberConfirmed,
-                        TwoFactorEnabled = user.TwoFactorEnabled,
-                        LockoutEnd = user.LockoutEnd,
-                        LockoutEnabled = user.LockoutEnabled,
-                        AccessFailedCount = user.AccessFailedCount,
-                        CartId = user.CartId,
-
-                    })
-                    .FirstOrDefaultAsync();
-
-                if (user == null)
+            var user = await _unitOfWork.GetRepository<ApplicationUser>()
+                .Entities
+                .Where(u => u.Id == userId)
+                .Select(user => new UserResponseByIdModel
                 {
-                    throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "user not found");
-                }
-                return user;
-            
+                    Id = user.Id,
+                    UserName = user.UserName,
+                    NormalizedUserName = user.NormalizedUserName,
+                    Email = user.Email,
+                    NormalizedEmail = user.NormalizedEmail,
+                    EmailConfirmed = user.EmailConfirmed,
+                    PhoneNumber = user.PhoneNumber,
+                    PhoneNumberConfirmed = user.PhoneNumberConfirmed,
+                    TwoFactorEnabled = user.TwoFactorEnabled,
+                    LockoutEnd = user.LockoutEnd,
+                    LockoutEnabled = user.LockoutEnabled,
+                    AccessFailedCount = user.AccessFailedCount,
+                    CartId = user.CartId,
+
+                })
+                .FirstOrDefaultAsync();
+
+            if (user == null)
+            {
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "user not found");
+            }
+            return user;
+
         }
         public async Task<UpdateUserResponseModel?> UpdateUser(string id, UpdateUserDTO updateUserDTO)
         {
-          
 
             if (!Guid.TryParse(id, out Guid userId))
             {
@@ -132,9 +133,6 @@ namespace HandmadeProductManagement.Services.Service
             {
                 throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Phone number already exists");
             }
-
-
-
 
             user.UserName = updateUserDTO.UserName;
             user.Email = updateUserDTO.Email;
@@ -189,6 +187,45 @@ namespace HandmadeProductManagement.Services.Service
             return true;
         }
 
+        public async Task<IList<NotificationModel>> GetNotificationList(string Id)
+        {
+            if (!Guid.TryParse(Id, out Guid userId))
+            {
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Invalid userID");
+            }
+
+            var shopIds = await _unitOfWork.GetRepository<Shop>()
+                .Entities
+                .Where(shop => shop.UserId == userId)
+                .Select(shop => shop.Id)
+                .ToListAsync();
+
+            var reviews = await _unitOfWork.GetRepository<Review>()
+                .Entities
+                .Where(r => shopIds.Contains(r.Product.ShopId))
+                .Include(r => r.User)
+                .ToListAsync();
+
+            var replies = await _unitOfWork.GetRepository<Reply>()
+                .Entities
+                .Where(rep => reviews.Select(r => r.Id).Contains(rep.ReviewId)) 
+                .ToListAsync();
+
+            var nonReplies = reviews
+                .Where(r => !replies.Any(rep => rep.ReviewId == r.Id))
+                .ToList();
+
+            var notifications = nonReplies.Select(nonReplies => new NotificationModel
+            {
+                Id = nonReplies.Id,
+                Message = $"Sản phẩm của bạn đã được {nonReplies.User.UserName} review",
+                Tag = "Review",
+                URL = $"api/review/{nonReplies.Id}"
+            }).ToList();
+
+            return notifications;
+        }
+
         public async Task<bool> ReverseDeleteUser(string Id)
         {
             if (!Guid.TryParse(Id, out Guid userId))
@@ -206,7 +243,6 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "User not found or already active");
             }
 
-
             user.Status = "active";
             user.DeletedBy = null;
             user.DeletedTime = null;
@@ -216,7 +252,5 @@ namespace HandmadeProductManagement.Services.Service
 
             return true;
         }
-
-
     }
 }

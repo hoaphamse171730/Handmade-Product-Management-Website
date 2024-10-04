@@ -17,7 +17,7 @@ namespace HandmadeProductManagementAPI.Controllers
             _statusChangeService = statusChangeService;
         }
 
-        // GET: api/statuschange/page?page=1&pageSize=10
+       
         [HttpGet("page")]
         public async Task<IActionResult> GetByPage([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
@@ -31,7 +31,7 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
-        // GET: api/StatusChange/Order/{orderId}
+     
         [HttpGet("Order/{orderId}")]
         public async Task<IActionResult> GetStatusChangesByOrderId(string orderId)
         {
@@ -45,7 +45,7 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
-        // POST: api/statuschange
+    
         [HttpPost]
         public async Task<IActionResult> CreateStatusChange([FromBody] StatusChangeForCreationDto statusChange)
         {
@@ -60,7 +60,7 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
-        // PUT: api/statuschange/{id}
+      
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateStatusChange(string id, [FromBody] StatusChangeForUpdateDto updatedStatusChange)
         {
@@ -75,7 +75,7 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
-        // DELETE: api/statuschange/{id}
+     
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteStatusChange(string id)
         {

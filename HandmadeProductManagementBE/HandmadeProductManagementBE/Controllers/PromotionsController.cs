@@ -24,7 +24,6 @@ namespace HandmadeProductManagementAPI.Controllers
 
             var result = await _promotionService.GetAll();
             return Ok(BaseResponse<IList<PromotionDto>>.OkResponse(result));
-
         }
 
         [HttpGet("{id}")]
@@ -33,7 +32,6 @@ namespace HandmadeProductManagementAPI.Controllers
 
             var promotion = await _promotionService.GetById(id);
             return Ok(BaseResponse<PromotionDto>.OkResponse(promotion));
-
         }
 
         [HttpPost]
@@ -71,17 +69,15 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> SoftDeletePromotion(string id)
         {
-
             var result = await _promotionService.SoftDelete(id);
             return Ok(BaseResponse<bool>.OkResponse(result));
-
         }
 
         [HttpGet("Expired/{id}")]
         public async Task<IActionResult> ExpiredPromotion(string id)
         {
 
-            var isExpired = await _promotionService.updatePromotionStatusByRealtime(id);
+            var isExpired = await _promotionService.UpdatePromotionStatusByRealtime(id);
             var response = new BaseResponse<bool>
             {
                 Code = "Success",
@@ -90,7 +86,16 @@ namespace HandmadeProductManagementAPI.Controllers
                 Data = isExpired
             };
             return Ok(response);
+        }
 
+
+        [HttpPut("{id}/status")]
+        public async Task<IActionResult> UpdatePromotionStatusByRealtime(string id)
+        {
+            var result = await _promotionService.UpdatePromotionStatusByRealtime(id);
+            return Ok(result);
         }
     }
+
 }
+

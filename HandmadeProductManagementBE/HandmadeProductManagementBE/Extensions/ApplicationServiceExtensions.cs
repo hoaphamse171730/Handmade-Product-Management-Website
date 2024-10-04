@@ -10,8 +10,8 @@ using HandmadeProductManagement.ModelViews.CancelReasonModelViews;
 using HandmadeProductManagement.ModelViews.OrderDetailModelViews;
 using HandmadeProductManagement.ModelViews.ProductModelViews;
 using HandmadeProductManagement.ModelViews.PromotionModelViews;
-using HandmadeProductManagement.ModelViews.StatusChangeModelViews;
 using HandmadeProductManagement.ModelViews.UserModelViews;
+using HandmadeProductManagement.ModelViews.StatusChangeModelViews;
 using HandmadeProductManagement.ModelViews.VariationModelViews;
 using HandmadeProductManagement.ModelViews.VariationOptionModelViews;
 using HandmadeProductManagement.Repositories.Context;
@@ -22,8 +22,8 @@ using HandmadeProductManagement.Validation.CancelReason;
 using HandmadeProductManagement.Validation.OrderDetail;
 using HandmadeProductManagement.Validation.Product;
 using HandmadeProductManagement.Validation.Promotion;
-using HandmadeProductManagement.Validation.StatusChange;
 using HandmadeProductManagement.Validation.User;
+using HandmadeProductManagement.Validation.StatusChange;
 using HandmadeProductManagement.Validation.Variation;
 using HandmadeProductManagement.Validation.VariationOption;
 using HandmadeProductManagementAPI.BackgroundServices;
@@ -60,6 +60,7 @@ public static class ApplicationServiceExtensions
         
         services.AddExceptionHandler<CustomExceptionHandler>();
         services.AddScoped<ICancelReasonService, CancelReasonService>();
+        services.AddScoped<IAuthenticationService, AuthenticationService>();
         services.AddScoped<IStatusChangeService, StatusChangeService>();
         services.AddScoped<IProductService, ProductService>();
         services.AddScoped<IPromotionService, PromotionService>();
@@ -99,13 +100,12 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IValidator<OrderDetailForUpdateDto>, OrderDetailForUpdateDtoValidator>();
         #endregion
 
+        #region User
+        services.AddScoped<IValidator<UpdateUserDTO>, UpdateUserDTOValidator>();
+        #endregion
         #region CancelReason
         services.AddScoped<IValidator<CancelReasonForCreationDto>, CancelReasonForCreationDtoValidator>();
         services.AddScoped<IValidator<CancelReasonForUpdateDto>, CancelReasonForUpdateDtoValidator>();
-        #endregion
-
-        #region User
-        services.AddScoped<IValidator<UpdateUserDTO>, UpdateUserDTOValidator>();     
         #endregion
 
         #region StatusChange
