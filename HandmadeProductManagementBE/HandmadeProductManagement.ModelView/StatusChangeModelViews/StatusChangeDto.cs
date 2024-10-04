@@ -1,6 +1,6 @@
 ﻿namespace HandmadeProductManagement.ModelViews.StatusChangeModelViews
 {
-    public class StatusChangeResponseModel
+    public class StatusChangeDto
     {
         public string Id { get; set; } = string.Empty;
         public required DateTime ChangeTime { get; set; }
