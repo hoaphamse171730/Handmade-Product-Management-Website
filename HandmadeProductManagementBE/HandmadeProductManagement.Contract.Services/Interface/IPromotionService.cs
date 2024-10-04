@@ -18,6 +18,6 @@ namespace HandmadeProductManagement.Contract.Services.Interface
         Task<PromotionDto> Update(string id, PromotionForUpdateDto promotion);
         Task<bool> Delete(string id);
         Task<bool> SoftDelete(string id);
-        Task<bool> updatePromotionStatusByRealtime(string id);
+        Task<bool> UpdatePromotionStatusByRealtime(string id);
     }
 }

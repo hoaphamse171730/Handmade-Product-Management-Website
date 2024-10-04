@@ -6,6 +6,15 @@ using HandmadeProductManagement.ModelViews.UserModelViews;
 using HandmadeProductManagement.Repositories.Entity;
 using Microsoft.EntityFrameworkCore;
 using FluentValidation;
+using HandmadeProductManagement.ModelViews.NotificationModelViews;
+using HandmadeProductManagement.ModelViews.ReviewModelViews;
+using HandmadeProductManagement.ModelViews.ReplyModelViews;
+using HandmadeProductManagement.ModelViews.ShopModelViews;
+using HandmadeProductManagement.Contract.Repositories.Entity;
+using static System.Formats.Asn1.AsnWriter;
+using HandmadeProductManagement.Core.Utils;
+using HandmadeProductManagement.Contract.Repositories.Entity;
+using HandmadeProductManagement.ModelViews.ProductModelViews;
 namespace HandmadeProductManagement.Services.Service
 {
     public class UserService : IUserService
@@ -20,33 +29,33 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<IList<UserResponseModel>> GetAll()
         {
-            
-                var users = await _unitOfWork.GetRepository<ApplicationUser>()
-                    .Entities
-                    .Select(user => new UserResponseModel
-                    {
-                        Id = user.Id,
-                        UserName = user.UserName,
-                        Email = user.Email,
-                        PhoneNumber = user.PhoneNumber,
-                        CreatedBy = user.CreatedBy,
-                        LastUpdatedBy = user.LastUpdatedBy,
-                        DeletedBy = user.DeletedBy,
-                        CreatedTime = user.CreatedTime,
-                        LastUpdatedTime = user.LastUpdatedTime,
-                        DeletedTime = user.DeletedTime,
-                        Status = user.Status,
-                        CartId = user.CartId,
-                    })
-                    .ToListAsync();
 
-                if (users == null || !users.Any())
+            var users = await _unitOfWork.GetRepository<ApplicationUser>()
+                .Entities
+                .Select(user => new UserResponseModel
                 {
-                    throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(),"Please check UserID");
-                }
+                    Id = user.Id,
+                    UserName = user.UserName,
+                    Email = user.Email,
+                    PhoneNumber = user.PhoneNumber,
+                    CreatedBy = user.CreatedBy,
+                    LastUpdatedBy = user.LastUpdatedBy,
+                    DeletedBy = user.DeletedBy,
+                    CreatedTime = user.CreatedTime,
+                    LastUpdatedTime = user.LastUpdatedTime,
+                    DeletedTime = user.DeletedTime,
+                    Status = user.Status,
+                    CartId = user.CartId,
+                })
+                .ToListAsync();
 
-                return users;
-          
+            if (users == null || !users.Any())
+            {
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Please check UserID");
+            }
+
+            return users;
+
         }
 
         public async Task<UserResponseByIdModel> GetById(string Id)
@@ -56,38 +65,37 @@ namespace HandmadeProductManagement.Services.Service
             {
                 throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Invalid userID");
             }
-                var user = await _unitOfWork.GetRepository<ApplicationUser>()
-                    .Entities
-                    .Where(u => u.Id == userId)
-                    .Select(user => new UserResponseByIdModel
-                    {
-                        Id = user.Id,
-                        UserName = user.UserName,
-                        NormalizedUserName = user.NormalizedUserName,
-                        Email = user.Email,
-                        NormalizedEmail = user.NormalizedEmail,
-                        EmailConfirmed = user.EmailConfirmed,
-                        PhoneNumber = user.PhoneNumber,
-                        PhoneNumberConfirmed = user.PhoneNumberConfirmed,
-                        TwoFactorEnabled = user.TwoFactorEnabled,
-                        LockoutEnd = user.LockoutEnd,
-                        LockoutEnabled = user.LockoutEnabled,
-                        AccessFailedCount = user.AccessFailedCount,
-                        CartId = user.CartId,
-
-                    })
-                    .FirstOrDefaultAsync();
-
-                if (user == null)
+            var user = await _unitOfWork.GetRepository<ApplicationUser>()
+                .Entities
+                .Where(u => u.Id == userId)
+                .Select(user => new UserResponseByIdModel
                 {
-                    throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "user not found");
-                }
-                return user;
-            
+                    Id = user.Id,
+                    UserName = user.UserName,
+                    NormalizedUserName = user.NormalizedUserName,
+                    Email = user.Email,
+                    NormalizedEmail = user.NormalizedEmail,
+                    EmailConfirmed = user.EmailConfirmed,
+                    PhoneNumber = user.PhoneNumber,
+                    PhoneNumberConfirmed = user.PhoneNumberConfirmed,
+                    TwoFactorEnabled = user.TwoFactorEnabled,
+                    LockoutEnd = user.LockoutEnd,
+                    LockoutEnabled = user.LockoutEnabled,
+                    AccessFailedCount = user.AccessFailedCount,
+                    CartId = user.CartId,
+
+                })
+                .FirstOrDefaultAsync();
+
+            if (user == null)
+            {
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "user not found");
+            }
+            return user;
+
         }
         public async Task<UpdateUserResponseModel?> UpdateUser(string id, UpdateUserDTO updateUserDTO)
         {
-          
 
             if (!Guid.TryParse(id, out Guid userId))
             {
@@ -189,6 +197,37 @@ namespace HandmadeProductManagement.Services.Service
             return true;
         }
 
+        public async Task<List<NotificationModel>> GetNotificationList(string Id)
+        {
+            if (!Guid.TryParse(Id, out Guid userId))
+            {
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Invalid userID");
+            }
+           
+            var shop = await _unitOfWork.GetRepository<Shop>()
+                .Entities
+                .Where(shop => shop.UserId == userId)
+                .Select(shop => shop.Id)
+                .ToListAsync();
+          
+            var reviews = await _unitOfWork.GetRepository<Review>()
+                .Entities
+                .Include(r => r.User) 
+                .Where(review => shop.Contains(review.ProductId) && review.Reply == null)
+                .ToListAsync();
+
+            var notifications = reviews.Select(review => new NotificationModel
+            {
+                Id = review.Id,
+                Message = $"Sản phẩm của bạn đã được {review.User.UserName} review",
+                Tag = "Review",
+                URL = $"api/review/{review.Id}"
+            }).ToList();
+
+            return notifications;
+
+        }
+
         public async Task<bool> ReverseDeleteUser(string Id)
         {
             if (!Guid.TryParse(Id, out Guid userId))
@@ -216,6 +255,9 @@ namespace HandmadeProductManagement.Services.Service
 
             return true;
         }
+
+
+     
 
 
     }

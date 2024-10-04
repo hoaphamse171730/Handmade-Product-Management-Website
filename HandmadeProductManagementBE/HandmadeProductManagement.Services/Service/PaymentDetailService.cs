@@ -13,10 +13,12 @@ namespace HandmadeProductManagement.Services.Service
     public class PaymentDetailService : IPaymentDetailService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IPaymentService _paymentService;
 
-        public PaymentDetailService(IUnitOfWork unitOfWork)
+        public PaymentDetailService(IUnitOfWork unitOfWork, IPaymentService paymentService)
         {
             _unitOfWork = unitOfWork;
+            _paymentService = paymentService;
         }
 
         public async Task<bool> CreatePaymentDetailAsync(CreatePaymentDetailDto createPaymentDetailDto)
@@ -38,7 +40,9 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.NotFoundException("payment_not_found", "Payment not found.");
             }
 
-            var invalidStatuses = new[] { "Completed", "Expired", "Refunded", "Failed", "Closed" };
+            await _paymentService.UpdatePaymentStatusAsync(createPaymentDetailDto.PaymentId, "Processing");
+
+            var invalidStatuses = new[] { "Completed", "Expired", "Refunded", "Closed" };
             if (invalidStatuses.Contains(payment.Status))
             {
                 throw new BaseException.BadRequestException("invalid_payment_status", $"Cannot create payment detail for payment with status '{payment.Status}'.");
@@ -61,7 +65,7 @@ namespace HandmadeProductManagement.Services.Service
             {
                 payment.Status = "Completed";
                 payment.LastUpdatedTime = DateTime.UtcNow;
-                paymentRepository.Update(payment);
+                await paymentRepository.UpdateAsync(payment);
 
                 var orderRepository = _unitOfWork.GetRepository<Order>();
                 var order = await orderRepository.Entities
@@ -70,10 +74,11 @@ namespace HandmadeProductManagement.Services.Service
                 {
                     order.Status = "Processing";
                     order.LastUpdatedTime = DateTime.UtcNow;
-                    orderRepository.Update(order);
+                    await orderRepository.UpdateAsync(order);
                 }
-
                 await _unitOfWork.SaveAsync();
+                await _paymentService.UpdatePaymentStatusAsync(createPaymentDetailDto.PaymentId, "Completed");
+
             }
 
             return true;
@@ -93,7 +98,7 @@ namespace HandmadeProductManagement.Services.Service
 
             var paymentRepository = _unitOfWork.GetRepository<Payment>();
             var paymentExists = await paymentRepository.Entities
-                        .AnyAsync(p => p.Id == paymentId && !p.DeletedTime.HasValue);
+                .AnyAsync(p => p.Id == paymentId && !p.DeletedTime.HasValue);
 
             if (!paymentExists)
             {
@@ -102,7 +107,8 @@ namespace HandmadeProductManagement.Services.Service
 
             var paymentDetailRepository = _unitOfWork.GetRepository<PaymentDetail>();
             var paymentDetail = await paymentDetailRepository.Entities
-                        .FirstOrDefaultAsync(pd => pd.PaymentId == paymentId && !pd.DeletedTime.HasValue);
+                .FirstOrDefaultAsync(pd => pd.PaymentId == paymentId && !pd.DeletedTime.HasValue);
+
             if (paymentDetail == null)
             {
                 throw new BaseException.NotFoundException("payment_detail_not_found", "Payment detail not found.");
@@ -132,7 +138,8 @@ namespace HandmadeProductManagement.Services.Service
 
             var paymentDetailRepository = _unitOfWork.GetRepository<PaymentDetail>();
             var paymentDetail = await paymentDetailRepository.Entities
-                        .FirstOrDefaultAsync(pd => pd.Id == id && !pd.DeletedTime.HasValue);
+                .FirstOrDefaultAsync(pd => pd.Id == id && !pd.DeletedTime.HasValue);
+
             if (paymentDetail == null)
             {
                 throw new BaseException.NotFoundException("payment_detail_not_found", "Payment detail not found.");
