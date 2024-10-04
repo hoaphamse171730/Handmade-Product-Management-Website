@@ -124,8 +124,6 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
-
-
         [HttpPut("{productId}/promotion/{promotionId}")]
         public async Task<IActionResult> UpdateProductPromotion(string productId, string promotionId)
         {
@@ -133,5 +131,20 @@ namespace HandmadeProductManagementAPI.Controllers
             var updatedProduct = await _productService.UpdateProductPromotionAsync(productId, promotionId);
             return Ok(updatedProduct);
         }
+
+        [HttpGet("CalculateAverageRating/{id}")]
+        public async Task<IActionResult> CalculateAverageRating([Required] string id)
+        {
+            var averageRating = await _productService.CalculateAverageRatingAsync(id);
+            var response = new BaseResponse<decimal>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Average rating calculated successfully.",
+                Data = averageRating
+            };
+            return Ok(response);
+        }
     }
 }
+

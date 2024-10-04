@@ -50,7 +50,6 @@ namespace HandmadeProductManagement.Services.Service
             {
                 PaymentId = createPaymentDetailDto.PaymentId,
                 Status = createPaymentDetailDto.Status,
-                Amount = payment.TotalAmount,
                 Method = createPaymentDetailDto.Method,
                 ExternalTransaction = createPaymentDetailDto.ExternalTransaction
             };
@@ -113,7 +112,6 @@ namespace HandmadeProductManagement.Services.Service
                 Id = paymentDetail.Id,
                 PaymentId = paymentDetail.PaymentId,
                 Status = paymentDetail.Status,
-                Amount = paymentDetail.Amount,
                 Method = paymentDetail.Method,
                 ExternalTransaction = paymentDetail.ExternalTransaction
             };
@@ -144,7 +142,6 @@ namespace HandmadeProductManagement.Services.Service
                 Id = paymentDetail.Id,
                 PaymentId = paymentDetail.PaymentId,
                 Status = paymentDetail.Status,
-                Amount = paymentDetail.Amount,
                 Method = paymentDetail.Method,
                 ExternalTransaction = paymentDetail.ExternalTransaction
             };

@@ -10,5 +10,5 @@ public interface IOrderDetailService
     Task<OrderDetailDto> Create(OrderDetailForCreationDto promotion);
     Task<OrderDetailDto> Update(string orderDetailId, OrderDetailForUpdateDto promotion); 
     Task<bool> SoftDelete(string id);
-    Task<IList<OrderDetailDto>> GetByOrderId(string orderId);
+    //Task<OrderDetailDto> GetByOrderId(string orderId); // cai nay fix sau
 }

@@ -96,7 +96,7 @@ namespace HandmadeProductManagement.Services.Service
             return true;
         }
 
-       
+
 
         public async Task<bool> UpdatePromotionStatusByRealtime(string id)
         {

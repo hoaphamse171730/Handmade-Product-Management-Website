@@ -90,27 +90,51 @@ namespace HandmadeProductManagement.Services.Service
         public async Task<UpdateUserResponseModel?> UpdateUser(string id, UpdateUserDTO updateUserDTO)
         {
 
-
             if (!Guid.TryParse(id, out Guid userId))
             {
                 throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Invalid userID");
             }
-
+            //query
             var user = await _unitOfWork.GetRepository<ApplicationUser>()
                 .Entities
                 .Where(u => u.Id == userId)
-                .FirstOrDefaultAsync();
-
+                .FirstOrDefaultAsync(); 
+            //check user found
             if (user == null)
             {
                 throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "user not found");
             }
-
+            // check format DTO by fluent validation
             var updateValidation = _updateValidator.Validate(updateUserDTO);
             if (!updateValidation.IsValid)
             {
                 throw new ValidationException(updateValidation.Errors);
             }
+            // check existing unique fields
+            var existingUsername = await _unitOfWork.GetRepository<ApplicationUser>().Entities
+                .AnyAsync(u => u.UserName == updateUserDTO.UserName && u.Id != userId);
+            if(existingUsername)
+            {
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Username already exists");
+            }
+
+            var existingUserWithSameEmail = await _unitOfWork.GetRepository<ApplicationUser>()
+      .Entities
+      .AnyAsync(u => u.Email == updateUserDTO.Email && u.Id != userId);
+            if (existingUserWithSameEmail)
+            {
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Email already exists");
+            }
+
+            var existingUserWithSamePhoneNumber = await _unitOfWork.GetRepository<ApplicationUser>()
+        .Entities
+        .AnyAsync(u => u.PhoneNumber == updateUserDTO.PhoneNumber && u.Id != userId);
+            if (existingUserWithSamePhoneNumber)
+            {
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Phone number already exists");
+            }
+
+
 
 
             user.UserName = updateUserDTO.UserName;

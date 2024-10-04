@@ -153,3 +153,5 @@ HandmadeProductManagementBE/HandmadeProductManagement.Contract.Services/obj/Debu
 /HandmadeProductManagementBE/Migrations/
 /.vs
 
+!HandmadeProductManagementBE/HandmadeProductManagement.Validation/User/
+

@@ -26,22 +26,17 @@ namespace HandmadeProductManagement.Services.Service
         public async Task<bool> CreateOrderAsync(CreateOrderDto createOrder)
         {
             ValidateOrder(createOrder);
-
             var userRepository = _unitOfWork.GetRepository<ApplicationUser>();
             var userExists = await userRepository.Entities
                 .AnyAsync(u => u.Id.ToString() == createOrder.UserId && !u.DeletedTime.HasValue);
-
             if (!userExists)
             {
                 throw new BaseException.NotFoundException("user_not_found", "User not found.");
             }
-
             var orderRepository = _unitOfWork.GetRepository<Order>();
             var orderDetailRepository = _unitOfWork.GetRepository<OrderDetail>();
             var productItemRepository = _unitOfWork.GetRepository<ProductItem>();
-
             var totalPrice = createOrder.OrderDetails.Sum(detail => detail.UnitPrice * detail.ProductQuantity);
-
             var order = new Order
             {
                 TotalPrice = (decimal)totalPrice,
@@ -58,11 +53,9 @@ namespace HandmadeProductManagement.Services.Service
             };
             try
             {
-                // Insert the order
                 await orderRepository.InsertAsync(order);
                 await _unitOfWork.SaveAsync();
 
-                // Iterate through each order detail, validate, and decrease stock
                 foreach (var detail in createOrder.OrderDetails)
                 {
                     ValidateOrderDetail(detail);
@@ -91,10 +84,7 @@ namespace HandmadeProductManagement.Services.Service
                     await orderDetailRepository.InsertAsync(orderDetail);
                 }
 
-                // Save changes for stock decrease and order details
                 await _unitOfWork.SaveAsync();
-
-                // Create an initial status change after the order is created
                 var statusChangeDto = new StatusChangeForCreationDto
                 {
                     OrderId = order.Id.ToString(),
@@ -267,7 +257,8 @@ namespace HandmadeProductManagement.Services.Service
                     { "Return Failed", new List<string> { "On Hold" } },
                     { "Returned", new List<string> { "Refunded" } },
                     { "Refunded", new List<string> { "Closed" } },
-                    { "Canceled", new List<string> { "Closed" } }
+                    { "Canceled", new List<string> { "Closed" } },
+                    { "Delivering Retry", new List<string> { "Delivering" } }
                 };
 
             var allValidStatuses = validStatusTransitions.Keys
