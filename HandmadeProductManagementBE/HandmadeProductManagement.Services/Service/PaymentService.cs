@@ -2,6 +2,7 @@
 using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.ModelViews.OrderModelViews;
 using HandmadeProductManagement.ModelViews.PaymentDetailModelViews;
 using HandmadeProductManagement.ModelViews.PaymentModelViews;
 using HandmadeProductManagement.Repositories.Entity;
@@ -97,13 +98,23 @@ namespace HandmadeProductManagement.Services.Service
 
             if (status == "Completed")
             {
-                await _orderService.UpdateOrderStatusAsync(payment.OrderId, "Processing", "");
+                var dto = new UpdateStatusOrderDto
+                {
+                    OrderId = payment.OrderId,
+                    Status = "Processing"
+                };
+                await _orderService.UpdateOrderStatusAsync(dto);
             }
 
             //will update when the CancelReason table has data
             if (status == "Expired")
             {
-                await _orderService.UpdateOrderStatusAsync(payment.OrderId, "Canceled", "");
+                var dto = new UpdateStatusOrderDto
+                {
+                    OrderId = payment.OrderId,
+                    Status = "Canceled"
+                };
+                await _orderService.UpdateOrderStatusAsync(dto);
             }
 
             payment.Status = status;

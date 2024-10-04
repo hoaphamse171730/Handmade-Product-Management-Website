@@ -231,31 +231,31 @@ namespace HandmadeProductManagement.Services.Service
             return orders;
         }
 
-        public async Task<bool> UpdateOrderStatusAsync(string orderId, string status, string cancelReasonId)
+        public async Task<bool> UpdateOrderStatusAsync(UpdateStatusOrderDto updateStatusOrderDto)
         {
-            if (string.IsNullOrWhiteSpace(orderId))
+            if (string.IsNullOrWhiteSpace(updateStatusOrderDto.OrderId))
             {
                 throw new BaseException.BadRequestException("invalid_order_id", "Order ID is required.");
             }
 
-            if (!Guid.TryParse(orderId, out _))
+            if (!Guid.TryParse(updateStatusOrderDto.OrderId, out _))
             {
                 throw new BaseException.BadRequestException("invalid_order_id_format", "Order ID format is invalid. Example: 123e4567-e89b-12d3-a456-426614174000.");
             }
 
-            if (string.IsNullOrWhiteSpace(status))
+            if (string.IsNullOrWhiteSpace(updateStatusOrderDto.Status))
             {
                 throw new BaseException.BadRequestException("invalid_status", "Status cannot be null or empty.");
             }
 
-            if (status != "Canceled" && cancelReasonId != null)
+            if (updateStatusOrderDto.Status != "Canceled" && updateStatusOrderDto.CancelReasonId != null)
             {
                 throw new BaseException.BadRequestException("invalid_input", "CancelReasonId must be null when status is not {Canceled}");
             }
 
             var repository = _unitOfWork.GetRepository<Order>();
             var existingOrder = await repository.Entities
-                .FirstOrDefaultAsync(o => o.Id == orderId && !o.DeletedTime.HasValue);
+                .FirstOrDefaultAsync(o => o.Id == updateStatusOrderDto.OrderId && !o.DeletedTime.HasValue);
 
             if (existingOrder == null)
             {
@@ -286,15 +286,15 @@ namespace HandmadeProductManagement.Services.Service
                 .Distinct()
                 .ToList();
 
-            if (!allValidStatuses.Contains(status))
+            if (!allValidStatuses.Contains(updateStatusOrderDto.Status))
             {
-                throw new BaseException.BadRequestException("invalid_status", $"Status {status} is not a valid status.");
+                throw new BaseException.BadRequestException("invalid_status", $"Status {updateStatusOrderDto.Status} is not a valid status.");
             }
 
             if (!validStatusTransitions.ContainsKey(existingOrder.Status) ||
-                !validStatusTransitions[existingOrder.Status].Contains(status))
+                !validStatusTransitions[existingOrder.Status].Contains(updateStatusOrderDto.Status))
             {
-                throw new BaseException.ErrorException(400, "invalid_status_transition", $"Cannot transition from {existingOrder.Status} to {status}.");
+                throw new BaseException.ErrorException(400, "invalid_status_transition", $"Cannot transition from {existingOrder.Status} to {updateStatusOrderDto.Status}.");
             }
 
             _unitOfWork.BeginTransaction();
@@ -302,26 +302,26 @@ namespace HandmadeProductManagement.Services.Service
             try
             {
                 // Validate if updatedStatus is Canceled
-                if (status == "Canceled")
+                if (updateStatusOrderDto.Status == "Canceled")
                 {
-                    if (string.IsNullOrWhiteSpace(cancelReasonId))
+                    if (string.IsNullOrWhiteSpace(updateStatusOrderDto.CancelReasonId))
                     {
                         throw new BaseException.BadRequestException("validation_failed", "CancelReasonId is required when updating status to {Canceled}.");
                     }
 
-                    var cancelReason = await _unitOfWork.GetRepository<CancelReason>().GetByIdAsync(cancelReasonId);
+                    var cancelReason = await _unitOfWork.GetRepository<CancelReason>().GetByIdAsync(updateStatusOrderDto.CancelReasonId);
 
                     if (cancelReason == null)
                     {
                         throw new BaseException.NotFoundException("not_found", $"Cancel Reason not found. {existingOrder.CancelReasonId}");
                     }
 
-                    existingOrder.CancelReasonId = cancelReasonId;
+                    existingOrder.CancelReasonId = updateStatusOrderDto.CancelReasonId;
 
                     // Retrieve the order details to update product stock
                     var orderDetailRepository = _unitOfWork.GetRepository<OrderDetail>();
                     var orderDetails = await orderDetailRepository.Entities
-                        .Where(od => od.OrderId == orderId && !od.DeletedTime.HasValue)
+                        .Where(od => od.OrderId == updateStatusOrderDto.OrderId && !od.DeletedTime.HasValue)
                         .ToListAsync();
 
                     var productItemRepository = _unitOfWork.GetRepository<ProductItem>();
@@ -344,15 +344,15 @@ namespace HandmadeProductManagement.Services.Service
                 }
 
                 // Update order status
-                existingOrder.Status = status;
+                existingOrder.Status = updateStatusOrderDto.Status;
                 existingOrder.LastUpdatedBy = existingOrder.UserId.ToString();
                 existingOrder.LastUpdatedTime = DateTime.UtcNow;
 
                 // Create a new status change record after updating the order status
                 var statusChangeDto = new StatusChangeForCreationDto
                 {
-                    OrderId = orderId,
-                    Status = status,
+                    OrderId = updateStatusOrderDto.OrderId,
+                    Status = updateStatusOrderDto.Status,
                     ChangeTime = DateTime.UtcNow
                 };
 

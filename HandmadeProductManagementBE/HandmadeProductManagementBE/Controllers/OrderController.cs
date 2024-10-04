@@ -59,13 +59,11 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
-        [HttpPatch("{orderId}/status")]
-        public async Task<IActionResult> UpdateOrderStatus(string orderId, [FromBody] dynamic body)
+        [HttpPatch("status")]
+        public async Task<IActionResult> UpdateOrderStatus([FromBody] UpdateStatusOrderDto dto)
         {
-            string status = body.status;
-            string cancelReasonId = body.cancelReasonId;
 
-            var updatedOrder = await _orderService.UpdateOrderStatusAsync(orderId, status, cancelReasonId);
+            var updatedOrder = await _orderService.UpdateOrderStatusAsync(dto);
             var response = new BaseResponse<bool>
             {
                 Code = "Success",
