@@ -338,6 +338,7 @@ public class AuthenticationController(
     public IActionResult TestClaims()
     {
         var claims = User.Claims.Select(c => new { c.Type, c.Value }).ToList();
+        //var claims = User.Claims.Select(c => c.Type = )
         return Ok(claims);
     }
 

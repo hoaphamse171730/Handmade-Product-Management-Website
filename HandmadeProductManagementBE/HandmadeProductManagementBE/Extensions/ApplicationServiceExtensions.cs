@@ -56,6 +56,7 @@ public static class ApplicationServiceExtensions
         
         services.AddExceptionHandler<CustomExceptionHandler>();
         services.AddScoped<ICancelReasonService, CancelReasonService>();
+        services.AddScoped<IAuthenticationService, AuthenticationService>();
         services.AddScoped<IStatusChangeService, StatusChangeService>();
         services.AddScoped<IProductService, ProductService>();
         services.AddScoped<IPromotionService, PromotionService>();
