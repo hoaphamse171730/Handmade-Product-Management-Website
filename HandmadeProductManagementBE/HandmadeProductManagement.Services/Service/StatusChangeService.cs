@@ -79,10 +79,14 @@ namespace HandmadeProductManagement.Services.Service
         {
             // Validate
             var result = _creationValidator.ValidateAsync(createStatusChange);
+
             if (!result.Result.IsValid)
             {
                 throw new ValidationException(result.Result.Errors);
             }
+
+            // Validate ChangeTime
+            await ValidateChangeTime(createStatusChange.OrderId, createStatusChange.Status, createStatusChange.ChangeTime);
 
             var statusChangeEntity = _mapper.Map<StatusChange>(createStatusChange);
 
@@ -113,6 +117,15 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.NotFoundException("not_found", "Status Change not found");
             }
 
+            // Ensure OrderId cannot be changed
+            if (statusChangeEntity.OrderId != updatedStatusChange.OrderId)
+            {
+                throw new BaseException.BadRequestException("invalid_order_id_change", "OrderId cannot be changed when updating a status change.");
+            }
+
+            // Validate ChangeTime
+            await ValidateChangeTime(statusChangeEntity.OrderId, updatedStatusChange.Status, updatedStatusChange.ChangeTime);
+
             _mapper.Map(updatedStatusChange, statusChangeEntity);
 
             statusChangeEntity.LastUpdatedTime = DateTime.UtcNow;
@@ -139,6 +152,43 @@ namespace HandmadeProductManagement.Services.Service
             await statusChangeRepo.UpdateAsync(statusChangeEntity);
             await _unitOfWork.SaveAsync();
             return true;
+        }
+
+        // Validate the ChangeTime based on the order and status
+        private async Task ValidateChangeTime(string orderId, string newStatus, DateTime changeTime)
+        {
+            if (changeTime > DateTime.UtcNow)
+            {
+                throw new BaseException.BadRequestException("invalid_change_time", "ChangeTime cannot be in the future.");
+            }
+
+            // Retrieve the order and its current status
+            var orderRepo = _unitOfWork.GetRepository<Order>();
+            var order = await orderRepo.Entities
+                .FirstOrDefaultAsync(o => o.Id == orderId && !o.DeletedTime.HasValue);
+
+            if (order == null)
+            {
+                throw new BaseException.NotFoundException("order_not_found", "Order not found.");
+            }
+
+            // If status is 'Pending', ChangeTime must match the order creation time
+            //if (newStatus == "Pending" && changeTime != order.CreatedTime)
+            //{
+            //    throw new BaseException.BadRequestException("invalid_pending_time", "For Pending status, ChangeTime must match the order creation time.");
+            //}
+
+            // Get the latest status change for the given order
+            var lastStatusChange = await _unitOfWork.GetRepository<StatusChange>().Entities
+                .Where(sc => sc.OrderId == orderId && !sc.DeletedTime.HasValue)
+                .OrderByDescending(sc => sc.ChangeTime)
+                .FirstOrDefaultAsync();
+
+            // If there's a previous status change, ChangeTime must be after the last status change
+            if (lastStatusChange != null && changeTime <= lastStatusChange.ChangeTime)
+            {
+                throw new BaseException.BadRequestException("invalid_change_time", "ChangeTime must be after the previous status change.");
+            }
         }
     }
 }

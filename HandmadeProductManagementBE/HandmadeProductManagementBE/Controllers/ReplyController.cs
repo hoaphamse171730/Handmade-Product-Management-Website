@@ -2,7 +2,6 @@
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.ReplyModelViews;
-using HandmadeProductManagement.ModelViews.ReviewModelViews;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 

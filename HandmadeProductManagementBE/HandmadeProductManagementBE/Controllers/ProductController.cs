@@ -36,18 +36,7 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
 
-        //[httpget("search")]
-        //public async task<iactionresult> searchproducts(productsearchmodel searchmodel)
-        //{
-        //    var response = new baseresponse<productsearchvm>
-        //    {
-        //        code = ,
-        //        statuscode = statuscodehelper.ok,
-        //        message = "success",
-        //        data = _productservice.searchproductsasync(searchmodel)
-        //    };
-        //    return ok(response);
-        //}
+
 
         [HttpGet("sort")]
         public async Task<IActionResult> SortProducts([FromQuery] ProductSortFilter sortModel)

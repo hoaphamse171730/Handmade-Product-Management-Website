@@ -106,13 +106,18 @@ namespace HandmadeProductManagement.Services.Service
             {
                 throw new BaseException.NotFoundException("not_found", "Promotion Not Found!");
             }
-            if (DateTime.UtcNow > promotion.EndDate)
+            promotion.Status = "active";
+
+            if (DateTime.UtcNow > promotion.EndDate || DateTime.UtcNow < promotion.StartDate)
             {
                 promotion.Status = "inactive";
                 await _unitOfWork.GetRepository<Promotion>().UpdateAsync(promotion);
                 await _unitOfWork.SaveAsync();
             }
-            return true;
+            await _unitOfWork.GetRepository<Promotion>().UpdateAsync(promotion);
+            await _unitOfWork.SaveAsync();
+            return true; 
+
         }
     }
 }

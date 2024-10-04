@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("HandmadeProductManagement.ModelViews")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+99039d4ff8293501dcef49041a4504c8bf4f3f86")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e1750506b2c9614d6fad210195945bd61bcf1055")]
 [assembly: System.Reflection.AssemblyProductAttribute("HandmadeProductManagement.ModelViews")]
 [assembly: System.Reflection.AssemblyTitleAttribute("HandmadeProductManagement.ModelViews")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
