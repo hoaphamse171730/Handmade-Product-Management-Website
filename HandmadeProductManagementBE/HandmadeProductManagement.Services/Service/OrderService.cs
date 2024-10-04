@@ -280,7 +280,7 @@ namespace HandmadeProductManagement.Services.Service
                 { "Canceled", new List<string> { "Closed" } },
                 { "Delivering Retry", new List<string> { "Delivering" } }
             };
-            
+
             var allValidStatuses = validStatusTransitions.Keys
                 .Concat(validStatusTransitions.Values.SelectMany(v => v))
                 .Distinct()

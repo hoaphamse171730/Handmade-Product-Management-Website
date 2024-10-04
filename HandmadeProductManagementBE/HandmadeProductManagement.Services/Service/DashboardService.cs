@@ -30,8 +30,8 @@ namespace HandmadeProductManagement.Services.Service
         public async Task<decimal> GetTotalSales()
         {
             decimal totalSales = await _unitOfWork.GetRepository<Order>().Entities
-                                     .Where(o => o.Status == "Shipped") 
-                                     .SumAsync(o => o.TotalPrice); 
+                                     .Where(o => o.Status == "Shipped")
+                                     .SumAsync(o => o.TotalPrice);
 
             return totalSales;
         }
@@ -46,18 +46,19 @@ namespace HandmadeProductManagement.Services.Service
         }
 
 
-       public async Task<decimal> GetTotalSaleByShopId(string Id, DashboardDTO dashboardDTO)
+        public async Task<decimal> GetTotalSaleByShopId(string Id, DashboardDTO dashboardDTO)
         {
-            decimal totalSales = await _unitOfWork.GetRepository<Order>()
-       .Entities
-       .Where(order => order.OrderDetails
-           .Any(od => od.Product.ShopId == Id) 
-           && order.OrderDate >= dashboardDTO.from
-           && order.OrderDate <= dashboardDTO.to
-           && order.Status == "Shipped") 
-       .SumAsync(order => order.TotalPrice);
+            //     decimal totalSales = await _unitOfWork.GetRepository<Order>()
+            //.Entities
+            //.Where(order => order.OrderDetails
+            //    .Any(od => od.Product.ShopId == Id)
+            //    && order.OrderDate >= dashboardDTO.from
+            //    && order.OrderDate <= dashboardDTO.to
+            //    && order.Status == "Shipped")
+            //.SumAsync(order => order.TotalPrice);
 
-            return totalSales;
+            //     return totalSales;
+            return 0;
         }
 
         public async Task<List<Product>> GetTopSellingProducts()
