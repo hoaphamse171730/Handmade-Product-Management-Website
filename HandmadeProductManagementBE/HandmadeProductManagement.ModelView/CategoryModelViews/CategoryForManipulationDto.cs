@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace HandmadeProductManagement.ModelViews.CategoryModelViews
 {
-    internal class CategoryForManipulationDto
+    public class CategoryForManipulationDto
     {
+        
     }
 }

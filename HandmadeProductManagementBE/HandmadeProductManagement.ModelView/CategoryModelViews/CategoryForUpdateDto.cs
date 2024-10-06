@@ -6,7 +6,10 @@ using System.Threading.Tasks;
 
 namespace HandmadeProductManagement.ModelViews.CategoryModelViews
 {
-    public class CategoryForUpdateDto : CategoryForManipulationDto
+    public class CategoryForUpdateDto
     {
+        public string Name { get; set; } = string.Empty;
+        public string? Description { get; set; }
+        public string? PromotionId { get; set; } = string.Empty;
     }
 }

@@ -138,16 +138,17 @@ namespace HandmadeProductManagement.Repositories.Context
                 entity.Property(e => e.Description)
                       .HasMaxLength(500);
 
+                entity.Property(e => e.PromotionId)
+                      .IsRequired(false);
+
                 entity.HasMany(e => e.Variations)
                       .WithOne(v => v.Category)
                       .HasForeignKey(v => v.CategoryId);
 
-                entity.HasOne(c => c.Promotion) 
+                entity.HasOne(c => c.Promotion)
                       .WithMany(p => p.Categories)
                       .HasForeignKey(c => c.PromotionId)
-                      .OnDelete(DeleteBehavior.NoAction)
-                      .IsRequired(false);
-
+                      .OnDelete(DeleteBehavior.NoAction);
             });
 
             // Variation Configuration
