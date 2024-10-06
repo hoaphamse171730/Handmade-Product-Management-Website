@@ -32,7 +32,6 @@ namespace HandmadeProductManagement.Services.Service
             }
 
             ValidateOrder(createOrder);
-
             var userRepository = _unitOfWork.GetRepository<ApplicationUser>();
             var userExists = await userRepository.Entities
                 .AnyAsync(u => u.Id.ToString() == createOrder.UserId && !u.DeletedTime.HasValue);
@@ -487,6 +486,7 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.BadRequestException("invalid_phone_format", "Phone number must be numeric and up to 10 digits.");
             }
         }
+
 
     }
 }
