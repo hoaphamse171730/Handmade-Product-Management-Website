@@ -333,6 +333,7 @@ public class AuthenticationController(
         var claims = User.Claims.Select(c => new { c.Type, c.Value }).ToList();
         return Ok(new { Message = "This is a Seller only endpoint", Claims = claims });
     }
+
     [Authorize]
     [HttpGet("test-claims")]
     public IActionResult TestClaims()
