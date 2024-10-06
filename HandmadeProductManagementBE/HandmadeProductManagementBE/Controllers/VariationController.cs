@@ -50,33 +50,16 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] VariationForCreationDto variation)
         {
-            try
+            var result = await _variationService.Create(variation);
+
+            var response = new BaseResponse<bool>
             {
-                var result = await _variationService.Create(variation);
-
-                var response = new BaseResponse<bool>
-                {
-                    Code = "Success",
-                    StatusCode = StatusCodeHelper.OK,
-                    Message = "Variation created successfully.",
-                    Data = result
-                };
-                return Ok(response);
-            }
-            catch (DbUpdateException ex)
-            {
-                var innerExceptionMessage = ex.InnerException?.Message ?? ex.Message;
-
-                var errorResponse = new BaseResponse<string>
-                {
-                    Code = "DbUpdateException",
-                    StatusCode = StatusCodeHelper.ServerError,
-                    Message = $"An error occurred while saving the entity changes: {innerExceptionMessage}",
-                    Data = innerExceptionMessage
-                };
-
-                return StatusCode(StatusCodes.Status500InternalServerError, errorResponse);
-            }
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Variation created successfully.",
+                Data = result
+            };
+            return Ok(response);
         }
 
         // PUT: api/variation/{id}
