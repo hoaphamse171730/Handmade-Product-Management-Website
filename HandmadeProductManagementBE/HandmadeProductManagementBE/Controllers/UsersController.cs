@@ -131,11 +131,12 @@ namespace HandmadeProductManagementAPI.Controllers
             else
             {
                 response.Message = "No new reviews available"; // Thay đổi thông điệp nếu không có dữ liệu
-            }         
+            }
+         
             return Ok(response);
         }
 
-        [HttpGet("{id}/notification_order")]
+        [HttpGet("{id}/notification_statuschange")]
         public async Task<IActionResult> GetNewStatusChangeNotification(string id)
         {
             var response = new BaseResponse<IList<NotificationModel>>
