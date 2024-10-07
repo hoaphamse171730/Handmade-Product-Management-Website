@@ -66,7 +66,8 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpPatch("status")]
         public async Task<IActionResult> UpdateOrderStatus([FromBody] UpdateStatusOrderDto dto)
         {
-            var updatedOrder = await _orderService.UpdateOrderStatusAsync(dto);
+            var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
+            var updatedOrder = await _orderService.UpdateOrderStatusAsync(dto, username);
             var response = new BaseResponse<bool>
             {
                 Code = "Success",
@@ -81,8 +82,8 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateOrder([FromBody] CreateOrderDto createOrder)
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            var order = await _orderService.CreateOrderAsync(userId, createOrder);
+            var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
+            var order = await _orderService.CreateOrderAsync(createOrder, username);
             var response = new BaseResponse<bool>
             {
                 Code = "Success",
@@ -96,8 +97,8 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpPut("{orderId}")]
         public async Task<IActionResult> UpdateOrder(string orderId, [FromBody] UpdateOrderDto order)
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            var updatedOrder = await _orderService.UpdateOrderAsync(userId, orderId, order);
+            var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
+            var updatedOrder = await _orderService.UpdateOrderAsync(orderId, order, username);
             var response = new BaseResponse<bool>
             {
                 Code = "Success",

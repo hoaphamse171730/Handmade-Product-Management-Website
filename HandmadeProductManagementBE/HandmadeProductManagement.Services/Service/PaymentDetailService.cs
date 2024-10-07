@@ -21,7 +21,7 @@ namespace HandmadeProductManagement.Services.Service
             _paymentService = paymentService;
         }
 
-        public async Task<bool> CreatePaymentDetailAsync(string userId, CreatePaymentDetailDto createPaymentDetailDto)
+        public async Task<bool> CreatePaymentDetailAsync(CreatePaymentDetailDto createPaymentDetailDto, string username)
         {
             ValidatePaymentDetail(createPaymentDetailDto);
 
@@ -40,7 +40,7 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.NotFoundException("payment_not_found", "Payment not found.");
             }
 
-            await _paymentService.UpdatePaymentStatusAsync(createPaymentDetailDto.PaymentId, "Processing");
+            await _paymentService.UpdatePaymentStatusAsync(createPaymentDetailDto.PaymentId, "Processing", username);
 
             var invalidStatuses = new[] { "Completed", "Expired", "Refunded", "Closed" };
             if (invalidStatuses.Contains(payment.Status))
@@ -65,7 +65,7 @@ namespace HandmadeProductManagement.Services.Service
 
             if (createPaymentDetailDto.Status == "Success")
             {
-                await _paymentService.UpdatePaymentStatusAsync(createPaymentDetailDto.PaymentId, "Completed");
+                await _paymentService.UpdatePaymentStatusAsync(createPaymentDetailDto.PaymentId, "Completed", username);
             }
 
             return true;

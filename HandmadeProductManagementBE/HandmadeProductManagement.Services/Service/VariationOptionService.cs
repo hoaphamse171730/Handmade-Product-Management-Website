@@ -86,7 +86,7 @@ namespace HandmadeProductManagement.Services.Service
         }
 
 
-        public async Task<bool> Create(VariationOptionForCreationDto option)
+        public async Task<bool> Create(VariationOptionForCreationDto option, string username)
         {
             // Validate id format
             if (!Guid.TryParse(option.VariationId, out var guidId))
@@ -111,8 +111,8 @@ namespace HandmadeProductManagement.Services.Service
             var optionEntity = _mapper.Map<VariationOption>(option);
 
             // Set metadata
-            optionEntity.CreatedBy = "currentUser"; // Update with actual user info
-            optionEntity.LastUpdatedBy = "currentUser"; // Update with actual user info
+            optionEntity.CreatedBy = username;
+            optionEntity.LastUpdatedBy = username;
 
             await _unitOfWork.GetRepository<VariationOption>().InsertAsync(optionEntity);
             await _unitOfWork.SaveAsync();
@@ -120,7 +120,7 @@ namespace HandmadeProductManagement.Services.Service
             return true;
         }
 
-        public async Task<bool> Update(string id, VariationOptionForUpdateDto option)
+        public async Task<bool> Update(string id, VariationOptionForUpdateDto option, string username)
         {
             // Validate id format
             if (!Guid.TryParse(id, out var guidId))
@@ -142,6 +142,8 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.NotFoundException("not_found", "Variation Option not found.");
             }
 
+            existingOption.LastUpdatedBy = username;
+
             _mapper.Map(option, existingOption);
             await _unitOfWork.GetRepository<VariationOption>().UpdateAsync(existingOption);
             await _unitOfWork.SaveAsync();
@@ -149,7 +151,7 @@ namespace HandmadeProductManagement.Services.Service
             return true;
         }
 
-        public async Task<bool> Delete(string id)
+        public async Task<bool> Delete(string id, string username)
         {
             // Validate id format
             if (!Guid.TryParse(id, out var guidId))
@@ -165,7 +167,7 @@ namespace HandmadeProductManagement.Services.Service
             }
 
             option.DeletedTime = DateTime.UtcNow;
-            option.DeletedBy = "user";
+            option.DeletedBy = username;
 
             await _unitOfWork.GetRepository<VariationOption>().UpdateAsync(option);
             await _unitOfWork.SaveAsync();

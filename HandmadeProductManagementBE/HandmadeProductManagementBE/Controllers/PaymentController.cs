@@ -39,7 +39,8 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpPut("{paymentId}/status")]
         public async Task<IActionResult> UpdatePaymentStatus(string paymentId, [FromBody] string status)
         {
-            var updatedPayment = await _paymentService.UpdatePaymentStatusAsync(paymentId, status);
+            var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
+            var updatedPayment = await _paymentService.UpdatePaymentStatusAsync(paymentId, status, username);
             var response = new BaseResponse<bool>
             {
                 Code = "Success",
