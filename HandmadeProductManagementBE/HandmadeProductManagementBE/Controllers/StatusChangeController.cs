@@ -46,53 +46,53 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
-        [Authorize(Roles = "Admin")]
-        [HttpPost]
-        public async Task<IActionResult> CreateStatusChange([FromBody] StatusChangeForCreationDto statusChange)
-        {
-            var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
-            var result = await _statusChangeService.Create(statusChange, username);
-            var response = new BaseResponse<bool>
-            {
-                Code = "Success",
-                StatusCode = StatusCodeHelper.OK,
-                Message = "Created Status Change successfully!",
-                Data = result
-            };
-            return Ok(response);
-        }
+        //[Authorize(Roles = "Admin")]
+        //[HttpPost]
+        //public async Task<IActionResult> CreateStatusChange([FromBody] StatusChangeForCreationDto statusChange)
+        //{
+        //    var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
+        //    var result = await _statusChangeService.Create(statusChange, username);
+        //    var response = new BaseResponse<bool>
+        //    {
+        //        Code = "Success",
+        //        StatusCode = StatusCodeHelper.OK,
+        //        Message = "Created Status Change successfully!",
+        //        Data = result
+        //    };
+        //    return Ok(response);
+        //}
 
-        [Authorize(Roles = "Admin")]
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateStatusChange(string id, [FromBody] StatusChangeForUpdateDto updatedStatusChange)
-        {
-            var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
-            var result = await _statusChangeService.Update(id, updatedStatusChange, username);
-            var response = new BaseResponse<bool>
-            {
-                Code = "Success",
-                StatusCode = StatusCodeHelper.OK,
-                Message = "Updated Status Change successfully!",
-                Data = result
-            };
-            return Ok(response);
-        }
+        //[Authorize(Roles = "Admin")]
+        //[HttpPut("{id}")]
+        //public async Task<IActionResult> UpdateStatusChange(string id, [FromBody] StatusChangeForUpdateDto updatedStatusChange)
+        //{
+        //    var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
+        //    var result = await _statusChangeService.Update(id, updatedStatusChange, username);
+        //    var response = new BaseResponse<bool>
+        //    {
+        //        Code = "Success",
+        //        StatusCode = StatusCodeHelper.OK,
+        //        Message = "Updated Status Change successfully!",
+        //        Data = result
+        //    };
+        //    return Ok(response);
+        //}
 
-        [Authorize(Roles = "Admin")]
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteStatusChange(string id)
-        {
-            var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
-            await _statusChangeService.Delete(id, username);
+        //[Authorize(Roles = "Admin")]
+        //[HttpDelete("{id}")]
+        //public async Task<IActionResult> DeleteStatusChange(string id)
+        //{
+        //    var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
+        //    await _statusChangeService.Delete(id, username);
 
-            var response = new BaseResponse<string>
-            {
-                Code = "Success",
-                StatusCode = StatusCodeHelper.OK,
-                Message = $"Status Change with ID {id} has been successfully deleted.",
-                Data = null
-            };
-            return Ok(response);
-        }
+        //    var response = new BaseResponse<string>
+        //    {
+        //        Code = "Success",
+        //        StatusCode = StatusCodeHelper.OK,
+        //        Message = $"Status Change with ID {id} has been successfully deleted.",
+        //        Data = null
+        //    };
+        //    return Ok(response);
+        //}
     }
 }

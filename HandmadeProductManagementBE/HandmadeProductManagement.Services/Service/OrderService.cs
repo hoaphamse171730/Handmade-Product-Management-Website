@@ -312,7 +312,7 @@ namespace HandmadeProductManagement.Services.Service
             if (!validStatusTransitions.ContainsKey(existingOrder.Status) ||
                 !validStatusTransitions[existingOrder.Status].Contains(updateStatusOrderDto.Status))
             {
-                throw new BaseException.ErrorException(400, "invalid_status_transition", $"Cannot transition from {existingOrder.Status} to {updateStatusOrderDto.Status}.");
+                throw new BaseException.BadRequestException("invalid_status_transition", $"Cannot transition from {existingOrder.Status} to {updateStatusOrderDto.Status}.");
             }
 
             _unitOfWork.BeginTransaction();
