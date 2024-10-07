@@ -127,7 +127,7 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [HttpGet("GetProductDetails/{id}")]
-        [Authorize(Roles = "Admin")]
+        [Authorize]
         public async Task<IActionResult> GetProductDetails([Required] string id)
         {
             var productDetails = await _productService.GetProductDetailsByIdAsync(id);
