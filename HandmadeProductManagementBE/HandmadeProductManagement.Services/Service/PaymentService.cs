@@ -29,9 +29,17 @@ namespace HandmadeProductManagement.Services.Service
         }
 
 
-        public async Task<bool> CreatePaymentAsync(string userId, CreatePaymentDto createPaymentDto)
+        public async Task<bool> CreatePaymentAsync(string userId, string orderId)
         {
-            ValidatePayment(createPaymentDto);
+            if (string.IsNullOrWhiteSpace(orderId))
+            {
+                throw new BaseException.BadRequestException("invalid_order_id", "Please input order id.");
+            }
+
+            if (!Guid.TryParse(orderId, out _))
+            {
+                throw new BaseException.BadRequestException("invalid_order_id_format", "Order ID format is invalid. Example: 123e4567-e89b-12d3-a456-426614174000.");
+            }
 
             var userRepository = _unitOfWork.GetRepository<ApplicationUser>();
             var userExists = await userRepository.Entities
@@ -43,7 +51,7 @@ namespace HandmadeProductManagement.Services.Service
 
             var orderRepository = _unitOfWork.GetRepository<Order>();
             var order = await orderRepository.Entities
-                .FirstOrDefaultAsync(o => o.Id == createPaymentDto.OrderId && !o.DeletedTime.HasValue);
+                .FirstOrDefaultAsync(o => o.Id == orderId && !o.DeletedTime.HasValue);
             if (order == null)
             {
                 throw new BaseException.NotFoundException("order_not_found", "Order not found.");
@@ -68,8 +76,8 @@ namespace HandmadeProductManagement.Services.Service
 
             var payment = new Payment
             {
-                OrderId = createPaymentDto.OrderId,
-                TotalAmount = createPaymentDto.TotalAmount,
+                OrderId = orderId,
+                TotalAmount = order.TotalPrice,
                 Status = "Pending",
                 ExpirationDate = expirationDate
             };
@@ -156,6 +164,15 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.NotFoundException("payment_not_found", "Payment not found.");
             }
 
+            var paymentDetails = payment.PaymentDetails.Select(pd => new PaymentDetailResponseModel
+            {
+                Id = pd.Id,
+                PaymentId = pd.PaymentId,
+                Status = pd.Status,
+                Method = pd.Method,
+                ExternalTransaction = pd.ExternalTransaction
+            }).ToList();
+
             return new PaymentResponseModel
             {
                 Id = payment.Id,
@@ -163,6 +180,7 @@ namespace HandmadeProductManagement.Services.Service
                 TotalAmount = payment.TotalAmount,
                 Status = payment.Status,
                 ExpirationDate = payment.ExpirationDate,
+                PaymentDetails = paymentDetails
             };
         }
 
@@ -181,24 +199,6 @@ namespace HandmadeProductManagement.Services.Service
             }
 
             await _unitOfWork.SaveAsync();
-        }
-
-        private void ValidatePayment(CreatePaymentDto createPaymentDto)
-        {
-            if (string.IsNullOrWhiteSpace(createPaymentDto.OrderId))
-            {
-                throw new BaseException.BadRequestException("invalid_order_id", "Please input order id.");
-            }
-
-            if (!Guid.TryParse(createPaymentDto.OrderId, out _))
-            {
-                throw new BaseException.BadRequestException("invalid_order_id_format", "Order ID format is invalid. Example: 123e4567-e89b-12d3-a456-426614174000.");
-            }
-
-            if (createPaymentDto.TotalAmount <= 0)
-            {
-                throw new BaseException.BadRequestException("invalid_amount", "Total amount must be a positive number.");
-            }
         }
 
         private void ValidatePaymentStatus(string paymentId, string status)

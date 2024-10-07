@@ -11,7 +11,6 @@ namespace HandmadeProductManagement.ModelViews.PaymentDetailModelViews
         public string Id { get; set; } = string.Empty;
         public string PaymentId { get; set; } = string.Empty;
         public string Status { get; set; } = string.Empty;
-        public decimal Amount { get; set; }
         public string Method { get; set; } = string.Empty;
         public string? ExternalTransaction { get; set; }
     }
