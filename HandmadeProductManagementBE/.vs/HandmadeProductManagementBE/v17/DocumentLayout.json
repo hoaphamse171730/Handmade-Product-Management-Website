@@ -3,12 +3,12 @@
   "WorkspaceRootPath": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{B48678A4-822E-4A18-9F58-32C525718D88}|HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj|D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\handmadeproductmanagement.services\\service\\cartservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{B48678A4-822E-4A18-9F58-32C525718D88}|HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj|solutionrelative:handmadeproductmanagement.services\\service\\cartservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{5ECD79B2-DBFD-424D-B888-3C9BBB2FA09D}|HandmadeProductManagement.Contract.Services\\HandmadeProductManagement.Contract.Services.csproj|D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\handmadeproductmanagement.contract.services\\interface\\ipromotionservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{5ECD79B2-DBFD-424D-B888-3C9BBB2FA09D}|HandmadeProductManagement.Contract.Services\\HandmadeProductManagement.Contract.Services.csproj|solutionrelative:handmadeproductmanagement.contract.services\\interface\\ipromotionservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B48678A4-822E-4A18-9F58-32C525718D88}|HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj|D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\handmadeproductmanagement.services\\service\\cartservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B48678A4-822E-4A18-9F58-32C525718D88}|HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj|solutionrelative:handmadeproductmanagement.services\\service\\cartservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{B48678A4-822E-4A18-9F58-32C525718D88}|HandmadeProductManagement.Services\\HandmadeProductManagement.Services.csproj|D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\handmadeproductmanagement.services\\service\\userservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -334,7 +334,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 13,
+          "SelectedChildIndex": 15,
           "Children": [
             {
               "$type": "Bookmark",
@@ -378,19 +378,6 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "handmade-product-bde7a-firebase-adminsdk-g3y5r-fd05db8476.json",
-              "DocumentMoniker": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\handmade-product-bde7a-firebase-adminsdk-g3y5r-fd05db8476.json",
-              "RelativeDocumentMoniker": "HandmadeProductManagementBE\\handmade-product-bde7a-firebase-adminsdk-g3y5r-fd05db8476.json",
-              "ToolTip": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\handmade-product-bde7a-firebase-adminsdk-g3y5r-fd05db8476.json",
-              "RelativeToolTip": "HandmadeProductManagementBE\\handmade-product-bde7a-firebase-adminsdk-g3y5r-fd05db8476.json",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAA0AAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2024-10-06T16:48:54.498Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
               "DocumentIndex": 2,
               "Title": "UserService.cs",
               "DocumentMoniker": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\Service\\UserService.cs",
@@ -417,13 +404,13 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "CartService.cs",
               "DocumentMoniker": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\Service\\CartService.cs",
               "RelativeDocumentMoniker": "HandmadeProductManagement.Services\\Service\\CartService.cs",
-              "ToolTip": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\Service\\CartService.cs*",
-              "RelativeToolTip": "HandmadeProductManagement.Services\\Service\\CartService.cs*",
-              "ViewState": "AQIAACwAAAAAAAAAAAAqwDEAAAAAAAAA",
+              "ToolTip": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Services\\Service\\CartService.cs",
+              "RelativeToolTip": "HandmadeProductManagement.Services\\Service\\CartService.cs",
+              "ViewState": "AQIAAEMAAAAAAAAAAAAuwFIAAABHAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-10-02T07:04:44.432Z",
               "EditorCaption": ""
@@ -456,6 +443,32 @@
             },
             {
               "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "IPromotionService.cs",
+              "DocumentMoniker": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Services\\Interface\\IPromotionService.cs",
+              "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Services\\Interface\\IPromotionService.cs",
+              "ToolTip": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Services\\Interface\\IPromotionService.cs",
+              "RelativeToolTip": "HandmadeProductManagement.Contract.Services\\Interface\\IPromotionService.cs",
+              "ViewState": "AQIAAAMAAAAAAAAAAAAAAA8AAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-10-02T09:40:06.311Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "handmade-product-bde7a-firebase-adminsdk-g3y5r-fd05db8476.json",
+              "DocumentMoniker": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\handmade-product-bde7a-firebase-adminsdk-g3y5r-fd05db8476.json",
+              "RelativeDocumentMoniker": "HandmadeProductManagementBE\\handmade-product-bde7a-firebase-adminsdk-g3y5r-fd05db8476.json",
+              "ToolTip": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagementBE\\handmade-product-bde7a-firebase-adminsdk-g3y5r-fd05db8476.json",
+              "RelativeToolTip": "HandmadeProductManagementBE\\handmade-product-bde7a-firebase-adminsdk-g3y5r-fd05db8476.json",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAA0AAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2024-10-06T16:48:54.498Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 10,
               "Title": "IGenericRepository.cs",
               "DocumentMoniker": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Repositories\\IUOW\\IGenericRepository.cs",
@@ -465,19 +478,6 @@
               "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-10-06T18:32:38.995Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "IPromotionService.cs",
-              "DocumentMoniker": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Services\\Interface\\IPromotionService.cs",
-              "RelativeDocumentMoniker": "HandmadeProductManagement.Contract.Services\\Interface\\IPromotionService.cs",
-              "ToolTip": "D:\\FPT\\2024\\sem6\\Handmade-Product-Management-Website\\HandmadeProductManagementBE\\HandmadeProductManagement.Contract.Services\\Interface\\IPromotionService.cs",
-              "RelativeToolTip": "HandmadeProductManagement.Contract.Services\\Interface\\IPromotionService.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAawAwAAAAoAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-10-02T09:40:06.311Z",
-              "EditorCaption": ""
             },
             {
               "$type": "Document",
