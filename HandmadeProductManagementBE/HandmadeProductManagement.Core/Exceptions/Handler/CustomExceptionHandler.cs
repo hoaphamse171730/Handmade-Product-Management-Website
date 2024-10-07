@@ -5,58 +5,71 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
-namespace HandmadeProductManagement.Core.Exceptions.Handler;
-
-public class CustomExceptionHandler(ILogger<CustomExceptionHandler> logger) : IExceptionHandler
+namespace HandmadeProductManagement.Core.Exceptions.Handler
 {
-    public async ValueTask<bool> TryHandleAsync(HttpContext context, Exception exception, CancellationToken cancellationToken)
+    public class CustomExceptionHandler(ILogger<CustomExceptionHandler> logger) : IExceptionHandler
     {
-        logger.LogError("Error Message: {exceptionMessage}, Time of occurrence: {time}",
-            exception.Message, DateTime.UtcNow);
-
-        (string Detail, string Title, int StatusCode) details = exception switch
+        public async ValueTask<bool> TryHandleAsync(HttpContext context, Exception exception, CancellationToken cancellationToken)
         {
-            ValidationException validationException => (
-                validationException.Message,
-                validationException.GetType().Name,
-                context.Response.StatusCode = StatusCodes.Status400BadRequest
-            ),
+            logger.LogError("Error Message: {exceptionMessage}, Time of occurrence: {time}",
+                exception.Message, DateTime.UtcNow);
 
-            BaseException.BadRequestException badRequestException => (
-                badRequestException.ErrorDetail.ErrorMessage?.ToString() ?? exception.Message,
-                badRequestException.GetType().Name,
-                context.Response.StatusCode = StatusCodes.Status400BadRequest
-            ),
+            (string Detail, string Title, int StatusCode) details = exception switch
+            {
+                ValidationException validationException => (
+                    validationException.Message,
+                    validationException.GetType().Name,
+                    context.Response.StatusCode = StatusCodes.Status400BadRequest
+                ),
 
-            BaseException.NotFoundException notFoundException => (
-                notFoundException.ErrorDetail.ErrorMessage?.ToString() ?? exception.Message,
-                notFoundException.GetType().Name,
-                context.Response.StatusCode = StatusCodes.Status404NotFound
-            ),
+                BaseException.BadRequestException badRequestException => (
+                    badRequestException.ErrorDetail.ErrorMessage?.ToString() ?? exception.Message,
+                    badRequestException.GetType().Name,
+                    context.Response.StatusCode = StatusCodes.Status400BadRequest
+                ),
 
-            _ => (
-                exception.Message,
-                exception.GetType().Name,
-                context.Response.StatusCode = StatusCodes.Status500InternalServerError
-            )
-        };
+                BaseException.NotFoundException notFoundException => (
+                    notFoundException.ErrorDetail.ErrorMessage?.ToString() ?? exception.Message,
+                    notFoundException.GetType().Name,
+                    context.Response.StatusCode = StatusCodes.Status404NotFound
+                ),
 
-        var problemDetails = new ProblemDetails()
-        {
-            Title = details.Title,
-            Detail = details.Detail, // Here we pass the correct custom error message
-            Status = details.StatusCode,
-            Instance = context.Request.Path
-        };
+                UnauthorizedAccessException unauthorizedAccessException => (
+                    "Access is denied due to invalid credentials.",
+                    unauthorizedAccessException.GetType().Name,
+                    context.Response.StatusCode = StatusCodes.Status401Unauthorized
+                ),
 
-        problemDetails.Extensions.Add("traceId", context.TraceIdentifier);
+                BaseException.ForbiddenException forbiddenException => (
+                    forbiddenException.ErrorDetail.ErrorMessage?.ToString() ?? "You do not have permission to perform this action.",
+                    forbiddenException.GetType().Name,
+                    context.Response.StatusCode = StatusCodes.Status403Forbidden
+                ),
 
-        if (exception is ValidationException vEx)
-        {
-            problemDetails.Extensions.Add("ValidationErrors", vEx.Errors);
+                _ => (
+                    exception.Message,
+                    exception.GetType().Name,
+                    context.Response.StatusCode = StatusCodes.Status500InternalServerError
+                )
+            };
+
+            var problemDetails = new ProblemDetails()
+            {
+                Title = details.Title,
+                Detail = details.Detail,
+                Status = details.StatusCode,
+                Instance = context.Request.Path
+            };
+
+            problemDetails.Extensions.Add("traceId", context.TraceIdentifier);
+
+            if (exception is ValidationException vEx)
+            {
+                problemDetails.Extensions.Add("ValidationErrors", vEx.Errors);
+            }
+
+            await context.Response.WriteAsJsonAsync(problemDetails, cancellationToken);
+            return true;
         }
-
-        await context.Response.WriteAsJsonAsync(problemDetails, cancellationToken);
-        return true;
     }
 }
