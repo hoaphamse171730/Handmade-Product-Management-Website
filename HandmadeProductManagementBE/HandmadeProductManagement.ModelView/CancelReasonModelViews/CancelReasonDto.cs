@@ -1,6 +1,6 @@
 ﻿namespace HandmadeProductManagement.ModelViews.CancelReasonModelViews
 {
-    public class CancelReasonResponseModel
+    public class CancelReasonDto
     {
         public string Id { get; set; } = string.Empty;
         public required string Description { get; set; }

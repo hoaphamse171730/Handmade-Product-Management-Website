@@ -11,8 +11,6 @@ namespace HandmadeProductManagement.Repositories.Context
         public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options)
         {
         }
-
-        // user
         public virtual DbSet<ApplicationUser> ApplicationUsers => Set<ApplicationUser>();
         public virtual DbSet<ApplicationRole> ApplicationRoles => Set<ApplicationRole>();
         public virtual DbSet<ApplicationUserClaims> ApplicationUserClaims => Set<ApplicationUserClaims>();
@@ -31,6 +29,8 @@ namespace HandmadeProductManagement.Repositories.Context
         public DbSet<Order> Orders => Set<Order>();
         public DbSet<Product> Products => Set<Product>();
         public DbSet<Category> Categories => Set<Category>();
+        public DbSet<CancelReason> CancelReasons => Set<CancelReason>();
+        public DbSet<StatusChange> StatusChanges => Set<StatusChange>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -138,23 +138,33 @@ namespace HandmadeProductManagement.Repositories.Context
                 entity.Property(e => e.Description)
                       .HasMaxLength(500);
 
+                entity.Property(e => e.PromotionId)
+                      .IsRequired(false);
+
                 entity.HasMany(e => e.Variations)
                       .WithOne(v => v.Category)
                       .HasForeignKey(v => v.CategoryId);
 
+                entity.HasOne(c => c.Promotion)
+                      .WithMany(p => p.Categories)
+                      .HasForeignKey(c => c.PromotionId)
+                      .OnDelete(DeleteBehavior.NoAction);
             });
 
             // Variation Configuration
             modelBuilder.Entity<Variation>(entity =>
             {
-                entity.ToTable("Variation");
+                entity.HasKey(e => e.Id);
 
                 entity.HasOne(v => v.Category)
                     .WithMany(c => c.Variations)
                     .HasForeignKey(v => v.CategoryId);
 
+                entity.HasMany(vc => vc.VariationOptions)
+                      .WithOne(v => v.Variation)
+                      .HasForeignKey(v => v.VariationId);
+
                 entity.Property(v => v.Name)
-                    .HasColumnType("text")
                     .HasMaxLength(150)
                     .IsRequired();
 
@@ -163,10 +173,9 @@ namespace HandmadeProductManagement.Repositories.Context
             // Variation Option Configuration
             modelBuilder.Entity<VariationOption>(entity =>
             {
-                entity.ToTable("VariationOption");
+                entity.HasKey(e => e.Id);
 
                 entity.Property(vo => vo.Value)
-                    .HasColumnType("text")
                     .HasMaxLength(150)
                     .IsRequired();
 
@@ -236,7 +245,7 @@ namespace HandmadeProductManagement.Repositories.Context
                       .IsRequired();
                 // One-to-many relationship with Order
                 entity.HasMany(cr => cr.Orders)
-                    .WithOne(o => o.CancelReason) // Each Order has one CancelReason
+                    .WithOne(o => o.CancelReason)
                     .HasForeignKey(o => o.CancelReasonId);
             });
             // Payment Entity Configuration

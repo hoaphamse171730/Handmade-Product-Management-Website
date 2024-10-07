@@ -1,10 +1,13 @@
 ﻿using AutoMapper;
 using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.ModelViews.CancelReasonModelViews;
+using HandmadeProductManagement.ModelViews.CategoryModelViews;
 using HandmadeProductManagement.ModelViews.OrderDetailModelViews;
 using HandmadeProductManagement.ModelViews.ProductModelViews;
 using HandmadeProductManagement.ModelViews.PromotionModelViews;
 using HandmadeProductManagement.ModelViews.StatusChangeModelViews;
+using HandmadeProductManagement.ModelViews.VariationModelViews;
+using HandmadeProductManagement.ModelViews.VariationOptionModelViews;
 
 namespace HandmadeProductManagementAPI;
 
@@ -31,16 +34,33 @@ public class MappingProfile : Profile
         #endregion
 
         #region CancelReason
-        CreateMap<CancelReason, CancelReasonResponseModel>();
+        CreateMap<CancelReason, CancelReasonDto>();
         CreateMap<CancelReasonForCreationDto, CancelReason>();
         CreateMap<CancelReasonForUpdateDto, CancelReason>();
         #endregion
 
-
         #region StatusChange
-        CreateMap<StatusChange, StatusChangeResponseModel>();
+        CreateMap<StatusChange, StatusChangeDto>();
         CreateMap<StatusChangeForCreationDto, StatusChange>();
         CreateMap<StatusChangeForUpdateDto, StatusChange>();
+        #endregion
+
+        #region Variation
+        CreateMap<Variation, VariationDto>();
+        CreateMap<VariationForCreationDto, Variation>();
+        CreateMap<VariationForUpdateDto, Variation>();
+        #endregion
+
+        #region VariationOption
+        CreateMap<VariationOption, VariationOptionDto>();
+        CreateMap<VariationOptionForCreationDto, VariationOption>();
+        CreateMap<VariationOptionForUpdateDto, VariationOption>();
+        #endregion
+
+        #region Category
+        CreateMap<Category, CategoryDto>();
+        CreateMap<CategoryForCreationDto, Category>();
+        CreateMap<CategoryForUpdateDto, Category>();
         #endregion
     }
 

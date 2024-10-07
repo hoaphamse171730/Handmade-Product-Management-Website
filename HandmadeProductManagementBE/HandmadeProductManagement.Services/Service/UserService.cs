@@ -7,15 +7,15 @@ using HandmadeProductManagement.Repositories.Entity;
 using Microsoft.EntityFrameworkCore;
 using FluentValidation;
 using HandmadeProductManagement.ModelViews.NotificationModelViews;
-using HandmadeProductManagement.ModelViews.ReviewModelViews;
-using HandmadeProductManagement.ModelViews.ReplyModelViews;
-using HandmadeProductManagement.ModelViews.ShopModelViews;
 using HandmadeProductManagement.Contract.Repositories.Entity;
+<<<<<<< HEAD
 using static System.Formats.Asn1.AsnWriter;
 using HandmadeProductManagement.Core.Utils;
 using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.ModelViews.ProductModelViews;
 using Microsoft.IdentityModel.Tokens;
+=======
+>>>>>>> dev
 namespace HandmadeProductManagement.Services.Service
 {
     public class UserService : IUserService

@@ -12,6 +12,8 @@ using HandmadeProductManagement.ModelViews.ProductModelViews;
 using HandmadeProductManagement.ModelViews.PromotionModelViews;
 using HandmadeProductManagement.ModelViews.UserModelViews;
 using HandmadeProductManagement.ModelViews.StatusChangeModelViews;
+using HandmadeProductManagement.ModelViews.VariationModelViews;
+using HandmadeProductManagement.ModelViews.VariationOptionModelViews;
 using HandmadeProductManagement.Repositories.Context;
 using HandmadeProductManagement.Repositories.Entity;
 using HandmadeProductManagement.Repositories.UOW;
@@ -22,9 +24,13 @@ using HandmadeProductManagement.Validation.Product;
 using HandmadeProductManagement.Validation.Promotion;
 using HandmadeProductManagement.Validation.User;
 using HandmadeProductManagement.Validation.StatusChange;
+using HandmadeProductManagement.Validation.Variation;
+using HandmadeProductManagement.Validation.VariationOption;
 using HandmadeProductManagementAPI.BackgroundServices;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
+using HandmadeProductManagement.ModelViews.CategoryModelViews;
+using HandmadeProductManagement.Validation.Category;
 
 namespace HandmadeProductManagementAPI.Extensions;
 
@@ -99,6 +105,7 @@ public static class ApplicationServiceExtensions
         #region User
         services.AddScoped<IValidator<UpdateUserDTO>, UpdateUserDTOValidator>();
         #endregion
+
         #region CancelReason
         services.AddScoped<IValidator<CancelReasonForCreationDto>, CancelReasonForCreationDtoValidator>();
         services.AddScoped<IValidator<CancelReasonForUpdateDto>, CancelReasonForUpdateDtoValidator>();
@@ -107,6 +114,21 @@ public static class ApplicationServiceExtensions
         #region StatusChange
         services.AddScoped<IValidator<StatusChangeForCreationDto>, StatusChangeForCreationDtoValidator>();
         services.AddScoped<IValidator<StatusChangeForUpdateDto>, StatusChangeForUpdateDtoValidator>();
+        #endregion
+
+        #region Variation
+        services.AddScoped<IValidator<VariationForCreationDto>, VariationForCreationDtoValidator>();
+        services.AddScoped<IValidator<VariationForUpdateDto>, VariationForUpdateDtoValidator>();
+        #endregion
+
+        #region VariationOption
+        services.AddScoped<IValidator<VariationOptionForCreationDto>, VariationOptionForCreationDtoValidator>();
+        services.AddScoped<IValidator<VariationOptionForUpdateDto>, VariationOptionForUpdateDtoValidator>();
+        #endregion
+
+        #region Category
+        services.AddScoped<IValidator<CategoryForCreationDto>, CategoryForCreationDtoValidator>();
+        services.AddScoped<IValidator<CategoryForUpdateDto>, CategoryForUpdateDtoValidator>();
         #endregion
     }
 
