@@ -218,12 +218,10 @@ namespace HandmadeProductManagement.Services.Service
             return productToReturn;
 
         }
-
-
-
         public async Task<ProductDto> Create(ProductForCreationDto product)
         {
             var result = _creationValidator.ValidateAsync(product);
+
             if (!result.Result.IsValid)
                 throw new ValidationException(result.Result.Errors);
             var productEntity = _mapper.Map<Product>(product);
