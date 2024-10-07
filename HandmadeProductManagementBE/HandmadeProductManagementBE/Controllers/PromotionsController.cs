@@ -1,13 +1,11 @@
-﻿using HandmadeProductManagement.Contract.Repositories.Entity;
-using HandmadeProductManagement.Contract.Services.Interface;
+﻿using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Constants;
-using HandmadeProductManagement.ModelViews.PaymentModelViews;
 using HandmadeProductManagement.ModelViews.PromotionModelViews;
-using HandmadeProductManagement.Services.Service;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace HandmadeProductManagementAPI.Controllers
 {
@@ -16,86 +14,112 @@ namespace HandmadeProductManagementAPI.Controllers
     public class PromotionsController : ControllerBase
     {
         private readonly IPromotionService _promotionService;
+
         public PromotionsController(IPromotionService promotionService) => _promotionService = promotionService;
 
         [HttpGet]
+        [Authorize]
         public async Task<IActionResult> GetPromotions()
         {
-
             var result = await _promotionService.GetAll();
-            return Ok(BaseResponse<IList<PromotionDto>>.OkResponse(result));
+            var response = new BaseResponse<IList<PromotionDto>>
+            {
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Promotions retrieved successfully.",
+                Data = result
+            };
+            return Ok(response);
         }
 
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<IActionResult> GetPromotion(string id)
         {
-
             var promotion = await _promotionService.GetById(id);
-            return Ok(BaseResponse<PromotionDto>.OkResponse(promotion));
+            var response = new BaseResponse<PromotionDto>
+            {
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Promotion retrieved successfully.",
+                Data = promotion
+            };
+            return Ok(response);
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreatePromotion(PromotionForCreationDto promotionForCreation)
         {
             var result = await _promotionService.Create(promotionForCreation);
-
             var response = new BaseResponse<bool>
             {
-                Code = "Success",
-                StatusCode = StatusCodeHelper.OK,
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK, 
                 Message = "Promotion created successfully.",
                 Data = result
             };
             return Ok(response);
-
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdatePromotion(string id, PromotionForUpdateDto promotionForUpdate)
         {
             var result = await _promotionService.Update(id, promotionForUpdate);
-
             var response = new BaseResponse<bool>
             {
-                Code = "Success",
+                Code = "200",
                 StatusCode = StatusCodeHelper.OK,
                 Message = "Promotion updated successfully.",
                 Data = result
             };
             return Ok(response);
-
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> SoftDeletePromotion(string id)
         {
             var result = await _promotionService.SoftDelete(id);
-            return Ok(BaseResponse<bool>.OkResponse(result));
+            var response = new BaseResponse<bool>
+            {
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Promotion soft-deleted successfully.",
+                Data = result
+            };
+            return Ok(response);
         }
 
         [HttpGet("Expired/{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> ExpiredPromotion(string id)
         {
-
             var isExpired = await _promotionService.UpdatePromotionStatusByRealtime(id);
             var response = new BaseResponse<bool>
             {
-                Code = "Success",
+                Code = "200",
                 StatusCode = StatusCodeHelper.OK,
-                Message = "Promotion Status Updated Successfully!",
+                Message = "Promotion status updated successfully.",
                 Data = isExpired
             };
             return Ok(response);
         }
 
-
         [HttpPut("{id}/status")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdatePromotionStatusByRealtime(string id)
         {
             var result = await _promotionService.UpdatePromotionStatusByRealtime(id);
-            return Ok(result);
+            var response = new BaseResponse<bool>
+            {
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Promotion status updated successfully.",
+                Data = result
+            };
+            return Ok(response);
         }
     }
-
 }
-

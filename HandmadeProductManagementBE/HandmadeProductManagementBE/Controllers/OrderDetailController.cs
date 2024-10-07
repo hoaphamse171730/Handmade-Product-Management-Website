@@ -6,6 +6,9 @@ using HandmadeProductManagement.ModelViews.OrderModelViews;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using HandmadeProductManagement.Contract.Services;
+using HandmadeProductManagement.Core.Constants;
 
 namespace HandmadeProductManagementAPI.Controllers
 {
@@ -16,45 +19,79 @@ namespace HandmadeProductManagementAPI.Controllers
         private readonly IOrderDetailService _orderDetailService;
 
         public OrderDetailController(IOrderDetailService orderDetailService) => _orderDetailService = orderDetailService;
-
         [HttpGet]
+        [Authorize]
         public async Task<IActionResult> GetOrderDetails()
         {
             var result = await _orderDetailService.GetAll();
-            return Ok(BaseResponse<IList<OrderDetailDto>>.OkResponse(result));
+            var response = new BaseResponse<IList<OrderDetailDto>>
+            {
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Success",
+                Data = result
+            };
+            return Ok(response);
         }
 
-
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<IActionResult> GetOrderDetail(string id)
         {
             var result = await _orderDetailService.GetById(id);
-            return Ok(BaseResponse<OrderDetailDto>.OkResponse(result));
+            var response = new BaseResponse<OrderDetailDto>
+            {
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Success",
+                Data = result
+            };
+            return Ok(response);
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateOrderDetail(OrderDetailForCreationDto orderDetailForCreation)
         {
-
             var result = await _orderDetailService.Create(orderDetailForCreation);
-            return Ok(BaseResponse<OrderDetailDto>.OkResponse(result));
+            var response = new BaseResponse<OrderDetailDto>
+            {
+                Code = "200", 
+                StatusCode = StatusCodeHelper.OK, 
+                Message = "Order detail created successfully",
+                Data = result
+            };
+            return Ok(response);
         }
 
+
         [HttpPut("{orderDetailId}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateOrderDetail(string orderDetailId, OrderDetailForUpdateDto orderDetailForUpdate)
         {
-
-            var result = await _orderDetailService.Update(orderDetailId, orderDetailForUpdate);
-            return Ok(BaseResponse<OrderDetailDto>.OkResponse(result));
+            var respone = new BaseResponse<OrderDetailDto>
+            {
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Success",
+                Data = await _orderDetailService.Update(orderDetailId, orderDetailForUpdate),
+            };
+            return Ok(respone);
 
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteOrderDetail(string id)
         {
-
-            var result = await _orderDetailService.SoftDelete(id);
-            return Ok(BaseResponse<bool>.OkResponse(result));
+            var response = new BaseResponse<bool>
+            {
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Success",
+                Data = await _orderDetailService.SoftDelete(id),
+            };
+            return Ok(response);
 
         }
 

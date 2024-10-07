@@ -8,10 +8,6 @@ using Microsoft.EntityFrameworkCore;
 using FluentValidation;
 using HandmadeProductManagement.ModelViews.NotificationModelViews;
 using HandmadeProductManagement.Contract.Repositories.Entity;
-using static System.Formats.Asn1.AsnWriter;
-using HandmadeProductManagement.Core.Utils;
-using HandmadeProductManagement.Contract.Repositories.Entity;
-using HandmadeProductManagement.ModelViews.ProductModelViews;
 using Microsoft.IdentityModel.Tokens;
 namespace HandmadeProductManagement.Services.Service
 {
@@ -192,6 +188,120 @@ namespace HandmadeProductManagement.Services.Service
             return true;
         }
 
+        public async Task<IList<NotificationModel>> GetNotificationList(string Id)
+        {
+            if (!Guid.TryParse(Id, out Guid userId))
+            {
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Invalid userID");
+            }
+
+            var shopIds = await _unitOfWork.GetRepository<Shop>()
+                .Entities
+                .Where(shop => shop.UserId == userId)
+                .Select(shop => shop.Id)
+                .ToListAsync();
+
+            if(shopIds.IsNullOrEmpty())
+            {
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "User not found");
+            }
+
+            var review = await _unitOfWork.GetRepository<Review>()
+                .Entities
+                .Where(r => r.UserId == userId && r.Reply == null)
+                .Include(r => r.User)
+                .ToListAsync();
+
+            var notifications = review.Select(review => new NotificationModel
+            {
+                Id = review.Id,
+                Message = $"Sản phẩm của bạn đã được {review.User.UserName} review",
+                Tag = "Review",
+                URL = $"api/review/{review.Id}"
+            }).ToList();
+
+            return notifications;
+        }
+
+        public async Task<IList<NotificationModel>> GetNewOrderNotificationList(string Id)
+        {
+            if (!Guid.TryParse(Id, out Guid userId))
+            {
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Invalid userID");
+            }
+
+            var shopIds = await _unitOfWork.GetRepository<Shop>()
+                .Entities
+                .Where(shop => shop.UserId == userId)
+                .Select(shop => shop.Id)
+                .ToListAsync();
+
+            if (shopIds.IsNullOrEmpty())
+            {
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "User not found");
+            }
+
+            var order = await _unitOfWork.GetRepository<Order>()
+                .Entities
+                .Where(o => o.UserId == userId)
+                .Include(o => o.User)
+                .ToListAsync();
+
+            var notifications = order.Select(order => new NotificationModel
+            {
+                Id = order.Id,
+                Message = $"Đơn hàng của {order.User.UserName} được {order.Status} lúc {order.OrderDate} ",
+                Tag = "Order",
+                URL = $"api/review/{order.Id}"
+            }).ToList();
+
+            return notifications;
+        }
+
+
+        public async Task<IList<NotificationModel>> GetNewReplyNotificationList(string Id)
+        {
+            if (!Guid.TryParse(Id, out Guid userId))
+            {
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Invalid userID");
+            }
+
+            // Lấy danh sách các review của người dùng
+            var reviews = await _unitOfWork.GetRepository<Review>()
+                .Entities
+                .Where(r => r.UserId == userId)
+                .ToListAsync();
+
+            if (reviews == null || !reviews.Any())
+            {
+                return new List<NotificationModel>();
+            }
+
+            // Lấy tất cả các reply mới cho những review của khách hàng
+            var replies = await _unitOfWork.GetRepository<Reply>()
+                .Entities
+                .Where(rep => reviews.Select(r => r.Id).Contains(rep.ReviewId) && rep.Date >= DateTime.UtcNow.AddDays(-2)) // Lọc theo thời gian tạo reply trong 2 ngày gần nhất
+                .Include(rep => rep.Review) // Bao gồm review
+                .ThenInclude(r => r.Product) // Bao gồm sản phẩm
+                .ToListAsync();
+
+            if (replies == null || !replies.Any())
+            {
+                return new List<NotificationModel>();
+            }
+
+            // Tạo thông báo cho từng phản hồi mới
+            var replyNotifications = replies.Select(reply => new NotificationModel
+            {
+                Id = reply.Id,
+                Message = $"Bạn đã nhận được phản hồi mới cho review sản phẩm {reply.Review.Product.Name}",
+                Tag = "Reply",
+                URL = $"api/reply/{reply.Id}"
+            }).ToList();
+
+            return replyNotifications;
+        }
+
         public async Task<IList<NotificationModel>> GetNewReviewNotificationList(string Id)
         {
 
@@ -206,7 +316,7 @@ namespace HandmadeProductManagement.Services.Service
                 .Select(shop => shop.Id)
                 .ToListAsync();
 
-            if(shopIds.IsNullOrEmpty())
+            if (shopIds.IsNullOrEmpty())
             {
                 throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "User not found");
             }
@@ -265,7 +375,6 @@ namespace HandmadeProductManagement.Services.Service
 
             return notifications;
         }
-
         public async Task<bool> ReverseDeleteUser(string Id)
         {
             if (!Guid.TryParse(Id, out Guid userId))
