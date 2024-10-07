@@ -113,12 +113,12 @@ namespace HandmadeProductManagement.Services.Service
             }
 
             // Validate Status Flow
-            var currentStatus = order.Status;
+            //var currentStatus = order.Status;
 
-            if (!IsValidStatusTransition(currentStatus, createStatusChange.Status))
-            {
-                throw new BaseException.BadRequestException("invalid_status_transition", $"Cannot transition from {currentStatus} to {createStatusChange.Status}.");
-            }
+            //if (!IsValidStatusTransition(currentStatus, createStatusChange.Status))
+            //{
+            //    throw new BaseException.BadRequestException("invalid_status_transition", $"Cannot transition from {order.Status} to {createStatusChange.Status}.");
+            //}
 
             var statusChangeEntity = _mapper.Map<StatusChange>(createStatusChange);
 
@@ -135,115 +135,115 @@ namespace HandmadeProductManagement.Services.Service
         }
 
         // Update an existing status change
-        public async Task<bool> Update(string id, StatusChangeForUpdateDto updatedStatusChange, string username)
-        {
-            // Validate id format
-            if (!Guid.TryParse(id, out var guidId))
-            {
-                throw new BaseException.BadRequestException("invalid_input", "ID is not in a valid GUID format.");
-            }
+        //public async Task<bool> Update(string id, StatusChangeForUpdateDto updatedStatusChange, string username)
+        //{
+        //    // Validate id format
+        //    if (!Guid.TryParse(id, out var guidId))
+        //    {
+        //        throw new BaseException.BadRequestException("invalid_input", "ID is not in a valid GUID format.");
+        //    }
 
-            var validationResult = await _updateValidator.ValidateAsync(updatedStatusChange);
-            if (!validationResult.IsValid)
-            {
-                throw new BaseException.BadRequestException("validation_failed", validationResult.Errors.Select(e => e.ErrorMessage).FirstOrDefault());
-            }
+        //    var validationResult = await _updateValidator.ValidateAsync(updatedStatusChange);
+        //    if (!validationResult.IsValid)
+        //    {
+        //        throw new BaseException.BadRequestException("validation_failed", validationResult.Errors.Select(e => e.ErrorMessage).FirstOrDefault());
+        //    }
 
-            var statusChangeEntity = await _unitOfWork.GetRepository<StatusChange>().Entities
-                .FirstOrDefaultAsync(p => p.Id == id && (!p.DeletedTime.HasValue || p.DeletedBy == null));
+        //    var statusChangeEntity = await _unitOfWork.GetRepository<StatusChange>().Entities
+        //        .FirstOrDefaultAsync(p => p.Id == id && (!p.DeletedTime.HasValue || p.DeletedBy == null));
 
-            if (statusChangeEntity == null)
-            {
-                throw new BaseException.NotFoundException("not_found", "Status Change not found");
-            }
+        //    if (statusChangeEntity == null)
+        //    {
+        //        throw new BaseException.NotFoundException("not_found", "Status Change not found");
+        //    }
 
-            // Define valid statuses within the method
-            var validStatuses = new List<string>
-            {
-                "Pending",
-                "Canceled",
-                "Awaiting Payment",
-                "Processing",
-                "Delivering",
-                "Shipped",
-                "Delivery Failed",
-                "On Hold",
-                "Delivering Retry",
-                "Refund Requested",
-                "Refund Denied",
-                "Refund Approve",
-                "Returning",
-                "Return Failed",
-                "Returned",
-                "Refunded",
-                "Closed"
-            };
+        //    // Define valid statuses within the method
+        //    var validStatuses = new List<string>
+        //    {
+        //        "Pending",
+        //        "Canceled",
+        //        "Awaiting Payment",
+        //        "Processing",
+        //        "Delivering",
+        //        "Shipped",
+        //        "Delivery Failed",
+        //        "On Hold",
+        //        "Delivering Retry",
+        //        "Refund Requested",
+        //        "Refund Denied",
+        //        "Refund Approve",
+        //        "Returning",
+        //        "Return Failed",
+        //        "Returned",
+        //        "Refunded",
+        //        "Closed"
+        //    };
 
-            // Check if the new status is valid
-            if (!validStatuses.Contains(updatedStatusChange.Status))
-            {
-                throw new BaseException.BadRequestException("invalid_status", $"The status '{updatedStatusChange.Status}' is not valid.");
-            }
+        //    // Check if the new status is valid
+        //    if (!validStatuses.Contains(updatedStatusChange.Status))
+        //    {
+        //        throw new BaseException.BadRequestException("invalid_status", $"The status '{updatedStatusChange.Status}' is not valid.");
+        //    }
 
-            _mapper.Map(updatedStatusChange, statusChangeEntity);
+        //    _mapper.Map(updatedStatusChange, statusChangeEntity);
 
-            statusChangeEntity.ChangeTime = DateTime.UtcNow;
+        //    statusChangeEntity.ChangeTime = DateTime.UtcNow;
 
-            statusChangeEntity.LastUpdatedTime = DateTime.UtcNow;
-            statusChangeEntity.LastUpdatedBy = username;
+        //    statusChangeEntity.LastUpdatedTime = DateTime.UtcNow;
+        //    statusChangeEntity.LastUpdatedBy = username;
 
-            await _unitOfWork.GetRepository<StatusChange>().UpdateAsync(statusChangeEntity);
-            await _unitOfWork.SaveAsync();
+        //    await _unitOfWork.GetRepository<StatusChange>().UpdateAsync(statusChangeEntity);
+        //    await _unitOfWork.SaveAsync();
 
-            return true;
-        }
+        //    return true;
+        //}
 
         // Soft delete status change
-        public async Task<bool> Delete(string id, string username)
-        {
-            // Validate id format
-            if (!Guid.TryParse(id, out var guidId))
-            {
-                throw new BaseException.BadRequestException("invalid_input", "ID is not in a valid GUID format.");
-            }
+        //public async Task<bool> Delete(string id, string username)
+        //{
+        //    // Validate id format
+        //    if (!Guid.TryParse(id, out var guidId))
+        //    {
+        //        throw new BaseException.BadRequestException("invalid_input", "ID is not in a valid GUID format.");
+        //    }
 
-            var statusChangeRepo = _unitOfWork.GetRepository<StatusChange>();
-            var statusChangeEntity = await statusChangeRepo.Entities.FirstOrDefaultAsync(x => x.Id == id);
-            if (statusChangeEntity == null || statusChangeEntity.DeletedTime.HasValue || statusChangeEntity.DeletedBy != null)
-            {
-                throw new BaseException.NotFoundException("not_found", "Status Change not found");
-            }
+        //    var statusChangeRepo = _unitOfWork.GetRepository<StatusChange>();
+        //    var statusChangeEntity = await statusChangeRepo.Entities.FirstOrDefaultAsync(x => x.Id == id);
+        //    if (statusChangeEntity == null || statusChangeEntity.DeletedTime.HasValue || statusChangeEntity.DeletedBy != null)
+        //    {
+        //        throw new BaseException.NotFoundException("not_found", "Status Change not found");
+        //    }
 
-            statusChangeEntity.DeletedTime = DateTime.UtcNow;
-            statusChangeEntity.DeletedBy = username;
+        //    statusChangeEntity.DeletedTime = DateTime.UtcNow;
+        //    statusChangeEntity.DeletedBy = username;
 
-            await statusChangeRepo.UpdateAsync(statusChangeEntity);
-            await _unitOfWork.SaveAsync();
+        //    await statusChangeRepo.UpdateAsync(statusChangeEntity);
+        //    await _unitOfWork.SaveAsync();
 
-            return true;
-        }
+        //    return true;
+        //}
 
-        private bool IsValidStatusTransition(string currentStatus, string newStatus)
-        {
-            var validStatusTransitions = new Dictionary<string, List<string>>
-            {
-                { "Pending", new List<string> { "Canceled", "Awaiting Payment" } },
-                { "Awaiting Payment", new List<string> { "Canceled", "Processing" } },
-                { "Processing", new List<string> { "Delivering" } },
-                { "Delivering", new List<string> { "Shipped", "Delivery Failed" } },
-                { "Delivery Failed", new List<string> { "On Hold" } },
-                { "On Hold", new List<string> { "Delivering Retry", "Refund Requested" } },
-                { "Refund Requested", new List<string> { "Refund Denied", "Refund Approve" } },
-                { "Refund Approve", new List<string> { "Returning" } },
-                { "Returning", new List<string> { "Return Failed", "Returned" } },
-                { "Return Failed", new List<string> { "On Hold" } },
-                { "Returned", new List<string> { "Refunded" } },
-                { "Refunded", new List<string> { "Closed" } },
-                { "Canceled", new List<string> { "Closed" } },
-                { "Delivering Retry", new List<string> { "Delivering" } }
-            };
+        //private bool IsValidStatusTransition(string currentStatus, string newStatus)
+        //{
+        //    var validStatusTransitions = new Dictionary<string, List<string>>
+        //    {
+        //        { "Pending", new List<string> { "Canceled", "Awaiting Payment" } },
+        //        { "Awaiting Payment", new List<string> { "Canceled", "Processing" } },
+        //        { "Processing", new List<string> { "Delivering" } },
+        //        { "Delivering", new List<string> { "Shipped", "Delivery Failed" } },
+        //        { "Delivery Failed", new List<string> { "On Hold" } },
+        //        { "On Hold", new List<string> { "Delivering Retry", "Refund Requested" } },
+        //        { "Refund Requested", new List<string> { "Refund Denied", "Refund Approve" } },
+        //        { "Refund Approve", new List<string> { "Returning" } },
+        //        { "Returning", new List<string> { "Return Failed", "Returned" } },
+        //        { "Return Failed", new List<string> { "On Hold" } },
+        //        { "Returned", new List<string> { "Refunded" } },
+        //        { "Refunded", new List<string> { "Closed" } },
+        //        { "Canceled", new List<string> { "Closed" } },
+        //        { "Delivering Retry", new List<string> { "Delivering" } }
+        //    };
 
-            return validStatusTransitions.TryGetValue(currentStatus, out var validNextStatuses) && validNextStatuses.Contains(newStatus);
-        }
+        //    return validStatusTransitions.TryGetValue(currentStatus, out var validNextStatuses) && validNextStatuses.Contains(newStatus);
+        //}
     }
 }
