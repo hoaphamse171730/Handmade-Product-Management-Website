@@ -1,2 +1,2 @@
 # Handmade-Product-Management-Website
- [![.NET](https://github.com/hoaphamse171730/Handmade-Product-Management-Website/actions/workflows/dotnet.yml/badge.svg?branch=Luan)](https://github.com/hoaphamse171730/Handmade-Product-Management-Website/actions/workflows/dotnet.yml)
+[![Handmade Product Management Website (CI/CD applied).](https://github.com/hoaphamse171730/Handmade-Product-Management-Website/actions/workflows/dotnet.yml/badge.svg?branch=Luan)](https://github.com/hoaphamse171730/Handmade-Product-Management-Website/actions/workflows/dotnet.yml)
