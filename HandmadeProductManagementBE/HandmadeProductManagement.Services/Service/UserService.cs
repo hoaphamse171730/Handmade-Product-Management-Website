@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using FluentValidation;
 using HandmadeProductManagement.ModelViews.NotificationModelViews;
 using HandmadeProductManagement.Contract.Repositories.Entity;
+using Microsoft.IdentityModel.Tokens;
 namespace HandmadeProductManagement.Services.Service
 {
     public class UserService : IUserService
@@ -239,30 +240,28 @@ namespace HandmadeProductManagement.Services.Service
                 .Select(shop => shop.Id)
                 .ToListAsync();
 
-            // Lấy danh sách đơn hàng mới trong vòng 2 ngày
-            var currentDate = DateTime.UtcNow;
-            var twoDaysAgo = currentDate.AddDays(-2);
+            if (shopIds.IsNullOrEmpty())
+            {
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "User not found");
+            }
 
-            var newOrders = await _unitOfWork.GetRepository<Order>()
-            .Entities
-            .Where(o => o.OrderDetails.Any(od => shopIds.Contains(od.ProductItem.Product.ShopId)) && o.OrderDate >= twoDaysAgo && o.OrderDate <= currentDate)
-            .Include(o => o.User)
-            .Include(o => o.OrderDetails) // Bao gồm OrderDetails để truy cập ProductItem
-            .ThenInclude(od => od.ProductItem) // Bao gồm ProductItem trong OrderDetail
-            .ThenInclude(pi => pi.Product) // Bao gồm Product trong ProductItem
-            .ToListAsync();
+            var order = await _unitOfWork.GetRepository<Order>()
+                .Entities
+                .Where(o => o.UserId == userId)
+                .Include(o => o.User)
+                .ToListAsync();
 
-
-            var orderNotifications = newOrders.Select(order => new NotificationModel
+            var notifications = order.Select(order => new NotificationModel
             {
                 Id = order.Id,
-                Message = $"Bạn có một đơn hàng mới từ {order.User.UserName}",
-                Tag = "NewOrder",
-                URL = $"api/order/{order.Id}"
+                Message = $"Đơn hàng của {order.User.UserName} được {order.Status} lúc {order.OrderDate} ",
+                Tag = "Order",
+                URL = $"api/review/{order.Id}"
             }).ToList();
 
-            return orderNotifications;
+            return notifications;
         }
+
 
         public async Task<IList<NotificationModel>> GetNewReplyNotificationList(string Id)
         {

@@ -112,30 +112,18 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [HttpGet("{id}/notification_Review")]
-        public async Task<IActionResult> GetNewReviewifications(string id)
+        public async Task<IActionResult> GetNotifications(string id)
         {
             var response = new BaseResponse<IList<NotificationModel>>
             {
                 Code = "200",
                 StatusCode = StatusCodeHelper.OK,
-                Data = await _userService.GetNewReviewNotificationList(id),
+                Data = await _userService.GetNotificationList(id),
                 Message = "Success",
             };
             return Ok(response);
         }
 
-        [HttpGet("{id}/notification_order")]
-        public async Task<IActionResult> GetNewStatusChangeNotification(string id)
-        {
-            var response = new BaseResponse<IList<NotificationModel>>
-            {
-                Code = "200",
-                StatusCode = StatusCodeHelper.OK,
-                Data = await _userService.GetNewStatusChangeNotificationList(id),
-                Message = "Success",
-            };
-            return Ok(response);
-        }
 
         [HttpGet("{userId}/notification/new-order")]
         public async Task<IActionResult> GetNewOrderNotifications(string userId)
