@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace HandmadeProductManagement.ModelViews.CategoryModelViews
 {
-    public class CategoryForCreationDto
+    public class CategoryForCreationDto : CategoryForManipulationDto
     {
         public string Name { get; set; } = string.Empty;
         public string? Description { get; set; }

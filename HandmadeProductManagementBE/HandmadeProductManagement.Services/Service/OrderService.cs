@@ -77,6 +77,7 @@ namespace HandmadeProductManagement.Services.Service
 
             try
             {
+
                 foreach (var shopGroup in groupedByShop)
                 {
                     var totalPrice = shopGroup.Sum(x => x.Detail.DiscountPrice * x.Detail.ProductQuantity);
