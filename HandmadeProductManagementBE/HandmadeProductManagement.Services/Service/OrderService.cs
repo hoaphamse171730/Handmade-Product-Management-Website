@@ -32,7 +32,6 @@ namespace HandmadeProductManagement.Services.Service
             }
 
             ValidateOrder(createOrder);
-
             var userRepository = _unitOfWork.GetRepository<ApplicationUser>();
             var userExists = await userRepository.Entities
                 .AnyAsync(u => u.Id.ToString() == createOrder.UserId && !u.DeletedTime.HasValue);
@@ -80,7 +79,7 @@ namespace HandmadeProductManagement.Services.Service
             {
                 foreach (var shopGroup in groupedByShop)
                 {
-                    var totalPrice = shopGroup.Sum(x => x.Detail.UnitPrice * x.Detail.ProductQuantity);
+                    var totalPrice = shopGroup.Sum(x => x.Detail.DiscountPrice * x.Detail.ProductQuantity);
                     var order = new Order
                     {
                         TotalPrice = (decimal)totalPrice,
@@ -136,8 +135,7 @@ namespace HandmadeProductManagement.Services.Service
                     var statusChangeDto = new StatusChangeForCreationDto
                     {
                         OrderId = order.Id.ToString(),
-                        Status = order.Status,
-                        ChangeTime = DateTime.UtcNow
+                        Status = order.Status
                     };
 
                     await _statusChangeService.Create(statusChangeDto);
@@ -394,8 +392,7 @@ namespace HandmadeProductManagement.Services.Service
                 var statusChangeDto = new StatusChangeForCreationDto
                 {
                     OrderId = updateStatusOrderDto.OrderId,
-                    Status = updateStatusOrderDto.Status,
-                    ChangeTime = DateTime.UtcNow
+                    Status = updateStatusOrderDto.Status
                 };
 
                 repository.Update(existingOrder);
@@ -489,6 +486,7 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.BadRequestException("invalid_phone_format", "Phone number must be numeric and up to 10 digits.");
             }
         }
+
 
     }
 }

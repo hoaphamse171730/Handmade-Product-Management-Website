@@ -1,11 +1,13 @@
 ﻿using AutoMapper;
 using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.ModelViews.CancelReasonModelViews;
+using HandmadeProductManagement.ModelViews.CategoryModelViews;
 using HandmadeProductManagement.ModelViews.OrderDetailModelViews;
 using HandmadeProductManagement.ModelViews.ProductModelViews;
 using HandmadeProductManagement.ModelViews.PromotionModelViews;
 using HandmadeProductManagement.ModelViews.StatusChangeModelViews;
 using HandmadeProductManagement.ModelViews.VariationModelViews;
+using HandmadeProductManagement.ModelViews.VariationOptionModelViews;
 
 namespace HandmadeProductManagementAPI;
 
@@ -47,6 +49,18 @@ public class MappingProfile : Profile
         CreateMap<Variation, VariationDto>();
         CreateMap<VariationForCreationDto, Variation>();
         CreateMap<VariationForUpdateDto, Variation>();
+        #endregion
+
+        #region VariationOption
+        CreateMap<VariationOption, VariationOptionDto>();
+        CreateMap<VariationOptionForCreationDto, VariationOption>();
+        CreateMap<VariationOptionForUpdateDto, VariationOption>();
+        #endregion
+
+        #region Category
+        CreateMap<Category, CategoryDto>();
+        CreateMap<CategoryForCreationDto, Category>();
+        CreateMap<CategoryForUpdateDto, Category>();
         #endregion
     }
 

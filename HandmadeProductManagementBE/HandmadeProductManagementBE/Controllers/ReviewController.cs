@@ -2,6 +2,7 @@
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.ReviewModelViews;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 
@@ -46,15 +47,20 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
+
+        [Authorize]
         [HttpPost]
-        public async Task<IActionResult> Create(string? content, [Required] int rating, [Required] string productId, [Required] Guid userId, [Required] string orderId)
+        public async Task<IActionResult> Create(string? content, [Required] int rating, [Required] string productId, [Required] string orderId)
         {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userName = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
+
             var reviewModel = new ReviewModel
             {
                 Content = content,
                 Rating = rating,
                 ProductId = productId,
-                UserId = userId
+                UserId = Guid.Parse(userId)
             };
 
             var createdReview = await _reviewService.CreateAsync(reviewModel,orderId);
@@ -69,14 +75,17 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
+        [Authorize]
         [HttpPut("{reviewId}")]
-        public async Task<IActionResult> Update([Required] string reviewId, [Required] Guid userId, string? content, int? rating)
+        public async Task<IActionResult> Update([Required] string reviewId, string? content, int? rating)
         {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
             var existingReview = await _reviewService.GetByIdAsync(reviewId);
             existingReview.Content = content;
             existingReview.Rating = rating;
 
-            var updatedReview = await _reviewService.UpdateAsync(reviewId, userId, existingReview);
+            var updatedReview = await _reviewService.UpdateAsync(reviewId, Guid.Parse(userId), existingReview);
             var response = new BaseResponse<ReviewModel>
             {
                 Code = "Success",
@@ -86,10 +95,13 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
+        [Authorize]
         [HttpDelete("{reviewId}")]
-        public async Task<IActionResult> Delete([Required] string reviewId, [Required] Guid userId)
+        public async Task<IActionResult> Delete([Required] string reviewId)
         {
-            var result = await _reviewService.DeleteAsync(reviewId, userId);
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+            var result = await _reviewService.DeleteAsync(reviewId, Guid.Parse(userId));
             var response = new BaseResponse<bool>
             {
                 Code = "Success",
@@ -99,10 +111,13 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
+        [Authorize]
         [HttpDelete("{reviewId}/softdelete")]
-        public async Task<IActionResult> SoftDelete([Required] string reviewId, [Required] Guid userId)
+        public async Task<IActionResult> SoftDelete([Required] string reviewId)
         {
-            var result = await _reviewService.SoftDeleteAsync(reviewId, userId);
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+            var result = await _reviewService.SoftDeleteAsync(reviewId, Guid.Parse(userId));
             var response = new BaseResponse<bool>
             {
                 Code = "Success",
