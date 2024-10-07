@@ -5,6 +5,7 @@ using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.ModelViews.StatusChangeModelViews;
+using HandmadeProductManagement.Repositories.Entity;
 using Microsoft.EntityFrameworkCore;
 
 namespace HandmadeProductManagement.Services.Service
@@ -88,7 +89,7 @@ namespace HandmadeProductManagement.Services.Service
         }
 
         // Create a new status change
-        public async Task<bool> Create(StatusChangeForCreationDto createStatusChange, string username)
+        public async Task<bool> Create(StatusChangeForCreationDto createStatusChange, string userId)
         {
             // Validate id format
             if (!Guid.TryParse(createStatusChange.OrderId, out var orderGuidId))
@@ -125,8 +126,8 @@ namespace HandmadeProductManagement.Services.Service
             statusChangeEntity.ChangeTime = DateTime.UtcNow;
 
             // Set metadata
-            statusChangeEntity.CreatedBy = username; 
-            statusChangeEntity.LastUpdatedBy = username;
+            statusChangeEntity.CreatedBy = userId; 
+            statusChangeEntity.LastUpdatedBy = userId;
 
             await _unitOfWork.GetRepository<StatusChange>().InsertAsync(statusChangeEntity);
             await _unitOfWork.SaveAsync();

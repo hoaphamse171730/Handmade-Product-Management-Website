@@ -44,7 +44,7 @@ namespace HandmadeProductManagement.Services.Service
         }
 
         // Create a new cancel reason
-        public async Task<bool> Create(CancelReasonForCreationDto cancelReason, string username)
+        public async Task<bool> Create(CancelReasonForCreationDto cancelReason, string userId)
         {
             // Validate
             var validationResult = await _creationValidator.ValidateAsync(cancelReason);
@@ -56,8 +56,8 @@ namespace HandmadeProductManagement.Services.Service
             var cancelReasonEntity = _mapper.Map<CancelReason>(cancelReason);
 
             // Set metadata
-            cancelReasonEntity.CreatedBy = username;
-            cancelReasonEntity.LastUpdatedBy = username;
+            cancelReasonEntity.CreatedBy = userId;
+            cancelReasonEntity.LastUpdatedBy = userId;
 
             await _unitOfWork.GetRepository<CancelReason>().InsertAsync(cancelReasonEntity);
             await _unitOfWork.SaveAsync();
@@ -66,7 +66,7 @@ namespace HandmadeProductManagement.Services.Service
         }
 
         // Update an existing cancel reason
-        public async Task<bool> Update(string id, CancelReasonForUpdateDto cancelReason, string username)
+        public async Task<bool> Update(string id, CancelReasonForUpdateDto cancelReason, string userId)
         {
             // Validate id format
             if (!Guid.TryParse(id, out var guidId))
@@ -89,7 +89,7 @@ namespace HandmadeProductManagement.Services.Service
             _mapper.Map(cancelReason, cancelReasonEntity);
 
             cancelReasonEntity.LastUpdatedTime = DateTime.UtcNow;
-            cancelReasonEntity.LastUpdatedBy = username;
+            cancelReasonEntity.LastUpdatedBy = userId;
 
             await _unitOfWork.GetRepository<CancelReason>().UpdateAsync(cancelReasonEntity);
             await _unitOfWork.SaveAsync();
@@ -98,7 +98,7 @@ namespace HandmadeProductManagement.Services.Service
         }
 
         // Soft delete 
-        public async Task<bool> Delete(string id, string username)
+        public async Task<bool> Delete(string id, string userId)
         {
             // Validate id format
             if (!Guid.TryParse(id, out var guidId))
@@ -113,7 +113,7 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.NotFoundException("not_found", "Cancel Reason not found");
             }
             cancelReasonEntity.DeletedTime = DateTime.UtcNow;
-            cancelReasonEntity.DeletedBy = username;
+            cancelReasonEntity.DeletedBy = userId;
 
             await cancelReasonRepo.UpdateAsync(cancelReasonEntity);
             await _unitOfWork.SaveAsync();
