@@ -3,6 +3,7 @@ using HandmadeProductManagement.Core.Base;
 using Microsoft.AspNetCore.Mvc;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.VariationOptionModelViews;
+using Microsoft.AspNetCore.Authorization;
 
 namespace HandmadeProductManagementAPI.Controllers
 {
@@ -45,11 +46,14 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
+        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Seller")]
         // POST: api/variationoption
         [HttpPost]
         public async Task<IActionResult> CreateVariationOption([FromBody] VariationOptionForCreationDto variationOption)
         {
-            var result = await _variationOptionService.Create(variationOption);
+            var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
+            var result = await _variationOptionService.Create(variationOption, username);
             var response = new BaseResponse<bool>
             {
                 Code = "Success",
@@ -60,11 +64,14 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
+        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Seller")]
         // PUT: api/variationoption/{id}
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateVariationOption(string id, [FromBody] VariationOptionForUpdateDto variationOption)
         {
-            var result = await _variationOptionService.Update(id, variationOption);
+            var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
+            var result = await _variationOptionService.Update(id, variationOption, username);
             var response = new BaseResponse<bool>
             {
                 Code = "Success",
@@ -75,11 +82,14 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
+        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Seller")]
         // DELETE: api/variationoption/{id}
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteVariationOption(string id)
         {
-            await _variationOptionService.Delete(id);
+            var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
+            await _variationOptionService.Delete(id, username);
 
             var response = new BaseResponse<string>
             {

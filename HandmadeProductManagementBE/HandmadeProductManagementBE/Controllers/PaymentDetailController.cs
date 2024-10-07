@@ -21,7 +21,8 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> CreatePaymentDetail([FromBody] CreatePaymentDetailDto createPaymentDetailDto)
         {
-            var createdPaymentDetail = await _paymentDetailService.CreatePaymentDetailAsync(createPaymentDetailDto);
+            var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
+            var createdPaymentDetail = await _paymentDetailService.CreatePaymentDetailAsync(createPaymentDetailDto, username);
             var response = new BaseResponse<bool>
             {
                 Code = "Success",

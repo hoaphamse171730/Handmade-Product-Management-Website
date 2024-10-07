@@ -1,6 +1,5 @@
 using FluentValidation;
 using HandmadeProductManagement.Core.Base;
-using HandmadeProductManagement.Core.Constants;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

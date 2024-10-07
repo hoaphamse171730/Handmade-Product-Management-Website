@@ -88,7 +88,7 @@ namespace HandmadeProductManagement.Services.Service
         }
 
         // Create a new status change
-        public async Task<bool> Create(StatusChangeForCreationDto createStatusChange)
+        public async Task<bool> Create(StatusChangeForCreationDto createStatusChange, string username)
         {
             // Validate id format
             if (!Guid.TryParse(createStatusChange.OrderId, out var orderGuidId))
@@ -125,8 +125,8 @@ namespace HandmadeProductManagement.Services.Service
             statusChangeEntity.ChangeTime = DateTime.UtcNow;
 
             // Set metadata
-            statusChangeEntity.CreatedBy = "currentUser"; // Update with actual user info
-            statusChangeEntity.LastUpdatedBy = "currentUser"; // Update with actual user info
+            statusChangeEntity.CreatedBy = username; 
+            statusChangeEntity.LastUpdatedBy = username;
 
             await _unitOfWork.GetRepository<StatusChange>().InsertAsync(statusChangeEntity);
             await _unitOfWork.SaveAsync();
@@ -135,7 +135,7 @@ namespace HandmadeProductManagement.Services.Service
         }
 
         // Update an existing status change
-        public async Task<bool> Update(string id, StatusChangeForUpdateDto updatedStatusChange)
+        public async Task<bool> Update(string id, StatusChangeForUpdateDto updatedStatusChange, string username)
         {
             // Validate id format
             if (!Guid.TryParse(id, out var guidId))
@@ -190,7 +190,7 @@ namespace HandmadeProductManagement.Services.Service
             statusChangeEntity.ChangeTime = DateTime.UtcNow;
 
             statusChangeEntity.LastUpdatedTime = DateTime.UtcNow;
-            statusChangeEntity.LastUpdatedBy = "user";
+            statusChangeEntity.LastUpdatedBy = username;
 
             await _unitOfWork.GetRepository<StatusChange>().UpdateAsync(statusChangeEntity);
             await _unitOfWork.SaveAsync();
@@ -199,7 +199,7 @@ namespace HandmadeProductManagement.Services.Service
         }
 
         // Soft delete status change
-        public async Task<bool> Delete(string id)
+        public async Task<bool> Delete(string id, string username)
         {
             // Validate id format
             if (!Guid.TryParse(id, out var guidId))
@@ -215,7 +215,7 @@ namespace HandmadeProductManagement.Services.Service
             }
 
             statusChangeEntity.DeletedTime = DateTime.UtcNow;
-            statusChangeEntity.DeletedBy = "user";
+            statusChangeEntity.DeletedBy = username;
 
             await statusChangeRepo.UpdateAsync(statusChangeEntity);
             await _unitOfWork.SaveAsync();
