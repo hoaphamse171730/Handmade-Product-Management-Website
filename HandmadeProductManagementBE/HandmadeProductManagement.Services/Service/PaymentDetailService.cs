@@ -21,7 +21,7 @@ namespace HandmadeProductManagement.Services.Service
             _paymentService = paymentService;
         }
 
-        public async Task<bool> CreatePaymentDetailAsync(CreatePaymentDetailDto createPaymentDetailDto, string username)
+        public async Task<bool> CreatePaymentDetailAsync(string userId, CreatePaymentDetailDto createPaymentDetailDto, string username)
         {
             ValidatePaymentDetail(createPaymentDetailDto);
 

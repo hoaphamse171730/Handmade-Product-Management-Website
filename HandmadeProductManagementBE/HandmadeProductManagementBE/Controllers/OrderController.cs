@@ -82,8 +82,9 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateOrder([FromBody] CreateOrderDto createOrder)
         {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
-            var order = await _orderService.CreateOrderAsync(createOrder, username);
+            var order = await _orderService.CreateOrderAsync(userId, createOrder, username);
             var response = new BaseResponse<bool>
             {
                 Code = "Success",

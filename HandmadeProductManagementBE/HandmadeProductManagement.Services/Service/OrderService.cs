@@ -24,7 +24,7 @@ namespace HandmadeProductManagement.Services.Service
             _orderDetailService = orderDetailService;
         }
 
-        public async Task<bool> CreateOrderAsync(CreateOrderDto createOrder, string username)
+        public async Task<bool> CreateOrderAsync(string userId, CreateOrderDto createOrder, string username)
         {
             if (createOrder.OrderDetails == null || !createOrder.OrderDetails.Any())
             {
