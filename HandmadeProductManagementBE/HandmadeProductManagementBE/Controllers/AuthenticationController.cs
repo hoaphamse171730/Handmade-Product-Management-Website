@@ -154,6 +154,17 @@ public class AuthenticationController(
             return BaseResponse<string>.OkResponse(user.Id.ToString());
         }
 
+        var errorMessages = result.Errors
+            .Select(e => e.Description)
+            .ToList();
+
+        return new BaseResponse<string>()
+        {
+            StatusCode = StatusCodeHelper.BadRequest,
+            Message = "User creation failed: " + string.Join("; ", errorMessages),
+            Data = null
+        };
+
         return new BaseResponse<string>()
         {
             StatusCode = StatusCodeHelper.BadRequest,
