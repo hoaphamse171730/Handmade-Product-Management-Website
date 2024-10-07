@@ -19,9 +19,14 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
-      - name: Restore dependencies
+      - name: Install dependencies
         run: dotnet restore
-      - name: Build
-        run: dotnet build --no-restore
-      - name: Test
+        working-directory: HandmadeProductManagementBE
+
+      - name: Build solution
+        run: dotnet build --configuration Release --no-restore
+        working-directory: HandmadeProductManagementBE
+
+      - name: Run tests
         run: dotnet test --no-build --verbosity normal
+        working-directory: HandmadeProductManagementBE/PromotionControllerTests
