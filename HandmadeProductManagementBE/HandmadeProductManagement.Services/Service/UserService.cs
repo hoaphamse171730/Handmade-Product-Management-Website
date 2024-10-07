@@ -211,27 +211,18 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "User not found");
             }
 
-            var reviews = await _unitOfWork.GetRepository<Review>()
+            var review = await _unitOfWork.GetRepository<Review>()
                 .Entities
-                .Where(r => shopIds.Contains(r.Product.ShopId))
+                .Where(r => r.UserId == userId && r.Reply == null)
                 .Include(r => r.User)
                 .ToListAsync();
 
-            var replies = await _unitOfWork.GetRepository<Reply>()
-                .Entities
-                .Where(rep => reviews.Select(r => r.Id).Contains(rep.ReviewId)) 
-                .ToListAsync();
-
-            var nonReplies = reviews
-                .Where(r => !replies.Any(rep => rep.ReviewId == r.Id))
-                .ToList();
-
-            var notifications = nonReplies.Select(nonReplies => new NotificationModel
+            var notifications = review.Select(review => new NotificationModel
             {
-                Id = nonReplies.Id,
-                Message = $"Sản phẩm của bạn đã được {nonReplies.User.UserName} review",
+                Id = review.Id,
+                Message = $"Sản phẩm của bạn đã được {review.User.UserName} review",
                 Tag = "Review",
-                URL = $"api/review/{nonReplies.Id}"
+                URL = $"api/review/{review.Id}"
             }).ToList();
 
             return notifications;

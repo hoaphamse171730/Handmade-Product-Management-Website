@@ -114,13 +114,24 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpGet("{id}/notification_Review")]
         public async Task<IActionResult> GetNewReviewifications(string id)
         {
+            var notifications = await _userService.GetNewReviewNotificationList(id);
+
             var response = new BaseResponse<IList<NotificationModel>>
             {
                 Code = "200",
                 StatusCode = StatusCodeHelper.OK,
-                Data = await _userService.GetNewReviewNotificationList(id),
-                Message = "Success",
+                Message = "Success"
             };
+
+            // Kiểm tra xem notifications có dữ liệu hay không
+            if (notifications != null && notifications.Any())
+            {
+                response.Data = notifications; // Thêm dữ liệu vào phản hồi nếu có
+            }
+            else
+            {
+                response.Message = "No new reviews available"; // Thay đổi thông điệp nếu không có dữ liệu
+            }         
             return Ok(response);
         }
 
