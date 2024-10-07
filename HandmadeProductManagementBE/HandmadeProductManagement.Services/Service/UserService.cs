@@ -15,6 +15,7 @@ using static System.Formats.Asn1.AsnWriter;
 using HandmadeProductManagement.Core.Utils;
 using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.ModelViews.ProductModelViews;
+using Microsoft.IdentityModel.Tokens;
 namespace HandmadeProductManagement.Services.Service
 {
     public class UserService : IUserService
@@ -196,6 +197,7 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<IList<NotificationModel>> GetNotificationList(string Id)
         {
+
             if (!Guid.TryParse(Id, out Guid userId))
             {
                 throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Invalid userID");
@@ -206,6 +208,11 @@ namespace HandmadeProductManagement.Services.Service
                 .Where(shop => shop.UserId == userId)
                 .Select(shop => shop.Id)
                 .ToListAsync();
+
+            if(shopIds.IsNullOrEmpty())
+            {
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "User not found");
+            }
 
             var reviews = await _unitOfWork.GetRepository<Review>()
                 .Entities
