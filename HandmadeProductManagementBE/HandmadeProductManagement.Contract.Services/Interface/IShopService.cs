@@ -1,5 +1,6 @@
 ﻿using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.Core.Utils;
 using HandmadeProductManagement.ModelViews.ShopModelViews;
 using System;
 using System.Collections.Generic;
@@ -11,7 +12,7 @@ namespace HandmadeProductManagement.Contract.Services.Interface
 {
     public interface IShopService
     {
-        Task<IList<ShopResponseModel>> GetAllShopsAsync();
+        Task<PaginatedList<ShopResponseModel>> GetShopsByPageAsync(int pageNumber, int pageSize);
         Task<ShopResponseModel> GetShopByUserIdAsync(Guid userId);
         Task<bool> CreateShopAsync(string userId, CreateShopDto createShop);
         Task<bool> UpdateShopAsync(string userId, string id, CreateShopDto shop);

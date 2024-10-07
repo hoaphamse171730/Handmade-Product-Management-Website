@@ -2,6 +2,7 @@
 using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.Core.Utils;
 using HandmadeProductManagement.ModelViews.OrderDetailModelViews;
 using HandmadeProductManagement.ModelViews.OrderModelViews;
 using HandmadeProductManagement.ModelViews.StatusChangeModelViews;
@@ -152,6 +153,32 @@ namespace HandmadeProductManagement.Services.Service
             }
         }
 
+        public async Task<PaginatedList<OrderResponseModel>> GetOrdersByPageAsync(int pageNumber, int pageSize)
+        {
+            var repository = _unitOfWork.GetRepository<Order>();
+            var query = repository.Entities.Where(order => !order.DeletedTime.HasValue);
+
+            var totalItems = await query.CountAsync();
+            var orders = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .Select(order => new OrderResponseModel
+                {
+                    Id = order.Id,
+                    TotalPrice = order.TotalPrice,
+                    OrderDate = order.OrderDate,
+                    Status = order.Status,
+                    UserId = order.UserId,
+                    Address = order.Address,
+                    CustomerName = order.CustomerName,
+                    Phone = order.Phone,
+                    Note = order.Note,
+                    CancelReasonId = order.CancelReasonId,
+                })
+                .ToListAsync();
+
+            return new PaginatedList<OrderResponseModel>(orders, totalItems, pageNumber, pageSize);
+        }
         public async Task<OrderResponseModel> GetOrderByIdAsync(string orderId)
         {
             if (string.IsNullOrWhiteSpace(orderId))
@@ -173,6 +200,24 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.NotFoundException("order_not_found", "Order not found.");
             }
 
+            var orderDetailRepository = _unitOfWork.GetRepository<OrderDetail>();
+            var orderDetails = await orderDetailRepository.Entities
+                .Where(od => od.OrderId == orderId && !od.DeletedTime.HasValue)
+                .Select(od => new OrderDetailDto
+                {
+                    Id = od.Id,
+                    ProductItemId = od.ProductItemId,
+                    OrderId = od.OrderId,
+                    ProductQuantity = od.ProductQuantity,
+                    DiscountPrice = od.DiscountPrice,
+                    CreatedBy = od.CreatedBy,
+                    LastUpdatedBy = od.LastUpdatedBy,
+                    DeletedBy = od.DeletedBy,
+                    CreatedTime = od.CreatedTime,
+                    LastUpdatedTime = od.LastUpdatedTime,
+                    DeletedTime = od.DeletedTime
+                }).ToListAsync();
+
             return new OrderResponseModel
             {
                 Id = order.Id,
@@ -184,7 +229,8 @@ namespace HandmadeProductManagement.Services.Service
                 CustomerName = order.CustomerName,
                 Phone = order.Phone,
                 Note = order.Note,
-                CancelReasonId = order.CancelReasonId
+                CancelReasonId = order.CancelReasonId,
+                OrderDetails = orderDetails
             };
         }
 
