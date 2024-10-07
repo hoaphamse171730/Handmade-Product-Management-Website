@@ -226,6 +226,88 @@ namespace HandmadeProductManagement.Services.Service
             return notifications;
         }
 
+        public async Task<IList<NotificationModel>> GetNewOrderNotificationList(string Id)
+        {
+            if (!Guid.TryParse(Id, out Guid userId))
+            {
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Invalid userID");
+            }
+
+            var shopIds = await _unitOfWork.GetRepository<Shop>()
+                .Entities
+                .Where(shop => shop.UserId == userId)
+                .Select(shop => shop.Id)
+                .ToListAsync();
+
+            // Lấy danh sách đơn hàng mới trong vòng 2 ngày
+            var currentDate = DateTime.UtcNow;
+            var twoDaysAgo = currentDate.AddDays(-2);
+
+            var newOrders = await _unitOfWork.GetRepository<Order>()
+            .Entities
+            .Where(o => o.OrderDetails.Any(od => shopIds.Contains(od.ProductItem.Product.ShopId)) && o.OrderDate >= twoDaysAgo && o.OrderDate <= currentDate)
+            .Include(o => o.User)
+            .Include(o => o.OrderDetails) // Bao gồm OrderDetails để truy cập ProductItem
+            .ThenInclude(od => od.ProductItem) // Bao gồm ProductItem trong OrderDetail
+            .ThenInclude(pi => pi.Product) // Bao gồm Product trong ProductItem
+            .ToListAsync();
+
+
+            var orderNotifications = newOrders.Select(order => new NotificationModel
+            {
+                Id = order.Id,
+                Message = $"Bạn có một đơn hàng mới từ {order.User.UserName}",
+                Tag = "NewOrder",
+                URL = $"api/order/{order.Id}"
+            }).ToList();
+
+            return orderNotifications;
+        }
+
+        public async Task<IList<NotificationModel>> GetNewReplyNotificationList(string Id)
+        {
+            if (!Guid.TryParse(Id, out Guid userId))
+            {
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Invalid userID");
+            }
+
+            // Lấy danh sách các review của người dùng
+            var reviews = await _unitOfWork.GetRepository<Review>()
+                .Entities
+                .Where(r => r.UserId == userId)
+                .ToListAsync();
+
+            if (reviews == null || !reviews.Any())
+            {
+                return new List<NotificationModel>();
+            }
+
+            // Lấy tất cả các reply mới cho những review của khách hàng
+            var replies = await _unitOfWork.GetRepository<Reply>()
+                .Entities
+                .Where(rep => reviews.Select(r => r.Id).Contains(rep.ReviewId) && rep.Date >= DateTime.UtcNow.AddDays(-2)) // Lọc theo thời gian tạo reply trong 2 ngày gần nhất
+                .Include(rep => rep.Review) // Bao gồm review
+                .ThenInclude(r => r.Product) // Bao gồm sản phẩm
+                .ToListAsync();
+
+            if (replies == null || !replies.Any())
+            {
+                return new List<NotificationModel>();
+            }
+
+            // Tạo thông báo cho từng phản hồi mới
+            var replyNotifications = replies.Select(reply => new NotificationModel
+            {
+                Id = reply.Id,
+                Message = $"Bạn đã nhận được phản hồi mới cho review sản phẩm {reply.Review.Product.Name}",
+                Tag = "Reply",
+                URL = $"api/reply/{reply.Id}"
+            }).ToList();
+
+            return replyNotifications;
+        }
+
+
         public async Task<bool> ReverseDeleteUser(string Id)
         {
             if (!Guid.TryParse(Id, out Guid userId))

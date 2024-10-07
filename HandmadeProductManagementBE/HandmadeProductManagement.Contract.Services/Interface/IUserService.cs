@@ -18,6 +18,10 @@ namespace HandmadeProductManagement.Contract.Services.Interface
         Task<bool> ReverseDeleteUser(string Id);
 
         Task<IList<NotificationModel>> GetNotificationList(string Id);
+
+        Task<IList<NotificationModel>> GetNewOrderNotificationList(string Id);
+
+        Task<IList<NotificationModel>> GetNewReplyNotificationList(string Id);
     }
 }
 
