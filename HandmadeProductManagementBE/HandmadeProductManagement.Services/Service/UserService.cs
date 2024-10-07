@@ -15,6 +15,7 @@ namespace HandmadeProductManagement.Services.Service
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IValidator<UpdateUserDTO> _updateValidator;
+        private string Url = "https://" + "localhost:44328/";
         public UserService(IUnitOfWork unitOfWork, IValidator<UpdateUserDTO> updateValidator)
         {
             _unitOfWork = unitOfWork;
@@ -302,6 +303,7 @@ namespace HandmadeProductManagement.Services.Service
             return replyNotifications;
         }
 
+
         public async Task<IList<NotificationModel>> GetNewReviewNotificationList(string Id)
         {
 
@@ -332,7 +334,7 @@ namespace HandmadeProductManagement.Services.Service
                 Id = review.Id,
                 Message = $"Sản phẩm của bạn đã được {review.User.UserName} review",
                 Tag = "Review",
-                URL = $"api/review/{review.Id}"
+                URL = Url + $"api/review/{review.Id}"
             }).ToList();
 
             return notifications;
@@ -370,7 +372,7 @@ namespace HandmadeProductManagement.Services.Service
                 Id = status.Id,
                 Message = $"Đơn hàng của bạn được {status.Status} lúc {status.ChangeTime}",
                 Tag = "StatusChange",
-                URL = $"api/statuschange/order/{status.OrderId}"
+                URL = Url +  $"api/statuschange/order/{status.OrderId}"
             }).ToList();
 
             return notifications;
