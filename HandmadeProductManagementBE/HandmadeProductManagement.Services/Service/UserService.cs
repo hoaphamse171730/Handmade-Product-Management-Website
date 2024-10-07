@@ -192,7 +192,7 @@ namespace HandmadeProductManagement.Services.Service
             return true;
         }
 
-        public async Task<IList<NotificationModel>> GetNotificationList(string Id)
+        public async Task<IList<NotificationModel>> GetNewReviewNotificationList(string Id)
         {
 
             if (!Guid.TryParse(Id, out Guid userId))
@@ -269,7 +269,7 @@ namespace HandmadeProductManagement.Services.Service
                 Id = status.Id,
                 Message = $"Đơn hàng của bạn được {status.Status} lúc {status.ChangeTime}",
                 Tag = "StatusChange",
-                URL = $"api/statuschange/{status.Id}"
+                URL = $"api/statuschange/order/{status.OrderId}"
             }).ToList();
 
             return notifications;
