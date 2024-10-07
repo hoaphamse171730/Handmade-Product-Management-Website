@@ -77,13 +77,8 @@ namespace HandmadeProductManagement.Services.Service
 
             try
             {
-<<<<<<< HEAD
-                await orderRepository.InsertAsync(order);
-                await _unitOfWork.SaveAsync();
-                foreach (var detail in createOrder.OrderDetails)
-=======
+
                 foreach (var shopGroup in groupedByShop)
->>>>>>> 2b18e37a801812ca335c960190d17048642692c0
                 {
                     var totalPrice = shopGroup.Sum(x => x.Detail.DiscountPrice * x.Detail.ProductQuantity);
                     var order = new Order
