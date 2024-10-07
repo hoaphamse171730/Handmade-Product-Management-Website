@@ -40,7 +40,7 @@ namespace HandmadeProductManagementAPI.Controllers
         public async Task<IActionResult> UpdatePaymentStatus(string paymentId, [FromBody] string status)
         {
             var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
-            var updatedPayment = await _paymentService.UpdatePaymentStatusAsync(paymentId, status, username);
+            var updatedPayment = await _paymentService.UpdatePaymentStatusAsync(paymentId, status, "system");
             var response = new BaseResponse<bool>
             {
                 Code = "Success",

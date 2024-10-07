@@ -24,7 +24,7 @@ namespace HandmadeProductManagementAPI.Controllers
         {
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
-            var createdPaymentDetail = await _paymentDetailService.CreatePaymentDetailAsync(userId, createPaymentDetailDto, username);
+            var createdPaymentDetail = await _paymentDetailService.CreatePaymentDetailAsync(userId, createPaymentDetailDto);
             var response = new BaseResponse<bool>
             {
                 Code = "Success",
