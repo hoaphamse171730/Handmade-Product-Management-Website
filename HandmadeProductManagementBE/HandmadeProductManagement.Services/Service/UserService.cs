@@ -225,34 +225,26 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<IList<NotificationModel>> GetNewOrderNotificationList(string Id)
         {
+
             if (!Guid.TryParse(Id, out Guid userId))
             {
                 throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Invalid userID");
             }
 
-            var shopIds = await _unitOfWork.GetRepository<Shop>()
-                .Entities
-                .Where(shop => shop.UserId == userId)
-                .Select(shop => shop.Id)
-                .ToListAsync();
-
-            if (shopIds.IsNullOrEmpty())
-            {
-                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "User not found");
-            }
-
-            var order = await _unitOfWork.GetRepository<Order>()
+            // Lấy danh sách đơn hàng của người dùng
+            var orders = await _unitOfWork.GetRepository<Order>()
                 .Entities
                 .Where(o => o.UserId == userId)
                 .Include(o => o.User)
                 .ToListAsync();
 
-            var notifications = order.Select(order => new NotificationModel
+            // Tạo danh sách thông báo cho các đơn hàng
+            var notifications = orders.Select(order => new NotificationModel
             {
                 Id = order.Id,
-                Message = $"Đơn hàng của {order.User.UserName} được {order.Status} lúc {order.OrderDate} ",
+                Message = $"Bạn có đơn hàng mới từ {order.CustomerName} với trạng thái: {order.Status} vào ngày: {order.OrderDate.ToString("dd/MM/yyyy")}",
                 Tag = "Order",
-                URL = $"api/review/{order.Id}"
+                URL = $"api/order/{order.Id}"
             }).ToList();
 
             return notifications;

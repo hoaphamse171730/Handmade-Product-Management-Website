@@ -8,6 +8,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.NotificationModelViews;
+using Microsoft.AspNetCore.Authorization;
 namespace HandmadeProductManagementAPI.Controllers
 {
     [Route("api/[controller]")]
@@ -149,33 +150,44 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
-        [HttpGet("{userId}/notification/new-order")]
-        public async Task<IActionResult> GetNewOrderNotifications(string userId)
+        [HttpGet("notification/new-order")]
+        [Authorize]
+        public async Task<IActionResult> GetNewOrderNotifications()
         {
-            var orderNotifications = await _userService.GetNewOrderNotificationList(userId);
+            // Lấy thông tin người dùng từ token
+            var userIdFromToken = User.FindFirstValue(ClaimTypes.NameIdentifier); // Giả sử NameIdentifier là claim cho userId
+            var userFullNameFromToken = User.FindFirstValue(ClaimTypes.Name); // Giả sử Name là claim cho tên đầy đủ của người dùng
+
+            // Lấy danh sách thông báo đơn hàng mới
+            var orderNotifications = await _userService.GetNewOrderNotificationList(userIdFromToken);
 
             var response = new BaseResponse<IList<NotificationModel>>
             {
                 Code = "200",
                 StatusCode = StatusCodeHelper.OK,
                 Data = orderNotifications,
-                Message = "Success",
+                Message = "Thành công",
             };
 
             return Ok(response);
         }
 
-        [HttpGet("{userId}/notification/new-reply")]
-        public async Task<IActionResult> GetNewReplyNotifications(string userId)
+        [HttpGet("notification/new-reply")]
+        [Authorize]
+        public async Task<IActionResult> GetNewReplyNotifications()
         {
-            var replyNotifications = await _userService.GetNewReplyNotificationList(userId);
+            // Lấy thông tin người dùng từ token
+            var userIdFromToken = User.FindFirstValue(ClaimTypes.NameIdentifier); // Giả sử NameIdentifier là claim cho userId
+
+            // Lấy danh sách thông báo phản hồi mới
+            var replyNotifications = await _userService.GetNewReplyNotificationList(userIdFromToken);
 
             var response = new BaseResponse<IList<NotificationModel>>
             {
                 Code = "200",
                 StatusCode = StatusCodeHelper.OK,
                 Data = replyNotifications,
-                Message = "Success",
+                Message = "Thành công",
             };
 
             return Ok(response);
