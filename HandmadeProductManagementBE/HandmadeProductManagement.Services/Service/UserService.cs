@@ -2,10 +2,12 @@
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Constants;
-
-using HandmadeProductManagement.Core.Utils;
 using HandmadeProductManagement.ModelViews.UserModelViews;
 using HandmadeProductManagement.Repositories.Entity;
+using Microsoft.EntityFrameworkCore;
+using FluentValidation;
+using HandmadeProductManagement.ModelViews.NotificationModelViews;
+using HandmadeProductManagement.Contract.Repositories.Entity;
 
 
 namespace HandmadeProductManagement.Services.Service

@@ -47,7 +47,6 @@ public class CartService : ICartService
     public async Task<Decimal> GetTotalCartPrice(string cartId)
     {
 
-        var update = _promotionService.UpdatePromotionStatusByRealtime(cartId); 
         if (!Guid.TryParse(cartId, out Guid cardId))
         {
             throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Invalid cartID");
