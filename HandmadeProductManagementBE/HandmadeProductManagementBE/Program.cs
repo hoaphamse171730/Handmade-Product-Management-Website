@@ -32,6 +32,8 @@ builder.Services.AddIdentityServices(builder.Configuration);
 builder.Services.AddConfig(builder.Configuration);
 builder.Services.RegisterMapsterConfiguration();
 builder.Services.ConfigureFluentValidation();
+builder.Services.AddFireBaseServices();
+
 builder.Services.ConfigureSwaggerServices();
 
 
