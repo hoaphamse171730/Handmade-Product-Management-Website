@@ -136,6 +136,18 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
+        [HttpGet("{id}/notification_statuschange")]
+        public async Task<IActionResult> GetNewStatusChangeNotification(string id)
+        {
+            var response = new BaseResponse<IList<NotificationModel>>
+            {
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Data = await _userService.GetNewStatusChangeNotificationList(id),
+                Message = "Success",
+            };
+            return Ok(response);
+        }
 
         [HttpGet("{userId}/notification/new-order")]
         public async Task<IActionResult> GetNewOrderNotifications(string userId)

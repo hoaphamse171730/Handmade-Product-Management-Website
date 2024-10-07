@@ -302,7 +302,79 @@ namespace HandmadeProductManagement.Services.Service
             return replyNotifications;
         }
 
+        public async Task<IList<NotificationModel>> GetNewReviewNotificationList(string Id)
+        {
 
+            if (!Guid.TryParse(Id, out Guid userId))
+            {
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Invalid userID");
+            }
+
+            var shopIds = await _unitOfWork.GetRepository<Shop>()
+                .Entities
+                .Where(shop => shop.UserId == userId)
+                .Select(shop => shop.Id)
+                .ToListAsync();
+
+            if (shopIds.IsNullOrEmpty())
+            {
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "User not found");
+            }
+
+            var review = await _unitOfWork.GetRepository<Review>()
+                .Entities
+                .Where(r => r.UserId == userId && r.Reply == null)
+                .Include(r => r.User)
+                .ToListAsync();
+
+            var notifications = review.Select(review => new NotificationModel
+            {
+                Id = review.Id,
+                Message = $"Sản phẩm của bạn đã được {review.User.UserName} review",
+                Tag = "Review",
+                URL = $"api/review/{review.Id}"
+            }).ToList();
+
+            return notifications;
+        }
+
+        public async Task<IList<NotificationModel>> GetNewStatusChangeNotificationList(string Id)
+        {
+            if (!Guid.TryParse(Id, out Guid userId))
+            {
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Invalid userID");
+            }
+
+            // Lấy danh sách order của người dùng
+            var orders = await _unitOfWork.GetRepository<Order>()
+                .Entities
+                .Where(o => o.UserId == userId)
+                .Select(o => o.Id)
+                .ToListAsync();
+
+            if (orders.IsNullOrEmpty())
+            {
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "User not found");
+            }
+
+            // Lấy status của orders
+            var status = await _unitOfWork.GetRepository<StatusChange>()
+                .Entities
+                .Where(s => orders.Contains(s.OrderId))
+                .Include(s => s.Order)
+                .ToListAsync();
+
+            // Tạo thông báo phản hồi 
+            var notifications = status.Select(status => new NotificationModel
+            {
+                Id = status.Id,
+                Message = $"Đơn hàng của bạn được {status.Status} lúc {status.ChangeTime}",
+                Tag = "StatusChange",
+                URL = $"api/statuschange/order/{status.OrderId}"
+            }).ToList();
+
+            return notifications;
+        }
         public async Task<bool> ReverseDeleteUser(string Id)
         {
             if (!Guid.TryParse(Id, out Guid userId))
