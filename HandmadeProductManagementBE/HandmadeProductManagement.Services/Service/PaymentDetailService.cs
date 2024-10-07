@@ -21,12 +21,12 @@ namespace HandmadeProductManagement.Services.Service
             _paymentService = paymentService;
         }
 
-        public async Task<bool> CreatePaymentDetailAsync(CreatePaymentDetailDto createPaymentDetailDto)
+        public async Task<bool> CreatePaymentDetailAsync(string userId, CreatePaymentDetailDto createPaymentDetailDto)
         {
             ValidatePaymentDetail(createPaymentDetailDto);
 
             var userRepository = _unitOfWork.GetRepository<ApplicationUser>();
-            var userExists = await userRepository.Entities.AnyAsync(u => u.Id.ToString() == createPaymentDetailDto.UserId && !u.DeletedTime.HasValue);
+            var userExists = await userRepository.Entities.AnyAsync(u => u.Id.ToString() == userId && !u.DeletedTime.HasValue);
             if (!userExists)
             {
                 throw new BaseException.NotFoundException("user_not_found", "User not found.");
@@ -58,6 +58,8 @@ namespace HandmadeProductManagement.Services.Service
                 ExternalTransaction = createPaymentDetailDto.ExternalTransaction
             };
 
+            paymentDetail.CreatedBy = userId;
+            paymentDetail.LastUpdatedBy = userId;
             await paymentDetailRepository.InsertAsync(paymentDetail);
             await _unitOfWork.SaveAsync();
 
@@ -150,16 +152,6 @@ namespace HandmadeProductManagement.Services.Service
             if (!Guid.TryParse(createPaymentDetailDto.PaymentId, out _))
             {
                 throw new BaseException.BadRequestException("invalid_payment_id_format", "Payment ID format is invalid. Example: 123e4567-e89b-12d3-a456-426614174000.");
-            }
-
-            if (string.IsNullOrWhiteSpace(createPaymentDetailDto.UserId))
-            {
-                throw new BaseException.BadRequestException("invalid_user_id", "Please input user id.");
-            }
-
-            if (!Guid.TryParse(createPaymentDetailDto.UserId, out _))
-            {
-                throw new BaseException.BadRequestException("invalid_user_id_format", "User ID format is invalid. Example: 123e4567-e89b-12d3-a456-426614174000.");
             }
 
             if (string.IsNullOrWhiteSpace(createPaymentDetailDto.Status))
