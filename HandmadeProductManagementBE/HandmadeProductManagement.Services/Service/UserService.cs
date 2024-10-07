@@ -9,6 +9,7 @@ using FluentValidation;
 using HandmadeProductManagement.ModelViews.NotificationModelViews;
 using HandmadeProductManagement.Contract.Repositories.Entity;
 using Microsoft.IdentityModel.Tokens;
+using static System.Net.WebRequestMethods;
 namespace HandmadeProductManagement.Services.Service
 {
     public class UserService : IUserService
@@ -230,7 +231,7 @@ namespace HandmadeProductManagement.Services.Service
             {
                 throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Invalid userID");
             }
-
+            var urlroot = "https://localhost:7159";
             // Lấy danh sách đơn hàng của người dùng
             var orders = await _unitOfWork.GetRepository<Order>()
                 .Entities
@@ -244,7 +245,7 @@ namespace HandmadeProductManagement.Services.Service
                 Id = order.Id,
                 Message = $"Bạn có đơn hàng mới từ {order.CustomerName} với trạng thái: {order.Status} vào ngày: {order.OrderDate.ToString("dd/MM/yyyy")}",
                 Tag = "Order",
-                URL = $"api/order/{order.Id}"
+                URL = urlroot + $"api/order/{order.Id}"
             }).ToList();
 
             return notifications;
@@ -268,7 +269,7 @@ namespace HandmadeProductManagement.Services.Service
             {
                 return new List<NotificationModel>();
             }
-
+            var urlroot = "https://localhost:7159";
             // Lấy tất cả các reply mới cho những review của khách hàng
             var replies = await _unitOfWork.GetRepository<Reply>()
                 .Entities
@@ -288,7 +289,7 @@ namespace HandmadeProductManagement.Services.Service
                 Id = reply.Id,
                 Message = $"Bạn đã nhận được phản hồi mới cho review sản phẩm {reply.Review.Product.Name}",
                 Tag = "Reply",
-                URL = $"api/reply/{reply.Id}"
+                URL = urlroot + $"api/reply/{reply.Id}"
             }).ToList();
 
             return replyNotifications;
