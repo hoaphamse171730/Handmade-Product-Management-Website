@@ -29,13 +29,13 @@ namespace HandmadeProductManagement.Services.Service
         }
 
 
-        public async Task<bool> CreatePaymentAsync(CreatePaymentDto createPaymentDto)
+        public async Task<bool> CreatePaymentAsync(string userId, CreatePaymentDto createPaymentDto)
         {
             ValidatePayment(createPaymentDto);
 
             var userRepository = _unitOfWork.GetRepository<ApplicationUser>();
             var userExists = await userRepository.Entities
-                .AnyAsync(u => u.Id.ToString() == createPaymentDto.UserId && !u.DeletedTime.HasValue);
+                .AnyAsync(u => u.Id.ToString() == userId && !u.DeletedTime.HasValue);
             if (!userExists)
             {
                 throw new BaseException.NotFoundException("user_not_found", "User not found.");
@@ -54,7 +54,7 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.BadRequestException("invalid_order_status", "Order status must be 'Awaiting Payment'.");
             }
 
-            if (order.UserId.ToString() != createPaymentDto.UserId)
+            if (order.UserId.ToString() != userId)
             {
                 throw new BaseException.BadRequestException("user_not_owner", "User does not own the order.");
             }
@@ -74,8 +74,8 @@ namespace HandmadeProductManagement.Services.Service
                 ExpirationDate = expirationDate
             };
 
-            payment.CreatedBy = createPaymentDto.UserId;
-            payment.LastUpdatedBy = createPaymentDto.UserId;
+            payment.CreatedBy = userId;
+            payment.LastUpdatedBy = userId;
 
             await paymentRepository.InsertAsync(payment);
             await _unitOfWork.SaveAsync();
@@ -193,16 +193,6 @@ namespace HandmadeProductManagement.Services.Service
             if (!Guid.TryParse(createPaymentDto.OrderId, out _))
             {
                 throw new BaseException.BadRequestException("invalid_order_id_format", "Order ID format is invalid. Example: 123e4567-e89b-12d3-a456-426614174000.");
-            }
-
-            if (string.IsNullOrWhiteSpace(createPaymentDto.UserId))
-            {
-                throw new BaseException.BadRequestException("invalid_user_id", "Please input user id.");
-            }
-
-            if (!Guid.TryParse(createPaymentDto.UserId, out _))
-            {
-                throw new BaseException.BadRequestException("invalid_user_id_format", "User ID format is invalid. Example: 123e4567-e89b-12d3-a456-426614174000.");
             }
 
             if (createPaymentDto.TotalAmount <= 0)

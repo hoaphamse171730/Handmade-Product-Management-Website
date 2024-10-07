@@ -40,6 +40,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\HandmadeProductManagement.Repositories\HandmadeProductManagement.Repositories.csproj" />
     <ProjectReference Include="..\HandmadeProductManagement.Services\HandmadeProductManagement.Services.csproj" />
     <ProjectReference Include="..\HandmadeProductManagement.Validation\HandmadeProductManagement.Validation.csproj" />
   </ItemGroup>

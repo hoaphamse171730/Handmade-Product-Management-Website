@@ -21,12 +21,12 @@ namespace HandmadeProductManagement.Services.Service
             _paymentService = paymentService;
         }
 
-        public async Task<bool> CreatePaymentDetailAsync(CreatePaymentDetailDto createPaymentDetailDto, string username)
+        public async Task<bool> CreatePaymentDetailAsync(string userId, CreatePaymentDetailDto createPaymentDetailDto)
         {
             ValidatePaymentDetail(createPaymentDetailDto);
 
             var userRepository = _unitOfWork.GetRepository<ApplicationUser>();
-            var userExists = await userRepository.Entities.AnyAsync(u => u.Id.ToString() == createPaymentDetailDto.UserId && !u.DeletedTime.HasValue);
+            var userExists = await userRepository.Entities.AnyAsync(u => u.Id.ToString() == userId && !u.DeletedTime.HasValue);
             if (!userExists)
             {
                 throw new BaseException.NotFoundException("user_not_found", "User not found.");
@@ -40,7 +40,7 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.NotFoundException("payment_not_found", "Payment not found.");
             }
 
-            await _paymentService.UpdatePaymentStatusAsync(createPaymentDetailDto.PaymentId, "Processing", username);
+            await _paymentService.UpdatePaymentStatusAsync(createPaymentDetailDto.PaymentId, "Processing");
 
             var invalidStatuses = new[] { "Completed", "Expired", "Refunded", "Closed" };
             if (invalidStatuses.Contains(payment.Status))
@@ -58,12 +58,14 @@ namespace HandmadeProductManagement.Services.Service
                 ExternalTransaction = createPaymentDetailDto.ExternalTransaction
             };
 
+            paymentDetail.CreatedBy = userId;
+            paymentDetail.LastUpdatedBy = userId;
             await paymentDetailRepository.InsertAsync(paymentDetail);
             await _unitOfWork.SaveAsync();
 
             if (createPaymentDetailDto.Status == "Success")
             {
-                await _paymentService.UpdatePaymentStatusAsync(createPaymentDetailDto.PaymentId, "Completed", username);
+                await _paymentService.UpdatePaymentStatusAsync(createPaymentDetailDto.PaymentId, "Completed");
             }
 
             return true;
@@ -150,16 +152,6 @@ namespace HandmadeProductManagement.Services.Service
             if (!Guid.TryParse(createPaymentDetailDto.PaymentId, out _))
             {
                 throw new BaseException.BadRequestException("invalid_payment_id_format", "Payment ID format is invalid. Example: 123e4567-e89b-12d3-a456-426614174000.");
-            }
-
-            if (string.IsNullOrWhiteSpace(createPaymentDetailDto.UserId))
-            {
-                throw new BaseException.BadRequestException("invalid_user_id", "Please input user id.");
-            }
-
-            if (!Guid.TryParse(createPaymentDetailDto.UserId, out _))
-            {
-                throw new BaseException.BadRequestException("invalid_user_id_format", "User ID format is invalid. Example: 123e4567-e89b-12d3-a456-426614174000.");
             }
 
             if (string.IsNullOrWhiteSpace(createPaymentDetailDto.Status))

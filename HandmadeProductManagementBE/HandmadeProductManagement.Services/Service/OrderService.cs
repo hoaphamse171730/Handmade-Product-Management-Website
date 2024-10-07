@@ -24,7 +24,7 @@ namespace HandmadeProductManagement.Services.Service
             _orderDetailService = orderDetailService;
         }
 
-        public async Task<bool> CreateOrderAsync(CreateOrderDto createOrder, string username)
+        public async Task<bool> CreateOrderAsync(string userId, CreateOrderDto createOrder)
         {
             if (createOrder.OrderDetails == null || !createOrder.OrderDetails.Any())
             {
@@ -34,7 +34,7 @@ namespace HandmadeProductManagement.Services.Service
             ValidateOrder(createOrder);
             var userRepository = _unitOfWork.GetRepository<ApplicationUser>();
             var userExists = await userRepository.Entities
-                .AnyAsync(u => u.Id.ToString() == createOrder.UserId && !u.DeletedTime.HasValue);
+                .AnyAsync(u => u.Id.ToString() == userId && !u.DeletedTime.HasValue);
             if (!userExists)
             {
                 throw new BaseException.NotFoundException("user_not_found", "User not found.");
@@ -77,6 +77,7 @@ namespace HandmadeProductManagement.Services.Service
 
             try
             {
+
                 foreach (var shopGroup in groupedByShop)
                 {
                     var totalPrice = shopGroup.Sum(x => x.Detail.DiscountPrice * x.Detail.ProductQuantity);
@@ -85,13 +86,13 @@ namespace HandmadeProductManagement.Services.Service
                         TotalPrice = (decimal)totalPrice,
                         OrderDate = DateTime.UtcNow,
                         Status = "Pending",
-                        UserId = Guid.Parse(createOrder.UserId.ToString()),
+                        UserId = Guid.Parse(userId.ToString()),
                         Address = createOrder.Address,
                         CustomerName = createOrder.CustomerName,
                         Phone = createOrder.Phone,
                         Note = createOrder.Note,
-                        CreatedBy = username,
-                        LastUpdatedBy = username
+                        CreatedBy = userId,
+                        LastUpdatedBy = userId
                     };
 
                     await orderRepository.InsertAsync(order);
@@ -138,7 +139,7 @@ namespace HandmadeProductManagement.Services.Service
                         Status = order.Status
                     };
 
-                    await _statusChangeService.Create(statusChangeDto, username);
+                    await _statusChangeService.Create(statusChangeDto);
                     await _unitOfWork.SaveAsync();
                 }
 
@@ -150,28 +151,6 @@ namespace HandmadeProductManagement.Services.Service
                 _unitOfWork.RollBack();
                 throw;
             }
-        }
-
-
-        public async Task<IList<OrderResponseModel>> GetAllOrdersAsync()
-        {
-            IQueryable<Order> query = _unitOfWork.GetRepository<Order>().Entities
-                .Where(order => !order.DeletedTime.HasValue);
-            var result = await query.Select(order => new OrderResponseModel
-            {
-                Id = order.Id,
-                TotalPrice = order.TotalPrice,
-                OrderDate = order.OrderDate,
-                Status = order.Status,
-                UserId = order.UserId,
-                Address = order.Address,
-                CustomerName = order.CustomerName,
-                Phone = order.Phone,
-                Note = order.Note,
-                CancelReasonId = order.CancelReasonId
-            }).ToListAsync();
-
-            return result;
         }
 
         public async Task<OrderResponseModel> GetOrderByIdAsync(string orderId)
@@ -210,7 +189,7 @@ namespace HandmadeProductManagement.Services.Service
             };
         }
 
-        public async Task<bool> UpdateOrderAsync(string orderId, UpdateOrderDto order, string username)
+        public async Task<bool> UpdateOrderAsync(string userId, string orderId, UpdateOrderDto order)
         {
             if (string.IsNullOrWhiteSpace(orderId) || !Guid.TryParse(orderId, out _))
             {
@@ -232,7 +211,8 @@ namespace HandmadeProductManagement.Services.Service
             existingOrder.CustomerName = order.CustomerName;
             existingOrder.Phone = order.Phone;
             existingOrder.Note = order.Note;
-            existingOrder.LastUpdatedBy = username;
+            existingOrder.LastUpdatedBy = userId;
+            existingOrder.LastUpdatedTime = DateTime.UtcNow;
 
             repository.Update(existingOrder);
             await _unitOfWork.SaveAsync();
@@ -270,7 +250,7 @@ namespace HandmadeProductManagement.Services.Service
             return orders;
         }
 
-        public async Task<bool> UpdateOrderStatusAsync(UpdateStatusOrderDto updateStatusOrderDto, string username)
+        public async Task<bool> UpdateOrderStatusAsync(UpdateStatusOrderDto updateStatusOrderDto)
         {
             if (string.IsNullOrWhiteSpace(updateStatusOrderDto.OrderId))
             {
@@ -333,7 +313,7 @@ namespace HandmadeProductManagement.Services.Service
             if (!validStatusTransitions.ContainsKey(existingOrder.Status) ||
                 !validStatusTransitions[existingOrder.Status].Contains(updateStatusOrderDto.Status))
             {
-                throw new BaseException.BadRequestException("invalid_status_transition", $"Cannot transition from {existingOrder.Status} to {updateStatusOrderDto.Status}.");
+                throw new BaseException.ErrorException(400, "invalid_status_transition", $"Cannot transition from {existingOrder.Status} to {updateStatusOrderDto.Status}.");
             }
 
             _unitOfWork.BeginTransaction();
@@ -384,7 +364,7 @@ namespace HandmadeProductManagement.Services.Service
 
                 // Update order status
                 existingOrder.Status = updateStatusOrderDto.Status;
-                existingOrder.LastUpdatedBy = username;
+                existingOrder.LastUpdatedBy = existingOrder.UserId.ToString();
                 existingOrder.LastUpdatedTime = DateTime.UtcNow;
 
                 // Create a new status change record after updating the order status
@@ -395,7 +375,7 @@ namespace HandmadeProductManagement.Services.Service
                 };
 
                 repository.Update(existingOrder);
-                await _statusChangeService.Create(statusChangeDto, username);
+                await _statusChangeService.Create(statusChangeDto);
 
                 await _unitOfWork.SaveAsync();
                 _unitOfWork.CommitTransaction();
@@ -411,16 +391,6 @@ namespace HandmadeProductManagement.Services.Service
 
         private void ValidateOrder(CreateOrderDto order)
         {
-            if (string.IsNullOrWhiteSpace(order.UserId))
-            {
-                throw new BaseException.BadRequestException("invalid_user_id", "Please input User id.");
-            }
-
-            if (!Guid.TryParse(order.UserId, out _))
-            {
-                throw new BaseException.BadRequestException("invalid_user_id_format", "User ID format is invalid. Example: 123e4567-e89b-12d3-a456-426614174000.");
-            }
-
             if (string.IsNullOrWhiteSpace(order.Address))
             {
                 throw new BaseException.BadRequestException("invalid_address", "Address cannot be null or empty.");

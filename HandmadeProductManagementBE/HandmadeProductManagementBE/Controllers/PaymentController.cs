@@ -2,6 +2,7 @@
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.PaymentModelViews;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
@@ -19,10 +20,12 @@ namespace HandmadeProductManagementAPI.Controllers
             _paymentService = paymentService;
         }
 
+        [Authorize(Roles = "Customer")]
         [HttpPost]
         public async Task<IActionResult> CreatePayment([FromBody] CreatePaymentDto createPaymentDto)
         {
-            var createdPayment = await _paymentService.CreatePaymentAsync(createPaymentDto);
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var createdPayment = await _paymentService.CreatePaymentAsync(userId, createPaymentDto);
             var response = new BaseResponse<bool>
             {
                 Code = "Success",
