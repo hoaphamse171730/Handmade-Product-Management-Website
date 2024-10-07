@@ -46,8 +46,7 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
-        [Authorize(Roles = "Admin")]
-        [Authorize(Roles = "Seller")]
+        [Authorize(Roles = "Admin, Seller")]
         // POST: api/variationoption
         [HttpPost]
         public async Task<IActionResult> CreateVariationOption([FromBody] VariationOptionForCreationDto variationOption)
@@ -64,8 +63,7 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
-        [Authorize(Roles = "Admin")]
-        [Authorize(Roles = "Seller")]
+        [Authorize(Roles = "Admin, Seller")]
         // PUT: api/variationoption/{id}
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateVariationOption(string id, [FromBody] VariationOptionForUpdateDto variationOption)
@@ -82,8 +80,7 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
-        [Authorize(Roles = "Admin")]
-        [Authorize(Roles = "Seller")]
+        [Authorize(Roles = "Admin, Seller")]
         // DELETE: api/variationoption/{id}
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteVariationOption(string id)
