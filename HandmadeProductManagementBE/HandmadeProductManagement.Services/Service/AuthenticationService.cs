@@ -71,7 +71,7 @@ public class AuthenticationService : IAuthenticationService
             Token = token
         };
     }
-    public async Task AssignRoleToUser(string userId, string role)
+    public async Task<bool> AssignRoleToUser(string userId, string role)
     {
         var user = await _userManager.FindByIdAsync(userId);
         if (user == null)
@@ -87,5 +87,7 @@ public class AuthenticationService : IAuthenticationService
                 throw new Exception($"Failed to add role to user: {string.Join(", ", result.Errors.Select(e => e.Description))}");
             }
         }
+
+        return true;
     }
 }

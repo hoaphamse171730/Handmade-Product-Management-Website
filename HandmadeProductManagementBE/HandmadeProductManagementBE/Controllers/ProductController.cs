@@ -83,14 +83,6 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(BaseResponse<string>.OkResponse("Product updated successfully"));
         }
 
-        [HttpDelete("{id}")]
-        public async Task<ActionResult> DeleteProduct(string id)
-        {
-
-            await _productService.Delete(id);
-            return Ok(new BaseResponse<bool>(StatusCodeHelper.OK, "Product deleted successfully.", true));
-        }
-
         [HttpDelete("soft-delete/{id}")]
         public async Task<ActionResult> SoftDeleteProduct(string id)
         {
@@ -113,13 +105,6 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
-        [HttpPut("{productId}/promotion/{promotionId}")]
-        public async Task<IActionResult> UpdateProductPromotion(string productId, string promotionId)
-        {
-
-            var updatedProduct = await _productService.UpdateProductPromotionAsync(productId, promotionId);
-            return Ok(updatedProduct);
-        }
 
         [HttpGet("CalculateAverageRating/{id}")]
         public async Task<IActionResult> CalculateAverageRating([Required] string id)

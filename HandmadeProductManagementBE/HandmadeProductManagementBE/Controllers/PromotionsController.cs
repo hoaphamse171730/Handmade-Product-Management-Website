@@ -1,4 +1,5 @@
-﻿using HandmadeProductManagement.Contract.Services.Interface;
+﻿using HandmadeProductManagement.Contract.Repositories.Entity;
+using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.PaymentModelViews;
@@ -34,18 +35,35 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<BaseResponse<PromotionDto>>> CreatePromotion(PromotionForCreationDto promotionForCreation)
+        public async Task<IActionResult> CreatePromotion(PromotionForCreationDto promotionForCreation)
         {
-
             var result = await _promotionService.Create(promotionForCreation);
-            return Ok(BaseResponse<PromotionDto>.OkResponse(result));
+
+            var response = new BaseResponse<bool>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Promotion created successfully.",
+                Data = result
+            };
+            return Ok(response);
+
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdatePromotion(string id, PromotionForUpdateDto promotionForUpdate)
         {
             var result = await _promotionService.Update(id, promotionForUpdate);
-            return Ok(BaseResponse<PromotionDto>.OkResponse(result));
+
+            var response = new BaseResponse<bool>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Promotion updated successfully.",
+                Data = result
+            };
+            return Ok(response);
+
         }
 
         [HttpDelete("{id}")]

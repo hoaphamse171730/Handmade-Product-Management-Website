@@ -2,6 +2,7 @@
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.ReplyModelViews;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 
@@ -45,6 +46,7 @@ namespace HandmadeProductManagementAPI.Controllers
             };
             return Ok(response);
         }
+
 
         [HttpPost]
         public async Task<IActionResult> Create([Required] string content, [Required] string reviewId, [Required] string shopId)

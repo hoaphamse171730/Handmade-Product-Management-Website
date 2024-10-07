@@ -32,11 +32,6 @@ namespace HandmadeProductManagement.Services.Service
             }
 
             ValidateOrder(createOrder);
-            // Check if OrderDetails is empty
-            if (createOrder.OrderDetails == null || !createOrder.OrderDetails.Any())
-            {
-                throw new BaseException.BadRequestException("empty_order_details", "Order details cannot be empty.");
-            }
             var userRepository = _unitOfWork.GetRepository<ApplicationUser>();
             var userExists = await userRepository.Entities
                 .AnyAsync(u => u.Id.ToString() == createOrder.UserId && !u.DeletedTime.HasValue);
@@ -44,74 +39,115 @@ namespace HandmadeProductManagement.Services.Service
             {
                 throw new BaseException.NotFoundException("user_not_found", "User not found.");
             }
+
             var orderRepository = _unitOfWork.GetRepository<Order>();
             var cartItemRepository = _unitOfWork.GetRepository<CartItem>();
             var productItemRepository = _unitOfWork.GetRepository<ProductItem>();
-            var totalPrice = createOrder.OrderDetails.Sum(detail => detail.UnitPrice * detail.ProductQuantity);
-            var order = new Order
+
+            var productRepository = _unitOfWork.GetRepository<Product>();
+
+            var groupedOrderDetails = await Task.WhenAll(createOrder.OrderDetails.Select(async detail =>
             {
-                TotalPrice = (decimal)totalPrice,
-                OrderDate = DateTime.UtcNow,
-                Status = "Pending",
-                UserId = Guid.Parse(createOrder.UserId.ToString()),
-                Address = createOrder.Address,
-                CustomerName = createOrder.CustomerName,
-                Phone = createOrder.Phone,
-                Note = createOrder.Note,
-                CreatedBy = createOrder.UserId,
-                LastUpdatedBy = createOrder.UserId
-            };
+                var productItem = await productItemRepository.Entities
+                    .FirstOrDefaultAsync(p => p.Id == detail.ProductItemId && !p.DeletedTime.HasValue);
+
+                if (productItem == null)
+                {
+                    throw new BaseException.NotFoundException("product_item_not_found", $"Product Item {detail.ProductItemId} not found.");
+                }
+
+                var product = await productRepository.Entities
+                    .FirstOrDefaultAsync(p => p.Id == productItem.ProductId && !p.DeletedTime.HasValue);
+
+                if (product == null)
+                {
+                    throw new BaseException.NotFoundException("product_not_found", $"Product for Item {productItem.Id} not found.");
+                }
+
+                return new
+                {
+                    ShopId = product.ShopId,
+                    Detail = detail
+                };
+            }));
+            // Groupby product by shop
+            var groupedByShop = groupedOrderDetails.GroupBy(x => x.ShopId).ToList();
 
             _unitOfWork.BeginTransaction();
 
             try
             {
+<<<<<<< HEAD
                 await orderRepository.InsertAsync(order);
                 await _unitOfWork.SaveAsync();
                 foreach (var detail in createOrder.OrderDetails)
+=======
+                foreach (var shopGroup in groupedByShop)
+>>>>>>> 2b18e37a801812ca335c960190d17048642692c0
                 {
-
-                    var productItem = await productItemRepository.Entities
-                        .FirstOrDefaultAsync(p => p.Id == detail.ProductItemId && !p.DeletedTime.HasValue);
-
-                    if (productItem == null)
+                    var totalPrice = shopGroup.Sum(x => x.Detail.DiscountPrice * x.Detail.ProductQuantity);
+                    var order = new Order
                     {
-                        throw new BaseException.NotFoundException("product_item_not_found", $"Product Item {detail.ProductItemId} not found.");
+                        TotalPrice = (decimal)totalPrice,
+                        OrderDate = DateTime.UtcNow,
+                        Status = "Pending",
+                        UserId = Guid.Parse(createOrder.UserId.ToString()),
+                        Address = createOrder.Address,
+                        CustomerName = createOrder.CustomerName,
+                        Phone = createOrder.Phone,
+                        Note = createOrder.Note,
+                        CreatedBy = createOrder.UserId,
+                        LastUpdatedBy = createOrder.UserId
+                    };
+
+                    await orderRepository.InsertAsync(order);
+                    await _unitOfWork.SaveAsync();
+
+                    foreach (var groupedDetail in shopGroup)
+                    {
+                        var detail = groupedDetail.Detail;
+
+                        var productItem = await productItemRepository.Entities
+                            .FirstOrDefaultAsync(p => p.Id == detail.ProductItemId && !p.DeletedTime.HasValue);
+
+                        if (productItem == null)
+                        {
+                            throw new BaseException.NotFoundException("product_item_not_found", $"Product Item {detail.ProductItemId} not found.");
+                        }
+
+                        if (productItem.QuantityInStock - detail.ProductQuantity < 0)
+                        {
+                            throw new BaseException.BadRequestException("insufficient_stock", $"Product {productItem.Id} has insufficient stock.");
+                        }
+
+                        productItem.QuantityInStock -= detail.ProductQuantity;
+                        productItemRepository.Update(productItem);
+
+                        detail.OrderId = order.Id;
+                        await _orderDetailService.Create(detail);
+
+                        var cartItems = await cartItemRepository.Entities
+                            .Where(ci => ci.ProductItemId == detail.ProductItemId && ci.Cart.UserId == order.UserId)
+                            .ToListAsync();
+
+                        foreach (var cartItem in cartItems)
+                        {
+                            cartItemRepository.Delete(cartItem);
+                        }
                     }
 
-                    // Validate if stock after deduction is non-negative
-                    if (productItem.QuantityInStock - detail.ProductQuantity < 0)
+                    await _unitOfWork.SaveAsync();
+
+                    var statusChangeDto = new StatusChangeForCreationDto
                     {
-                        throw new BaseException.BadRequestException("insufficient_stock", $"Product {productItem.Id} has insufficient stock. Current stock: {productItem.QuantityInStock}, Requested: {detail.ProductQuantity}");
-                    }
+                        OrderId = order.Id.ToString(),
+                        Status = order.Status
+                    };
 
-                    productItem.QuantityInStock -= detail.ProductQuantity;
-                    productItemRepository.Update(productItem);
-
-                    //save order detail
-                    detail.OrderId = order.Id;
-                    await _orderDetailService.Create(detail);
-
-                    //clear cart item
-                    var cartItems = await cartItemRepository.Entities
-                        .Where(ci => ci.ProductItemId == detail.ProductItemId && ci.Cart.UserId == order.UserId)
-                        .ToListAsync();
-
-                    foreach (var cartItem in cartItems)
-                    {
-                        cartItemRepository.Delete(cartItem);
-                    }
+                    await _statusChangeService.Create(statusChangeDto);
+                    await _unitOfWork.SaveAsync();
                 }
-                await _unitOfWork.SaveAsync();
-                var statusChangeDto = new StatusChangeForCreationDto
-                {
-                    OrderId = order.Id.ToString(),
-                    Status = order.Status,
-                    ChangeTime = DateTime.UtcNow
-                };
 
-                await _statusChangeService.Create(statusChangeDto);
-                await _unitOfWork.SaveAsync();
                 _unitOfWork.CommitTransaction();
                 return true;
             }
@@ -121,6 +157,7 @@ namespace HandmadeProductManagement.Services.Service
                 throw;
             }
         }
+
 
         public async Task<IList<OrderResponseModel>> GetAllOrdersAsync()
         {
@@ -289,7 +326,7 @@ namespace HandmadeProductManagement.Services.Service
                 { "Canceled", new List<string> { "Closed" } },
                 { "Delivering Retry", new List<string> { "Delivering" } }
             };
-            
+
             var allValidStatuses = validStatusTransitions.Keys
                 .Concat(validStatusTransitions.Values.SelectMany(v => v))
                 .Distinct()
@@ -361,8 +398,7 @@ namespace HandmadeProductManagement.Services.Service
                 var statusChangeDto = new StatusChangeForCreationDto
                 {
                     OrderId = updateStatusOrderDto.OrderId,
-                    Status = updateStatusOrderDto.Status,
-                    ChangeTime = DateTime.UtcNow
+                    Status = updateStatusOrderDto.Status
                 };
 
                 repository.Update(existingOrder);

@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 
 namespace HandmadeProductManagement.ModelViews.CategoryModelViews
 {
-    internal class CategoryForManipulationDto
+    public class CategoryForManipulationDto
     {
+        public string Name { get; set; }
+        public string? Description { get; set; }
     }
 }

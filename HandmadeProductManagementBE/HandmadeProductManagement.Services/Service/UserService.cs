@@ -7,14 +7,7 @@ using HandmadeProductManagement.Repositories.Entity;
 using Microsoft.EntityFrameworkCore;
 using FluentValidation;
 using HandmadeProductManagement.ModelViews.NotificationModelViews;
-using HandmadeProductManagement.ModelViews.ReviewModelViews;
-using HandmadeProductManagement.ModelViews.ReplyModelViews;
-using HandmadeProductManagement.ModelViews.ShopModelViews;
 using HandmadeProductManagement.Contract.Repositories.Entity;
-using static System.Formats.Asn1.AsnWriter;
-using HandmadeProductManagement.Core.Utils;
-using HandmadeProductManagement.Contract.Repositories.Entity;
-using HandmadeProductManagement.ModelViews.ProductModelViews;
 namespace HandmadeProductManagement.Services.Service
 {
     public class UserService : IUserService
@@ -141,9 +134,6 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Phone number already exists");
             }
 
-
-
-
             user.UserName = updateUserDTO.UserName;
             user.Email = updateUserDTO.Email;
             user.PhoneNumber = updateUserDTO.PhoneNumber;
@@ -197,35 +187,43 @@ namespace HandmadeProductManagement.Services.Service
             return true;
         }
 
-        public async Task<List<NotificationModel>> GetNotificationList(string Id)
+        public async Task<IList<NotificationModel>> GetNotificationList(string Id)
         {
             if (!Guid.TryParse(Id, out Guid userId))
             {
                 throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Invalid userID");
             }
-           
-            var shop = await _unitOfWork.GetRepository<Shop>()
+
+            var shopIds = await _unitOfWork.GetRepository<Shop>()
                 .Entities
                 .Where(shop => shop.UserId == userId)
                 .Select(shop => shop.Id)
                 .ToListAsync();
-          
+
             var reviews = await _unitOfWork.GetRepository<Review>()
                 .Entities
-                .Include(r => r.User) 
-                .Where(review => shop.Contains(review.ProductId) && review.Reply == null)
+                .Where(r => shopIds.Contains(r.Product.ShopId))
+                .Include(r => r.User)
                 .ToListAsync();
 
-            var notifications = reviews.Select(review => new NotificationModel
+            var replies = await _unitOfWork.GetRepository<Reply>()
+                .Entities
+                .Where(rep => reviews.Select(r => r.Id).Contains(rep.ReviewId)) 
+                .ToListAsync();
+
+            var nonReplies = reviews
+                .Where(r => !replies.Any(rep => rep.ReviewId == r.Id))
+                .ToList();
+
+            var notifications = nonReplies.Select(nonReplies => new NotificationModel
             {
-                Id = review.Id,
-                Message = $"Sản phẩm của bạn đã được {review.User.UserName} review",
+                Id = nonReplies.Id,
+                Message = $"Sản phẩm của bạn đã được {nonReplies.User.UserName} review",
                 Tag = "Review",
-                URL = $"api/review/{review.Id}"
+                URL = $"api/review/{nonReplies.Id}"
             }).ToList();
 
             return notifications;
-
         }
 
         public async Task<bool> ReverseDeleteUser(string Id)
@@ -245,7 +243,6 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "User not found or already active");
             }
 
-
             user.Status = "active";
             user.DeletedBy = null;
             user.DeletedTime = null;
@@ -255,10 +252,5 @@ namespace HandmadeProductManagement.Services.Service
 
             return true;
         }
-
-
-     
-
-
     }
 }
