@@ -18,6 +18,48 @@ namespace HandmadeProductManagement.Services.Service
         {
             _unitOfWork = unitOfWork;
         }
+        public async Task<IList<ReviewModel>> GetByProductIdAsync(string productId, int pageNumber, int pageSize)
+        {
+            if (string.IsNullOrWhiteSpace(productId) || !Guid.TryParse(productId, out _))
+            {
+                throw new BaseException.BadRequestException("invalid_product_id_format", "Invalid productId format.");
+            }
+            if (pageNumber <= 0)
+            {
+                throw new BaseException.BadRequestException("invalid_page_number", "Page Number must be greater than zero.");
+            }
+            if (pageSize <= 0)
+            {
+                throw new BaseException.BadRequestException("invalid_page_size", "Page Size must be greater than zero.");
+            }
+
+            var reviews = await _unitOfWork.GetRepository<Review>()
+                                           .Entities
+                                           .Include(r => r.Reply)
+                                           .Where(r => r.ProductId == productId)
+                                           .OrderByDescending(r => r.Date)
+                                           .Skip((pageNumber - 1) * pageSize)
+                                           .Take(pageSize)
+                                           .ToListAsync();
+
+            return reviews.Select(r => new ReviewModel
+            {
+                Id = r.Id,
+                Content = r.Content,
+                Rating = r.Rating,
+                Date = r.Date,
+                ProductId = r.ProductId,
+                UserId = r.UserId,
+                Reply = r.Reply == null ? null : new ReplyModel
+                {
+                    Id = r.Reply.Id,
+                    Content = r.Reply.Content,
+                    Date = r.Reply.Date,
+                    ReviewId = r.Reply.ReviewId,
+                    ShopId = r.Reply.ShopId
+                }
+            }).ToList();
+        }
 
         public async Task<IList<ReviewModel>> GetByPageAsync(int pageNumber, int pageSize)
         {
