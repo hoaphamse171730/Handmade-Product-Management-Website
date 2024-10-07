@@ -24,21 +24,8 @@ namespace HandmadeProductManagement.Services.Service
             _updateValidator = updateValidator;
         }
 
-        public async Task<CancelReasonResponseModel> GetById(string id)
-        {
-            var cancelReason = await _unitOfWork.GetRepository<CancelReason>().Entities.FirstOrDefaultAsync(cr => cr.Id == id);
-            if (cancelReason == null)
-            {
-                throw new BaseException.NotFoundException("cancel_reason_not_found", "Cancel Reason not found.");
-            }
-
-            var cancelReasonDto = _mapper.Map<CancelReasonResponseModel>(cancelReason);
-            return cancelReasonDto;
-        }
-
-
         // Get cancel reasons by page (only active records)
-        public async Task<IList<CancelReasonResponseModel>> GetByPage(int page, int pageSize)
+        public async Task<IList<CancelReasonDto>> GetByPage(int page, int pageSize)
         {
             if (page <= 0)
             {
@@ -56,7 +43,7 @@ namespace HandmadeProductManagement.Services.Service
             var cancelReasons = await query
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
-                .Select(cancelReason => new CancelReasonResponseModel
+                .Select(cancelReason => new CancelReasonDto
                 {
                     Id = cancelReason.Id.ToString(),
                     Description = cancelReason.Description,
@@ -64,7 +51,7 @@ namespace HandmadeProductManagement.Services.Service
                 })
                 .ToListAsync();
 
-            var cancelReasonDto = _mapper.Map<IList<CancelReasonResponseModel>>(cancelReasons);
+            var cancelReasonDto = _mapper.Map<IList<CancelReasonDto>>(cancelReasons);
             return cancelReasonDto;
         }
 
@@ -72,10 +59,10 @@ namespace HandmadeProductManagement.Services.Service
         public async Task<bool> Create(CancelReasonForCreationDto cancelReason)
         {
             // Validate
-            var result = _creationValidator.ValidateAsync(cancelReason);
-            if (!result.Result.IsValid)
+            var validationResult = await _creationValidator.ValidateAsync(cancelReason);
+            if (!validationResult.IsValid)
             {
-                throw new ValidationException(result.Result.Errors);
+                throw new BaseException.BadRequestException("validation_failed", validationResult.Errors.Select(e => e.ErrorMessage).FirstOrDefault());
             }
 
             var cancelReasonEntity = _mapper.Map<CancelReason>(cancelReason);
@@ -93,13 +80,20 @@ namespace HandmadeProductManagement.Services.Service
         // Update an existing cancel reason
         public async Task<bool> Update(string id, CancelReasonForUpdateDto cancelReason)
         {
-            var result = _updateValidator.ValidateAsync(cancelReason);
-            if (!result.Result.IsValid)
+            // Validate id format
+            if (!Guid.TryParse(id, out var guidId))
             {
-                throw new ValidationException(result.Result.Errors); 
+                throw new BaseException.BadRequestException("invalid_input", "ID is not in a valid GUID format.");
             }
+
+            var validationResult = await _updateValidator.ValidateAsync(cancelReason);
+            if (!validationResult.IsValid)
+            {
+                throw new BaseException.BadRequestException("validation_failed", validationResult.Errors.Select(e => e.ErrorMessage).FirstOrDefault());
+            }
+
             var cancelReasonEntity = await _unitOfWork.GetRepository<CancelReason>().Entities
-                .FirstOrDefaultAsync(p => p.Id == id);
+                .FirstOrDefaultAsync(p => p.Id == id && (!p.DeletedTime.HasValue || p.DeletedBy == null));
             if (cancelReasonEntity == null)
             {
                 throw new BaseException.NotFoundException("not_found", "Cancel Reason not found");
@@ -118,6 +112,12 @@ namespace HandmadeProductManagement.Services.Service
         // Soft delete 
         public async Task<bool> Delete(string id)
         {
+            // Validate id format
+            if (!Guid.TryParse(id, out var guidId))
+            {
+                throw new BaseException.BadRequestException("invalid_input", "ID is not in a valid GUID format.");
+            }
+
             var cancelReasonRepo = _unitOfWork.GetRepository<CancelReason>();
             var cancelReasonEntity = await cancelReasonRepo.Entities.FirstOrDefaultAsync(x => x.Id == id);
             if (cancelReasonEntity == null || cancelReasonEntity.DeletedTime.HasValue || cancelReasonEntity.DeletedBy != null)

@@ -1,8 +1,10 @@
-﻿using HandmadeProductManagement.Contract.Services.Interface;
+﻿using HandmadeProductManagement.Contract.Repositories.Entity;
+using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.PaymentModelViews;
 using HandmadeProductManagement.ModelViews.PromotionModelViews;
+using HandmadeProductManagement.Services.Service;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -14,118 +16,68 @@ namespace HandmadeProductManagementAPI.Controllers
     public class PromotionsController : ControllerBase
     {
         private readonly IPromotionService _promotionService;
-
-        public PromotionsController(IPromotionService promotionService)
-        {
-            _promotionService = promotionService;
-        }
+        public PromotionsController(IPromotionService promotionService) => _promotionService = promotionService;
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<PromotionDto>>> GetPromotions()
+        public async Task<IActionResult> GetPromotions()
         {
-            try
-            {
-                IList<PromotionDto> promotions = await _promotionService.GetAll();
-                return Ok(BaseResponse<IList<PromotionDto>>.OkResponse(promotions));
-            }
-            catch (System.Exception ex)
-            {
-                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
-            }
+
+            var result = await _promotionService.GetAll();
+            return Ok(BaseResponse<IList<PromotionDto>>.OkResponse(result));
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<PromotionDto>> GetPromotion(string id)
+        public async Task<IActionResult> GetPromotion(string id)
         {
-            try
-            {
-                PromotionDto promotion = await _promotionService.GetById(id);
-                return Ok(BaseResponse<PromotionDto>.OkResponse(promotion));
-            }
-            catch (KeyNotFoundException)
-            {
-                return NotFound(BaseResponse<string>.FailResponse("Promotion not found"));
-            }
-            catch (System.Exception ex)
-            {
-                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
-            }
+
+            var promotion = await _promotionService.GetById(id);
+            return Ok(BaseResponse<PromotionDto>.OkResponse(promotion));
         }
 
         [HttpPost]
-        public async Task<ActionResult<PromotionDto>> CreatePromotion(PromotionForCreationDto promotionForCreation)
+        public async Task<IActionResult> CreatePromotion(PromotionForCreationDto promotionForCreation)
         {
-            try
+            var result = await _promotionService.Create(promotionForCreation);
+
+            var response = new BaseResponse<bool>
             {
-                PromotionDto createdPromotion = await _promotionService.Create(promotionForCreation);
-                return Ok(BaseResponse<PromotionDto>.OkResponse(createdPromotion));
-            }
-            catch (System.Exception ex)
-            {
-                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
-            }
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Promotion created successfully.",
+                Data = result
+            };
+            return Ok(response);
+
         }
 
-
         [HttpPut("{id}")]
-        public async Task<ActionResult> UpdatePromotion(string id, PromotionForUpdateDto promotionForUpdate)
+        public async Task<IActionResult> UpdatePromotion(string id, PromotionForUpdateDto promotionForUpdate)
         {
-            try
+            var result = await _promotionService.Update(id, promotionForUpdate);
+
+            var response = new BaseResponse<bool>
             {
-                await _promotionService.Update(id, promotionForUpdate);
-                return Ok(BaseResponse<string>.OkResponse("Promotion updated successfully"));
-            }
-            catch (KeyNotFoundException)
-            {
-                return NotFound(BaseResponse<string>.FailResponse("Promotion not found"));
-            }
-            catch (System.Exception ex)
-            {
-                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
-            }
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Promotion updated successfully.",
+                Data = result
+            };
+            return Ok(response);
+
         }
 
         [HttpDelete("{id}")]
-        public async Task<ActionResult> DeletePromotion(string id)
+        public async Task<IActionResult> SoftDeletePromotion(string id)
         {
-            try
-            {
-                await _promotionService.Delete(id);
-                return Ok(new BaseResponse<bool>(StatusCodeHelper.OK, "Promotion deleted successfully.", true));
-            }
-            catch (KeyNotFoundException)
-            {
-                return NotFound(BaseResponse<string>.FailResponse("Promotion not found"));
-            }
-            catch (System.Exception ex)
-            {
-                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
-            }
-        }
-
-        [HttpDelete("soft-delete/{id}")]
-        public async Task<ActionResult> SoftDeletePromotion(string id)
-        {
-            try
-            {
-                await _promotionService.SoftDelete(id);
-                return Ok(BaseResponse<string>.OkResponse("Promotion soft-deleted successfully"));
-            }
-            catch (KeyNotFoundException)
-            {
-                return NotFound(BaseResponse<string>.FailResponse("Promotion not found"));
-            }
-            catch (System.Exception ex)
-            {
-                return StatusCode(500, BaseResponse<string>.FailResponse(ex.Message));
-            }
+            var result = await _promotionService.SoftDelete(id);
+            return Ok(BaseResponse<bool>.OkResponse(result));
         }
 
         [HttpGet("Expired/{id}")]
-        public async Task<ActionResult> ExpiredPromotion(string id)
+        public async Task<IActionResult> ExpiredPromotion(string id)
         {
-            var isExpired = await _promotionService.updatePromotionStatusByRealtime(id);
 
+            var isExpired = await _promotionService.UpdatePromotionStatusByRealtime(id);
             var response = new BaseResponse<bool>
             {
                 Code = "Success",
@@ -135,5 +87,15 @@ namespace HandmadeProductManagementAPI.Controllers
             };
             return Ok(response);
         }
+
+
+        [HttpPut("{id}/status")]
+        public async Task<IActionResult> UpdatePromotionStatusByRealtime(string id)
+        {
+            var result = await _promotionService.UpdatePromotionStatusByRealtime(id);
+            return Ok(result);
+        }
     }
+
 }
+

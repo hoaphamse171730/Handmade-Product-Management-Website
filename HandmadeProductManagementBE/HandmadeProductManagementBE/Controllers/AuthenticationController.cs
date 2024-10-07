@@ -21,7 +21,9 @@ namespace HandmadeProductManagementAPI.Controllers;
 public class AuthenticationController(
     UserManager<ApplicationUser> userManager,
     TokenService tokenService,
-    IEmailService emailService
+    IEmailService emailService,
+    IAuthenticationService authenticationService
+    
 )
     : ControllerBase
 {
@@ -71,7 +73,9 @@ public class AuthenticationController(
 
         if (success)
         {
-            return BaseResponse<UserLoginResponseModel>.OkResponse(CreateUserResponse(user));
+            var userResponse = await CreateUserResponse(user);  // Await async call
+            return BaseResponse<UserLoginResponseModel>.OkResponse(userResponse);
+
         }
 
         return new BaseResponse<UserLoginResponseModel>()
@@ -81,14 +85,15 @@ public class AuthenticationController(
         };
     }
 
-    private UserLoginResponseModel CreateUserResponse(ApplicationUser user)
+    private async Task<UserLoginResponseModel> CreateUserResponse(ApplicationUser user)
     {
+        var token = await tokenService.CreateToken(user);
         return new UserLoginResponseModel()
         {
             FullName = user.UserInfo.FullName,
             UserName = user.UserName,
             DisplayName = user.UserInfo.DisplayName,
-            Token = tokenService.CreateToken(user)
+            Token = token
         };
     }
 
@@ -96,7 +101,7 @@ public class AuthenticationController(
     [HttpPost("register")]
     public async Task<ActionResult<BaseResponse<string>>> Register(RegisterModelView registerModelView)
     {
-        throw new BaseException.BadRequestException("bad_request", "this is a very bad request");
+        //throw new BaseException.BadRequestException("bad_request", "this is a very bad request");
         if (!ValidationHelper.IsValidNames(CustomRegex.UsernameRegex, registerModelView.UserName) ||
             !ValidationHelper.IsValidNames(CustomRegex.FullNameRegex, registerModelView.FullName)
            )
@@ -144,6 +149,73 @@ public class AuthenticationController(
         if (result.Succeeded)
         {
             await emailService.SendEmailConfirmationAsync(user.Email!, registerModelView.ClientUri);
+            await authenticationService.AssignRoleToUser(user.Id.ToString(), "Seller");
+
+            return BaseResponse<string>.OkResponse(user.Id.ToString());
+        }
+
+        return new BaseResponse<string>()
+        {
+            StatusCode = StatusCodeHelper.BadRequest,
+            Message = result.Errors.ToString(),
+        };
+    }
+
+    [Authorize(Roles = "Admin")]
+    [AllowAnonymous]
+    [HttpPost("admin/register")]
+    public async Task<ActionResult<BaseResponse<string>>> RegisterForAdmin(RegisterModelView registerModelView)
+    {
+        //throw new BaseException.BadRequestException("bad_request", "this is a very bad request");
+        if (!ValidationHelper.IsValidNames(CustomRegex.UsernameRegex, registerModelView.UserName) ||
+            !ValidationHelper.IsValidNames(CustomRegex.FullNameRegex, registerModelView.FullName)
+           )
+            return new BaseResponse<string>()
+            {
+                StatusCode = StatusCodeHelper.Unauthorized,
+                Message = "Username or Full Name contains invalid characters.",
+            };
+
+        if (await userManager.Users.AnyAsync(x => x.UserName == registerModelView.UserName))
+        {
+            ModelState.AddModelError("username", "Username is already taken");
+        }
+
+        if (await userManager.Users.AnyAsync(x => x.Email == registerModelView.Email))
+        {
+            ModelState.AddModelError("email", "Email is already taken");
+        }
+
+        if (await userManager.Users.AnyAsync(x => x.PhoneNumber == registerModelView.PhoneNumber))
+        {
+            ModelState.AddModelError("phone", "Phone is already taken");
+        }
+
+        //Return validation errors if any
+        if (!ModelState.IsValid)
+        {
+            var errors = ModelState.Values
+                .SelectMany(v => v.Errors)
+                .Select(e => e.ErrorMessage)
+                .ToList();
+
+            return new BaseResponse<string>
+            {
+                StatusCode = StatusCodeHelper.BadRequest,
+                Message = "Validation failed: " + string.Join("; ", errors),
+                Data = null
+            };
+        }
+
+        var user = registerModelView.Adapt<ApplicationUser>();
+
+        var result = await userManager.CreateAsync(user, registerModelView.Password);
+
+        if (result.Succeeded)
+        {
+            await emailService.SendEmailConfirmationAsync(user.Email!, registerModelView.ClientUri);
+            await authenticationService.AssignRoleToUser(user.Id.ToString(), "Admin");
+
             return BaseResponse<string>.OkResponse(user.Id.ToString());
         }
 
@@ -246,4 +318,33 @@ public class AuthenticationController(
         return BaseResponse<string>.FailResponse(statusCode: StatusCodeHelper.BadRequest, 
             message: "Error confirming the email.");
     }
+
+    [Authorize(Roles = "Admin")]
+    [HttpGet("admin-only")]
+    public IActionResult AdminOnlyEndpoint()
+    {
+        return Ok("This is an Admin only endpoint");
+    }
+
+    [Authorize(Roles = "Seller")]
+    [HttpGet("seller-only")]
+    public IActionResult SellerOnlyEndpoint()
+    {
+        var claims = User.Claims.Select(c => new { c.Type, c.Value }).ToList();
+        return Ok(new { Message = "This is a Seller only endpoint", Claims = claims });
+    }
+
+    [Authorize]
+    [HttpGet("test-claims")]
+    public IActionResult TestClaims()
+    {
+        var claims = User.Claims.Select(c => new { c.Type, c.Value }).ToList();
+        //var name = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
+        //var nameIdentifier = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        //var emailAddress = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+        //var role = User.FindFirst("http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
+
+        return Ok(claims);
+    }
+
 }

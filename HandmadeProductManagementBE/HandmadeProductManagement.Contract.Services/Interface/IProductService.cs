@@ -18,9 +18,8 @@ namespace HandmadeProductManagement.Contract.Services.Interface
         Task<ProductDto> GetById(string id);
         Task<ProductDto> Create(ProductForCreationDto promotion);
         Task<ProductDto> Update(string id, ProductForUpdateDto promotion);
-        Task<bool> Delete(string id);
         Task<bool> SoftDelete(string id);
-
         Task<ProductDetailResponseModel> GetProductDetailsByIdAsync(string productId);
+        Task<decimal> CalculateAverageRatingAsync(string productId);
     }
 }

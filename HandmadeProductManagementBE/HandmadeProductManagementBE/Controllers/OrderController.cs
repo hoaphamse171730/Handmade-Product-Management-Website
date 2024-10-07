@@ -59,10 +59,11 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
-        [HttpPatch("{orderId}/status")]
-        public async Task<IActionResult> UpdateOrderStatus(string orderId, [FromBody] CreateOrderDto updateOrderStatusDto)
+        [HttpPatch("status")]
+        public async Task<IActionResult> UpdateOrderStatus([FromBody] UpdateStatusOrderDto dto)
         {
-            var updatedOrder = await _orderService.UpdateOrderStatusAsync(orderId, updateOrderStatusDto.Status, updateOrderStatusDto.CancelReasonId);
+
+            var updatedOrder = await _orderService.UpdateOrderStatusAsync(dto);
             var response = new BaseResponse<bool>
             {
                 Code = "Success",
@@ -88,9 +89,9 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [HttpPut("{orderId}")]
-        public async Task<IActionResult> UpdateOrder(string orderId, [FromBody] CreateOrderDto order)
+        public async Task<IActionResult> UpdateOrder(string orderId, [FromBody] UpdateOrderDto order)
         {
-            var updatedOrder = await _orderService.UpdateOrderAsync(orderId, order, order.CancelReasonId);
+            var updatedOrder = await _orderService.UpdateOrderAsync(orderId, order);
             var response = new BaseResponse<bool>
             {
                 Code = "Success",

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using FluentValidation;
 using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Contract.Repositories.Interface;
@@ -21,7 +17,8 @@ namespace HandmadeProductManagement.Services.Service
         private readonly IValidator<PromotionForUpdateDto> _updateValidator;
 
 
-        public PromotionService(IUnitOfWork unitOfWork, IMapper mapper, IValidator<PromotionForCreationDto> creationValidator, IValidator<PromotionForUpdateDto> updateValidator)
+        public PromotionService(IUnitOfWork unitOfWork, IMapper mapper,
+            IValidator<PromotionForCreationDto> creationValidator, IValidator<PromotionForUpdateDto> updateValidator)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
@@ -29,64 +26,64 @@ namespace HandmadeProductManagement.Services.Service
             _updateValidator = updateValidator;
         }
 
+        public async Task<IList<PromotionDto>> GetAll()
+        {
+            var promotions = await _unitOfWork.GetRepository<Promotion>().Entities
+                .Where(p => p.DeletedTime == null)
+                .ToListAsync();
+            return _mapper.Map<IList<PromotionDto>>(promotions);
+        }
+
         public async Task<PromotionDto> GetById(string id)
         {
             var promotion = await _unitOfWork.GetRepository<Promotion>().Entities
-                .FirstOrDefaultAsync(p => p.Id == id);
-
+                .FirstOrDefaultAsync(p => p.Id == id && p.DeletedTime == null);
             if (promotion == null)
                 throw new KeyNotFoundException("Promotion not found");
-
             return _mapper.Map<PromotionDto>(promotion);
         }
 
-        public async Task<PromotionDto> Create(PromotionForCreationDto promotion)
+        public async Task<bool> Create(PromotionForCreationDto promotion)
         {
             var validationResult = await _creationValidator.ValidateAsync(promotion);
             if (!validationResult.IsValid)
                 throw new ValidationException(validationResult.Errors);
-
             var promotionEntity = _mapper.Map<Promotion>(promotion);
             promotionEntity.CreatedTime = DateTime.UtcNow;
-
             await _unitOfWork.GetRepository<Promotion>().InsertAsync(promotionEntity);
             await _unitOfWork.SaveAsync();
-
-            return _mapper.Map<PromotionDto>(promotionEntity);
+            return true;
         }
 
-        public async Task<PromotionDto> Update(string id, PromotionForUpdateDto promotion)
+        public async Task<bool> Update(string id, PromotionForUpdateDto promotion)
         {
             var validationResult = await _updateValidator.ValidateAsync(promotion);
             if (!validationResult.IsValid)
                 throw new ValidationException(validationResult.Errors);
-
             var promotionEntity = await _unitOfWork.GetRepository<Promotion>().Entities
-                .FirstOrDefaultAsync(p => p.Id == id);
-
+                .FirstOrDefaultAsync(p => p.Id == id && p.DeletedTime == null);
             if (promotionEntity == null)
                 throw new KeyNotFoundException("Promotion not found");
-
             _mapper.Map(promotion, promotionEntity);
             promotionEntity.LastUpdatedTime = DateTime.UtcNow;
-
             await _unitOfWork.GetRepository<Promotion>().UpdateAsync(promotionEntity);
             await _unitOfWork.SaveAsync();
-
-            return _mapper.Map<PromotionDto>(promotionEntity);
+            return true;
         }
 
         public async Task<bool> Delete(string id)
         {
             var promotionRepo = _unitOfWork.GetRepository<Promotion>();
-            var promotionEntity = await promotionRepo.Entities.FirstOrDefaultAsync(p => p.Id == id);
+            var promotionEntity = promotionRepo.Entities
+                .FirstOrDefault(p => p.Id == id);
             if (promotionEntity == null)
                 throw new KeyNotFoundException("Promotion not found");
-
-            await promotionRepo.DeleteAsync(id);
+            // promotionEntity.DeletedBy = userId.ToString();
+            promotionEntity.DeletedTime = DateTime.UtcNow;
+            promotionRepo.Delete(promotionEntity);
             await _unitOfWork.SaveAsync();
 
-            return true;  // Return success/failure as a boolean
+            return true;
         }
 
         public async Task<bool> SoftDelete(string id)
@@ -95,44 +92,34 @@ namespace HandmadeProductManagement.Services.Service
             var promotionEntity = await promotionRepo.Entities.FirstOrDefaultAsync(p => p.Id == id);
             if (promotionEntity == null)
                 throw new KeyNotFoundException("Promotion not found");
-
             promotionEntity.DeletedTime = DateTime.UtcNow;
             await promotionRepo.UpdateAsync(promotionEntity);
             await _unitOfWork.SaveAsync();
-
             return true;
         }
-        
 
-        public async Task<IList<PromotionDto>> GetAll()
-        {
-            var promotions = await _unitOfWork.GetRepository<Promotion>().Entities.ToListAsync();
-            return _mapper.Map<IList<PromotionDto>>(promotions);
-        }
 
-        // Thêm phương thức update khuyến mãi hết hạn 
-        public async Task<bool> updatePromotionStatusByRealtime(string id)
+
+        public async Task<bool> UpdatePromotionStatusByRealtime(string id)
         {
-            // Lấy khuyến mãi theo ID
             var promotion = await _unitOfWork.GetRepository<Promotion>().Entities
-                .FirstOrDefaultAsync(p => p.Id == id);
-
-            // Kiểm tra xem promotion có giá trị null không
+                .FirstOrDefaultAsync(p => p.Id == id && p.DeletedTime == null);
             if (promotion == null)
             {
                 throw new BaseException.NotFoundException("not_found", "Promotion Not Found!");
             }
+            promotion.Status = "active";
 
-            // Update nếu promotion hết hạn
-            if(DateTime.UtcNow > promotion.EndDate)
+            if (DateTime.UtcNow > promotion.EndDate || DateTime.UtcNow < promotion.StartDate)
             {
                 promotion.Status = "inactive";
                 await _unitOfWork.GetRepository<Promotion>().UpdateAsync(promotion);
                 await _unitOfWork.SaveAsync();
             }
+            await _unitOfWork.GetRepository<Promotion>().UpdateAsync(promotion);
+            await _unitOfWork.SaveAsync();
+            return true; 
 
-            return true; // Trả về true nếu hoạt động bình thường
         }
-
     }
 }
