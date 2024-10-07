@@ -18,6 +18,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="FirebaseAdmin" Version="3.0.1" />
+    <PackageReference Include="Google.Cloud.Storage.V1" Version="4.10.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.8">
       <PrivateAssets>all</PrivateAssets>
@@ -40,8 +42,19 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\HandmadeProductManagement.Repositories\HandmadeProductManagement.Repositories.csproj" />
     <ProjectReference Include="..\HandmadeProductManagement.Services\HandmadeProductManagement.Services.csproj" />
     <ProjectReference Include="..\HandmadeProductManagement.Validation\HandmadeProductManagement.Validation.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Migrations\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="handmade-product-bde7a-firebase-adminsdk-g3y5r-fd05db8476.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>

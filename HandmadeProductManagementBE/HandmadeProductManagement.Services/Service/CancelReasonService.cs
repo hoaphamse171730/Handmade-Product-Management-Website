@@ -24,25 +24,13 @@ namespace HandmadeProductManagement.Services.Service
             _updateValidator = updateValidator;
         }
 
-        // Get cancel reasons by page (only active records)
-        public async Task<IList<CancelReasonDto>> GetByPage(int page, int pageSize)
+        // Get all cancel reasons (only active records)
+        public async Task<IList<CancelReasonDto>> GetAll()
         {
-            if (page <= 0)
-            {
-                throw new BaseException.BadRequestException("invalid_input", "Page must be greater than 0.");
-            }
-
-            if (pageSize <= 0)
-            {
-                throw new BaseException.BadRequestException("invalid_input", "Page size must be greater than 0.");
-            }
-
             IQueryable<CancelReason> query = _unitOfWork.GetRepository<CancelReason>().Entities
                 .Where(cr => !cr.DeletedTime.HasValue || cr.DeletedBy == null);
 
             var cancelReasons = await query
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
                 .Select(cancelReason => new CancelReasonDto
                 {
                     Id = cancelReason.Id.ToString(),
@@ -56,7 +44,7 @@ namespace HandmadeProductManagement.Services.Service
         }
 
         // Create a new cancel reason
-        public async Task<bool> Create(CancelReasonForCreationDto cancelReason)
+        public async Task<bool> Create(CancelReasonForCreationDto cancelReason, string username)
         {
             // Validate
             var validationResult = await _creationValidator.ValidateAsync(cancelReason);
@@ -68,8 +56,8 @@ namespace HandmadeProductManagement.Services.Service
             var cancelReasonEntity = _mapper.Map<CancelReason>(cancelReason);
 
             // Set metadata
-            cancelReasonEntity.CreatedBy = "currentUser"; // Update with actual user info
-            cancelReasonEntity.LastUpdatedBy = "currentUser"; // Update with actual user info
+            cancelReasonEntity.CreatedBy = username;
+            cancelReasonEntity.LastUpdatedBy = username;
 
             await _unitOfWork.GetRepository<CancelReason>().InsertAsync(cancelReasonEntity);
             await _unitOfWork.SaveAsync();
@@ -78,7 +66,7 @@ namespace HandmadeProductManagement.Services.Service
         }
 
         // Update an existing cancel reason
-        public async Task<bool> Update(string id, CancelReasonForUpdateDto cancelReason)
+        public async Task<bool> Update(string id, CancelReasonForUpdateDto cancelReason, string username)
         {
             // Validate id format
             if (!Guid.TryParse(id, out var guidId))
@@ -101,7 +89,7 @@ namespace HandmadeProductManagement.Services.Service
             _mapper.Map(cancelReason, cancelReasonEntity);
 
             cancelReasonEntity.LastUpdatedTime = DateTime.UtcNow;
-            cancelReasonEntity.LastUpdatedBy = "user";
+            cancelReasonEntity.LastUpdatedBy = username;
 
             await _unitOfWork.GetRepository<CancelReason>().UpdateAsync(cancelReasonEntity);
             await _unitOfWork.SaveAsync();
@@ -110,7 +98,7 @@ namespace HandmadeProductManagement.Services.Service
         }
 
         // Soft delete 
-        public async Task<bool> Delete(string id)
+        public async Task<bool> Delete(string id, string username)
         {
             // Validate id format
             if (!Guid.TryParse(id, out var guidId))
@@ -125,7 +113,7 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.NotFoundException("not_found", "Cancel Reason not found");
             }
             cancelReasonEntity.DeletedTime = DateTime.UtcNow;
-            cancelReasonEntity.DeletedBy = "user";
+            cancelReasonEntity.DeletedBy = username;
 
             await cancelReasonRepo.UpdateAsync(cancelReasonEntity);
             await _unitOfWork.SaveAsync();

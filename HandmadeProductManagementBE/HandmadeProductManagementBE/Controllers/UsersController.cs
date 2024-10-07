@@ -111,20 +111,76 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
-        [HttpGet("{userId}/notification")]
-        public async Task<IActionResult> GetNotifications(string userId)
+        [HttpGet("{id}/notification_Review")]
+        public async Task<IActionResult> GetNotifications(string id)
         {
-                var notifications = await _userService.GetNotificationList(userId);
-              
-                var response = new BaseResponse<IList<NotificationModel>>
-                {
-                    Code = "200",
-                    StatusCode = StatusCodeHelper.OK,
-                    Data = await _userService.GetNotificationList(userId),
-                    Message = "Success",
-                };
-                return Ok(response);
+            var notifications = await _userService.GetNewReviewNotificationList(id);
+
+            var response = new BaseResponse<IList<NotificationModel>>
+            {
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Data = notifications,
+                Message = "Success",
+            };
+
+            // Kiểm tra xem notifications có dữ liệu hay không
+            if (notifications != null && notifications.Any())
+            {
+                response.Data = notifications; // Thêm dữ liệu vào phản hồi nếu có
+            }
+            else
+            {
+                response.Message = "No new reviews available"; // Thay đổi thông điệp nếu không có dữ liệu
+            }         
+            return Ok(response);
         }
+
+        [HttpGet("{id}/notification_statuschange")]
+        public async Task<IActionResult> GetNewStatusChangeNotification(string id)
+        {
+            var response = new BaseResponse<IList<NotificationModel>>
+            {
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Data = await _userService.GetNewStatusChangeNotificationList(id),
+                Message = "Success",
+            };
+            return Ok(response);
+        }
+
+        [HttpGet("{userId}/notification/new-order")]
+        public async Task<IActionResult> GetNewOrderNotifications(string userId)
+        {
+            var orderNotifications = await _userService.GetNewOrderNotificationList(userId);
+
+            var response = new BaseResponse<IList<NotificationModel>>
+            {
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Data = orderNotifications,
+                Message = "Success",
+            };
+
+            return Ok(response);
+        }
+
+        [HttpGet("{userId}/notification/new-reply")]
+        public async Task<IActionResult> GetNewReplyNotifications(string userId)
+        {
+            var replyNotifications = await _userService.GetNewReplyNotificationList(userId);
+
+            var response = new BaseResponse<IList<NotificationModel>>
+            {
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Data = replyNotifications,
+                Message = "Success",
+            };
+
+            return Ok(response);
+        }
+
 
         // POST: api/Users
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
