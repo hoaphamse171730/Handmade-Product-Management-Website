@@ -81,6 +81,7 @@ public class CartService : ICartService
             if (promotion != null)
             {
                 await _promotionService.UpdatePromotionStatusByRealtime(promotion.Id);
+
                 if(promotion.Status == "active"){
                     discountRate = 1 - (decimal)promotion.DiscountRate;
                 }            

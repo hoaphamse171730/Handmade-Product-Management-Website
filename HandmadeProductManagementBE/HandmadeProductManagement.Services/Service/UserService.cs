@@ -8,8 +8,6 @@ using Microsoft.EntityFrameworkCore;
 using FluentValidation;
 using HandmadeProductManagement.ModelViews.NotificationModelViews;
 using HandmadeProductManagement.Contract.Repositories.Entity;
-
-
 namespace HandmadeProductManagement.Services.Service
 {
     public class UserService : IUserService
@@ -100,7 +98,7 @@ namespace HandmadeProductManagement.Services.Service
             var user = await _unitOfWork.GetRepository<ApplicationUser>()
                 .Entities
                 .Where(u => u.Id == userId)
-                .FirstOrDefaultAsync(); 
+                .FirstOrDefaultAsync();
             //check user found
             if (user == null)
             {
@@ -115,7 +113,7 @@ namespace HandmadeProductManagement.Services.Service
             // check existing unique fields
             var existingUsername = await _unitOfWork.GetRepository<ApplicationUser>().Entities
                 .AnyAsync(u => u.UserName == updateUserDTO.UserName && u.Id != userId);
-            if(existingUsername)
+            if (existingUsername)
             {
                 throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Username already exists");
             }
@@ -210,7 +208,7 @@ namespace HandmadeProductManagement.Services.Service
 
             var replies = await _unitOfWork.GetRepository<Reply>()
                 .Entities
-                .Where(rep => reviews.Select(r => r.Id).Contains(rep.ReviewId)) 
+                .Where(rep => reviews.Select(r => r.Id).Contains(rep.ReviewId))
                 .ToListAsync();
 
             var nonReplies = reviews
