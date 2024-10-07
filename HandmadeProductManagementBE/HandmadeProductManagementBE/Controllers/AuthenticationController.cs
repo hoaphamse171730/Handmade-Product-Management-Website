@@ -1,4 +1,5 @@
 using System.Web;
+using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Common;
@@ -154,10 +155,15 @@ public class AuthenticationController(
             return BaseResponse<string>.OkResponse(user.Id.ToString());
         }
 
+        var errorMessages = result.Errors
+            .Select(e => e.Description)  
+            .ToList();  
+
         return new BaseResponse<string>()
         {
             StatusCode = StatusCodeHelper.BadRequest,
-            Message = result.Errors.ToString(),
+            Message = "User creation failed: " + string.Join("; ", errorMessages),
+            Data = null
         };
     }
 
