@@ -24,9 +24,9 @@ jobs:
         working-directory: HandmadeProductManagementBE
 
       - name: Build solution
-        run: dotnet build --configuration Release --no-restore
+        run: dotnet build
         working-directory: HandmadeProductManagementBE
 
       - name: Run tests
-        run: dotnet test --no-build --verbosity normal
-        working-directory: PromotionControllerTests
+        run: dotnet test
+        working-directory: HandmadeProductManagementBE
