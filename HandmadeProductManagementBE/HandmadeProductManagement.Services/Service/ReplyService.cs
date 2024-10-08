@@ -72,7 +72,7 @@ namespace HandmadeProductManagement.Services.Service
             };
         }
 
-        public async Task<bool> CreateAsync(ReplyModel replyModel)
+        public async Task<bool> CreateAsync(ReplyModel replyModel, Guid userId)
         {
             if (replyModel == null)
             {
@@ -90,18 +90,14 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.NotFoundException("review_not_found", "Review not found.");
             }
 
-            if (string.IsNullOrWhiteSpace(replyModel.ShopId) || !Guid.TryParse(replyModel.ShopId, out _))
-            {
-                throw new BaseException.BadRequestException("invalid_shop_id_format", "Invalid shopId format.");
-            }
-
             var shop = await _unitOfWork.GetRepository<Shop>()
-                                 .Entities
-                                 .FirstOrDefaultAsync(s => s.Id == replyModel.ShopId);
+                             .Entities
+                             .FirstOrDefaultAsync(s => s.UserId == userId);
             if (shop == null)
             {
-                throw new BaseException.NotFoundException("shop_not_found", "Shop not found.");
+                throw new BaseException.UnauthorizedException("unauthorized_shop_access", "User does not own this shop.");
             }
+            replyModel.ShopId = shop.Id;
 
             var product = await _unitOfWork.GetRepository<Product>()
                                            .Entities
@@ -135,7 +131,7 @@ namespace HandmadeProductManagement.Services.Service
             return true;
         }
 
-        public async Task<bool> UpdateAsync(string replyId, string shopId, ReplyModel updatedReply)
+        public async Task<bool> UpdateAsync(string replyId, Guid userId, ReplyModel updatedReply)
         {
             if (string.IsNullOrWhiteSpace(replyId))
             {
@@ -148,23 +144,13 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.NotFoundException("reply_not_found", "Reply not found.");
             }
 
-            if (string.IsNullOrWhiteSpace(updatedReply.ShopId) || !Guid.TryParse(updatedReply.ShopId, out _))
-            {
-                throw new BaseException.BadRequestException("invalid_shop_id_format", "Invalid shopId format.");
-            }
-
-            // Validate that only the shop that created the reply can update it
-            if (existingReply.ShopId != updatedReply.ShopId)
-            {
-                throw new BaseException.BadRequestException("unauthorized_update", "Only the shop that created this reply can update it.");
-            }
-
             var shop = await _unitOfWork.GetRepository<Shop>()
-                         .Entities
-                         .FirstOrDefaultAsync(s => s.Id == updatedReply.ShopId);
-            if (shop == null)
+                             .Entities
+                             .FirstOrDefaultAsync(s => s.UserId == userId);
+
+            if (shop == null || shop.Id != existingReply.ShopId)
             {
-                throw new BaseException.NotFoundException("shop_not_found", "Shop not found.");
+                throw new BaseException.UnauthorizedException("unauthorized_update", "User does not own the shop associated with this reply.");
             }
 
             // Validate that the reply belongs to the product associated with the review
@@ -196,7 +182,7 @@ namespace HandmadeProductManagement.Services.Service
             return true;
         }
 
-        public async Task<bool> DeleteAsync(string replyId, string shopId)
+        public async Task<bool> DeleteAsync(string replyId, Guid userId)
         {
             if (string.IsNullOrWhiteSpace(replyId))
             {
@@ -209,13 +195,13 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.NotFoundException("reply_not_found", "Reply not found.");
             }
 
-            // Validate that only the shop that created the reply can delete it
             var shop = await _unitOfWork.GetRepository<Shop>()
-                                         .Entities
-                                         .FirstOrDefaultAsync(s => s.Id == existingReply.ShopId);
-            if (shop == null)
+                             .Entities
+                             .FirstOrDefaultAsync(s => s.UserId == userId);
+
+            if (shop == null || shop.Id != existingReply.ShopId)
             {
-                throw new BaseException.NotFoundException("shop_not_found", "Shop not found.");
+                throw new BaseException.UnauthorizedException("unauthorized_delete", "User does not own the shop associated with this reply.");
             }
 
             existingReply.DeletedTime = DateTimeOffset.UtcNow;
@@ -225,7 +211,7 @@ namespace HandmadeProductManagement.Services.Service
             return true;
         }
 
-        public async Task<bool> SoftDeleteAsync(string replyId, string shopId)
+        public async Task<bool> SoftDeleteAsync(string replyId, Guid userId)
         {
             if (string.IsNullOrWhiteSpace(replyId))
             {
@@ -238,13 +224,13 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.NotFoundException("reply_not_found", "Reply not found.");
             }
 
-            // Validate that only the shop that created the reply can soft delete it
             var shop = await _unitOfWork.GetRepository<Shop>()
-                                 .Entities
-                                 .FirstOrDefaultAsync(s => s.Id == existingReply.ShopId);
-            if (shop == null)
+                             .Entities
+                             .FirstOrDefaultAsync(s => s.UserId == userId);
+
+            if (shop == null || shop.Id != existingReply.ShopId)
             {
-                throw new BaseException.NotFoundException("shop_not_found", "Shop not found.");
+                throw new BaseException.UnauthorizedException("unauthorized_delete", "User does not own the shop associated with this reply.");
             }
 
 

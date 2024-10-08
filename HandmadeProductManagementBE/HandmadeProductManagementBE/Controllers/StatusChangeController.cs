@@ -3,6 +3,7 @@ using HandmadeProductManagement.Core.Base;
 using Microsoft.AspNetCore.Mvc;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.StatusChangeModelViews;
+using Microsoft.AspNetCore.Authorization;
 
 namespace HandmadeProductManagementAPI.Controllers
 {
@@ -17,7 +18,7 @@ namespace HandmadeProductManagementAPI.Controllers
             _statusChangeService = statusChangeService;
         }
 
-       
+        [Authorize]
         [HttpGet("page")]
         public async Task<IActionResult> GetByPage([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
@@ -31,7 +32,7 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
-     
+        [Authorize]
         [HttpGet("Order/{orderId}")]
         public async Task<IActionResult> GetStatusChangesByOrderId(string orderId)
         {
@@ -45,50 +46,53 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
-    
-        [HttpPost]
-        public async Task<IActionResult> CreateStatusChange([FromBody] StatusChangeForCreationDto statusChange)
-        {
-            var result = await _statusChangeService.Create(statusChange);
-            var response = new BaseResponse<bool>
-            {
-                Code = "Success",
-                StatusCode = StatusCodeHelper.OK,
-                Message = "Created Status Change successfully!",
-                Data = result
-            };
-            return Ok(response);
-        }
+        //[Authorize(Roles = "Admin")]
+        //[HttpPost]
+        //public async Task<IActionResult> CreateStatusChange([FromBody] StatusChangeForCreationDto statusChange)
+        //{
+        //    var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
+        //    var result = await _statusChangeService.Create(statusChange, username);
+        //    var response = new BaseResponse<bool>
+        //    {
+        //        Code = "Success",
+        //        StatusCode = StatusCodeHelper.OK,
+        //        Message = "Created Status Change successfully!",
+        //        Data = result
+        //    };
+        //    return Ok(response);
+        //}
 
-      
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateStatusChange(string id, [FromBody] StatusChangeForUpdateDto updatedStatusChange)
-        {
-            var result = await _statusChangeService.Update(id, updatedStatusChange);
-            var response = new BaseResponse<bool>
-            {
-                Code = "Success",
-                StatusCode = StatusCodeHelper.OK,
-                Message = "Updated Status Change successfully!",
-                Data = result
-            };
-            return Ok(response);
-        }
+        //[Authorize(Roles = "Admin")]
+        //[HttpPut("{id}")]
+        //public async Task<IActionResult> UpdateStatusChange(string id, [FromBody] StatusChangeForUpdateDto updatedStatusChange)
+        //{
+        //    var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
+        //    var result = await _statusChangeService.Update(id, updatedStatusChange, username);
+        //    var response = new BaseResponse<bool>
+        //    {
+        //        Code = "Success",
+        //        StatusCode = StatusCodeHelper.OK,
+        //        Message = "Updated Status Change successfully!",
+        //        Data = result
+        //    };
+        //    return Ok(response);
+        //}
 
-     
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteStatusChange(string id)
-        {
-            await _statusChangeService.Delete(id);
+        //[Authorize(Roles = "Admin")]
+        //[HttpDelete("{id}")]
+        //public async Task<IActionResult> DeleteStatusChange(string id)
+        //{
+        //    var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
+        //    await _statusChangeService.Delete(id, username);
 
-            var response = new BaseResponse<string>
-            {
-                Code = "Success",
-                StatusCode = StatusCodeHelper.OK,
-                Message = $"Status Change with ID {id} has been successfully deleted.",
-                Data = null
-            };
-            return Ok(response);
-        }
+        //    var response = new BaseResponse<string>
+        //    {
+        //        Code = "Success",
+        //        StatusCode = StatusCodeHelper.OK,
+        //        Message = $"Status Change with ID {id} has been successfully deleted.",
+        //        Data = null
+        //    };
+        //    return Ok(response);
+        //}
     }
 }

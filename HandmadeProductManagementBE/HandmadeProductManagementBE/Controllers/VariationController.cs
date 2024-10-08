@@ -2,13 +2,13 @@
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.VariationModelViews;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace HandmadeProductManagementAPI.Controllers
 {
-    [ApiController]
     [Route("api/[controller]")]
+    [ApiController]
     public class VariationController : ControllerBase
     {
         private readonly IVariationService _variationService;
@@ -32,6 +32,7 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
+
         // GET: api/variation/category/{categoryId}
         [HttpGet("category/{categoryId}")]
         public async Task<IActionResult> GetByCategoryId(string categoryId)
@@ -46,44 +47,31 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
+        [Authorize(Roles = "Admin")]
         // POST: api/variation
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] VariationForCreationDto variation)
         {
-            try
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var result = await _variationService.Create(variation, userId);
+
+            var response = new BaseResponse<bool>
             {
-                var result = await _variationService.Create(variation);
-
-                var response = new BaseResponse<bool>
-                {
-                    Code = "Success",
-                    StatusCode = StatusCodeHelper.OK,
-                    Message = "Variation created successfully.",
-                    Data = result
-                };
-                return Ok(response);
-            }
-            catch (DbUpdateException ex)
-            {
-                var innerExceptionMessage = ex.InnerException?.Message ?? ex.Message;
-
-                var errorResponse = new BaseResponse<string>
-                {
-                    Code = "DbUpdateException",
-                    StatusCode = StatusCodeHelper.ServerError,
-                    Message = $"An error occurred while saving the entity changes: {innerExceptionMessage}",
-                    Data = innerExceptionMessage
-                };
-
-                return StatusCode(StatusCodes.Status500InternalServerError, errorResponse);
-            }
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Variation created successfully.",
+                Data = result
+            };
+            return Ok(response);
         }
 
+        [Authorize(Roles = "Admin")]
         // PUT: api/variation/{id}
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(string id, [FromBody] VariationForUpdateDto variation)
         {
-            var result = await _variationService.Update(id, variation);
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var result = await _variationService.Update(id, variation, userId);
 
             var response = new BaseResponse<bool>
             {
@@ -95,11 +83,13 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
+        [Authorize(Roles = "Admin")]
         // DELETE: api/variation/{id}
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(string id)
         {
-            var result = await _variationService.Delete(id);
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var result = await _variationService.Delete(id, userId);
 
             var response = new BaseResponse<bool>
             {

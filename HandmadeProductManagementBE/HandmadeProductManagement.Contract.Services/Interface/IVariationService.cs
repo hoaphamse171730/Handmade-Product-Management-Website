@@ -6,8 +6,8 @@ namespace HandmadeProductManagement.Contract.Services.Interface
     {
         Task<IList<VariationDto>> GetByCategoryId(string id);
         Task<IList<VariationDto>> GetByPage(int page, int pageSize);
-        Task<bool> Create(VariationForCreationDto cancelReason);
-        Task<bool> Update(string id, VariationForUpdateDto cancelReason);
-        Task<bool> Delete(string id);
+        Task<bool> Create(VariationForCreationDto cancelReason, string userId);
+        Task<bool> Update(string id, VariationForUpdateDto cancelReason, string username);
+        Task<bool> Delete(string id, string userId);
     }
 }

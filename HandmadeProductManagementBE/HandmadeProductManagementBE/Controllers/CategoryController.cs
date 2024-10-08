@@ -2,6 +2,7 @@
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.ModelViews.CategoryModelViews;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -14,7 +15,10 @@ namespace HandmadeProductManagementAPI.Controllers
     {
         private readonly ICategoryService _categoryService;
 
-        public CategoryController(ICategoryService categoryService) => _categoryService = categoryService;
+        public CategoryController(ICategoryService categoryService) 
+        {
+            _categoryService = categoryService;
+        }
 
         [HttpGet]
         [Authorize]
@@ -36,8 +40,23 @@ namespace HandmadeProductManagementAPI.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateCategory(CategoryForCreationDto categoryForCreation)
         {
-            var result = await _categoryService.Create(categoryForCreation);
-            return Ok(BaseResponse<CategoryDto>.OkResponse(result));
+            try
+            {
+                var result = await _categoryService.Create(categoryForCreation);
+                return Ok(BaseResponse<CategoryDto>.OkResponse(result));
+            }
+            catch (DbUpdateException dbEx)
+            {
+                var innerException = dbEx.InnerException?.Message;
+                return StatusCode(500, new
+                {
+                    title = "DbUpdateException",
+                    status = 500,
+                    detail = "An error occurred while saving the entity changes. See the inner exception for details.",
+                    instance = HttpContext.Request.Path,
+                    innerException
+                });
+            }
         }
 
         [HttpPut("{categoryId}")]

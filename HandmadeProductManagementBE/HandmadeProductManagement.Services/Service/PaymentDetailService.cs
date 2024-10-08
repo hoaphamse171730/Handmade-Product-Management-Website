@@ -21,12 +21,12 @@ namespace HandmadeProductManagement.Services.Service
             _paymentService = paymentService;
         }
 
-        public async Task<bool> CreatePaymentDetailAsync(CreatePaymentDetailDto createPaymentDetailDto)
+        public async Task<bool> CreatePaymentDetailAsync(string userId, CreatePaymentDetailDto createPaymentDetailDto)
         {
             ValidatePaymentDetail(createPaymentDetailDto);
 
             var userRepository = _unitOfWork.GetRepository<ApplicationUser>();
-            var userExists = await userRepository.Entities.AnyAsync(u => u.Id.ToString() == createPaymentDetailDto.UserId && !u.DeletedTime.HasValue);
+            var userExists = await userRepository.Entities.AnyAsync(u => u.Id.ToString() == userId && !u.DeletedTime.HasValue);
             if (!userExists)
             {
                 throw new BaseException.NotFoundException("user_not_found", "User not found.");
@@ -40,7 +40,7 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.NotFoundException("payment_not_found", "Payment not found.");
             }
 
-            await _paymentService.UpdatePaymentStatusAsync(createPaymentDetailDto.PaymentId, "Processing");
+            await _paymentService.UpdatePaymentStatusAsync(createPaymentDetailDto.PaymentId, "Processing", userId);
 
             var invalidStatuses = new[] { "Completed", "Expired", "Refunded", "Closed" };
             if (invalidStatuses.Contains(payment.Status))
@@ -58,88 +58,18 @@ namespace HandmadeProductManagement.Services.Service
                 ExternalTransaction = createPaymentDetailDto.ExternalTransaction
             };
 
+            paymentDetail.CreatedBy = userId;
+            paymentDetail.LastUpdatedBy = userId;
             await paymentDetailRepository.InsertAsync(paymentDetail);
             await _unitOfWork.SaveAsync();
 
             if (createPaymentDetailDto.Status == "Success")
             {
-                await _paymentService.UpdatePaymentStatusAsync(createPaymentDetailDto.PaymentId, "Completed");
+                await _paymentService.UpdatePaymentStatusAsync(createPaymentDetailDto.PaymentId, "Completed", userId);
             }
 
             return true;
         }
-
-        public async Task<PaymentDetailResponseModel> GetPaymentDetailByPaymentIdAsync(string paymentId)
-        {
-            if (string.IsNullOrWhiteSpace(paymentId))
-            {
-                throw new BaseException.BadRequestException("invalid_payment_id", "Please input payment id.");
-            }
-
-            if (!Guid.TryParse(paymentId, out _))
-            {
-                throw new BaseException.BadRequestException("invalid_payment_id_format", "Payment ID format is invalid. Example: 123e4567-e89b-12d3-a456-426614174000.");
-            }
-
-            var paymentRepository = _unitOfWork.GetRepository<Payment>();
-            var paymentExists = await paymentRepository.Entities
-                .AnyAsync(p => p.Id == paymentId && !p.DeletedTime.HasValue);
-
-            if (!paymentExists)
-            {
-                throw new BaseException.NotFoundException("payment_not_found", "Payment not found.");
-            }
-
-            var paymentDetailRepository = _unitOfWork.GetRepository<PaymentDetail>();
-            var paymentDetail = await paymentDetailRepository.Entities
-                .FirstOrDefaultAsync(pd => pd.PaymentId == paymentId && !pd.DeletedTime.HasValue);
-
-            if (paymentDetail == null)
-            {
-                throw new BaseException.NotFoundException("payment_detail_not_found", "Payment detail not found.");
-            }
-
-            return new PaymentDetailResponseModel
-            {
-                Id = paymentDetail.Id,
-                PaymentId = paymentDetail.PaymentId,
-                Status = paymentDetail.Status,
-                Method = paymentDetail.Method,
-                ExternalTransaction = paymentDetail.ExternalTransaction
-            };
-        }
-
-        public async Task<PaymentDetailResponseModel> GetPaymentDetailByIdAsync(string id)
-        {
-            if (string.IsNullOrWhiteSpace(id))
-            {
-                throw new BaseException.BadRequestException("invalid_id", "Please input id.");
-            }
-
-            if (!Guid.TryParse(id, out _))
-            {
-                throw new BaseException.BadRequestException("invalid_id_format", "ID format is invalid. Example: 123e4567-e89b-12d3-a456-426614174000.");
-            }
-
-            var paymentDetailRepository = _unitOfWork.GetRepository<PaymentDetail>();
-            var paymentDetail = await paymentDetailRepository.Entities
-                .FirstOrDefaultAsync(pd => pd.Id == id && !pd.DeletedTime.HasValue);
-
-            if (paymentDetail == null)
-            {
-                throw new BaseException.NotFoundException("payment_detail_not_found", "Payment detail not found.");
-            }
-
-            return new PaymentDetailResponseModel
-            {
-                Id = paymentDetail.Id,
-                PaymentId = paymentDetail.PaymentId,
-                Status = paymentDetail.Status,
-                Method = paymentDetail.Method,
-                ExternalTransaction = paymentDetail.ExternalTransaction
-            };
-        }
-
         private void ValidatePaymentDetail(CreatePaymentDetailDto createPaymentDetailDto)
         {
             if (string.IsNullOrWhiteSpace(createPaymentDetailDto.PaymentId))
@@ -150,16 +80,6 @@ namespace HandmadeProductManagement.Services.Service
             if (!Guid.TryParse(createPaymentDetailDto.PaymentId, out _))
             {
                 throw new BaseException.BadRequestException("invalid_payment_id_format", "Payment ID format is invalid. Example: 123e4567-e89b-12d3-a456-426614174000.");
-            }
-
-            if (string.IsNullOrWhiteSpace(createPaymentDetailDto.UserId))
-            {
-                throw new BaseException.BadRequestException("invalid_user_id", "Please input user id.");
-            }
-
-            if (!Guid.TryParse(createPaymentDetailDto.UserId, out _))
-            {
-                throw new BaseException.BadRequestException("invalid_user_id_format", "User ID format is invalid. Example: 123e4567-e89b-12d3-a456-426614174000.");
             }
 
             if (string.IsNullOrWhiteSpace(createPaymentDetailDto.Status))

@@ -29,6 +29,8 @@ using HandmadeProductManagement.Validation.VariationOption;
 using HandmadeProductManagementAPI.BackgroundServices;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
+using HandmadeProductManagement.ModelViews.CategoryModelViews;
+using HandmadeProductManagement.Validation.Category;
 
 namespace HandmadeProductManagementAPI.Extensions;
 
@@ -80,6 +82,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IUserAgentService, UserAgentService>();
         services.AddScoped<IDashboardService, DashboardService>();
+        services.AddScoped<IProductImageService, ProductImageService>();
         return services;
     }
 
@@ -103,6 +106,7 @@ public static class ApplicationServiceExtensions
         #region User
         services.AddScoped<IValidator<UpdateUserDTO>, UpdateUserDTOValidator>();
         #endregion
+
         #region CancelReason
         services.AddScoped<IValidator<CancelReasonForCreationDto>, CancelReasonForCreationDtoValidator>();
         services.AddScoped<IValidator<CancelReasonForUpdateDto>, CancelReasonForUpdateDtoValidator>();
@@ -121,6 +125,11 @@ public static class ApplicationServiceExtensions
         #region VariationOption
         services.AddScoped<IValidator<VariationOptionForCreationDto>, VariationOptionForCreationDtoValidator>();
         services.AddScoped<IValidator<VariationOptionForUpdateDto>, VariationOptionForUpdateDtoValidator>();
+        #endregion
+
+        #region Category
+        services.AddScoped<IValidator<CategoryForCreationDto>, CategoryForCreationDtoValidator>();
+        services.AddScoped<IValidator<CategoryForUpdateDto>, CategoryForUpdateDtoValidator>();
         #endregion
     }
 

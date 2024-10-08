@@ -8,6 +8,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.NotificationModelViews;
+using Microsoft.AspNetCore.Authorization;
 namespace HandmadeProductManagementAPI.Controllers
 {
     [Route("api/[controller]")]
@@ -110,21 +111,94 @@ namespace HandmadeProductManagementAPI.Controllers
             };
             return Ok(response);
         }
-
-        [HttpGet("{userId}/notification")]
-        public async Task<IActionResult> GetNotifications(string userId)
+        [Authorize(Roles = "Admin, Seller")]
+        [HttpGet("notification_review")]
+        public async Task<IActionResult> GetNotifications()
         {
-                var notifications = await _userService.GetNotificationList(userId);
-              
-                var response = new BaseResponse<IList<NotificationModel>>
-                {
-                    Code = "200",
-                    StatusCode = StatusCodeHelper.OK,
-                    Data = await _userService.GetNotificationList(userId),
-                    Message = "Success",
-                };
-                return Ok(response);
+            var id = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var notifications = await _userService.GetNewReviewNotificationList(id);
+
+            var response = new BaseResponse<IList<NotificationModel>>
+            {
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Data = notifications,
+                Message = "Success",
+            };
+
+            // Kiểm tra xem notifications có dữ liệu hay không
+            if (notifications != null && notifications.Any())
+            {
+                response.Data = notifications; // Thêm dữ liệu vào phản hồi nếu có
+            }
+            else
+            {
+                response.Message = "No new reviews available"; // Thay đổi thông điệp nếu không có dữ liệu
+            }
+         
+            return Ok(response);
         }
+
+
+        [Authorize(Roles = "Admin, Customer, Seller")]
+        [HttpGet("notification_statuschange")]
+        public async Task<IActionResult> GetNewStatusChangeNotification()
+        {
+            var id = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+            var response = new BaseResponse<IList<NotificationModel>>
+            {
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Data = await _userService.GetNewStatusChangeNotificationList(id),
+                Message = "Success",
+            };
+            return Ok(response);
+        }
+
+        [HttpGet("notification/new-order")]
+        [Authorize]
+        public async Task<IActionResult> GetNewOrderNotifications()
+        {
+            // Lấy thông tin người dùng từ token
+            var userIdFromToken = User.FindFirstValue(ClaimTypes.NameIdentifier); // Giả sử NameIdentifier là claim cho userId
+            var userFullNameFromToken = User.FindFirstValue(ClaimTypes.Name); // Giả sử Name là claim cho tên đầy đủ của người dùng
+
+            // Lấy danh sách thông báo đơn hàng mới
+            var orderNotifications = await _userService.GetNewOrderNotificationList(userIdFromToken);
+
+            var response = new BaseResponse<IList<NotificationModel>>
+            {
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Data = orderNotifications,
+                Message = "Thành công",
+            };
+
+            return Ok(response);
+        }
+
+        [HttpGet("notification/new-reply")]
+        [Authorize]
+        public async Task<IActionResult> GetNewReplyNotifications()
+        {
+            // Lấy thông tin người dùng từ token
+            var userIdFromToken = User.FindFirstValue(ClaimTypes.NameIdentifier); // Giả sử NameIdentifier là claim cho userId
+
+            // Lấy danh sách thông báo phản hồi mới
+            var replyNotifications = await _userService.GetNewReplyNotificationList(userIdFromToken);
+
+            var response = new BaseResponse<IList<NotificationModel>>
+            {
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Data = replyNotifications,
+                Message = "Thành công",
+            };
+
+            return Ok(response);
+        }
+
 
         // POST: api/Users
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754

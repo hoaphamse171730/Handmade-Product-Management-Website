@@ -47,18 +47,19 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
-
+        [Authorize]
         [HttpPost]
-        public async Task<IActionResult> Create([Required] string content, [Required] string reviewId, [Required] string shopId)
+        public async Task<IActionResult> Create([Required] string content, [Required] string reviewId)
         {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
             var replyModel = new ReplyModel
             {
                 Content = content,
                 ReviewId = reviewId,
-                ShopId = shopId
             };
 
-            var createdReply = await _replyService.CreateAsync(replyModel);
+            var createdReply = await _replyService.CreateAsync(replyModel, Guid.Parse(userId));
             var response = new BaseResponse<bool>
             {
                 Code = "Success",
@@ -69,16 +70,18 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
+        [Authorize]
         [HttpPut("{replyId}")]
-        public async Task<IActionResult> Update([Required] string replyId, [Required] string content, [Required] string shopId)
+        public async Task<IActionResult> Update([Required] string replyId, [Required] string content)
         {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
             var replyModel = new ReplyModel
             {
-                Content = content,
-                ShopId = shopId
+                Content = content
             };
 
-            var updatedReply = await _replyService.UpdateAsync(replyId, shopId, replyModel);
+            var updatedReply = await _replyService.UpdateAsync(replyId, Guid.Parse(userId), replyModel);
             var response = new BaseResponse<ReplyModel>
             {
                 Code = "Success",
@@ -88,10 +91,13 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
+        [Authorize]
         [HttpDelete("{replyId}")]
-        public async Task<IActionResult> Delete([Required] string replyId, [Required] string shopId)
+        public async Task<IActionResult> Delete([Required] string replyId)
         {
-            var result = await _replyService.DeleteAsync(replyId, shopId);
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+            var result = await _replyService.DeleteAsync(replyId, Guid.Parse(userId));
             var response = new BaseResponse<bool>
             {
                 Code = "Success",
@@ -101,10 +107,13 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
+        [Authorize]
         [HttpDelete("{replyId}/soft-delete")]
-        public async Task<IActionResult> SoftDelete(string replyId, [Required] string shopId)
+        public async Task<IActionResult> SoftDelete([Required] string replyId)
         {
-            var result = await _replyService.SoftDeleteAsync(replyId, shopId);
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+            var result = await _replyService.SoftDeleteAsync(replyId, Guid.Parse(userId));
             var response = new BaseResponse<bool>
             {
                 Code = "Success",
