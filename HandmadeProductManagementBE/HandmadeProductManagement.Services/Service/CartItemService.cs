@@ -145,4 +145,25 @@ public class CartItemService : ICartItemService
         }
     }
 
+    public async Task<List<CartItemModel>> GetCartItemsByUserIdAsync(string userId)
+    {
+        var cartRepo = _unitOfWork.GetRepository<Cart>();
+        var cart = await cartRepo.Entities
+            .Include(c => c.CartItems)
+            .SingleOrDefaultAsync(c => c.UserId.ToString() == userId);
+
+        if (cart == null)
+        {
+            throw new Exception($"Cart for user {userId} not found.");
+        }
+
+        var cartItemModels = cart.CartItems.Select(ci => new CartItemModel
+        {
+            CartItemId = ci.Id.ToString(),
+            ProductItemId = ci.ProductItemId.ToString(),
+            ProductQuantity = ci.ProductQuantity
+        }).ToList();
+
+        return cartItemModels;
+    }
 }

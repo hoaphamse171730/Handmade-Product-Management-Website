@@ -21,8 +21,8 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [Authorize]
-        [HttpPost]
-        public async Task<IActionResult> CreatePayment([FromBody] string orderId)
+        [HttpPost("{orderId}")]
+        public async Task<IActionResult> CreatePayment(string orderId)
         {
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             var createdPayment = await _paymentService.CreatePaymentAsync(userId, orderId);
@@ -39,8 +39,8 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpPut("{paymentId}/status")]
         public async Task<IActionResult> UpdatePaymentStatus(string paymentId, [FromBody] string status)
         {
-            var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
-            var updatedPayment = await _paymentService.UpdatePaymentStatusAsync(paymentId, status, "system");
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var updatedPayment = await _paymentService.UpdatePaymentStatusAsync(paymentId, status, userId);
             var response = new BaseResponse<bool>
             {
                 Code = "Success",
