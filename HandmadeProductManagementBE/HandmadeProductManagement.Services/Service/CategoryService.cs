@@ -50,6 +50,9 @@ namespace HandmadeProductManagement.Services.Service
                 throw new ValidationException(validationResult.Errors);
             var categoryEntity = _mapper.Map<Category>(category);
             categoryEntity.CreatedTime = DateTime.UtcNow;
+            categoryEntity.Status = "active";
+            categoryEntity.CreatedBy = "currentUser";
+            categoryEntity.LastUpdatedBy = "currentUser";
             await _unitOfWork.GetRepository<Category>().InsertAsync(categoryEntity);
             await _unitOfWork.SaveAsync();
             return _mapper.Map<CategoryDto>(categoryEntity);
@@ -66,6 +69,7 @@ namespace HandmadeProductManagement.Services.Service
                 throw new KeyNotFoundException("Category not found");
             _mapper.Map(category, categoryEntity);
             categoryEntity.LastUpdatedTime = DateTime.UtcNow;
+
             await _unitOfWork.GetRepository<Category>().UpdateAsync(categoryEntity);
             await _unitOfWork.SaveAsync();
             return _mapper.Map<CategoryDto>(categoryEntity);
