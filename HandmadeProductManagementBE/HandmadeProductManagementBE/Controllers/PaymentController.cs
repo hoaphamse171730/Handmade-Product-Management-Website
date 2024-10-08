@@ -2,6 +2,7 @@
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.PaymentModelViews;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
@@ -19,10 +20,12 @@ namespace HandmadeProductManagementAPI.Controllers
             _paymentService = paymentService;
         }
 
+        [Authorize]
         [HttpPost]
-        public async Task<IActionResult> CreatePayment([FromBody] CreatePaymentDto createPaymentDto)
+        public async Task<IActionResult> CreatePayment([FromBody] string orderId)
         {
-            var createdPayment = await _paymentService.CreatePaymentAsync(createPaymentDto);
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var createdPayment = await _paymentService.CreatePaymentAsync(userId, orderId);
             var response = new BaseResponse<bool>
             {
                 Code = "Success",
@@ -36,7 +39,8 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpPut("{paymentId}/status")]
         public async Task<IActionResult> UpdatePaymentStatus(string paymentId, [FromBody] string status)
         {
-            var updatedPayment = await _paymentService.UpdatePaymentStatusAsync(paymentId, status);
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var updatedPayment = await _paymentService.UpdatePaymentStatusAsync(paymentId, status, userId);
             var response = new BaseResponse<bool>
             {
                 Code = "Success",
@@ -47,6 +51,7 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
+        [Authorize]
         [HttpGet("order/{orderId}")]
         public async Task<IActionResult> GetPaymentByOrderId(string orderId)
         {

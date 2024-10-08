@@ -156,8 +156,8 @@ public class AuthenticationController(
         }
 
         var errorMessages = result.Errors
-            .Select(e => e.Description)  
-            .ToList();  
+            .Select(e => e.Description)
+            .ToList();
 
         return new BaseResponse<string>()
         {

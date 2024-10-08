@@ -53,5 +53,10 @@ namespace HandmadeProductManagement.Core.Base
         {
             return new BaseResponse<T>(statusCode, code, message);
         }
+
+        public static implicit operator BaseResponse<T>(BaseResponse<bool> v)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
