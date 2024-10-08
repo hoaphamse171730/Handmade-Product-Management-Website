@@ -6,6 +6,8 @@ using HandmadeProductManagement.Contract.Services;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.UserModelViews;
 using HandmadeProductManagement.Services.Service;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace HandmadeProductManagementAPI.Controllers
 {
@@ -22,10 +24,21 @@ namespace HandmadeProductManagementAPI.Controllers
             _cartItemService = cartItemService;
         }
 
-        [HttpGet("{userId}")]
-        public async Task<IActionResult> GetCart(Guid userId)
+        [HttpGet("cart")]
+        [Authorize]
+        public async Task<IActionResult> GetCart()
         {
-                var cart = await _cartService.GetCartByUserId(userId);
+            // Lấy thông tin userId từ token
+            var userIdFromToken = User.FindFirstValue(ClaimTypes.NameIdentifier); // Giả sử NameIdentifier là claim cho userId
+
+            if (!Guid.TryParse(userIdFromToken, out Guid userId))
+            {
+                return BadRequest(new { Message = "Invalid User ID" });
+            }
+
+            // Lấy giỏ hàng dựa trên userId
+            var cart = await _cartService.GetCartByUserId(userId);
+
             return Ok(BaseResponse<CartModel>.OkResponse(cart));
         }
 
