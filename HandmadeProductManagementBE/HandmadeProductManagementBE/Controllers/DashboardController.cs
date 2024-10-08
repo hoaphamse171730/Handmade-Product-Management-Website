@@ -2,6 +2,7 @@
 using HandmadeProductManagement.Contract.Services.Interface;
     using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.ModelViews.DashboardModelViews;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
     namespace HandmadeProductManagementAPI.Controllers
@@ -9,7 +10,8 @@ using Microsoft.AspNetCore.Mvc;
 
         [Route("api/[controller]")]
         [ApiController]
-        public class DashboardController : ControllerBase
+    
+    public class DashboardController : ControllerBase
         {
             private readonly IDashboardService _dashboardService;
 
@@ -19,6 +21,7 @@ using Microsoft.AspNetCore.Mvc;
             }
 
         [HttpGet("total-orders")]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult>GetTotalOrders()
         {
             int totalOrders = await _dashboardService.GetTotalOrders();
@@ -27,6 +30,7 @@ using Microsoft.AspNetCore.Mvc;
             }
 
         [HttpGet("total-products")]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> GetTotalProducts()
         {
             int totalProduct = await _dashboardService.GetTotalProducts();
@@ -35,6 +39,7 @@ using Microsoft.AspNetCore.Mvc;
         }
 
         [HttpGet("total-sales")]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> GetTotalSales()
         {
             decimal totalSales = await _dashboardService.GetTotalSales();
@@ -43,6 +48,7 @@ using Microsoft.AspNetCore.Mvc;
         }
 
         [HttpGet("top10-shops")]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> GetTop10Shops()
         {
            List<Shop> topShops = await _dashboardService.GetTop10Shops();
@@ -51,6 +57,7 @@ using Microsoft.AspNetCore.Mvc;
 
         }
         [HttpPost("TotalSaleById")]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> TotalSaleByShopId(string Id, DashboardDTO dashboardDTO)
         {
             decimal totalSale = await _dashboardService.GetTotalSaleByShopId(Id, dashboardDTO);
@@ -58,6 +65,7 @@ using Microsoft.AspNetCore.Mvc;
             return Ok(BaseResponse<decimal>.OkResponse(totalSale)); 
         }
         [HttpPost("TopSellingProducts")]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> TopSellingProducts()
         {
             List<Product> topSellingProducts = await _dashboardService.GetTopSellingProducts();

@@ -110,7 +110,7 @@ namespace HandmadeProductManagementAPI.Controllers
             };
             return Ok(response);
         }
-
+/*
         [HttpGet("{id}/notification_Review")]
         public async Task<IActionResult> GetNotifications(string id)
         {
@@ -134,7 +134,7 @@ namespace HandmadeProductManagementAPI.Controllers
                 response.Message = "No new reviews available"; // Thay đổi thông điệp nếu không có dữ liệu
             }         
             return Ok(response);
-        }
+        }*/
 
 
         [HttpGet("{userId}/notification/new-order")]
