@@ -40,7 +40,7 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.NotFoundException("payment_not_found", "Payment not found.");
             }
 
-            await _paymentService.UpdatePaymentStatusAsync(createPaymentDetailDto.PaymentId, "Processing", "system");
+            await _paymentService.UpdatePaymentStatusAsync(createPaymentDetailDto.PaymentId, "Processing", userId);
 
             var invalidStatuses = new[] { "Completed", "Expired", "Refunded", "Closed" };
             if (invalidStatuses.Contains(payment.Status))
@@ -65,53 +65,11 @@ namespace HandmadeProductManagement.Services.Service
 
             if (createPaymentDetailDto.Status == "Success")
             {
-                await _paymentService.UpdatePaymentStatusAsync(createPaymentDetailDto.PaymentId, "Completed", "system");
+                await _paymentService.UpdatePaymentStatusAsync(createPaymentDetailDto.PaymentId, "Completed", userId);
             }
 
             return true;
         }
-
-        public async Task<List<PaymentDetailResponseModel>> GetPaymentDetailByPaymentIdAsync(string paymentId)
-        {
-            if (string.IsNullOrWhiteSpace(paymentId))
-            {
-                throw new BaseException.BadRequestException("invalid_payment_id", "Please input payment id.");
-            }
-
-            if (!Guid.TryParse(paymentId, out _))
-            {
-                throw new BaseException.BadRequestException("invalid_payment_id_format", "Payment ID format is invalid. Example: 123e4567-e89b-12d3-a456-426614174000.");
-            }
-
-            var paymentRepository = _unitOfWork.GetRepository<Payment>();
-            var paymentExists = await paymentRepository.Entities
-                .AnyAsync(p => p.Id == paymentId && !p.DeletedTime.HasValue);
-
-            if (!paymentExists)
-            {
-                throw new BaseException.NotFoundException("payment_not_found", "Payment not found.");
-            }
-
-            var paymentDetailRepository = _unitOfWork.GetRepository<PaymentDetail>();
-            var paymentDetails = await paymentDetailRepository.Entities
-                .Where(pd => pd.PaymentId == paymentId && !pd.DeletedTime.HasValue)
-                .ToListAsync();
-
-            if (!paymentDetails.Any())
-            {
-                throw new BaseException.NotFoundException("payment_detail_not_found", "Payment details not found.");
-            }
-
-            return paymentDetails.Select(pd => new PaymentDetailResponseModel
-            {
-                Id = pd.Id,
-                PaymentId = pd.PaymentId,
-                Status = pd.Status,
-                Method = pd.Method,
-                ExternalTransaction = pd.ExternalTransaction
-            }).ToList();
-        }
-
         private void ValidatePaymentDetail(CreatePaymentDetailDto createPaymentDetailDto)
         {
             if (string.IsNullOrWhiteSpace(createPaymentDetailDto.PaymentId))

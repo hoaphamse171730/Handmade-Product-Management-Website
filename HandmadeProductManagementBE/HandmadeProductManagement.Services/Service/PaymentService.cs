@@ -91,7 +91,7 @@ namespace HandmadeProductManagement.Services.Service
             return true;
         }
 
-        public async Task<bool> UpdatePaymentStatusAsync(string paymentId, string status, string username)
+        public async Task<bool> UpdatePaymentStatusAsync(string paymentId, string status, string userId)
         {
             ValidatePaymentStatus(paymentId, status);
 
@@ -111,7 +111,7 @@ namespace HandmadeProductManagement.Services.Service
                     OrderId = payment.OrderId,
                     Status = "Processing"
                 };
-                await _orderService.UpdateOrderStatusAsync(dto, username);
+                await _orderService.UpdateOrderStatusAsync(dto, userId);
             }
 
             //will update when the CancelReason table has data
@@ -122,7 +122,7 @@ namespace HandmadeProductManagement.Services.Service
                     OrderId = payment.OrderId,
                     Status = "Canceled"
                 };
-                await _orderService.UpdateOrderStatusAsync(dto, username);
+                await _orderService.UpdateOrderStatusAsync(dto, userId);
             }
 
             payment.Status = status;
@@ -195,7 +195,7 @@ namespace HandmadeProductManagement.Services.Service
 
             foreach (var payment in expiredPayments)
             {
-                await UpdatePaymentStatusAsync(payment.Id.ToString(), "Expired", "system");
+                await UpdatePaymentStatusAsync(payment.Id.ToString(), "Expired", "System");
             }
 
             await _unitOfWork.SaveAsync();
