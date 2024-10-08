@@ -21,8 +21,8 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [Authorize]
-        [HttpPost]
-        public async Task<IActionResult> CreatePayment([FromBody] string orderId)
+        [HttpPost("{orderId}")]
+        public async Task<IActionResult> CreatePayment(string orderId)
         {
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             var createdPayment = await _paymentService.CreatePaymentAsync(userId, orderId);

@@ -10,6 +10,7 @@ using HandmadeProductManagement.ModelViews.NotificationModelViews;
 using HandmadeProductManagement.Contract.Repositories.Entity;
 using Microsoft.IdentityModel.Tokens;
 using static System.Net.WebRequestMethods;
+using Microsoft.AspNetCore.Http;
 namespace HandmadeProductManagement.Services.Service
 {
     public class UserService : IUserService
@@ -396,5 +397,56 @@ namespace HandmadeProductManagement.Services.Service
 
             return true;
         }
+
+        public async Task<UpdateUserResponseModel?> UpdateUserProfile(string id, UpdateUserDTO updateUserProfileDTO)
+        {
+            if (!Guid.TryParse(id, out Guid userId))
+            {
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Invalid userID");
+            }
+
+            var user = await _unitOfWork.GetRepository<ApplicationUser>()
+                .Entities
+                .Where(u => u.Id == userId)
+                .FirstOrDefaultAsync();
+
+            if (user == null)
+            {
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "User not found");
+            }
+
+            if (!string.IsNullOrEmpty(updateUserProfileDTO.UserName))
+            {
+                user.UserName = updateUserProfileDTO.UserName;
+                user.NormalizedUserName = updateUserProfileDTO.UserName.ToUpper();
+            }
+            _unitOfWork.GetRepository<ApplicationUser>().Update(user);
+            await _unitOfWork.SaveAsync();
+
+            var updatedUserResponse = new UpdateUserResponseModel
+            {
+                Id = user.Id,
+                UserName = user.UserName,
+                Email = user.Email,
+                PhoneNumber = user.PhoneNumber,
+            };
+
+            return updatedUserResponse;
+        }
+
+        private async Task<string> SaveAvatarFile(IFormFile avatarFile)
+        {
+            // Implement logic to save the avatar file locally or in cloud storage (e.g., AWS S3, Azure Blob Storage)
+            // Return the URL to the saved file
+            var filePath = Path.Combine("wwwroot/images/avatars", avatarFile.FileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await avatarFile.CopyToAsync(stream);
+            }
+
+            return $"/images/avatars/{avatarFile.FileName}"; // Return the relative path or URL of the image
+        }
+
     }
 }
