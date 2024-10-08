@@ -33,7 +33,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTests", "UnitTests", "{
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Controllers", "Controllers", "{CBB853F9-2066-43B9-A60E-B0FF7261E6EC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PromotionControllerTests", "PromotionControllerTests\PromotionControllerTests.csproj", "{22FFF17B-F313-4918-9545-EDCD33315169}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ControllerTests", "PromotionControllerTests\ControllerTests.csproj", "{22FFF17B-F313-4918-9545-EDCD33315169}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
