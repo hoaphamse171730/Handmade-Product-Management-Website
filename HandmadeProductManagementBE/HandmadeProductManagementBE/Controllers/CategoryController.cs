@@ -4,6 +4,7 @@ using HandmadeProductManagement.ModelViews.CategoryModelViews;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace HandmadeProductManagementAPI.Controllers
 {
@@ -16,6 +17,7 @@ namespace HandmadeProductManagementAPI.Controllers
         public CategoryController(ICategoryService categoryService) => _categoryService = categoryService;
 
         [HttpGet]
+        [Authorize]
         public async Task<IActionResult> GetCategories()
         {
             var result = await _categoryService.GetAll();
@@ -23,6 +25,7 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<IActionResult> GetCategory(string id)
         {
             var result = await _categoryService.GetById(id);
@@ -30,6 +33,7 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateCategory(CategoryForCreationDto categoryForCreation)
         {
             var result = await _categoryService.Create(categoryForCreation);
@@ -37,6 +41,8 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [HttpPut("{categoryId}")]
+        [Authorize(Roles = "Admin")]
+
         public async Task<IActionResult> UpdateCategory(string categoryId, CategoryForUpdateDto categoryForUpdate)
         {
             var result = await _categoryService.Update(categoryId, categoryForUpdate);
@@ -44,6 +50,8 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
+
         public async Task<IActionResult> DeleteCategory(string id)
         {
             var result = await _categoryService.SoftDelete(id);
