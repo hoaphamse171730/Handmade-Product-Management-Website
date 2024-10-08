@@ -321,7 +321,7 @@ public class AuthenticationController(
             };
         }
 
-        return BaseResponse<string>.FailResponse(statusCode: StatusCodeHelper.BadRequest, 
+        return BaseResponse<string>.FailResponse(statusCode: StatusCodeHelper.BadRequest,
             message: "Error confirming the email.");
     }
 
