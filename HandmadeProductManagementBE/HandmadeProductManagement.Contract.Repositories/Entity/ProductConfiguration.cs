@@ -1,6 +1,4 @@
-﻿using HandmadeProductManagement.Core.Base;
-
-namespace HandmadeProductManagement.Contract.Repositories.Entity
+﻿namespace HandmadeProductManagement.Contract.Repositories.Entity
 {
     public class ProductConfiguration
     {

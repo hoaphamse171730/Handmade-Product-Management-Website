@@ -23,7 +23,7 @@ namespace HandmadeProductManagement.Services.Service
         }
 
         // Create a new Product Configuration
-        public async Task<bool> Create(ProductConfigurationForCreationDto productConfigurationDto, string userId)
+        public async Task<bool> Create(ProductConfigurationForCreationDto productConfigurationDto)
         {
             var validationResult = await _creationValidator.ValidateAsync(productConfigurationDto);
             if (!validationResult.IsValid)
@@ -55,7 +55,7 @@ namespace HandmadeProductManagement.Services.Service
             return true;
         }
 
-        // Soft delete Product Configuration by id
+        // Delete
         public async Task<bool> Delete(string productItemId, string variationOptionId)
         {
             if (!Guid.TryParse(productItemId, out _))
@@ -76,7 +76,7 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.NotFoundException("not_found", "Product Configuration not found");
             }
 
-            await productConfigurationRepo.DeleteAsync(productConfigurationEntity);
+            await productConfigurationRepo.DeleteAsync(productItemId, variationOptionId);
             await _unitOfWork.SaveAsync();
 
             return true;

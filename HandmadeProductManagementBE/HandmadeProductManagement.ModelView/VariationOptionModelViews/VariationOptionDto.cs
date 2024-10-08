@@ -1,5 +1,4 @@
-﻿
-namespace HandmadeProductManagement.ModelViews.VariationOptionModelViews
+﻿namespace HandmadeProductManagement.ModelViews.VariationOptionModelViews
 {
     public class VariationOptionDto
     {

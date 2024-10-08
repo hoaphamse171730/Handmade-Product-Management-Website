@@ -4,7 +4,7 @@ namespace HandmadeProductManagement.Contract.Services.Interface
 {
     public interface IProductConfigurationService
     {
-        Task<bool> Create(ProductConfigurationForCreationDto productConfigurationDto, string userId);
+        Task<bool> Create(ProductConfigurationForCreationDto productConfigurationDto);
         Task<bool> Delete(string productItemId, string variationOptionId);
     }
 }

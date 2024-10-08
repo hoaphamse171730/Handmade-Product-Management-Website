@@ -46,22 +46,22 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
-        [Authorize(Roles = "Admin, Seller")]
-        // POST: api/variationoption
-        [HttpPost]
-        public async Task<IActionResult> CreateVariationOption([FromBody] VariationOptionForCreationDto variationOption)
-        {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            var result = await _variationOptionService.Create(variationOption, userId);
-            var response = new BaseResponse<bool>
-            {
-                Code = "Success",
-                StatusCode = StatusCodeHelper.OK,
-                Message = "Created Variation Option successfully.",
-                Data = result
-            };
-            return Ok(response);
-        }
+        //[Authorize(Roles = "Admin, Seller")]
+        //// POST: api/variationoption
+        //[HttpPost]
+        //public async Task<IActionResult> CreateVariationOption([FromBody] VariationOptionForCreationDto variationOption)
+        //{
+        //    var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        //    var result = await _variationOptionService.Create(variationOption, userId);
+        //    var response = new BaseResponse<bool>
+        //    {
+        //        Code = "Success",
+        //        StatusCode = StatusCodeHelper.OK,
+        //        Message = "Created Variation Option successfully.",
+        //        Data = result
+        //    };
+        //    return Ok(response);
+        //}
 
         [Authorize(Roles = "Admin, Seller")]
         // PUT: api/variationoption/{id}

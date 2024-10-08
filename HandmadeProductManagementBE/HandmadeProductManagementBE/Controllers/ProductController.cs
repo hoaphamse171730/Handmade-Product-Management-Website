@@ -85,7 +85,8 @@ namespace HandmadeProductManagementAPI.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateProduct(ProductForCreationDto productForCreation)
         {
-            var createdProduct = await _productService.Create(productForCreation);
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var createdProduct = await _productService.Create(productForCreation, userId);
             var response = new BaseResponse<ProductDto>
             {
                 Code = "200",
@@ -100,7 +101,8 @@ namespace HandmadeProductManagementAPI.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateProduct(string id, ProductForUpdateDto productForUpdate)
         {
-            await _productService.Update(id, productForUpdate);
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            await _productService.Update(id, productForUpdate, userId);
             var response = new BaseResponse<string>
             {
                 Code = "200",
@@ -115,7 +117,8 @@ namespace HandmadeProductManagementAPI.Controllers
         [Authorize(Roles = "Admin")] 
         public async Task<IActionResult> SoftDeleteProduct(string id)
         {
-            await _productService.SoftDelete(id);
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            await _productService.SoftDelete(id, userId);
             var response = new BaseResponse<string>
             {
                 Code = "200",

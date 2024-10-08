@@ -1,6 +1,4 @@
-﻿
-
-namespace HandmadeProductManagement.ModelViews.ProductItemModelViews
+﻿namespace HandmadeProductManagement.ModelViews.ProductItemModelViews
 {
     public class ProductItemDto
     {

@@ -16,9 +16,9 @@ namespace HandmadeProductManagement.Contract.Services.Interface
         Task<IEnumerable<ProductSearchVM>> SortProductsAsync(ProductSortFilter sortFilter);
         Task<IList<ProductDto>> GetAll();
         Task<ProductDto> GetById(string id);
-        Task<ProductDto> Create(ProductForCreationDto product);
-        Task<ProductDto> Update(string id, ProductForUpdateDto product);
-        Task<bool> SoftDelete(string id);
+        Task<ProductDto> Create(ProductForCreationDto product, string userId);
+        Task<ProductDto> Update(string id, ProductForUpdateDto product, string userId);
+        Task<bool> SoftDelete(string id, string userId);
         Task<ProductDetailResponseModel> GetProductDetailsByIdAsync(string productId);
         Task<decimal> CalculateAverageRatingAsync(string productId);
     }

@@ -2,22 +2,16 @@
 using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
-using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.ProductDetailModelViews;
 using HandmadeProductManagement.ModelViews.ProductModelViews;
-using HandmadeProductManagement.ModelViews.ReviewModelViews;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using AutoMapper;
 using FluentValidation;
-using HandmadeProductManagement.ModelViews.PromotionModelViews;
-using HandmadeProductManagement.Core.Utils;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
+using HandmadeProductManagement.ModelViews.ProductItemModelViews;
+using HandmadeProductManagement.ModelViews.VariationModelViews;
+using HandmadeProductManagement.ModelViews.VariationOptionModelViews;
+using HandmadeProductManagement.ModelViews.VariationCombinationModelViews;
 
 namespace HandmadeProductManagement.Services.Service
 {
@@ -37,6 +31,122 @@ namespace HandmadeProductManagement.Services.Service
             _creationValidator = creationValidator;
             _updateValidator = updateValidator;
         }
+
+        public async Task<ProductDto> Create(ProductForCreationDto productDto, string userId)
+        {
+            // Step 1: Validate the product creation DTO
+            var validationResult = await _creationValidator.ValidateAsync(productDto);
+            if (!validationResult.IsValid)
+            {
+                throw new ValidationException(validationResult.Errors);
+            }
+
+            // Step 2: Map the product DTO to the Product entity
+            var productEntity = _mapper.Map<Product>(productDto);
+            productEntity.CreatedBy = userId;
+            productEntity.LastUpdatedBy = userId;
+
+            // Step 3: Insert the product into the repository
+            await _unitOfWork.GetRepository<Product>().InsertAsync(productEntity);
+            await _unitOfWork.SaveAsync();
+
+            //// Step 4: Fetch variations and their options from the DB
+            //var variationCombinations = await GetVariationCombinations(productDto.Variations, userId);
+
+            // Step 5: Create ProductItems based on combinations of variation options
+            //foreach (var combination in variationCombinations)
+            //{
+            //    var productItemDto = new ProductItemForCreationDto
+            //    {
+            //        QuantityInStock = combination.QuantityInStock,
+            //        Price = combination.Price
+            //    };
+
+            //    // Step 6: Map and insert the product item
+            //    var productItemEntity = _mapper.Map<ProductItem>(productItemDto);
+            //    productItemEntity.ProductId = productEntity.Id;
+            //    productItemEntity.CreatedBy = userId;
+            //    productItemEntity.LastUpdatedBy = userId;
+
+            //    await _unitOfWork.GetRepository<ProductItem>().InsertAsync(productItemEntity);
+            //    await _unitOfWork.SaveAsync();
+
+            //    // Step 7: Create ProductConfiguration for each variation option in the combination
+            //    foreach (var variationOptionId in combination.VariationOptionIds)
+            //    {
+            //        var productConfig = new ProductConfiguration
+            //        {
+            //            ProductItemId = productItemEntity.Id,
+            //            VariationOptionId = variationOptionId
+            //        };
+
+            //        await _unitOfWork.GetRepository<ProductConfiguration>().InsertAsync(productConfig);
+            //    }
+            //}
+
+            // Step 8: Save all product configurations
+            await _unitOfWork.SaveAsync();
+
+            // Step 9: Map and return the final product DTO
+            var productToReturn = _mapper.Map<ProductDto>(productEntity);
+            return productToReturn;
+        }
+
+        //private async Task<List<VariationCombinationDto>> GetVariationCombinations(List<VariationForCreationDto> variations, string userId)
+        //{
+        //    var variationCombinations = new List<VariationCombinationDto>();
+
+        //    // Step 1: Get all variation options with quantityInStock and price from the database
+        //    var variationOptionLists = new List<List<VariationOptionDto>>();
+        //    foreach (var variation in variations)
+        //    {
+        //        // Fetch all options of a variation
+        //        var variationOptions = await _unitOfWork.GetRepository<VariationOption>()
+        //            .Entities
+        //            .Where(vo => vo.VariationId == variation.Id)
+        //            .Select(vo => new VariationOptionDto
+        //            {
+        //                Id = vo.Id,
+        //                Value = vo.Value,
+        //                QuantityInStock = vo.QuantityInStock,
+        //                Price = vo.Price
+        //            })
+        //            .ToListAsync();
+
+        //        variationOptionLists.Add(variationOptions);
+        //    }
+
+        //    // Step 2: Generate all possible combinations of variation options
+        //    var allCombinations = GetCombinations(variationOptionLists);
+
+        //    // Step 3: Calculate price and quantity for each combination
+        //    foreach (var combination in allCombinations)
+        //    {
+        //        variationCombinations.Add(new VariationCombinationDto
+        //        {
+        //            VariationOptionIds = combination.Select(v => v.Id).ToList(),
+        //            Price = combination.Sum(v => v.Price),
+        //            QuantityInStock = combination.Min(v => v.QuantityInStock)
+        //        });
+        //    }
+
+        //    return variationCombinations;
+        //}
+
+        //private IEnumerable<List<VariationOptionDto>> GetCombinations(List<List<VariationOptionDto>> lists)
+        //{
+        //    IEnumerable<IEnumerable<VariationOptionDto>> result = new List<VariationOptionDto> { new List<VariationOptionDto>() };
+
+        //    foreach (var list in lists)
+        //    {
+        //        result = from combination in result
+        //                 from item in list
+        //                 select combination.Concat(new[] { item });
+
+        //    }
+
+        //    return result;
+        //}
 
         public async Task<IEnumerable<ProductSearchVM>> SearchProductsAsync(ProductSearchFilter searchModel)
         {
@@ -218,22 +328,8 @@ namespace HandmadeProductManagement.Services.Service
             return productToReturn;
 
         }
-        public async Task<ProductDto> Create(ProductForCreationDto product)
-        {
-            var result = _creationValidator.ValidateAsync(product);
 
-            if (!result.Result.IsValid)
-                throw new ValidationException(result.Result.Errors);
-            var productEntity = _mapper.Map<Product>(product);
-            productEntity.CreatedTime = DateTime.UtcNow;
-            await _unitOfWork.GetRepository<Product>().InsertAsync(productEntity);
-            await _unitOfWork.SaveAsync();
-            var productToReturn = _mapper.Map<ProductDto>(productEntity);
-            return productToReturn;
-
-        }
-
-        public async Task<ProductDto> Update(string id, ProductForUpdateDto product)
+        public async Task<ProductDto> Update(string id, ProductForUpdateDto product, string userId)
         {
             var result = _updateValidator.ValidateAsync(product);
             if (!result.Result.IsValid)
@@ -243,20 +339,24 @@ namespace HandmadeProductManagement.Services.Service
             if (productEntity == null)
                 throw new KeyNotFoundException("Product not found");
             _mapper.Map(product, productEntity);
+
             productEntity.LastUpdatedTime = DateTime.UtcNow;
+            productEntity.LastUpdatedBy = userId;
+
             await _unitOfWork.GetRepository<Product>().UpdateAsync(productEntity);
             await _unitOfWork.SaveAsync();
             var productToReturn = _mapper.Map<ProductDto>(productEntity);
             return productToReturn;
         }
 
-        public async Task<bool> SoftDelete(string id)
+        public async Task<bool> SoftDelete(string id, string userId)
         {
             var productRepo = _unitOfWork.GetRepository<Product>();
             var productEntity = await productRepo.Entities.FirstOrDefaultAsync(x => x.Id == id.ToString());
             if (productEntity == null)
                 throw new KeyNotFoundException("Product not found");
             productEntity.DeletedTime = DateTime.UtcNow;
+            productEntity.DeletedBy = userId;
             await productRepo.UpdateAsync(productEntity);
             await _unitOfWork.SaveAsync();
             return true;
