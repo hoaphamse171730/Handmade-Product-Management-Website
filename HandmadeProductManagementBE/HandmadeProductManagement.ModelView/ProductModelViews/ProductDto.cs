@@ -12,10 +12,8 @@ namespace HandmadeProductManagement.ModelViews.ProductModelViews
         public string? Name { get; set; } = string.Empty;
         public string? Description { get; set; }
         public string? CategoryId { get; set; } = string.Empty;
-        public string? ShopId { get; set; } = string.Empty;
-        public decimal? Rating { get; set; }
-        public string? Status { get; set; } = string.Empty;
-        public int? SoldCount { get; set; }
-
+        public string? CreatedBy { get; set; }
+        public string? LastUpdatedBy { get; set; }
+        public string? DeletedBy { get; set; }
     }
 }

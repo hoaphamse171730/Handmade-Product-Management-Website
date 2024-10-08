@@ -17,5 +17,6 @@ namespace HandmadeProductManagement.ModelViews.CategoryModelViews
         public DateTimeOffset CreatedTime { get; set; }
         public DateTimeOffset LastUpdatedTime { get; set; }
         public DateTimeOffset? DeletedTime { get; set; }
+        public string? Status { get; set; }
     }
 }

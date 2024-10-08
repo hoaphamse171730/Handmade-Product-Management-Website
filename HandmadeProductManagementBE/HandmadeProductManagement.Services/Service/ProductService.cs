@@ -220,14 +220,15 @@ namespace HandmadeProductManagement.Services.Service
         }
 
 
-
         public async Task<ProductDto> Create(ProductForCreationDto product)
         {
             var result = _creationValidator.ValidateAsync(product);
             if (!result.Result.IsValid)
                 throw new ValidationException(result.Result.Errors);
             var productEntity = _mapper.Map<Product>(product);
+            productEntity.Status = "active";
             productEntity.CreatedTime = DateTime.UtcNow;
+            productEntity.CreatedBy = "currentUser";
             await _unitOfWork.GetRepository<Product>().InsertAsync(productEntity);
             await _unitOfWork.SaveAsync();
             var productToReturn = _mapper.Map<ProductDto>(productEntity);
@@ -245,6 +246,7 @@ namespace HandmadeProductManagement.Services.Service
             if (productEntity == null)
                 throw new KeyNotFoundException("Product not found");
             _mapper.Map(product, productEntity);
+            productEntity.LastUpdatedBy = "currentUser";
             productEntity.LastUpdatedTime = DateTime.UtcNow;
             await _unitOfWork.GetRepository<Product>().UpdateAsync(productEntity);
             await _unitOfWork.SaveAsync();
@@ -259,6 +261,8 @@ namespace HandmadeProductManagement.Services.Service
             if (productEntity == null)
                 throw new KeyNotFoundException("Product not found");
             productEntity.DeletedTime = DateTime.UtcNow;
+            productEntity.DeletedBy = "currentUser";
+            productEntity.Status = "inactive";
             await productRepo.UpdateAsync(productEntity);
             await _unitOfWork.SaveAsync();
             return true;
