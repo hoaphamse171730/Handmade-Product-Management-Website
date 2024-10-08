@@ -6,11 +6,8 @@ using HandmadeProductManagement.ModelViews.PromotionModelViews;
 using HandmadeProductManagementAPI.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Xunit;
 
-namespace HandmadeProductManagementAPI.Tests.Controllers
+namespace ControllerTests
 {
     public class PromotionsControllerTests
     {
