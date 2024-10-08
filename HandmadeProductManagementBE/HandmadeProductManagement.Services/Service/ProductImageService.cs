@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Constants;
 using Microsoft.EntityFrameworkCore;
+using HandmadeProductManagement.ModelViews.ProductImageModelViews;
 
 
 namespace HandmadeProductManagement.Services.Service
@@ -35,7 +36,7 @@ namespace HandmadeProductManagement.Services.Service
             if (product == null)
                 throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "Product not found");
 
-            var uploadImageService = new UploadImageService();
+            var uploadImageService = new ManageFirebaseImageService();
 
             using (var stream = file.OpenReadStream())
             {
@@ -52,6 +53,42 @@ namespace HandmadeProductManagement.Services.Service
                 await _unitOfWork.SaveAsync();
             }
             return true;
+        }
+        
+        public async Task<bool>DeleteProductImage(string imageId)
+        {
+            var productImage = await _unitOfWork.GetRepository<ProductImage>()
+                .Entities.Where(pi=>pi.Id == imageId).FirstOrDefaultAsync();
+
+            if (productImage == null)
+            {
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "Image not found");
+            }
+
+            var deleteImageService = new ManageFirebaseImageService();
+            await deleteImageService.DeleteFileAsync(productImage.Url);
+
+            _unitOfWork.GetRepository<ProductImage>().Delete(productImage.Id);
+            await _unitOfWork.SaveAsync();
+
+            return true;
+        }
+
+        public async Task<IList<productImageByIdResponse>>GetProductImageById(string id)
+        {
+            var images = await _unitOfWork.GetRepository<ProductImage>()
+                .Entities.Where (pi=>pi.ProductId == id)
+                .Select(pi=> new productImageByIdResponse
+                {
+                    Id = pi.Id,
+                    Url = pi.Url,
+                }).ToListAsync();
+
+            if( images == null || !images.Any())
+            {
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "No Images found for this product");
+            }
+            return images;
         }
     }
 }
