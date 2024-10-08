@@ -1,6 +1,5 @@
 using FluentValidation;
 using HandmadeProductManagement.Core.Base;
-using HandmadeProductManagement.Core.Constants;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -33,6 +32,18 @@ public class CustomExceptionHandler(ILogger<CustomExceptionHandler> logger) : IE
                 notFoundException.ErrorDetail.ErrorMessage?.ToString() ?? exception.Message,
                 notFoundException.GetType().Name,
                 context.Response.StatusCode = StatusCodes.Status404NotFound
+            ),
+
+            UnauthorizedAccessException unauthorizedAccessException => (
+                    "Access is denied due to invalid credentials.",
+                    unauthorizedAccessException.GetType().Name,
+                    context.Response.StatusCode = StatusCodes.Status401Unauthorized
+                ),
+
+            BaseException.ForbiddenException forbiddenException => (
+                forbiddenException.ErrorDetail.ErrorMessage?.ToString() ?? "You do not have permission to perform this action.",
+                forbiddenException.GetType().Name,
+                context.Response.StatusCode = StatusCodes.Status403Forbidden
             ),
 
             _ => (

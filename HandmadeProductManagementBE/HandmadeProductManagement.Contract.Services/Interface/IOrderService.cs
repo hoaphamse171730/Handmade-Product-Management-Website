@@ -1,4 +1,5 @@
-﻿using HandmadeProductManagement.ModelViews.OrderModelViews;
+﻿using HandmadeProductManagement.Core.Utils;
+using HandmadeProductManagement.ModelViews.OrderModelViews;
 
 namespace HandmadeProductManagement.Contract.Services.Interface
 {
@@ -7,7 +8,8 @@ namespace HandmadeProductManagement.Contract.Services.Interface
         Task<OrderResponseModel> GetOrderByIdAsync(string orderId);
         Task<bool> CreateOrderAsync(string userId, CreateOrderDto createOrder);
         Task<bool> UpdateOrderAsync(string userId, string orderId, UpdateOrderDto order);
-        Task<bool> UpdateOrderStatusAsync(UpdateStatusOrderDto updateStatusOrderDto);
+        Task<bool> UpdateOrderStatusAsync(UpdateStatusOrderDto updateStatusOrderDto, string userId);
         Task<IList<OrderResponseModel>> GetOrderByUserIdAsync(Guid userId);
+        Task<PaginatedList<OrderResponseModel>> GetOrdersByPageAsync(int pageNumber, int pageSize);
     }
 }
