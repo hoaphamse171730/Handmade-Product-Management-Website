@@ -88,8 +88,8 @@ namespace HandmadeProductManagement.Services.Service
                                                     Name = p.Name,
                                                     CategoryName = p.Category.Name,
                                                     Price = p.ProductItems.FirstOrDefault() != null ? p.ProductItems.FirstOrDefault().Price : 0,
-                                                    ProductImages = p.ProductImages.ToList()
-                                                })
+                                                    ImageUrls = p.ProductImages.Select(pi => pi.Url).ToList()
+                                               })
                                               .ToListAsync();
             return topProducts;
         }
