@@ -1,7 +1,10 @@
 ﻿using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Contract.Services.Interface;
     using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.DashboardModelViews;
+using HandmadeProductManagement.ModelViews.ReviewModelViews;
+using HandmadeProductManagement.Services.Service;
 using Microsoft.AspNetCore.Mvc;
 
     namespace HandmadeProductManagementAPI.Controllers
@@ -62,6 +65,20 @@ using Microsoft.AspNetCore.Mvc;
         {
             List<Product> topSellingProducts = await _dashboardService.GetTopSellingProducts();
             return Ok(BaseResponse<List<Product>>.OkResponse(topSellingProducts));
+        }
+
+        [HttpGet("GetTop10NewProduct")]
+        public async Task<IActionResult> Top10NewProducts()
+        {
+            var products = await _dashboardService.GetTop10NewProducts();
+            var response = new BaseResponse<IList<Product>>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Reviews retrieved successfully.",
+                Data = products
+            };
+            return Ok(response);
         }
     }
 }
