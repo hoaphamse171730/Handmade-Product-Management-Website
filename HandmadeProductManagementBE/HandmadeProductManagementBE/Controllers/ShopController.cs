@@ -2,6 +2,7 @@
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Constants;
+using HandmadeProductManagement.Core.Utils;
 using HandmadeProductManagement.ModelViews.ShopModelViews;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -22,7 +23,7 @@ namespace HandmadeProductManagementAPI.Controllers
             _shopService = shopService;
         }
 
-        [Authorize(Roles = "Seller")]
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> CreateShop([FromBody] CreateShopDto shop)
         {
@@ -38,7 +39,7 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
-        [Authorize(Roles = "Seller, Admin")]
+        [Authorize]
         [HttpDelete("{shopId}")]
         public async Task<IActionResult> DeleteShop(string shopId)
         {
@@ -56,15 +57,15 @@ namespace HandmadeProductManagementAPI.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpGet]
-        public async Task<IActionResult> GetAllShops()
+        public async Task<IActionResult> GetShopsByPage([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var shops = await _shopService.GetAllShopsAsync();
-            var response = new BaseResponse<IList<ShopResponseModel>>
+            var paginatedShops = await _shopService.GetShopsByPageAsync(pageNumber, pageSize);
+            var response = new BaseResponse<PaginatedList<ShopResponseModel>>
             {
                 Code = "Success",
                 StatusCode = StatusCodeHelper.OK,
                 Message = "Shops retrieved successfully",
-                Data = shops
+                Data = paginatedShops
             };
             return Ok(response);
         }
@@ -84,7 +85,7 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
-        [Authorize(Roles = "Seller")]
+        [Authorize]
         [HttpGet("user")]
         public async Task<IActionResult> GetShopByUserId()
         {

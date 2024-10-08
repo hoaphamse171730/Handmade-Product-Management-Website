@@ -111,10 +111,11 @@ namespace HandmadeProductManagementAPI.Controllers
             };
             return Ok(response);
         }
-
-        [HttpGet("{id}/notification_Review")]
-        public async Task<IActionResult> GetNotifications(string id)
+        [Authorize(Roles = "Admin, Seller")]
+        [HttpGet("notification_review")]
+        public async Task<IActionResult> GetNotifications()
         {
+            var id = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             var notifications = await _userService.GetNewReviewNotificationList(id);
 
             var response = new BaseResponse<IList<NotificationModel>>
@@ -133,13 +134,18 @@ namespace HandmadeProductManagementAPI.Controllers
             else
             {
                 response.Message = "No new reviews available"; // Thay đổi thông điệp nếu không có dữ liệu
-            }         
+            }
+         
             return Ok(response);
         }
 
-        [HttpGet("{id}/notification_statuschange")]
-        public async Task<IActionResult> GetNewStatusChangeNotification(string id)
+
+        [Authorize(Roles = "Admin, Customer, Seller")]
+        [HttpGet("notification_statuschange")]
+        public async Task<IActionResult> GetNewStatusChangeNotification()
         {
+            var id = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
             var response = new BaseResponse<IList<NotificationModel>>
             {
                 Code = "200",

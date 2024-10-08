@@ -2,6 +2,7 @@
 using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.Core.Utils;
 using HandmadeProductManagement.ModelViews.PaymentModelViews;
 using HandmadeProductManagement.ModelViews.ShopModelViews;
 using HandmadeProductManagement.Repositories.Entity;
@@ -97,6 +98,11 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.NotFoundException("shop_not_found", "Shop not found.");
             }
 
+            if (shop.UserId.ToString() != userId)
+            {
+                throw new BaseException.ErrorException(403, "not_owner", "User is not the owner of the shop.");
+            }
+
             shop.DeletedBy = userId;
             shop.DeletedTime = DateTime.UtcNow;
 
@@ -105,20 +111,26 @@ namespace HandmadeProductManagement.Services.Service
             return true;
         }
 
-        public async Task<IList<ShopResponseModel>> GetAllShopsAsync()
+        public async Task<PaginatedList<ShopResponseModel>> GetShopsByPageAsync(int pageNumber, int pageSize)
         {
-            IQueryable<Shop> query = _unitOfWork.GetRepository<Shop>().Entities
-                .Where(shop => !shop.DeletedTime.HasValue);
-            var result = await query.Select(shop => new ShopResponseModel
-            {
-                Id = shop.Id.ToString(),
-                Name = shop.Name,
-                Description = shop.Description,
-                Rating = shop.Rating,
-                UserId = shop.UserId
-            }).ToListAsync();
+            var repository = _unitOfWork.GetRepository<Shop>();
+            var query = repository.Entities.Where(shop => !shop.DeletedTime.HasValue);
 
-            return result;
+            var totalItems = await query.CountAsync();
+            var shops = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .Select(shop => new ShopResponseModel
+                {
+                    Id = shop.Id.ToString(),
+                    Name = shop.Name,
+                    Description = shop.Description,
+                    Rating = shop.Rating,
+                    UserId = shop.UserId
+                })
+                .ToListAsync();
+
+            return new PaginatedList<ShopResponseModel>(shops, totalItems, pageNumber, pageSize);
         }
 
         public async Task<ShopResponseModel> GetShopByUserIdAsync(Guid userId)
@@ -168,6 +180,11 @@ namespace HandmadeProductManagement.Services.Service
             {
                 throw new BaseException.NotFoundException(
                     "shop_not_found", "Shop not found.");
+            }
+
+            if (existingShop.UserId.ToString() != userId)
+            {
+                throw new BaseException.ErrorException(403, "not_owner", "User is not the owner of the shop.");
             }
 
             existingShop.Name = shop.Name;

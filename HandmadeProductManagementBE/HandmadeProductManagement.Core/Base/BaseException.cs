@@ -59,6 +59,15 @@ namespace HandmadeProductManagement.Core.Base
             {
             }
         }
+
+        public class ForbiddenException : ErrorException
+        {
+            public ForbiddenException(string errorCode, string message)
+                : base(403, errorCode, message)
+            {
+            }
+        }
+
         public class ErrorException : Exception
         {
             public int StatusCode { get; }

@@ -40,7 +40,7 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.NotFoundException("payment_not_found", "Payment not found.");
             }
 
-            await _paymentService.UpdatePaymentStatusAsync(createPaymentDetailDto.PaymentId, "Processing");
+            await _paymentService.UpdatePaymentStatusAsync(createPaymentDetailDto.PaymentId, "Processing", "system");
 
             var invalidStatuses = new[] { "Completed", "Expired", "Refunded", "Closed" };
             if (invalidStatuses.Contains(payment.Status))
@@ -65,13 +65,13 @@ namespace HandmadeProductManagement.Services.Service
 
             if (createPaymentDetailDto.Status == "Success")
             {
-                await _paymentService.UpdatePaymentStatusAsync(createPaymentDetailDto.PaymentId, "Completed");
+                await _paymentService.UpdatePaymentStatusAsync(createPaymentDetailDto.PaymentId, "Completed", "system");
             }
 
             return true;
         }
 
-        public async Task<PaymentDetailResponseModel> GetPaymentDetailByPaymentIdAsync(string paymentId)
+        public async Task<List<PaymentDetailResponseModel>> GetPaymentDetailByPaymentIdAsync(string paymentId)
         {
             if (string.IsNullOrWhiteSpace(paymentId))
             {
@@ -93,53 +93,23 @@ namespace HandmadeProductManagement.Services.Service
             }
 
             var paymentDetailRepository = _unitOfWork.GetRepository<PaymentDetail>();
-            var paymentDetail = await paymentDetailRepository.Entities
-                .FirstOrDefaultAsync(pd => pd.PaymentId == paymentId && !pd.DeletedTime.HasValue);
+            var paymentDetails = await paymentDetailRepository.Entities
+                .Where(pd => pd.PaymentId == paymentId && !pd.DeletedTime.HasValue)
+                .ToListAsync();
 
-            if (paymentDetail == null)
+            if (!paymentDetails.Any())
             {
-                throw new BaseException.NotFoundException("payment_detail_not_found", "Payment detail not found.");
+                throw new BaseException.NotFoundException("payment_detail_not_found", "Payment details not found.");
             }
 
-            return new PaymentDetailResponseModel
+            return paymentDetails.Select(pd => new PaymentDetailResponseModel
             {
-                Id = paymentDetail.Id,
-                PaymentId = paymentDetail.PaymentId,
-                Status = paymentDetail.Status,
-                Method = paymentDetail.Method,
-                ExternalTransaction = paymentDetail.ExternalTransaction
-            };
-        }
-
-        public async Task<PaymentDetailResponseModel> GetPaymentDetailByIdAsync(string id)
-        {
-            if (string.IsNullOrWhiteSpace(id))
-            {
-                throw new BaseException.BadRequestException("invalid_id", "Please input id.");
-            }
-
-            if (!Guid.TryParse(id, out _))
-            {
-                throw new BaseException.BadRequestException("invalid_id_format", "ID format is invalid. Example: 123e4567-e89b-12d3-a456-426614174000.");
-            }
-
-            var paymentDetailRepository = _unitOfWork.GetRepository<PaymentDetail>();
-            var paymentDetail = await paymentDetailRepository.Entities
-                .FirstOrDefaultAsync(pd => pd.Id == id && !pd.DeletedTime.HasValue);
-
-            if (paymentDetail == null)
-            {
-                throw new BaseException.NotFoundException("payment_detail_not_found", "Payment detail not found.");
-            }
-
-            return new PaymentDetailResponseModel
-            {
-                Id = paymentDetail.Id,
-                PaymentId = paymentDetail.PaymentId,
-                Status = paymentDetail.Status,
-                Method = paymentDetail.Method,
-                ExternalTransaction = paymentDetail.ExternalTransaction
-            };
+                Id = pd.Id,
+                PaymentId = pd.PaymentId,
+                Status = pd.Status,
+                Method = pd.Method,
+                ExternalTransaction = pd.ExternalTransaction
+            }).ToList();
         }
 
         private void ValidatePaymentDetail(CreatePaymentDetailDto createPaymentDetailDto)
