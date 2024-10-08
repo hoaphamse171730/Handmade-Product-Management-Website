@@ -50,14 +50,14 @@ using Microsoft.AspNetCore.Mvc;
             return Ok(BaseResponse<List<Shop>>.OkResponse(topShops)); 
 
         }
-        [HttpPost("TotalSaleById")]
+        [HttpGet("TotalSaleById")]
         public async Task<IActionResult> TotalSaleByShopId(string Id, DashboardDTO dashboardDTO)
         {
             decimal totalSale = await _dashboardService.GetTotalSaleByShopId(Id, dashboardDTO);
 
             return Ok(BaseResponse<decimal>.OkResponse(totalSale)); 
         }
-        [HttpPost("TopSellingProducts")]
+        [HttpGet("TopSellingProducts")]
         public async Task<IActionResult> TopSellingProducts()
         {
             List<Product> topSellingProducts = await _dashboardService.GetTopSellingProducts();
