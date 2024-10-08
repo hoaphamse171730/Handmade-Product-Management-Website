@@ -25,7 +25,7 @@ namespace HandmadeProductManagement.Services.Service
             _orderDetailService = orderDetailService;
         }
 
-        public async Task<bool> CreateOrderAsync(string userId, CreateOrderDto createOrder, string username)
+        public async Task<bool> CreateOrderAsync(string userId, CreateOrderDto createOrder)
         {
             if (createOrder.OrderDetails == null || !createOrder.OrderDetails.Any())
             {
@@ -92,8 +92,8 @@ namespace HandmadeProductManagement.Services.Service
                         CustomerName = createOrder.CustomerName,
                         Phone = createOrder.Phone,
                         Note = createOrder.Note,
-                        CreatedBy = username,
-                        LastUpdatedBy = username
+                        CreatedBy = userId,
+                        LastUpdatedBy = userId
                     };
 
                     await orderRepository.InsertAsync(order);
@@ -140,7 +140,7 @@ namespace HandmadeProductManagement.Services.Service
                         Status = order.Status
                     };
 
-                    await _statusChangeService.Create(statusChangeDto, username);
+                    await _statusChangeService.Create(statusChangeDto, userId);
                     await _unitOfWork.SaveAsync();
                 }
 
@@ -235,7 +235,7 @@ namespace HandmadeProductManagement.Services.Service
             };
         }
 
-        public async Task<bool> UpdateOrderAsync(string orderId, UpdateOrderDto order, string username)
+        public async Task<bool> UpdateOrderAsync(string userId, string orderId, UpdateOrderDto order)
         {
             if (string.IsNullOrWhiteSpace(orderId) || !Guid.TryParse(orderId, out _))
             {
@@ -257,7 +257,8 @@ namespace HandmadeProductManagement.Services.Service
             existingOrder.CustomerName = order.CustomerName;
             existingOrder.Phone = order.Phone;
             existingOrder.Note = order.Note;
-            existingOrder.LastUpdatedBy = username;
+            existingOrder.LastUpdatedBy = userId;
+            existingOrder.LastUpdatedTime = DateTime.UtcNow;
 
             repository.Update(existingOrder);
             await _unitOfWork.SaveAsync();
@@ -295,7 +296,7 @@ namespace HandmadeProductManagement.Services.Service
             return orders;
         }
 
-        public async Task<bool> UpdateOrderStatusAsync(UpdateStatusOrderDto updateStatusOrderDto, string username)
+        public async Task<bool> UpdateOrderStatusAsync(UpdateStatusOrderDto updateStatusOrderDto, string userId)
         {
             if (string.IsNullOrWhiteSpace(updateStatusOrderDto.OrderId))
             {
@@ -358,7 +359,7 @@ namespace HandmadeProductManagement.Services.Service
             if (!validStatusTransitions.ContainsKey(existingOrder.Status) ||
                 !validStatusTransitions[existingOrder.Status].Contains(updateStatusOrderDto.Status))
             {
-                throw new BaseException.BadRequestException("invalid_status_transition", $"Cannot transition from {existingOrder.Status} to {updateStatusOrderDto.Status}.");
+                throw new BaseException.ErrorException(400, "invalid_status_transition", $"Cannot transition from {existingOrder.Status} to {updateStatusOrderDto.Status}.");
             }
 
             _unitOfWork.BeginTransaction();
@@ -409,7 +410,7 @@ namespace HandmadeProductManagement.Services.Service
 
                 // Update order status
                 existingOrder.Status = updateStatusOrderDto.Status;
-                existingOrder.LastUpdatedBy = username;
+                existingOrder.LastUpdatedBy = existingOrder.UserId.ToString();
                 existingOrder.LastUpdatedTime = DateTime.UtcNow;
 
                 // Create a new status change record after updating the order status
@@ -420,7 +421,7 @@ namespace HandmadeProductManagement.Services.Service
                 };
 
                 repository.Update(existingOrder);
-                await _statusChangeService.Create(statusChangeDto, username);
+                await _statusChangeService.Create(statusChangeDto, userId);
 
                 await _unitOfWork.SaveAsync();
                 _unitOfWork.CommitTransaction();

@@ -6,6 +6,7 @@ using HandmadeProductManagement.ModelViews.VariationModelViews;
 using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Core.Base;
 using Microsoft.EntityFrameworkCore;
+using HandmadeProductManagement.Repositories.Entity;
 
 namespace HandmadeProductManagement.Services.Service
 {
@@ -83,7 +84,7 @@ namespace HandmadeProductManagement.Services.Service
             return _mapper.Map<IList<VariationDto>>(variations);
         }
 
-        public async Task<bool> Create(VariationForCreationDto variationForCreation, string username)
+        public async Task<bool> Create(VariationForCreationDto variationForCreation, string userId)
         {
             // Validate id format
             if (!Guid.TryParse(variationForCreation.CategoryId, out var guidId))
@@ -108,8 +109,8 @@ namespace HandmadeProductManagement.Services.Service
 
             var variationEntity = _mapper.Map<Variation>(variationForCreation);
 
-            variationEntity.CreatedBy = username;
-            variationEntity.LastUpdatedBy = username;
+            variationEntity.CreatedBy = userId;
+            variationEntity.LastUpdatedBy = userId;
 
             await _unitOfWork.GetRepository<Variation>().InsertAsync(variationEntity);
             await _unitOfWork.SaveAsync();
@@ -117,7 +118,7 @@ namespace HandmadeProductManagement.Services.Service
             return true;
         }
 
-        public async Task<bool> Update(string id, VariationForUpdateDto variationForUpdate, string username)
+        public async Task<bool> Update(string id, VariationForUpdateDto variationForUpdate, string userId)
         {
             // Validate id format
             if (!Guid.TryParse(id, out var guidId))
@@ -140,7 +141,8 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.NotFoundException("variation_not_found", "Variation not found.");
             }
 
-            variation.LastUpdatedBy = username;
+            variation.LastUpdatedBy = userId;
+            variation.LastUpdatedTime = DateTime.UtcNow;
 
             _mapper.Map(variationForUpdate, variation);
             repository.Update(variation);
@@ -150,7 +152,7 @@ namespace HandmadeProductManagement.Services.Service
         }
 
 
-        public async Task<bool> Delete(string id, string username)
+        public async Task<bool> Delete(string id, string userId)
         {
             // Validate id format
             if (!Guid.TryParse(id, out var guidId))
@@ -166,8 +168,9 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.NotFoundException("not_found", "Variation not found");
             }
 
-            variation.DeletedBy = username;
+            variation.DeletedBy = userId;
             variation.DeletedTime = DateTime.UtcNow;
+
             repository.Update(variation);
             await _unitOfWork.SaveAsync();
 

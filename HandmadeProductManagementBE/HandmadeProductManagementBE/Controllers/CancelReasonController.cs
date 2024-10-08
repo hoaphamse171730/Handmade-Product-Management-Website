@@ -38,8 +38,8 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateCancelReason([FromBody] CancelReasonForCreationDto reason)
         {
-            var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
-            var result = await _cancelReasonService.Create(reason, username);
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var result = await _cancelReasonService.Create(reason, userId);
             var response = new BaseResponse<bool>
             {
                 Code = "Success",
@@ -55,8 +55,8 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateCancelReason(string id, CancelReasonForUpdateDto updatedReason)
         {
-            var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
-            var result = await _cancelReasonService.Update(id, updatedReason, username);
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var result = await _cancelReasonService.Update(id, updatedReason, userId);
             var response = new BaseResponse<bool>
             {
                 Code = "Success",
@@ -72,8 +72,8 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult> SoftDeleteCancelReason(string id)
         {
-            var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
-            await _cancelReasonService.Delete(id, username);
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            await _cancelReasonService.Delete(id, userId);
 
             var response = new BaseResponse<string>
             {
