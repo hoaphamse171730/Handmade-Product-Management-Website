@@ -18,8 +18,6 @@ namespace HandmadeProductManagement.Repositories.Entity
 
         public string Status { get; set; } = "active";
 
-        public string UserName { get; set; }
-
         public ICollection<Review> Reviews { get; set; } = new List<Review>();
 
         public ApplicationUser()
