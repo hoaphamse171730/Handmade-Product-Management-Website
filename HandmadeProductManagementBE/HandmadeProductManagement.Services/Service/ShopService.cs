@@ -77,13 +77,8 @@ namespace HandmadeProductManagement.Services.Service
             return true;
         }
 
-        public async Task<bool> DeleteShopAsync(string userId, string id)
+        public async Task<bool> DeleteShopAsync(string userId)
         {
-            if (!Guid.TryParse(userId.ToString(), out _) || !Guid.TryParse(id, out _))
-            {
-                throw new BaseException.BadRequestException("invalid_format", "UserId or Id is not in the correct format. Ex: 123e4567-e89b-12d3-a456-426614174000.");
-            }
-
             var userRepository = _unitOfWork.GetRepository<ApplicationUser>();
             var userExists = await userRepository.Entities.AnyAsync(u => u.Id.ToString() == userId && !u.DeletedTime.HasValue);
             if (!userExists)
@@ -91,23 +86,21 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.NotFoundException("user_not_found", "User not found.");
             }
 
-            var repository = _unitOfWork.GetRepository<Shop>();
-            var shop = await repository.Entities.FirstOrDefaultAsync(s => s.Id == id && !s.DeletedTime.HasValue);
+            var shopRepository = _unitOfWork.GetRepository<Shop>();
+            var shop = await shopRepository.Entities
+                .FirstOrDefaultAsync(s => s.UserId.ToString() == userId && !s.DeletedTime.HasValue);
+
             if (shop == null)
             {
                 throw new BaseException.NotFoundException("shop_not_found", "Shop not found.");
             }
 
-            if (shop.UserId.ToString() != userId)
-            {
-                throw new BaseException.ErrorException(403, "not_owner", "User is not the owner of the shop.");
-            }
-
             shop.DeletedBy = userId;
             shop.DeletedTime = DateTime.UtcNow;
 
-            repository.Update(shop);
+            shopRepository.Update(shop);
             await _unitOfWork.SaveAsync();
+
             return true;
         }
 

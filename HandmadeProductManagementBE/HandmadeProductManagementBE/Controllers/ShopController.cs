@@ -40,11 +40,11 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [Authorize]
-        [HttpDelete("{shopId}")]
-        public async Task<IActionResult> DeleteShop(string shopId)
+        [HttpDelete]
+        public async Task<IActionResult> DeleteShop()
         {
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            var result = await _shopService.DeleteShopAsync(userId, shopId);
+            var result = await _shopService.DeleteShopAsync(userId);
             var response = new BaseResponse<bool>
             {
                 Code = "Success",
