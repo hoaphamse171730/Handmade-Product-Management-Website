@@ -3,6 +3,8 @@ using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.ModelViews.DashboardModelViews;
+using HandmadeProductManagement.ModelViews.ProductModelViews;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
@@ -72,12 +74,22 @@ namespace HandmadeProductManagement.Services.Service
             return topsellingProducts;
         }
 
-        public async Task<IList<Product>> GetTop10NewProducts()
+        public async Task<IList<ProductForDashboard>> GetTop10NewProducts()
         {
-            var topProducts = await _unitOfWork.GetRepository<Product>().Entities
-                                              .OrderByDescending(p =>  p.CreatedTime)
-                                              .ThenByDescending(p => p.LastUpdatedTime)
-                                              .Take(10)
+            var topProducts = await _unitOfWork.GetRepository<Product>()
+                                               .Entities
+                                               .Include(p => p.Category)
+                                               .Include(p => p.ProductItems)
+                                               .OrderByDescending(p =>  p.CreatedTime)
+                                               .ThenByDescending(p => p.LastUpdatedTime)
+                                               .Take(10)
+                                               .Select(p => new ProductForDashboard
+                                                {
+                                                    Name = p.Name,
+                                                    CategoryName = p.Category.Name,
+                                                    Price = p.ProductItems.FirstOrDefault() != null ? p.ProductItems.FirstOrDefault().Price : 0,
+                                                    ProductImages = p.ProductImages.ToList()
+                                                })
                                               .ToListAsync();
             return topProducts;
         }
