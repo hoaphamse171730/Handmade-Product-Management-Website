@@ -52,30 +52,18 @@ namespace HandmadeProductManagementAPI.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateCategory(CategoryForCreationDto categoryForCreation)
         {
-            try
+
+            var createdCategory = await _categoryService.Create(categoryForCreation);
+            var response = new BaseResponse<CategoryDto>
             {
-                var createdCategory = await _categoryService.Create(categoryForCreation);
-                var response = new BaseResponse<CategoryDto>
-                {
-                    Code = "200",
-                    StatusCode = StatusCodeHelper.OK,
-                    Message = "Category created successfully",
-                    Data = createdCategory
-                };
-                return Ok(response);
-            }
-            catch (DbUpdateException dbEx)
-            {
-                var innerException = dbEx.InnerException?.Message;
-                return StatusCode(500, new
-                {
-                    title = "DbUpdateException",
-                    status = 500,
-                    detail = "An error occurred while saving the entity changes. See the inner exception for details.",
-                    instance = HttpContext.Request.Path,
-                    innerException
-                });
-            }
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Category created successfully",
+                Data = createdCategory
+            };
+            return Ok(response);
+
+
         }
 
         [HttpPut("{categoryId}")]
@@ -102,7 +90,7 @@ namespace HandmadeProductManagementAPI.Controllers
             {
                 Code = "200",
                 StatusCode = StatusCodeHelper.OK,
-                Message = "Category soft-deleted successfully",
+                Message = "Category deleted successfully",
                 Data = isDeleted
             };
             return Ok(response);
