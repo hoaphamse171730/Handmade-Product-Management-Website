@@ -139,7 +139,7 @@ namespace HandmadeProductManagement.Services.Service
                         Status = order.Status
                     };
 
-                    await _statusChangeService.Create(statusChangeDto);
+                    await _statusChangeService.Create(statusChangeDto, userId);
                     await _unitOfWork.SaveAsync();
                 }
 
@@ -250,7 +250,7 @@ namespace HandmadeProductManagement.Services.Service
             return orders;
         }
 
-        public async Task<bool> UpdateOrderStatusAsync(UpdateStatusOrderDto updateStatusOrderDto)
+        public async Task<bool> UpdateOrderStatusAsync(UpdateStatusOrderDto updateStatusOrderDto, string userId)
         {
             if (string.IsNullOrWhiteSpace(updateStatusOrderDto.OrderId))
             {
@@ -375,7 +375,7 @@ namespace HandmadeProductManagement.Services.Service
                 };
 
                 repository.Update(existingOrder);
-                await _statusChangeService.Create(statusChangeDto);
+                await _statusChangeService.Create(statusChangeDto, userId);
 
                 await _unitOfWork.SaveAsync();
                 _unitOfWork.CommitTransaction();
