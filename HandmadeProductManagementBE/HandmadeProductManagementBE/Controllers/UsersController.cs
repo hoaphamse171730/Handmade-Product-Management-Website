@@ -137,7 +137,7 @@ namespace HandmadeProductManagementAPI.Controllers
             }
          
             return Ok(response);
-        }*/
+        }
 
 
         [Authorize(Roles = "Admin, Customer, Seller")]
