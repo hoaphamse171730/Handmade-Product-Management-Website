@@ -13,5 +13,6 @@ namespace HandmadeProductManagement.Contract.Services.Interface
         Task<BaseResponse<bool>> AddCartItem(string cartId, CreateCartItemDto createCartItemDto);
         Task<BaseResponse<bool>> UpdateCartItem(string cartItemId, int productQuantity);
         Task<BaseResponse<bool>> RemoveCartItem(string cartItemId);
+        Task<List<CartItemModel>> GetCartItemsByUserIdAsync(string userId);
     }
 }

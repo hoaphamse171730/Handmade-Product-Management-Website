@@ -111,7 +111,7 @@ namespace HandmadeProductManagement.Services.Service
                     OrderId = payment.OrderId,
                     Status = "Processing"
                 };
-                await _orderService.UpdateOrderStatusAsync(dto, userId);
+                await _orderService.UpdateOrderStatusAsync(userId,dto);
             }
 
             //will update when the CancelReason table has data
@@ -122,11 +122,12 @@ namespace HandmadeProductManagement.Services.Service
                     OrderId = payment.OrderId,
                     Status = "Canceled"
                 };
-                await _orderService.UpdateOrderStatusAsync(dto, userId);
+                await _orderService.UpdateOrderStatusAsync(userId, dto);
             }
 
             payment.Status = status;
             payment.LastUpdatedTime = DateTime.UtcNow;
+            payment.LastUpdatedBy = userId;
 
             paymentRepository.Update(payment);
             await _unitOfWork.SaveAsync();

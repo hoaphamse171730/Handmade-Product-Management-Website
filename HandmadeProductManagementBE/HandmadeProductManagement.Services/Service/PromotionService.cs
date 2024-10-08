@@ -50,6 +50,7 @@ namespace HandmadeProductManagement.Services.Service
                 throw new ValidationException(validationResult.Errors);
             var promotionEntity = _mapper.Map<Promotion>(promotion);
             promotionEntity.CreatedTime = DateTime.UtcNow;
+            promotionEntity.Status = "active";
             await _unitOfWork.GetRepository<Promotion>().InsertAsync(promotionEntity);
             await _unitOfWork.SaveAsync();
             return true;
@@ -66,6 +67,7 @@ namespace HandmadeProductManagement.Services.Service
                 throw new KeyNotFoundException("Promotion not found");
             _mapper.Map(promotion, promotionEntity);
             promotionEntity.LastUpdatedTime = DateTime.UtcNow;
+            promotionEntity.LastUpdatedBy = "currentUser";
             await _unitOfWork.GetRepository<Promotion>().UpdateAsync(promotionEntity);
             await _unitOfWork.SaveAsync();
             return true;
@@ -79,8 +81,10 @@ namespace HandmadeProductManagement.Services.Service
             if (promotionEntity == null)
                 throw new KeyNotFoundException("Promotion not found");
             // promotionEntity.DeletedBy = userId.ToString();
+            promotionEntity.Status = "inactive";
+            promotionEntity.LastUpdatedBy = "currentUser";
             promotionEntity.DeletedTime = DateTime.UtcNow;
-            promotionRepo.Delete(promotionEntity);
+            await promotionRepo.DeleteAsync(promotionEntity);
             await _unitOfWork.SaveAsync();
 
             return true;
@@ -92,7 +96,9 @@ namespace HandmadeProductManagement.Services.Service
             var promotionEntity = await promotionRepo.Entities.FirstOrDefaultAsync(p => p.Id == id);
             if (promotionEntity == null)
                 throw new KeyNotFoundException("Promotion not found");
-            promotionEntity.DeletedTime = DateTime.UtcNow;
+            promotionEntity.Status = "inactive";
+            promotionEntity.LastUpdatedBy = "currentUser";
+            promotionEntity.DeletedTime = DateTime.UtcNow; 
             await promotionRepo.UpdateAsync(promotionEntity);
             await _unitOfWork.SaveAsync();
             return true;
@@ -118,8 +124,7 @@ namespace HandmadeProductManagement.Services.Service
             }
             await _unitOfWork.GetRepository<Promotion>().UpdateAsync(promotion);
             await _unitOfWork.SaveAsync();
-            return true; 
-
+            return true;
         }
     }
 }

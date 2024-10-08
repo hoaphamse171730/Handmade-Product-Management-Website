@@ -17,44 +17,38 @@ namespace HandmadeProductManagement.Services.Service
         private readonly IUnitOfWork _unitOfWork;
         private readonly IStatusChangeService _statusChangeService;
         private readonly IOrderDetailService _orderDetailService;
+        private readonly ICartItemService _cartItemService;
 
-        public OrderService(IUnitOfWork unitOfWork, IStatusChangeService statusChangeService, IOrderDetailService orderDetailService)
+        public OrderService(IUnitOfWork unitOfWork, 
+            IStatusChangeService statusChangeService, 
+            IOrderDetailService orderDetailService, 
+            ICartItemService cartItemService)
         {
             _unitOfWork = unitOfWork;
             _statusChangeService = statusChangeService;
             _orderDetailService = orderDetailService;
+            _cartItemService = cartItemService;
         }
 
         public async Task<bool> CreateOrderAsync(string userId, CreateOrderDto createOrder)
         {
-            if (createOrder.OrderDetails == null || !createOrder.OrderDetails.Any())
-            {
-                throw new BaseException.BadRequestException("invalid_order_details", "Order details cannot be null or empty.");
-            }
-
             ValidateOrder(createOrder);
-            var userRepository = _unitOfWork.GetRepository<ApplicationUser>();
-            var userExists = await userRepository.Entities
-                .AnyAsync(u => u.Id.ToString() == userId && !u.DeletedTime.HasValue);
-            if (!userExists)
-            {
-                throw new BaseException.NotFoundException("user_not_found", "User not found.");
-            }
 
             var orderRepository = _unitOfWork.GetRepository<Order>();
             var cartItemRepository = _unitOfWork.GetRepository<CartItem>();
             var productItemRepository = _unitOfWork.GetRepository<ProductItem>();
-
             var productRepository = _unitOfWork.GetRepository<Product>();
 
-            var groupedOrderDetails = await Task.WhenAll(createOrder.OrderDetails.Select(async detail =>
+            var cartItems = await _cartItemService.GetCartItemsByUserIdAsync(userId);
+
+            var groupedOrderDetails = await Task.WhenAll(cartItems.Select(async cartItem =>
             {
                 var productItem = await productItemRepository.Entities
-                    .FirstOrDefaultAsync(p => p.Id == detail.ProductItemId && !p.DeletedTime.HasValue);
+                    .FirstOrDefaultAsync(p => p.Id.ToString() == cartItem.ProductItemId && !p.DeletedTime.HasValue);
 
                 if (productItem == null)
                 {
-                    throw new BaseException.NotFoundException("product_item_not_found", $"Product Item {detail.ProductItemId} not found.");
+                    throw new BaseException.NotFoundException("product_item_not_found", $"Product Item {cartItem.ProductItemId} not found.");
                 }
 
                 var product = await productRepository.Entities
@@ -68,9 +62,11 @@ namespace HandmadeProductManagement.Services.Service
                 return new
                 {
                     ShopId = product.ShopId,
-                    Detail = detail
+                    CartItem = cartItem,
+                    ProductItem = productItem
                 };
             }));
+
             // Groupby product by shop
             var groupedByShop = groupedOrderDetails.GroupBy(x => x.ShopId).ToList();
 
@@ -78,22 +74,21 @@ namespace HandmadeProductManagement.Services.Service
 
             try
             {
-
                 foreach (var shopGroup in groupedByShop)
                 {
-                    var totalPrice = shopGroup.Sum(x => x.Detail.DiscountPrice * x.Detail.ProductQuantity);
+                    var totalPrice = shopGroup.Sum(x => x.ProductItem.Price * x.CartItem.ProductQuantity);
                     var order = new Order
                     {
                         TotalPrice = (decimal)totalPrice,
                         OrderDate = DateTime.UtcNow,
                         Status = "Pending",
-                        UserId = Guid.Parse(userId.ToString()),
+                        UserId = Guid.Parse(userId),
                         Address = createOrder.Address,
                         CustomerName = createOrder.CustomerName,
                         Phone = createOrder.Phone,
                         Note = createOrder.Note,
                         CreatedBy = userId,
-                        LastUpdatedBy = userId
+                        LastUpdatedBy = userId,
                     };
 
                     await orderRepository.InsertAsync(order);
@@ -101,34 +96,34 @@ namespace HandmadeProductManagement.Services.Service
 
                     foreach (var groupedDetail in shopGroup)
                     {
-                        var detail = groupedDetail.Detail;
+                        var cartItem = groupedDetail.CartItem;
+                        var productItem = groupedDetail.ProductItem;
 
-                        var productItem = await productItemRepository.Entities
-                            .FirstOrDefaultAsync(p => p.Id == detail.ProductItemId && !p.DeletedTime.HasValue);
-
-                        if (productItem == null)
-                        {
-                            throw new BaseException.NotFoundException("product_item_not_found", $"Product Item {detail.ProductItemId} not found.");
-                        }
-
-                        if (productItem.QuantityInStock - detail.ProductQuantity < 0)
+                        if (productItem.QuantityInStock - cartItem.ProductQuantity < 0)
                         {
                             throw new BaseException.BadRequestException("insufficient_stock", $"Product {productItem.Id} has insufficient stock.");
                         }
 
-                        productItem.QuantityInStock -= detail.ProductQuantity;
+                        productItem.QuantityInStock -= cartItem.ProductQuantity;
                         productItemRepository.Update(productItem);
 
-                        detail.OrderId = order.Id;
-                        await _orderDetailService.Create(detail);
+                        var orderDetail = new OrderDetailForCreationDto
+                        {
+                            OrderId = order.Id,
+                            ProductItemId = productItem.Id,
+                            ProductQuantity = cartItem.ProductQuantity,
+                            DiscountPrice = productItem.Price // Sử dụng giá từ ProductItem
+                        };
 
-                        var cartItems = await cartItemRepository.Entities
-                            .Where(ci => ci.ProductItemId == detail.ProductItemId && ci.Cart.UserId == order.UserId)
+                        await _orderDetailService.Create(orderDetail);
+
+                        var cartItemsToDelete = await cartItemRepository.Entities
+                            .Where(ci => ci.ProductItemId == productItem.Id && ci.Cart.UserId == order.UserId)
                             .ToListAsync();
 
-                        foreach (var cartItem in cartItems)
+                        foreach (var cartItemToDelete in cartItemsToDelete)
                         {
-                            cartItemRepository.Delete(cartItem);
+                            cartItemRepository.Delete(cartItemToDelete);
                         }
                     }
 
@@ -147,12 +142,13 @@ namespace HandmadeProductManagement.Services.Service
                 _unitOfWork.CommitTransaction();
                 return true;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 _unitOfWork.RollBack();
                 throw;
             }
         }
+
 
         public async Task<PaginatedList<OrderResponseModel>> GetOrdersByPageAsync(int pageNumber, int pageSize)
         {
@@ -258,7 +254,6 @@ namespace HandmadeProductManagement.Services.Service
             existingOrder.Phone = order.Phone;
             existingOrder.Note = order.Note;
             existingOrder.LastUpdatedBy = userId;
-            existingOrder.LastUpdatedTime = DateTime.UtcNow;
 
             repository.Update(existingOrder);
             await _unitOfWork.SaveAsync();
@@ -296,7 +291,7 @@ namespace HandmadeProductManagement.Services.Service
             return orders;
         }
 
-        public async Task<bool> UpdateOrderStatusAsync(UpdateStatusOrderDto updateStatusOrderDto, string userId)
+        public async Task<bool> UpdateOrderStatusAsync(string userId, UpdateStatusOrderDto updateStatusOrderDto)
         {
             if (string.IsNullOrWhiteSpace(updateStatusOrderDto.OrderId))
             {
@@ -359,7 +354,8 @@ namespace HandmadeProductManagement.Services.Service
             if (!validStatusTransitions.ContainsKey(existingOrder.Status) ||
                 !validStatusTransitions[existingOrder.Status].Contains(updateStatusOrderDto.Status))
             {
-                throw new BaseException.ErrorException(400, "invalid_status_transition", $"Cannot transition from {existingOrder.Status} to {updateStatusOrderDto.Status}.");
+                throw new BaseException.BadRequestException("invalid_status_transition", 
+                    $"Cannot transition from {existingOrder.Status} to {updateStatusOrderDto.Status}.");
             }
 
             _unitOfWork.BeginTransaction();
@@ -410,7 +406,7 @@ namespace HandmadeProductManagement.Services.Service
 
                 // Update order status
                 existingOrder.Status = updateStatusOrderDto.Status;
-                existingOrder.LastUpdatedBy = existingOrder.UserId.ToString();
+                existingOrder.LastUpdatedBy = userId;
                 existingOrder.LastUpdatedTime = DateTime.UtcNow;
 
                 // Create a new status change record after updating the order status
@@ -428,7 +424,7 @@ namespace HandmadeProductManagement.Services.Service
 
                 return true;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 _unitOfWork.RollBack();
                 throw;

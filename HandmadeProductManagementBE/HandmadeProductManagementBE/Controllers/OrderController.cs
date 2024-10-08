@@ -84,7 +84,7 @@ namespace HandmadeProductManagementAPI.Controllers
         public async Task<IActionResult> UpdateOrderStatus([FromBody] UpdateStatusOrderDto dto)
         {
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            var updatedOrder = await _orderService.UpdateOrderStatusAsync(dto, userId);
+            var updatedOrder = await _orderService.UpdateOrderStatusAsync(userId,dto);
             var response = new BaseResponse<bool>
             {
                 Code = "Success",

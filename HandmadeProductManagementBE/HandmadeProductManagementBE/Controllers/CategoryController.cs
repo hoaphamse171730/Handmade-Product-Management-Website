@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using HandmadeProductManagement.Core.Constants;
 
 namespace HandmadeProductManagementAPI.Controllers
 {
@@ -14,59 +16,84 @@ namespace HandmadeProductManagementAPI.Controllers
     {
         private readonly ICategoryService _categoryService;
 
-        public CategoryController(ICategoryService categoryService) 
-        {
-            _categoryService = categoryService;
-        }
+        public CategoryController(ICategoryService categoryService) => _categoryService = categoryService;
 
         [HttpGet]
+        [Authorize]
         public async Task<IActionResult> GetCategories()
         {
-            var result = await _categoryService.GetAll();
-            return Ok(BaseResponse<IList<CategoryDto>>.OkResponse(result));
+            var categories = await _categoryService.GetAll();
+            var response = new BaseResponse<IList<CategoryDto>>
+            {
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Categories retrieved successfully",
+                Data = categories
+            };
+            return Ok(response);
         }
 
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<IActionResult> GetCategory(string id)
         {
-            var result = await _categoryService.GetById(id);
-            return Ok(BaseResponse<CategoryDto>.OkResponse(result));
+            var category = await _categoryService.GetById(id);
+            var response = new BaseResponse<CategoryDto>
+            {
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Category retrieved successfully",
+                Data = category
+            };
+            return Ok(response);
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateCategory(CategoryForCreationDto categoryForCreation)
         {
-            try
+
+            var createdCategory = await _categoryService.Create(categoryForCreation);
+            var response = new BaseResponse<CategoryDto>
             {
-                var result = await _categoryService.Create(categoryForCreation);
-                return Ok(BaseResponse<CategoryDto>.OkResponse(result));
-            }
-            catch (DbUpdateException dbEx)
-            {
-                var innerException = dbEx.InnerException?.Message;
-                return StatusCode(500, new
-                {
-                    title = "DbUpdateException",
-                    status = 500,
-                    detail = "An error occurred while saving the entity changes. See the inner exception for details.",
-                    instance = HttpContext.Request.Path,
-                    innerException
-                });
-            }
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Category created successfully",
+                Data = createdCategory
+            };
+            return Ok(response);
+
+
         }
 
         [HttpPut("{categoryId}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateCategory(string categoryId, CategoryForUpdateDto categoryForUpdate)
         {
-            var result = await _categoryService.Update(categoryId, categoryForUpdate);
-            return Ok(BaseResponse<CategoryDto>.OkResponse(result));
+            var updatedCategory = await _categoryService.Update(categoryId, categoryForUpdate);
+            var response = new BaseResponse<CategoryDto>
+            {
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Category updated successfully",
+                Data = updatedCategory
+            };
+            return Ok(response);
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteCategory(string id)
         {
-            var result = await _categoryService.SoftDelete(id);
-            return Ok(BaseResponse<bool>.OkResponse(result));
+            var isDeleted = await _categoryService.SoftDelete(id);
+            var response = new BaseResponse<bool>
+            {
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Category deleted successfully",
+                Data = isDeleted
+            };
+            return Ok(response);
         }
     }
 }

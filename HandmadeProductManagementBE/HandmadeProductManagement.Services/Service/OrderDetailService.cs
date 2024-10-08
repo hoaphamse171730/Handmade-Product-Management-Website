@@ -53,43 +53,5 @@ namespace HandmadeProductManagement.Services.Service
             await _unitOfWork.SaveAsync();
             return _mapper.Map<OrderDetailDto>(orderDetailEntity);
         }
-
-        public async Task<OrderDetailDto> Update(string orderDetailId, OrderDetailForUpdateDto orderDetailForUpdate)
-        {
-            var validationResult = await _updateValidator.ValidateAsync(orderDetailForUpdate);
-            if (!validationResult.IsValid)
-                throw new ValidationException(validationResult.Errors);
-            var orderDetailEntity = await _unitOfWork.GetRepository<OrderDetail>().Entities
-                .FirstOrDefaultAsync(p => p.Id == orderDetailId && p.DeletedTime == null);
-            if (orderDetailEntity == null)
-                throw new KeyNotFoundException("Order detail not found"); 
-            _mapper.Map(orderDetailForUpdate, orderDetailEntity);
-            orderDetailEntity.LastUpdatedTime = DateTime.UtcNow;
-            await _unitOfWork.GetRepository<OrderDetail>().UpdateAsync(orderDetailEntity);
-            await _unitOfWork.SaveAsync();
-            return _mapper.Map<OrderDetailDto>(orderDetailEntity);
-        }
-
-        public async Task<bool> SoftDelete(string id)
-        {
-            var orderDetailEntity = await _unitOfWork.GetRepository<OrderDetail>().Entities.FirstOrDefaultAsync(p => p.Id == id);
-            if (orderDetailEntity == null)
-                throw new KeyNotFoundException("Order Detail not found");
-            orderDetailEntity.DeletedTime = DateTime.UtcNow;
-            await _unitOfWork.GetRepository<OrderDetail>().UpdateAsync(orderDetailEntity);
-            await _unitOfWork.SaveAsync();
-            return true;
-        }
-
-        // Cai nay fix sau
-        //public async Task<<OrderDetailDto> GetByOrderId(string orderId)
-        //{
-        //    var orderDetails = await _unitOfWork.GetRepository<OrderDetail>().Entities
-        //        .Where(od => od.OrderId == orderId && od.DeletedTime == null)
-        //        .ToListAsync();
-        //    if (orderDetails == null || orderDetails.Count == 0)
-        //        throw new KeyNotFoundException("No order details found for the given Order ID.");
-        //    return _mapper.Map<OrderDetailDto>(orderDetails);
-        //}
     }
 }

@@ -1,0 +1,27 @@
+version: 2.1
+
+jobs:
+  run-tests:
+    docker:
+      - image: cimg/dotnet:8.0
+
+    steps:
+      - checkout
+
+      - run:
+          name: "Install Dependencies"
+          command: |
+            dotnet restore  # Restore NuGet packages
+
+      - run:
+          name: "Run Tests"
+          command: |
+            dotnet test --no-restore  # Run tests without restoring packages again
+
+      - store_test_results:
+          path: test-results
+
+workflows:
+  test-workflow:
+    jobs:
+      - run-tests
