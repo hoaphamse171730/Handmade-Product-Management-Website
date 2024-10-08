@@ -3,6 +3,7 @@ using HandmadeProductManagement.Contract.Services.Interface;
     using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.DashboardModelViews;
+using HandmadeProductManagement.ModelViews.ProductModelViews;
 using HandmadeProductManagement.ModelViews.ReviewModelViews;
 using HandmadeProductManagement.Services.Service;
 using Microsoft.AspNetCore.Mvc;
@@ -71,7 +72,7 @@ using Microsoft.AspNetCore.Mvc;
         public async Task<IActionResult> Top10NewProducts()
         {
             var products = await _dashboardService.GetTop10NewProducts();
-            var response = new BaseResponse<IList<Product>>
+            var response = new BaseResponse<IList<ProductForDashboard>>
             {
                 Code = "Success",
                 StatusCode = StatusCodeHelper.OK,

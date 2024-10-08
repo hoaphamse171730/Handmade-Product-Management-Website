@@ -1,5 +1,6 @@
 ﻿using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.ModelViews.DashboardModelViews;
+using HandmadeProductManagement.ModelViews.ProductModelViews;
 
 
 namespace HandmadeProductManagement.Contract.Services.Interface
@@ -18,6 +19,6 @@ namespace HandmadeProductManagement.Contract.Services.Interface
 
         Task<List<Product>> GetTopSellingProducts();
 
-        Task<IList<Product>> GetTop10NewProducts();
+        Task<IList<ProductForDashboard>> GetTop10NewProducts();
     }
 }
