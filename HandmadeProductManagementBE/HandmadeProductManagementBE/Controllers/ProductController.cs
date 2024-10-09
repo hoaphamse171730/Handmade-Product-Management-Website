@@ -82,7 +82,7 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "Admin")]
+        [Authorize]
         public async Task<IActionResult> CreateProduct(ProductForCreationDto productForCreation)
         {
             var createdProduct = await _productService.Create(productForCreation);
@@ -97,7 +97,7 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [HttpPut("{id}")]
-        [Authorize(Roles = "Admin")]
+        [Authorize]
         public async Task<IActionResult> UpdateProduct(string id, ProductForUpdateDto productForUpdate)
         {
             await _productService.Update(id, productForUpdate);
@@ -112,7 +112,7 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [HttpDelete("soft-delete/{id}")]
-        [Authorize(Roles = "Admin")] 
+        [Authorize] 
         public async Task<IActionResult> SoftDeleteProduct(string id)
         {
             await _productService.SoftDelete(id);
@@ -142,7 +142,7 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [HttpGet("CalculateAverageRating/{id}")]
-        [Authorize(Roles = "Admin")]
+        [Authorize]
         public async Task<IActionResult> CalculateAverageRating([Required] string id)
         {
             var averageRating = await _productService.CalculateAverageRatingAsync(id);
