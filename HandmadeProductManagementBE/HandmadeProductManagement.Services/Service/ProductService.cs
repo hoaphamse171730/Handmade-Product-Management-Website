@@ -144,11 +144,11 @@ namespace HandmadeProductManagement.Services.Service
 
                 // Step 10: Check if all required combinations exist in VariationCombinations
                 var providedCombinations = productDto.VariationCombinations
-                    .Select(vc => string.Join("-", vc.VariationOptionIds.OrderBy(id => id))) // Ensure you order the VariationOptionIds
+                    .Select(vc => string.Join("-", vc.VariationOptionIds.OrderBy(id => id)))
                     .ToList();
 
                 var validCombinations = variationCombinations
-                    .Select(vc => string.Join("-", vc.VariationOptionIds.OrderBy(id => id))) // Ensure you order the valid combinations
+                    .Select(vc => string.Join("-", vc.VariationOptionIds.OrderBy(id => id)))
                     .ToList();
 
                 // Step 11: Compare combinations
