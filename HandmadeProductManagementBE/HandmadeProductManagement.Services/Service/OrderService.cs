@@ -238,8 +238,6 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.BadRequestException("invalid_order_id", "Order ID is not in the correct format. Ex: 123e4567-e89b-12d3-a456-426614174000.");
             }
 
-            ValidateOrder(order);
-
             var repository = _unitOfWork.GetRepository<Order>();
             var existingOrder = await repository.Entities
                 .FirstOrDefaultAsync(o => o.Id == orderId && !o.DeletedTime.HasValue);
@@ -249,11 +247,45 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.NotFoundException("order_not_found", "Order not found.");
             }
 
-            existingOrder.Address = order.Address;
-            existingOrder.CustomerName = order.CustomerName;
-            existingOrder.Phone = order.Phone;
-            existingOrder.Note = order.Note;
+            if (existingOrder.Status != "Pending" && existingOrder.Status != "Awaiting Payment")
+            {
+                throw new BaseException.ErrorException(400,"invalid_order_status", "Order is processing, can not update.");
+            }
+
+            if (!string.IsNullOrWhiteSpace(order.Address))
+            {
+                if (Regex.IsMatch(order.Address, @"[^a-zA-Z0-9\s,\.]"))
+                {
+                    throw new BaseException.BadRequestException("invalid_address_format", "Address cannot contain special characters except commas and periods.");
+                }
+                existingOrder.Address = order.Address;
+            }
+
+            if (!string.IsNullOrWhiteSpace(order.CustomerName))
+            {
+                if (Regex.IsMatch(order.CustomerName, @"[^a-zA-Z\s]"))
+                {
+                    throw new BaseException.BadRequestException("invalid_customer_name_format", "Customer name can only contain letters and spaces.");
+                }
+                existingOrder.CustomerName = order.CustomerName;
+            }
+
+            if (!string.IsNullOrWhiteSpace(order.Phone))
+            {
+                if (!Regex.IsMatch(order.Phone, @"^\d{1,10}$"))
+                {
+                    throw new BaseException.BadRequestException("invalid_phone_format", "Phone number must be numeric and up to 10 digits.");
+                }
+                existingOrder.Phone = order.Phone;
+            }
+
+            if (!string.IsNullOrWhiteSpace(order.Note))
+            {
+                existingOrder.Note = order.Note;
+            }
+
             existingOrder.LastUpdatedBy = userId;
+            existingOrder.LastUpdatedTime = DateTime.UtcNow;
 
             repository.Update(existingOrder);
             await _unitOfWork.SaveAsync();
@@ -320,6 +352,11 @@ namespace HandmadeProductManagement.Services.Service
             if (existingOrder == null)
             {
                 throw new BaseException.NotFoundException("order_not_found", "Order not found.");
+            }
+
+            if (existingOrder.Status == "Closed")
+            {
+                throw new BaseException.ErrorException(400, "order_closed", "Order was closed");
             }
 
             // Validate Status Flow
@@ -463,41 +500,6 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.BadRequestException("invalid_phone_format", "Phone number must be numeric and up to 10 digits.");
             }
         }
-
-        private void ValidateOrder(UpdateOrderDto order)
-        {
-
-            if (string.IsNullOrWhiteSpace(order.Address))
-            {
-                throw new BaseException.BadRequestException("invalid_address", "Address cannot be null or empty.");
-            }
-
-            if (Regex.IsMatch(order.Address, @"[^a-zA-Z0-9\s,\.]"))
-            {
-                throw new BaseException.BadRequestException("invalid_address_format", "Address cannot contain special characters except commas and periods.");
-            }
-
-            if (string.IsNullOrWhiteSpace(order.CustomerName))
-            {
-                throw new BaseException.BadRequestException("invalid_customer_name", "Customer name cannot be null or empty.");
-            }
-
-            if (Regex.IsMatch(order.CustomerName, @"[^a-zA-Z\s]"))
-            {
-                throw new BaseException.BadRequestException("invalid_customer_name_format", "Customer name can only contain letters and spaces.");
-            }
-
-            if (string.IsNullOrWhiteSpace(order.Phone))
-            {
-                throw new BaseException.BadRequestException("invalid_phone", "Phone number cannot be null or empty.");
-            }
-
-            if (!Regex.IsMatch(order.Phone, @"^\d{1,10}$"))
-            {
-                throw new BaseException.BadRequestException("invalid_phone_format", "Phone number must be numeric and up to 10 digits.");
-            }
-        }
-
 
     }
 }
