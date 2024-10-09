@@ -23,6 +23,7 @@ namespace HandmadeProductManagementAPI.Controllers
 
         // GET: api/Users
         [HttpGet]
+        [Authorize(Roles ="Admin")]
         public async Task<IActionResult> GetApplicationUsers()
         {
 
@@ -39,6 +40,8 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize(Roles = "Admin")]
+
         public async Task<IActionResult> GetApplicationUsersById(String id)
         {
             var response = new BaseResponse<UserResponseByIdModel>
@@ -55,25 +58,11 @@ namespace HandmadeProductManagementAPI.Controllers
 
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
+
         public async Task<IActionResult> UpdateUser(string id,  UpdateUserDTO updateUserDTO)
         {
-            /*
-
-
-            if (!new EmailAddressAttribute().IsValid(updateUserDTO.Email))
-            {
-                return StatusCode(400, BaseResponse<string>.FailResponse("Email is not valid"));
-            }
-
-            
-            var phoneRegex = new Regex(@"^\d{10}$");  
-            if (!phoneRegex.IsMatch(updateUserDTO.PhoneNumber))
-            {
-                return StatusCode(400, BaseResponse<string>.FailResponse("Phone number is not valid"));
-            }
-
-
-            }*/
+          
             var response = new BaseResponse<UpdateUserResponseModel>
             {
                 Code = "200",
@@ -85,6 +74,8 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
+
         public async Task<IActionResult> DeleteUser(string id)
         {
 
@@ -98,7 +89,9 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
-        [HttpPost("{id}/restore")] 
+        [HttpPost("{id}/restore")]
+        [Authorize(Roles = "Admin")]
+
         public async Task<IActionResult> ReverseDeleteUser(string id)
         {
 
