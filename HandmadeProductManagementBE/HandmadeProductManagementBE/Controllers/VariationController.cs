@@ -18,16 +18,16 @@ namespace HandmadeProductManagementAPI.Controllers
             _variationService = variationService;
         }
 
-        // GET: api/variation/page?page=1&pageSize=10
-        [HttpGet("page")]
-        public async Task<IActionResult> GetByPage([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        // GET: api/variation
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
         {
             var response = new BaseResponse<IList<VariationDto>>
             {
                 Code = "Success",
                 StatusCode = StatusCodeHelper.OK,
-                Message = "Get Variations by page successfully.",
-                Data = await _variationService.GetByPage(page, pageSize)
+                Message = "Get all Variations successfully.",
+                Data = await _variationService.GetAll()
             };
             return Ok(response);
         }
