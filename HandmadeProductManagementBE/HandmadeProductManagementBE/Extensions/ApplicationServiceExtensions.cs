@@ -35,6 +35,8 @@ using HandmadeProductManagement.ModelViews.ProductItemModelViews;
 using HandmadeProductManagement.Validation.ProductItem;
 using HandmadeProductManagement.ModelViews.ProductConfigurationModelViews;
 using HandmadeProductManagement.Validation.ProductConfiguration;
+using HandmadeProductManagement.ModelViews.VariationCombinationModelViews;
+using HandmadeProductManagement.Validation.VariationCombination;
 
 namespace HandmadeProductManagementAPI.Extensions;
 
@@ -147,6 +149,10 @@ public static class ApplicationServiceExtensions
 
         #region ProductConfiguration
         services.AddScoped<IValidator<ProductConfigurationForCreationDto>, ProductConfigurationForCreationDtoValidator>();
+        #endregion
+
+        #region VariationCombination
+        services.AddScoped<IValidator<VariationCombinationDto>, VariationCombinationDtoValidator>();
         #endregion
     }
 

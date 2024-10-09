@@ -87,10 +87,10 @@ namespace HandmadeProductManagement.Services.Service
         }
 
 
-        public async Task<bool> Create(VariationOptionForCreationDto option, string userId, string variationId)
+        public async Task<bool> Create(VariationOptionForCreationDto option, string userId)
         {
             // Validate id format
-            if (!Guid.TryParse(variationId, out var guidId))
+            if (!Guid.TryParse(option.VariationId, out var guidId))
             {
                 throw new BaseException.BadRequestException("invalid_input", "ID is not in a valid GUID format.");
             }
@@ -103,7 +103,7 @@ namespace HandmadeProductManagement.Services.Service
 
             // Check if VariationId exists
             var variationExists = await _unitOfWork.GetRepository<Variation>().Entities
-                .AnyAsync(v => v.Id == variationId);
+                .AnyAsync(v => v.Id == option.VariationId);
             if (!variationExists)
             {
                 throw new BaseException.NotFoundException("not_found", "Variation not found.");

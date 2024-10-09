@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 
 namespace HandmadeProductManagementAPI.Controllers
 {
@@ -85,16 +86,36 @@ namespace HandmadeProductManagementAPI.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateProduct(ProductForCreationDto productForCreation)
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            var createdProduct = await _productService.Create(productForCreation, userId);
-            var response = new BaseResponse<ProductDto>
+            try
             {
-                Code = "200",
-                StatusCode = StatusCodeHelper.OK,
-                Message = "Product created successfully",
-                Data = createdProduct
-            };
-            return Ok(response); 
+                var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                var createdProduct = await _productService.Create(productForCreation, userId);
+
+                var response = new BaseResponse<ProductDto>
+                {
+                    Code = "200",
+                    StatusCode = StatusCodeHelper.OK,
+                    Message = "Product created successfully",
+                    Data = createdProduct
+                };
+
+                return Ok(response);
+            }
+            catch (DbUpdateException ex)
+            {
+                // Log the error for further investigation (you can use any logging framework)
+                // _logger.LogError(ex, "An error occurred while saving the product.");
+
+                var response = new BaseResponse<string>
+                {
+                    Code = "500",
+                    StatusCode = StatusCodeHelper.ServerError,
+                    Message = "An error occurred while saving the product. Please try again later.",
+                    Data = ex.InnerException?.Message ?? ex.Message // Include detailed error if available
+                };
+
+                return StatusCode(StatusCodes.Status500InternalServerError, response);
+            }
         }
 
         [HttpPut("{id}")]
