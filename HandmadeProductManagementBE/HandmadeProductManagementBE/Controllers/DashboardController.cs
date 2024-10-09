@@ -60,7 +60,7 @@ using Microsoft.AspNetCore.Mvc;
             return Ok(BaseResponse<List<Shop>>.OkResponse(topShops)); 
 
         }
-        [HttpPost("TotalSaleById")]
+        [HttpPost("TotalSaleByShopId")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> TotalSaleByShopId(string Id, DashboardDTO dashboardDTO)
         {
