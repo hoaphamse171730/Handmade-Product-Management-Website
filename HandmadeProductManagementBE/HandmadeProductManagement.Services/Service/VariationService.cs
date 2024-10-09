@@ -47,38 +47,17 @@ namespace HandmadeProductManagement.Services.Service
             return _mapper.Map<IList<VariationDto>>(variations);
         }
 
-
-
-        // Get variations by page (only active records)
-        public async Task<IList<VariationDto>> GetByPage(int page, int pageSize)
+        public async Task<IList<VariationDto>> GetAll()
         {
-            if (page <= 0)
-            {
-                throw new BaseException.BadRequestException("invalid_input", "Page must be greater than 0.");
-            }
+            var variationRepository = _unitOfWork.GetRepository<Variation>();
 
-            if (pageSize <= 0)
-            {
-                throw new BaseException.BadRequestException("invalid_input", "Page size must be greater than 0.");
-            }
-
-            IQueryable<Variation> query = _unitOfWork.GetRepository<Variation>().Entities
-                .Where(v => !v.DeletedTime.HasValue || v.DeletedBy == null);
-
-            var variations = await query
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .Select(variation => new VariationDto
-                {
-                    Id = variation.Id.ToString(),
-                    Name = variation.Name,
-                    CategoryId = variation.CategoryId,
-                })
+            var variations = await variationRepository.Entities
+                .Where(v => !v.DeletedTime.HasValue || v.DeletedBy == null)
                 .ToListAsync();
 
             if (variations == null || !variations.Any())
             {
-                throw new BaseException.NotFoundException("not_found", "No variations found for the specified page.");
+                throw new BaseException.NotFoundException("not_found", "No variations found.");
             }
 
             return _mapper.Map<IList<VariationDto>>(variations);

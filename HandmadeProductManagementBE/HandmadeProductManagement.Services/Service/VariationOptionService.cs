@@ -30,30 +30,16 @@ namespace HandmadeProductManagement.Services.Service
             _updateValidator = updateValidator;
         }
 
-        public async Task<IList<VariationOptionDto>> GetByPage(int page, int pageSize)
+        // Get all variation options
+        public async Task<IList<VariationOptionDto>> GetAll()
         {
-            if (page <= 0 || pageSize <= 0)
-            {
-                throw new BaseException.BadRequestException("invalid_input", "Page and PageSize must be greater than 0.");
-            }
-
-            IQueryable<VariationOption> query = _unitOfWork.GetRepository<VariationOption>().Entities
-                .Where(cr => !cr.DeletedTime.HasValue || cr.DeletedBy == null);
-
-            var variationOptions = await query
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .Select(variationOption => new VariationOptionDto
-                {
-                    Id = variationOption.Id.ToString(),
-                    Value = variationOption.Value,
-                    VariationId = variationOption.VariationId,
-                })
+            var variationOptions = await _unitOfWork.GetRepository<VariationOption>().Entities
+                .Where(vo => !vo.DeletedTime.HasValue || vo.DeletedBy == null)
                 .ToListAsync();
 
             if (variationOptions == null || !variationOptions.Any())
             {
-                throw new BaseException.NotFoundException("not_found", "No variation options found for the specified page.");
+                throw new BaseException.NotFoundException("not_found", "No variation options found.");
             }
 
             return _mapper.Map<IList<VariationOptionDto>>(variationOptions);

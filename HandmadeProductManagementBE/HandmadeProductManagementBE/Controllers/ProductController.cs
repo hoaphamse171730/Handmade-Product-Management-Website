@@ -68,7 +68,6 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [HttpGet("{id}")]
-        [Authorize]
         public async Task<IActionResult> GetProduct(string id)
         {
             var product = await _productService.GetById(id);
