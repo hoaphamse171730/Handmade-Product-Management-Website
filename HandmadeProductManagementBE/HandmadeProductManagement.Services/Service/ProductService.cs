@@ -256,6 +256,27 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.BadRequestException("bad_request", "MinRating must be between 0 and 5.");
             }
 
+            // Check if CategoryId exists
+            if (!string.IsNullOrWhiteSpace(searchModel.CategoryId))
+            {
+                var categoryExists = await _unitOfWork.GetRepository<Category>().Entities
+                    .AnyAsync(c => c.Id == searchModel.CategoryId);
+                if (!categoryExists)
+                {
+                    throw new BaseException.NotFoundException("not_found", "Category Not Found");
+                }
+            }
+
+            // Check if ShopId exists
+            if (!string.IsNullOrWhiteSpace(searchModel.ShopId))
+            {
+                var shopExists = await _unitOfWork.GetRepository<Shop>().Entities
+                    .AnyAsync(s => s.Id == searchModel.ShopId);
+                if (!shopExists)
+                {
+                    throw new BaseException.NotFoundException("not_found", "Shop Not Found");
+                }
+            }
 
             var query = _unitOfWork.GetRepository<Product>().Entities.AsQueryable();
 
