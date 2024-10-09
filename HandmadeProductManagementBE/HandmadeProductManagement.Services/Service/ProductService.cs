@@ -32,7 +32,7 @@ namespace HandmadeProductManagement.Services.Service
             _variationCombinationValidator = variationCombinationValidator;
         }
 
-        public async Task<ProductDto> Create(ProductForCreationDto productDto, string userId)
+        public async Task<bool> Create(ProductForCreationDto productDto, string userId)
         {
             // Step 1: Validate the product creation DTO
             var validationResult = await _creationValidator.ValidateAsync(productDto);
@@ -187,11 +187,8 @@ namespace HandmadeProductManagement.Services.Service
 
                 // Step 14: Save all changes for ProductConfigurations
                 await _unitOfWork.SaveAsync();
-
-                // Step 15: Map and return the final product DTO
-                var productToReturn = _mapper.Map<ProductDto>(productEntity);
-                await _unitOfWork.SaveAsync();
-                return productToReturn;
+                _unitOfWork.CommitTransaction();
+                return true;
             }
             catch (Exception)
             {
@@ -418,7 +415,7 @@ namespace HandmadeProductManagement.Services.Service
 
         }
 
-        public async Task<ProductDto> Update(string id, ProductForUpdateDto product, string userId)
+        public async Task<bool> Update(string id, ProductForUpdateDto product, string userId)
         {
             var result = _updateValidator.ValidateAsync(product);
             if (!result.Result.IsValid)
@@ -434,8 +431,7 @@ namespace HandmadeProductManagement.Services.Service
 
             await _unitOfWork.GetRepository<Product>().UpdateAsync(productEntity);
             await _unitOfWork.SaveAsync();
-            var productToReturn = _mapper.Map<ProductDto>(productEntity);
-            return productToReturn;
+            return true;
         }
 
         public async Task<bool> SoftDelete(string id, string userId)

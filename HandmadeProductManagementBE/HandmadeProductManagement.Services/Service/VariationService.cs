@@ -86,16 +86,28 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.NotFoundException("category_not_found", "Category does not exist.");
             }
 
+            // Check if the variation name already exists for the given category
+            var variationNameExists = await _unitOfWork.GetRepository<Variation>()
+                .Entities.AnyAsync(v => v.Name == variationForCreation.Name && v.CategoryId == variationForCreation.CategoryId);
+
+            if (variationNameExists)
+            {
+                throw new BaseException.BadRequestException("duplicate_variation_name", "Variation name already exists in this category.");
+            }
+
+            // Map the DTO to the entity
             var variationEntity = _mapper.Map<Variation>(variationForCreation);
 
             variationEntity.CreatedBy = userId;
             variationEntity.LastUpdatedBy = userId;
 
+            // Insert the new variation
             await _unitOfWork.GetRepository<Variation>().InsertAsync(variationEntity);
             await _unitOfWork.SaveAsync();
 
             return true;
         }
+
 
         public async Task<bool> Update(string id, VariationForUpdateDto variationForUpdate, string userId)
         {
