@@ -23,7 +23,6 @@ namespace HandmadeProductManagementAPI.Controllers
         public ProductController(IProductService productService) => _productService = productService;
 
         [HttpGet("search")]
-        [Authorize]
         public async Task<IActionResult> SearchProducts([FromQuery] ProductSearchFilter searchFilter)
         {
             var products = await _productService.SearchProductsAsync(searchFilter);
@@ -38,7 +37,6 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [HttpGet("sort")]
-        [Authorize]
         public async Task<IActionResult> SortProducts([FromQuery] ProductSortFilter sortModel)
         {
             var products = await _productService.SortProductsAsync(sortModel);

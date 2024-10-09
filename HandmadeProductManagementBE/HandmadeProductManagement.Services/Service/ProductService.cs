@@ -259,10 +259,11 @@ namespace HandmadeProductManagement.Services.Service
 
             var query = _unitOfWork.GetRepository<Product>().Entities.AsQueryable();
 
-            // Apply Search Filters
+            // Apply server-side filters
             if (!string.IsNullOrEmpty(searchModel.Name))
             {
-                query = query.Where(p => p.Name.Contains(searchModel.Name));
+                //Skip normalization on the server-side 
+                query = query.Where(p => p.Name != null);  // Placeholder to avoid mixing EF logic - if you delete this sentence, search go wrong 
             }
 
             if (!string.IsNullOrWhiteSpace(searchModel.CategoryId))
@@ -329,14 +330,20 @@ namespace HandmadeProductManagement.Services.Service
                     Price = g.SelectMany(p => p.ProductItems).Any()
                         ? g.SelectMany(p => p.ProductItems).Min(pi => pi.Price)
                         : 0
-                }).OrderBy(pr => searchModel.SortByPrice
-                    ? (searchModel.SortDescending
-                        ? (decimal)-pr.Price
-                        : (decimal)pr.Price) // Sort by price ascending or descending
-                    : (searchModel.SortDescending
-                        ? (decimal)-pr.Rating
-                        : (decimal)pr.Rating)) // Sort by rating ascending or descending
-                .ToListAsync();
+                }).ToListAsync();
+
+            // Search Normalized name - using Client-Side filter
+            if (!string.IsNullOrEmpty(searchModel.Name))
+            {
+                var normalizedSearchName = NormalizeString(searchModel.Name);
+                productSearchVMs = productSearchVMs.Where(p => NormalizeString(p.Name).Contains(normalizedSearchName)).ToList();
+            }
+
+            // Sort by price or rating after filtering
+            productSearchVMs = searchModel.SortByPrice
+                ? productSearchVMs.OrderBy(pr => searchModel.SortDescending ? -pr.Price : pr.Price).ToList()
+                : productSearchVMs.OrderBy(pr => searchModel.SortDescending ? -pr.Rating : pr.Rating).ToList();
+
 
             if (productSearchVMs.IsNullOrEmpty())
             {
@@ -558,6 +565,15 @@ namespace HandmadeProductManagement.Services.Service
             await _unitOfWork.SaveAsync();
             return averageRating;
         }
+
+        private string NormalizeString(string input)
+        {
+            if (string.IsNullOrWhiteSpace(input))
+                return string.Empty;
+
+            return input.ToLower().Trim().Replace("-", "");
+        }
+
     }
 }
 
