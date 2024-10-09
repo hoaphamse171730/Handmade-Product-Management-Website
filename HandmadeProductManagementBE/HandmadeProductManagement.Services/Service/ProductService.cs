@@ -2,22 +2,14 @@
 using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
-using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.ProductDetailModelViews;
 using HandmadeProductManagement.ModelViews.ProductModelViews;
-using HandmadeProductManagement.ModelViews.ReviewModelViews;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using AutoMapper;
 using FluentValidation;
-using HandmadeProductManagement.ModelViews.PromotionModelViews;
-using HandmadeProductManagement.Core.Utils;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
+using HandmadeProductManagement.ModelViews.VariationCombinationModelViews;
+using System.Linq;
 
 namespace HandmadeProductManagement.Services.Service
 {
@@ -28,14 +20,221 @@ namespace HandmadeProductManagement.Services.Service
         private readonly IMapper _mapper;
         private readonly IValidator<ProductForCreationDto> _creationValidator;
         private readonly IValidator<ProductForUpdateDto> _updateValidator;
+        private readonly IValidator<VariationCombinationDto> _variationCombinationValidator;
 
         public ProductService(IUnitOfWork unitOfWork, IMapper mapper,
-            IValidator<ProductForCreationDto> creationValidator, IValidator<ProductForUpdateDto> updateValidator)
+            IValidator<ProductForCreationDto> creationValidator, IValidator<ProductForUpdateDto> updateValidator, IValidator<VariationCombinationDto> variationCombinationValidator)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _creationValidator = creationValidator;
             _updateValidator = updateValidator;
+            _variationCombinationValidator = variationCombinationValidator;
+        }
+
+        public async Task<ProductDto> Create(ProductForCreationDto productDto, string userId)
+        {
+            // Step 1: Validate the product creation DTO
+            var validationResult = await _creationValidator.ValidateAsync(productDto);
+            if (!validationResult.IsValid)
+            {
+                throw new BaseException.BadRequestException("validation_failed", validationResult.Errors.Select(e => e.ErrorMessage).FirstOrDefault());
+            }
+
+            // Validate VariationCombinationDtos
+            foreach (var variationCombination in productDto.VariationCombinations)
+            {
+                var variationCombinationValidationResult = await _variationCombinationValidator.ValidateAsync(variationCombination);
+                if (!variationCombinationValidationResult.IsValid)
+                {
+                    throw new BaseException.BadRequestException("validation_failed", variationCombinationValidationResult.Errors.Select(e => e.ErrorMessage).FirstOrDefault());
+                }
+            }
+
+            _unitOfWork.BeginTransaction();
+
+            try
+            {
+                // Step 2: Validate if the Category exists and if its ID is a valid GUID
+                if (!Guid.TryParse(productDto.CategoryId, out _))
+                {
+                    throw new BaseException.BadRequestException("invalid_category_id", "Category ID must be a valid GUID.");
+                }
+
+                var categoryRepository = _unitOfWork.GetRepository<Category>();
+                var categoryExists = await categoryRepository.Entities
+                    .AnyAsync(c => c.Id == productDto.CategoryId);
+                if (!categoryExists)
+                {
+                    throw new BaseException.NotFoundException("category_not_found", $"Category not found.");
+                }
+
+                // Step 3: Validate if the Shop exists and if its ID is a valid GUID
+                if (!Guid.TryParse(productDto.ShopId, out _))
+                {
+                    throw new BaseException.BadRequestException("invalid_shop_id", "Shop ID must be a valid GUID.");
+                }
+
+                var shopRepository = _unitOfWork.GetRepository<Shop>();
+                var shopExists = await shopRepository.Entities
+                    .AnyAsync(s => s.Id == productDto.ShopId);
+                if (!shopExists)
+                {
+                    throw new BaseException.NotFoundException("shop_not_found", $"Shop not found.");
+                }
+
+                // Step 4: Map the product DTO to the Product entity
+                var productEntity = _mapper.Map<Product>(productDto);
+                productEntity.Status = "Available";
+                productEntity.CreatedBy = userId;
+                productEntity.LastUpdatedBy = userId;
+
+                // Step 5: Insert the product into the repository
+                await _unitOfWork.GetRepository<Product>().InsertAsync(productEntity);
+                await _unitOfWork.SaveAsync();
+
+                // Step 6: Validate if each Variation exists and if its ID is a valid GUID
+                var variationRepository = _unitOfWork.GetRepository<Variation>();
+
+                foreach (var variation in productDto.Variations)
+                {
+                    if (!Guid.TryParse(variation.Id, out _))
+                    {
+                        throw new BaseException.BadRequestException("invalid_variation_id", $"Variation ID must be a valid GUID.");
+                    }
+
+                    var variationExists = await variationRepository.Entities
+                        .AnyAsync(v => v.Id == variation.Id);
+                    if (!variationExists)
+                    {
+                        throw new BaseException.NotFoundException("variation_not_found", $"Variation not found.");
+                    }
+                }
+
+                // Step 7: Validate if each VariationOption exists and if its ID is a valid GUID
+                var variationOptionRepository = _unitOfWork.GetRepository<VariationOption>();
+
+                foreach (var variation in productDto.Variations)
+                {
+                    foreach (var variationOptionId in variation.VariationOptionIds)
+                    {
+                        if (!Guid.TryParse(variationOptionId, out _))
+                        {
+                            throw new BaseException.BadRequestException("invalid_variation_option_id", $"Variation Option ID  must be a valid GUID.");
+                        }
+
+                        var variationOptionExists = await variationOptionRepository.Entities
+                            .AnyAsync(vo => vo.Id == variationOptionId);
+                        if (!variationOptionExists)
+                        {
+                            throw new BaseException.NotFoundException("variation_option_not_found", $"Variation Option with ID not found.");
+                        }
+                    }
+                }
+
+                // Step 8: Handle the variations and collect VariationOptionIds per variation
+                var variationOptionIdsPerVariation = new Dictionary<string, List<string>>();
+                foreach (var variation in productDto.Variations)
+                {
+                    variationOptionIdsPerVariation[variation.Id] = variation.VariationOptionIds;
+                }
+
+                // Step 9: Generate all combinations of VariationOptionIds
+                var variationCombinations = GetVariationOptionCombinations(variationOptionIdsPerVariation);
+
+                // Step 10: Check if all required combinations exist in VariationCombinations
+                var providedCombinations = productDto.VariationCombinations
+                    .Select(vc => string.Join("-", vc.VariationOptionIds.OrderBy(id => id)))
+                    .ToList();
+
+                var validCombinations = variationCombinations
+                    .Select(vc => string.Join("-", vc.VariationOptionIds.OrderBy(id => id)))
+                    .ToList();
+
+                // Step 11: Compare combinations
+                if (!validCombinations.All(providedCombinations.Contains))
+                {
+                    throw new BaseException.BadRequestException("incomplete_combinations", "Some required variation combinations are missing.");
+                }
+
+                // Step 12: Create ProductItems based on combinations of variation options
+                foreach (var combination in productDto.VariationCombinations)
+                {
+                    var productItem = new ProductItem
+                    {
+                        ProductId = productEntity.Id,
+                        Price = combination.Price,
+                        QuantityInStock = combination.QuantityInStock,
+                        CreatedBy = userId,
+                        LastUpdatedBy = userId
+                    };
+
+                    await _unitOfWork.GetRepository<ProductItem>().InsertAsync(productItem);
+                    await _unitOfWork.SaveAsync();
+
+                    // Step 13: Create ProductConfiguration for each VariationOption in the combination
+                    foreach (var variationOptionId in combination.VariationOptionIds)
+                    {
+                        var productConfiguration = new ProductConfiguration
+                        {
+                            ProductItemId = productItem.Id,
+                            VariationOptionId = variationOptionId
+                        };
+
+                        await _unitOfWork.GetRepository<ProductConfiguration>().InsertAsync(productConfiguration);
+                    }
+                }
+
+                // Step 14: Save all changes for ProductConfigurations
+                await _unitOfWork.SaveAsync();
+
+                // Step 15: Map and return the final product DTO
+                var productToReturn = _mapper.Map<ProductDto>(productEntity);
+                await _unitOfWork.SaveAsync();
+                return productToReturn;
+            }
+            catch (Exception)
+            {
+                _unitOfWork.RollBack();
+                throw;
+            }
+        }
+
+
+        // Method to generate all combinations of VariationOptionIds
+        private List<VariationCombinationDto> GetVariationOptionCombinations(Dictionary<string, List<string>> variationOptionIdsPerVariation)
+        {
+            // Generate all possible combinations of variation options based on the IDs per variation
+            var allCombinations = new List<VariationCombinationDto>();
+
+            var lists = variationOptionIdsPerVariation.Values.ToList();
+
+            var combinations = GetCombinations(lists);
+
+            foreach (var combination in combinations)
+            {
+                allCombinations.Add(new VariationCombinationDto
+                {
+                    VariationOptionIds = combination
+                });
+            }
+
+            return allCombinations;
+        }
+
+        // Method to generate all possible combinations of elements from multiple lists
+        private IEnumerable<List<string>> GetCombinations(List<List<string>> lists)
+        {
+            IEnumerable<IEnumerable<string>> result = new List<List<string>> { new List<string>() };
+
+            foreach (var list in lists)
+            {
+                result = from combination in result
+                         from item in list
+                         select combination.Concat(new[] { item });
+            }
+
+            return result.Select(c => c.ToList());
         }
 
         public async Task<IEnumerable<ProductSearchVM>> SearchProductsAsync(ProductSearchFilter searchModel)
@@ -60,10 +259,11 @@ namespace HandmadeProductManagement.Services.Service
 
             var query = _unitOfWork.GetRepository<Product>().Entities.AsQueryable();
 
-            // Apply Search Filters
+            // Apply server-side filters
             if (!string.IsNullOrEmpty(searchModel.Name))
             {
-                query = query.Where(p => p.Name.Contains(searchModel.Name));
+                //Skip normalization on the server-side 
+                query = query.Where(p => p.Name != null);  // Placeholder to avoid mixing EF logic - if you delete this sentence, search go wrong 
             }
 
             if (!string.IsNullOrWhiteSpace(searchModel.CategoryId))
@@ -130,14 +330,20 @@ namespace HandmadeProductManagement.Services.Service
                     Price = g.SelectMany(p => p.ProductItems).Any()
                         ? g.SelectMany(p => p.ProductItems).Min(pi => pi.Price)
                         : 0
-                }).OrderBy(pr => searchModel.SortByPrice
-                    ? (searchModel.SortDescending
-                        ? (decimal)-pr.Price
-                        : (decimal)pr.Price) // Sort by price ascending or descending
-                    : (searchModel.SortDescending
-                        ? (decimal)-pr.Rating
-                        : (decimal)pr.Rating)) // Sort by rating ascending or descending
-                .ToListAsync();
+                }).ToListAsync();
+
+            // Search Normalized name - using Client-Side filter
+            if (!string.IsNullOrEmpty(searchModel.Name))
+            {
+                var normalizedSearchName = NormalizeString(searchModel.Name);
+                productSearchVMs = productSearchVMs.Where(p => NormalizeString(p.Name).Contains(normalizedSearchName)).ToList();
+            }
+
+            // Sort by price or rating after filtering
+            productSearchVMs = searchModel.SortByPrice
+                ? productSearchVMs.OrderBy(pr => searchModel.SortDescending ? -pr.Price : pr.Price).ToList()
+                : productSearchVMs.OrderBy(pr => searchModel.SortDescending ? -pr.Rating : pr.Rating).ToList();
+
 
             if (productSearchVMs.IsNullOrEmpty())
             {
@@ -219,24 +425,7 @@ namespace HandmadeProductManagement.Services.Service
 
         }
 
-
-        public async Task<ProductDto> Create(ProductForCreationDto product)
-        {
-            var result = _creationValidator.ValidateAsync(product);
-            if (!result.Result.IsValid)
-                throw new ValidationException(result.Result.Errors);
-            var productEntity = _mapper.Map<Product>(product);
-            productEntity.Status = "active";
-            productEntity.CreatedTime = DateTime.UtcNow;
-            productEntity.CreatedBy = "currentUser";
-            await _unitOfWork.GetRepository<Product>().InsertAsync(productEntity);
-            await _unitOfWork.SaveAsync();
-            var productToReturn = _mapper.Map<ProductDto>(productEntity);
-            return productToReturn;
-
-        }
-
-        public async Task<ProductDto> Update(string id, ProductForUpdateDto product)
+        public async Task<ProductDto> Update(string id, ProductForUpdateDto product, string userId)
         {
             var result = _updateValidator.ValidateAsync(product);
             if (!result.Result.IsValid)
@@ -246,23 +435,24 @@ namespace HandmadeProductManagement.Services.Service
             if (productEntity == null)
                 throw new KeyNotFoundException("Product not found");
             _mapper.Map(product, productEntity);
-            productEntity.LastUpdatedBy = "currentUser";
+
             productEntity.LastUpdatedTime = DateTime.UtcNow;
+            productEntity.LastUpdatedBy = userId;
+
             await _unitOfWork.GetRepository<Product>().UpdateAsync(productEntity);
             await _unitOfWork.SaveAsync();
             var productToReturn = _mapper.Map<ProductDto>(productEntity);
             return productToReturn;
         }
 
-        public async Task<bool> SoftDelete(string id)
+        public async Task<bool> SoftDelete(string id, string userId)
         {
             var productRepo = _unitOfWork.GetRepository<Product>();
             var productEntity = await productRepo.Entities.FirstOrDefaultAsync(x => x.Id == id.ToString());
             if (productEntity == null)
                 throw new KeyNotFoundException("Product not found");
             productEntity.DeletedTime = DateTime.UtcNow;
-            productEntity.DeletedBy = "currentUser";
-            productEntity.Status = "inactive";
+            productEntity.DeletedBy = userId;
             await productRepo.UpdateAsync(productEntity);
             await _unitOfWork.SaveAsync();
             return true;
@@ -294,8 +484,9 @@ namespace HandmadeProductManagement.Services.Service
             }
 
             var promotion = await _unitOfWork.GetRepository<Promotion>().Entities
-                .Where(p => p.Status == "active")
-                .FirstOrDefaultAsync(p => p.Categories.Any(c => c.Id == product.CategoryId));
+                .FirstOrDefaultAsync(p => p.Categories.Any(c => c.Id == product.CategoryId) &&
+                                          p.StartDate <= DateTime.UtcNow &&
+                                          p.EndDate >= DateTime.UtcNow);
 
             var response = new ProductDetailResponseModel
             {
@@ -374,6 +565,15 @@ namespace HandmadeProductManagement.Services.Service
             await _unitOfWork.SaveAsync();
             return averageRating;
         }
+
+        private string NormalizeString(string input)
+        {
+            if (string.IsNullOrWhiteSpace(input))
+                return string.Empty;
+
+            return input.ToLower().Trim().Replace("-", "");
+        }
+
     }
 }
 

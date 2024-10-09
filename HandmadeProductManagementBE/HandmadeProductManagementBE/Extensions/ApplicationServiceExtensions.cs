@@ -31,6 +31,12 @@ using Mapster;
 using Microsoft.EntityFrameworkCore;
 using HandmadeProductManagement.ModelViews.CategoryModelViews;
 using HandmadeProductManagement.Validation.Category;
+using HandmadeProductManagement.ModelViews.ProductItemModelViews;
+using HandmadeProductManagement.Validation.ProductItem;
+using HandmadeProductManagement.ModelViews.ProductConfigurationModelViews;
+using HandmadeProductManagement.Validation.ProductConfiguration;
+using HandmadeProductManagement.ModelViews.VariationCombinationModelViews;
+using HandmadeProductManagement.Validation.VariationCombination;
 
 namespace HandmadeProductManagementAPI.Extensions;
 
@@ -83,6 +89,10 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IUserAgentService, UserAgentService>();
         services.AddScoped<IDashboardService, DashboardService>();
         services.AddScoped<IProductImageService, ProductImageService>();
+        services.AddScoped<IVariationService, VariationService>();
+        services.AddScoped<IVariationOptionService, VariationOptionService>();
+        services.AddScoped<IProductItemService, ProductItemService>();
+        services.AddScoped<IProductConfigurationService, ProductConfigurationService>();
         return services;
     }
 
@@ -130,6 +140,19 @@ public static class ApplicationServiceExtensions
         #region Category
         services.AddScoped<IValidator<CategoryForCreationDto>, CategoryForCreationDtoValidator>();
         services.AddScoped<IValidator<CategoryForUpdateDto>, CategoryForUpdateDtoValidator>();
+        #endregion
+
+        #region ProductItem
+        services.AddScoped<IValidator<ProductItemForCreationDto>, ProductItemForCreationDtoValidator>();
+        services.AddScoped<IValidator<ProductItemForUpdateDto>, ProductItemForUpdateDtoValidator>();
+        #endregion
+
+        #region ProductConfiguration
+        services.AddScoped<IValidator<ProductConfigurationForCreationDto>, ProductConfigurationForCreationDtoValidator>();
+        #endregion
+
+        #region VariationCombination
+        services.AddScoped<IValidator<VariationCombinationDto>, VariationCombinationDtoValidator>();
         #endregion
     }
 

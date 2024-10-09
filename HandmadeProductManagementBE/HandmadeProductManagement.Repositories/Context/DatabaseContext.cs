@@ -94,8 +94,8 @@ namespace HandmadeProductManagement.Repositories.Context
 
 
             //Primary Key cua ProductConfiguration
-            modelBuilder.Entity<ProductConfiguration>().HasKey(e => e.ProductItemId);
-            modelBuilder.Entity<ProductConfiguration>().HasKey(e => e.VariationOptionId);
+            modelBuilder.Entity<ProductConfiguration>()
+                        .HasKey(e => new { e.ProductItemId, e.VariationOptionId });
 
 
             // Quan hệ giữa ProductConfiguration và ProductItem (1-N)

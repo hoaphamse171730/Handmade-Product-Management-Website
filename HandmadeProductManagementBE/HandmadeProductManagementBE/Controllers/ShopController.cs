@@ -101,11 +101,12 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateShop(string id, [FromBody] CreateShopDto shop)
+        [Authorize]
+        [HttpPut("update")]
+        public async Task<IActionResult> UpdateShop([FromBody] CreateShopDto shop)
         {
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            var updatedShop = await _shopService.UpdateShopAsync(userId, id, shop);
+            var updatedShop = await _shopService.UpdateShopAsync(userId, shop);
             var response = new BaseResponse<bool>
             {
                 Code = "Success",
