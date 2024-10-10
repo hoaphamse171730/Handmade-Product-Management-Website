@@ -66,7 +66,7 @@ namespace HandmadeProductManagement.Services.Service
 
             if(dashboardDTO.to  < dashboardDTO.from)
             {
-                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(),"toDate must be after fromDate")
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "toDate must be after fromDate");
             }
 
 
