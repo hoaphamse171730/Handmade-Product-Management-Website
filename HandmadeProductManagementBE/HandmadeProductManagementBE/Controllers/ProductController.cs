@@ -1,14 +1,10 @@
-using Azure;
-using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Constants;
-using HandmadeProductManagement.Core.Utils;
 using HandmadeProductManagement.ModelViews.ProductDetailModelViews;
 using HandmadeProductManagement.ModelViews.ProductModelViews;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,6 +17,49 @@ namespace HandmadeProductManagementAPI.Controllers
         private readonly IProductService _productService;
 
         public ProductController(IProductService productService) => _productService = productService;
+
+        [HttpGet("page")]
+        public async Task<IActionResult> GetProducts([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            var response = new BaseResponse<IList<ProductOverviewDto>>
+            {
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Products retrieved successfully",
+                Data = await _productService.GetByPage(pageNumber, pageSize)
+            };
+            return Ok(response);
+        }
+
+        [HttpGet("user")]
+        [Authorize(Roles = "Seller")]
+        public async Task<IActionResult> GetProductsByUser([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+            var response = new BaseResponse<IList<ProductOverviewDto>>
+            {
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Products retrieved successfully",
+                Data = await _productService.GetProductsByUserByPage(userId, pageNumber, pageSize)
+            };
+            return Ok(response);
+        }
+
+        [HttpGet("category/{categoryId}")]
+        public async Task<IActionResult> GetProductsByCategoryId(string categoryId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            var response = new BaseResponse<IList<ProductOverviewDto>>
+            {
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Products retrieved successfully.",
+                Data = await _productService.GetProductByCategoryId(categoryId, pageNumber, pageSize)
+            };
+
+            return Ok(response);
+        }
 
         [HttpGet("search")]
         [Authorize]
@@ -52,21 +91,6 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
-        [HttpGet]
-        [Authorize]
-        public async Task<IActionResult> GetProducts()
-        {
-            var products = await _productService.GetAll();
-            var response = new BaseResponse<IList<ProductDto>>
-            {
-                Code = "200",
-                StatusCode = StatusCodeHelper.OK,
-                Message = "Products retrieved successfully",
-                Data = products
-            };
-            return Ok(response);
-        }
-
         [HttpGet("{id}")]
         public async Task<IActionResult> GetProduct(string id)
         {
@@ -82,7 +106,7 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Seller")]
         public async Task<IActionResult> CreateProduct(ProductForCreationDto productForCreation)
         {
             try
@@ -148,8 +172,7 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
-        [HttpGet("GetProductDetails/{id}")]
-        [Authorize]
+        [HttpGet("detail/{id}")]
         public async Task<IActionResult> GetProductDetails([Required] string id)
         {
             var productDetails = await _productService.GetProductDetailsByIdAsync(id);
