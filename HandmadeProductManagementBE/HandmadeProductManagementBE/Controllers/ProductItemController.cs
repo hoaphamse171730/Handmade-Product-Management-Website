@@ -52,40 +52,40 @@ namespace HandmadeProductManagementAPI.Controllers
         //    return Ok(response);
         //}
 
-        //[Authorize(Roles = "Seller")]
-        //// PUT: api/ProductItem/{id}
-        //[HttpPut("{id}")]
-        //public async Task<IActionResult> UpdateProductItem(string id, [FromBody] ProductItemForUpdateDto updatedProductItemDto)
-        //{
-        //    var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-        //    var result = await _productItemService.Update(id, updatedProductItemDto, userId);
+        [Authorize(Roles = "Seller")]
+        // PUT: api/ProductItem/{id}
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateProductItem(string id, [FromBody] ProductItemForUpdateDto updatedProductItemDto)
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var result = await _productItemService.Update(id, updatedProductItemDto, userId);
 
-        //    var response = new BaseResponse<bool>
-        //    {
-        //        Code = "Success",
-        //        StatusCode = StatusCodeHelper.OK,
-        //        Message = "Updated Product Item successfully!",
-        //        Data = result
-        //    };
-        //    return Ok(response);
-        //}
+            var response = new BaseResponse<bool>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Updated Product Item successfully!",
+                Data = result
+            };
+            return Ok(response);
+        }
 
-        //[Authorize(Roles = "Seller, Admin")]
-        //// DELETE: api/ProductItem/{id}
-        //[HttpDelete("{id}")]
-        //public async Task<IActionResult> SoftDeleteProductItem(string id)
-        //{
-        //    var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-        //    var result = await _productItemService.Delete(id, userId);
+        [Authorize(Roles = "Seller, Admin")]
+        // DELETE: api/ProductItem/{id}
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> SoftDeleteProductItem(string id)
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var result = await _productItemService.Delete(id, userId);
 
-        //    var response = new BaseResponse<string>
-        //    {
-        //        Code = "Success",
-        //        StatusCode = StatusCodeHelper.OK,
-        //        Message = $"Product Item with ID {id} has been successfully deleted.",
-        //        Data = null
-        //    };
-        //    return Ok(response);
-        //}
+            var response = new BaseResponse<string>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = $"Product Item with ID {id} has been successfully deleted.",
+                Data = null
+            };
+            return Ok(response);
+        }
     }
 }

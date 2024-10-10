@@ -36,27 +36,39 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.BadRequestException("invalid_page_size", "Page Size must be greater than zero.");
             }
 
-            var replies = await _unitOfWork.GetRepository<Reply>().GetAllAsync();
-            return replies.Skip((pageNumber - 1) * pageSize)
-                          .Take(pageSize)
-                          .Select(r => new ReplyModel
-                          {
-                              Id = r.Id,
-                              Content = r.Content,
-                              Date = r.Date,
-                              ReviewId = r.ReviewId,
-                              ShopId = r.ShopId
-                          }).ToList();
+            var replies = await _unitOfWork.GetRepository<Reply>()
+                                           .Entities
+                                           .Where(r => r.DeletedTime == null) 
+                                           .Skip((pageNumber - 1) * pageSize)
+                                           .Take(pageSize)
+                                           .Select(r => new ReplyModel
+                                           {
+                                               Id = r.Id,
+                                               Content = r.Content,
+                                               Date = r.Date,
+                                               ReviewId = r.ReviewId,
+                                               ShopId = r.ShopId
+                                           })
+                                           .ToListAsync();
+
+            return replies;
         }
 
         public async Task<ReplyModel> GetByIdAsync(string replyId)
         {
+            if (string.IsNullOrWhiteSpace(replyId) || !Guid.TryParse(replyId, out _))
+            {
+                throw new BaseException.BadRequestException("invalid_review_id_format", "Invalid reviewId format.");
+            }
+
             if (string.IsNullOrWhiteSpace(replyId))
             {
                 throw new BaseException.BadRequestException("invalid_reply_id", "Reply ID cannot be null or empty.");
             }
 
-            var reply = await _unitOfWork.GetRepository<Reply>().GetByIdAsync(replyId);
+            var reply = await _unitOfWork.GetRepository<Reply>().Entities
+                                 .Where(r => r.Id == replyId && r.DeletedTime == null) 
+                                 .FirstOrDefaultAsync();
             if (reply == null)
             {
                 throw new BaseException.NotFoundException("reply_not_found", "Reply not found.");
@@ -74,6 +86,11 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<bool> CreateAsync(ReplyModel replyModel, Guid userId)
         {
+            if (string.IsNullOrWhiteSpace(userId.ToString()) || !Guid.TryParse(userId.ToString(), out _))
+            {
+                throw new BaseException.BadRequestException("invalid_user_id_format", "Invalid userId format.");
+            }
+
             if (replyModel == null)
             {
                 throw new BaseException.BadRequestException("null_reply_model", "Reply model cannot be null.");
@@ -121,8 +138,8 @@ namespace HandmadeProductManagement.Services.Service
                 ReviewId = replyModel.ReviewId,
                 ShopId = replyModel.ShopId,
                 Date = DateTime.UtcNow,
-                CreatedBy = shop.Name,
-                LastUpdatedBy = shop.Name
+                CreatedBy = replyModel.ShopId,
+                LastUpdatedBy = replyModel.ShopId
             };
 
             await _unitOfWork.GetRepository<Reply>().InsertAsync(reply);
@@ -133,6 +150,16 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<bool> UpdateAsync(string replyId, Guid userId, ReplyModel updatedReply)
         {
+            if (string.IsNullOrWhiteSpace(userId.ToString()) || !Guid.TryParse(userId.ToString(), out _))
+            {
+                throw new BaseException.BadRequestException("invalid_user_id_format", "Invalid userId format.");
+            }
+
+            if (string.IsNullOrWhiteSpace(replyId) || !Guid.TryParse(replyId, out _))
+            {
+                throw new BaseException.BadRequestException("invalid_review_id_format", "Invalid reviewId format.");
+            }
+
             if (string.IsNullOrWhiteSpace(replyId))
             {
                 throw new BaseException.BadRequestException("invalid_reply_id", "Reply ID cannot be null or empty.");
@@ -173,7 +200,12 @@ namespace HandmadeProductManagement.Services.Service
                 existingReply.Content = updatedReply.Content;
             }
 
-            existingReply.LastUpdatedBy = shop.Name;
+            if (existingReply.DeletedTime != null)
+            {
+                throw new BaseException.NotFoundException("review_not_found", "Cannot update the review which has been soft-delete.");
+            }
+
+            existingReply.LastUpdatedBy = existingReply.ShopId;
             existingReply.LastUpdatedTime = DateTimeOffset.UtcNow;
 
             await _unitOfWork.GetRepository<Reply>().UpdateAsync(existingReply);
@@ -184,6 +216,16 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<bool> DeleteAsync(string replyId, Guid userId)
         {
+            if (string.IsNullOrWhiteSpace(replyId) || !Guid.TryParse(replyId, out _))
+            {
+                throw new BaseException.BadRequestException("invalid_review_id_format", "Invalid reviewId format.");
+            }
+
+            if (string.IsNullOrWhiteSpace(userId.ToString()) || !Guid.TryParse(userId.ToString(), out _))
+            {
+                throw new BaseException.BadRequestException("invalid_user_id_format", "Invalid userId format.");
+            }
+
             if (string.IsNullOrWhiteSpace(replyId))
             {
                 throw new BaseException.BadRequestException("invalid_reply_id", "Reply ID cannot be null or empty.");
@@ -204,6 +246,12 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.UnauthorizedException("unauthorized_delete", "User does not own the shop associated with this reply.");
             }
 
+            if (existingReply.DeletedTime != null)
+            {
+                throw new BaseException.NotFoundException("review_not_found", "Cannot update the review which has been soft-delete.");
+            }
+
+            existingReply.LastUpdatedBy = existingReply.ShopId;
             existingReply.DeletedTime = DateTimeOffset.UtcNow;
 
             await _unitOfWork.GetRepository<Reply>().DeleteAsync(replyId);
@@ -213,6 +261,11 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<bool> SoftDeleteAsync(string replyId, Guid userId)
         {
+            if (string.IsNullOrWhiteSpace(replyId) || !Guid.TryParse(replyId, out _))
+            {
+                throw new BaseException.BadRequestException("invalid_review_id_format", "Invalid reviewId format.");
+            }
+
             if (string.IsNullOrWhiteSpace(replyId))
             {
                 throw new BaseException.BadRequestException("invalid_reply_id", "Reply ID cannot be null or empty.");
@@ -235,7 +288,7 @@ namespace HandmadeProductManagement.Services.Service
 
 
             existingReply.DeletedTime = DateTimeOffset.UtcNow;
-            existingReply.DeletedBy = shop.Name;
+            existingReply.DeletedBy = existingReply.ShopId;
 
             await _unitOfWork.GetRepository<Reply>().UpdateAsync(existingReply);
             await _unitOfWork.SaveAsync();
