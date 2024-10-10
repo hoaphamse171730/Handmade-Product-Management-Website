@@ -68,6 +68,12 @@ namespace HandmadeProductManagement.Services.Service
             }
 
             var paymentRepository = _unitOfWork.GetRepository<Payment>();
+            var existingPayment = await paymentRepository.Entities
+                .AnyAsync(p => p.OrderId == orderId && !p.DeletedTime.HasValue);
+            if (existingPayment)
+            {
+                throw new BaseException.BadRequestException("payment_already_exists", "A payment for this order already exists.");
+            }
             var expirationDate = DateTime.UtcNow.AddDays(1);
             expirationDate = new DateTime(expirationDate.Year, 
                                         expirationDate.Month, 
@@ -91,9 +97,9 @@ namespace HandmadeProductManagement.Services.Service
             return true;
         }
 
-        public async Task<bool> UpdatePaymentStatusAsync(string paymentId, string status, string userId)
+        public async Task<bool> UpdatePaymentStatusAsync(string paymentId, string newStatus, string userId)
         {
-            ValidatePaymentStatus(paymentId, status);
+            ValidatePaymentStatus(paymentId, newStatus);
 
             var paymentRepository = _unitOfWork.GetRepository<Payment>();
             var payment = await paymentRepository.Entities
@@ -104,7 +110,31 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.NotFoundException("payment_not_found", "Payment not found.");
             }
 
-            if (status == "Completed")
+            // Validate Status Flow
+            var validStatusTransitions = new Dictionary<string, List<string>>
+            {
+                { "Pending", new List<string> { "Completed", "Expired" } },
+                { "Completed", new List<string> { "Refunded" } }
+            };
+
+            var allValidStatuses = validStatusTransitions.Keys
+                .Concat(validStatusTransitions.Values.SelectMany(v => v))
+                .Distinct()
+                .ToList();
+
+            if (!allValidStatuses.Contains(newStatus))
+            {
+                throw new BaseException.BadRequestException("invalid_status", $"Status {newStatus} is not a valid status.");
+            }
+
+            if (!validStatusTransitions.ContainsKey(payment.Status) ||
+                !validStatusTransitions[payment.Status].Contains(newStatus))
+            {
+                throw new BaseException.BadRequestException("invalid_status_transition",
+                    $"Cannot transition from {payment.Status} to {newStatus}.");
+            }
+
+            if (newStatus == "Completed")
             {
                 var dto = new UpdateStatusOrderDto
                 {
@@ -115,7 +145,7 @@ namespace HandmadeProductManagement.Services.Service
             }
 
             //will update when the CancelReason table has data
-            if (status == "Expired")
+            if (newStatus == "Expired")
             {
                 var dto = new UpdateStatusOrderDto
                 {
@@ -125,7 +155,7 @@ namespace HandmadeProductManagement.Services.Service
                 await _orderService.UpdateOrderStatusAsync(userId, dto);
             }
 
-            payment.Status = status;
+            payment.Status = newStatus;
             payment.LastUpdatedTime = DateTime.UtcNow;
             payment.LastUpdatedBy = userId;
 
