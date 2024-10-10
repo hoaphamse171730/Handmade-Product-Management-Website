@@ -8,6 +8,6 @@
         public string? ProductImageUrl { get; set; }
         public decimal Rating { get; set; }
         public int SoldCount { get; set; }
-        public decimal LowestPrice { get; set; }
+        public int LowestPrice { get; set; }
     }
 }

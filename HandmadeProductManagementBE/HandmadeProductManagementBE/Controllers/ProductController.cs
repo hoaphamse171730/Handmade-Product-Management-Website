@@ -18,19 +18,6 @@ namespace HandmadeProductManagementAPI.Controllers
 
         public ProductController(IProductService productService) => _productService = productService;
 
-        [HttpGet("page")]
-        public async Task<IActionResult> GetProducts([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
-        {
-            var response = new BaseResponse<IList<ProductOverviewDto>>
-            {
-                Code = "200",
-                StatusCode = StatusCodeHelper.OK,
-                Message = "Products retrieved successfully",
-                Data = await _productService.GetByPage(pageNumber, pageSize)
-            };
-            return Ok(response);
-        }
-
         [HttpGet("user")]
         [Authorize(Roles = "Seller")]
         public async Task<IActionResult> GetProductsByUser([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
@@ -47,25 +34,10 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
-        [HttpGet("category/{categoryId}")]
-        public async Task<IActionResult> GetProductsByCategoryId(string categoryId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
-        {
-            var response = new BaseResponse<IList<ProductOverviewDto>>
-            {
-                Code = "200",
-                StatusCode = StatusCodeHelper.OK,
-                Message = "Products retrieved successfully.",
-                Data = await _productService.GetProductByCategoryId(categoryId, pageNumber, pageSize)
-            };
-
-            return Ok(response);
-        }
-
         [HttpGet("search")]
-        [Authorize]
-        public async Task<IActionResult> SearchProducts([FromQuery] ProductSearchFilter searchFilter)
+        public async Task<IActionResult> SearchProducts([FromQuery] ProductSearchFilter searchFilter, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var products = await _productService.SearchProductsAsync(searchFilter);
+            var products = await _productService.SearchProductsAsync(searchFilter, pageNumber, pageSize);
             var response = new BaseResponse<IEnumerable<ProductSearchVM>>
             {
                 Code = "200",
@@ -76,20 +48,20 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
-        [HttpGet("sort")]
-        [Authorize]
-        public async Task<IActionResult> SortProducts([FromQuery] ProductSortFilter sortModel)
-        {
-            var products = await _productService.SortProductsAsync(sortModel);
-            var response = new BaseResponse<IEnumerable<ProductSearchVM>>
-            {
-                Code = "200",
-                StatusCode = StatusCodeHelper.OK,
-                Message = "Sort Product Successfully",
-                Data = products
-            };
-            return Ok(response);
-        }
+        //[HttpGet("sort")]
+        //[Authorize]
+        //public async Task<IActionResult> SortProducts([FromQuery] ProductSortFilter sortModel)
+        //{
+        //    var products = await _productService.SortProductsAsync(sortModel);
+        //    var response = new BaseResponse<IEnumerable<ProductSearchVM>>
+        //    {
+        //        Code = "200",
+        //        StatusCode = StatusCodeHelper.OK,
+        //        Message = "Sort Product Successfully",
+        //        Data = products
+        //    };
+        //    return Ok(response);
+        //}
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetProduct(string id)
