@@ -24,7 +24,6 @@ namespace HandmadeProductManagement.Services.Service
         public async Task<bool> CreatePaymentDetailAsync(string userId, CreatePaymentDetailDto createPaymentDetailDto)
         {
             ValidatePaymentDetail(createPaymentDetailDto);
-
             var userRepository = _unitOfWork.GetRepository<ApplicationUser>();
             var userExists = await userRepository.Entities.AnyAsync(u => u.Id.ToString() == userId && !u.DeletedTime.HasValue);
             if (!userExists)
@@ -40,9 +39,7 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.NotFoundException("payment_not_found", "Payment not found.");
             }
 
-            await _paymentService.UpdatePaymentStatusAsync(createPaymentDetailDto.PaymentId, "Processing", userId);
-
-            var invalidStatuses = new[] { "Completed", "Expired", "Refunded", "Closed" };
+            var invalidStatuses = new[] { "Completed", "Expired", "Refunded"};
             if (invalidStatuses.Contains(payment.Status))
             {
                 throw new BaseException.BadRequestException("invalid_payment_status", $"Cannot create payment detail for payment with status '{payment.Status}'.");
@@ -87,9 +84,9 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.BadRequestException("invalid_status", "Please input status.");
             }
 
-            if (Regex.IsMatch(createPaymentDetailDto.Status, @"[^a-zA-Z\s]"))
+            if (createPaymentDetailDto.Status != "Success" && createPaymentDetailDto.Status != "Failed")
             {
-                throw new BaseException.BadRequestException("invalid_status_format", "Status cannot contain numbers or special characters.");
+                throw new BaseException.BadRequestException("invalid_status_format", "Status must be Success or Failed.");
             }
 
             if (string.IsNullOrWhiteSpace(createPaymentDetailDto.Method))
