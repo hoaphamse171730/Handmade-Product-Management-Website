@@ -28,6 +28,9 @@ namespace HandmadeProductManagement.Services
             services.AddScoped<IVariationService, VariationService>();
             services.AddScoped<IVariationOptionService, VariationOptionService>();
             services.AddScoped<ICategoryService, CategoryService>();
+            services.AddScoped<IProductItemService, ProductItemService>();
+            services.AddScoped<IProductConfigurationService, ProductConfigurationService>();
+            services.AddScoped<IUserInfoService, UserInfoService>();
         }
 
     }

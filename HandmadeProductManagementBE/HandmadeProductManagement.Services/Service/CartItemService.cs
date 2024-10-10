@@ -68,7 +68,7 @@ public class CartItemService : ICartItemService
             return BaseResponse<bool>.OkResponse(true);
         }
         catch
-        { 
+        {
             throw new BaseException.CoreException("server_error", "Error adding cart item. Please try again.", (int)StatusCodeHelper.ServerError);
         }
     }
@@ -114,7 +114,7 @@ public class CartItemService : ICartItemService
             await _unitOfWork.SaveAsync();
             return BaseResponse<bool>.OkResponse(true);
         }
-        catch 
+        catch
         {
             throw new BaseException.CoreException("server_error", "Internal server error updating cart item.", (int)StatusCodeHelper.ServerError);
         }
@@ -139,31 +139,41 @@ public class CartItemService : ICartItemService
             await _unitOfWork.SaveAsync();
             return BaseResponse<bool>.OkResponse(true);
         }
-        catch 
+        catch
         {
             throw new BaseException.CoreException("server_error", "Internal server error removing cart item.", (int)StatusCodeHelper.ServerError);
         }
     }
 
-    public async Task<List<CartItemModel>> GetCartItemsByUserIdAsync(string userId)
+    public async Task<List<CartItem>> GetCartItemsByUserIdAsync(string userId)
     {
         var cartRepo = _unitOfWork.GetRepository<Cart>();
         var cart = await cartRepo.Entities
             .Include(c => c.CartItems)
-            .SingleOrDefaultAsync(c => c.UserId.ToString() == userId);
+            .SingleOrDefaultAsync(c => c.UserId == Guid.Parse(userId));
 
         if (cart == null)
         {
-            throw new Exception($"Cart for user {userId} not found.");
+            throw new BaseException.NotFoundException("cart_not_found", $"Cart for user {userId} not found.");
         }
 
-        var cartItemModels = cart.CartItems.Select(ci => new CartItemModel
-        {
-            CartItemId = ci.Id.ToString(),
-            ProductItemId = ci.ProductItemId.ToString(),
-            ProductQuantity = ci.ProductQuantity
-        }).ToList();
+        return cart.CartItems.ToList();
+    }
 
-        return cartItemModels;
+    public async Task<bool> DeleteCartItemByIdAsync(string cartItemId)
+    {
+        var cartItemRepo = _unitOfWork.GetRepository<CartItem>();
+        var cartItem = await cartItemRepo.Entities
+            .FirstOrDefaultAsync(ci => ci.Id == cartItemId && ci.DeletedTime == null);
+
+        if (cartItem == null)
+        {
+            throw new BaseException.NotFoundException("cart_item_not_found", "Cart item not found.");
+        }
+
+        await cartItemRepo.DeleteAsync(cartItem.Id);
+
+        await _unitOfWork.SaveAsync();
+        return true;
     }
 }

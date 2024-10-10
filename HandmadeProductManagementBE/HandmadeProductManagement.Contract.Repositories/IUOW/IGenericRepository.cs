@@ -23,6 +23,7 @@ namespace HandmadeProductManagement.Contract.Repositories.Interface
         Task InsertAsync(T obj);
         Task UpdateAsync(T obj);
         Task DeleteAsync(object id);
+        Task DeleteAsync(params object[] keyValues);
         Task SaveAsync();
         Task<T?> FindAsync(params object[] keyValues);
 

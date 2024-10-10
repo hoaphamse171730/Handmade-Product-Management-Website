@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HandmadeProductManagement.ModelViews.VariationModelViews;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,8 +13,6 @@ namespace HandmadeProductManagement.ModelViews.ProductModelViews
         public string? Name { get; set; } = string.Empty;
         public string? Description { get; set; }
         public string? CategoryId { get; set; } = string.Empty;
-        public string? CreatedBy { get; set; }
-        public string? LastUpdatedBy { get; set; }
-        public string? DeletedBy { get; set; }
+        public List<VariationForProductCreationDto> Variations { get; set; } = new List<VariationForProductCreationDto>();
     }
 }

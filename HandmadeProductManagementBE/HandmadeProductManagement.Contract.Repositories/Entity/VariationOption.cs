@@ -8,7 +8,7 @@ namespace HandmadeProductManagement.Contract.Repositories.Entity
         public string VariationId { get; set; } = string.Empty;
         public Variation? Variation { get; set; }
 
-        public ICollection<ProductConfiguration> ProductConfiguration { get; set; } = new List<ProductConfiguration>();
+        public ICollection<ProductConfiguration> ProductConfiguration { get; set; } = [];
 
     }
 }

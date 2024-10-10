@@ -3,9 +3,12 @@ using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.ModelViews.CancelReasonModelViews;
 using HandmadeProductManagement.ModelViews.CategoryModelViews;
 using HandmadeProductManagement.ModelViews.OrderDetailModelViews;
+using HandmadeProductManagement.ModelViews.ProductConfigurationModelViews;
+using HandmadeProductManagement.ModelViews.ProductItemModelViews;
 using HandmadeProductManagement.ModelViews.ProductModelViews;
 using HandmadeProductManagement.ModelViews.PromotionModelViews;
 using HandmadeProductManagement.ModelViews.StatusChangeModelViews;
+using HandmadeProductManagement.ModelViews.UserInfoModelViews;
 using HandmadeProductManagement.ModelViews.VariationModelViews;
 using HandmadeProductManagement.ModelViews.VariationOptionModelViews;
 
@@ -61,6 +64,21 @@ public class MappingProfile : Profile
         CreateMap<Category, CategoryDto>();
         CreateMap<CategoryForCreationDto, Category>();
         CreateMap<CategoryForUpdateDto, Category>();
+        #endregion
+
+        #region ProductItem
+        CreateMap<ProductItem, ProductItemDto>();
+        CreateMap<ProductItemForCreationDto, ProductItem>();
+        CreateMap<ProductItemForUpdateDto, ProductItem>();
+        #endregion
+
+        #region ProductConfiguration
+        CreateMap<ProductConfiguration, ProductConfigurationDto>();
+        CreateMap<ProductConfigurationForCreationDto, ProductConfiguration>();
+        #endregion
+
+        #region UserInfo
+        CreateMap<UserInfo, UserInfoDto>();
         #endregion
     }
 

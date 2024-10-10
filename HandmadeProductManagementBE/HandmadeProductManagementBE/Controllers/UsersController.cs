@@ -4,8 +4,6 @@ using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.ModelViews.UserModelViews;
 using System.Security.Claims;
-using System.ComponentModel.DataAnnotations;
-using System.Text.RegularExpressions;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.NotificationModelViews;
 using Microsoft.AspNetCore.Authorization;
@@ -23,6 +21,7 @@ namespace HandmadeProductManagementAPI.Controllers
 
         // GET: api/Users
         [HttpGet]
+        [Authorize(Roles ="Admin")]
         public async Task<IActionResult> GetApplicationUsers()
         {
 
@@ -39,6 +38,8 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize(Roles = "Admin")]
+
         public async Task<IActionResult> GetApplicationUsersById(String id)
         {
             var response = new BaseResponse<UserResponseByIdModel>
@@ -55,25 +56,11 @@ namespace HandmadeProductManagementAPI.Controllers
 
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
+
         public async Task<IActionResult> UpdateUser(string id,  UpdateUserDTO updateUserDTO)
         {
-            /*
-
-
-            if (!new EmailAddressAttribute().IsValid(updateUserDTO.Email))
-            {
-                return StatusCode(400, BaseResponse<string>.FailResponse("Email is not valid"));
-            }
-
-            
-            var phoneRegex = new Regex(@"^\d{10}$");  
-            if (!phoneRegex.IsMatch(updateUserDTO.PhoneNumber))
-            {
-                return StatusCode(400, BaseResponse<string>.FailResponse("Phone number is not valid"));
-            }
-
-
-            }*/
+          
             var response = new BaseResponse<UpdateUserResponseModel>
             {
                 Code = "200",
@@ -85,6 +72,8 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
+
         public async Task<IActionResult> DeleteUser(string id)
         {
 
@@ -98,7 +87,9 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
-        [HttpPost("{id}/restore")] 
+        [HttpPost("{id}/restore")]
+        [Authorize(Roles = "Admin")]
+
         public async Task<IActionResult> ReverseDeleteUser(string id)
         {
 
@@ -199,18 +190,7 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
-        [HttpPut("api/user/profile/{id}")]
-        public async Task<IActionResult> UpdateUserProfile(string id, [FromForm] UpdateUserDTO updateUserProfileDTO)
-        {
-            var response = new BaseResponse<UpdateUserResponseModel>
-            {
-                Code = "200",
-                StatusCode = StatusCodeHelper.OK,
-                Message = "Success",
-                Data = await _userService.UpdateUser(id, updateUserProfileDTO)
-            };
-            return Ok(response);
-        }
+       
 
 
 
