@@ -48,6 +48,10 @@ namespace HandmadeProductManagement.Services.Service
             var validationResult = await _creationValidator.ValidateAsync(category);
             if (!validationResult.IsValid)
                 throw new ValidationException(validationResult.Errors);
+            var existedCategory = await _unitOfWork.GetRepository<Category>().Entities
+                .FirstOrDefaultAsync(c => c.Name == category.Name && c.DeletedTime == null);
+            if (existedCategory is not null)
+                throw new ValidationException("Category name already exists");
             var categoryEntity = _mapper.Map<Category>(category);
             categoryEntity.CreatedTime = DateTime.UtcNow;
             categoryEntity.Status = "active";
@@ -67,9 +71,12 @@ namespace HandmadeProductManagement.Services.Service
                 .FirstOrDefaultAsync(c => c.Id == id && c.DeletedTime == null);
             if (categoryEntity == null)
                 throw new KeyNotFoundException("Category not found");
+            var existedCategory = await _unitOfWork.GetRepository<Category>().Entities
+                .FirstOrDefaultAsync(c => c.Name == category.Name && c.DeletedTime == null);
+            if (existedCategory is not null)
+                throw new ValidationException("Category name already exists");
             _mapper.Map(category, categoryEntity);
             categoryEntity.LastUpdatedTime = DateTime.UtcNow;
-
             await _unitOfWork.GetRepository<Category>().UpdateAsync(categoryEntity);
             await _unitOfWork.SaveAsync();
             return _mapper.Map<CategoryDto>(categoryEntity);
