@@ -36,7 +36,7 @@ public class AuthenticationController(
         return result.StatusCode == StatusCodeHelper.Unauthorized ? Unauthorized(result) : Ok(result);
 
     }
-    
+
     [AllowAnonymous]
     [HttpPost("register")]
     public async Task<ActionResult<BaseResponse<string>>> Register(RegisterModelView registerModelView)
@@ -44,7 +44,6 @@ public class AuthenticationController(
         var result = await authenticationService.RegisterAsync(registerModelView);
         return result.StatusCode == StatusCodeHelper.BadRequest ? BadRequest(result) : Ok(result);
     }
-
 
     [Authorize(Roles = "Admin")]
     [HttpPost("admin/register")]

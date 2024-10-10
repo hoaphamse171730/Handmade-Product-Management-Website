@@ -86,6 +86,22 @@ public class AuthenticationService : IAuthenticationService
     {
         ValidateRegisterModel(registerModelView);
 
+        if (await _userManager.Users.AnyAsync(u => u.UserName == registerModelView.UserName))
+        {
+            throw new BaseException.BadRequestException("username_taken", "Username is already taken.");
+        }
+
+        if (await _userManager.Users.AnyAsync(u => u.Email == registerModelView.Email))
+        {
+            throw new BaseException.BadRequestException("email_taken", "Email is already taken.");
+        }
+
+        if (await _userManager.Users.AnyAsync(u => u.PhoneNumber == registerModelView.PhoneNumber))
+        {
+            throw new BaseException.BadRequestException("phone_taken", "Phone number is already taken.");
+        }
+
+
         var user = registerModelView.Adapt<ApplicationUser>();
 
         try
@@ -117,6 +133,22 @@ public class AuthenticationService : IAuthenticationService
     public async Task<BaseResponse<string>> RegisterAdminAsync(RegisterModelView registerModelView)
     {
         ValidateRegisterModel(registerModelView);
+
+        if (await _userManager.Users.AnyAsync(u => u.UserName == registerModelView.UserName))
+        {
+            throw new BaseException.BadRequestException("username_taken", "Username is already taken.");
+        }
+
+        if (await _userManager.Users.AnyAsync(u => u.Email == registerModelView.Email))
+        {
+            throw new BaseException.BadRequestException("email_taken", "Email is already taken.");
+        }
+
+        if (await _userManager.Users.AnyAsync(u => u.PhoneNumber == registerModelView.PhoneNumber))
+        {
+            throw new BaseException.BadRequestException("phone_taken", "Phone number is already taken.");
+        }
+
 
         var user = registerModelView.Adapt<ApplicationUser>();
 
@@ -172,8 +204,7 @@ public class AuthenticationService : IAuthenticationService
                 "Invalid Phone Number format. Phone number must be between 10 to 11 digits and start with 0.");
         }
 
-        if (string.IsNullOrWhiteSpace(registerModelView.Password) ||
-            !IsValidPassword(registerModelView.Password))
+        if (string.IsNullOrWhiteSpace(registerModelView.Password) || !IsValidPassword(registerModelView.Password))
         {
             throw new BaseException.BadRequestException("weak_password",
                 "Password is too weak. It must be at least 8 characters long, contain uppercase, lowercase, a special character, and a digit.");
@@ -237,8 +268,6 @@ public class AuthenticationService : IAuthenticationService
     }
     private bool IsValidPassword(string password)
     {
-        return System.Text.RegularExpressions.Regex.IsMatch(password, "^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$");
+        return System.Text.RegularExpressions.Regex.IsMatch(password, @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+={}[\]|\\:;'\<>,.?/~`])[A-Za-z\d!@#$%^&*()_+={}[\]|\\:;'\<>,.?/~`]{8,}$");
     }
-
-
 }
