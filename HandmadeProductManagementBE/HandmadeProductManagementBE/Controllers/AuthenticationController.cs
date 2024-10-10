@@ -30,72 +30,11 @@ public class AuthenticationController(
 {
     [AllowAnonymous]
     [HttpPost("login")]
-    public async Task<ActionResult<BaseResponse<UserLoginResponseModel>>> Login(LoginModelView loginModelView)
+    public async Task<IActionResult> Login(LoginModelView loginModelView)
     {
-        if (string.IsNullOrWhiteSpace(loginModelView.PhoneNumber) &&
-            string.IsNullOrWhiteSpace(loginModelView.Email) &&
-            string.IsNullOrWhiteSpace(loginModelView.UserName) ||
-            string.IsNullOrWhiteSpace(loginModelView.Password)
-           )
-        {
-            return new BaseResponse<UserLoginResponseModel>()
-            {
-                StatusCode = StatusCodeHelper.Unauthorized,
-                Message = "At least one of Phone Number, Email, or Username is required for login.",
-            };
-        }
+        var result = await authenticationService.LoginAsync(loginModelView);
+        return result.StatusCode == StatusCodeHelper.Unauthorized ? Unauthorized(result) : Ok(result);
 
-        var user = await userManager.Users
-            .Include(u => u.UserInfo)
-            .Include(u => u.Cart)
-            .FirstOrDefaultAsync(u => u.Email == loginModelView.Email
-                                      || u.PhoneNumber == loginModelView.PhoneNumber
-                                      || u.UserName == loginModelView.UserName);
-
-        if (user is null)
-        {
-            return new BaseResponse<UserLoginResponseModel>()
-            {
-                StatusCode = StatusCodeHelper.Unauthorized,
-                Message = "Incorrect user login credentials"
-            };
-        }
-
-        if (user.Status != Constants.UserActiveStatus)
-        {
-            return new BaseResponse<UserLoginResponseModel>()
-            {
-                StatusCode = StatusCodeHelper.Unauthorized,
-                Message = "This account has been disabled."
-            };
-        }
-
-        var success = await userManager.CheckPasswordAsync(user, loginModelView.Password);
-
-        if (success)
-        {
-            var userResponse = await CreateUserResponse(user);  // Await async call
-            return BaseResponse<UserLoginResponseModel>.OkResponse(userResponse);
-
-        }
-
-        return new BaseResponse<UserLoginResponseModel>()
-        {
-            StatusCode = StatusCodeHelper.Unauthorized,
-            Message = "Incorrect password",
-        };
-    }
-
-    private async Task<UserLoginResponseModel> CreateUserResponse(ApplicationUser user)
-    {
-        var token = await tokenService.CreateToken(user);
-        return new UserLoginResponseModel()
-        {
-            FullName = user.UserInfo.FullName,
-            UserName = user.UserName,
-            DisplayName = user.UserInfo.DisplayName,
-            Token = token
-        };
     }
 
     [AllowAnonymous]

@@ -21,14 +21,21 @@ public class AuthenticationService : IAuthenticationService
         _tokenService = tokenService;
     }
 
-    public async Task<UserLoginResponseModel> AuthenticateUser(LoginModelView loginModelView)
+    public async Task<BaseResponse<UserLoginResponseModel>> LoginAsync(LoginModelView loginModelView)
     {
         if (string.IsNullOrWhiteSpace(loginModelView.PhoneNumber) &&
             string.IsNullOrWhiteSpace(loginModelView.Email) &&
-            string.IsNullOrWhiteSpace(loginModelView.UserName))
+            string.IsNullOrWhiteSpace(loginModelView.UserName) ||
+            string.IsNullOrWhiteSpace(loginModelView.Password))
         {
             throw new BaseException.BadRequestException("missing_login_identifier",
                 "At least one of Phone Number, Email, or Username is required for login.");
+        }
+
+        if (!string.IsNullOrWhiteSpace(loginModelView.Email) && !IsValidEmail(loginModelView.Email))
+        {
+            throw new BaseException.BadRequestException("invalid_email_format",
+                "Invalid Email format.");
         }
 
         var user = await _userManager.Users
@@ -50,20 +57,32 @@ public class AuthenticationService : IAuthenticationService
 
         var success = await _userManager.CheckPasswordAsync(user, loginModelView.Password);
 
-        if (success)
+        if (!success)
         {
-            var userResponse = await CreateUserResponse(user);
-            return userResponse;
+            throw new BaseException.UnauthorizedException("incorrect_password", "Incorrect password");
         }
 
-        throw new BaseException.UnauthorizedException("incorrect_password", "Incorrect password");
-        // return (false, "Incorrect password", null, StatusCodes.Status401Unauthorized);
+        var userResponse = await CreateUserResponse(user);
+        return BaseResponse<UserLoginResponseModel>.OkResponse(userResponse);
     }
 
-    public async Task<UserLoginResponseModel> CreateUserResponse(ApplicationUser user)
+    private bool IsValidEmail(string email)
     {
-        var token = await _tokenService.CreateToken(user); 
-        return new UserLoginResponseModel()
+        try
+        {
+            var addr = new System.Net.Mail.MailAddress(email);
+            return addr.Address == email;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private async Task<UserLoginResponseModel> CreateUserResponse(ApplicationUser user)
+    {
+        var token = await _tokenService.CreateToken(user);
+        return new UserLoginResponseModel
         {
             FullName = user.UserInfo.FullName,
             UserName = user.UserName,
