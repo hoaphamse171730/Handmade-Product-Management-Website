@@ -14,12 +14,14 @@ namespace HandmadeProductManagement.Contract.Services.Interface
     {
         Task<IEnumerable<ProductSearchVM>> SearchProductsAsync(ProductSearchFilter searchFilter);
         Task<IEnumerable<ProductSearchVM>> SortProductsAsync(ProductSortFilter sortFilter);
-        Task<IList<ProductDto>> GetAll();
         Task<ProductDto> GetById(string id);
         Task<bool> Create(ProductForCreationDto product, string userId);
         Task<bool> Update(string id, ProductForUpdateDto product, string userId);
         Task<bool> SoftDelete(string id, string userId);
         Task<ProductDetailResponseModel> GetProductDetailsByIdAsync(string productId);
         Task<decimal> CalculateAverageRatingAsync(string productId);
+        Task<IList<ProductOverviewDto>> GetByPage(int pageNumber, int pageSize);
+        Task<IList<ProductOverviewDto>> GetProductsByUserByPage(string userId, int pageNumber, int pageSize);
+        Task<IList<ProductOverviewDto>> GetProductByCategoryId(string categoryId, int pageNumber, int pageSize);
     }
 }
