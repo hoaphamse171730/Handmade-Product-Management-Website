@@ -55,8 +55,8 @@ namespace HandmadeProductManagement.Services.Service
             var categoryEntity = _mapper.Map<Category>(category);
             categoryEntity.CreatedTime = DateTime.UtcNow;
             categoryEntity.Status = "active";
-            categoryEntity.CreatedBy = "currentUser";
-            categoryEntity.LastUpdatedBy = "currentUser";
+            categoryEntity.CreatedBy = "user";
+            categoryEntity.LastUpdatedBy = "user";
             await _unitOfWork.GetRepository<Category>().InsertAsync(categoryEntity);
             await _unitOfWork.SaveAsync();
             return _mapper.Map<CategoryDto>(categoryEntity);
