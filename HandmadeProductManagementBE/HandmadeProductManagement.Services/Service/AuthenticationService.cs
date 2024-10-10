@@ -84,30 +84,7 @@ public class AuthenticationService : IAuthenticationService
 
     public async Task<BaseResponse<string>> RegisterAsync(RegisterModelView registerModelView)
     {
-        if (!ValidationHelper.IsValidNames(CustomRegex.UsernameRegex, registerModelView.UserName) ||
-            !ValidationHelper.IsValidNames(CustomRegex.FullNameRegex, registerModelView.FullName))
-        {
-            throw new BaseException.BadRequestException("invalid_name_format",
-                "Username or Full Name contains invalid characters.");
-        }
-
-        if (await _userManager.Users.AnyAsync(x => x.UserName == registerModelView.UserName))
-        {
-            throw new BaseException.BadRequestException("username_taken",
-                "Username is already taken");
-        }
-
-        if (await _userManager.Users.AnyAsync(x => x.Email == registerModelView.Email))
-        {
-            throw new BaseException.BadRequestException("email_taken",
-                "Email is already taken");
-        }
-
-        if (await _userManager.Users.AnyAsync(x => x.PhoneNumber == registerModelView.PhoneNumber))
-        {
-            throw new BaseException.BadRequestException("phone_taken",
-                "Phone is already taken");
-        }
+        ValidateRegisterModel(registerModelView);
 
         var user = registerModelView.Adapt<ApplicationUser>();
 
@@ -139,30 +116,7 @@ public class AuthenticationService : IAuthenticationService
 
     public async Task<BaseResponse<string>> RegisterAdminAsync(RegisterModelView registerModelView)
     {
-        if (!ValidationHelper.IsValidNames(CustomRegex.UsernameRegex, registerModelView.UserName) ||
-            !ValidationHelper.IsValidNames(CustomRegex.FullNameRegex, registerModelView.FullName))
-        {
-            throw new BaseException.BadRequestException("invalid_name_format",
-                "Username or Full Name contains invalid characters.");
-        }
-
-        if (await _userManager.Users.AnyAsync(x => x.UserName == registerModelView.UserName))
-        {
-            throw new BaseException.BadRequestException("username_taken",
-                "Username is already taken");
-        }
-
-        if (await _userManager.Users.AnyAsync(x => x.Email == registerModelView.Email))
-        {
-            throw new BaseException.BadRequestException("email_taken",
-                "Email is already taken");
-        }
-
-        if (await _userManager.Users.AnyAsync(x => x.PhoneNumber == registerModelView.PhoneNumber))
-        {
-            throw new BaseException.BadRequestException("phone_taken",
-                "Phone is already taken");
-        }
+        ValidateRegisterModel(registerModelView);
 
         var user = registerModelView.Adapt<ApplicationUser>();
 
@@ -192,6 +146,39 @@ public class AuthenticationService : IAuthenticationService
         }
     }
 
+    private void ValidateRegisterModel(RegisterModelView registerModelView)
+    {
+        if (!IsValidEmail(registerModelView.Email))
+        {
+            throw new BaseException.BadRequestException("invalid_email_format",
+                "Invalid Email format.");
+        }
+
+        if (!IsValidUsername(registerModelView.UserName))
+        {
+            throw new BaseException.BadRequestException("invalid_username_format",
+                "Invalid Username format. Special characters are not allowed.");
+        }
+
+        if (!ValidationHelper.IsValidNames(CustomRegex.FullNameRegex, registerModelView.FullName))
+        {
+            throw new BaseException.BadRequestException("invalid_fullname_format",
+                "Full Name contains invalid characters.");
+        }
+
+        if (!IsValidPhoneNumber(registerModelView.PhoneNumber))
+        {
+            throw new BaseException.BadRequestException("invalid_phone_format",
+                "Invalid Phone Number format. Phone number must be between 10 to 11 digits and start with 0.");
+        }
+
+        if (string.IsNullOrWhiteSpace(registerModelView.Password) ||
+            !IsValidPassword(registerModelView.Password))
+        {
+            throw new BaseException.BadRequestException("weak_password",
+                "Password is too weak. It must be at least 8 characters long, contain uppercase, lowercase, a special character, and a digit.");
+        }
+    }
 
 
     private async Task<UserLoginResponseModel> CreateUserResponse(ApplicationUser user)
@@ -247,6 +234,10 @@ public class AuthenticationService : IAuthenticationService
     private bool IsValidPhoneNumber(string phoneNumber)
     {
         return System.Text.RegularExpressions.Regex.IsMatch(phoneNumber, "^0[0-9]{9,10}$");
+    }
+    private bool IsValidPassword(string password)
+    {
+        return System.Text.RegularExpressions.Regex.IsMatch(password, "^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$");
     }
 
 
