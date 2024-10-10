@@ -25,8 +25,8 @@ namespace HandmadeProductManagement.Validation.Promotion
                 .WithMessage("Discount percentage must be a float between 0 and 100.");
             
             RuleFor(x => x.StartDate)
-                .LessThanOrEqualTo(x => x.EndDate)
-                .WithMessage("Start date must be less than or equal to end date.");
+                .LessThan(x => x.EndDate)
+                .WithMessage("Start date must be less than end date.");
 
         }
 

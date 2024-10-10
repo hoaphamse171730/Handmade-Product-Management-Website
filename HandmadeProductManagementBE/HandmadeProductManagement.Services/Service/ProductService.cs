@@ -445,10 +445,11 @@ namespace HandmadeProductManagement.Services.Service
             if (productEntity == null)
                 throw new KeyNotFoundException("Product not found");
             _mapper.Map(product, productEntity);
-
             productEntity.LastUpdatedTime = DateTime.UtcNow;
             productEntity.LastUpdatedBy = userId;
-
+            productEntity.Name = product.Name;
+            productEntity.Description = product.Description;
+            productEntity.CategoryId = product.CategoryId;
             await _unitOfWork.GetRepository<Product>().UpdateAsync(productEntity);
             await _unitOfWork.SaveAsync();
             return true;

@@ -73,7 +73,7 @@ namespace HandmadeProductManagement.Services.Service
             var promotionEntity = _mapper.Map<Promotion>(promotion);
             promotionEntity.CreatedTime = DateTime.UtcNow;
             promotionEntity.Status = "active";
-            promotionEntity.CreatedBy = "currentUser";
+            promotionEntity.CreatedBy = "user";
             await _unitOfWork.GetRepository<Promotion>().InsertAsync(promotionEntity);
             await _unitOfWork.SaveAsync();
             return true;
@@ -103,7 +103,7 @@ namespace HandmadeProductManagement.Services.Service
                 });
             _mapper.Map(promotion, promotionEntity);
             promotionEntity.LastUpdatedTime = DateTime.UtcNow;
-            promotionEntity.LastUpdatedBy = "currentUser";
+            promotionEntity.LastUpdatedBy = "user";
             await _unitOfWork.GetRepository<Promotion>().UpdateAsync(promotionEntity);
             await _unitOfWork.SaveAsync();
             return true;
@@ -116,7 +116,7 @@ namespace HandmadeProductManagement.Services.Service
             if (promotionEntity == null)
                 throw new KeyNotFoundException("Promotion not found");
             promotionEntity.Status = "inactive";
-            promotionEntity.LastUpdatedBy = "currentUser";
+            promotionEntity.LastUpdatedBy = "user";
             promotionEntity.DeletedTime = DateTime.UtcNow;
             await promotionRepo.UpdateAsync(promotionEntity);
             await _unitOfWork.SaveAsync();
