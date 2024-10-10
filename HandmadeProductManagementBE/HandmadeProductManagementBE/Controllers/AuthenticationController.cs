@@ -1,19 +1,14 @@
 using System.Web;
-using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
-using HandmadeProductManagement.Core.Common;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.Core.Utils;
 using HandmadeProductManagement.ModelViews.AuthModelViews;
-using HandmadeProductManagement.ModelViews.UserModelViews;
 using HandmadeProductManagement.Repositories.Entity;
 using HandmadeProductManagement.Services.Service;
-using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace HandmadeProductManagementAPI.Controllers;
 
@@ -53,98 +48,28 @@ public class AuthenticationController(
         return result.StatusCode == StatusCodeHelper.BadRequest ? BadRequest(result) : Ok(result);
     }
 
-
     [AllowAnonymous]
     [HttpPost("forgot-password")]
-    public async Task<ActionResult<BaseResponse<string>>> ForgotPassword(ForgotPasswordModelView forgotPasswordModelView)
+    public async Task<IActionResult> ForgotPassword(ForgotPasswordModelView forgotPasswordModelView)
     {
-        var user = await userManager.FindByEmailAsync(forgotPasswordModelView.Email);
-        if (user == null
-            // || !user.EmailConfirmed
-           )
-        {
-            return new BaseResponse<string>()
-            {
-                StatusCode = StatusCodeHelper.BadRequest,
-                Message = "Email is invalid or not confirmed."
-            };
-        }
-
-        var resetToken = await userManager.GeneratePasswordResetTokenAsync(user);
-        var encodedToken = HttpUtility.UrlEncode(resetToken); //encode the token for URL safety
-
-        var passwordResetLink = $"{forgotPasswordModelView.ClientUri}?email={user.Email}&token={encodedToken}";
-
-        await emailService.SendPasswordRecoveryEmailAsync(user.Email!, passwordResetLink);
-
-        return new BaseResponse<string>()
-        {
-            StatusCode = StatusCodeHelper.OK,
-            Message = "Password reset link has been sent to your email."
-        };
+        var result = await authenticationService.ForgotPasswordAsync(forgotPasswordModelView);
+        return result.StatusCode == StatusCodeHelper.BadRequest ? BadRequest(result) : Ok(result);
     }
 
     [AllowAnonymous]
     [HttpPost("reset-password")]
-    public async Task<ActionResult<BaseResponse<string>>> ResetPassword(ResetPasswordModelView resetPasswordModelView)
+    public async Task<IActionResult> ResetPassword(ResetPasswordModelView resetPasswordModelView)
     {
-        var user = await userManager.FindByEmailAsync(resetPasswordModelView.Email);
-        if (user == null)
-        {
-            return new BaseResponse<string>()
-            {
-                StatusCode = StatusCodeHelper.BadRequest,
-                Message = "Invalid request."
-            };
-        }
-
-        var decodedToken = HttpUtility.UrlDecode(resetPasswordModelView.Token); //decode the token from the request
-        var result = await userManager.ResetPasswordAsync(user, decodedToken, resetPasswordModelView.NewPassword);
-
-        if (result.Succeeded)
-        {
-            return new BaseResponse<string>()
-            {
-                StatusCode = StatusCodeHelper.OK,
-                Message = "Password has been reset successfully."
-            };
-        }
-
-        return new BaseResponse<string>()
-        {
-            StatusCode = StatusCodeHelper.BadRequest,
-            Message = "Error resetting the password.",
-        };
+        var result = await authenticationService.ResetPasswordAsync(resetPasswordModelView);
+        return result.StatusCode == StatusCodeHelper.BadRequest ? BadRequest(result) : Ok(result);
     }
 
     [AllowAnonymous]
     [HttpPost("confirm-email")]
-    public async Task<BaseResponse<string>> ConfirmEmail(ConfirmEmailModelView confirmEmailModelView)
+    public async Task<IActionResult> ConfirmEmail(ConfirmEmailModelView confirmEmailModelView)
     {
-        var user = await userManager.FindByEmailAsync(confirmEmailModelView.Email);
-        if (user is null)
-        {
-            return new BaseResponse<string>()
-            {
-                StatusCode = StatusCodeHelper.BadRequest,
-                Message = "User not found."
-            };
-        }
-
-        var decodedToken = HttpUtility.UrlDecode(confirmEmailModelView.Token);
-        var result = await userManager.ConfirmEmailAsync(user, decodedToken);
-
-        if (result.Succeeded)
-        {
-            return new BaseResponse<string>()
-            {
-                StatusCode = StatusCodeHelper.OK,
-                Message = StatusCodeHelper.OK.Name()
-            };
-        }
-
-        return BaseResponse<string>.FailResponse(statusCode: StatusCodeHelper.BadRequest,
-            message: "Error confirming the email.");
+        var result = await authenticationService.ConfirmEmailAsync(confirmEmailModelView);
+        return result.StatusCode == StatusCodeHelper.BadRequest ? BadRequest(result) : Ok(result);
     }
 
     [Authorize(Roles = "Admin")]

@@ -9,4 +9,8 @@ public interface IAuthenticationService
     Task<BaseResponse<UserLoginResponseModel>> LoginAsync(LoginModelView loginModelView);
     Task<BaseResponse<string>> RegisterAsync(RegisterModelView registerModelView);
     Task<BaseResponse<string>> RegisterAdminAsync(RegisterModelView registerModelView);
+    Task<BaseResponse<string>> ForgotPasswordAsync(ForgotPasswordModelView forgotPasswordModelView);
+    Task<BaseResponse<string>> ResetPasswordAsync(ResetPasswordModelView resetPasswordModelView);
+    Task<BaseResponse<string>> ConfirmEmailAsync(ConfirmEmailModelView confirmEmailModelView);
+
 }

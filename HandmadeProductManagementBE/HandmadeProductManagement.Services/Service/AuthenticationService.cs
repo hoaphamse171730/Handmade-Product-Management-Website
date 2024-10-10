@@ -10,6 +10,7 @@ using Mapster;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Web;
 
 namespace HandmadeProductManagement.Services.Service;
 
@@ -211,6 +212,77 @@ public class AuthenticationService : IAuthenticationService
         }
     }
 
+    public async Task<BaseResponse<string>> ForgotPasswordAsync(ForgotPasswordModelView forgotPasswordModelView)
+    {
+        var user = await _userManager.FindByEmailAsync(forgotPasswordModelView.Email);
+        if (user == null)
+        {
+            throw new BaseException.BadRequestException("invalid_email","Email is invalid or not confirmed.");
+        }
+
+        var resetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
+        var encodedToken = HttpUtility.UrlEncode(resetToken);
+        var passwordResetLink = $"{forgotPasswordModelView.ClientUri}?email={user.Email}&token={encodedToken}";
+
+        await _emailService.SendPasswordRecoveryEmailAsync(user.Email!, passwordResetLink);
+
+        return new BaseResponse<string>()
+        {
+            StatusCode = StatusCodeHelper.OK,
+            Message = "Password reset link has been sent to your email."
+        };
+    }
+
+    public async Task<BaseResponse<string>> ResetPasswordAsync(ResetPasswordModelView resetPasswordModelView)
+    {
+        var user = await _userManager.FindByEmailAsync(resetPasswordModelView.Email);
+        if (user == null)
+        {
+            throw new BaseException.BadRequestException("invalid_email", "Email is invalid.");
+        }
+
+
+        var decodedToken = HttpUtility.UrlDecode(resetPasswordModelView.Token);
+        var result = await _userManager.ResetPasswordAsync(user, decodedToken, resetPasswordModelView.NewPassword);
+
+        if (result.Succeeded)
+        {
+            return new BaseResponse<string>()
+            {
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Password has been reset successfully."
+            };
+        }
+
+        throw new BaseException.BadRequestException("error", "Error resetting the password.");
+    }
+
+    public async Task<BaseResponse<string>> ConfirmEmailAsync(ConfirmEmailModelView confirmEmailModelView)
+    {
+        if (string.IsNullOrWhiteSpace(confirmEmailModelView.Email) || !IsValidEmail(confirmEmailModelView.Email))
+        {
+            throw new BaseException.BadRequestException("invalid_email", "The email address is not valid.");
+        }
+
+        var user = await _userManager.FindByEmailAsync(confirmEmailModelView.Email);
+        if (user == null)
+        {
+            throw new BaseException.NotFoundException("not_found", "User not found.");
+        }
+
+        var decodedToken = HttpUtility.UrlDecode(confirmEmailModelView.Token);
+        var result = await _userManager.ConfirmEmailAsync(user, decodedToken);
+
+        if (result.Succeeded)
+        {
+            return new BaseResponse<string>()
+            {
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Email confirmed successfully."
+            };
+        }
+        throw new BaseException.BadRequestException("error", "Error confirming the email.");
+    }
 
     private async Task<UserLoginResponseModel> CreateUserResponse(ApplicationUser user)
     {
