@@ -38,6 +38,17 @@ public class AuthenticationService : IAuthenticationService
                 "Invalid Email format.");
         }
 
+        if (!string.IsNullOrWhiteSpace(loginModelView.UserName) && !IsValidUsername(loginModelView.UserName))
+        {
+            throw new BaseException.BadRequestException("invalid_username_format",
+                "Invalid Username format. Special characters are not allowed.");
+        }
+
+        if (!string.IsNullOrWhiteSpace(loginModelView.PhoneNumber) && !IsValidPhoneNumber(loginModelView.PhoneNumber))
+        {
+            throw new BaseException.BadRequestException("invalid_phone_format",
+                "Invalid Phone Number format. Phone number must be between 10 to 11 digits and start with 0.");
+        }
         var user = await _userManager.Users
             .Include(u => u.UserInfo)
             .Include(u => u.Cart)
@@ -78,6 +89,17 @@ public class AuthenticationService : IAuthenticationService
             return false;
         }
     }
+    private bool IsValidUsername(string username)
+    {
+        return !System.Text.RegularExpressions.Regex.IsMatch(username, "[^a-zA-Z0-9]");
+    }
+
+    private bool IsValidPhoneNumber(string phoneNumber)
+    {
+        return System.Text.RegularExpressions.Regex.IsMatch(phoneNumber, "^0[0-9]{9,10}$");
+    }
+
+
 
     private async Task<UserLoginResponseModel> CreateUserResponse(ApplicationUser user)
     {
