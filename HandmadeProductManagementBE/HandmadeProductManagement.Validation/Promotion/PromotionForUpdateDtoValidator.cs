@@ -24,6 +24,10 @@ namespace HandmadeProductManagement.Validation.Promotion
             RuleFor(x => x.DiscountRate)
                 .InclusiveBetween(0m, 100m)  
                 .WithMessage("Discount percentage must be a decimal between 0 and 100.");
+            
+            RuleFor(x => x.StartDate)
+                .LessThanOrEqualTo(x => x.EndDate)
+                .WithMessage("Start date must be less than or equal to end date.");
         }
     }
 }
