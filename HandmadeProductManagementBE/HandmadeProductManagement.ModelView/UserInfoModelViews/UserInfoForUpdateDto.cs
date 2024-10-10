@@ -1,8 +1,7 @@
 ﻿namespace HandmadeProductManagement.ModelViews.UserInfoModelViews
 {
-    public class UserInfoDto
+    public class UserInfoForUpdateDto
     {
-        public required string Id { get; set; }
         public string FullName { get; set; } = string.Empty;
         public string? DisplayName { get; set; } = default!;
         public string? Bio { get; set; } = default!;
