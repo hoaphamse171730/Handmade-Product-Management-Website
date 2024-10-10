@@ -4,8 +4,6 @@ using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.ModelViews.UserModelViews;
 using System.Security.Claims;
-using System.ComponentModel.DataAnnotations;
-using System.Text.RegularExpressions;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.NotificationModelViews;
 using Microsoft.AspNetCore.Authorization;

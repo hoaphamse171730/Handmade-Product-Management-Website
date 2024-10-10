@@ -9,7 +9,6 @@ using FluentValidation;
 using HandmadeProductManagement.ModelViews.NotificationModelViews;
 using HandmadeProductManagement.Contract.Repositories.Entity;
 using Microsoft.IdentityModel.Tokens;
-using static System.Net.WebRequestMethods;
 using Microsoft.AspNetCore.Http;
 namespace HandmadeProductManagement.Services.Service
 {

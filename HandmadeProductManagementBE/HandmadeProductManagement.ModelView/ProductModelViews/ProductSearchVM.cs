@@ -19,7 +19,6 @@ namespace HandmadeProductManagement.ModelViews.ProductModelViews
         public decimal Rating { get; set; }
         public string? Status { get; set; }
         public int SoldCount { get; set; }
-        public float Price { get; set; }
 
     }
 }
