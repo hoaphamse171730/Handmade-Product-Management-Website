@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.CancelReasonModelViews;
 using Microsoft.AspNetCore.Authorization;
+using HandmadeProductManagement.Contract.Repositories.Entity;
 
 namespace HandmadeProductManagementAPI.Controllers
 {
@@ -81,6 +82,39 @@ namespace HandmadeProductManagementAPI.Controllers
                 StatusCode = StatusCodeHelper.OK,
                 Message = $"Cancel Reason with ID {id} has been successfully deleted.",
                 Data = null
+            };
+            return Ok(response);
+        }
+
+        [Authorize(Roles = "Admin")]
+        // GET: api/cancelreason/deleted
+        [HttpGet("deleted")]
+        public async Task<IActionResult> GetDeletedCancelReasons()
+        {
+            var response = new BaseResponse<IList<CancelReason>>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Get all deleted Cancel Reasons successfully!",
+                Data = await _cancelReasonService.GetDeletedCancelReasons()
+            };
+            return Ok(response);
+        }
+
+        [Authorize(Roles = "Admin")]
+        // PATCH: api/CancelReason/reverse-delete/{id}
+        [HttpPatch("reverse-delete/{id}")]
+        public async Task<IActionResult> PatchReverseDeleteCancelReason(string id)
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var result = await _cancelReasonService.PatchReverseDelete(id, userId);
+
+            var response = new BaseResponse<bool>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = $"Cancel Reason with ID {id} has been successfully restored.",
+                Data = result
             };
             return Ok(response);
         }

@@ -5,9 +5,7 @@ using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.ModelViews.VariationOptionModelViews;
-using HandmadeProductManagement.Repositories.Entity;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Cryptography;
 
 namespace HandmadeProductManagement.Services.Service
 {
@@ -29,22 +27,6 @@ namespace HandmadeProductManagement.Services.Service
             _creationValidator = creationValidator;
             _updateValidator = updateValidator;
         }
-
-        // Get all variation options
-        public async Task<IList<VariationOptionDto>> GetAll()
-        {
-            var variationOptions = await _unitOfWork.GetRepository<VariationOption>().Entities
-                .Where(vo => !vo.DeletedTime.HasValue || vo.DeletedBy == null)
-                .ToListAsync();
-
-            if (variationOptions == null || !variationOptions.Any())
-            {
-                throw new BaseException.NotFoundException("not_found", "No variation options found.");
-            }
-
-            return _mapper.Map<IList<VariationOptionDto>>(variationOptions);
-        }
-
 
         public async Task<IList<VariationOptionDto>> GetByVariationId(string variationId)
         {
@@ -72,7 +54,6 @@ namespace HandmadeProductManagement.Services.Service
             return _mapper.Map<IList<VariationOptionDto>>(options);
         }
 
-
         public async Task<bool> Create(VariationOptionForCreationDto option, string userId)
         {
             // Validate if the VariationId is a valid GUID
@@ -95,23 +76,11 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.NotFoundException("not_found", "Variation not found.");
             }
 
-            // Check if the variation option with the same value already exists for this variation
-            var optionExists = await _unitOfWork.GetRepository<VariationOption>()
-                .Entities.AnyAsync(vo => vo.VariationId == option.VariationId && vo.Value == option.Value);
-
-            if (optionExists)
-            {
-                throw new BaseException.BadRequestException("duplicate_option", "Variation Option with this value already exists.");
-            }
-
-            // Step 3: Map the DTO to the entity
             var optionEntity = _mapper.Map<VariationOption>(option);
 
-            // Set metadata for creation
             optionEntity.CreatedBy = userId;
             optionEntity.LastUpdatedBy = userId;
 
-            // Step 4: Insert the new variation option into the database
             await _unitOfWork.GetRepository<VariationOption>().InsertAsync(optionEntity);
             await _unitOfWork.SaveAsync();
 
