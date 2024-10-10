@@ -4,8 +4,6 @@ using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.ModelViews.UserModelViews;
 using System.Security.Claims;
-using System.ComponentModel.DataAnnotations;
-using System.Text.RegularExpressions;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.NotificationModelViews;
 using Microsoft.AspNetCore.Authorization;
@@ -192,18 +190,7 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
-        [HttpPut("api/user/profile/{id}")]
-        public async Task<IActionResult> UpdateUserProfile(string id, [FromForm] UpdateUserDTO updateUserProfileDTO)
-        {
-            var response = new BaseResponse<UpdateUserResponseModel>
-            {
-                Code = "200",
-                StatusCode = StatusCodeHelper.OK,
-                Message = "Success",
-                Data = await _userService.UpdateUser(id, updateUserProfileDTO)
-            };
-            return Ok(response);
-        }
+       
 
 
 

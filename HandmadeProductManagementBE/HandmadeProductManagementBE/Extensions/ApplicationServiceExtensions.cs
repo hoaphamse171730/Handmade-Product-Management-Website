@@ -81,6 +81,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IPaymentDetailService, PaymentDetailService>();
         services.AddScoped<IPaymentService, PaymentService>();
         services.AddHostedService<PaymentExpirationBackgroundService>();
+        services.AddHostedService<PromotionExpirationBackgroundService>();
         services.AddScoped<ICartService, CartService>();
         services.AddScoped<ICartItemService, CartItemService>();
         services.AddScoped<IUserService, UserService>();
@@ -93,6 +94,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IVariationOptionService, VariationOptionService>();
         services.AddScoped<IProductItemService, ProductItemService>();
         services.AddScoped<IProductConfigurationService, ProductConfigurationService>();
+        services.AddScoped<IUserInfoService, UserInfoService>();
         return services;
     }
 

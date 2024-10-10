@@ -40,8 +40,14 @@ namespace HandmadeProductManagement.Services.Service
             var productRepository = _unitOfWork.GetRepository<Product>();
 
             var cartItems = await _cartItemService.GetCartItemsByUserIdAsync(userId);
+            if (cartItems.Count == 0)
+            {
+                throw new BaseException.NotFoundException("empty_cart", "Cart is empty.");
+            }
 
-            var groupedOrderDetails = await Task.WhenAll(cartItems.Select(async cartItem =>
+            var groupedOrderDetails = new List<GroupedOrderDetail>();
+
+            foreach (var cartItem in cartItems)
             {
                 var productItem = await productItemRepository.Entities
                     .FirstOrDefaultAsync(p => p.Id.ToString() == cartItem.ProductItemId && !p.DeletedTime.HasValue);
@@ -59,13 +65,13 @@ namespace HandmadeProductManagement.Services.Service
                     throw new BaseException.NotFoundException("product_not_found", $"Product for Item {productItem.Id} not found.");
                 }
 
-                return new
+                groupedOrderDetails.Add(new GroupedOrderDetail
                 {
                     ShopId = product.ShopId,
                     CartItem = cartItem,
                     ProductItem = productItem
-                };
-            }));
+                });
+            }
 
             // Groupby product by shop
             var groupedByShop = groupedOrderDetails.GroupBy(x => x.ShopId).ToList();
@@ -116,15 +122,7 @@ namespace HandmadeProductManagement.Services.Service
                         };
 
                         await _orderDetailService.Create(orderDetail);
-
-                        var cartItemsToDelete = await cartItemRepository.Entities
-                            .Where(ci => ci.ProductItemId == productItem.Id && ci.Cart.UserId == order.UserId)
-                            .ToListAsync();
-
-                        foreach (var cartItemToDelete in cartItemsToDelete)
-                        {
-                            cartItemRepository.Delete(cartItemToDelete);
-                        }
+                        await _cartItemService.DeleteCartItemByIdAsync(cartItem.Id);
                     }
 
                     await _unitOfWork.SaveAsync();

@@ -67,7 +67,7 @@ public class AuthenticationService : IAuthenticationService
             throw new BaseException.UnauthorizedException("unauthorized", "Incorrect user login credentials");
         }
 
-        if (user.Status != Constants.UserActiveStatus)
+        if (user.Status != Constants.UserActiveStatus) 
         {
             throw new BaseException.UnauthorizedException("unauthorized", "This account has been disabled.");
         }
