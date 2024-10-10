@@ -1,9 +1,12 @@
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Common;
+using HandmadeProductManagement.Core.Constants;
+using HandmadeProductManagement.Core.Utils;
 using HandmadeProductManagement.ModelViews.AuthModelViews;
 using HandmadeProductManagement.ModelViews.UserModelViews;
 using HandmadeProductManagement.Repositories.Entity;
+using Mapster;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -14,11 +17,13 @@ public class AuthenticationService : IAuthenticationService
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly TokenService _tokenService;
+    private readonly IEmailService _emailService;
 
-    public AuthenticationService(UserManager<ApplicationUser> userManager, TokenService tokenService)
+    public AuthenticationService(UserManager<ApplicationUser> userManager, TokenService tokenService, IEmailService emailService)
     {
         _userManager = userManager;
         _tokenService = tokenService;
+        _emailService = emailService;
     }
 
     public async Task<BaseResponse<UserLoginResponseModel>> LoginAsync(LoginModelView loginModelView)
@@ -77,26 +82,114 @@ public class AuthenticationService : IAuthenticationService
         return BaseResponse<UserLoginResponseModel>.OkResponse(userResponse);
     }
 
-    private bool IsValidEmail(string email)
+    public async Task<BaseResponse<string>> RegisterAsync(RegisterModelView registerModelView)
     {
+        if (!ValidationHelper.IsValidNames(CustomRegex.UsernameRegex, registerModelView.UserName) ||
+            !ValidationHelper.IsValidNames(CustomRegex.FullNameRegex, registerModelView.FullName))
+        {
+            throw new BaseException.BadRequestException("invalid_name_format",
+                "Username or Full Name contains invalid characters.");
+        }
+
+        if (await _userManager.Users.AnyAsync(x => x.UserName == registerModelView.UserName))
+        {
+            throw new BaseException.BadRequestException("username_taken",
+                "Username is already taken");
+        }
+
+        if (await _userManager.Users.AnyAsync(x => x.Email == registerModelView.Email))
+        {
+            throw new BaseException.BadRequestException("email_taken",
+                "Email is already taken");
+        }
+
+        if (await _userManager.Users.AnyAsync(x => x.PhoneNumber == registerModelView.PhoneNumber))
+        {
+            throw new BaseException.BadRequestException("phone_taken",
+                "Phone is already taken");
+        }
+
+        var user = registerModelView.Adapt<ApplicationUser>();
+
         try
         {
-            var addr = new System.Net.Mail.MailAddress(email);
-            return addr.Address == email;
+            var result = await _userManager.CreateAsync(user, registerModelView.Password);
+
+            if (!result.Succeeded)
+            {
+                var errorMessages = result.Errors
+                    .Select(e => e.Description)
+                    .ToList();
+
+                throw new BaseException.BadRequestException("user_creation_failed",
+                    "User creation failed: " + string.Join("; ", errorMessages));
+            }
+
+            await _emailService.SendEmailConfirmationAsync(user.Email!, registerModelView.ClientUri);
+            await AssignRoleToUser(user.Id.ToString(), "Seller");
+
+            return BaseResponse<string>.OkResponse(user.Id.ToString());
         }
         catch
         {
-            return false;
+            await _userManager.DeleteAsync(user);
+            throw;
         }
     }
-    private bool IsValidUsername(string username)
-    {
-        return !System.Text.RegularExpressions.Regex.IsMatch(username, "[^a-zA-Z0-9]");
-    }
 
-    private bool IsValidPhoneNumber(string phoneNumber)
+    public async Task<BaseResponse<string>> RegisterAdminAsync(RegisterModelView registerModelView)
     {
-        return System.Text.RegularExpressions.Regex.IsMatch(phoneNumber, "^0[0-9]{9,10}$");
+        if (!ValidationHelper.IsValidNames(CustomRegex.UsernameRegex, registerModelView.UserName) ||
+            !ValidationHelper.IsValidNames(CustomRegex.FullNameRegex, registerModelView.FullName))
+        {
+            throw new BaseException.BadRequestException("invalid_name_format",
+                "Username or Full Name contains invalid characters.");
+        }
+
+        if (await _userManager.Users.AnyAsync(x => x.UserName == registerModelView.UserName))
+        {
+            throw new BaseException.BadRequestException("username_taken",
+                "Username is already taken");
+        }
+
+        if (await _userManager.Users.AnyAsync(x => x.Email == registerModelView.Email))
+        {
+            throw new BaseException.BadRequestException("email_taken",
+                "Email is already taken");
+        }
+
+        if (await _userManager.Users.AnyAsync(x => x.PhoneNumber == registerModelView.PhoneNumber))
+        {
+            throw new BaseException.BadRequestException("phone_taken",
+                "Phone is already taken");
+        }
+
+        var user = registerModelView.Adapt<ApplicationUser>();
+
+        try
+        {
+            var result = await _userManager.CreateAsync(user, registerModelView.Password);
+
+            if (!result.Succeeded)
+            {
+                var errorMessages = result.Errors
+                    .Select(e => e.Description)
+                    .ToList();
+
+                throw new BaseException.BadRequestException("user_creation_failed",
+                    "User creation failed: " + string.Join("; ", errorMessages));
+            }
+
+            await _emailService.SendEmailConfirmationAsync(user.Email!, registerModelView.ClientUri);
+            await AssignRoleToUser(user.Id.ToString(), "Admin");
+
+            return BaseResponse<string>.OkResponse(user.Id.ToString());
+        }
+        catch
+        {
+            await _userManager.DeleteAsync(user);
+            throw;
+        }
     }
 
 
@@ -112,6 +205,7 @@ public class AuthenticationService : IAuthenticationService
             Token = token
         };
     }
+
     public async Task<bool> AssignRoleToUser(string userId, string role)
     {
         var user = await _userManager.FindByIdAsync(userId);
@@ -131,4 +225,29 @@ public class AuthenticationService : IAuthenticationService
 
         return true;
     }
+
+    private bool IsValidEmail(string email)
+    {
+        try
+        {
+            var addr = new System.Net.Mail.MailAddress(email);
+            return addr.Address == email;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+   
+    private bool IsValidUsername(string username)
+    {
+        return !System.Text.RegularExpressions.Regex.IsMatch(username, "[^a-zA-Z0-9]");
+    }
+    
+    private bool IsValidPhoneNumber(string phoneNumber)
+    {
+        return System.Text.RegularExpressions.Regex.IsMatch(phoneNumber, "^0[0-9]{9,10}$");
+    }
+
+
 }
