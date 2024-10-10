@@ -215,7 +215,7 @@ public class AuthenticationService : IAuthenticationService
     public async Task<BaseResponse<string>> ForgotPasswordAsync(ForgotPasswordModelView forgotPasswordModelView)
     {
         var user = await _userManager.FindByEmailAsync(forgotPasswordModelView.Email);
-        if (user == null)
+        if (user == null || !user.EmailConfirmed)
         {
             throw new BaseException.BadRequestException("invalid_email","Email is invalid or not confirmed.");
         }
