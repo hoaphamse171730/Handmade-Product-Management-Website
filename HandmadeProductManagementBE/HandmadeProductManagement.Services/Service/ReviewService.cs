@@ -33,10 +33,21 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.BadRequestException("invalid_page_size", "Page Size must be greater than zero.");
             }
 
+            var productExists = await _unitOfWork.GetRepository<Product>().GetByIdAsync(productId);
+            if (productExists == null)
+            {
+                throw new BaseException.NotFoundException("product_not_found", "Product not found.");
+            }
+
+            if (productExists.DeletedTime != null)
+            {
+                throw new BaseException.NotFoundException("product_not_found", "Product not found as it has been soft-delete.");
+            }
+
             var reviews = await _unitOfWork.GetRepository<Review>()
                                            .Entities
                                            .Include(r => r.Reply)
-                                           .Where(r => r.ProductId == productId)
+                                           .Where(r => r.ProductId == productId && r.DeletedTime == null)
                                            .OrderByDescending(r => r.Date)
                                            .Skip((pageNumber - 1) * pageSize)
                                            .Take(pageSize)
@@ -75,6 +86,7 @@ namespace HandmadeProductManagement.Services.Service
             var reviews = await _unitOfWork.GetRepository<Review>()
                                            .Entities
                                            .Include(r => r.Reply)
+                                           .Where(r => r.DeletedTime == null)
                                            .Skip((pageNumber - 1) * pageSize)
                                            .Take(pageSize)
                                            .ToListAsync();
@@ -108,7 +120,7 @@ namespace HandmadeProductManagement.Services.Service
             var review = await _unitOfWork.GetRepository<Review>()
                                           .Entities
                                           .Include(r => r.Reply)
-                                          .FirstOrDefaultAsync(r => r.Id == reviewId);
+                                          .FirstOrDefaultAsync(r => r.Id == reviewId && r.DeletedTime == null);
 
             if (review == null)
             {
@@ -146,6 +158,12 @@ namespace HandmadeProductManagement.Services.Service
             if (productExists == null)
             {
                 throw new BaseException.NotFoundException("product_not_found", "Product not found.");
+            }
+
+
+            if (string.IsNullOrWhiteSpace(orderId) || !Guid.TryParse(orderId, out _))
+            {
+                throw new BaseException.BadRequestException("invalid_order_id_format", "Invalid orderId format.");
             }
 
             // Check if the order exists
@@ -192,7 +210,7 @@ namespace HandmadeProductManagement.Services.Service
 
             var user = await _unitOfWork.GetRepository<ApplicationUser>()
                                          .Entities
-                                         .Include(u => u.UserInfo)
+                                         //.Include(u => u.UserInfo)
                                          .FirstOrDefaultAsync(u => u.Id == reviewModel.UserId);
 
             if (user == null)
@@ -200,7 +218,7 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.NotFoundException("user_not_found", "User not found.");
             }
 
-            var userFullName = user.UserInfo.FullName;
+            //var userFullName = user.UserInfo.FullName;
 
             var review = new Review
             {
@@ -209,8 +227,8 @@ namespace HandmadeProductManagement.Services.Service
                 Date = DateTime.UtcNow,
                 ProductId = reviewModel.ProductId,
                 UserId = reviewModel.UserId,
-                CreatedBy = userFullName,
-                LastUpdatedBy = userFullName
+                CreatedBy = reviewModel.UserId.ToString(),
+                LastUpdatedBy = reviewModel.UserId.ToString()
             };
 
             await _unitOfWork.GetRepository<Review>().InsertAsync(review);
@@ -258,7 +276,12 @@ namespace HandmadeProductManagement.Services.Service
                 existingReview.Rating = updatedReview.Rating;
             }
 
-            existingReview.LastUpdatedBy = existingReview.User.UserInfo.FullName;
+            if (existingReview.DeletedTime != null)
+            {
+                throw new BaseException.NotFoundException("review_not_found", "Cannot update the review which has been soft-delete.");
+            }
+
+            existingReview.LastUpdatedBy = existingReview.UserId.ToString();
             existingReview.LastUpdatedTime = DateTime.UtcNow;
 
             _unitOfWork.GetRepository<Review>().UpdateAsync(existingReview);
@@ -289,7 +312,12 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.BadRequestException("unauthorized_review_delete", "User does not have permission to delete this review.");
             }
 
-            existingReview.DeletedTime = DateTime.UtcNow;
+            if(existingReview.DeletedTime != null)
+            {
+                throw new BaseException.NotFoundException("review_not_found", "Review not found as it has been soft-delete.");
+            }
+
+            existingReview.DeletedBy = userId.ToString();
 
             await _unitOfWork.GetRepository<Review>().DeleteAsync(existingReview.Id);
             await _unitOfWork.SaveAsync();
@@ -319,8 +347,8 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.BadRequestException("unauthorized_review_delete", "User does not have permission to delete this review.");
             }
 
-            existingReview.DeletedTime = CoreHelper.SystemTimeNow;
-            existingReview.DeletedBy = existingReview.User.UserInfo.FullName;
+            existingReview.DeletedTime = DateTime.UtcNow;
+            existingReview.DeletedBy = userId.ToString();
 
             await _unitOfWork.GetRepository<Review>().UpdateAsync(existingReview);
             await _unitOfWork.SaveAsync();

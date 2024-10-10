@@ -31,6 +31,14 @@ namespace HandmadeProductManagement.Repositories.Context
         public DbSet<Category> Categories => Set<Category>();
         public DbSet<CancelReason> CancelReasons => Set<CancelReason>();
         public DbSet<StatusChange> StatusChanges => Set<StatusChange>();
+        public DbSet<ProductConfiguration> ProductConfigurations => Set<ProductConfiguration>();
+        public DbSet<ProductImage> ProductImages => Set<ProductImage>();
+        public DbSet<UserInfoImage> UserInfoImages => Set<UserInfoImage>();
+        public DbSet<Cart> Carts => Set<Cart>();
+        public DbSet<CartItem> CartItems => Set<CartItem>();
+        public DbSet<Payment> Payments => Set<Payment>();
+        public DbSet<PaymentDetail> PaymentDetails => Set<PaymentDetail>();
+        public DbSet<ProductItem> ProductItems => Set<ProductItem>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -94,14 +102,14 @@ namespace HandmadeProductManagement.Repositories.Context
 
 
             //Primary Key cua ProductConfiguration
-            modelBuilder.Entity<ProductConfiguration>().HasKey(e => e.ProductItemId);
-            modelBuilder.Entity<ProductConfiguration>().HasKey(e => e.VariationOptionId);
+            modelBuilder.Entity<ProductConfiguration>()
+                        .HasKey(e => new { e.ProductItemId, e.VariationOptionId });
 
 
             // Quan hệ giữa ProductConfiguration và ProductItem (1-N)
             modelBuilder.Entity<ProductConfiguration>()
                 .HasOne(pc => pc.ProductItem)
-                .WithMany(pi => pi.ProductConfiguration)
+                .WithMany(pi => pi.ProductConfigurations)
                 .HasForeignKey(pc => pc.ProductItemId);
 
             // Quan hệ giữa ProductConfiguration và VariationOption (1-N)

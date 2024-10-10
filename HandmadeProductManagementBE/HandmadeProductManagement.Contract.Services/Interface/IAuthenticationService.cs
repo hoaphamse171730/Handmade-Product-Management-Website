@@ -1,12 +1,16 @@
+using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.ModelViews.AuthModelViews;
 using HandmadeProductManagement.ModelViews.UserModelViews;
-using HandmadeProductManagement.Repositories.Entity;
 
 namespace HandmadeProductManagement.Contract.Services.Interface;
 
 public interface IAuthenticationService
 {
-    Task<UserLoginResponseModel> AuthenticateUser(LoginModelView loginModelView);
-    Task<UserLoginResponseModel> CreateUserResponse(ApplicationUser user);
-    Task<bool> AssignRoleToUser(string userId, string role);
+    Task<BaseResponse<UserLoginResponseModel>> LoginAsync(LoginModelView loginModelView);
+    Task<BaseResponse<string>> RegisterAsync(RegisterModelView registerModelView);
+    Task<BaseResponse<string>> RegisterAdminAsync(RegisterModelView registerModelView);
+    Task<BaseResponse<string>> ForgotPasswordAsync(ForgotPasswordModelView forgotPasswordModelView);
+    Task<BaseResponse<string>> ResetPasswordAsync(ResetPasswordModelView resetPasswordModelView);
+    Task<BaseResponse<string>> ConfirmEmailAsync(ConfirmEmailModelView confirmEmailModelView);
+
 }

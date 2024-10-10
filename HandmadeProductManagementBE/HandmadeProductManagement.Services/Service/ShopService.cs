@@ -106,6 +106,16 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<PaginatedList<ShopResponseModel>> GetShopsByPageAsync(int pageNumber, int pageSize)
         {
+            if (pageNumber <= 0)
+            {
+                throw new BaseException.BadRequestException("invalid_input", "Page must be greater than 0.");
+            }
+
+            if (pageSize <= 0)
+            {
+                throw new BaseException.BadRequestException("invalid_input", "Page size must be greater than 0.");
+            }
+
             var repository = _unitOfWork.GetRepository<Shop>();
             var query = repository.Entities.Where(shop => !shop.DeletedTime.HasValue);
 
@@ -155,33 +165,47 @@ namespace HandmadeProductManagement.Services.Service
             };
         }
 
-        public async Task<bool> UpdateShopAsync(string userId, string id, CreateShopDto shop)
+        public async Task<bool> UpdateShopAsync(string userId, CreateShopDto shop)
         {
-            ValidateShop(shop);
-
-            if (string.IsNullOrWhiteSpace(id) || !Guid.TryParse(id, out _))
-            {
-                throw new BaseException.BadRequestException("invalid_format", "Id is not in the correct format. " +
-                    "Ex: 123e4567-e89b-12d3-a456-426614174000.");
-            }
-
             var repository = _unitOfWork.GetRepository<Shop>();
             var existingShop = await repository.Entities
-                .FirstOrDefaultAsync(s => s.Id == id && !s.DeletedTime.HasValue);
+                .FirstOrDefaultAsync(s => s.UserId.ToString() == userId && !s.DeletedTime.HasValue);
 
-            if (existingShop == null)
+            if (shop == null)
             {
-                throw new BaseException.NotFoundException(
-                    "shop_not_found", "Shop not found.");
+                throw new BaseException.NotFoundException("shop_not_found", "Shop not found.");
             }
 
-            if (existingShop.UserId.ToString() != userId)
+            if (!string.IsNullOrWhiteSpace(shop.Name))
             {
-                throw new BaseException.ErrorException(403, "not_owner", "User is not the owner of the shop.");
+                if (string.IsNullOrWhiteSpace(shop.Name))
+                {
+                    throw new BaseException.BadRequestException("invalid_shop_name", "Please input shop name.");
+                }
+
+                if (Regex.IsMatch(shop.Name, @"[^a-zA-Z\s]"))
+                {
+                    throw new BaseException.BadRequestException("invalid_shop_name_format", "Shop name can only contain letters and spaces.");
+                }
+
+                existingShop.Name = shop.Name;
             }
 
-            existingShop.Name = shop.Name;
-            existingShop.Description = shop.Description;
+            if (!string.IsNullOrWhiteSpace(shop.Description))
+            {
+                if (string.IsNullOrWhiteSpace(shop.Description))
+                {
+                    throw new BaseException.BadRequestException("invalid_shop_description", "Please input shop description.");
+                }
+
+                if (Regex.IsMatch(shop.Description, @"[^a-zA-Z0-9\s]"))
+                {
+                    throw new BaseException.BadRequestException("invalid_shop_description_format", "Shop description cannot contain special characters.");
+                }
+
+                existingShop.Description = shop.Description;
+            }
+
             existingShop.LastUpdatedBy = userId;
             existingShop.LastUpdatedTime = DateTime.UtcNow;
 

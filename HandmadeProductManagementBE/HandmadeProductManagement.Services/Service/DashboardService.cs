@@ -51,17 +51,17 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<decimal> GetTotalSaleByShopId(string Id, DashboardDTO dashboardDTO)
         {
-            //     decimal totalSales = await _unitOfWork.GetRepository<Order>()
-            //.Entities
-            //.Where(order => order.OrderDetails
-            //    .Any(od => od.Product.ShopId == Id)
-            //    && order.OrderDate >= dashboardDTO.from
-            //    && order.OrderDate <= dashboardDTO.to
-            //    && order.Status == "Shipped")
-            //.SumAsync(order => order.TotalPrice);
+                 decimal totalSales = await _unitOfWork.GetRepository<Order>()
+            .Entities
+            .Where(order => order.OrderDetails
+                .Any(od => od.ProductItem.Product.ShopId == Id)
+                && order.OrderDate >= dashboardDTO.from
+                && order.OrderDate <= dashboardDTO.to
+                && order.Status == "Shipped")
+            .SumAsync(order => order.TotalPrice);
 
-            //     return totalSales;
-            return 0;
+                 return totalSales;
+
         }
 
         public async Task<List<Product>> GetTopSellingProducts()
