@@ -19,9 +19,9 @@ namespace HandmadeProductManagementAPI.Controllers
 
         [HttpGet]
         [Authorize]
-        public async Task<IActionResult> GetPromotions()
+        public async Task<IActionResult> GetPromotions(int pageNumber = 1, int pageSize = 10)
         {
-            var result = await _promotionService.GetAll();
+            var result = await _promotionService.GetAll(pageNumber, pageSize);
             var response = new BaseResponse<IList<PromotionDto>>
             {
                 Code = "200",

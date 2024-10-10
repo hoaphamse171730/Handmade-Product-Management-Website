@@ -1,4 +1,6 @@
+using System.IdentityModel.Tokens.Jwt;
 using System.Web;
+using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Constants;
@@ -19,7 +21,6 @@ public class AuthenticationController(
     TokenService tokenService,
     IEmailService emailService,
     IAuthenticationService authenticationService
-    
 )
     : ControllerBase
 {
@@ -100,4 +101,124 @@ public class AuthenticationController(
         return Ok(claims);
     }
 
+
+    [HttpPost]
+    [Route("google-login")]
+    public async Task<IActionResult> GoogleLogin(string token)
+    {
+        var handler = new JwtSecurityTokenHandler();
+        var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
+        if (jsonToken == null)
+        {
+            return BadRequest("Invalid token.");
+        }
+
+        var email = jsonToken.Claims.FirstOrDefault(claim => claim.Type == "email")?.Value;
+        var name = jsonToken.Claims.FirstOrDefault(claim => claim.Type == "name")?.Value;
+        var picture = jsonToken.Claims.FirstOrDefault(claim => claim.Type == "picture")?.Value;
+
+        if (email == null || name == null)
+        {
+            return BadRequest("Token is missing necessary claims.");
+        }
+
+        var user = await userManager.FindByEmailAsync(email);
+        if (user == null)
+        {
+            user = new ApplicationUser
+            {
+                Email = email,
+                UserName = email,
+                SecurityStamp = Guid.NewGuid().ToString()
+            };
+
+            var createResult = await userManager.CreateAsync(user);
+            if (!createResult.Succeeded)
+            {
+                return BadRequest("Failed to create a new user.");
+            }
+            var userInfo = new UserInfo
+            {
+                Id = (user.Id).ToString(),                   
+                FullName = name,                   
+                AvatarUrl = picture,              
+                DisplayName = name,               
+                Bio = string.Empty,                 
+                BankAccount = null,                 
+                BankAccountName = null,            
+                Bank = null,
+                Address = null,                  
+                UserInfoImages = new List<UserInfoImage>() 
+            };
+            await userManager.AddToRoleAsync(user, "Customer");
+        }
+        var roles = await userManager.GetRolesAsync(user);
+        var userRole = roles.FirstOrDefault();
+        var userToken = await tokenService.CreateToken(user);
+
+        return Ok(new
+        {
+            Token = userToken
+        });
+    }
+
+    [HttpPost]
+    [Route("facebook-login")]
+    public async Task<IActionResult> FacebookLogin(string token)
+    {
+        var handler = new JwtSecurityTokenHandler();
+        var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
+        if (jsonToken == null)
+        {
+            return BadRequest("Invalid token.");
+        }
+
+        var email = jsonToken.Claims.FirstOrDefault(claim => claim.Type == "email")?.Value;
+        var name = jsonToken.Claims.FirstOrDefault(claim => claim.Type == "name")?.Value;
+        var picture = jsonToken.Claims.FirstOrDefault(claim => claim.Type == "picture")?.Value;
+
+        if (email == null || name == null)
+        {
+            return BadRequest("Token is missing necessary claims.");
+        }
+
+        var user = await userManager.FindByEmailAsync(email);
+        if (user == null)
+        {
+            user = new ApplicationUser
+            {
+                Email = email,
+                UserName = email,
+                SecurityStamp = Guid.NewGuid().ToString()
+            };
+
+            var createResult = await userManager.CreateAsync(user);
+            if (!createResult.Succeeded)
+            {
+                return BadRequest("Failed to create a new user.");
+            }
+
+            var userInfo = new UserInfo
+            {
+                Id = (user.Id).ToString(),                   
+                FullName = name,                   
+                AvatarUrl = picture,              
+                DisplayName = name,               
+                Bio = string.Empty,                 
+                BankAccount = null,                 
+                BankAccountName = null,            
+                Bank = null,
+                Address = null,                  
+                UserInfoImages = new List<UserInfoImage>() 
+            };
+            await userManager.AddToRoleAsync(user, "Customer");
+        }
+        var roles = await userManager.GetRolesAsync(user);
+        var userRole = roles.FirstOrDefault();
+        var userToken = await tokenService.CreateToken(user);
+        return Ok(new
+        {
+            Token = userToken
+        });
+    }
 }
