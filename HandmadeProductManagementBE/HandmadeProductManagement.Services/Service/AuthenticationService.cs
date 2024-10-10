@@ -275,14 +275,24 @@ public class AuthenticationService : IAuthenticationService
 
         if (result.Succeeded)
         {
+            user.EmailConfirmed = true;
+            await _userManager.UpdateAsync(user);
             return new BaseResponse<string>()
             {
                 StatusCode = StatusCodeHelper.OK,
                 Message = "Email confirmed successfully."
             };
         }
-        throw new BaseException.BadRequestException("error", "Error confirming the email.");
+        else
+        {
+            var errorMessages = result.Errors
+                .Select(e => e.Description)
+                .ToList();
+
+            throw new BaseException.BadRequestException("error", "Error confirming the email: " + string.Join("; ", errorMessages));
+        }
     }
+
 
     private async Task<UserLoginResponseModel> CreateUserResponse(ApplicationUser user)
     {
