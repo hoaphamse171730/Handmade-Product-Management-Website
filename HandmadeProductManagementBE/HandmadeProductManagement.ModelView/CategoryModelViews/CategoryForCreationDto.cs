@@ -9,9 +9,6 @@ namespace HandmadeProductManagement.ModelViews.CategoryModelViews
 {
     public class CategoryForCreationDto : CategoryForManipulationDto
     {
-        public string Name { get; set; } = string.Empty;
-        public string? Description { get; set; }
-        [JsonIgnore]
-        public string? PromotionId { get; set; } = string.Empty;
+
     }
 }

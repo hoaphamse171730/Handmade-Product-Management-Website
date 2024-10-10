@@ -44,7 +44,6 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<CategoryDto> Create(CategoryForCreationDto category)
         {
-            category.PromotionId = null;
             var validationResult = await _creationValidator.ValidateAsync(category);
             if (!validationResult.IsValid)
                 throw new ValidationException(validationResult.Errors);
