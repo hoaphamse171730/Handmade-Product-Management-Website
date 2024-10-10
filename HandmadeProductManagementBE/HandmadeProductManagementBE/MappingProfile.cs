@@ -79,6 +79,7 @@ public class MappingProfile : Profile
 
         #region UserInfo
         CreateMap<UserInfo, UserInfoDto>();
+        CreateMap<UserInfoForUpdateDto, UserInfo>();
         #endregion
     }
 

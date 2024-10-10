@@ -19,7 +19,7 @@ namespace HandmadeProductManagementAPI.Controllers
 
         [HttpGet]
         [Authorize]
-        public async Task<IActionResult> GetApplicationUsersById()
+        public async Task<IActionResult> GetUserInfoById()
         {
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             var response = new BaseResponse<UserInfoDto>
@@ -29,6 +29,24 @@ namespace HandmadeProductManagementAPI.Controllers
                 Message = "Success",
                 Data = await _userInfoService.GetUserInfoByIdAsync(userId)
             };
+            return Ok(response);
+        }
+
+        // PATCH api/userinfo
+        [HttpPatch]
+        [Authorize]
+        public async Task<IActionResult> PatchUserInfo([FromBody] UserInfoForUpdateDto patchDto)
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var updatedUserInfo = await _userInfoService.PatchUserInfoAsync(userId, patchDto);
+            var response = new BaseResponse<bool>
+            {
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "User info updated successfully.",
+                Data = updatedUserInfo
+            };
+
             return Ok(response);
         }
     }
