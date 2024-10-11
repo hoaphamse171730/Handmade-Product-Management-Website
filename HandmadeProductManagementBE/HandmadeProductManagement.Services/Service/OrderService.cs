@@ -18,16 +18,19 @@ namespace HandmadeProductManagement.Services.Service
         private readonly IStatusChangeService _statusChangeService;
         private readonly IOrderDetailService _orderDetailService;
         private readonly ICartItemService _cartItemService;
+        private readonly IProductService _productService;
 
         public OrderService(IUnitOfWork unitOfWork, 
             IStatusChangeService statusChangeService, 
             IOrderDetailService orderDetailService, 
-            ICartItemService cartItemService)
+            ICartItemService cartItemService,
+            IProductService productService)
         {
             _unitOfWork = unitOfWork;
             _statusChangeService = statusChangeService;
             _orderDetailService = orderDetailService;
             _cartItemService = cartItemService;
+            _productService = productService;
         }
 
         public async Task<bool> CreateOrderAsync(string userId, CreateOrderDto createOrder)
@@ -453,6 +456,12 @@ namespace HandmadeProductManagement.Services.Service
 
                 repository.Update(existingOrder);
                 await _statusChangeService.Create(statusChangeDto, userId);
+
+                // Update product sold count if the new status is "Shipped"
+                if (updateStatusOrderDto.Status == "Shipped")
+                {
+                    await _productService.UpdateProductSoldCountAsync(updateStatusOrderDto.OrderId);
+                }
 
                 await _unitOfWork.SaveAsync();
                 _unitOfWork.CommitTransaction();

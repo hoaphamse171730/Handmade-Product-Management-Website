@@ -668,6 +668,33 @@ namespace HandmadeProductManagement.Services.Service
             return averageRating;
         }
 
+        public async Task UpdateProductSoldCountAsync(string orderId)
+        {
+            var order = await _unitOfWork.GetRepository<Order>().Entities
+                .Include(o => o.OrderDetails)
+                .ThenInclude(od => od.ProductItem)
+                .ThenInclude(pi => pi.Product)
+                .FirstOrDefaultAsync(o => o.Id == orderId);
+
+            if (order == null)
+            {
+                throw new BaseException.NotFoundException("order_not_found", "Order not found.");
+            }
+
+            if (order.Status != "Shipped")
+            {
+                return; // Only update soldCount when the order status is "Shipped"
+            }
+
+            foreach (var orderDetail in order.OrderDetails)
+            {
+                var product = orderDetail.ProductItem.Product;
+                product.SoldCount += orderDetail.ProductQuantity;
+                await _unitOfWork.GetRepository<Product>().UpdateAsync(product);
+            }
+
+            await _unitOfWork.SaveAsync();
+        }
     }
 }
 
