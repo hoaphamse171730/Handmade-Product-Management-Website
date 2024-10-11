@@ -25,8 +25,8 @@ namespace HandmadeProductManagement.Services.Service
             _updateValidator = updateValidator;
         }
 
-        // Get status changes by page (only active records)
-        public async Task<IList<StatusChangeDto>> GetByPage(int page, int pageSize)
+        // Get status changes by OrderId (only active records)
+        public async Task<IList<StatusChangeDto>> GetByPage(int page, int pageSize, bool sortAsc)
         {
             if (page <= 0)
             {
@@ -40,6 +40,11 @@ namespace HandmadeProductManagement.Services.Service
 
             IQueryable<StatusChange> query = _unitOfWork.GetRepository<StatusChange>().Entities
                 .Where(cr => !cr.DeletedTime.HasValue || cr.DeletedBy == null);
+
+            // Sắp xếp theo sortOrder
+            query = sortAsc
+                ? query.OrderBy(statusChange => statusChange.ChangeTime)
+                : query.OrderByDescending(statusChange => statusChange.ChangeTime);
 
             var statusChanges = await query
                 .Skip((page - 1) * pageSize)
@@ -61,8 +66,7 @@ namespace HandmadeProductManagement.Services.Service
             return _mapper.Map<IList<StatusChangeDto>>(statusChanges);
         }
 
-        // Get status changes by OrderId (only active records)
-        public async Task<IList<StatusChangeDto>> GetByOrderId(string orderId)
+        public async Task<IList<StatusChangeDto>> GetByOrderId(string orderId, bool sortAsc)
         {
             // Validate id format
             if (!Guid.TryParse(orderId, out var guidId))
@@ -78,6 +82,11 @@ namespace HandmadeProductManagement.Services.Service
             IQueryable<StatusChange> query = _unitOfWork.GetRepository<StatusChange>().Entities
                 .Where(sc => sc.OrderId == orderId && (!sc.DeletedTime.HasValue || sc.DeletedBy == null));
 
+            // Sắp xếp theo sortOrder
+            query = sortAsc
+                ? query.OrderBy(statusChange => statusChange.ChangeTime)
+                : query.OrderByDescending(statusChange => statusChange.ChangeTime);
+
             var statusChanges = await query.ToListAsync();
 
             if (!statusChanges.Any())
@@ -87,6 +96,7 @@ namespace HandmadeProductManagement.Services.Service
 
             return _mapper.Map<IList<StatusChangeDto>>(statusChanges);
         }
+
 
         // Create a new status change
         public async Task<bool> Create(StatusChangeForCreationDto createStatusChange, string userId)

@@ -9,6 +9,7 @@ using AutoMapper;
 using FluentValidation;
 using Microsoft.IdentityModel.Tokens;
 using HandmadeProductManagement.ModelViews.VariationCombinationModelViews;
+using Firebase.Auth;
 
 namespace HandmadeProductManagement.Services.Service
 {
@@ -233,6 +234,15 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<IEnumerable<ProductSearchVM>> SearchProductsAsync(ProductSearchFilter searchFilter, int pageNumber, int pageSize)
         {
+            if (pageNumber <= 0)
+            {
+                throw new BaseException.BadRequestException("invalid_page_number", "Page Number must be greater than zero.");
+            }
+            if (pageSize <= 0)
+            {
+                throw new BaseException.BadRequestException("invalid_page_size", "Page Size must be greater than zero.");
+            }
+
             // Validate CategoryId and ShopId datatype (Guid)
             if (!string.IsNullOrWhiteSpace(searchFilter.CategoryId) && !IsValidGuid(searchFilter.CategoryId))
             {
@@ -253,7 +263,12 @@ namespace HandmadeProductManagement.Services.Service
             var query = _unitOfWork.GetRepository<Product>().Entities
                                     .Include(p => p.ProductImages)
                                     .Include(p => p.ProductItems)
+                                    .Where(p => !p.DeletedTime.HasValue || p.DeletedBy == null)
                                     .AsQueryable();
+            if (!query.Any())
+            {
+                throw new BaseException.NotFoundException("not_found", "There is no products.");
+            }
 
             // Apply Search Filters
             if (!string.IsNullOrEmpty(searchFilter.Name))
@@ -377,13 +392,22 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<IList<ProductOverviewDto>> GetProductsByUserByPage(string userId, int pageNumber, int pageSize)
         {
+            if (pageNumber <= 0)
+            {
+                throw new BaseException.BadRequestException("invalid_page_number", "Page Number must be greater than zero.");
+            }
+            if (pageSize <= 0)
+            {
+                throw new BaseException.BadRequestException("invalid_page_size", "Page Size must be greater than zero.");
+            }
+
             if (!Guid.TryParse(userId, out var guidId))
             {
                 throw new BaseException.BadRequestException("invalid_input", "ID is not in a valid GUID format.");
             }
 
             var shop = await _unitOfWork.GetRepository<Shop>().Entities
-                    .FirstOrDefaultAsync(s => s.UserId == Guid.Parse(userId));
+                    .FirstOrDefaultAsync(s => s.UserId == Guid.Parse(userId) && (s.DeletedBy == null || !s.DeletedTime.HasValue));
 
             if (shop == null)
             {
@@ -416,6 +440,7 @@ namespace HandmadeProductManagement.Services.Service
                 ProductImageUrl = p.ProductImages.FirstOrDefault()?.Url ?? string.Empty,
                 Rating = p.Rating,
                 SoldCount = p.SoldCount,
+                Status = p.Status,
                 LowestPrice = p.ProductItems.Any() ? p.ProductItems.Min(pi => pi.Price) : 0
             }).ToList();
 
@@ -425,7 +450,7 @@ namespace HandmadeProductManagement.Services.Service
         public async Task<ProductDto> GetById(string id)
         {
             var product = await _unitOfWork.GetRepository<Product>().Entities
-                .FirstOrDefaultAsync(p => p.Id == id);
+                .FirstOrDefaultAsync(p => p.Id == id && (!p.DeletedTime.HasValue || p.DeletedBy == null));
 
             if (product == null)
                 throw new KeyNotFoundException("Product not found");
@@ -445,10 +470,11 @@ namespace HandmadeProductManagement.Services.Service
             if (productEntity == null)
                 throw new KeyNotFoundException("Product not found");
             _mapper.Map(product, productEntity);
-
             productEntity.LastUpdatedTime = DateTime.UtcNow;
             productEntity.LastUpdatedBy = userId;
-
+            productEntity.Name = product.Name;
+            productEntity.Description = product.Description;
+            productEntity.CategoryId = product.CategoryId;
             await _unitOfWork.GetRepository<Product>().UpdateAsync(productEntity);
             await _unitOfWork.SaveAsync();
             return true;
@@ -458,12 +484,79 @@ namespace HandmadeProductManagement.Services.Service
         {
             var productRepo = _unitOfWork.GetRepository<Product>();
             var productEntity = await productRepo.Entities.FirstOrDefaultAsync(x => x.Id == id.ToString());
-            if (productEntity == null)
+            if (productEntity == null || productEntity.DeletedBy != null || productEntity.DeletedTime.HasValue)
                 throw new KeyNotFoundException("Product not found");
             productEntity.DeletedTime = DateTime.UtcNow;
             productEntity.DeletedBy = userId;
             await productRepo.UpdateAsync(productEntity);
             await _unitOfWork.SaveAsync();
+            return true;
+        }
+
+        public async Task<IList<Product>> GetAllDeletedProducts(int pageNumber, int pageSize)
+        {
+            var deletedProductsQuery = _unitOfWork.GetRepository<Product>().Entities
+                .Where(p => p.DeletedTime.HasValue || p.DeletedBy != null);
+
+            var totalRecords = await deletedProductsQuery.CountAsync();
+            if (totalRecords == 0)
+            {
+                throw new BaseException.NotFoundException("not_found", "No deleted products found.");
+            }
+
+            var deletedProducts = await deletedProductsQuery
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return deletedProducts;
+        }
+
+        public async Task<bool> RecoverProduct(string id, string userId)
+        {
+            var productRepo = _unitOfWork.GetRepository<Product>();
+            var productEntity = await productRepo.Entities.FirstOrDefaultAsync(x => x.Id == id);
+
+            if (productEntity == null || productEntity.DeletedBy == null || !productEntity.DeletedTime.HasValue)
+                throw new BaseException.NotFoundException("product_not_found", "Product not found or has not been deleted.");
+
+            productEntity.DeletedTime = null;
+            productEntity.DeletedBy = null;
+            productEntity.LastUpdatedBy = userId;
+
+            await productRepo.UpdateAsync(productEntity);
+            await _unitOfWork.SaveAsync();
+
+            return true;
+        }
+
+        public async Task<bool> UpdateStatusProduct(string productId, string newStatus, string userId)
+        {
+            if (newStatus != "Available" && newStatus != "Unavailable")
+            {
+                throw new BaseException.BadRequestException("invalid_status", "Status must be either 'Available' or 'Unavailable'.");
+            }
+
+            var productEntity = await _unitOfWork.GetRepository<Product>().Entities
+                .FirstOrDefaultAsync(p => p.Id == productId);
+
+            if (productEntity == null)
+            {
+                throw new BaseException.NotFoundException("product_not_found", "Product not found.");
+            }
+
+            if(newStatus == productEntity.Status)
+            {
+                throw new BaseException.BadRequestException("bad_request", $"The product already has {productEntity.Status} status");
+            }
+
+            productEntity.Status = newStatus;
+
+            productEntity.LastUpdatedBy = userId;
+            productEntity.LastUpdatedTime = DateTime.UtcNow;
+
+            await _unitOfWork.SaveAsync();
+
             return true;
         }
 
@@ -574,7 +667,6 @@ namespace HandmadeProductManagement.Services.Service
             await _unitOfWork.SaveAsync();
             return averageRating;
         }
-
 
     }
 }

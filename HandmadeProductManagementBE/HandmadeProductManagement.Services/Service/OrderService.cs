@@ -39,11 +39,20 @@ namespace HandmadeProductManagement.Services.Service
             var productItemRepository = _unitOfWork.GetRepository<ProductItem>();
             var productRepository = _unitOfWork.GetRepository<Product>();
 
+            //get cart items by user id
             var cartItems = await _cartItemService.GetCartItemsByUserIdAsync(userId);
             if (cartItems.Count == 0)
             {
                 throw new BaseException.NotFoundException("empty_cart", "Cart is empty.");
             }
+
+            var promotionRepository = _unitOfWork.GetRepository<Promotion>();
+            var categoryRepository = _unitOfWork.GetRepository<Category>();
+
+            //get active promotions
+            var activePromotions = await promotionRepository.Entities
+                .Where(p => p.Status == "Active" && DateTime.UtcNow >= p.StartDate && DateTime.UtcNow <= p.EndDate)
+                .ToListAsync();
 
             var groupedOrderDetails = new List<GroupedOrderDetail>();
 
@@ -65,11 +74,28 @@ namespace HandmadeProductManagement.Services.Service
                     throw new BaseException.NotFoundException("product_not_found", $"Product for Item {productItem.Id} not found.");
                 }
 
+                var category = await categoryRepository.Entities
+                    .FirstOrDefaultAsync(c => c.Id == product.CategoryId);
+
+                decimal finalPrice = productItem.Price;
+                if (category != null && !string.IsNullOrWhiteSpace(category.PromotionId))
+                {
+                    // Check if the product has a promotion
+                    var applicablePromotion = activePromotions
+                        .FirstOrDefault(p => p.Id == category.PromotionId);
+
+                    if (applicablePromotion != null)
+                    {
+                        finalPrice = productItem.Price - (productItem.Price * applicablePromotion.DiscountRate);
+                    }
+                }
+
                 groupedOrderDetails.Add(new GroupedOrderDetail
                 {
                     ShopId = product.ShopId,
                     CartItem = cartItem,
-                    ProductItem = productItem
+                    ProductItem = productItem,
+                    DiscountPrice = finalPrice,
                 });
             }
 
@@ -82,7 +108,7 @@ namespace HandmadeProductManagement.Services.Service
             {
                 foreach (var shopGroup in groupedByShop)
                 {
-                    var totalPrice = shopGroup.Sum(x => x.ProductItem.Price * x.CartItem.ProductQuantity);
+                    var totalPrice = shopGroup.Sum(x => x.DiscountPrice * x.CartItem.ProductQuantity);
                     var order = new Order
                     {
                         TotalPrice = (decimal)totalPrice,
@@ -118,7 +144,7 @@ namespace HandmadeProductManagement.Services.Service
                             OrderId = order.Id,
                             ProductItemId = productItem.Id,
                             ProductQuantity = cartItem.ProductQuantity,
-                            DiscountPrice = productItem.Price // Sử dụng giá từ ProductItem
+                            DiscountPrice = groupedDetail.DiscountPrice,
                         };
 
                         await _orderDetailService.Create(orderDetail);
@@ -270,9 +296,9 @@ namespace HandmadeProductManagement.Services.Service
 
             if (!string.IsNullOrWhiteSpace(order.Phone))
             {
-                if (!Regex.IsMatch(order.Phone, @"^\d{1,10}$"))
+                if (!Regex.IsMatch(order.Phone, @"^0\d{9,10}$"))
                 {
-                    throw new BaseException.BadRequestException("invalid_phone_format", "Phone number must be numeric and up to 10 digits.");
+                    throw new BaseException.BadRequestException("invalid_phone_format", "Phone number must be numeric, start with 0, and be 10 or 11 digits long.");
                 }
                 existingOrder.Phone = order.Phone;
             }
@@ -493,9 +519,9 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.BadRequestException("invalid_phone", "Phone number cannot be null or empty.");
             }
 
-            if (!Regex.IsMatch(order.Phone, @"^\d{1,10}$"))
+            if (!Regex.IsMatch(order.Phone, @"^0\d{9,10}$"))
             {
-                throw new BaseException.BadRequestException("invalid_phone_format", "Phone number must be numeric and up to 10 digits.");
+                throw new BaseException.BadRequestException("invalid_phone_format", "Phone number must be numeric, start with 0, and be 10 or 11 digits long.");
             }
         }
 

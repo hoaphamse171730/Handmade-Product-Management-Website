@@ -38,13 +38,12 @@ namespace HandmadeProductManagement.Services.Service
             var category = await _unitOfWork.GetRepository<Category>().Entities
                 .FirstOrDefaultAsync(c => c.Id == id && c.DeletedTime == null);
             if (category == null)
-                throw new KeyNotFoundException("Category not found");
+                throw new BaseException.NotFoundException("404", "Category not found");
             return _mapper.Map<CategoryDto>(category);
         }
 
         public async Task<CategoryDto> Create(CategoryForCreationDto category)
         {
-            category.PromotionId = null;
             var validationResult = await _creationValidator.ValidateAsync(category);
             if (!validationResult.IsValid)
                 throw new ValidationException(validationResult.Errors);

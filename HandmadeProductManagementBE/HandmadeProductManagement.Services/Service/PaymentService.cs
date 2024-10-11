@@ -2,6 +2,7 @@
 using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.ModelViews.CancelReasonModelViews;
 using HandmadeProductManagement.ModelViews.OrderModelViews;
 using HandmadeProductManagement.ModelViews.PaymentDetailModelViews;
 using HandmadeProductManagement.ModelViews.PaymentModelViews;
@@ -21,11 +22,13 @@ namespace HandmadeProductManagement.Services.Service
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IOrderService _orderService;
+        private readonly ICancelReasonService _cancelReasonService;
 
-        public PaymentService(IUnitOfWork unitOfWork, IOrderService orderService)
+        public PaymentService(IUnitOfWork unitOfWork, IOrderService orderService, ICancelReasonService cancelReasonService)
         {
             _unitOfWork = unitOfWork;
             _orderService = orderService;
+            _cancelReasonService = cancelReasonService;
         }
 
 
@@ -145,15 +148,32 @@ namespace HandmadeProductManagement.Services.Service
             }
 
             //will update when the CancelReason table has data
-            if (newStatus == "Expired")
-            {
-                var dto = new UpdateStatusOrderDto
+                if (newStatus == "Expired")
                 {
-                    OrderId = payment.OrderId,
-                    Status = "Canceled"
-                };
-                await _orderService.UpdateOrderStatusAsync(userId, dto);
-            }
+                    var cancelReasons = await _cancelReasonService.GetAll();
+                    var cancelReason = cancelReasons.FirstOrDefault(cr => cr.Description != null && 
+                                                                cr.Description.Contains("Payment failed"));
+                    if (cancelReason == null)
+                    {
+                        var crDto = new CancelReasonForCreationDto
+                        {
+                            Description = "Payment failed",
+                            RefundRate = 0
+                        };
+                        await _cancelReasonService.Create(crDto, "System");
+                        cancelReasons = await _cancelReasonService.GetAll();
+                        cancelReason = cancelReasons.FirstOrDefault(cr => cr.Description != null &&
+                                                                    cr.Description.Contains("Payment failed"));
+                    }
+
+                    var dto = new UpdateStatusOrderDto
+                    {
+                        OrderId = payment.OrderId,
+                        Status = "Canceled",
+                        CancelReasonId = cancelReason.Id,
+                    };
+                    await _orderService.UpdateOrderStatusAsync(userId, dto);
+                }
 
             payment.Status = newStatus;
             payment.LastUpdatedTime = DateTime.UtcNow;

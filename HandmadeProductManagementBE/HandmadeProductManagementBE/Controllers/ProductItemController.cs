@@ -53,13 +53,12 @@ namespace HandmadeProductManagementAPI.Controllers
         //}
 
         [Authorize(Roles = "Seller")]
-        // PUT: api/ProductItem/{id}
-        [HttpPut("{id}")]
+        // PATCH: api/ProductItem/{id}
+        [HttpPatch("{id}")]
         public async Task<IActionResult> UpdateProductItem(string id, [FromBody] ProductItemForUpdateDto updatedProductItemDto)
         {
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             var result = await _productItemService.Update(id, updatedProductItemDto, userId);
-
             var response = new BaseResponse<bool>
             {
                 Code = "Success",

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using HandmadeProductManagement.Contract.Repositories.Entity;
 
 namespace HandmadeProductManagementAPI.Controllers
 {
@@ -33,6 +34,25 @@ namespace HandmadeProductManagementAPI.Controllers
             };
             return Ok(response);
         }
+
+        [HttpPut("update-status/{id}")]
+        [Authorize(Roles = "Seller")]
+        public async Task<IActionResult> UpdateStatusProduct(string id, [FromBody] string newStatus)
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var updateResult = await _productService.UpdateStatusProduct(id, newStatus, userId);
+
+            var response = new BaseResponse<bool>
+            {
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Product status updated successfully.",
+                Data = updateResult
+            };
+
+            return Ok(response);
+        }
+
 
         [HttpGet("search")]
         public async Task<IActionResult> SearchProducts([FromQuery] ProductSearchFilter searchFilter, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
@@ -129,7 +149,7 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [HttpDelete("soft-delete/{id}")]
-        [Authorize(Roles = "Admin")] 
+        [Authorize(Roles = "Admin, Seller")] 
         public async Task<IActionResult> SoftDeleteProduct(string id)
         {
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
@@ -141,6 +161,40 @@ namespace HandmadeProductManagementAPI.Controllers
                 Message = "Product soft-deleted successfully",
                 Data = "Product soft-deleted successfully"
             };
+            return Ok(response);
+        }
+
+        [HttpGet("all-deleted-products")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetAllDeletedProducts([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+            var response = new BaseResponse<IList<Product>>
+            {
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "All deleted products retrieved successfully",
+                Data = await _productService.GetAllDeletedProducts(pageNumber, pageSize)
+            };
+
+            return Ok(response);
+        }
+
+        [HttpPut("recover/{id}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> RecoverProduct(string id)
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+            var response = new BaseResponse<bool>
+            {
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Product recovered successfully",
+                Data = await _productService.RecoverProduct(id, userId)
+            };
+
             return Ok(response);
         }
 

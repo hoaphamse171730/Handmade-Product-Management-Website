@@ -39,6 +39,11 @@ namespace HandmadeProductManagement.Services.Service
                 })
                 .ToListAsync();
 
+            if (!cancelReasons.Any())
+            {
+                throw new BaseException.NotFoundException("not_found", "There is no cancel reasons.");
+            }
+
             var cancelReasonDto = _mapper.Map<IList<CancelReasonDto>>(cancelReasons);
             return cancelReasonDto;
         }
@@ -65,7 +70,7 @@ namespace HandmadeProductManagement.Services.Service
             return true;
         }
 
-        // Update an existing cancel reason
+        // Update an existing cancel reason partially (PATCH)
         public async Task<bool> Update(string id, CancelReasonForUpdateDto cancelReason, string userId)
         {
             // Validate id format
@@ -80,17 +85,31 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.BadRequestException("validation_failed", validationResult.Errors.Select(e => e.ErrorMessage).FirstOrDefault());
             }
 
+            // Find the entity to be updated
             var cancelReasonEntity = await _unitOfWork.GetRepository<CancelReason>().Entities
                 .FirstOrDefaultAsync(p => p.Id == id && (!p.DeletedTime.HasValue || p.DeletedBy == null));
+
             if (cancelReasonEntity == null)
             {
                 throw new BaseException.NotFoundException("not_found", "Cancel Reason not found");
             }
-            _mapper.Map(cancelReason, cancelReasonEntity);
 
+            // Map only updated properties, keeping old values for null or unchanged fields
+            if (!string.IsNullOrWhiteSpace(cancelReason.Description))
+            {
+                cancelReasonEntity.Description = cancelReason.Description;
+            }
+
+            if (cancelReason.RefundRate.HasValue)
+            {
+                cancelReasonEntity.RefundRate = cancelReason.RefundRate.Value;
+            }
+
+            // Update metadata (last updated time, updated by user)
             cancelReasonEntity.LastUpdatedTime = DateTime.UtcNow;
             cancelReasonEntity.LastUpdatedBy = userId;
 
+            // Update the entity in the repository
             await _unitOfWork.GetRepository<CancelReason>().UpdateAsync(cancelReasonEntity);
             await _unitOfWork.SaveAsync();
 
@@ -117,6 +136,61 @@ namespace HandmadeProductManagement.Services.Service
 
             await cancelReasonRepo.UpdateAsync(cancelReasonEntity);
             await _unitOfWork.SaveAsync();
+            return true;
+        }
+
+        // Get all soft-deleted cancel reasons
+        public async Task<IList<CancelReason>> GetDeletedCancelReasons()
+        {
+            var query = _unitOfWork.GetRepository<CancelReason>().Entities
+                .Where(cr => cr.DeletedTime.HasValue && cr.DeletedBy != null);
+
+            var cancelReasons = await query
+                .Select(cancelReason => new CancelReason
+                {
+                    Id = cancelReason.Id.ToString(),
+                    Description = cancelReason.Description,
+                    RefundRate = cancelReason.RefundRate,
+                    DeletedBy = cancelReason.DeletedBy,
+                    DeletedTime = cancelReason.DeletedTime,
+                })
+                .ToListAsync();
+
+            if (!cancelReasons.Any())
+            {
+                throw new BaseException.NotFoundException("not_found", "There is no cancel reasons.");
+            }
+
+            return cancelReasons;
+        }
+
+        // Patch reverse delete (restore a soft-deleted cancel reason)
+        public async Task<bool> PatchReverseDelete(string id, string userId)
+        {
+            // Validate id format
+            if (!Guid.TryParse(id, out var guidId))
+            {
+                throw new BaseException.BadRequestException("invalid_input", "ID is not in a valid GUID format.");
+            }
+
+            var cancelReasonRepo = _unitOfWork.GetRepository<CancelReason>();
+            var cancelReasonEntity = await cancelReasonRepo.Entities
+                .FirstOrDefaultAsync(cr => cr.Id == id && cr.DeletedTime.HasValue && cr.DeletedBy != null);
+
+            if (cancelReasonEntity == null)
+            {
+                throw new BaseException.NotFoundException("not_found", "Cancel Reason not found or not deleted.");
+            }
+
+            cancelReasonEntity.DeletedTime = null;
+            cancelReasonEntity.DeletedBy = null;
+
+            cancelReasonEntity.LastUpdatedTime = DateTime.UtcNow;
+            cancelReasonEntity.LastUpdatedBy = userId;
+
+            await cancelReasonRepo.UpdateAsync(cancelReasonEntity);
+            await _unitOfWork.SaveAsync();
+
             return true;
         }
     }
