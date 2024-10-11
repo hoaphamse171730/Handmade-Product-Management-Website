@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using HandmadeProductManagement.Contract.Repositories.Entity;
 
 namespace HandmadeProductManagementAPI.Controllers
 {
@@ -17,19 +18,6 @@ namespace HandmadeProductManagementAPI.Controllers
         private readonly IProductService _productService;
 
         public ProductController(IProductService productService) => _productService = productService;
-
-        [HttpGet("page")]
-        public async Task<IActionResult> GetProducts([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
-        {
-            var response = new BaseResponse<IList<ProductOverviewDto>>
-            {
-                Code = "200",
-                StatusCode = StatusCodeHelper.OK,
-                Message = "Products retrieved successfully",
-                Data = await _productService.GetByPage(pageNumber, pageSize)
-            };
-            return Ok(response);
-        }
 
         [HttpGet("user")]
         [Authorize(Roles = "Seller")]
@@ -47,25 +35,29 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
-        [HttpGet("category/{categoryId}")]
-        public async Task<IActionResult> GetProductsByCategoryId(string categoryId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        [HttpPut("update-status/{id}")]
+        [Authorize(Roles = "Seller")]
+        public async Task<IActionResult> UpdateStatusProduct(string id, [FromBody] string newStatus)
         {
-            var response = new BaseResponse<IList<ProductOverviewDto>>
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var updateResult = await _productService.UpdateStatusProduct(id, newStatus, userId);
+
+            var response = new BaseResponse<bool>
             {
                 Code = "200",
                 StatusCode = StatusCodeHelper.OK,
-                Message = "Products retrieved successfully.",
-                Data = await _productService.GetProductByCategoryId(categoryId, pageNumber, pageSize)
+                Message = "Product status updated successfully.",
+                Data = updateResult
             };
 
             return Ok(response);
         }
 
+
         [HttpGet("search")]
-        [Authorize]
-        public async Task<IActionResult> SearchProducts([FromQuery] ProductSearchFilter searchFilter)
+        public async Task<IActionResult> SearchProducts([FromQuery] ProductSearchFilter searchFilter, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var products = await _productService.SearchProductsAsync(searchFilter);
+            var products = await _productService.SearchProductsAsync(searchFilter, pageNumber, pageSize);
             var response = new BaseResponse<IEnumerable<ProductSearchVM>>
             {
                 Code = "200",
@@ -76,20 +68,20 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
-        [HttpGet("sort")]
-        [Authorize]
-        public async Task<IActionResult> SortProducts([FromQuery] ProductSortFilter sortModel)
-        {
-            var products = await _productService.SortProductsAsync(sortModel);
-            var response = new BaseResponse<IEnumerable<ProductSearchVM>>
-            {
-                Code = "200",
-                StatusCode = StatusCodeHelper.OK,
-                Message = "Sort Product Successfully",
-                Data = products
-            };
-            return Ok(response);
-        }
+        //[HttpGet("sort")]
+        //[Authorize]
+        //public async Task<IActionResult> SortProducts([FromQuery] ProductSortFilter sortModel)
+        //{
+        //    var products = await _productService.SortProductsAsync(sortModel);
+        //    var response = new BaseResponse<IEnumerable<ProductSearchVM>>
+        //    {
+        //        Code = "200",
+        //        StatusCode = StatusCodeHelper.OK,
+        //        Message = "Sort Product Successfully",
+        //        Data = products
+        //    };
+        //    return Ok(response);
+        //}
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetProduct(string id)
@@ -157,7 +149,7 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [HttpDelete("soft-delete/{id}")]
-        [Authorize(Roles = "Admin")] 
+        [Authorize(Roles = "Admin, Seller")] 
         public async Task<IActionResult> SoftDeleteProduct(string id)
         {
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
@@ -169,6 +161,40 @@ namespace HandmadeProductManagementAPI.Controllers
                 Message = "Product soft-deleted successfully",
                 Data = "Product soft-deleted successfully"
             };
+            return Ok(response);
+        }
+
+        [HttpGet("all-deleted-products")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetAllDeletedProducts([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+            var response = new BaseResponse<IList<Product>>
+            {
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "All deleted products retrieved successfully",
+                Data = await _productService.GetAllDeletedProducts(pageNumber, pageSize)
+            };
+
+            return Ok(response);
+        }
+
+        [HttpPut("recover/{id}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> RecoverProduct(string id)
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+            var response = new BaseResponse<bool>
+            {
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Product recovered successfully",
+                Data = await _productService.RecoverProduct(id, userId)
+            };
+
             return Ok(response);
         }
 

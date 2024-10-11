@@ -9,6 +9,7 @@ using AutoMapper;
 using FluentValidation;
 using Microsoft.IdentityModel.Tokens;
 using HandmadeProductManagement.ModelViews.VariationCombinationModelViews;
+using Firebase.Auth;
 
 namespace HandmadeProductManagement.Services.Service
 {
@@ -231,192 +232,170 @@ namespace HandmadeProductManagement.Services.Service
             return result.Select(c => c.ToList());
         }
 
-        public async Task<IEnumerable<ProductSearchVM>> SearchProductsAsync(ProductSearchFilter searchModel)
+        public async Task<IEnumerable<ProductSearchVM>> SearchProductsAsync(ProductSearchFilter searchFilter, int pageNumber, int pageSize)
         {
+            if (pageNumber <= 0)
+            {
+                throw new BaseException.BadRequestException("invalid_page_number", "Page Number must be greater than zero.");
+            }
+            if (pageSize <= 0)
+            {
+                throw new BaseException.BadRequestException("invalid_page_size", "Page Size must be greater than zero.");
+            }
+
             // Validate CategoryId and ShopId datatype (Guid)
-            if (!string.IsNullOrWhiteSpace(searchModel.CategoryId) && !IsValidGuid(searchModel.CategoryId))
+            if (!string.IsNullOrWhiteSpace(searchFilter.CategoryId) && !IsValidGuid(searchFilter.CategoryId))
             {
                 throw new BaseException.BadRequestException("bad_request", "Invalid Category Id");
             }
 
-            if (!string.IsNullOrWhiteSpace(searchModel.ShopId) && !IsValidGuid(searchModel.ShopId))
+            if (!string.IsNullOrWhiteSpace(searchFilter.ShopId) && !IsValidGuid(searchFilter.ShopId))
             {
                 throw new BaseException.BadRequestException("bad_request", "Invalid Shop ID");
             }
 
             // Validate MinRating limit (from 0 to 5)
-            if (searchModel.MinRating.HasValue && (searchModel.MinRating < 0 || searchModel.MinRating > 5))
+            if (searchFilter.MinRating.HasValue && (searchFilter.MinRating < 0 || searchFilter.MinRating > 5))
             {
                 throw new BaseException.BadRequestException("bad_request", "MinRating must be between 0 and 5.");
             }
 
-
-            var query = _unitOfWork.GetRepository<Product>().Entities.AsQueryable();
+            var query = _unitOfWork.GetRepository<Product>().Entities
+                                    .Include(p => p.ProductImages)
+                                    .Include(p => p.ProductItems)
+                                    .AsQueryable();
 
             // Apply Search Filters
-            if (!string.IsNullOrEmpty(searchModel.Name))
+            if (!string.IsNullOrEmpty(searchFilter.Name))
             {
-                query = query.Where(p => p.Name.Contains(searchModel.Name));
+                query = query.Where(p => p.Name.Contains(searchFilter.Name));
             }
 
-            if (!string.IsNullOrWhiteSpace(searchModel.CategoryId))
+            if (!string.IsNullOrWhiteSpace(searchFilter.CategoryId))
             {
-                query = query.Where(p => p.CategoryId == searchModel.CategoryId);
+                query = query.Where(p => p.CategoryId == searchFilter.CategoryId);
             }
 
-            if (!string.IsNullOrWhiteSpace(searchModel.ShopId))
+            if (!string.IsNullOrWhiteSpace(searchFilter.ShopId))
             {
-                query = query.Where(p => p.ShopId == searchModel.ShopId);
+                query = query.Where(p => p.ShopId == searchFilter.ShopId);
             }
 
-            if (!string.IsNullOrWhiteSpace(searchModel.Status))
+            if (!string.IsNullOrWhiteSpace(searchFilter.Status))
             {
-                query = query.Where(p => p.Status == searchModel.Status);
+                query = query.Where(p => p.Status == searchFilter.Status);
             }
 
-            if (searchModel.MinRating.HasValue)
+            if (searchFilter.MinRating.HasValue)
             {
-                query = query.Where(p => p.Rating >= searchModel.MinRating.Value);
+                query = query.Where(p => p.Rating >= searchFilter.MinRating.Value);
             }
-
 
             // Sort Logic
-            if (searchModel.SortByPrice)
+            if (searchFilter.SortByPrice)
             {
-                query = searchModel.SortDescending
+                query = searchFilter.SortDescending
                     ? query.OrderByDescending(p => p.ProductItems.Min(pi => pi.Price))
                     : query.OrderBy(p => p.ProductItems.Min(pi => pi.Price));
             }
-
             else
             {
-                query = searchModel.SortDescending
+                query = searchFilter.SortDescending
                     ? query.OrderByDescending(p => p.Rating)
                     : query.OrderBy(p => p.Rating);
             }
 
+            // Pagination: Apply Skip and Take
+            var totalItems = await query.CountAsync();
+            var paginatedQuery = query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize);
 
-
-            var productSearchVMs = await query
-                .GroupBy(p => new
+            // Now we group and project the result into ProductSearchVM
+            var productSearchVMs = await paginatedQuery
+                .Select(p => new ProductSearchVM
                 {
-                    p.Id,
-                    p.Name,
-                    p.Description,
-                    p.CategoryId,
-                    p.ShopId,
-                    p.Rating,
-                    p.Status,
-                    p.SoldCount
+                    Id = p.Id,
+                    Name = p.Name,
+                    Description = p.Description,
+                    CategoryId = p.CategoryId,
+                    ShopId = p.ShopId,
+                    Rating = p.Rating,
+                    Status = p.Status,
+                    SoldCount = p.SoldCount,
+                    ProductImageUrl = p.ProductImages.FirstOrDefault() != null ? p.ProductImages.FirstOrDefault().Url : string.Empty,
+                    LowestPrice = p.ProductItems.Any() ? p.ProductItems.Min(pi => pi.Price) : 0
                 })
-                .Select(g => new ProductSearchVM
-                {
-                    Id = g.Key.Id,
-                    Name = g.Key.Name,
-                    Description = g.Key.Description,
-                    CategoryId = g.Key.CategoryId,
-                    ShopId = g.Key.ShopId,
-                    Rating = g.Key.Rating,
-                    Status = g.Key.Status,
-                    SoldCount = g.Key.SoldCount,
-                    // Avoid duplicates
-                    Price = g.SelectMany(p => p.ProductItems).Any()
-                        ? g.SelectMany(p => p.ProductItems).Min(pi => pi.Price)
-                        : 0
-                }).OrderBy(pr => searchModel.SortByPrice
-                    ? (searchModel.SortDescending
-                        ? (decimal)-pr.Price
-                        : (decimal)pr.Price) // Sort by price ascending or descending
-                    : (searchModel.SortDescending
-                        ? (decimal)-pr.Rating
-                        : (decimal)pr.Rating)) // Sort by rating ascending or descending
                 .ToListAsync();
 
-            if (productSearchVMs.IsNullOrEmpty())
+            if (!productSearchVMs.Any())
             {
                 throw new BaseException.NotFoundException("not_found", "Product Not Found");
             }
 
+            // Return the paginated result and total items count
             return productSearchVMs;
-
         }
-
 
         // Sort Function
 
-        public async Task<IEnumerable<ProductSearchVM>> SortProductsAsync(ProductSortFilter sortFilter)
-        {
-            var query = _unitOfWork.GetRepository<Product>().Entities
-                .Include(p => p.ProductItems)
-                .Include(p => p.Reviews)
-                .AsQueryable();
+        //public async Task<IEnumerable<ProductSearchVM>> SortProductsAsync(ProductSortFilter sortFilter)
+        //{
+        //    var query = _unitOfWork.GetRepository<Product>().Entities
+        //        .Include(p => p.ProductItems)
+        //        .Include(p => p.Reviews)
+        //        .AsQueryable();
 
-            // Sort by Price
-            if (sortFilter.SortByPrice)
-            {
-                query = sortFilter.SortDescending
-                    ? query.OrderByDescending(p => p.ProductItems.Min(pi => pi.Price))
-                    : query.OrderBy(p => p.ProductItems.Min(pi => pi.Price));
-            }
+        //    // Sort by Price
+        //    if (sortFilter.SortByPrice)
+        //    {
+        //        query = sortFilter.SortDescending
+        //            ? query.OrderByDescending(p => p.ProductItems.Min(pi => pi.Price))
+        //            : query.OrderBy(p => p.ProductItems.Min(pi => pi.Price));
+        //    }
 
-            // Sort by Rating
-            else if (sortFilter.SortByRating)
-            {
-                query = sortFilter.SortDescending
-                    ? query.OrderByDescending(p => p.Rating)
-                    : query.OrderBy(p => p.Rating);
-            }
+        //    // Sort by Rating
+        //    else if (sortFilter.SortByRating)
+        //    {
+        //        query = sortFilter.SortDescending
+        //            ? query.OrderByDescending(p => p.Rating)
+        //            : query.OrderBy(p => p.Rating);
+        //    }
 
-            var products = await query.ToListAsync();
+        //    var products = await query.ToListAsync();
 
-            var productSearchVMs = products.Select(p => new ProductSearchVM
-            {
-                Id = p.Id,
-                Name = p.Name,
-                Description = p.Description,
-                CategoryId = p.CategoryId,
-                ShopId = p.ShopId,
-                Rating = p.Rating,
-                Status = p.Status,
-                SoldCount = p.SoldCount,
-                Price = p.ProductItems.Any() ? p.ProductItems.Min(pi => pi.Price) : 0
-            });
-            if (productSearchVMs.IsNullOrEmpty())
-            {
-                throw new BaseException.NotFoundException("not_found", "Product Not Found");
-            }
+        //    var productSearchVMs = products.Select(p => new ProductSearchVM
+        //    {
+        //        Id = p.Id,
+        //        Name = p.Name,
+        //        Description = p.Description,
+        //        CategoryId = p.CategoryId,
+        //        ShopId = p.ShopId,
+        //        Rating = p.Rating,
+        //        Status = p.Status,
+        //        SoldCount = p.SoldCount,
+        //        Price = p.ProductItems.Any() ? p.ProductItems.Min(pi => pi.Price) : 0
+        //    });
+        //    if (productSearchVMs.IsNullOrEmpty())
+        //    {
+        //        throw new BaseException.NotFoundException("not_found", "Product Not Found");
+        //    }
 
-            return productSearchVMs;
+        //    return productSearchVMs;
 
-        }
-
-        public async Task<IList<ProductOverviewDto>> GetByPage(int pageNumber, int pageSize)
-        {
-            var products = await _unitOfWork.GetRepository<Product>().Entities
-                .Where(p => p.DeletedTime == null || p.DeletedBy == null)
-                .Include(p => p.ProductImages)
-                .Include(p => p.ProductItems)
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
-
-            var productsOverviewDto = products.Select(p => new ProductOverviewDto
-            {
-                Id = p.Id,
-                Name = p.Name,
-                CategoryId = p.CategoryId,
-                ProductImageUrl = p.ProductImages.FirstOrDefault()?.Url ?? string.Empty,
-                Rating = p.Rating,
-                SoldCount = p.SoldCount,
-                LowestPrice = p.ProductItems.Any() ? p.ProductItems.Min(pi => pi.Price) : 0
-            }).ToList();
-
-            return productsOverviewDto;
-        }
-
+        //}
 
         public async Task<IList<ProductOverviewDto>> GetProductsByUserByPage(string userId, int pageNumber, int pageSize)
         {
+            if (pageNumber <= 0)
+            {
+                throw new BaseException.BadRequestException("invalid_page_number", "Page Number must be greater than zero.");
+            }
+            if (pageSize <= 0)
+            {
+                throw new BaseException.BadRequestException("invalid_page_size", "Page Size must be greater than zero.");
+            }
+
             if (!Guid.TryParse(userId, out var guidId))
             {
                 throw new BaseException.BadRequestException("invalid_input", "ID is not in a valid GUID format.");
@@ -456,40 +435,7 @@ namespace HandmadeProductManagement.Services.Service
                 ProductImageUrl = p.ProductImages.FirstOrDefault()?.Url ?? string.Empty,
                 Rating = p.Rating,
                 SoldCount = p.SoldCount,
-                LowestPrice = p.ProductItems.Any() ? p.ProductItems.Min(pi => pi.Price) : 0
-            }).ToList();
-
-            return productsOverviewDto;
-        }
-
-        public async Task<IList<ProductOverviewDto>> GetProductByCategoryId(string categoryId, int pageNumber, int pageSize)
-        {
-            if (string.IsNullOrEmpty(categoryId))
-            {
-                throw new BaseException.BadRequestException("invalid_category_id", "Category ID cannot be null or empty.");
-            }
-
-            var products = await _unitOfWork.GetRepository<Product>().Entities
-                .Where(p => p.CategoryId == categoryId && (p.DeletedTime == null || p.DeletedBy == null))
-                .Include(p => p.ProductImages)
-                .Include(p => p.ProductItems)
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
-
-            if (!products.Any())
-            {
-                throw new BaseException.NotFoundException("not_found", "No products found for the specified category.");
-            }
-
-            var productsOverviewDto = products.Select(p => new ProductOverviewDto
-            {
-                Id = p.Id,
-                Name = p.Name,
-                CategoryId = p.CategoryId,
-                ProductImageUrl = p.ProductImages.FirstOrDefault()?.Url ?? string.Empty,
-                Rating = p.Rating,
-                SoldCount = p.SoldCount,
+                Status = p.Status,
                 LowestPrice = p.ProductItems.Any() ? p.ProductItems.Min(pi => pi.Price) : 0
             }).ToList();
 
@@ -533,12 +479,79 @@ namespace HandmadeProductManagement.Services.Service
         {
             var productRepo = _unitOfWork.GetRepository<Product>();
             var productEntity = await productRepo.Entities.FirstOrDefaultAsync(x => x.Id == id.ToString());
-            if (productEntity == null)
+            if (productEntity == null || productEntity.DeletedBy != null || productEntity.DeletedTime.HasValue)
                 throw new KeyNotFoundException("Product not found");
             productEntity.DeletedTime = DateTime.UtcNow;
             productEntity.DeletedBy = userId;
             await productRepo.UpdateAsync(productEntity);
             await _unitOfWork.SaveAsync();
+            return true;
+        }
+
+        public async Task<IList<Product>> GetAllDeletedProducts(int pageNumber, int pageSize)
+        {
+            var deletedProductsQuery = _unitOfWork.GetRepository<Product>().Entities
+                .Where(p => p.DeletedTime.HasValue || p.DeletedBy != null);
+
+            var totalRecords = await deletedProductsQuery.CountAsync();
+            if (totalRecords == 0)
+            {
+                throw new BaseException.NotFoundException("not_found", "No deleted products found.");
+            }
+
+            var deletedProducts = await deletedProductsQuery
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return deletedProducts;
+        }
+
+        public async Task<bool> RecoverProduct(string id, string userId)
+        {
+            var productRepo = _unitOfWork.GetRepository<Product>();
+            var productEntity = await productRepo.Entities.FirstOrDefaultAsync(x => x.Id == id);
+
+            if (productEntity == null || productEntity.DeletedBy == null || !productEntity.DeletedTime.HasValue)
+                throw new BaseException.NotFoundException("product_not_found", "Product not found or has not been deleted.");
+
+            productEntity.DeletedTime = null;
+            productEntity.DeletedBy = null;
+            productEntity.LastUpdatedBy = userId;
+
+            await productRepo.UpdateAsync(productEntity);
+            await _unitOfWork.SaveAsync();
+
+            return true;
+        }
+
+        public async Task<bool> UpdateStatusProduct(string productId, string newStatus, string userId)
+        {
+            if (newStatus != "Available" && newStatus != "Unavailable")
+            {
+                throw new BaseException.BadRequestException("invalid_status", "Status must be either 'Available' or 'Unavailable'.");
+            }
+
+            var productEntity = await _unitOfWork.GetRepository<Product>().Entities
+                .FirstOrDefaultAsync(p => p.Id == productId);
+
+            if (productEntity == null)
+            {
+                throw new BaseException.NotFoundException("product_not_found", "Product not found.");
+            }
+
+            if(newStatus == productEntity.Status)
+            {
+                throw new BaseException.BadRequestException("bad_request", $"The product already has {productEntity.Status} status");
+            }
+
+            productEntity.Status = newStatus;
+
+            productEntity.LastUpdatedBy = userId;
+            productEntity.LastUpdatedTime = DateTime.UtcNow;
+
+            await _unitOfWork.SaveAsync();
+
             return true;
         }
 
@@ -649,7 +662,6 @@ namespace HandmadeProductManagement.Services.Service
             await _unitOfWork.SaveAsync();
             return averageRating;
         }
-
 
     }
 }

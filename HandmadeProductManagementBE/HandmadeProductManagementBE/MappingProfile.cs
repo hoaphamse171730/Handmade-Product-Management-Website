@@ -8,6 +8,7 @@ using HandmadeProductManagement.ModelViews.ProductItemModelViews;
 using HandmadeProductManagement.ModelViews.ProductModelViews;
 using HandmadeProductManagement.ModelViews.PromotionModelViews;
 using HandmadeProductManagement.ModelViews.StatusChangeModelViews;
+using HandmadeProductManagement.ModelViews.UserInfoModelViews;
 using HandmadeProductManagement.ModelViews.VariationModelViews;
 using HandmadeProductManagement.ModelViews.VariationOptionModelViews;
 
@@ -74,6 +75,11 @@ public class MappingProfile : Profile
         #region ProductConfiguration
         CreateMap<ProductConfiguration, ProductConfigurationDto>();
         CreateMap<ProductConfigurationForCreationDto, ProductConfiguration>();
+        #endregion
+
+        #region UserInfo
+        CreateMap<UserInfo, UserInfoDto>();
+        CreateMap<UserInfoForUpdateDto, UserInfo>();
         #endregion
     }
 
