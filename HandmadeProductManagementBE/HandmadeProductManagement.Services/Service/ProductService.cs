@@ -411,7 +411,7 @@ namespace HandmadeProductManagement.Services.Service
 
             if (shop == null)
             {
-                throw new BaseException.NotFoundException("shop_not_found", $"Shop not found for the provided user.");
+                throw new BaseException.NotFoundException("shop_not_found", $"You don't own a shop.");
             }
 
             var productsQuery = _unitOfWork.GetRepository<Product>().Entities
@@ -468,6 +468,7 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.BadRequestException("validation_failed", validationResult.Errors.Select(e => e.ErrorMessage).FirstOrDefault());
             }
 
+            // Fetch product and check if it exists
             var productEntity = await _unitOfWork.GetRepository<Product>().Entities
                 .FirstOrDefaultAsync(p => p.Id == id);
             if (productEntity == null)
@@ -475,19 +476,13 @@ namespace HandmadeProductManagement.Services.Service
                 throw new KeyNotFoundException("Product not found");
             }
 
-            var shop = await _unitOfWork.GetRepository<Shop>().Entities
-                    .FirstOrDefaultAsync(s => s.UserId == Guid.Parse(userId) && (s.DeletedBy == null || !s.DeletedTime.HasValue));
-
-            if (shop == null)
-            {
-                throw new BaseException.NotFoundException("shop_not_found", $"Shop not found for the provided user.");
-            }
-
-            if (shop.Id != productEntity.ShopId)
+            // Check if the user has permission to update the product
+            if (productEntity.CreatedBy != userId)
             {
                 throw new BaseException.ForbiddenException("forbidden", $"You have no permission to access this resource.");
             }
 
+            // Update fields if provided
             if (!string.IsNullOrWhiteSpace(product.Name))
             {
                 productEntity.Name = product.Name;
@@ -503,6 +498,7 @@ namespace HandmadeProductManagement.Services.Service
                 productEntity.CategoryId = product.CategoryId;
             }
 
+            // Update metadata
             productEntity.LastUpdatedTime = DateTime.UtcNow;
             productEntity.LastUpdatedBy = userId;
 
@@ -512,17 +508,29 @@ namespace HandmadeProductManagement.Services.Service
             return true;
         }
 
-
         public async Task<bool> SoftDelete(string id, string userId)
         {
+            // Fetch product and check if it exists
             var productRepo = _unitOfWork.GetRepository<Product>();
-            var productEntity = await productRepo.Entities.FirstOrDefaultAsync(x => x.Id == id.ToString());
-            if (productEntity == null || productEntity.DeletedBy != null || productEntity.DeletedTime.HasValue)
+            var productEntity = await productRepo.Entities.FirstOrDefaultAsync(p => p.Id == id);
+            if (productEntity == null)
+            {
                 throw new KeyNotFoundException("Product not found");
+            }
+
+            // Check if the user has permission to delete the product
+            if (productEntity.CreatedBy != userId)
+            {
+                throw new BaseException.ForbiddenException("forbidden", $"You have no permission to delete this resource.");
+            }
+
+            // Mark as soft deleted
             productEntity.DeletedTime = DateTime.UtcNow;
             productEntity.DeletedBy = userId;
+
             await productRepo.UpdateAsync(productEntity);
             await _unitOfWork.SaveAsync();
+
             return true;
         }
 
@@ -563,28 +571,32 @@ namespace HandmadeProductManagement.Services.Service
             return true;
         }
 
-        public async Task<bool> UpdateStatusProduct(string productId, string newStatus, string userId)
+        public async Task<bool> UpdateStatusProduct(string productId, bool isAvailable, string userId)
         {
-            if (newStatus != "Available" && newStatus != "Unavailable")
-            {
-                throw new BaseException.BadRequestException("invalid_status", "Status must be either 'Available' or 'Unavailable'.");
-            }
-
+            // Retrieve the product
             var productEntity = await _unitOfWork.GetRepository<Product>().Entities
-                .FirstOrDefaultAsync(p => p.Id == productId);
+                .FirstOrDefaultAsync(p => p.Id == productId && (!p.DeletedTime.HasValue || p.DeletedBy == null));
 
             if (productEntity == null)
             {
                 throw new BaseException.NotFoundException("product_not_found", "Product not found.");
             }
 
-            if(newStatus == productEntity.Status)
+            // Check if the current user is the creator of the product
+            if (productEntity.CreatedBy != userId)
             {
-                throw new BaseException.BadRequestException("bad_request", $"The product already has {productEntity.Status} status");
+                throw new BaseException.ForbiddenException("forbidden", "You do not have permission to update this product.");
+            }
+
+            var newStatus = isAvailable ? "Available" : "Unavailable";
+
+            // Check if the status is the same as the current status
+            if (newStatus == productEntity.Status)
+            {
+                throw new BaseException.BadRequestException("bad_request", $"The product already has {productEntity.Status} status.");
             }
 
             productEntity.Status = newStatus;
-
             productEntity.LastUpdatedBy = userId;
             productEntity.LastUpdatedTime = DateTime.UtcNow;
 

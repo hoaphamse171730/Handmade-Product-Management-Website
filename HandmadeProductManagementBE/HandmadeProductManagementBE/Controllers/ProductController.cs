@@ -37,21 +37,20 @@ namespace HandmadeProductManagementAPI.Controllers
 
         [HttpPut("update-status/{id}")]
         [Authorize(Roles = "Seller")]
-        public async Task<IActionResult> UpdateStatusProduct(string id, [FromBody] string newStatus)
+        public async Task<IActionResult> UpdateStatusProduct(string id, [FromQuery] bool isAvailable = false)
         {
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            var updateResult = await _productService.UpdateStatusProduct(id, newStatus, userId);
-
             var response = new BaseResponse<bool>
             {
                 Code = "200",
                 StatusCode = StatusCodeHelper.OK,
                 Message = "Product status updated successfully.",
-                Data = updateResult
+                Data = await _productService.UpdateStatusProduct(id, isAvailable, userId)
             };
 
             return Ok(response);
         }
+
 
 
         [HttpGet("search")]

@@ -95,6 +95,7 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.BadRequestException("invalid_input", "ID is not in a valid GUID format.");
             }
 
+            // Validate the input data
             var validationResult = await _updateValidator.ValidateAsync(option);
             if (!validationResult.IsValid)
             {
@@ -109,6 +110,11 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.NotFoundException("not_found", "Variation Option not found.");
             }
 
+            if (existingOption.CreatedBy != userId)
+            {
+                throw new BaseException.ForbiddenException("forbidden", "You do not have permission to access this resource.");
+            }
+
             existingOption.LastUpdatedBy = userId;
             existingOption.LastUpdatedTime = DateTime.UtcNow;
 
@@ -118,7 +124,6 @@ namespace HandmadeProductManagement.Services.Service
 
             return true;
         }
-
 
         public async Task<bool> Delete(string id, string userId)
         {
@@ -130,11 +135,19 @@ namespace HandmadeProductManagement.Services.Service
 
             var option = await _unitOfWork.GetRepository<VariationOption>().Entities
                 .FirstOrDefaultAsync(vo => vo.Id == id);
+
             if (option == null || option.DeletedTime.HasValue || option.DeletedBy != null)
             {
                 throw new BaseException.NotFoundException("not_found", "Variation Option not found.");
             }
 
+            // Check if the current user is the creator
+            if (option.CreatedBy != userId)
+            {
+                throw new BaseException.ForbiddenException("forbidden", "You do not have permission to access this resource.");
+            }
+
+            // Perform the soft delete
             option.DeletedTime = DateTime.UtcNow;
             option.DeletedBy = userId;
 
@@ -143,5 +156,7 @@ namespace HandmadeProductManagement.Services.Service
 
             return true;
         }
+
+
     }
 }

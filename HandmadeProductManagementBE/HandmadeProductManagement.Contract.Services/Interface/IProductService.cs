@@ -17,6 +17,6 @@ namespace HandmadeProductManagement.Contract.Services.Interface
         Task<ProductDetailResponseModel> GetProductDetailsByIdAsync(string productId);
         Task<decimal> CalculateAverageRatingAsync(string productId);
         Task<IList<ProductOverviewDto>> GetProductsByUserByPage(string userId, int pageNumber, int pageSize);
-        Task<bool> UpdateStatusProduct(string productId, string newStatus, string userId);
+        Task<bool> UpdateStatusProduct(string productId, bool isAvailable, string userId);
     }
 }
