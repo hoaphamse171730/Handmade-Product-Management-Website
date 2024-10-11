@@ -608,7 +608,7 @@ namespace HandmadeProductManagement.Services.Service
                     Id = pi.Id,
                     QuantityInStock = pi.QuantityInStock,
                     Price = pi.Price,
-                    DiscountedPrice = promotion != null ? (int)(pi.Price * (1 - promotion.DiscountRate/100)) : null,
+                    DiscountedPrice = promotion != null ? (int)(pi.Price * (1 - promotion.DiscountRate)) : null,
                     Configurations = pi.ProductConfigurations.Select(pc => new ProductConfigurationDetailModel
                     {
                         VariationName = pc.VariationOption.Variation.Name,
