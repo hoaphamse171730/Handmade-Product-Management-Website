@@ -21,15 +21,17 @@ namespace HandmadeProductManagement.Services.Service
         private readonly IValidator<ProductForCreationDto> _creationValidator;
         private readonly IValidator<ProductForUpdateDto> _updateValidator;
         private readonly IValidator<VariationCombinationDto> _variationCombinationValidator;
+        private readonly IPromotionService _promotionService;
 
         public ProductService(IUnitOfWork unitOfWork, IMapper mapper,
-            IValidator<ProductForCreationDto> creationValidator, IValidator<ProductForUpdateDto> updateValidator, IValidator<VariationCombinationDto> variationCombinationValidator)
+            IValidator<ProductForCreationDto> creationValidator, IValidator<ProductForUpdateDto> updateValidator, IValidator<VariationCombinationDto> variationCombinationValidator, IPromotionService promotionService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _creationValidator = creationValidator;
             _updateValidator = updateValidator;
             _variationCombinationValidator = variationCombinationValidator;
+            _promotionService = promotionService;
         }
 
         public async Task<bool> Create(ProductForCreationDto productDto, string userId)
@@ -585,10 +587,13 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.NotFoundException("product_not_found", "Product not found.");
             }
 
+            var promotionExist = await _unitOfWork.GetRepository<Promotion>().Entities.FirstOrDefaultAsync(p => p.Categories.Any(c => c.Id == product.CategoryId));
+
+                await _promotionService.UpdatePromotionStatusByRealtime(promotionExist.Id);
+
             var promotion = await _unitOfWork.GetRepository<Promotion>().Entities
                 .FirstOrDefaultAsync(p => p.Categories.Any(c => c.Id == product.CategoryId) &&
-                                          p.StartDate <= DateTime.UtcNow &&
-                                          p.EndDate >= DateTime.UtcNow);
+                                          p.Status == "active");
 
             var response = new ProductDetailResponseModel
             {
