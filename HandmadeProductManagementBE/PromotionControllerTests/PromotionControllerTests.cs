@@ -33,7 +33,6 @@ namespace ControllerTests
                     DiscountRate = 0.15m,
                     StartDate = new DateTime(2024, 12, 20),
                     EndDate = new DateTime(2025, 1, 5),
-                    Status = "Active"
                 },
                 new PromotionDto
                 {
@@ -43,7 +42,6 @@ namespace ControllerTests
                     DiscountRate = 0.20m,
                     StartDate = new DateTime(2024, 6, 1),
                     EndDate = new DateTime(2024, 6, 30),
-                    Status = "Expired"
                 }
             };
             var pageNumber = 1;
@@ -72,7 +70,6 @@ namespace ControllerTests
                 DiscountRate = 0.15m,
                 StartDate = new DateTime(2024, 12, 20),
                 EndDate = new DateTime(2025, 1, 5),
-                Status = "Active"
             };
             _mockPromotionService.Setup(service => service.GetById(promotionId)).ReturnsAsync(promotion);
             var result = await _controller.GetPromotion(promotionId);
@@ -140,40 +137,6 @@ namespace ControllerTests
             var result = true;
             _mockPromotionService.Setup(service => service.SoftDelete(promotionId)).ReturnsAsync(result);
             var actionResult = await _controller.SoftDeletePromotion(promotionId);
-            var okResult = actionResult as OkObjectResult;
-            okResult.Should().NotBeNull();
-            var response = okResult.Value as BaseResponse<bool>;
-            response.Should().NotBeNull();
-            response.Code.Should().Be("200");
-            response.StatusCode.Should().Be(StatusCodeHelper.OK);
-            response.Data.Should().BeTrue();
-        }
-
-        [Fact]
-        public async Task ExpiredPromotion_ReturnsOkResult_OnSuccess()
-        {
-            var promotionId = "promo1";
-            var isExpired = true;
-            _mockPromotionService.Setup(service => service.UpdatePromotionStatusByRealtime(promotionId))
-                .ReturnsAsync(isExpired);
-            var actionResult = await _controller.ExpiredPromotion(promotionId);
-            var okResult = actionResult as OkObjectResult;
-            okResult.Should().NotBeNull();
-            var response = okResult.Value as BaseResponse<bool>;
-            response.Should().NotBeNull();
-            response.Code.Should().Be("200");
-            response.StatusCode.Should().Be(StatusCodeHelper.OK);
-            response.Data.Should().BeTrue();
-        }
-
-        [Fact]
-        public async Task UpdatePromotionStatusByRealtime_ReturnsOkResult_OnSuccess()
-        {
-            var promotionId = "promo1";
-            var result = true;
-            _mockPromotionService.Setup(service => service.UpdatePromotionStatusByRealtime(promotionId))
-                .ReturnsAsync(result);
-            var actionResult = await _controller.UpdatePromotionStatusByRealtime(promotionId);
             var okResult = actionResult as OkObjectResult;
             okResult.Should().NotBeNull();
             var response = okResult.Value as BaseResponse<bool>;

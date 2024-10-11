@@ -37,6 +37,8 @@ using HandmadeProductManagement.ModelViews.ProductConfigurationModelViews;
 using HandmadeProductManagement.Validation.ProductConfiguration;
 using HandmadeProductManagement.ModelViews.VariationCombinationModelViews;
 using HandmadeProductManagement.Validation.VariationCombination;
+using HandmadeProductManagement.ModelViews.UserInfoModelViews;
+using HandmadeProductManagement.Validation.UserInfo;
 
 namespace HandmadeProductManagementAPI.Extensions;
 
@@ -81,7 +83,6 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IPaymentDetailService, PaymentDetailService>();
         services.AddScoped<IPaymentService, PaymentService>();
         services.AddHostedService<PaymentExpirationBackgroundService>();
-        services.AddHostedService<PromotionExpirationBackgroundService>();
         services.AddScoped<ICartService, CartService>();
         services.AddScoped<ICartItemService, CartItemService>();
         services.AddScoped<IUserService, UserService>();
@@ -155,6 +156,10 @@ public static class ApplicationServiceExtensions
 
         #region VariationCombination
         services.AddScoped<IValidator<VariationCombinationDto>, VariationCombinationDtoValidator>();
+        #endregion
+
+        #region UserInfo
+        services.AddScoped<IValidator<UserInfoForUpdateDto>, UserInfoForUpdateDtoValidator>();
         #endregion
     }
 

@@ -18,20 +18,6 @@ namespace HandmadeProductManagementAPI.Controllers
             _variationOptionService = variationOptionService;
         }
 
-        // GET: api/variationoption
-        [HttpGet]
-        public async Task<IActionResult> GetAll()
-        {
-            var response = new BaseResponse<IList<VariationOptionDto>>
-            {
-                Code = "Success",
-                StatusCode = StatusCodeHelper.OK,
-                Message = "Get all Variation Options successfully.",
-                Data = await _variationOptionService.GetAll()
-            };
-            return Ok(response);
-        }
-
         // GET: api/variationoption/variation/{variationId}
         [HttpGet("variation/{variationId}")]
         public async Task<IActionResult> GetByVariationId(string variationId)
@@ -46,7 +32,7 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
-        [Authorize(Roles = "Admin, Seller")]
+        [Authorize(Roles = "Seller")]
         // POST: api/variationoption
         [HttpPost]
         public async Task<IActionResult> CreateVariationOption([FromBody] VariationOptionForCreationDto variationOption)
@@ -63,7 +49,7 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
-        [Authorize(Roles = "Admin, Seller")]
+        [Authorize(Roles = "Seller")]
         // PUT: api/variationoption/{id}
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateVariationOption(string id, [FromBody] VariationOptionForUpdateDto variationOption)
@@ -80,7 +66,7 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
-        [Authorize(Roles = "Admin, Seller")]
+        [Authorize(Roles = "Seller")]
         // DELETE: api/variationoption/{id}
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteVariationOption(string id)

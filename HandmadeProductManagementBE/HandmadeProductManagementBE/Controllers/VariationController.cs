@@ -1,4 +1,5 @@
-﻿using HandmadeProductManagement.Contract.Services.Interface;
+﻿using HandmadeProductManagement.Contract.Repositories.Entity;
+using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.VariationModelViews;
@@ -17,21 +18,6 @@ namespace HandmadeProductManagementAPI.Controllers
         {
             _variationService = variationService;
         }
-
-        // GET: api/variation
-        [HttpGet]
-        public async Task<IActionResult> GetAll()
-        {
-            var response = new BaseResponse<IList<VariationDto>>
-            {
-                Code = "Success",
-                StatusCode = StatusCodeHelper.OK,
-                Message = "Get all Variations successfully.",
-                Data = await _variationService.GetAll()
-            };
-            return Ok(response);
-        }
-
 
         // GET: api/variation/category/{categoryId}
         [HttpGet("category/{categoryId}")]
@@ -96,6 +82,39 @@ namespace HandmadeProductManagementAPI.Controllers
                 Code = "Success",
                 StatusCode = StatusCodeHelper.OK,
                 Message = "Variation deleted successfully.",
+                Data = result
+            };
+            return Ok(response);
+        }
+
+        [Authorize(Roles = "Admin")]
+        // GET: api/variation/deleted
+        [HttpGet("deleted")]
+        public async Task<IActionResult> GetDeleted()
+        {
+            var response = new BaseResponse<IList<Variation>>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Get all deleted Variations successfully.",
+                Data = await _variationService.GetDeleted()
+            };
+            return Ok(response);
+        }
+
+        [Authorize(Roles = "Admin")]
+        // PUT: api/variation/recover/{id}
+        [HttpPut("recover/{id}")]
+        public async Task<IActionResult> Recover(string id)
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var result = await _variationService.Recover(id, userId);
+
+            var response = new BaseResponse<bool>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Variation recovered successfully.",
                 Data = result
             };
             return Ok(response);
