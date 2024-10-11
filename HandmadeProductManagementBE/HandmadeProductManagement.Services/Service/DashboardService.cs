@@ -83,12 +83,23 @@ namespace HandmadeProductManagement.Services.Service
 
         }
 
-        public async Task<List<Product>> GetTopSellingProducts()
+        public async Task<IList<TopSellingProducts>> GetTopSellingProducts()
         {
             var topsellingProducts = await _unitOfWork.GetRepository<Product>()
-            .Entities
-            .OrderByDescending(p => p.SoldCount)
-            .Take(10).ToListAsync();
+                                                      .Entities
+                                                      .Include(p => p.Category)
+                                                      .Include(p => p.ProductItems)
+                                                      .OrderByDescending(p => p.SoldCount)
+                                                      .Take(10)
+                                                      .Select(p => new TopSellingProducts
+                                                      { 
+                                                            Name = p.Name,
+                                                            CategoryName = p.Category.Name,
+                                                            Price = p.ProductItems.FirstOrDefault() != null ? p.ProductItems.FirstOrDefault().Price : 0,
+                                                            ImageUrls = p.ProductImages.Select(pi => pi.Url).ToList(),
+                                                            SoldCount = p.SoldCount
+                                                      })
+                                                      .ToListAsync();
 
             return topsellingProducts;
         }
