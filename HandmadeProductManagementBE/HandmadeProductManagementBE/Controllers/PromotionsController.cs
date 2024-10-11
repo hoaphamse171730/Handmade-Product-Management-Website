@@ -89,35 +89,5 @@ namespace HandmadeProductManagementAPI.Controllers
             };
             return Ok(response);
         }
-
-        [HttpGet("Expired/{id}")]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> ExpiredPromotion(string id)
-        {
-            var isExpired = await _promotionService.UpdatePromotionStatusByRealtime(id);
-            var response = new BaseResponse<bool>
-            {
-                Code = "200",
-                StatusCode = StatusCodeHelper.OK,
-                Message = "Promotion status updated successfully.",
-                Data = isExpired
-            };
-            return Ok(response);
-        }
-
-        [HttpPut("{id}/status")]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> UpdatePromotionStatusByRealtime(string id)
-        {
-            var result = await _promotionService.UpdatePromotionStatusByRealtime(id);
-            var response = new BaseResponse<bool>
-            {
-                Code = "200",
-                StatusCode = StatusCodeHelper.OK,
-                Message = "Promotion status updated successfully.",
-                Data = result
-            };
-            return Ok(response);
-        }
     }
 }

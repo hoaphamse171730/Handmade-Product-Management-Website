@@ -148,39 +148,5 @@ namespace ControllerTests
             response.StatusCode.Should().Be(StatusCodeHelper.OK);
             response.Data.Should().BeTrue();
         }
-
-        [Fact]
-        public async Task ExpiredPromotion_ReturnsOkResult_OnSuccess()
-        {
-            var promotionId = "promo1";
-            var isExpired = true;
-            _mockPromotionService.Setup(service => service.UpdatePromotionStatusByRealtime(promotionId))
-                .ReturnsAsync(isExpired);
-            var actionResult = await _controller.ExpiredPromotion(promotionId);
-            var okResult = actionResult as OkObjectResult;
-            okResult.Should().NotBeNull();
-            var response = okResult.Value as BaseResponse<bool>;
-            response.Should().NotBeNull();
-            response.Code.Should().Be("200");
-            response.StatusCode.Should().Be(StatusCodeHelper.OK);
-            response.Data.Should().BeTrue();
-        }
-
-        [Fact]
-        public async Task UpdatePromotionStatusByRealtime_ReturnsOkResult_OnSuccess()
-        {
-            var promotionId = "promo1";
-            var result = true;
-            _mockPromotionService.Setup(service => service.UpdatePromotionStatusByRealtime(promotionId))
-                .ReturnsAsync(result);
-            var actionResult = await _controller.UpdatePromotionStatusByRealtime(promotionId);
-            var okResult = actionResult as OkObjectResult;
-            okResult.Should().NotBeNull();
-            var response = okResult.Value as BaseResponse<bool>;
-            response.Should().NotBeNull();
-            response.Code.Should().Be("200");
-            response.StatusCode.Should().Be(StatusCodeHelper.OK);
-            response.Data.Should().BeTrue();
-        }
     }
 }
