@@ -7,9 +7,21 @@ namespace HandmadeProductManagement.Validation.UserInfo
     {
         public UserInfoForUpdateDtoValidator()
         {
+            RuleFor(x => x)
+                .Must(dto => !string.IsNullOrWhiteSpace(dto.FullName) ||
+                             !string.IsNullOrWhiteSpace(dto.DisplayName) ||
+                             !string.IsNullOrWhiteSpace(dto.Bio) ||
+                             !string.IsNullOrWhiteSpace(dto.BankAccount) ||
+                             !string.IsNullOrWhiteSpace(dto.BankAccountName) ||
+                             !string.IsNullOrWhiteSpace(dto.Bank) ||
+                             !string.IsNullOrWhiteSpace(dto.Address) ||
+                             !string.IsNullOrWhiteSpace(dto.AvatarUrl))
+                .WithMessage("You have provided at least one invalid field.");
+
             RuleFor(x => x.FullName)
                 .MaximumLength(255).WithMessage("Full name cannot be longer than 255 characters.")
-                .Matches(@"^[a-zA-Z\s]+$").WithMessage("Full name can only contain letters and spaces.");
+                .Matches(@"^[a-zA-Z\s]+$").WithMessage("Full name can only contain letters and spaces.")
+                .When(x => !string.IsNullOrWhiteSpace(x.FullName));
             RuleFor(x => x.DisplayName)
                 .MaximumLength(100).WithMessage("Display name cannot be longer than 100 characters.")
                 .Matches("^[a-zA-Z]+$").WithMessage("Display name can only contain letters.")
