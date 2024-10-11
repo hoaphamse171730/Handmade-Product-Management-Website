@@ -63,7 +63,7 @@ namespace HandmadeProductManagementAPI.Controllers
             {
                 Code = "Success",
                 StatusCode = StatusCodeHelper.OK,
-                Message = "Updated Cancel Reason partially successfully!",
+                Message = "Updated Cancel Reason successfully!",
                 Data = result
             };
             return Ok(response);
