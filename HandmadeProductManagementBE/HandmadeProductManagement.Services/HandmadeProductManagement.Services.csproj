@@ -11,11 +11,16 @@
     <PackageReference Include="FirebaseAdmin" Version="3.0.1" />
     <PackageReference Include="FirebaseStorage.net" Version="1.0.3" />
     <PackageReference Include="Google.Cloud.Storage.V1" Version="4.10.0" />
+    <PackageReference Include="RabbitMQ.Client" Version="6.8.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\HandmadeProductManagement.Contract.Services\HandmadeProductManagement.Contract.Services.csproj" />
     <ProjectReference Include="..\HandmadeProductManagement.Validation\HandmadeProductManagement.Validation.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Service\ChatService.cs" />
   </ItemGroup>
 
 </Project>
