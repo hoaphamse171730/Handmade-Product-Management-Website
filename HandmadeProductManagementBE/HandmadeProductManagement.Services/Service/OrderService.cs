@@ -148,7 +148,7 @@ namespace HandmadeProductManagement.Services.Service
                         };
 
                         await _orderDetailService.Create(orderDetail);
-                        await _cartItemService.DeleteCartItemByIdAsync(cartItem.Id);
+                        //await _cartItemService.DeleteCartItemByIdAsync(cartItem.Id);
                     }
 
                     await _unitOfWork.SaveAsync();
@@ -177,6 +177,8 @@ namespace HandmadeProductManagement.Services.Service
         public async Task<PaginatedList<OrderResponseModel>> GetOrdersByPageAsync(int pageNumber, int pageSize)
         {
             var repository = _unitOfWork.GetRepository<Order>();
+            var orderDetailRepository = _unitOfWork.GetRepository<OrderDetail>();
+
             var query = repository.Entities.Where(order => !order.DeletedTime.HasValue);
 
             var totalItems = await query.CountAsync();
@@ -195,6 +197,16 @@ namespace HandmadeProductManagement.Services.Service
                     Phone = order.Phone,
                     Note = order.Note,
                     CancelReasonId = order.CancelReasonId,
+                    OrderDetails = orderDetailRepository.Entities
+                        .Where(od => od.OrderId == order.Id && !od.DeletedTime.HasValue)
+                        .Select(od => new OrderDetailDto
+                        {
+                            Id = od.Id,
+                            ProductItemId = od.ProductItemId,
+                            OrderId = od.OrderId,
+                            ProductQuantity = od.ProductQuantity,
+                            DiscountPrice = od.DiscountPrice,
+                        }).ToList()
                 })
                 .ToListAsync();
 
