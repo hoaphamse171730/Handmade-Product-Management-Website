@@ -33,7 +33,6 @@ namespace ControllerTests
                     DiscountRate = 0.15m,
                     StartDate = new DateTime(2024, 12, 20),
                     EndDate = new DateTime(2025, 1, 5),
-                    Status = "Active"
                 },
                 new PromotionDto
                 {
@@ -43,7 +42,6 @@ namespace ControllerTests
                     DiscountRate = 0.20m,
                     StartDate = new DateTime(2024, 6, 1),
                     EndDate = new DateTime(2024, 6, 30),
-                    Status = "Expired"
                 }
             };
             var pageNumber = 1;
@@ -72,7 +70,6 @@ namespace ControllerTests
                 DiscountRate = 0.15m,
                 StartDate = new DateTime(2024, 12, 20),
                 EndDate = new DateTime(2025, 1, 5),
-                Status = "Active"
             };
             _mockPromotionService.Setup(service => service.GetById(promotionId)).ReturnsAsync(promotion);
             var result = await _controller.GetPromotion(promotionId);
