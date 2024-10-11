@@ -52,9 +52,9 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [Authorize(Roles = "Admin")]
-        // PUT: api/variation/{id}
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(string id, [FromBody] VariationForUpdateDto variation)
+        // PATCH: api/variation/{id}
+        [HttpPatch("{id}")]
+        public async Task<IActionResult> Patch(string id, [FromBody] VariationForUpdateDto variation)
         {
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             var result = await _variationService.Update(id, variation, userId);
@@ -68,6 +68,7 @@ namespace HandmadeProductManagementAPI.Controllers
             };
             return Ok(response);
         }
+
 
         [Authorize(Roles = "Admin")]
         // DELETE: api/variation/{id}
