@@ -10,6 +10,7 @@ using HandmadeProductManagement.ModelViews.NotificationModelViews;
 using HandmadeProductManagement.Contract.Repositories.Entity;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Http;
+using HandmadeProductManagement.Core.Utils;
 namespace HandmadeProductManagement.Services.Service
 {
     public class UserService : IUserService
@@ -304,28 +305,32 @@ namespace HandmadeProductManagement.Services.Service
             {
                 throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Invalid userID");
             }
-
-            var shopIds = await _unitOfWork.GetRepository<Shop>()
+            var reviewID = await _unitOfWork.GetRepository<Review>()
                 .Entities
-                .Where(shop => shop.UserId == userId)
-                .Select(shop => shop.Id)
+                .Where(r => r.UserId == userId)
+                .Select(r => r.Id)
                 .ToListAsync();
 
-            if (shopIds.IsNullOrEmpty())
+            if (reviewID.IsNullOrEmpty())
             {
                 throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "User not found");
             }
 
+            var twoDaysAgo = DateTime.Now.AddDays(-2);
+
             var review = await _unitOfWork.GetRepository<Review>()
                 .Entities
-                .Where(r => r.UserId == userId && r.Reply == null)
-                .Include(r => r.User)
+                .Where(r => r.UserId == userId && r.Reply == null && r.Date >= twoDaysAgo)
+                .Include(r => r.Product)  // Nạp thông tin sản phẩm từ review
+                .ThenInclude(p => p.Shop)  // Nạp thông tin shop từ sản phẩm
+                .ThenInclude(s => s.User)  // Nạp thông tin user (chủ shop) từ shop
+                .ThenInclude(u => u.UserInfo) // Nạp thông tin UserInfo từ User (chủ shop)
                 .ToListAsync();
 
             var notifications = review.Select(review => new NotificationModel
             {
                 Id = review.Id,
-                Message = $"Sản phẩm của bạn đã được {review.User.UserName} review",
+                Message = $"Sản phẩm của bạn đã được {review.Product.Shop.User.UserInfo.FullName} review",
                 Tag = "Review",
                 URL = Url + $"api/review/{review.Id}"
             }).ToList();
