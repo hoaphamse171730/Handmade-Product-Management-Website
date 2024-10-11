@@ -85,6 +85,21 @@ namespace HandmadeProductManagement.Services.Service
             var productItemEntity = await _unitOfWork.GetRepository<ProductItem>().Entities
                 .FirstOrDefaultAsync(p => p.Id == id && (!p.DeletedTime.HasValue || p.DeletedBy == null));
 
+            // Get the associated product to check the shop ownership
+            var productRepo = _unitOfWork.GetRepository<Product>();
+            var productEntity = await productRepo.Entities
+                .FirstOrDefaultAsync(p => p.Id == productItemEntity.ProductId);
+
+            if (productEntity.CreatedBy != userId)
+            {
+                throw new BaseException.ForbiddenException("forbidden", "You do not have permission to access this resource.");
+            }
+
+            if (productEntity == null)
+            {
+                throw new BaseException.NotFoundException("not_found", "Associated product not found.");
+            }
+            
             if (productItemEntity == null)
             {
                 throw new BaseException.NotFoundException("not_found", "Product item not found");
@@ -122,6 +137,20 @@ namespace HandmadeProductManagement.Services.Service
 
             var productItemRepo = _unitOfWork.GetRepository<ProductItem>();
             var productItemEntity = await productItemRepo.Entities.FirstOrDefaultAsync(p => p.Id == id);
+
+            var productRepo = _unitOfWork.GetRepository<Product>();
+            var productEntity = await productRepo.Entities
+                .FirstOrDefaultAsync(p => p.Id == productItemEntity.ProductId);
+
+            if (productEntity.CreatedBy != userId)
+            {
+                throw new BaseException.ForbiddenException("forbidden", "You do not have permission to access this resource.");
+            }
+
+            if (productEntity == null)
+            {
+                throw new BaseException.NotFoundException("not_found", "Associated product not found.");
+            }
 
             if (productItemEntity == null || productItemEntity.DeletedTime.HasValue || productItemEntity.DeletedBy != null)
             {
