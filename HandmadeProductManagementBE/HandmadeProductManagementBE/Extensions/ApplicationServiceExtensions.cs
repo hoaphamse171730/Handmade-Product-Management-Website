@@ -94,6 +94,8 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IVariationOptionService, VariationOptionService>();
         services.AddScoped<IProductItemService, ProductItemService>();
         services.AddScoped<IProductConfigurationService, ProductConfigurationService>();
+        
+       
         return services;
     }
 
