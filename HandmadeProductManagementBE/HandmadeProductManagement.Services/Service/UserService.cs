@@ -248,7 +248,7 @@ namespace HandmadeProductManagement.Services.Service
             var notifications = orders.Select(order => new NotificationModel
             {
                 Id = order.Id,
-                Message = $"Bạn có đơn hàng mới từ {order.CustomerName} với trạng thái: {order.Status} vào ngày: {order.OrderDate.ToString("dd/MM/yyyy")}",
+                Message = $"Bạn có đơn hàng mới từ {order.CustomerName} với trạng thái: {order.Status} vào ngày: {order.LastUpdatedTime.ToString("dd/MM/yyyy")}",
                 Tag = "Order",
                 URL = urlroot + $"/api/order/{order.Id}"
             }).ToList();
@@ -309,13 +309,16 @@ namespace HandmadeProductManagement.Services.Service
             {
                 return new List<NotificationModel>();
             }
+
             var urlroot = "https://localhost:7159";
-            // Lấy tất cả các reply mới cho những review của khách hàng
+
+            // Lấy tất cả các reply mới cho những review của khách hàng, sắp xếp theo thời gian tạo reply (giảm dần)
             var replies = await _unitOfWork.GetRepository<Reply>()
                 .Entities
                 .Where(rep => reviews.Select(r => r.Id).Contains(rep.ReviewId) && rep.Date >= DateTime.UtcNow.AddDays(-2)) // Lọc theo thời gian tạo reply trong 2 ngày gần nhất
                 .Include(rep => rep.Review) // Bao gồm review
                 .ThenInclude(r => r.Product) // Bao gồm sản phẩm
+                .OrderByDescending(rep => rep.Date) // Sắp xếp theo thời gian tạo reply (giảm dần)
                 .ToListAsync();
 
             if (replies == null || !replies.Any())
@@ -335,6 +338,7 @@ namespace HandmadeProductManagement.Services.Service
             return replyNotifications;
         }
 
+
         public async Task<IList<NotificationModel>> GetNewStatusChangeNotificationList(string Id)
         {
             if (!Guid.TryParse(Id, out Guid userId))
@@ -349,29 +353,31 @@ namespace HandmadeProductManagement.Services.Service
                 .Select(o => o.Id)
                 .ToListAsync();
 
-            if (orders.IsNullOrEmpty())
+            if (orders == null || !orders.Any())
             {
                 throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "User not found");
             }
 
-            // Lấy status của orders
+            // Lấy status của orders, sắp xếp theo ChangeTime (giảm dần)
             var status = await _unitOfWork.GetRepository<StatusChange>()
                 .Entities
                 .Where(s => orders.Contains(s.OrderId))
                 .Include(s => s.Order)
+                .OrderByDescending(s => s.ChangeTime) // Sắp xếp theo thời gian thay đổi trạng thái (giảm dần)
                 .ToListAsync();
 
-            // Tạo thông báo phản hồi 
+            // Tạo thông báo phản hồi
             var notifications = status.Select(status => new NotificationModel
             {
                 Id = status.Id,
-                Message = $"Đơn hàng của bạn được {status.Status} lúc {status.ChangeTime}",
+                Message = $"Đơn hàng của bạn được {status.Status} lúc {status.ChangeTime.ToString("dd/MM/yyyy HH:mm")}",
                 Tag = "StatusChange",
-                URL = Url +  $"/api/statuschange/order/{status.OrderId}"
+                URL = Url + $"/api/statuschange/order/{status.OrderId}"
             }).ToList();
 
             return notifications;
         }
+
 
 
         public async Task<bool> ReverseDeleteUser(string Id)
