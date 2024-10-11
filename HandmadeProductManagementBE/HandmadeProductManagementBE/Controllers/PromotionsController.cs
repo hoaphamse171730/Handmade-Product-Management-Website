@@ -16,7 +16,6 @@ namespace HandmadeProductManagementAPI.Controllers
         public PromotionsController(IPromotionService promotionService) => _promotionService = promotionService;
 
         [HttpGet]
-        [Authorize]
         public async Task<IActionResult> GetPromotions(int pageNumber = 1, int pageSize = 10)
         {
             var result = await _promotionService.GetAll(pageNumber, pageSize);
@@ -29,9 +28,23 @@ namespace HandmadeProductManagementAPI.Controllers
             };
             return Ok(response);
         }
+        
+        
+        [HttpGet]
+        public async Task<IActionResult> GetExpiredPromotions(int pageNumber = 1, int pageSize = 10)
+        {
+            var result = await _promotionService.GetExpiredPromotions(pageNumber, pageSize);
+            var response = new BaseResponse<IList<PromotionDto>>
+            {
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Expired promotions retrieved successfully.",
+                Data = result
+            };
+            return Ok(response);
+        }
 
         [HttpGet("{id}")]
-        [Authorize]
         public async Task<IActionResult> GetPromotion(string id)
         {
             var promotion = await _promotionService.GetById(id);
