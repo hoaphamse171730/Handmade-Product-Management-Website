@@ -256,42 +256,6 @@ namespace HandmadeProductManagement.Services.Service
             return notifications;
         }
 
-
-        public async Task<IList<NotificationModel>> GetNewReviewNotificationList(string Id)
-        {
-
-            if (!Guid.TryParse(Id, out Guid userId))
-            {
-                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Invalid userID");
-            }
-
-            var shopIds = await _unitOfWork.GetRepository<Shop>()
-                .Entities
-                .Where(shop => shop.UserId == userId)
-                .Select(shop => shop.Id)
-                .ToListAsync();
-
-            if (shopIds.IsNullOrEmpty())
-            {
-                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "User not found");
-            }
-
-            var review = await _unitOfWork.GetRepository<Review>()
-                .Entities
-                .Where(r => r.UserId == userId && r.Reply == null)
-                .Include(r => r.User)
-                .ToListAsync();
-
-            var notifications = review.Select(review => new NotificationModel
-            {
-                Id = review.Id,
-                Message = $"Sản phẩm của bạn đã được {review.User.UserName} review",
-                Tag = "Review",
-                URL = Url + $"/api/review/{review.Id}"
-            }).ToList();
-
-            return notifications;
-        }
         public async Task<IList<NotificationModel>> GetNewReplyNotificationList(string Id)
         {
             if (!Guid.TryParse(Id, out Guid userId))
@@ -334,7 +298,6 @@ namespace HandmadeProductManagement.Services.Service
 
             return replyNotifications;
         }
-
 
         public async Task<IList<NotificationModel>> GetNewReviewNotificationList(string Id)
         {
