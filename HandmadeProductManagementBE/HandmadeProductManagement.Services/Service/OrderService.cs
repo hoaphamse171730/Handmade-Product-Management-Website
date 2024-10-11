@@ -270,9 +270,9 @@ namespace HandmadeProductManagement.Services.Service
 
             if (!string.IsNullOrWhiteSpace(order.Phone))
             {
-                if (!Regex.IsMatch(order.Phone, @"^\d{1,10}$"))
+                if (!Regex.IsMatch(order.Phone, @"^0\d{9,10}$"))
                 {
-                    throw new BaseException.BadRequestException("invalid_phone_format", "Phone number must be numeric and up to 10 digits.");
+                    throw new BaseException.BadRequestException("invalid_phone_format", "Phone number must be numeric, start with 0, and be 10 or 11 digits long.");
                 }
                 existingOrder.Phone = order.Phone;
             }
@@ -493,9 +493,9 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.BadRequestException("invalid_phone", "Phone number cannot be null or empty.");
             }
 
-            if (!Regex.IsMatch(order.Phone, @"^\d{1,10}$"))
+            if (!Regex.IsMatch(order.Phone, @"^0\d{9,10}$"))
             {
-                throw new BaseException.BadRequestException("invalid_phone_format", "Phone number must be numeric and up to 10 digits.");
+                throw new BaseException.BadRequestException("invalid_phone_format", "Phone number must be numeric, start with 0, and be 10 or 11 digits long.");
             }
         }
 

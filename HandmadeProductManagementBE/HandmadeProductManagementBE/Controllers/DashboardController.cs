@@ -43,7 +43,7 @@ using Microsoft.AspNetCore.Mvc;
         }
 
         [HttpGet("total-sales")]
-        [Authorize(Roles = "Admin")]
+        [Authorize]
         public async Task<IActionResult> GetTotalSales()
         {
             decimal totalSales = await _dashboardService.GetTotalSales();
@@ -52,7 +52,7 @@ using Microsoft.AspNetCore.Mvc;
         }
 
         [HttpGet("top10-shops")]
-        [Authorize(Roles = "Admin")]
+        [Authorize]
         public async Task<IActionResult> GetTop10Shops()
         {
            List<Shop> topShops = await _dashboardService.GetTop10Shops();
@@ -61,7 +61,6 @@ using Microsoft.AspNetCore.Mvc;
 
         }
         [HttpPost("TotalSaleByShopId")]
-        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> TotalSaleByShopId(string Id, DashboardDTO dashboardDTO)
         {
             decimal totalSale = await _dashboardService.GetTotalSaleByShopId(Id, dashboardDTO);
@@ -69,16 +68,13 @@ using Microsoft.AspNetCore.Mvc;
             return Ok(BaseResponse<decimal>.OkResponse(totalSale)); 
         }
         [HttpPost("TopSellingProducts")]
-        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> TopSellingProducts()
         {
-            List<Product> topSellingProducts = await _dashboardService.GetTopSellingProducts();
-            return Ok(BaseResponse<List<Product>>.OkResponse(topSellingProducts));
+            var topSellingProducts = await _dashboardService.GetTopSellingProducts();
+            return Ok(BaseResponse<IList<TopSellingProducts>>.OkResponse(topSellingProducts));
         }
 
         [HttpGet("GetTop10NewProduct")]
-        [Authorize(Roles = "Admin")]
-
         public async Task<IActionResult> Top10NewProducts()
         {
             var products = await _dashboardService.GetTop10NewProducts();

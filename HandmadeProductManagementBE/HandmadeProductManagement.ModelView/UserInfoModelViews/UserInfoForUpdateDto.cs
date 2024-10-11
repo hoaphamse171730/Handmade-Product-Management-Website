@@ -2,9 +2,9 @@
 {
     public class UserInfoForUpdateDto
     {
-        public string FullName { get; set; } = string.Empty;
-        public string? DisplayName { get; set; } = default!;
-        public string? Bio { get; set; } = default!;
+        public string? FullName { get; set; }
+        public string? DisplayName { get; set; }
+        public string? Bio { get; set; }
         public string? BankAccount { get; set; }
         public string? BankAccountName { get; set; }
         public string? Bank { get; set; }

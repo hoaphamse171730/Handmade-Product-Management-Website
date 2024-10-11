@@ -215,7 +215,7 @@ public class AuthenticationService : IAuthenticationService
     public async Task<BaseResponse<string>> ForgotPasswordAsync(ForgotPasswordModelView forgotPasswordModelView)
     {
         var user = await _userManager.FindByEmailAsync(forgotPasswordModelView.Email);
-        if (user == null)
+        if (user == null || !user.EmailConfirmed)
         {
             throw new BaseException.BadRequestException("invalid_email","Email is invalid or not confirmed.");
         }
@@ -275,14 +275,24 @@ public class AuthenticationService : IAuthenticationService
 
         if (result.Succeeded)
         {
+            user.EmailConfirmed = true;
+            await _userManager.UpdateAsync(user);
             return new BaseResponse<string>()
             {
                 StatusCode = StatusCodeHelper.OK,
                 Message = "Email confirmed successfully."
             };
         }
-        throw new BaseException.BadRequestException("error", "Error confirming the email.");
+        else
+        {
+            var errorMessages = result.Errors
+                .Select(e => e.Description)
+                .ToList();
+
+            throw new BaseException.BadRequestException("error", "Error confirming the email: " + string.Join("; ", errorMessages));
+        }
     }
+
 
     private async Task<UserLoginResponseModel> CreateUserResponse(ApplicationUser user)
     {

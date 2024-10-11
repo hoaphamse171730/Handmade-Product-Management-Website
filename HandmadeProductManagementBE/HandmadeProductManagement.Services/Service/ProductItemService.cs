@@ -4,6 +4,7 @@ using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.Core.Utils;
 using HandmadeProductManagement.ModelViews.ProductItemModelViews;
 using Microsoft.EntityFrameworkCore;
 
@@ -66,7 +67,7 @@ namespace HandmadeProductManagement.Services.Service
             return true;
         }
 
-        // Update an existing product item
+        // Update an existing product item partially (PATCH)
         public async Task<bool> Update(string id, ProductItemForUpdateDto productItemDto, string userId)
         {
             // Validate id format
@@ -89,8 +90,17 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.NotFoundException("not_found", "Product item not found");
             }
 
-            _mapper.Map(productItemDto, productItemEntity);
+            if (productItemDto.Price.HasValue)
+            {
+                productItemEntity.Price = productItemDto.Price.Value;
+            }
 
+            if (productItemDto.QuantityInStock.HasValue)
+            {
+                productItemEntity.QuantityInStock = productItemDto.QuantityInStock.Value;
+            }
+
+            // Cập nhật thông tin metadata
             productItemEntity.LastUpdatedTime = DateTime.UtcNow;
             productItemEntity.LastUpdatedBy = userId;
 
@@ -99,6 +109,7 @@ namespace HandmadeProductManagement.Services.Service
 
             return true;
         }
+
 
         // Soft delete a product item
         public async Task<bool> Delete(string id, string userId)

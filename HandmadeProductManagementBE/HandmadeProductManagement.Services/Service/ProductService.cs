@@ -263,7 +263,12 @@ namespace HandmadeProductManagement.Services.Service
             var query = _unitOfWork.GetRepository<Product>().Entities
                                     .Include(p => p.ProductImages)
                                     .Include(p => p.ProductItems)
+                                    .Where(p => !p.DeletedTime.HasValue || p.DeletedBy == null)
                                     .AsQueryable();
+            if (!query.Any())
+            {
+                throw new BaseException.NotFoundException("not_found", "There is no products.");
+            }
 
             // Apply Search Filters
             if (!string.IsNullOrEmpty(searchFilter.Name))
@@ -402,7 +407,7 @@ namespace HandmadeProductManagement.Services.Service
             }
 
             var shop = await _unitOfWork.GetRepository<Shop>().Entities
-                    .FirstOrDefaultAsync(s => s.UserId == Guid.Parse(userId));
+                    .FirstOrDefaultAsync(s => s.UserId == Guid.Parse(userId) && (s.DeletedBy == null || !s.DeletedTime.HasValue));
 
             if (shop == null)
             {
@@ -445,7 +450,7 @@ namespace HandmadeProductManagement.Services.Service
         public async Task<ProductDto> GetById(string id)
         {
             var product = await _unitOfWork.GetRepository<Product>().Entities
-                .FirstOrDefaultAsync(p => p.Id == id);
+                .FirstOrDefaultAsync(p => p.Id == id && (!p.DeletedTime.HasValue || p.DeletedBy == null));
 
             if (product == null)
                 throw new KeyNotFoundException("Product not found");
