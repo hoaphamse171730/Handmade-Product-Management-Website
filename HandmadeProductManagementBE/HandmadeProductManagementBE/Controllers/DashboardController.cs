@@ -69,7 +69,6 @@ using Microsoft.AspNetCore.Mvc;
             return Ok(BaseResponse<decimal>.OkResponse(totalSale)); 
         }
         [HttpPost("TopSellingProducts")]
-        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> TopSellingProducts()
         {
             List<Product> topSellingProducts = await _dashboardService.GetTopSellingProducts();
@@ -77,8 +76,6 @@ using Microsoft.AspNetCore.Mvc;
         }
 
         [HttpGet("GetTop10NewProduct")]
-        [Authorize(Roles = "Admin")]
-
         public async Task<IActionResult> Top10NewProducts()
         {
             var products = await _dashboardService.GetTop10NewProducts();

@@ -150,7 +150,7 @@ public class CartItemService : ICartItemService
         var cartRepo = _unitOfWork.GetRepository<Cart>();
         var cart = await cartRepo.Entities
             .Include(c => c.CartItems)
-            .SingleOrDefaultAsync(c => c.UserId == Guid.Parse(userId));
+            .SingleOrDefaultAsync(c => c.UserId == Guid.Parse(userId) && !c.DeletedTime.HasValue);
 
         if (cart == null)
         {

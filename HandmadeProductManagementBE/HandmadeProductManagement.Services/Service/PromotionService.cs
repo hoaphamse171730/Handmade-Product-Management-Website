@@ -42,6 +42,22 @@ namespace HandmadeProductManagement.Services.Service
                 .ToListAsync();
             return _mapper.Map<IList<PromotionDto>>(promotions);
         }
+        
+        public async Task<IList<PromotionDto>> GetExpiredPromotions(int pageNumber, int pageSize)
+        {
+            if (pageNumber <= 0)
+                throw new BaseException.BadRequestException("invalid_page_number",
+                    "Page Number must be greater than zero.");
+            if (pageSize <= 0)
+                throw new BaseException.BadRequestException("invalid_page_size",
+                    "Page Size must be greater than zero.");
+            var promotions = await _unitOfWork.GetRepository<Promotion>().Entities
+                .Where(p => p.DeletedTime == null && p.EndDate < DateTime.UtcNow)
+                .ToListAsync();
+            if (promotions is null)
+                throw new BaseException.NotFoundException("400", "Promotions not found");
+            return _mapper.Map<IList<PromotionDto>>(promotions);
+        }
 
         public async Task<PromotionDto> GetById(string id)
         {
@@ -73,7 +89,7 @@ namespace HandmadeProductManagement.Services.Service
             var promotionEntity = _mapper.Map<Promotion>(promotion);
             promotionEntity.CreatedTime = DateTime.UtcNow;
             promotionEntity.Status = "active";
-            promotionEntity.CreatedBy = "currentUser";
+            promotionEntity.CreatedBy = "user";
             await _unitOfWork.GetRepository<Promotion>().InsertAsync(promotionEntity);
             await _unitOfWork.SaveAsync();
             return true;
@@ -82,11 +98,8 @@ namespace HandmadeProductManagement.Services.Service
         public async Task<bool> Update(string id, PromotionForUpdateDto promotion)
         {
             if (!Guid.TryParse(id, out _))
-            {
                 throw new BaseException.BadRequestException("invalid_id_format",
                     "The provided ID is not in a valid GUID format.");
-            }
-
             var validationResult = await _updateValidator.ValidateAsync(promotion);
             if (!validationResult.IsValid)
                 throw new ValidationException(validationResult.Errors);
@@ -103,7 +116,7 @@ namespace HandmadeProductManagement.Services.Service
                 });
             _mapper.Map(promotion, promotionEntity);
             promotionEntity.LastUpdatedTime = DateTime.UtcNow;
-            promotionEntity.LastUpdatedBy = "currentUser";
+            promotionEntity.LastUpdatedBy = "user";
             await _unitOfWork.GetRepository<Promotion>().UpdateAsync(promotionEntity);
             await _unitOfWork.SaveAsync();
             return true;
@@ -111,12 +124,15 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<bool> SoftDelete(string id)
         {
+            if (!Guid.TryParse(id, out _))
+                throw new BaseException.BadRequestException("invalid_id_format",
+                    "The provided ID is not in a valid GUID format.");
             var promotionRepo = _unitOfWork.GetRepository<Promotion>();
             var promotionEntity = await promotionRepo.Entities.FirstOrDefaultAsync(p => p.Id == id);
-            if (promotionEntity == null)
-                throw new KeyNotFoundException("Promotion not found");
+            if (promotionEntity is null)
+                throw new BaseException.NotFoundException("400", "Promotions not found");
             promotionEntity.Status = "inactive";
-            promotionEntity.LastUpdatedBy = "currentUser";
+            promotionEntity.LastUpdatedBy = "user";
             promotionEntity.DeletedTime = DateTime.UtcNow;
             await promotionRepo.UpdateAsync(promotionEntity);
             await _unitOfWork.SaveAsync();
