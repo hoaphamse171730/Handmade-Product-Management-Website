@@ -190,18 +190,7 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
-        [HttpPut("api/user/profile/{id}")]
-        public async Task<IActionResult> UpdateUserProfile(string id, [FromForm] UpdateUserDTO updateUserProfileDTO)
-        {
-            var response = new BaseResponse<UpdateUserResponseModel>
-            {
-                Code = "200",
-                StatusCode = StatusCodeHelper.OK,
-                Message = "Success",
-                Data = await _userService.UpdateUser(id, updateUserProfileDTO)
-            };
-            return Ok(response);
-        }
+       
 
 
 

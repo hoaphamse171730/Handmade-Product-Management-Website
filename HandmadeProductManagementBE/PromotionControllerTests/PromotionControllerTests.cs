@@ -23,7 +23,6 @@ namespace ControllerTests
         [Fact]
         public async Task GetPromotions_ReturnsOkResult_WithPromotions()
         {
-            
             var promotions = new List<PromotionDto>
             {
                 new PromotionDto
@@ -47,8 +46,10 @@ namespace ControllerTests
                     Status = "Expired"
                 }
             };
-            _mockPromotionService.Setup(service => service.GetAll()).ReturnsAsync(promotions);
-            var result = await _controller.GetPromotions();
+            var pageNumber = 1;
+            var pageSize = 10;
+            _mockPromotionService.Setup(service => service.GetAll(pageNumber, pageSize)).ReturnsAsync(promotions);
+            var result = await _controller.GetPromotions(pageNumber, pageSize);
             var okResult = result as OkObjectResult;
             okResult.Should().NotBeNull();
             var response = okResult.Value as BaseResponse<IList<PromotionDto>>;
@@ -120,8 +121,9 @@ namespace ControllerTests
                 EndDate = new DateTime(2025, 1, 10)
             };
             var result = true;
-            _mockPromotionService.Setup(service => service.Update(promotionId, promotionForUpdate)).ReturnsAsync(result);
-            var actionResult = await _controller.UpdatePromotion(promotionId, promotionForUpdate); 
+            _mockPromotionService.Setup(service => service.Update(promotionId, promotionForUpdate))
+                .ReturnsAsync(result);
+            var actionResult = await _controller.UpdatePromotion(promotionId, promotionForUpdate);
             var okResult = actionResult as OkObjectResult;
             okResult.Should().NotBeNull();
             var response = okResult.Value as BaseResponse<bool>;
@@ -152,7 +154,8 @@ namespace ControllerTests
         {
             var promotionId = "promo1";
             var isExpired = true;
-            _mockPromotionService.Setup(service => service.UpdatePromotionStatusByRealtime(promotionId)).ReturnsAsync(isExpired);
+            _mockPromotionService.Setup(service => service.UpdatePromotionStatusByRealtime(promotionId))
+                .ReturnsAsync(isExpired);
             var actionResult = await _controller.ExpiredPromotion(promotionId);
             var okResult = actionResult as OkObjectResult;
             okResult.Should().NotBeNull();
@@ -168,7 +171,8 @@ namespace ControllerTests
         {
             var promotionId = "promo1";
             var result = true;
-            _mockPromotionService.Setup(service => service.UpdatePromotionStatusByRealtime(promotionId)).ReturnsAsync(result);
+            _mockPromotionService.Setup(service => service.UpdatePromotionStatusByRealtime(promotionId))
+                .ReturnsAsync(result);
             var actionResult = await _controller.UpdatePromotionStatusByRealtime(promotionId);
             var okResult = actionResult as OkObjectResult;
             okResult.Should().NotBeNull();
