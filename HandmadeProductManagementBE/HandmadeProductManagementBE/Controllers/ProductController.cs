@@ -133,20 +133,25 @@ namespace HandmadeProductManagementAPI.Controllers
             }
         }
 
-        [HttpPut("{id}")]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> UpdateProduct(string id, ProductForUpdateDto productForUpdate)
+        [HttpPatch("{id}")]
+        [Authorize(Roles = "Seller")]
+        public async Task<IActionResult> UpdateProduct(string id, [FromBody] ProductForUpdateDto product)
         {
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+            var updateResult = await _productService.Update(id, product, userId);
+
             var response = new BaseResponse<bool>
             {
                 Code = "200",
                 StatusCode = StatusCodeHelper.OK,
-                Message = "Product updated successfully",
-                Data = await _productService.Update(id, productForUpdate, userId)
+                Message = "Product updated successfully.",
+                Data = updateResult
             };
+
             return Ok(response);
         }
+
 
         [HttpDelete("soft-delete/{id}")]
         [Authorize(Roles = "Admin, Seller")] 

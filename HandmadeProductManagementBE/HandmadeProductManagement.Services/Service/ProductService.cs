@@ -462,22 +462,56 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<bool> Update(string id, ProductForUpdateDto product, string userId)
         {
-            var result = _updateValidator.ValidateAsync(product);
-            if (!result.Result.IsValid)
-                throw new ValidationException(result.Result.Errors);
+            var validationResult = await _updateValidator.ValidateAsync(product);
+            if (!validationResult.IsValid)
+            {
+                throw new BaseException.BadRequestException("validation_failed", validationResult.Errors.Select(e => e.ErrorMessage).FirstOrDefault());
+            }
+
             var productEntity = await _unitOfWork.GetRepository<Product>().Entities
                 .FirstOrDefaultAsync(p => p.Id == id);
             if (productEntity == null)
+            {
                 throw new KeyNotFoundException("Product not found");
-            _mapper.Map(product, productEntity);
+            }
+
+            var shop = await _unitOfWork.GetRepository<Shop>().Entities
+                    .FirstOrDefaultAsync(s => s.UserId == Guid.Parse(userId) && (s.DeletedBy == null || !s.DeletedTime.HasValue));
+
+            if (shop == null)
+            {
+                throw new BaseException.NotFoundException("shop_not_found", $"Shop not found for the provided user.");
+            }
+
+            if (shop.Id != productEntity.ShopId)
+            {
+                throw new BaseException.ForbiddenException("forbidden", $"You have no permission to access this resource.");
+            }
+
+            if (!string.IsNullOrWhiteSpace(product.Name))
+            {
+                productEntity.Name = product.Name;
+            }
+
+            if (!string.IsNullOrWhiteSpace(product.Description))
+            {
+                productEntity.Description = product.Description;
+            }
+
+            if (!string.IsNullOrWhiteSpace(product.CategoryId))
+            {
+                productEntity.CategoryId = product.CategoryId;
+            }
 
             productEntity.LastUpdatedTime = DateTime.UtcNow;
             productEntity.LastUpdatedBy = userId;
 
             await _unitOfWork.GetRepository<Product>().UpdateAsync(productEntity);
             await _unitOfWork.SaveAsync();
+
             return true;
         }
+
 
         public async Task<bool> SoftDelete(string id, string userId)
         {
