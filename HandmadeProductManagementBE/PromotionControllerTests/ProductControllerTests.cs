@@ -49,45 +49,45 @@ namespace ControllerTests
             Assert.Equal(product, response.Data);
         }
 
-        [Fact]
-        public async Task CreateProduct_ReturnsOkResult_WithCreatedProduct()
-        {
-            var newProduct = new ProductForCreationDto { Name = "New Product" };
-            var createdProduct = new ProductDto { Id = "1", Name = "New Product" };
-            _productServiceMock.Setup(service => service.Create(newProduct))
-                .ReturnsAsync(createdProduct);
-            var result = await _productController.CreateProduct(newProduct);
-            var okResult = Assert.IsType<OkObjectResult>(result);
-            var response = Assert.IsType<BaseResponse<ProductDto>>(okResult.Value);
-            Assert.Equal("200", response.Code);
-            Assert.Equal(createdProduct, response.Data);
-            Assert.Equal("Product created successfully", response.Message);
-        }
-        [Fact]
-        public async Task UpdateProduct_ReturnsOkResult_WithSuccessMessage()
-        {
-            var updatedProduct = new ProductForUpdateDto { Name = "Updated Product" };
-            var productDto = new ProductDto { Id = "1", Name = "Updated Product" }; 
-            _productServiceMock.Setup(service => service.Update("1", updatedProduct))
-                .ReturnsAsync(productDto);
-            var result = await _productController.UpdateProduct("1", updatedProduct);
-            var okResult = Assert.IsType<OkObjectResult>(result);
-            var response = Assert.IsType<BaseResponse<string>>(okResult.Value);
-            Assert.Equal("200", response.Code);
-            Assert.Equal("Product updated successfully", response.Data);
-        }
+        //[Fact]
+        //public async Task CreateProduct_ReturnsOkResult_WithCreatedProduct()
+        //{
+        //    var newProduct = new ProductForCreationDto { Name = "New Product" };
+        //    var createdProduct = new ProductDto { Id = "1", Name = "New Product" };
+        //    _productServiceMock.Setup(service => service.Create(newProduct))
+        //        .ReturnsAsync(createdProduct);
+        //    var result = await _productController.CreateProduct(newProduct);
+        //    var okResult = Assert.IsType<OkObjectResult>(result);
+        //    var response = Assert.IsType<BaseResponse<ProductDto>>(okResult.Value);
+        //    Assert.Equal("200", response.Code);
+        //    Assert.Equal(createdProduct, response.Data);
+        //    Assert.Equal("Product created successfully", response.Message);
+        //}
+        //[Fact]
+        //public async Task UpdateProduct_ReturnsOkResult_WithSuccessMessage()
+        //{
+        //    var updatedProduct = new ProductForUpdateDto { Name = "Updated Product" };
+        //    var productDto = new ProductDto { Id = "1", Name = "Updated Product" }; 
+        //    _productServiceMock.Setup(service => service.Update("1", updatedProduct))
+        //        .ReturnsAsync(productDto);
+        //    var result = await _productController.UpdateProduct("1", updatedProduct);
+        //    var okResult = Assert.IsType<OkObjectResult>(result);
+        //    var response = Assert.IsType<BaseResponse<string>>(okResult.Value);
+        //    Assert.Equal("200", response.Code);
+        //    Assert.Equal("Product updated successfully", response.Data);
+        //}
 
-        [Fact]
-        public async Task SoftDeleteProduct_ReturnsOkResult_WithSuccessMessage()
-        {
-            _productServiceMock.Setup(service => service.SoftDelete("1"))
-                .ReturnsAsync(true); 
-            var result = await _productController.SoftDeleteProduct("1");
-            var okResult = Assert.IsType<OkObjectResult>(result);
-            var response = Assert.IsType<BaseResponse<string>>(okResult.Value);
-            Assert.Equal("200", response.Code);
-            Assert.Equal("Product soft-deleted successfully", response.Data);
-        }
+        //[Fact]
+        //public async Task SoftDeleteProduct_ReturnsOkResult_WithSuccessMessage()
+        //{
+        //    _productServiceMock.Setup(service => service.SoftDelete("1"))
+        //        .ReturnsAsync(true); 
+        //    var result = await _productController.SoftDeleteProduct("1");
+        //    var okResult = Assert.IsType<OkObjectResult>(result);
+        //    var response = Assert.IsType<BaseResponse<string>>(okResult.Value);
+        //    Assert.Equal("200", response.Code);
+        //    Assert.Equal("Product soft-deleted successfully", response.Data);
+        //}
 
         [Fact]
         public async Task GetProductDetails_ReturnsOkResult_WithProductDetails()

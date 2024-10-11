@@ -66,7 +66,6 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [HttpGet("{id}")]
-        [Authorize]
         public async Task<IActionResult> GetProduct(string id)
         {
             var product = await _productService.GetById(id);
@@ -81,7 +80,7 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "Admin")]
+        [Authorize]
         public async Task<IActionResult> CreateProduct(ProductForCreationDto productForCreation)
         {
             try
@@ -89,7 +88,7 @@ namespace HandmadeProductManagementAPI.Controllers
                 var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
                 var createdProduct = await _productService.Create(productForCreation, userId);
 
-                var response = new BaseResponse<ProductDto>
+                var response = new BaseResponse<bool>
                 {
                     Code = "200",
                     StatusCode = StatusCodeHelper.OK,
@@ -117,23 +116,22 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [HttpPut("{id}")]
-        [Authorize(Roles = "Admin")]
+        [Authorize]
         public async Task<IActionResult> UpdateProduct(string id, ProductForUpdateDto productForUpdate)
         {
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            await _productService.Update(id, productForUpdate, userId);
-            var response = new BaseResponse<string>
+            var response = new BaseResponse<bool>
             {
                 Code = "200",
                 StatusCode = StatusCodeHelper.OK,
                 Message = "Product updated successfully",
-                Data = "Product updated successfully"
+                Data = await _productService.Update(id, productForUpdate, userId)
             };
             return Ok(response);
         }
 
         [HttpDelete("soft-delete/{id}")]
-        [Authorize(Roles = "Admin")] 
+        [Authorize] 
         public async Task<IActionResult> SoftDeleteProduct(string id)
         {
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
@@ -164,7 +162,7 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [HttpGet("CalculateAverageRating/{id}")]
-        [Authorize(Roles = "Admin")]
+        [Authorize]
         public async Task<IActionResult> CalculateAverageRating([Required] string id)
         {
             var averageRating = await _productService.CalculateAverageRatingAsync(id);

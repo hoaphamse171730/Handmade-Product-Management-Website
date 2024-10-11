@@ -30,30 +30,16 @@ namespace HandmadeProductManagement.Services.Service
             _updateValidator = updateValidator;
         }
 
-        public async Task<IList<VariationOptionDto>> GetByPage(int page, int pageSize)
+        // Get all variation options
+        public async Task<IList<VariationOptionDto>> GetAll()
         {
-            if (page <= 0 || pageSize <= 0)
-            {
-                throw new BaseException.BadRequestException("invalid_input", "Page and PageSize must be greater than 0.");
-            }
-
-            IQueryable<VariationOption> query = _unitOfWork.GetRepository<VariationOption>().Entities
-                .Where(cr => !cr.DeletedTime.HasValue || cr.DeletedBy == null);
-
-            var variationOptions = await query
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .Select(variationOption => new VariationOptionDto
-                {
-                    Id = variationOption.Id.ToString(),
-                    Value = variationOption.Value,
-                    VariationId = variationOption.VariationId,
-                })
+            var variationOptions = await _unitOfWork.GetRepository<VariationOption>().Entities
+                .Where(vo => !vo.DeletedTime.HasValue || vo.DeletedBy == null)
                 .ToListAsync();
 
             if (variationOptions == null || !variationOptions.Any())
             {
-                throw new BaseException.NotFoundException("not_found", "No variation options found for the specified page.");
+                throw new BaseException.NotFoundException("not_found", "No variation options found.");
             }
 
             return _mapper.Map<IList<VariationOptionDto>>(variationOptions);
@@ -89,10 +75,10 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<bool> Create(VariationOptionForCreationDto option, string userId)
         {
-            // Validate id format
+            // Validate if the VariationId is a valid GUID
             if (!Guid.TryParse(option.VariationId, out var guidId))
             {
-                throw new BaseException.BadRequestException("invalid_input", "ID is not in a valid GUID format.");
+                throw new BaseException.BadRequestException("invalid_input", "Variation ID is not in a valid GUID format.");
             }
 
             var validationResult = await _creationValidator.ValidateAsync(option);
@@ -101,20 +87,31 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.BadRequestException("validation_failed", validationResult.Errors.Select(e => e.ErrorMessage).FirstOrDefault());
             }
 
-            // Check if VariationId exists
-            var variationExists = await _unitOfWork.GetRepository<Variation>().Entities
-                .AnyAsync(v => v.Id == option.VariationId);
+            // Check if the VariationId exists
+            var variationExists = await _unitOfWork.GetRepository<Variation>()
+                .Entities.AnyAsync(v => v.Id == option.VariationId);
             if (!variationExists)
             {
                 throw new BaseException.NotFoundException("not_found", "Variation not found.");
             }
 
+            // Check if the variation option with the same value already exists for this variation
+            var optionExists = await _unitOfWork.GetRepository<VariationOption>()
+                .Entities.AnyAsync(vo => vo.VariationId == option.VariationId && vo.Value == option.Value);
+
+            if (optionExists)
+            {
+                throw new BaseException.BadRequestException("duplicate_option", "Variation Option with this value already exists.");
+            }
+
+            // Step 3: Map the DTO to the entity
             var optionEntity = _mapper.Map<VariationOption>(option);
 
-            // Set metadata
+            // Set metadata for creation
             optionEntity.CreatedBy = userId;
             optionEntity.LastUpdatedBy = userId;
 
+            // Step 4: Insert the new variation option into the database
             await _unitOfWork.GetRepository<VariationOption>().InsertAsync(optionEntity);
             await _unitOfWork.SaveAsync();
 
