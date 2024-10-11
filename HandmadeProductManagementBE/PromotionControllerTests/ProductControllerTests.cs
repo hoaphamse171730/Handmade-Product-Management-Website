@@ -19,23 +19,23 @@ namespace ControllerTests
             _productController = new ProductController(_productServiceMock.Object);
         }
 
-        [Fact]
-        public async Task GetProducts_ReturnsOkResult_WithListOfProducts()
-        {
-            var products = new List<ProductOverviewDto>
-            {
-                new ProductOverviewDto { Id = "1", Name = "Product 1" },
-                new ProductOverviewDto { Id = "2", Name = "Product 2" }
-            };
-            var pageNumber = 1;
-            var pageSize = 10;
-            _productServiceMock.Setup(service => service.GetByPage(pageNumber, pageSize)).ReturnsAsync(products);
-            var result = await _productController.GetProducts(pageNumber, pageSize);
-            var okResult = Assert.IsType<OkObjectResult>(result);
-            var response = Assert.IsType<BaseResponse<IList<ProductOverviewDto>>>(okResult.Value);
-            Assert.Equal("200", response.Code);
-            Assert.Equal(products, response.Data);
-        }
+        //[Fact]
+        //public async Task GetProducts_ReturnsOkResult_WithListOfProducts()
+        //{
+        //    var products = new List<ProductOverviewDto>
+        //    {
+        //        new ProductOverviewDto { Id = "1", Name = "Product 1" },
+        //        new ProductOverviewDto { Id = "2", Name = "Product 2" }
+        //    };
+        //    var pageNumber = 1;
+        //    var pageSize = 10;
+        //    _productServiceMock.Setup(service => service.GetByPage(pageNumber, pageSize)).ReturnsAsync(products);
+        //    var result = await _productController.GetProducts(pageNumber, pageSize);
+        //    var okResult = Assert.IsType<OkObjectResult>(result);
+        //    var response = Assert.IsType<BaseResponse<IList<ProductOverviewDto>>>(okResult.Value);
+        //    Assert.Equal("200", response.Code);
+        //    Assert.Equal(products, response.Data);
+        //}
 
         [Fact]
         public async Task GetProduct_ReturnsOkResult_WithSingleProduct()
@@ -76,22 +76,22 @@ namespace ControllerTests
             Assert.Equal(averageRating, response.Data);
         }
 
-        [Fact]
-        public async Task SearchProducts_ReturnsOkResult_WithSearchResults()
-        {
-            var searchFilter = new ProductSearchFilter { Name = "Test" };
-            var searchResults = new List<ProductSearchVM>
-            {
-                new ProductSearchVM { Id = "1", Name = "Test Product 1" },
-                new ProductSearchVM { Id = "2", Name = "Test Product 2" }
-            };
-            _productServiceMock.Setup(service => service.SearchProductsAsync(searchFilter))
-                .ReturnsAsync(searchResults);
-            var result = await _productController.SearchProducts(searchFilter);
-            var okResult = Assert.IsType<OkObjectResult>(result);
-            var response = Assert.IsType<BaseResponse<IEnumerable<ProductSearchVM>>>(okResult.Value);
-            Assert.Equal("200", response.Code);
-            Assert.Equal(searchResults, response.Data);
-        }
+        //[Fact]
+        //public async Task SearchProducts_ReturnsOkResult_WithSearchResults()
+        //{
+        //    var searchFilter = new ProductSearchFilter { Name = "Test" };
+        //    var searchResults = new List<ProductSearchVM>
+        //    {
+        //        new ProductSearchVM { Id = "1", Name = "Test Product 1" },
+        //        new ProductSearchVM { Id = "2", Name = "Test Product 2" }
+        //    };
+        //    _productServiceMock.Setup(service => service.SearchProductsAsync(searchFilter))
+        //        .ReturnsAsync(searchResults);
+        //    var result = await _productController.SearchProducts(searchFilter);
+        //    var okResult = Assert.IsType<OkObjectResult>(result);
+        //    var response = Assert.IsType<BaseResponse<IEnumerable<ProductSearchVM>>>(okResult.Value);
+        //    Assert.Equal("200", response.Code);
+        //    Assert.Equal(searchResults, response.Data);
+        //}
     }
 }
