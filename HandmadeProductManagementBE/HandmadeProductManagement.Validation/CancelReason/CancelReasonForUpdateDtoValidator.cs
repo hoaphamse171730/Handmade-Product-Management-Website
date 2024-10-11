@@ -7,6 +7,10 @@ namespace HandmadeProductManagement.Validation.CancelReason
     {
         public CancelReasonForUpdateDtoValidator() 
         {
+            RuleFor(x => x)
+                .Must(dto => !string.IsNullOrWhiteSpace(dto.Description) || dto.RefundRate >= 0)
+                .WithMessage("You must provide at least one valid field for update.");
+
             RuleFor(x => x.Description)
                 .MaximumLength(500).WithMessage("Description can not exceed 500 characters!");
             RuleFor(x => x.RefundRate)
