@@ -190,6 +190,7 @@ namespace HandmadeProductManagement.Services.Service
             return true;
         }
 
+
         public async Task<IList<NotificationModel>> GetNotificationList(string Id)
         {
             if (!Guid.TryParse(Id, out Guid userId))
@@ -227,16 +228,18 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<IList<NotificationModel>> GetNewOrderNotificationList(string Id)
         {
-
             if (!Guid.TryParse(Id, out Guid userId))
             {
                 throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Invalid userID");
             }
+
             var urlroot = "https://localhost:7159";
-            // Lấy danh sách đơn hàng của người dùng
+
+            // Lấy danh sách đơn hàng của người dùng, sắp xếp theo LastUpdatedTime (tăng dần)
             var orders = await _unitOfWork.GetRepository<Order>()
                 .Entities
                 .Where(o => o.UserId == userId)
+                .OrderBy(o => o.LastUpdatedTime) // Sắp xếp theo LastUpdatedTime tăng dần
                 .Include(o => o.User)
                 .ToListAsync();
 
@@ -253,6 +256,41 @@ namespace HandmadeProductManagement.Services.Service
         }
 
 
+        public async Task<IList<NotificationModel>> GetNewReviewNotificationList(string Id)
+        {
+
+            if (!Guid.TryParse(Id, out Guid userId))
+            {
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Invalid userID");
+            }
+
+            var shopIds = await _unitOfWork.GetRepository<Shop>()
+                .Entities
+                .Where(shop => shop.UserId == userId)
+                .Select(shop => shop.Id)
+                .ToListAsync();
+
+            if (shopIds.IsNullOrEmpty())
+            {
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "User not found");
+            }
+
+            var review = await _unitOfWork.GetRepository<Review>()
+                .Entities
+                .Where(r => r.UserId == userId && r.Reply == null)
+                .Include(r => r.User)
+                .ToListAsync();
+
+            var notifications = review.Select(review => new NotificationModel
+            {
+                Id = review.Id,
+                Message = $"Sản phẩm của bạn đã được {review.User.UserName} review",
+                Tag = "Review",
+                URL = Url + $"api/review/{review.Id}"
+            }).ToList();
+
+            return notifications;
+        }
         public async Task<IList<NotificationModel>> GetNewReplyNotificationList(string Id)
         {
             if (!Guid.TryParse(Id, out Guid userId))
@@ -296,43 +334,6 @@ namespace HandmadeProductManagement.Services.Service
             return replyNotifications;
         }
 
-
-        public async Task<IList<NotificationModel>> GetNewReviewNotificationList(string Id)
-        {
-
-            if (!Guid.TryParse(Id, out Guid userId))
-            {
-                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Invalid userID");
-            }
-
-            var shopIds = await _unitOfWork.GetRepository<Shop>()
-                .Entities
-                .Where(shop => shop.UserId == userId)
-                .Select(shop => shop.Id)
-                .ToListAsync();
-
-            if (shopIds.IsNullOrEmpty())
-            {
-                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "User not found");
-            }
-
-            var review = await _unitOfWork.GetRepository<Review>()
-                .Entities
-                .Where(r => r.UserId == userId && r.Reply == null)
-                .Include(r => r.User)
-                .ToListAsync();
-
-            var notifications = review.Select(review => new NotificationModel
-            {
-                Id = review.Id,
-                Message = $"Sản phẩm của bạn đã được {review.User.UserName} review",
-                Tag = "Review",
-                URL = Url + $"api/review/{review.Id}"
-            }).ToList();
-
-            return notifications;
-        }
-
         public async Task<IList<NotificationModel>> GetNewStatusChangeNotificationList(string Id)
         {
             if (!Guid.TryParse(Id, out Guid userId))
@@ -370,6 +371,8 @@ namespace HandmadeProductManagement.Services.Service
 
             return notifications;
         }
+
+
         public async Task<bool> ReverseDeleteUser(string Id)
         {
             if (!Guid.TryParse(Id, out Guid userId))
