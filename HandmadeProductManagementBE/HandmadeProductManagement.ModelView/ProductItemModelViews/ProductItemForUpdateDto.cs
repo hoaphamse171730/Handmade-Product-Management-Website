@@ -4,7 +4,7 @@ namespace HandmadeProductManagement.ModelViews.ProductItemModelViews
 {
     public class ProductItemForUpdateDto
     {
-        public required int QuantityInStock { get; set; }
-        public required int Price { get; set; }
+        public int? QuantityInStock { get; set; }
+        public int? Price { get; set; }
     }
 }
