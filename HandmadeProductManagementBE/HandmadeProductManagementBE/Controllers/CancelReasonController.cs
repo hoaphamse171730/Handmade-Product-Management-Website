@@ -57,30 +57,16 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpPatch("{id}")]
         public async Task<IActionResult> PatchCancelReason(string id, [FromBody] CancelReasonForUpdateDto updatedReason)
         {
-            try
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var result = await _cancelReasonService.Update(id, updatedReason, userId);
+            var response = new BaseResponse<bool>
             {
-                var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-                var result = await _cancelReasonService.Update(id, updatedReason, userId);
-                var response = new BaseResponse<bool>
-                {
-                    Code = "Success",
-                    StatusCode = StatusCodeHelper.OK,
-                    Message = "Updated Cancel Reason partially successfully!",
-                    Data = result
-                };
-                return Ok(response);
-            }
-            catch (DbUpdateException dbEx)
-            {
-                var errorResponse = new BaseResponse<string>
-                {
-                    Code = "DbUpdateError",
-                    StatusCode = StatusCodeHelper.ServerError,
-                    Message = "An error occurred while saving the entity changes.",
-                    Data = dbEx.InnerException?.Message ?? dbEx.Message
-                };
-                return StatusCode(StatusCodes.Status500InternalServerError, errorResponse);
-            }
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Updated Cancel Reason partially successfully!",
+                Data = result
+            };
+            return Ok(response);
         }
 
         [Authorize(Roles = "Admin")]
