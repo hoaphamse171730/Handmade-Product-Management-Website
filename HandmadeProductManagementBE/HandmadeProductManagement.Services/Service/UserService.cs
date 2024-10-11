@@ -221,7 +221,7 @@ namespace HandmadeProductManagement.Services.Service
                 Id = review.Id,
                 Message = $"Sản phẩm của bạn đã được {review.User.UserName} review",
                 Tag = "Review",
-                URL = $"api/review/{review.Id}"
+                URL = $"/api/review/{review.Id}"
             }).ToList();
 
             return notifications;
@@ -250,7 +250,7 @@ namespace HandmadeProductManagement.Services.Service
                 Id = order.Id,
                 Message = $"Bạn có đơn hàng mới từ {order.CustomerName} với trạng thái: {order.Status} vào ngày: {order.OrderDate.ToString("dd/MM/yyyy")}",
                 Tag = "Order",
-                URL = urlroot + $"api/order/{order.Id}"
+                URL = urlroot + $"/api/order/{order.Id}"
             }).ToList();
 
             return notifications;
@@ -287,7 +287,7 @@ namespace HandmadeProductManagement.Services.Service
                 Id = review.Id,
                 Message = $"Sản phẩm của bạn đã được {review.User.UserName} review",
                 Tag = "Review",
-                URL = Url + $"api/review/{review.Id}"
+                URL = Url + $"/api/review/{review.Id}"
             }).ToList();
 
             return notifications;
@@ -329,7 +329,7 @@ namespace HandmadeProductManagement.Services.Service
                 Id = reply.Id,
                 Message = $"Bạn đã nhận được phản hồi mới cho review sản phẩm {reply.Review.Product.Name}",
                 Tag = "Reply",
-                URL = urlroot + $"api/reply/{reply.Id}"
+                URL = urlroot + $"/api/reply/{reply.Id}"
             }).ToList();
 
             return replyNotifications;
@@ -367,7 +367,7 @@ namespace HandmadeProductManagement.Services.Service
                 Id = status.Id,
                 Message = $"Đơn hàng của bạn được {status.Status} lúc {status.ChangeTime}",
                 Tag = "StatusChange",
-                URL = Url +  $"api/statuschange/order/{status.OrderId}"
+                URL = Url +  $"/api/statuschange/order/{status.OrderId}"
             }).ToList();
 
             return notifications;
