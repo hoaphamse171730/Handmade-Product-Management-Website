@@ -13,10 +13,12 @@ namespace HandmadeProductManagement.Services.Service
     public class ReviewService : IReviewService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IProductService _productService;
 
-        public ReviewService(IUnitOfWork unitOfWork)
+        public ReviewService(IUnitOfWork unitOfWork, IProductService productService)
         {
             _unitOfWork = unitOfWork;
+            _productService = productService;
         }
         public async Task<IList<ReviewModel>> GetByProductIdAsync(string productId, int pageNumber, int pageSize)
         {
@@ -233,6 +235,8 @@ namespace HandmadeProductManagement.Services.Service
 
             await _unitOfWork.GetRepository<Review>().InsertAsync(review);
             await _unitOfWork.SaveAsync();
+
+            await _productService.CalculateAverageRatingAsync(reviewModel.ProductId);
 
             return true;
         }

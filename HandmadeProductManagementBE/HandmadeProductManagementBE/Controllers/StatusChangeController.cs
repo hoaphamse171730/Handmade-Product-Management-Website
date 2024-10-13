@@ -20,31 +20,33 @@ namespace HandmadeProductManagementAPI.Controllers
 
         [Authorize]
         [HttpGet("page")]
-        public async Task<IActionResult> GetByPage([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetByPage([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] bool sortAsc = true)
         {
             var response = new BaseResponse<IList<StatusChangeDto>>
             {
                 Code = "Success",
                 StatusCode = StatusCodeHelper.OK,
-                Message = "Get Status Change sucessfully!",
-                Data = await _statusChangeService.GetByPage(page, pageSize)
+                Message = "Get Status Change successfully!",
+                Data = await _statusChangeService.GetByPage(page, pageSize, sortAsc)
             };
             return Ok(response);
         }
 
+
         [Authorize]
         [HttpGet("Order/{orderId}")]
-        public async Task<IActionResult> GetStatusChangesByOrderId(string orderId)
+        public async Task<IActionResult> GetStatusChangesByOrderId(string orderId, [FromQuery] bool sortAsc = true)
         {
             var response = new BaseResponse<IList<StatusChangeDto>>
             {
                 Code = "Success",
                 StatusCode = StatusCodeHelper.OK,
-                Message = "Get Status Change sucessfully!",
-                Data = await _statusChangeService.GetByOrderId(orderId)
+                Message = "Get Status Change successfully!",
+                Data = await _statusChangeService.GetByOrderId(orderId, sortAsc)
             };
             return Ok(response);
         }
+
 
         //[Authorize(Roles = "Admin")]
         //[HttpPost]

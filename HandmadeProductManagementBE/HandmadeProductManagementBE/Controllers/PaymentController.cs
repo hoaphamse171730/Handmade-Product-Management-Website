@@ -36,6 +36,7 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
+        [Authorize]
         [HttpPut("{paymentId}/status")]
         public async Task<IActionResult> UpdatePaymentStatus(string paymentId, [FromBody] string status)
         {

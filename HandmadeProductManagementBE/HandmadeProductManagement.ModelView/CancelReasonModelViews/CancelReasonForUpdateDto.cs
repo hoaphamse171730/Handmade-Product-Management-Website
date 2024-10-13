@@ -1,6 +1,8 @@
 ﻿namespace HandmadeProductManagement.ModelViews.CancelReasonModelViews
 {
-    public class CancelReasonForUpdateDto : CancelReasonForManipulation
+    public class CancelReasonForUpdateDto
     {
+        public string? Description { get; set; }
+        public decimal? RefundRate { get; set; }
     }
 }

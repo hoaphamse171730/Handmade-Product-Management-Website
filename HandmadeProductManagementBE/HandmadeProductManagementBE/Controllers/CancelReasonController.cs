@@ -5,6 +5,7 @@ using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.CancelReasonModelViews;
 using Microsoft.AspNetCore.Authorization;
 using HandmadeProductManagement.Contract.Repositories.Entity;
+using Microsoft.EntityFrameworkCore;
 
 namespace HandmadeProductManagementAPI.Controllers
 {
@@ -52,9 +53,9 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [Authorize(Roles = "Admin")]
-        // PUT: api/CancelReason/{id} (string id)
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateCancelReason(string id, CancelReasonForUpdateDto updatedReason)
+        // PATCH: api/CancelReason/{id} (string id)
+        [HttpPatch("{id}")]
+        public async Task<IActionResult> PatchCancelReason(string id, [FromBody] CancelReasonForUpdateDto updatedReason)
         {
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             var result = await _cancelReasonService.Update(id, updatedReason, userId);

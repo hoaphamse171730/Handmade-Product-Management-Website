@@ -70,7 +70,7 @@ namespace HandmadeProductManagement.Services.Service
             return true;
         }
 
-        // Update an existing cancel reason
+        // Update an existing cancel reason partially (PATCH)
         public async Task<bool> Update(string id, CancelReasonForUpdateDto cancelReason, string userId)
         {
             // Validate id format
@@ -85,17 +85,31 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.BadRequestException("validation_failed", validationResult.Errors.Select(e => e.ErrorMessage).FirstOrDefault());
             }
 
+            // Find the entity to be updated
             var cancelReasonEntity = await _unitOfWork.GetRepository<CancelReason>().Entities
                 .FirstOrDefaultAsync(p => p.Id == id && (!p.DeletedTime.HasValue || p.DeletedBy == null));
+
             if (cancelReasonEntity == null)
             {
                 throw new BaseException.NotFoundException("not_found", "Cancel Reason not found");
             }
-            _mapper.Map(cancelReason, cancelReasonEntity);
 
+            // Map only updated properties, keeping old values for null or unchanged fields
+            if (!string.IsNullOrWhiteSpace(cancelReason.Description))
+            {
+                cancelReasonEntity.Description = cancelReason.Description;
+            }
+
+            if (cancelReason.RefundRate.HasValue)
+            {
+                cancelReasonEntity.RefundRate = cancelReason.RefundRate.Value;
+            }
+
+            // Update metadata (last updated time, updated by user)
             cancelReasonEntity.LastUpdatedTime = DateTime.UtcNow;
             cancelReasonEntity.LastUpdatedBy = userId;
 
+            // Update the entity in the repository
             await _unitOfWork.GetRepository<CancelReason>().UpdateAsync(cancelReasonEntity);
             await _unitOfWork.SaveAsync();
 

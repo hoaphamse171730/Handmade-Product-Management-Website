@@ -17,7 +17,7 @@ namespace HandmadeProductManagement.Contract.Services.Interface
 
         Task<decimal> GetTotalSaleByShopId(string Id, DashboardDTO dashboardDTO);
 
-        Task<List<Product>> GetTopSellingProducts();
+        Task<IList<TopSellingProducts>> GetTopSellingProducts();
 
         Task<IList<ProductForDashboard>> GetTop10NewProducts();
     }
