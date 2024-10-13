@@ -30,7 +30,7 @@ namespace HandmadeProductManagementAPI.Controllers
         }
         
         
-        [HttpGet(Name = "GetExpiredPromotions")]
+        [HttpGet( "GetExpiredPromotions")]
         public async Task<IActionResult> GetExpiredPromotions(int pageNumber = 1, int pageSize = 10)
         {
             var result = await _promotionService.GetExpiredPromotions(pageNumber, pageSize);

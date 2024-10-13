@@ -35,6 +35,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Controllers", "Controllers"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ControllerTests", "PromotionControllerTests\ControllerTests.csproj", "{22FFF17B-F313-4918-9545-EDCD33315169}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HandmadeProductManagement.GraphQL", "HandmadeProductManagement.GraphQL\HandmadeProductManagement.GraphQL.csproj", "{190394AD-EEBC-43CD-9208-25FD2F5F8124}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -77,6 +79,10 @@ Global
 		{22FFF17B-F313-4918-9545-EDCD33315169}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{22FFF17B-F313-4918-9545-EDCD33315169}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{22FFF17B-F313-4918-9545-EDCD33315169}.Release|Any CPU.Build.0 = Release|Any CPU
+		{190394AD-EEBC-43CD-9208-25FD2F5F8124}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{190394AD-EEBC-43CD-9208-25FD2F5F8124}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{190394AD-EEBC-43CD-9208-25FD2F5F8124}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{190394AD-EEBC-43CD-9208-25FD2F5F8124}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -92,6 +98,7 @@ Global
 		{EDFEF7CA-48D6-4617-8803-E478A59D732F} = {4B44ADB4-25D2-4FDC-AE65-06AE9AEC9A3D}
 		{CBB853F9-2066-43B9-A60E-B0FF7261E6EC} = {B46699BD-2028-428F-9FB3-3590A774D2B6}
 		{22FFF17B-F313-4918-9545-EDCD33315169} = {CBB853F9-2066-43B9-A60E-B0FF7261E6EC}
+		{190394AD-EEBC-43CD-9208-25FD2F5F8124} = {1F89EE8C-46B7-47EC-B572-DE2EBF606973}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0145BCBD-535D-4BC5-ACDE-30E00043F846}

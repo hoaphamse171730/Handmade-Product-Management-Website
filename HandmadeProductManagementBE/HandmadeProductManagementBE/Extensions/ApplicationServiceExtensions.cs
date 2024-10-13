@@ -1,10 +1,9 @@
-using System.Reflection;
 using FluentValidation;
+using GraphQL;
 using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Exceptions.Handler;
-using HandmadeProductManagement.Core.Utils;
 using HandmadeProductManagement.ModelViews.AuthModelViews;
 using HandmadeProductManagement.ModelViews.CancelReasonModelViews;
 using HandmadeProductManagement.ModelViews.OrderDetailModelViews;
@@ -39,6 +38,9 @@ using HandmadeProductManagement.ModelViews.VariationCombinationModelViews;
 using HandmadeProductManagement.Validation.VariationCombination;
 using HandmadeProductManagement.ModelViews.UserInfoModelViews;
 using HandmadeProductManagement.Validation.UserInfo;
+using HandmadeProductManagementAPI.GraphQL.Mutations;
+using HandmadeProductManagementAPI.GraphQL.Queries;
+using HandmadeProductManagementAPI.GraphQL.Types;
 
 namespace HandmadeProductManagementAPI.Extensions;
 
@@ -67,7 +69,7 @@ public static class ApplicationServiceExtensions
                         .WithOrigins("https://localhost:7159");
                 });
         });
-        
+
         services.AddExceptionHandler<CustomExceptionHandler>();
         services.AddScoped<ICancelReasonService, CancelReasonService>();
         services.AddScoped<IAuthenticationService, AuthenticationService>();
@@ -96,70 +98,98 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IProductItemService, ProductItemService>();
         services.AddScoped<IProductConfigurationService, ProductConfigurationService>();
         services.AddScoped<IUserInfoService, UserInfoService>();
+
         return services;
     }
 
     public static void ConfigureFluentValidation(this IServiceCollection services)
     {
         #region Promotion
+
         services.AddScoped<IValidator<PromotionForCreationDto>, PromotionForCreationDtoValidator>();
         services.AddScoped<IValidator<PromotionForUpdateDto>, PromotionForUpdateDtoValidator>();
+
         #endregion
 
         #region Product
+
         services.AddScoped<IValidator<ProductForCreationDto>, ProductForCreationDtoValidator>();
         services.AddScoped<IValidator<ProductForUpdateDto>, ProductForUpdateDtoValidator>();
+
         #endregion
 
         #region OrderDetail
+
         services.AddScoped<IValidator<OrderDetailForCreationDto>, OrderDetailForCreationDtoValidator>();
         services.AddScoped<IValidator<OrderDetailForUpdateDto>, OrderDetailForUpdateDtoValidator>();
+
         #endregion
 
         #region User
+
         services.AddScoped<IValidator<UpdateUserDTO>, UpdateUserDTOValidator>();
+
         #endregion
 
         #region CancelReason
+
         services.AddScoped<IValidator<CancelReasonForCreationDto>, CancelReasonForCreationDtoValidator>();
         services.AddScoped<IValidator<CancelReasonForUpdateDto>, CancelReasonForUpdateDtoValidator>();
+
         #endregion
 
         #region StatusChange
+
         services.AddScoped<IValidator<StatusChangeForCreationDto>, StatusChangeForCreationDtoValidator>();
         services.AddScoped<IValidator<StatusChangeForUpdateDto>, StatusChangeForUpdateDtoValidator>();
+
         #endregion
 
         #region Variation
+
         services.AddScoped<IValidator<VariationForCreationDto>, VariationForCreationDtoValidator>();
         services.AddScoped<IValidator<VariationForUpdateDto>, VariationForUpdateDtoValidator>();
+
         #endregion
 
         #region VariationOption
+
         services.AddScoped<IValidator<VariationOptionForCreationDto>, VariationOptionForCreationDtoValidator>();
         services.AddScoped<IValidator<VariationOptionForUpdateDto>, VariationOptionForUpdateDtoValidator>();
+
         #endregion
 
         #region Category
+
         services.AddScoped<IValidator<CategoryForCreationDto>, CategoryForCreationDtoValidator>();
         services.AddScoped<IValidator<CategoryForUpdateDto>, CategoryForUpdateDtoValidator>();
+
         #endregion
 
         #region ProductItem
+
         services.AddScoped<IValidator<ProductItemForCreationDto>, ProductItemForCreationDtoValidator>();
         services.AddScoped<IValidator<ProductItemForUpdateDto>, ProductItemForUpdateDtoValidator>();
+
         #endregion
 
         #region ProductConfiguration
-        services.AddScoped<IValidator<ProductConfigurationForCreationDto>, ProductConfigurationForCreationDtoValidator>();
+
+        services
+            .AddScoped<IValidator<ProductConfigurationForCreationDto>, ProductConfigurationForCreationDtoValidator>();
+
         #endregion
 
         #region VariationCombination
+
         services.AddScoped<IValidator<VariationCombinationDto>, VariationCombinationDtoValidator>();
+
         #endregion
 
         #region UserInfo
+
         services.AddScoped<IValidator<UserInfoForUpdateDto>, UserInfoForUpdateDtoValidator>();
+
         #endregion
     }
 
@@ -171,9 +201,19 @@ public static class ApplicationServiceExtensions
             .Map(dest => dest.CartId, () => Guid.NewGuid())
             .Map(dest => dest.CreatedBy, src => src.UserName)
             .Map(dest => dest.LastUpdatedBy, src => src.UserName)
-            
             .Map(dest => dest.Cart.CreatedBy, src => src.UserName)
             .Map(dest => dest.Cart.LastUpdatedBy, src => src.UserName)
             ;
     }
+
+    public static void ConfigureGraphql(this IServiceCollection services)
+    {
+        services
+            .AddGraphQLServer()
+            .AddQueryType<PromotionQuery>()
+            .AddMutationType<PromotionMutation>()
+            .AddType<PromotionType>();
+    }
+
+
 }
