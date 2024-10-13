@@ -62,11 +62,8 @@ namespace HandmadeProductManagement.Services.Service
         public async Task<PromotionDto> GetById(string id)
         {
             if (!Guid.TryParse(id, out _))
-            {
                 throw new BaseException.BadRequestException("invalid_id_format",
                     "The provided ID is not in a valid GUID format.");
-            }
-
             var promotion = await _unitOfWork.GetRepository<Promotion>().Entities
                 .FirstOrDefaultAsync(p => p.Id == id && p.DeletedTime == null);
             if (promotion == null)

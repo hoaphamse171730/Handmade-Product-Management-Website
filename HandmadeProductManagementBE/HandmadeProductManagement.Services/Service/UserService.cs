@@ -136,7 +136,6 @@ namespace HandmadeProductManagement.Services.Service
             {
                 throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Phone number already exists");
             }
-
             user.UserName = updateUserDTO.UserName;
             user.Email = updateUserDTO.Email;
             user.PhoneNumber = updateUserDTO.PhoneNumber;

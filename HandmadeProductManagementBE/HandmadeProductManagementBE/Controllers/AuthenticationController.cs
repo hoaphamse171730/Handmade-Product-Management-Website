@@ -111,16 +111,13 @@ public class AuthenticationController(
         {
             return BadRequest("Invalid token.");
         }
-
         var email = jsonToken.Claims.FirstOrDefault(claim => claim.Type == "email")?.Value;
         var name = jsonToken.Claims.FirstOrDefault(claim => claim.Type == "name")?.Value;
         var picture = jsonToken.Claims.FirstOrDefault(claim => claim.Type == "picture")?.Value;
-
         if (email == null || name == null)
         {
             return BadRequest("Token is missing necessary claims.");
         }
-
         var user = await userManager.FindByEmailAsync(email);
         if (user == null)
         {
@@ -154,7 +151,6 @@ public class AuthenticationController(
         var roles = await userManager.GetRolesAsync(user);
         var userRole = roles.FirstOrDefault();
         var userToken = await tokenService.CreateToken(user);
-
         return Ok(new
         {
             Token = userToken
