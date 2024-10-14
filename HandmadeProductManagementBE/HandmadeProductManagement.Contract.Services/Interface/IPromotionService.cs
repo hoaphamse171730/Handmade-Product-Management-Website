@@ -7,8 +7,8 @@ namespace HandmadeProductManagement.Contract.Services.Interface
         Task<IList<PromotionDto>> GetAll(int pageNumber, int pageSize);
         Task<PromotionDto> GetById(string id);
         Task<IList<PromotionDto>> GetExpiredPromotions(int pageNumber, int pageSize);
-        Task<bool> Create(PromotionForCreationDto promotion);
-        Task<bool> Update(string id, PromotionForUpdateDto promotion);
+        Task<bool> Create(PromotionForCreationDto promotion, string userId);
+        Task<bool> Update(string id, PromotionForUpdateDto promotion, string userId);
         Task<bool> SoftDelete(string id);
         Task<bool> UpdatePromotionStatusByRealtime(string id);
     }

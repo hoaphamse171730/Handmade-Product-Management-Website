@@ -4,6 +4,7 @@ using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.PromotionModelViews;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using HandmadeProductManagement.Services.Service;
 
 namespace HandmadeProductManagementAPI.Controllers
 {
@@ -62,7 +63,8 @@ namespace HandmadeProductManagementAPI.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreatePromotion(PromotionForCreationDto promotionForCreation)
         {
-            var result = await _promotionService.Create(promotionForCreation);
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var result = await _promotionService.Create(promotionForCreation, userId);
             var response = new BaseResponse<bool>
             {
                 Code = "200",
@@ -77,7 +79,8 @@ namespace HandmadeProductManagementAPI.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdatePromotion(string id, PromotionForUpdateDto promotionForUpdate)
         {
-            var result = await _promotionService.Update(id, promotionForUpdate);
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var result = await _promotionService.Update(id, promotionForUpdate, userId);
             var response = new BaseResponse<bool>
             {
                 Code = "200",
