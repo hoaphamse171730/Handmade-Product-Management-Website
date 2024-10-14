@@ -91,9 +91,8 @@ namespace HandmadeProductManagement.Services.Service
             return user;
 
         }
-        public async Task<UpdateUserResponseModel?> UpdateUser(string id, UpdateUserDTO updateUserDTO)
+        public async Task<bool> UpdateUser(string id, UpdateUserDTO updateUserDTO)
         {
-
             if (!Guid.TryParse(id, out Guid userId))
             {
                 throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Invalid userID");
@@ -102,7 +101,7 @@ namespace HandmadeProductManagement.Services.Service
             var user = await _unitOfWork.GetRepository<ApplicationUser>()
                 .Entities
                 .Where(u => u.Id == userId)
-                .FirstOrDefaultAsync(); 
+                .FirstOrDefaultAsync();
             //check user found
             if (user == null)
             {
@@ -115,50 +114,49 @@ namespace HandmadeProductManagement.Services.Service
                 throw new ValidationException(updateValidation.Errors);
             }
             // check existing unique fields
-            var existingUsername = await _unitOfWork.GetRepository<ApplicationUser>().Entities
-                .AnyAsync(u => u.UserName == updateUserDTO.UserName && u.Id != userId);
-            if(existingUsername)
+            if (!string.IsNullOrEmpty(updateUserDTO.UserName))
             {
-                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Username already exists");
+                var existingUsername = await _unitOfWork.GetRepository<ApplicationUser>().Entities
+                    .AnyAsync(u => u.UserName == updateUserDTO.UserName && u.Id != userId);
+                if (existingUsername)
+                {
+                    throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Username already exists");
+                }
+                user.UserName = updateUserDTO.UserName;
+                user.NormalizedUserName = updateUserDTO.UserName.ToUpper();
             }
 
-            var existingUserWithSameEmail = await _unitOfWork.GetRepository<ApplicationUser>()
-      .Entities
-      .AnyAsync(u => u.Email == updateUserDTO.Email && u.Id != userId);
-            if (existingUserWithSameEmail)
+            if (!string.IsNullOrEmpty(updateUserDTO.Email))
             {
-                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Email already exists");
+                var existingUserWithSameEmail = await _unitOfWork.GetRepository<ApplicationUser>()
+                    .Entities
+                    .AnyAsync(u => u.Email == updateUserDTO.Email && u.Id != userId);
+                if (existingUserWithSameEmail)
+                {
+                    throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Email already exists");
+                }
+                user.Email = updateUserDTO.Email;
+                user.NormalizedEmail = updateUserDTO.Email.ToUpper();
             }
 
-            var existingUserWithSamePhoneNumber = await _unitOfWork.GetRepository<ApplicationUser>()
-        .Entities
-        .AnyAsync(u => u.PhoneNumber == updateUserDTO.PhoneNumber && u.Id != userId);
-            if (existingUserWithSamePhoneNumber)
+            if (!string.IsNullOrEmpty(updateUserDTO.PhoneNumber))
             {
-                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Phone number already exists");
-            }
-            user.UserName = updateUserDTO.UserName;
-            user.Email = updateUserDTO.Email;
-            user.PhoneNumber = updateUserDTO.PhoneNumber;
+                var existingUserWithSamePhoneNumber = await _unitOfWork.GetRepository<ApplicationUser>()
+                    .Entities
+                    .AnyAsync(u => u.PhoneNumber == updateUserDTO.PhoneNumber && u.Id != userId);
+                if (existingUserWithSamePhoneNumber)
+                {
+                    throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Phone number already exists");
+                }
+                user.PhoneNumber = updateUserDTO.PhoneNumber;
+            } 
             user.TwoFactorEnabled = updateUserDTO.TwoFactorEnabled;
-            user.NormalizedUserName = updateUserDTO.UserName.ToUpper();
-            user.NormalizedEmail = updateUserDTO.Email.ToUpper();
             user.LastUpdatedTime = DateTime.UtcNow;
-
-            _unitOfWork.GetRepository<ApplicationUser>().Update(user);
+            await _unitOfWork.GetRepository<ApplicationUser>().UpdateAsync(user);
             await _unitOfWork.SaveAsync();
-
-            var updatedUserResponse = new UpdateUserResponseModel
-            {
-                Id = user.Id,
-                UserName = user.UserName,
-                Email = user.Email,
-                PhoneNumber = user.PhoneNumber,
-                TwoFactorEnabled = user.TwoFactorEnabled
-            };
-
-            return updatedUserResponse;
+            return true;
         }
+
 
         public async Task<bool> DeleteUser(string Id)
         {
@@ -204,7 +202,7 @@ namespace HandmadeProductManagement.Services.Service
                 .Select(shop => shop.Id)
                 .ToListAsync();
 
-            if(shopIds.IsNullOrEmpty())
+            if (shopIds.IsNullOrEmpty())
             {
                 throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "User not found");
             }

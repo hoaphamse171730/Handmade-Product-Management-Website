@@ -1,9 +1,11 @@
-using HandmadeProductManagement.Contract.Repositories.Entity;
+﻿using HandmadeProductManagement.Contract.Repositories.Entity;
+using HandmadeProductManagement.Services.SignalRHub;
 using HandmadeProductManagementAPI.Extensions;
 using HandmadeProductManagementAPI.Middlewares;
 using HandmadeProductManagementBE.API;
 using Microsoft.AspNetCore.Identity;
 using HotChocolate.AspNetCore;
+using Microsoft.AspNetCore.SignalR;
 using Serilog;
 
 
@@ -20,14 +22,16 @@ builder.Configuration
 
 builder.Services.AddAutoMapper(typeof(Program));
 builder.Services.AddControllers();
+//All extra services must be contained in ApplicationServiceExtensions & IdentityServiceExtensions
 builder.Services.AddApplicationServices(builder.Configuration);
 builder.Services.AddIdentityServices(builder.Configuration);
 builder.Services.AddConfig(builder.Configuration);
 builder.Services.RegisterMapsterConfiguration();
 builder.Services.ConfigureFluentValidation();
 builder.Services.AddFireBaseServices();
-builder.Services.ConfigureSwaggerServices();
 builder.Services.ConfigureGraphql();
+builder.Services.ConfigureSwaggerServices();
+
 
 // CORS for React application
 builder.Services.AddCors(options =>
@@ -51,7 +55,7 @@ using (var scope = app.Services.CreateScope())
     await SeedRoles(services); // Call the method to seed roles
 }
 
-// Configure the HTTP request pipeline.
+/// Configure the HTTP request pipeline.
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
@@ -59,17 +63,21 @@ app.UseSwaggerUI(c =>
 });
 app.UseHttpsRedirection();
 app.UseCors("AllowSpecificOrigin");
-app.UseAuthentication();
-app.UseRouting();
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapGraphQL("/graphql");
-});
+
+
+app.UseAuthentication(); 
+app.UseRouting();       
+app.UseAuthorization();  
+
+app.MapGraphQL();
 app.UseMiddleware<RequestLoggingMiddleware>();
-app.UseAuthorization();
 app.MapControllers();
-app.UseExceptionHandler(options => { });
+app.MapPost("broadcast", async (string message, IHubContext<ChatHub, IChatClient> context) => {
+    await context.Clients.All.ReceiveMessage(message);
+    return Results.NoContent();
+});
 app.Run();
+
 
 static async Task SeedRoles(IServiceProvider serviceProvider)
 {
