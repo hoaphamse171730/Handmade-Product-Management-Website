@@ -22,25 +22,46 @@ public class CartService : ICartService
     public async Task<CartModel?> GetCartByUserId(Guid userId)
     {
         var cart = await _unitOfWork.GetRepository<Cart>().Entities
-                   .Where(x => x.UserId == userId && x.DeletedTime == null)
-                   .Include(c => c.CartItems)
-                   .FirstOrDefaultAsync();
+            .Where(x => x.UserId == userId && x.DeletedTime == null)
+            .Include(c => c.CartItems)
+                .ThenInclude(ci => ci.ProductItem)
+                    .ThenInclude(pi => pi.Product)
+                        .ThenInclude(p => p.Category)
+            .FirstOrDefaultAsync();
 
         if (cart == null)
         {
             throw new BaseException.CoreException("cart_not_found", $"Cart not found for user ID {userId}", (int)StatusCodeHelper.NotFound);
         }
 
+        var cartItemModels = cart.CartItems
+            .Where(ci => ci.DeletedTime == null)
+            .Select(ci =>
+            {
+                // Assuming the promotion is fetched based on the product's category
+                var promotion = _unitOfWork.GetRepository<Promotion>().Entities
+                    .Where(p => p.Categories.Any(c => c.Id == ci.ProductItem.Product.CategoryId) && p.Status == "active")
+                    .FirstOrDefault();
+
+                var unitPrice = ci.ProductItem.Price;
+                var discountPrice = promotion != null ? unitPrice - (int)(unitPrice * promotion.DiscountRate) : unitPrice;
+
+                return new CartItemModel
+                {
+                    CartItemId = ci.Id,
+                    ProductItemId = ci.ProductItemId,
+                    ProductQuantity = ci.ProductQuantity,
+                    UnitPrice = unitPrice,
+                    DiscountPrice = discountPrice,
+                    TotalPriceEachProduct = discountPrice*ci.ProductQuantity
+                };
+            }).ToList();
+
         return new CartModel
         {
             CartId = cart.Id,
             UserId = cart.UserId,
-            CartItems = cart.CartItems.Where(ci => ci.DeletedTime == null).Select(ci => new CartItemModel
-            {
-                CartItemId = ci.Id,
-                ProductItemId = ci.ProductItemId,
-                ProductQuantity = ci.ProductQuantity
-            }).ToList()
+            CartItems = cartItemModels
         };
     }
 
