@@ -16,7 +16,7 @@ public class CartItemService : ICartItemService
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<BaseResponse<bool>> AddCartItem(string cartId, CreateCartItemDto createCartItemDto)
+    public async Task<bool> AddCartItem(string cartId, CreateCartItemDto createCartItemDto)
     {
         Console.WriteLine($"Attempting to add item to cart: {cartId}, ProductItem: {createCartItemDto.ProductItemId}");
 
@@ -65,7 +65,7 @@ public class CartItemService : ICartItemService
         try
         {
             await _unitOfWork.SaveAsync();
-            return BaseResponse<bool>.OkResponse(true);
+            return true;
         }
         catch
         {
@@ -73,7 +73,7 @@ public class CartItemService : ICartItemService
         }
     }
 
-    public async Task<BaseResponse<bool>> UpdateCartItem(string cartItemId, int productQuantity)
+    public async Task<bool> UpdateCartItem(string cartItemId, int productQuantity)
     {
         if (productQuantity < 0)
         {
@@ -112,7 +112,7 @@ public class CartItemService : ICartItemService
         try
         {
             await _unitOfWork.SaveAsync();
-            return BaseResponse<bool>.OkResponse(true);
+            return true;
         }
         catch
         {
@@ -120,7 +120,7 @@ public class CartItemService : ICartItemService
         }
     }
 
-    public async Task<BaseResponse<bool>> RemoveCartItem(string cartItemId)
+    public async Task<bool> RemoveCartItem(string cartItemId)
     {
         var cartItemRepo = _unitOfWork.GetRepository<CartItem>();
         var cartItem = await cartItemRepo.Entities
@@ -137,7 +137,7 @@ public class CartItemService : ICartItemService
         try
         {
             await _unitOfWork.SaveAsync();
-            return BaseResponse<bool>.OkResponse(true);
+            return true;
         }
         catch
         {
