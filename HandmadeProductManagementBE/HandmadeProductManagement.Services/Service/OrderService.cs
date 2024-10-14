@@ -200,13 +200,13 @@ namespace HandmadeProductManagement.Services.Service
                     CancelReasonId = order.CancelReasonId,
                     OrderDetails = orderDetailRepository.Entities
                         .Where(od => od.OrderId == order.Id && !od.DeletedTime.HasValue)
-                        .Select(od => new OrderDetailDto
+                        .Select(od => new OrderDetailResponseModel
                         {
                             Id = od.Id,
                             ProductItemId = od.ProductItemId,
                             OrderId = od.OrderId,
                             ProductQuantity = od.ProductQuantity,
-                            DiscountPrice = od.DiscountPrice,
+                            Price = od.DiscountPrice,
                         }).ToList()
                 })
                 .ToListAsync();
@@ -237,19 +237,13 @@ namespace HandmadeProductManagement.Services.Service
             var orderDetailRepository = _unitOfWork.GetRepository<OrderDetail>();
             var orderDetails = await orderDetailRepository.Entities
                 .Where(od => od.OrderId == orderId && !od.DeletedTime.HasValue)
-                .Select(od => new OrderDetailDto
+                .Select(od => new OrderDetailResponseModel
                 {
                     Id = od.Id,
                     ProductItemId = od.ProductItemId,
                     OrderId = od.OrderId,
                     ProductQuantity = od.ProductQuantity,
-                    DiscountPrice = od.DiscountPrice,
-                    CreatedBy = od.CreatedBy,
-                    LastUpdatedBy = od.LastUpdatedBy,
-                    DeletedBy = od.DeletedBy,
-                    CreatedTime = od.CreatedTime,
-                    LastUpdatedTime = od.LastUpdatedTime,
-                    DeletedTime = od.DeletedTime
+                    Price = od.DiscountPrice,
                 }).ToListAsync();
 
             return new OrderResponseModel
@@ -524,13 +518,13 @@ namespace HandmadeProductManagement.Services.Service
                     Phone = order.Phone,
                     Note = order.Note,
                     CancelReasonId = order.CancelReasonId,
-                    OrderDetails = order.OrderDetails.Select(od => new OrderDetailDto
+                    OrderDetails = order.OrderDetails.Select(od => new OrderDetailResponseModel
                     {
                         Id = od.Id,
                         ProductItemId = od.ProductItemId,
                         OrderId = od.OrderId,
                         ProductQuantity = od.ProductQuantity,
-                        DiscountPrice = od.DiscountPrice
+                        Price = od.DiscountPrice,
                     }).ToList()
                 }).ToListAsync();
 
