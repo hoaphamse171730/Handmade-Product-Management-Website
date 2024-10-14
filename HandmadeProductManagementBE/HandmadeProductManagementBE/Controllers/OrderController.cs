@@ -96,21 +96,21 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
-        [Authorize]
-        [HttpPost]
-        public async Task<IActionResult> CreateOrder([FromBody] CreateOrderDto createOrder)
-        {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            var order = await _orderService.CreateOrderAsync(userId, createOrder);
-            var response = new BaseResponse<bool>
-            {
-                Code = "Success",
-                StatusCode = StatusCodeHelper.OK,
-                Message = "Order created successfully",
-                Data = order
-            };
-            return Ok(response);
-        }
+        //[Authorize]
+        //[HttpPost]
+        //public async Task<IActionResult> CreateOrder([FromBody] CreateOrderDto createOrder)
+        //{
+        //    var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        //    var order = await _orderService.CreateOrderAsync(userId, createOrder);
+        //    var response = new BaseResponse<bool>
+        //    {
+        //        Code = "Success",
+        //        StatusCode = StatusCodeHelper.OK,
+        //        Message = "Order created successfully",
+        //        Data = order
+        //    };
+        //    return Ok(response);
+        //}
 
         [Authorize]
         [HttpPut("{orderId}")]

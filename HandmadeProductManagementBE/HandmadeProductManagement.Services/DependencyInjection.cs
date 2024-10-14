@@ -31,6 +31,7 @@ namespace HandmadeProductManagement.Services
             services.AddScoped<IProductItemService, ProductItemService>();
             services.AddScoped<IProductConfigurationService, ProductConfigurationService>();
             services.AddScoped<IUserInfoService, UserInfoService>();
+            services.AddScoped<ICartItemService, CartItemService>();
         }
 
     }

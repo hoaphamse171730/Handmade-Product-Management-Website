@@ -42,7 +42,6 @@ namespace HandmadeProductManagement.Services.Service
                     LastUpdatedTime = user.LastUpdatedTime,
                     DeletedTime = user.DeletedTime,
                     Status = user.Status,
-                    CartId = user.CartId,
                 })
                 .ToListAsync();
 
@@ -79,7 +78,6 @@ namespace HandmadeProductManagement.Services.Service
                     LockoutEnd = user.LockoutEnd,
                     LockoutEnabled = user.LockoutEnabled,
                     AccessFailedCount = user.AccessFailedCount,
-                    CartId = user.CartId,
 
                 })
                 .FirstOrDefaultAsync();
