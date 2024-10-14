@@ -34,6 +34,7 @@ public class CartItemService : ICartItemService
         var cart = await cartRepo.Entities
             .Include(c => c.CartItems)
             .SingleOrDefaultAsync(c => c.Id == cartId);
+
         if (cart == null)
         {
             throw new BaseException.NotFoundException("cart_not_found", $"Cart {cartId} not found.");

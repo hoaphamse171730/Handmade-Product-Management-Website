@@ -147,7 +147,6 @@ namespace HandmadeProductManagement.Services.Service
             }
         }
 
-
         public async Task<PaginatedList<OrderResponseModel>> GetOrdersByPageAsync(int pageNumber, int pageSize)
         {
             var repository = _unitOfWork.GetRepository<Order>();
@@ -174,7 +173,7 @@ namespace HandmadeProductManagement.Services.Service
 
             return new PaginatedList<OrderResponseModel>(orders, totalItems, pageNumber, pageSize);
         }
-        public async Task<OrderResponseModel> GetOrderByIdAsync(string orderId)
+        public async Task<OrderResponseModel> GetOrderByIdAsync(string orderId, string userId)
         {
             if (string.IsNullOrWhiteSpace(orderId))
             {
@@ -189,6 +188,11 @@ namespace HandmadeProductManagement.Services.Service
             var repository = _unitOfWork.GetRepository<Order>();
             var order = await repository.Entities
                 .FirstOrDefaultAsync(o => o.Id == orderId && !o.DeletedTime.HasValue);
+
+            if(order.CreatedBy != userId)
+            {
+                throw new BaseException.ForbiddenException("forbidden", $"You have no permission to access this resource.");
+            }
 
             if (order == null)
             {
@@ -240,6 +244,11 @@ namespace HandmadeProductManagement.Services.Service
             var existingOrder = await repository.Entities
                 .FirstOrDefaultAsync(o => o.Id == orderId && !o.DeletedTime.HasValue);
 
+            //if (existingOrder.CreatedBy != userId)
+            //{
+            //    throw new BaseException.ForbiddenException("forbidden", $"You have no permission to access this resource.");
+            //}
+
             if (existingOrder == null)
             {
                 throw new BaseException.NotFoundException("order_not_found", "Order not found.");
@@ -247,7 +256,7 @@ namespace HandmadeProductManagement.Services.Service
 
             if (existingOrder.Status != "Pending" && existingOrder.Status != "Awaiting Payment")
             {
-                throw new BaseException.ErrorException(400,"invalid_order_status", "Order is processing, can not update.");
+                throw new BaseException.BadRequestException("invalid_order_status", "Order is processing, can not update.");
             }
 
             if (!string.IsNullOrWhiteSpace(order.Address))
@@ -317,6 +326,11 @@ namespace HandmadeProductManagement.Services.Service
                     Note = order.Note,
                     CancelReasonId = order.CancelReasonId
                 }).ToListAsync();
+
+            if (!orders.Any())
+            {
+                throw new BaseException.NotFoundException("not_found", "There is no order.");
+            }
 
             return orders;
         }

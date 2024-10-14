@@ -138,7 +138,7 @@ namespace HandmadeProductManagementAPI.Controllers
                 Code = "200",
                 StatusCode = StatusCodeHelper.OK,
                 Message = "Product soft-deleted successfully",
-                Data = await _productService.SoftDelete(id, userId);
+                Data = await _productService.SoftDelete(id, userId)
             };
             return Ok(response);
         }
