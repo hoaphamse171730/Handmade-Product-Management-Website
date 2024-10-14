@@ -7,9 +7,7 @@ using HandmadeProductManagement.ModelViews.ProductModelViews;
 using Microsoft.EntityFrameworkCore;
 using AutoMapper;
 using FluentValidation;
-using Microsoft.IdentityModel.Tokens;
 using HandmadeProductManagement.ModelViews.VariationCombinationModelViews;
-using Firebase.Auth;
 
 namespace HandmadeProductManagement.Services.Service
 {
@@ -176,11 +174,9 @@ namespace HandmadeProductManagement.Services.Service
                     LastUpdatedBy = userId
                 };
 
-                // Insert ProductItem
                 await _unitOfWork.GetRepository<ProductItem>().InsertAsync(productItem);
                 await _unitOfWork.SaveAsync();
 
-                // Create ProductConfiguration for each VariationOption in the combination
                 foreach (var variationOptionId in combination.VariationOptionIds)
                 {
                     var productConfiguration = new ProductConfiguration
@@ -189,11 +185,9 @@ namespace HandmadeProductManagement.Services.Service
                         VariationOptionId = variationOptionId
                     };
 
-                    // Insert ProductConfiguration
                     await _unitOfWork.GetRepository<ProductConfiguration>().InsertAsync(productConfiguration);
                 }
 
-                // Save ProductConfiguration changes
                 await _unitOfWork.SaveAsync();
             }
         }
