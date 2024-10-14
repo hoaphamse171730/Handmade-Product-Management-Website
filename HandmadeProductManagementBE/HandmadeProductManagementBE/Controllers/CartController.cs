@@ -43,12 +43,13 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpPost("item/add/{cartId}")]
         public async Task<IActionResult> AddCartItem(string cartId, [FromBody] CreateCartItemDto createCartItemDto)
         {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             var response = new BaseResponse<bool>
             {
                 Code = "200",
                 StatusCode = StatusCodeHelper.OK,
                 Message = "Success",
-                Data = await _cartItemService.AddCartItem(cartId, createCartItemDto)
+                Data = await _cartItemService.AddCartItem(cartId, createCartItemDto, userId)
             };
             return Ok(response);
         }
@@ -58,12 +59,13 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpPut("item/updateQuantity/{cartItemId}")]
         public async Task<IActionResult> UpdateCartItem(string cartItemId, [FromBody] int productQuantity)
         {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             var response = new BaseResponse<bool>
             {
                 Code = "200",
                 StatusCode = StatusCodeHelper.OK,
                 Message = "Success",
-                Data = await _cartItemService.UpdateCartItem(cartItemId, productQuantity)
+                Data = await _cartItemService.UpdateCartItem(cartItemId, productQuantity, userId)
             };
             return Ok(response);
         }
@@ -73,12 +75,13 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpDelete("item/{cartItemId}")]
         public async Task<IActionResult> RemoveCartItem(string cartItemId)
         {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             var response = new BaseResponse<bool>
             {
                 Code = "200",
                 StatusCode = StatusCodeHelper.OK,
                 Message = "Success",
-                Data = await _cartItemService.DeleteCartItemByIdAsync(cartItemId)
+                Data = await _cartItemService.DeleteCartItemByIdAsync(cartItemId, userId)
             };
             return Ok(response);
         }

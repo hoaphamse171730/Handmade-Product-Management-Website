@@ -136,19 +136,29 @@ namespace HandmadeProductManagementAPI.Controllers
         [Authorize(Roles = "Seller")]
         public async Task<IActionResult> UpdateProduct(string id, [FromBody] ProductForUpdateDto product)
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-
-            var updateResult = await _productService.Update(id, product, userId);
-
-            var response = new BaseResponse<bool>
+            try
             {
-                Code = "200",
-                StatusCode = StatusCodeHelper.OK,
-                Message = "Product updated successfully.",
-                Data = updateResult
-            };
+                var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                var response = new BaseResponse<bool>
+                {
+                    Code = "200",
+                    StatusCode = StatusCodeHelper.OK,
+                    Message = "Product updated successfully.",
+                    Data = await _productService.Update(id, product, userId)
+                };
 
-            return Ok(response);
+                return Ok(response);
+            }
+            catch (DbUpdateException ex)
+            {
+                return StatusCode(500, new BaseResponse<string>
+                {
+                    Code = "500",
+                    StatusCode = StatusCodeHelper.ServerError,
+                    Message = "An error occurred while updating the product.",
+                    Data = ex.InnerException?.Message ?? ex.Message
+                });
+            }
         }
 
 

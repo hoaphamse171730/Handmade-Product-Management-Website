@@ -122,7 +122,7 @@ namespace HandmadeProductManagement.Services.Service
                         };
 
                         await _orderDetailService.Create(orderDetail);
-                        await _cartItemService.DeleteCartItemByIdAsync(cartItem.Id);
+                        await _cartItemService.DeleteCartItemByIdAsync(cartItem.Id, userId);
                     }
 
                     await _unitOfWork.SaveAsync();
