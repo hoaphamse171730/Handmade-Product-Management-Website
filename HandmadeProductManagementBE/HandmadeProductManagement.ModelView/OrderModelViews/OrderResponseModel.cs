@@ -14,6 +14,6 @@ namespace HandmadeProductManagement.ModelViews.OrderModelViews
         public string? Phone { get; set; } = string.Empty;
         public string? Note { get; set; }
         public string? CancelReasonId { get; set; }
-        public List<OrderDetailDto> OrderDetails { get; set; } = new List<OrderDetailDto>();
+        public List<OrderDetailResponseModel> OrderDetails { get; set; } = new List<OrderDetailResponseModel>();
     }
 }
