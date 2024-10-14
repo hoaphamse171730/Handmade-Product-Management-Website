@@ -375,17 +375,26 @@ namespace HandmadeProductManagement.Services.Service
                 .OrderBy(s => s.ChangeTime) // Sắp xếp theo thời gian thay đổi trạng thái (tăng dần)
                 .ToListAsync();
 
+            // Định nghĩa múi giờ UTC+7 (Vietnam)
+            var vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+
             // Tạo thông báo phản hồi
-            var notifications = status.Select(status => new NotificationModel
-            {
-                Id = status.Id,
-                Message = $"Đơn hàng của bạn được {status.Status} lúc {status.ChangeTime.ToString("dd/MM/yyyy HH:mm")}",
-                Tag = "StatusChange",
-                URL = Url + $"/api/statuschange/order/{status.OrderId}"
+            var notifications = status.Select(status => {
+                // Chuyển đổi thời gian từ UTC sang UTC+7
+                var changeTimeInVietnam = TimeZoneInfo.ConvertTimeFromUtc(status.ChangeTime, vietnamTimeZone);
+
+                return new NotificationModel
+                {
+                    Id = status.Id,
+                    Message = $"Đơn hàng của bạn được {status.Status} lúc {changeTimeInVietnam.ToString("dd/MM/yyyy HH:mm")}",
+                    Tag = "StatusChange",
+                    URL = Url + $"/api/statuschange/order/{status.OrderId}"
+                };
             }).ToList();
 
             return notifications;
         }
+
 
 
 
