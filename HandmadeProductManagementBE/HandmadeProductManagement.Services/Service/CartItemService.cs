@@ -54,13 +54,12 @@ namespace HandmadeProductManagement.Services.Service
             if (existingCartItem != null)
             {
                 existingCartItem.ProductQuantity += createCartItemDto.ProductQuantity.Value;
-                existingCartItem.LastUpdatedTime = CoreHelper.SystemTimeNow;
+                existingCartItem.LastUpdatedTime = DateTime.UtcNow;
             }
             else
             {
                 var cartItem = new CartItem
                 {
-                    Id = Guid.NewGuid().ToString(),
                     ProductItemId = productItem.Id,
                     ProductQuantity = createCartItemDto.ProductQuantity.Value,
                     UserId = Guid.Parse(userId),
@@ -121,13 +120,45 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<List<CartItemDto>> GetCartItemsByUserIdAsync(string userId)
         {
+            var userIdGuid = Guid.Parse(userId);
+
             var cartItems = await _unitOfWork.GetRepository<CartItem>()
                 .Entities
-                .Where(ci => ci.UserId == Guid.Parse(userId) && ci.DeletedTime == null)
+                .Include(ci => ci.ProductItem)
+                    .ThenInclude(pi => pi.Product)
+                        .ThenInclude(p => p.Category)
+                            .ThenInclude(cat => cat.Promotion)
+                .Where(ci => ci.UserId == userIdGuid && ci.DeletedTime == null)
                 .ToListAsync();
 
-            return _mapper.Map<List<CartItemDto>>(cartItems);
+            if (!cartItems.Any())
+            {
+                throw new BaseException.NotFoundException("not_found", "There is nothing in your cart.");
+            }
+
+            var cartItemDtos = cartItems.Select(ci =>
+            {
+                var promotion = ci.ProductItem.Product.Category.Promotion;
+                var unitPrice = ci.ProductItem.Price;
+                var discountPrice = promotion != null && promotion.Status == "Active"
+                    ? unitPrice - (int)(unitPrice * promotion.DiscountRate)
+                    : unitPrice;
+
+                return new CartItemDto
+                {
+                    Id = ci.Id,
+                    ProductItemId = ci.ProductItemId,
+                    ProductQuantity = ci.ProductQuantity,
+                    UnitPrice = unitPrice,
+                    DiscountPrice = discountPrice,
+                    TotalPriceEachProduct = discountPrice * ci.ProductQuantity,
+                    UserId = ci.UserId
+                };
+            }).ToList();
+
+            return cartItemDtos;
         }
+
 
         public async Task<bool> DeleteCartItemByIdAsync(string cartItemId, string userId)
         {
@@ -147,9 +178,20 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<Decimal> GetTotalCartPrice(string userId)
         {
+            await _promotionService.UpdatePromotionStatusByRealtime(userId);
+
+            if (!Guid.TryParse(userId, out Guid userIdGuid))
+            {
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Invalid userId");
+            }
+
             var cartItems = await _unitOfWork.GetRepository<CartItem>()
                 .Entities
-                .Where(ci => ci.UserId == Guid.Parse(userId) && ci.DeletedTime == null)
+                .Include(ci => ci.ProductItem)
+                .ThenInclude(pi => pi.Product)
+                .ThenInclude(p => p.Category)
+                .ThenInclude(cat => cat.Promotion)
+                .Where(ci => ci.UserId == userIdGuid && ci.DeletedTime == null)
                 .ToListAsync();
 
             if (cartItems.Count == 0)
@@ -161,17 +203,25 @@ namespace HandmadeProductManagement.Services.Service
 
             foreach (var cartItem in cartItems)
             {
-                var productItem = await _unitOfWork.GetRepository<ProductItem>()
-                    .Entities
-                    .SingleOrDefaultAsync(pi => pi.Id == cartItem.ProductItemId);
+                var productItemPrice = cartItem.ProductItem.Price;
+                var productQuantity = cartItem.ProductQuantity;
 
-                if (productItem != null)
+                var promotion = cartItem.ProductItem.Product.Category.Promotion;
+                decimal discountRate = 1;
+
+                if (promotion != null)
                 {
-                    totalPrice += cartItem.ProductQuantity * productItem.Price;
+                    await _promotionService.UpdatePromotionStatusByRealtime(promotion.Id);
+                    if (promotion.Status == "active")
+                    {
+                        discountRate = 1 - (decimal)promotion.DiscountRate;
+                    }
                 }
+                totalPrice += productItemPrice * productQuantity * discountRate;
             }
 
             return totalPrice;
         }
+
     }
 }

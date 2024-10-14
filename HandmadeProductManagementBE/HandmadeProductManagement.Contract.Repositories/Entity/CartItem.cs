@@ -7,7 +7,7 @@ namespace HandmadeProductManagement.Contract.Repositories.Entity
     {
         public Guid UserId { get; set; }
         public int ProductQuantity { get; set; }
-        public string ProductItemId { get; set; } = string.Empty;
+        public string ProductItemId { get; set; }
         public ProductItem ProductItem { get; set; }
         public ApplicationUser? User { get; set; }
     }
