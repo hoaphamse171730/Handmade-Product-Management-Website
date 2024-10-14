@@ -18,16 +18,19 @@ namespace HandmadeProductManagement.Services.Service
         private readonly IStatusChangeService _statusChangeService;
         private readonly IOrderDetailService _orderDetailService;
         private readonly ICartItemService _cartItemService;
+        private readonly IProductService _productService;
 
         public OrderService(IUnitOfWork unitOfWork, 
             IStatusChangeService statusChangeService, 
             IOrderDetailService orderDetailService, 
-            ICartItemService cartItemService)
+            ICartItemService cartItemService,
+            IProductService productService)
         {
             _unitOfWork = unitOfWork;
             _statusChangeService = statusChangeService;
             _orderDetailService = orderDetailService;
             _cartItemService = cartItemService;
+            _productService = productService;
         }
 
         public async Task<bool> CreateOrderAsync(string userId, CreateOrderDto createOrder)
@@ -39,11 +42,20 @@ namespace HandmadeProductManagement.Services.Service
             var productItemRepository = _unitOfWork.GetRepository<ProductItem>();
             var productRepository = _unitOfWork.GetRepository<Product>();
 
+            //get cart items by user id
             var cartItems = await _cartItemService.GetCartItemsByUserIdAsync(userId);
             if (cartItems.Count == 0)
             {
                 throw new BaseException.NotFoundException("empty_cart", "Cart is empty.");
             }
+
+            var promotionRepository = _unitOfWork.GetRepository<Promotion>();
+            var categoryRepository = _unitOfWork.GetRepository<Category>();
+
+            //get active promotions
+            var activePromotions = await promotionRepository.Entities
+                .Where(p => p.Status == "Active" && DateTime.UtcNow >= p.StartDate && DateTime.UtcNow <= p.EndDate)
+                .ToListAsync();
 
             var groupedOrderDetails = new List<GroupedOrderDetail>();
 
@@ -65,11 +77,28 @@ namespace HandmadeProductManagement.Services.Service
                     throw new BaseException.NotFoundException("product_not_found", $"Product for Item {productItem.Id} not found.");
                 }
 
+                var category = await categoryRepository.Entities
+                    .FirstOrDefaultAsync(c => c.Id == product.CategoryId);
+
+                decimal finalPrice = productItem.Price;
+                if (category != null && !string.IsNullOrWhiteSpace(category.PromotionId))
+                {
+                    // Check if the product has a promotion
+                    var applicablePromotion = activePromotions
+                        .FirstOrDefault(p => p.Id == category.PromotionId);
+
+                    if (applicablePromotion != null)
+                    {
+                        finalPrice = productItem.Price - (productItem.Price * applicablePromotion.DiscountRate);
+                    }
+                }
+
                 groupedOrderDetails.Add(new GroupedOrderDetail
                 {
                     ShopId = product.ShopId,
                     CartItem = cartItem,
-                    ProductItem = productItem
+                    ProductItem = productItem,
+                    DiscountPrice = finalPrice,
                 });
             }
 
@@ -82,7 +111,7 @@ namespace HandmadeProductManagement.Services.Service
             {
                 foreach (var shopGroup in groupedByShop)
                 {
-                    var totalPrice = shopGroup.Sum(x => x.ProductItem.Price * x.CartItem.ProductQuantity);
+                    var totalPrice = shopGroup.Sum(x => x.DiscountPrice * x.CartItem.ProductQuantity);
                     var order = new Order
                     {
                         TotalPrice = (decimal)totalPrice,
@@ -118,7 +147,7 @@ namespace HandmadeProductManagement.Services.Service
                             OrderId = order.Id,
                             ProductItemId = productItem.Id,
                             ProductQuantity = cartItem.ProductQuantity,
-                            DiscountPrice = productItem.Price // Sử dụng giá từ ProductItem
+                            DiscountPrice = groupedDetail.DiscountPrice,
                         };
 
                         await _orderDetailService.Create(orderDetail);
@@ -150,6 +179,8 @@ namespace HandmadeProductManagement.Services.Service
         public async Task<PaginatedList<OrderResponseModel>> GetOrdersByPageAsync(int pageNumber, int pageSize)
         {
             var repository = _unitOfWork.GetRepository<Order>();
+            var orderDetailRepository = _unitOfWork.GetRepository<OrderDetail>();
+
             var query = repository.Entities.Where(order => !order.DeletedTime.HasValue);
 
             var totalItems = await query.CountAsync();
@@ -168,6 +199,16 @@ namespace HandmadeProductManagement.Services.Service
                     Phone = order.Phone,
                     Note = order.Note,
                     CancelReasonId = order.CancelReasonId,
+                    OrderDetails = orderDetailRepository.Entities
+                        .Where(od => od.OrderId == order.Id && !od.DeletedTime.HasValue)
+                        .Select(od => new OrderDetailDto
+                        {
+                            Id = od.Id,
+                            ProductItemId = od.ProductItemId,
+                            OrderId = od.OrderId,
+                            ProductQuantity = od.ProductQuantity,
+                            DiscountPrice = od.DiscountPrice,
+                        }).ToList()
                 })
                 .ToListAsync();
 
@@ -467,6 +508,12 @@ namespace HandmadeProductManagement.Services.Service
 
                 repository.Update(existingOrder);
                 await _statusChangeService.Create(statusChangeDto, userId);
+
+                // Update product sold count if the new status is "Shipped"
+                if (updateStatusOrderDto.Status == "Shipped")
+                {
+                    await _productService.UpdateProductSoldCountAsync(updateStatusOrderDto.OrderId);
+                }
 
                 await _unitOfWork.SaveAsync();
                 _unitOfWork.CommitTransaction();

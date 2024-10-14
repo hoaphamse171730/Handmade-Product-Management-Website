@@ -21,15 +21,17 @@ namespace HandmadeProductManagement.Services.Service
         private readonly IValidator<ProductForCreationDto> _creationValidator;
         private readonly IValidator<ProductForUpdateDto> _updateValidator;
         private readonly IValidator<VariationCombinationDto> _variationCombinationValidator;
+        private readonly IPromotionService _promotionService;
 
         public ProductService(IUnitOfWork unitOfWork, IMapper mapper,
-            IValidator<ProductForCreationDto> creationValidator, IValidator<ProductForUpdateDto> updateValidator, IValidator<VariationCombinationDto> variationCombinationValidator)
+            IValidator<ProductForCreationDto> creationValidator, IValidator<ProductForUpdateDto> updateValidator, IValidator<VariationCombinationDto> variationCombinationValidator, IPromotionService promotionService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _creationValidator = creationValidator;
             _updateValidator = updateValidator;
             _variationCombinationValidator = variationCombinationValidator;
+            _promotionService = promotionService;
         }
 
         public async Task<bool> Create(ProductForCreationDto productDto, string userId)
@@ -629,10 +631,13 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.NotFoundException("product_not_found", "Product not found.");
             }
 
+            var promotionExist = await _unitOfWork.GetRepository<Promotion>().Entities.FirstOrDefaultAsync(p => p.Categories.Any(c => c.Id == product.CategoryId));
+
+                await _promotionService.UpdatePromotionStatusByRealtime(promotionExist.Id);
+
             var promotion = await _unitOfWork.GetRepository<Promotion>().Entities
                 .FirstOrDefaultAsync(p => p.Categories.Any(c => c.Id == product.CategoryId) &&
-                                          p.StartDate <= DateTime.UtcNow &&
-                                          p.EndDate >= DateTime.UtcNow);
+                                          p.Status == "active");
 
             var response = new ProductDetailResponseModel
             {
@@ -652,7 +657,7 @@ namespace HandmadeProductManagement.Services.Service
                     Id = pi.Id,
                     QuantityInStock = pi.QuantityInStock,
                     Price = pi.Price,
-                    DiscountedPrice = promotion != null ? (int)(pi.Price * (1 - promotion.DiscountRate/100)) : null,
+                    DiscountedPrice = promotion != null ? (int)(pi.Price * (1 - promotion.DiscountRate)) : null,
                     Configurations = pi.ProductConfigurations.Select(pc => new ProductConfigurationDetailModel
                     {
                         VariationName = pc.VariationOption.Variation.Name,
@@ -712,6 +717,33 @@ namespace HandmadeProductManagement.Services.Service
             return averageRating;
         }
 
+        public async Task UpdateProductSoldCountAsync(string orderId)
+        {
+            var order = await _unitOfWork.GetRepository<Order>().Entities
+                .Include(o => o.OrderDetails)
+                .ThenInclude(od => od.ProductItem)
+                .ThenInclude(pi => pi.Product)
+                .FirstOrDefaultAsync(o => o.Id == orderId);
+
+            if (order == null)
+            {
+                throw new BaseException.NotFoundException("order_not_found", "Order not found.");
+            }
+
+            if (order.Status != "Shipped")
+            {
+                return; // Only update soldCount when the order status is "Shipped"
+            }
+
+            foreach (var orderDetail in order.OrderDetails)
+            {
+                var product = orderDetail.ProductItem.Product;
+                product.SoldCount += orderDetail.ProductQuantity;
+                await _unitOfWork.GetRepository<Product>().UpdateAsync(product);
+            }
+
+            await _unitOfWork.SaveAsync();
+        }
     }
 }
 

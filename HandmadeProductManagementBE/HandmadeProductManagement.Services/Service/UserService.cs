@@ -10,6 +10,7 @@ using HandmadeProductManagement.ModelViews.NotificationModelViews;
 using HandmadeProductManagement.Contract.Repositories.Entity;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Http;
+using HandmadeProductManagement.Core.Utils;
 namespace HandmadeProductManagement.Services.Service
 {
     public class UserService : IUserService
@@ -190,6 +191,7 @@ namespace HandmadeProductManagement.Services.Service
             return true;
         }
 
+
         public async Task<IList<NotificationModel>> GetNotificationList(string Id)
         {
             if (!Guid.TryParse(Id, out Guid userId))
@@ -219,7 +221,7 @@ namespace HandmadeProductManagement.Services.Service
                 Id = review.Id,
                 Message = $"Sản phẩm của bạn đã được {review.User.UserName} review",
                 Tag = "Review",
-                URL = $"api/review/{review.Id}"
+                URL = $"/api/review/{review.Id}"
             }).ToList();
 
             return notifications;
@@ -227,16 +229,18 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<IList<NotificationModel>> GetNewOrderNotificationList(string Id)
         {
-
             if (!Guid.TryParse(Id, out Guid userId))
             {
                 throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Invalid userID");
             }
+
             var urlroot = "https://localhost:7159";
-            // Lấy danh sách đơn hàng của người dùng
+
+            // Lấy danh sách đơn hàng của người dùng, sắp xếp theo LastUpdatedTime (tăng dần)
             var orders = await _unitOfWork.GetRepository<Order>()
                 .Entities
                 .Where(o => o.UserId == userId)
+                .OrderBy(o => o.LastUpdatedTime) // Sắp xếp theo LastUpdatedTime tăng dần
                 .Include(o => o.User)
                 .ToListAsync();
 
@@ -244,14 +248,13 @@ namespace HandmadeProductManagement.Services.Service
             var notifications = orders.Select(order => new NotificationModel
             {
                 Id = order.Id,
-                Message = $"Bạn có đơn hàng mới từ {order.CustomerName} với trạng thái: {order.Status} vào ngày: {order.OrderDate.ToString("dd/MM/yyyy")}",
+                Message = $"Bạn có đơn hàng mới từ {order.CustomerName} với trạng thái: {order.Status} vào ngày: {order.LastUpdatedTime.ToString("dd/MM/yyyy")}",
                 Tag = "Order",
-                URL = urlroot + $"api/order/{order.Id}"
+                URL = urlroot + $"/api/order/{order.Id}"
             }).ToList();
 
             return notifications;
         }
-
 
         public async Task<IList<NotificationModel>> GetNewReplyNotificationList(string Id)
         {
@@ -270,13 +273,16 @@ namespace HandmadeProductManagement.Services.Service
             {
                 return new List<NotificationModel>();
             }
+
             var urlroot = "https://localhost:7159";
-            // Lấy tất cả các reply mới cho những review của khách hàng
+
+            // Lấy tất cả các reply mới cho những review của khách hàng, sắp xếp theo thời gian tạo reply (tăng dần)
             var replies = await _unitOfWork.GetRepository<Reply>()
                 .Entities
                 .Where(rep => reviews.Select(r => r.Id).Contains(rep.ReviewId) && rep.Date >= DateTime.UtcNow.AddDays(-2)) // Lọc theo thời gian tạo reply trong 2 ngày gần nhất
                 .Include(rep => rep.Review) // Bao gồm review
                 .ThenInclude(r => r.Product) // Bao gồm sản phẩm
+                .OrderBy(rep => rep.Date) // Sắp xếp theo thời gian tạo reply (tăng dần)
                 .ToListAsync();
 
             if (replies == null || !replies.Any())
@@ -290,12 +296,11 @@ namespace HandmadeProductManagement.Services.Service
                 Id = reply.Id,
                 Message = $"Bạn đã nhận được phản hồi mới cho review sản phẩm {reply.Review.Product.Name}",
                 Tag = "Reply",
-                URL = urlroot + $"api/reply/{reply.Id}"
+                URL = urlroot + $"/api/reply/{reply.Id}"
             }).ToList();
 
             return replyNotifications;
         }
-
 
         public async Task<IList<NotificationModel>> GetNewReviewNotificationList(string Id)
         {
@@ -304,28 +309,32 @@ namespace HandmadeProductManagement.Services.Service
             {
                 throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Invalid userID");
             }
-
-            var shopIds = await _unitOfWork.GetRepository<Shop>()
+            var reviewID = await _unitOfWork.GetRepository<Review>()
                 .Entities
-                .Where(shop => shop.UserId == userId)
-                .Select(shop => shop.Id)
+                .Where(r => r.UserId == userId)
+                .Select(r => r.Id)
                 .ToListAsync();
 
-            if (shopIds.IsNullOrEmpty())
+            if (reviewID.IsNullOrEmpty())
             {
                 throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "User not found");
             }
 
+            var twoDaysAgo = DateTime.Now.AddDays(-2);
+
             var review = await _unitOfWork.GetRepository<Review>()
                 .Entities
-                .Where(r => r.UserId == userId && r.Reply == null)
-                .Include(r => r.User)
+                .Where(r => r.UserId == userId && r.Reply == null && r.Date >= twoDaysAgo)
+                .Include(r => r.Product)  // Nạp thông tin sản phẩm từ review
+                .ThenInclude(p => p.Shop)  // Nạp thông tin shop từ sản phẩm
+                .ThenInclude(s => s.User)  // Nạp thông tin user (chủ shop) từ shop
+                .ThenInclude(u => u.UserInfo) // Nạp thông tin UserInfo từ User (chủ shop)
                 .ToListAsync();
 
             var notifications = review.Select(review => new NotificationModel
             {
                 Id = review.Id,
-                Message = $"Sản phẩm của bạn đã được {review.User.UserName} review",
+                Message = $"Sản phẩm của bạn đã được {review.Product.Shop.User.UserInfo.FullName} review",
                 Tag = "Review",
                 URL = Url + $"api/review/{review.Id}"
             }).ToList();
@@ -347,29 +356,34 @@ namespace HandmadeProductManagement.Services.Service
                 .Select(o => o.Id)
                 .ToListAsync();
 
-            if (orders.IsNullOrEmpty())
+            if (orders == null || !orders.Any())
             {
                 throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "User not found");
             }
 
-            // Lấy status của orders
+            // Lấy status của orders, sắp xếp theo ChangeTime (tăng dần)
             var status = await _unitOfWork.GetRepository<StatusChange>()
                 .Entities
                 .Where(s => orders.Contains(s.OrderId))
                 .Include(s => s.Order)
+                .OrderBy(s => s.ChangeTime) // Sắp xếp theo thời gian thay đổi trạng thái (tăng dần)
                 .ToListAsync();
 
-            // Tạo thông báo phản hồi 
+            // Tạo thông báo phản hồi
             var notifications = status.Select(status => new NotificationModel
             {
                 Id = status.Id,
-                Message = $"Đơn hàng của bạn được {status.Status} lúc {status.ChangeTime}",
+                Message = $"Đơn hàng của bạn được {status.Status} lúc {status.ChangeTime.ToString("dd/MM/yyyy HH:mm")}",
                 Tag = "StatusChange",
-                URL = Url +  $"api/statuschange/order/{status.OrderId}"
+                URL = Url + $"/api/statuschange/order/{status.OrderId}"
             }).ToList();
 
             return notifications;
         }
+
+
+
+
         public async Task<bool> ReverseDeleteUser(string Id)
         {
             if (!Guid.TryParse(Id, out Guid userId))
