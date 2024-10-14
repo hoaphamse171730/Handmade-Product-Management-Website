@@ -35,10 +35,10 @@ namespace HandmadeProductManagementAPI.Controllers
         // PATCH api/userinfo
         [HttpPatch]
         [Authorize]
-        public async Task<IActionResult> PatchUserInfo([FromBody] UserInfoForUpdateDto patchDto)
+        public async Task<IActionResult> PatchUserInfo([FromForm]UserInfoUpdateRequest request)
         {
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            var updatedUserInfo = await _userInfoService.PatchUserInfoAsync(userId, patchDto);
+            var updatedUserInfo = await _userInfoService.PatchUserInfoAsync(userId, request);
             var response = new BaseResponse<bool>
             {
                 Code = "200",
