@@ -43,7 +43,7 @@ namespace HandmadeProductManagement.Services.Service
             var productRepository = _unitOfWork.GetRepository<Product>();
 
             // get cartitems
-            var cartItems = await _cartItemService.GetCartItemsByUserIdAsync(userId);
+            var cartItems = await _cartItemService.GetCartItemsByUserIdForOrderCreation(userId);
             if (cartItems.Count == 0)
             {
                 throw new BaseException.NotFoundException("empty_cart", "Cart is empty.");
@@ -52,9 +52,9 @@ namespace HandmadeProductManagement.Services.Service
             var promotionRepository = _unitOfWork.GetRepository<Promotion>();
             var categoryRepository = _unitOfWork.GetRepository<Category>();
 
-            // get promotion
+            // get promotions
             var activePromotions = await promotionRepository.Entities
-                .Where(p => p.Status == "Active" && DateTime.UtcNow >= p.StartDate && DateTime.UtcNow <= p.EndDate)
+                .Where(p => (p.Status == "active" || p.Status == "Active") && DateTime.UtcNow >= p.StartDate && DateTime.UtcNow <= p.EndDate)
                 .ToListAsync();
 
             var groupedOrderDetails = new List<GroupedOrderDetail>();
@@ -152,7 +152,7 @@ namespace HandmadeProductManagement.Services.Service
                         };
 
                         // create order detail
-                        await _orderDetailService.Create(orderDetail);
+                        await _orderDetailService.Create(orderDetail, userId);
 
                         // clear cart
                         await _cartItemService.DeleteCartItemByIdAsync(cartItem.Id, userId);

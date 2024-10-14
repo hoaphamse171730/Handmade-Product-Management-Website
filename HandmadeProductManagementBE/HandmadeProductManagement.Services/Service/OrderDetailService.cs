@@ -41,14 +41,14 @@ namespace HandmadeProductManagement.Services.Service
             return _mapper.Map<OrderDetailDto>(orderDetail);
         }
 
-        public async Task<OrderDetailDto> Create(OrderDetailForCreationDto orderDetailForCreation)
+        public async Task<OrderDetailDto> Create(OrderDetailForCreationDto orderDetailForCreation, string userId)
         {
             var validationResult = await _creationValidator.ValidateAsync(orderDetailForCreation);
             if (!validationResult.IsValid)
                 throw new ValidationException(validationResult.Errors);
             var orderDetailEntity = _mapper.Map<OrderDetail>(orderDetailForCreation);
-            orderDetailEntity.CreatedBy = "user";
-            orderDetailEntity.LastUpdatedBy = "user";
+            orderDetailEntity.CreatedBy = userId;
+            orderDetailEntity.LastUpdatedBy = userId;
             await _unitOfWork.GetRepository<OrderDetail>().InsertAsync(orderDetailEntity);
             await _unitOfWork.SaveAsync();
             return _mapper.Map<OrderDetailDto>(orderDetailEntity);

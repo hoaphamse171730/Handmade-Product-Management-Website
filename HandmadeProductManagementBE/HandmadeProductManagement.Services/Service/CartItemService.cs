@@ -140,7 +140,7 @@ namespace HandmadeProductManagement.Services.Service
             {
                 var promotion = ci.ProductItem.Product.Category.Promotion;
                 var unitPrice = ci.ProductItem.Price;
-                var discountPrice = promotion != null && promotion.Status == "active"
+                var discountPrice = promotion != null && promotion.Status.Equals("active", StringComparison.OrdinalIgnoreCase)
                     ? unitPrice - (int)(unitPrice * promotion.DiscountRate)
                     : unitPrice;
 
@@ -159,6 +159,43 @@ namespace HandmadeProductManagement.Services.Service
             return cartItemDtos;
         }
 
+        public async Task<List<CartItem>> GetCartItemsByUserIdForOrderCreation(string userId)
+        {
+            var userIdGuid = Guid.Parse(userId);
+
+            var cartItems = await _unitOfWork.GetRepository<CartItem>()
+                .Entities
+                .Include(ci => ci.ProductItem)
+                    .ThenInclude(pi => pi.Product)
+                        .ThenInclude(p => p.Category)
+                            .ThenInclude(cat => cat.Promotion)
+                .Where(ci => ci.UserId == userIdGuid && ci.DeletedTime == null)
+                .ToListAsync();
+
+            if (!cartItems.Any())
+            {
+                throw new BaseException.NotFoundException("not_found", "There is nothing in your cart.");
+            }
+
+            var cartItemDtos = cartItems.Select(ci =>
+            {
+                var promotion = ci.ProductItem.Product.Category.Promotion;
+                var unitPrice = ci.ProductItem.Price;
+                var discountPrice = promotion != null && promotion.Status.Equals("active", StringComparison.OrdinalIgnoreCase)
+                    ? unitPrice - (int)(unitPrice * promotion.DiscountRate)
+                    : unitPrice;
+
+                return new CartItem
+                {
+                    Id = ci.Id,
+                    ProductItemId = ci.ProductItemId,
+                    ProductQuantity = ci.ProductQuantity,
+                    UserId = ci.UserId
+                };
+            }).ToList();
+
+            return cartItemDtos;
+        }
 
         public async Task<bool> DeleteCartItemByIdAsync(string cartItemId, string userId)
         {
@@ -215,7 +252,7 @@ namespace HandmadeProductManagement.Services.Service
                 if (promotion != null)
                 {
                     await _promotionService.UpdatePromotionStatusByRealtime(promotion.Id);
-                    if (promotion.Status == "active")
+                    if (promotion.Status.Equals("active", StringComparison.OrdinalIgnoreCase))
                     {
                         discountRate = 1 - (decimal)promotion.DiscountRate;
                     }

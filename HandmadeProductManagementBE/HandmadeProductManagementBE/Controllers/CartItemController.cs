@@ -19,7 +19,8 @@ namespace HandmadeProductManagement.Controllers
             _cartItemService = cartItemService;
         }
 
-        [Authorize(Roles = "Customer")]
+        [Authorize]
+        //[Authorize(Roles = "Customer")]
         // GET: api/cartitem
         [HttpGet]
         public async Task<IActionResult> GetCartItems()
@@ -35,7 +36,8 @@ namespace HandmadeProductManagement.Controllers
             return Ok(response);
         }
 
-        [Authorize(Roles = "Customer")]
+        [Authorize]
+        //[Authorize(Roles = "Customer")]
         // POST: api/cartitem
         [HttpPost]
         public async Task<IActionResult> AddCartItem(CartItemForCreationDto createCartItemDto)
@@ -64,7 +66,8 @@ namespace HandmadeProductManagement.Controllers
             }
         }
 
-        [Authorize(Roles = "Customer")]
+        [Authorize]
+        //[Authorize(Roles = "Customer")]
         // PUT: api/cartitem/{cartItemId}
         [HttpPut("{cartItemId}")]
         public async Task<IActionResult> UpdateCartItem(string cartItemId, [FromBody] CartItemForUpdateDto updateCartItemDto)
@@ -93,7 +96,8 @@ namespace HandmadeProductManagement.Controllers
             }
         }
 
-        [Authorize(Roles = "Customer")]
+        [Authorize]
+        //[Authorize(Roles = "Customer")]
         // DELETE: api/cartitem/{cartItemId}
         [HttpDelete("{cartItemId}")]
         public async Task<IActionResult> DeleteCartItem(string cartItemId)
@@ -123,7 +127,8 @@ namespace HandmadeProductManagement.Controllers
             
         }
 
-        [Authorize(Roles = "Customer")]
+        [Authorize]
+        //[Authorize(Roles = "Customer")]
         // GET: api/cartitem/total
         [HttpGet("total")]
         public async Task<IActionResult> GetTotalCartPrice()
