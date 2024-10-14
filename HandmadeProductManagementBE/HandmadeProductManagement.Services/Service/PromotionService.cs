@@ -42,7 +42,7 @@ namespace HandmadeProductManagement.Services.Service
                 .ToListAsync();
             return _mapper.Map<IList<PromotionDto>>(promotions);
         }
-        
+
         public async Task<IList<PromotionDto>> GetExpiredPromotions(int pageNumber, int pageSize)
         {
             if (pageNumber <= 0)
@@ -62,11 +62,8 @@ namespace HandmadeProductManagement.Services.Service
         public async Task<PromotionDto> GetById(string id)
         {
             if (!Guid.TryParse(id, out _))
-            {
                 throw new BaseException.BadRequestException("invalid_id_format",
                     "The provided ID is not in a valid GUID format.");
-            }
-
             var promotion = await _unitOfWork.GetRepository<Promotion>().Entities
                 .FirstOrDefaultAsync(p => p.Id == id && p.DeletedTime == null);
             if (promotion == null)
@@ -74,7 +71,7 @@ namespace HandmadeProductManagement.Services.Service
             return _mapper.Map<PromotionDto>(promotion);
         }
 
-        public async Task<bool> Create(PromotionForCreationDto promotion)
+        public async Task<bool> Create(PromotionForCreationDto promotion, string userId)
         {
             var validationResult = await _creationValidator.ValidateAsync(promotion);
             if (!validationResult.IsValid)
@@ -88,14 +85,16 @@ namespace HandmadeProductManagement.Services.Service
                 });
             var promotionEntity = _mapper.Map<Promotion>(promotion);
             promotionEntity.CreatedTime = DateTime.UtcNow;
-            promotionEntity.Status = "active";
-            promotionEntity.CreatedBy = "user";
+            promotionEntity.Status = promotion.StartDate > DateTime.UtcNow ? "inactive" : "active";
+            promotionEntity.CreatedBy = userId;
+            promotionEntity.LastUpdatedBy = userId;
+            promotionEntity.LastUpdatedTime = DateTime.UtcNow;
             await _unitOfWork.GetRepository<Promotion>().InsertAsync(promotionEntity);
             await _unitOfWork.SaveAsync();
             return true;
         }
 
-        public async Task<bool> Update(string id, PromotionForUpdateDto promotion)
+        public async Task<bool> Update(string id, PromotionForUpdateDto promotion, string userId)
         {
             if (!Guid.TryParse(id, out _))
                 throw new BaseException.BadRequestException("invalid_id_format",
@@ -116,7 +115,7 @@ namespace HandmadeProductManagement.Services.Service
                 });
             _mapper.Map(promotion, promotionEntity);
             promotionEntity.LastUpdatedTime = DateTime.UtcNow;
-            promotionEntity.LastUpdatedBy = "user";
+            promotionEntity.LastUpdatedBy = userId;
             await _unitOfWork.GetRepository<Promotion>().UpdateAsync(promotionEntity);
             await _unitOfWork.SaveAsync();
             return true;

@@ -12,5 +12,8 @@ public interface IAuthenticationService
     Task<BaseResponse<string>> ForgotPasswordAsync(ForgotPasswordModelView forgotPasswordModelView);
     Task<BaseResponse<string>> ResetPasswordAsync(ResetPasswordModelView resetPasswordModelView);
     Task<BaseResponse<string>> ConfirmEmailAsync(ConfirmEmailModelView confirmEmailModelView);
+    Task<BaseResponse<string>> GoogleLoginAsync(string token);
+    Task<BaseResponse<string>> FacebookLoginAsync(string token);
+
 
 }

@@ -18,8 +18,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="BananaCakePop.Middleware" Version="17.0.0" />
     <PackageReference Include="FirebaseAdmin" Version="3.0.1" />
     <PackageReference Include="Google.Cloud.Storage.V1" Version="4.10.0" />
+    <PackageReference Include="GraphQL" Version="8.1.0" />
+	<PackageReference Include="HotChocolate" Version="13.9.14" />
+    <PackageReference Include="HotChocolate.AspNetCore" Version="13.9.14" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.8">
       <PrivateAssets>all</PrivateAssets>
