@@ -33,6 +33,7 @@ public class CartItemService : ICartItemService
         var cartRepo = _unitOfWork.GetRepository<Cart>();
         var cart = await cartRepo.Entities
             .Include(c => c.CartItems)
+            .ThenInclude(ci => ci.ProductItem)
             .SingleOrDefaultAsync(c => c.Id == cartId);
 
         if (cart == null)
@@ -42,26 +43,42 @@ public class CartItemService : ICartItemService
 
         var productItemRepo = _unitOfWork.GetRepository<ProductItem>();
         var productItem = await productItemRepo.Entities
-            .SingleOrDefaultAsync(pi => pi.Id == createCartItemDto.ProductItemId);
+                                                .SingleOrDefaultAsync(pi => pi.Id == createCartItemDto.ProductItemId);
         if (productItem == null)
         {
             throw new BaseException.NotFoundException("product_item_not_found", $"ProductItem {createCartItemDto.ProductItemId} not found.");
         }
 
-        if (quantity > productItem.QuantityInStock)
+        var existingCartItem = cart.CartItems.Where(ci => ci.ProductItemId == productItem.Id).FirstOrDefault();
+        if(existingCartItem != null)
         {
-            throw new BaseException.BadRequestException("invalid_quantity", $"Only {productItem.QuantityInStock} items available.");
+            int newQuantity = existingCartItem.ProductQuantity + quantity;
+
+            if (newQuantity > productItem.QuantityInStock)
+            {
+                throw new BaseException.BadRequestException("invalid_quantity", $"Only {productItem.QuantityInStock} items available.");
+            }
+
+            existingCartItem.ProductQuantity = newQuantity;
+            existingCartItem.LastUpdatedTime = CoreHelper.SystemTimeNow;
+        } 
+        else
+        {
+            if (quantity > productItem.QuantityInStock)
+            {
+                throw new BaseException.BadRequestException("invalid_quantity", $"Only {productItem.QuantityInStock} items available.");
+            }
+
+            var cartItem = new CartItem
+            {
+                ProductItem = productItem,
+                ProductQuantity = quantity,
+                CreatedTime = CoreHelper.SystemTimeNow,
+                LastUpdatedTime = CoreHelper.SystemTimeNow
+            };
+
+            cart.CartItems.Add(cartItem);
         }
-
-        var cartItem = new CartItem
-        {
-            ProductItem = productItem,
-            ProductQuantity = quantity,
-            CreatedTime = CoreHelper.SystemTimeNow,
-            LastUpdatedTime = CoreHelper.SystemTimeNow
-        };
-
-        cart.CartItems.Add(cartItem);
 
         try
         {
