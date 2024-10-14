@@ -7,13 +7,13 @@ namespace HandmadeProductManagement.Contract.Services.Interface
 {
     public interface IDashboardService
     {
-        Task<int> GetTotalOrders();
+        Task<TotalOrdersByStatusDTO> GetTotalOrdersByStatus();
 
-        Task<int> GetTotalProducts();
+        Task<List<CategoryStockDistributionDTO>> StockDistribution();
 
         Task<decimal> GetTotalSales();
 
-        Task<List<Shop>> GetTop10Shops();
+        Task<List<TopShopDashboardDTO>> GetTop10Shops();
 
         Task<decimal> GetTotalSaleByShopId(string Id, DashboardDTO dashboardDTO);
 
