@@ -330,23 +330,22 @@ namespace HandmadeProductManagement.Services.Service
             }
 
             var twoDaysAgo = DateTime.Now.AddDays(-2);
-            
 
             var review = await _unitOfWork.GetRepository<Review>()
-                .Entities
-                .Where(r => r.Reply == null && r.Date.Value.Date >= twoDaysAgo.Date)  // Lọc các review không có phản hồi và trong hai ngày qua
-                .Include(r => r.Product)  // Nạp thông tin sản phẩm từ review
-                    .ThenInclude(p => p.Shop)  // Nạp thông tin shop từ sản phẩm
-                    .ThenInclude(s => s.User)  // Nạp thông tin user (chủ shop) từ shop
-                    .ThenInclude(u => u.UserInfo) // Nạp thông tin UserInfo từ User (chủ shop)
-                .ToListAsync();
+                 .Entities
+                 .Where(r => r.Reply == null && r.Date.Value.Date >= twoDaysAgo.Date)  // Lọc các review không có phản hồi và trong hai ngày qua
+                 .Include(r => r.User)  // Nạp thông tin người dùng từ review
+                    .ThenInclude(u => u.UserInfo)  // Nạp thông tin UserInfo từ User của người viết review
+                 //.Include(r => r.Product)  // Nạp thông tin sản phẩm từ review
+                 //   .ThenInclude(p => p.Shop)  // Nạp thông tin shop từ sản phẩm
+                 .ToListAsync();
 
-            var notifications = review.Select(review => new NotificationModel
+            var notifications = review.Select(r => new NotificationModel
             {
-                Id = review.Id,
-                Message = $"Sản phẩm của bạn đã được {review.Product.Shop.User.UserInfo.FullName} review",
+                Id = r.Id,
+                Message = $"Sản phẩm của bạn đã được {r.User.UserInfo.FullName} review",  // Lấy FullName từ người dùng trong Review
                 Tag = "Review",
-                URL = Url + $"api/review/{review.Id}"
+                URL = Url + $"api/review/{r.Id}"
             }).ToList();
 
             return notifications;
