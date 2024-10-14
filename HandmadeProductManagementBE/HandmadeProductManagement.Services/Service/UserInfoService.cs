@@ -6,6 +6,7 @@ using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.ModelViews.UserInfoModelViews;
 using HandmadeProductManagement.Repositories.Entity;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace HandmadeProductManagement.Services.Service
@@ -52,8 +53,11 @@ namespace HandmadeProductManagement.Services.Service
             return userInfoDto;
         }
 
-        public async Task<bool> PatchUserInfoAsync(string id, UserInfoForUpdateDto patchDto)
+        public async Task<bool> PatchUserInfoAsync(string id, UserInfoUpdateRequest request)
         {
+            var patchDto = request.UserInfo;
+            var avtFile = request.AvtFile;
+
             // Validate
             var validationResult = await _updateValidator.ValidateAsync(patchDto);
             if (!validationResult.IsValid)
@@ -90,7 +94,6 @@ namespace HandmadeProductManagement.Services.Service
                 { "BankAccountName", patchDto.BankAccountName },
                 { "Bank", patchDto.Bank },
                 { "Address", patchDto.Address },
-                { "AvatarUrl", patchDto.AvatarUrl }
             };
 
             // Iterate over the dictionary and update fields if they are not null
@@ -100,6 +103,24 @@ namespace HandmadeProductManagement.Services.Service
                 {
                     var propertyInfo = typeof(UserInfo).GetProperty(field.Key);
                     propertyInfo?.SetValue(userInfo, field.Value);
+                }
+            }
+
+            if (avtFile != null && avtFile.Length > 0)
+            {
+                //check file type is valid image
+                var allowedMimeTypes = new[] { "image/jpeg", "image/png", "image/gif" };
+                if (!allowedMimeTypes.Contains(avtFile.ContentType.ToLower()))
+                {
+                    throw new BaseException.BadRequestException("invalid_file_type", "The uploaded file is not a valid image.");
+                }
+
+                var uploadImageService = new ManageFirebaseImageService();
+                using (var stream = avtFile.OpenReadStream())
+                {
+                    var fileName = $"{Guid.NewGuid()}_{avtFile.FileName}";
+                    var imageUrl = await uploadImageService.UploadFileAsync(stream, fileName);
+                    userInfo.AvatarUrl = imageUrl;
                 }
             }
 

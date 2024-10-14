@@ -7,16 +7,15 @@ namespace HandmadeProductManagement.Validation.UserInfo
     {
         public UserInfoForUpdateDtoValidator()
         {
-            RuleFor(x => x)
-                .Must(dto => !string.IsNullOrWhiteSpace(dto.FullName) ||
-                             !string.IsNullOrWhiteSpace(dto.DisplayName) ||
-                             !string.IsNullOrWhiteSpace(dto.Bio) ||
-                             !string.IsNullOrWhiteSpace(dto.BankAccount) ||
-                             !string.IsNullOrWhiteSpace(dto.BankAccountName) ||
-                             !string.IsNullOrWhiteSpace(dto.Bank) ||
-                             !string.IsNullOrWhiteSpace(dto.Address) ||
-                             !string.IsNullOrWhiteSpace(dto.AvatarUrl))
-                .WithMessage("You have provided at least one invalid field.");
+            //RuleFor(x => x)
+            //    .Must(dto => !string.IsNullOrWhiteSpace(dto.FullName) ||
+            //                 !string.IsNullOrWhiteSpace(dto.DisplayName) ||
+            //                 !string.IsNullOrWhiteSpace(dto.Bio) ||
+            //                 !string.IsNullOrWhiteSpace(dto.BankAccount) ||
+            //                 !string.IsNullOrWhiteSpace(dto.BankAccountName) ||
+            //                 !string.IsNullOrWhiteSpace(dto.Bank) ||
+            //                 !string.IsNullOrWhiteSpace(dto.Address))
+            //    .WithMessage("You have provided at least one invalid field.");
 
             RuleFor(x => x.FullName)
                 .MaximumLength(255).WithMessage("Full name cannot be longer than 255 characters.")
@@ -45,9 +44,9 @@ namespace HandmadeProductManagement.Validation.UserInfo
                 .Matches(@"^[a-zA-Z0-9\s.,]+$").WithMessage("Address can only contain letters, numbers, spaces, commas, and periods.")
 
                 .When(x => !string.IsNullOrWhiteSpace(x.Address));
-            RuleFor(x => x.AvatarUrl)
-                .Must(uri => Uri.IsWellFormedUriString(uri, UriKind.Absolute)).WithMessage("Avatar URL must be a valid URL.")
-                .When(x => !string.IsNullOrWhiteSpace(x.AvatarUrl));
+            //RuleFor(x => x.AvatarUrl)
+            //    .Must(uri => Uri.IsWellFormedUriString(uri, UriKind.Absolute)).WithMessage("Avatar URL must be a valid URL.")
+            //    .When(x => !string.IsNullOrWhiteSpace(x.AvatarUrl));
         }
     }
 }
