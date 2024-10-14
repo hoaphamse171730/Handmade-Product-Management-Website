@@ -56,13 +56,12 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpGet("search")]
         public async Task<IActionResult> SearchProducts([FromQuery] ProductSearchFilter searchFilter, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var products = await _productService.SearchProductsAsync(searchFilter, pageNumber, pageSize);
             var response = new BaseResponse<IEnumerable<ProductSearchVM>>
             {
                 Code = "200",
                 StatusCode = StatusCodeHelper.OK,
                 Message = "Search Product Successfully",
-                Data = products
+                Data = await _productService.SearchProductsAsync(searchFilter, pageNumber, pageSize)
             };
             return Ok(response);
         }
@@ -85,13 +84,12 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetProduct(string id)
         {
-            var product = await _productService.GetById(id);
             var response = new BaseResponse<ProductDto>
             {
                 Code = "200",
                 StatusCode = StatusCodeHelper.OK,
                 Message = "Product retrieved successfully",
-                Data = product
+                Data = await _productService.GetById(id)
             };
             return Ok(response);
         }
@@ -100,36 +98,17 @@ namespace HandmadeProductManagementAPI.Controllers
         [Authorize(Roles = "Seller")]
         public async Task<IActionResult> CreateProduct(ProductForCreationDto productForCreation)
         {
-            try
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+            var response = new BaseResponse<bool>
             {
-                var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-                var createdProduct = await _productService.Create(productForCreation, userId);
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Product created successfully",
+                Data = await _productService.Create(productForCreation, userId)
+            };
 
-                var response = new BaseResponse<bool>
-                {
-                    Code = "200",
-                    StatusCode = StatusCodeHelper.OK,
-                    Message = "Product created successfully",
-                    Data = createdProduct
-                };
-
-                return Ok(response);
-            }
-            catch (DbUpdateException ex)
-            {
-                // Log the error for further investigation (you can use any logging framework)
-                // _logger.LogError(ex, "An error occurred while saving the product.");
-
-                var response = new BaseResponse<string>
-                {
-                    Code = "500",
-                    StatusCode = StatusCodeHelper.ServerError,
-                    Message = "An error occurred while saving the product. Please try again later.",
-                    Data = ex.InnerException?.Message ?? ex.Message // Include detailed error if available
-                };
-
-                return StatusCode(StatusCodes.Status500InternalServerError, response);
-            }
+            return Ok(response);
         }
 
         [HttpPatch("{id}")]
@@ -137,15 +116,12 @@ namespace HandmadeProductManagementAPI.Controllers
         public async Task<IActionResult> UpdateProduct(string id, [FromBody] ProductForUpdateDto product)
         {
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-
-            var updateResult = await _productService.Update(id, product, userId);
-
             var response = new BaseResponse<bool>
             {
                 Code = "200",
                 StatusCode = StatusCodeHelper.OK,
                 Message = "Product updated successfully.",
-                Data = updateResult
+                Data = await _productService.Update(id, product, userId)
             };
 
             return Ok(response);
@@ -157,13 +133,12 @@ namespace HandmadeProductManagementAPI.Controllers
         public async Task<IActionResult> SoftDeleteProduct(string id)
         {
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            await _productService.SoftDelete(id, userId);
-            var response = new BaseResponse<string>
+            var response = new BaseResponse<bool>
             {
                 Code = "200",
                 StatusCode = StatusCodeHelper.OK,
                 Message = "Product soft-deleted successfully",
-                Data = "Product soft-deleted successfully"
+                Data = await _productService.SoftDelete(id, userId)
             };
             return Ok(response);
         }
@@ -205,13 +180,12 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpGet("detail/{id}")]
         public async Task<IActionResult> GetProductDetails([Required] string id)
         {
-            var productDetails = await _productService.GetProductDetailsByIdAsync(id);
             var response = new BaseResponse<ProductDetailResponseModel>
             {
                 Code = "200",
                 StatusCode = StatusCodeHelper.OK,
                 Message = "Product details retrieved successfully.",
-                Data = productDetails
+                Data = await _productService.GetProductDetailsByIdAsync(id)
             };
             return Ok(response);
         }
@@ -220,13 +194,12 @@ namespace HandmadeProductManagementAPI.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CalculateAverageRating([Required] string id)
         {
-            var averageRating = await _productService.CalculateAverageRatingAsync(id);
             var response = new BaseResponse<decimal>
             {
                 Code = "200",
                 StatusCode = StatusCodeHelper.OK,
                 Message = "Average rating calculated successfully.",
-                Data = averageRating
+                Data = await _productService.CalculateAverageRatingAsync(id)
             };
             return Ok(response);
         }

@@ -16,7 +16,7 @@ public class CartItemService : ICartItemService
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<BaseResponse<bool>> AddCartItem(string cartId, CreateCartItemDto createCartItemDto)
+    public async Task<bool> AddCartItem(string cartId, CreateCartItemDto createCartItemDto, string userId)
     {
         Console.WriteLine($"Attempting to add item to cart: {cartId}, ProductItem: {createCartItemDto.ProductItemId}");
 
@@ -82,7 +82,7 @@ public class CartItemService : ICartItemService
         try
         {
             await _unitOfWork.SaveAsync();
-            return BaseResponse<bool>.OkResponse(true);
+            return true;
         }
         catch
         {
@@ -90,7 +90,7 @@ public class CartItemService : ICartItemService
         }
     }
 
-    public async Task<BaseResponse<bool>> UpdateCartItem(string cartItemId, int productQuantity)
+    public async Task<bool> UpdateCartItem(string cartItemId, int productQuantity, string userId)
     {
         if (productQuantity < 0)
         {
@@ -129,36 +129,11 @@ public class CartItemService : ICartItemService
         try
         {
             await _unitOfWork.SaveAsync();
-            return BaseResponse<bool>.OkResponse(true);
+            return true;
         }
         catch
         {
             throw new BaseException.CoreException("server_error", "Internal server error updating cart item.", (int)StatusCodeHelper.ServerError);
-        }
-    }
-
-    public async Task<BaseResponse<bool>> RemoveCartItem(string cartItemId)
-    {
-        var cartItemRepo = _unitOfWork.GetRepository<CartItem>();
-        var cartItem = await cartItemRepo.Entities
-                         .FirstOrDefaultAsync(ci => ci.Id == cartItemId && ci.DeletedTime == null);
-
-        if (cartItem == null)
-        {
-            throw new BaseException.BadRequestException("cart_item_not_found", "Cart item not found.");
-        }
-
-        cartItem.DeletedTime = CoreHelper.SystemTimeNow;
-        cartItem.DeletedBy = "System"; // Update later after having context accessor
-
-        try
-        {
-            await _unitOfWork.SaveAsync();
-            return BaseResponse<bool>.OkResponse(true);
-        }
-        catch
-        {
-            throw new BaseException.CoreException("server_error", "Internal server error removing cart item.", (int)StatusCodeHelper.ServerError);
         }
     }
 
@@ -177,7 +152,7 @@ public class CartItemService : ICartItemService
         return cart.CartItems.ToList();
     }
 
-    public async Task<bool> DeleteCartItemByIdAsync(string cartItemId)
+    public async Task<bool> DeleteCartItemByIdAsync(string cartItemId, string userId)
     {
         var cartItemRepo = _unitOfWork.GetRepository<CartItem>();
         var cartItem = await cartItemRepo.Entities

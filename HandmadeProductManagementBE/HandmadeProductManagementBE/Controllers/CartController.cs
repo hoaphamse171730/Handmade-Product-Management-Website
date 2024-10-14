@@ -4,8 +4,6 @@ using HandmadeProductManagement.Core.Base;
 using Microsoft.AspNetCore.Mvc;
 using HandmadeProductManagement.Contract.Services;
 using HandmadeProductManagement.Core.Constants;
-using HandmadeProductManagement.ModelViews.UserModelViews;
-using HandmadeProductManagement.Services.Service;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 
@@ -45,7 +43,14 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpPost("item/add/{cartId}")]
         public async Task<IActionResult> AddCartItem(string cartId, [FromBody] CreateCartItemDto createCartItemDto)
         {
-            var response = await _cartItemService.AddCartItem(cartId, createCartItemDto);
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var response = new BaseResponse<bool>
+            {
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Success",
+                Data = await _cartItemService.AddCartItem(cartId, createCartItemDto, userId)
+            };
             return Ok(response);
         }
 
@@ -54,7 +59,14 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpPut("item/updateQuantity/{cartItemId}")]
         public async Task<IActionResult> UpdateCartItem(string cartItemId, [FromBody] int productQuantity)
         {
-            var response = await _cartItemService.UpdateCartItem(cartItemId, productQuantity);
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var response = new BaseResponse<bool>
+            {
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Success",
+                Data = await _cartItemService.UpdateCartItem(cartItemId, productQuantity, userId)
+            };
             return Ok(response);
         }
 
@@ -63,7 +75,14 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpDelete("item/{cartItemId}")]
         public async Task<IActionResult> RemoveCartItem(string cartItemId)
         {
-            var response = await _cartItemService.RemoveCartItem(cartItemId);
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var response = new BaseResponse<bool>
+            {
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Success",
+                Data = await _cartItemService.DeleteCartItemByIdAsync(cartItemId, userId)
+            };
             return Ok(response);
         }
 
