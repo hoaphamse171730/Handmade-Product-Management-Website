@@ -38,9 +38,6 @@ using HandmadeProductManagement.ModelViews.VariationCombinationModelViews;
 using HandmadeProductManagement.Validation.VariationCombination;
 using HandmadeProductManagement.ModelViews.UserInfoModelViews;
 using HandmadeProductManagement.Validation.UserInfo;
-using HandmadeProductManagementAPI.GraphQL.Mutations;
-using HandmadeProductManagementAPI.GraphQL.Queries;
-using HandmadeProductManagementAPI.GraphQL.Types;
 
 namespace HandmadeProductManagementAPI.Extensions;
 
@@ -205,15 +202,5 @@ public static class ApplicationServiceExtensions
             .Map(dest => dest.Cart.LastUpdatedBy, src => src.UserName)
             ;
     }
-
-    public static void ConfigureGraphql(this IServiceCollection services)
-    {
-        services
-            .AddGraphQLServer()
-            .AddQueryType<PromotionQuery>()
-            .AddMutationType<PromotionMutation>()
-            .AddType<PromotionType>();
-    }
-
 
 }
