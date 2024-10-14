@@ -64,6 +64,22 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
+        [Authorize(Roles = "Seller")]
+        [HttpGet("seller")]
+        public async Task<IActionResult> GetOrderForSeller()
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var orders = await _orderService.GetOrdersBySellerUserIdAsync(Guid.Parse(userId));
+            var response = new BaseResponse<IList<OrderResponseModel>>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Orders retrieved successfully",
+                Data = orders
+            };
+            return Ok(response);
+        }
+
         [Authorize(Roles = "Admin")]
         [HttpGet("admin/user/{userId}")]
         public async Task<IActionResult> GetOrderByUserIdForAdmin(Guid userId)

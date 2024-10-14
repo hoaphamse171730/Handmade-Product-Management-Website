@@ -21,8 +21,8 @@ public static class IdentityServiceExtensions
             opt.Password.RequireNonAlphanumeric = false;
             opt.User.RequireUniqueEmail = false;
         })
-        .AddDefaultTokenProviders()  // Token provider (e.g., for password recovery)
-        .AddEntityFrameworkStores<DatabaseContext>();  // Entity Framework store for identity tables
+        .AddDefaultTokenProviders() 
+        .AddEntityFrameworkStores<DatabaseContext>();  
 
         var key = new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes(config["TokenKey"]!));
@@ -49,7 +49,6 @@ public static class IdentityServiceExtensions
         //services.AddAuthorization();
         services.AddAuthorization();
         services.AddScoped<TokenService>();
-
         return services;
     }
 }

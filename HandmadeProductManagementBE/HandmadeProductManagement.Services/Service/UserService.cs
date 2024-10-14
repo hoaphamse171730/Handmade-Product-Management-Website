@@ -91,9 +91,8 @@ namespace HandmadeProductManagement.Services.Service
             return user;
 
         }
-        public async Task<UpdateUserResponseModel?> UpdateUser(string id, UpdateUserDTO updateUserDTO)
+        public async Task<bool> UpdateUser(string id, UpdateUserDTO updateUserDTO)
         {
-
             if (!Guid.TryParse(id, out Guid userId))
             {
                 throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Invalid userID");
@@ -102,7 +101,7 @@ namespace HandmadeProductManagement.Services.Service
             var user = await _unitOfWork.GetRepository<ApplicationUser>()
                 .Entities
                 .Where(u => u.Id == userId)
-                .FirstOrDefaultAsync(); 
+                .FirstOrDefaultAsync();
             //check user found
             if (user == null)
             {
@@ -115,51 +114,49 @@ namespace HandmadeProductManagement.Services.Service
                 throw new ValidationException(updateValidation.Errors);
             }
             // check existing unique fields
-            var existingUsername = await _unitOfWork.GetRepository<ApplicationUser>().Entities
-                .AnyAsync(u => u.UserName == updateUserDTO.UserName && u.Id != userId);
-            if(existingUsername)
+            if (!string.IsNullOrEmpty(updateUserDTO.UserName))
             {
-                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Username already exists");
+                var existingUsername = await _unitOfWork.GetRepository<ApplicationUser>().Entities
+                    .AnyAsync(u => u.UserName == updateUserDTO.UserName && u.Id != userId);
+                if (existingUsername)
+                {
+                    throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Username already exists");
+                }
+                user.UserName = updateUserDTO.UserName;
+                user.NormalizedUserName = updateUserDTO.UserName.ToUpper();
             }
 
-            var existingUserWithSameEmail = await _unitOfWork.GetRepository<ApplicationUser>()
-      .Entities
-      .AnyAsync(u => u.Email == updateUserDTO.Email && u.Id != userId);
-            if (existingUserWithSameEmail)
+            if (!string.IsNullOrEmpty(updateUserDTO.Email))
             {
-                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Email already exists");
+                var existingUserWithSameEmail = await _unitOfWork.GetRepository<ApplicationUser>()
+                    .Entities
+                    .AnyAsync(u => u.Email == updateUserDTO.Email && u.Id != userId);
+                if (existingUserWithSameEmail)
+                {
+                    throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Email already exists");
+                }
+                user.Email = updateUserDTO.Email;
+                user.NormalizedEmail = updateUserDTO.Email.ToUpper();
             }
 
-            var existingUserWithSamePhoneNumber = await _unitOfWork.GetRepository<ApplicationUser>()
-        .Entities
-        .AnyAsync(u => u.PhoneNumber == updateUserDTO.PhoneNumber && u.Id != userId);
-            if (existingUserWithSamePhoneNumber)
+            if (!string.IsNullOrEmpty(updateUserDTO.PhoneNumber))
             {
-                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Phone number already exists");
-            }
-
-            user.UserName = updateUserDTO.UserName;
-            user.Email = updateUserDTO.Email;
-            user.PhoneNumber = updateUserDTO.PhoneNumber;
+                var existingUserWithSamePhoneNumber = await _unitOfWork.GetRepository<ApplicationUser>()
+                    .Entities
+                    .AnyAsync(u => u.PhoneNumber == updateUserDTO.PhoneNumber && u.Id != userId);
+                if (existingUserWithSamePhoneNumber)
+                {
+                    throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Phone number already exists");
+                }
+                user.PhoneNumber = updateUserDTO.PhoneNumber;
+            } 
             user.TwoFactorEnabled = updateUserDTO.TwoFactorEnabled;
-            user.NormalizedUserName = updateUserDTO.UserName.ToUpper();
-            user.NormalizedEmail = updateUserDTO.Email.ToUpper();
             user.LastUpdatedTime = DateTime.UtcNow;
-
-            _unitOfWork.GetRepository<ApplicationUser>().Update(user);
+            await _unitOfWork.GetRepository<ApplicationUser>().UpdateAsync(user);
             await _unitOfWork.SaveAsync();
-
-            var updatedUserResponse = new UpdateUserResponseModel
-            {
-                Id = user.Id,
-                UserName = user.UserName,
-                Email = user.Email,
-                PhoneNumber = user.PhoneNumber,
-                TwoFactorEnabled = user.TwoFactorEnabled
-            };
-
-            return updatedUserResponse;
+            return true;
         }
+
 
         public async Task<bool> DeleteUser(string Id)
         {
@@ -205,7 +202,7 @@ namespace HandmadeProductManagement.Services.Service
                 .Select(shop => shop.Id)
                 .ToListAsync();
 
-            if(shopIds.IsNullOrEmpty())
+            if (shopIds.IsNullOrEmpty())
             {
                 throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "User not found");
             }
@@ -330,23 +327,22 @@ namespace HandmadeProductManagement.Services.Service
             }
 
             var twoDaysAgo = DateTime.Now.AddDays(-2);
-            
 
             var review = await _unitOfWork.GetRepository<Review>()
-                .Entities
-                .Where(r => r.Reply == null && r.Date.Value.Date >= twoDaysAgo.Date)  // Lọc các review không có phản hồi và trong hai ngày qua
-                .Include(r => r.Product)  // Nạp thông tin sản phẩm từ review
-                    .ThenInclude(p => p.Shop)  // Nạp thông tin shop từ sản phẩm
-                    .ThenInclude(s => s.User)  // Nạp thông tin user (chủ shop) từ shop
-                    .ThenInclude(u => u.UserInfo) // Nạp thông tin UserInfo từ User (chủ shop)
-                .ToListAsync();
+                 .Entities
+                 .Where(r => r.Reply == null && r.Date.Value.Date >= twoDaysAgo.Date)  // Lọc các review không có phản hồi và trong hai ngày qua
+                 .Include(r => r.User)  // Nạp thông tin người dùng từ review
+                    .ThenInclude(u => u.UserInfo)  // Nạp thông tin UserInfo từ User của người viết review
+                 //.Include(r => r.Product)  // Nạp thông tin sản phẩm từ review
+                 //   .ThenInclude(p => p.Shop)  // Nạp thông tin shop từ sản phẩm
+                 .ToListAsync();
 
-            var notifications = review.Select(review => new NotificationModel
+            var notifications = review.Select(r => new NotificationModel
             {
-                Id = review.Id,
-                Message = $"Sản phẩm của bạn đã được {review.Product.Shop.User.UserInfo.FullName} review",
+                Id = r.Id,
+                Message = $"Sản phẩm của bạn đã được {r.User.UserInfo.FullName} review",  // Lấy FullName từ người dùng trong Review
                 Tag = "Review",
-                URL = Url + $"api/review/{review.Id}"
+                URL = Url + $"api/review/{r.Id}"
             }).ToList();
 
             return notifications;

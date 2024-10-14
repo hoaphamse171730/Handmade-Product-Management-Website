@@ -11,7 +11,7 @@ namespace HandmadeProductManagement.Contract.Services.Interface
 
         Task<UserResponseByIdModel> GetById(string Id);
 
-        Task<UpdateUserResponseModel> UpdateUser(string id, UpdateUserDTO updateUserDTO);
+        Task<bool> UpdateUser(string id, UpdateUserDTO updateUserDTO);
 
         Task<bool> DeleteUser(string Id);
 

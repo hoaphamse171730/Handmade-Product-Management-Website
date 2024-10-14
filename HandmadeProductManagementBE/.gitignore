@@ -132,6 +132,9 @@ _NCrunch*
 *.cache
 *.vsidx
 
+# Ignore JetBrains IDE settings
+.idea/
+
 # Ignore specific files and directories
 HandmadeProductManagementBE/HandmadeProductManagement.Contract.Services/obj/Debug/net8.0/HandmadeProductManagement.Contract.Services.AssemblyInfo.cs
 /HandmadeProductManagementBE/.vs/HandmadeProductManagementBE/FileContentIndex

@@ -175,8 +175,6 @@ namespace HandmadeProductManagement.Services.Service
                 throw;
             }
         }
-
-
         public async Task<PaginatedList<OrderResponseModel>> GetOrdersByPageAsync(int pageNumber, int pageSize)
         {
             var repository = _unitOfWork.GetRepository<Order>();
@@ -202,13 +200,13 @@ namespace HandmadeProductManagement.Services.Service
                     CancelReasonId = order.CancelReasonId,
                     OrderDetails = orderDetailRepository.Entities
                         .Where(od => od.OrderId == order.Id && !od.DeletedTime.HasValue)
-                        .Select(od => new OrderDetailDto
+                        .Select(od => new OrderDetailResponseModel
                         {
                             Id = od.Id,
                             ProductItemId = od.ProductItemId,
                             OrderId = od.OrderId,
                             ProductQuantity = od.ProductQuantity,
-                            DiscountPrice = od.DiscountPrice,
+                            Price = od.DiscountPrice,
                         }).ToList()
                 })
                 .ToListAsync();
@@ -239,19 +237,13 @@ namespace HandmadeProductManagement.Services.Service
             var orderDetailRepository = _unitOfWork.GetRepository<OrderDetail>();
             var orderDetails = await orderDetailRepository.Entities
                 .Where(od => od.OrderId == orderId && !od.DeletedTime.HasValue)
-                .Select(od => new OrderDetailDto
+                .Select(od => new OrderDetailResponseModel
                 {
                     Id = od.Id,
                     ProductItemId = od.ProductItemId,
                     OrderId = od.OrderId,
                     ProductQuantity = od.ProductQuantity,
-                    DiscountPrice = od.DiscountPrice,
-                    CreatedBy = od.CreatedBy,
-                    LastUpdatedBy = od.LastUpdatedBy,
-                    DeletedBy = od.DeletedBy,
-                    CreatedTime = od.CreatedTime,
-                    LastUpdatedTime = od.LastUpdatedTime,
-                    DeletedTime = od.DeletedTime
+                    Price = od.DiscountPrice,
                 }).ToListAsync();
 
             return new OrderResponseModel
@@ -269,7 +261,6 @@ namespace HandmadeProductManagement.Services.Service
                 OrderDetails = orderDetails
             };
         }
-
         public async Task<bool> UpdateOrderAsync(string userId, string orderId, UpdateOrderDto order)
         {
             if (string.IsNullOrWhiteSpace(orderId) || !Guid.TryParse(orderId, out _))
@@ -331,7 +322,6 @@ namespace HandmadeProductManagement.Services.Service
 
             return true;
         }
-
         public async Task<IList<OrderResponseModel>> GetOrderByUserIdAsync(Guid userId)
         {
             var userRepository = _unitOfWork.GetRepository<ApplicationUser>();
@@ -361,7 +351,6 @@ namespace HandmadeProductManagement.Services.Service
 
             return orders;
         }
-
         public async Task<bool> UpdateOrderStatusAsync(string userId, UpdateStatusOrderDto updateStatusOrderDto)
         {
             if (string.IsNullOrWhiteSpace(updateStatusOrderDto.OrderId))
@@ -512,7 +501,35 @@ namespace HandmadeProductManagement.Services.Service
                 throw;
             }
         }
+        public async Task<IList<OrderResponseModel>> GetOrdersBySellerUserIdAsync(Guid userId)
+        {
+            var orderRepository = _unitOfWork.GetRepository<Order>();
+            var orders = await orderRepository.Entities
+                .Where(o => o.OrderDetails.Any(od => od.ProductItem.Product.Shop.UserId == userId && !od.ProductItem.Product.Shop.DeletedTime.HasValue))
+                .Select(order => new OrderResponseModel
+                {
+                    Id = order.Id,
+                    TotalPrice = order.TotalPrice,
+                    OrderDate = order.OrderDate,
+                    Status = order.Status,
+                    UserId = order.UserId,
+                    Address = order.Address,
+                    CustomerName = order.CustomerName,
+                    Phone = order.Phone,
+                    Note = order.Note,
+                    CancelReasonId = order.CancelReasonId,
+                    OrderDetails = order.OrderDetails.Select(od => new OrderDetailResponseModel
+                    {
+                        Id = od.Id,
+                        ProductItemId = od.ProductItemId,
+                        OrderId = od.OrderId,
+                        ProductQuantity = od.ProductQuantity,
+                        Price = od.DiscountPrice,
+                    }).ToList()
+                }).ToListAsync();
 
+            return orders;
+        }
         private void ValidateOrder(CreateOrderDto order)
         {
             if (string.IsNullOrWhiteSpace(order.Address))
