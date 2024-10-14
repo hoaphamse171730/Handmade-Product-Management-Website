@@ -312,13 +312,13 @@ namespace HandmadeProductManagement.Services.Service
 
             var urlroot = "https://localhost:7159";
 
-            // Lấy tất cả các reply mới cho những review của khách hàng, sắp xếp theo thời gian tạo reply (giảm dần)
+            // Lấy tất cả các reply mới cho những review của khách hàng, sắp xếp theo thời gian tạo reply (tăng dần)
             var replies = await _unitOfWork.GetRepository<Reply>()
                 .Entities
                 .Where(rep => reviews.Select(r => r.Id).Contains(rep.ReviewId) && rep.Date >= DateTime.UtcNow.AddDays(-2)) // Lọc theo thời gian tạo reply trong 2 ngày gần nhất
                 .Include(rep => rep.Review) // Bao gồm review
                 .ThenInclude(r => r.Product) // Bao gồm sản phẩm
-                .OrderByDescending(rep => rep.Date) // Sắp xếp theo thời gian tạo reply (giảm dần)
+                .OrderBy(rep => rep.Date) // Sắp xếp theo thời gian tạo reply (tăng dần)
                 .ToListAsync();
 
             if (replies == null || !replies.Any())
@@ -358,12 +358,12 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "User not found");
             }
 
-            // Lấy status của orders, sắp xếp theo ChangeTime (giảm dần)
+            // Lấy status của orders, sắp xếp theo ChangeTime (tăng dần)
             var status = await _unitOfWork.GetRepository<StatusChange>()
                 .Entities
                 .Where(s => orders.Contains(s.OrderId))
                 .Include(s => s.Order)
-                .OrderByDescending(s => s.ChangeTime) // Sắp xếp theo thời gian thay đổi trạng thái (giảm dần)
+                .OrderBy(s => s.ChangeTime) // Sắp xếp theo thời gian thay đổi trạng thái (tăng dần)
                 .ToListAsync();
 
             // Tạo thông báo phản hồi
@@ -377,6 +377,7 @@ namespace HandmadeProductManagement.Services.Service
 
             return notifications;
         }
+
 
 
 
