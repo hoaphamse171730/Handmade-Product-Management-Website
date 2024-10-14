@@ -29,7 +29,6 @@ builder.Services.AddConfig(builder.Configuration);
 builder.Services.RegisterMapsterConfiguration();
 builder.Services.ConfigureFluentValidation();
 builder.Services.AddFireBaseServices();
-builder.Services.ConfigureGraphql();
 builder.Services.ConfigureSwaggerServices();
 
 
@@ -66,10 +65,8 @@ app.UseCors("AllowSpecificOrigin");
 
 
 app.UseAuthentication(); 
-app.UseRouting();       
 app.UseAuthorization();  
 
-app.MapGraphQL();
 app.UseMiddleware<RequestLoggingMiddleware>();
 app.MapControllers();
 app.MapPost("broadcast", async (string message, IHubContext<ChatHub, IChatClient> context) => {
