@@ -271,13 +271,18 @@ namespace HandmadeProductManagement.Services.Service
             {
                 return new List<NotificationModel>();
             }
-            var urlroot = "https://localhost:7159";
+            var twoDaysAgo = DateTime.Now.AddDays(-2);
+
+            
             // Lấy tất cả các reply mới cho những review của khách hàng
             var replies = await _unitOfWork.GetRepository<Reply>()
                 .Entities
-                .Where(rep => reviews.Select(r => r.Id).Contains(rep.ReviewId) && rep.Date >= DateTime.UtcNow.AddDays(-2)) // Lọc theo thời gian tạo reply trong 2 ngày gần nhất
+                .Where(rep => reviews.Select(r => r.Id).Contains(rep.ReviewId) && rep.Date.Value.Date >= twoDaysAgo.Date) // Lọc theo thời gian tạo reply trong 2 ngày gần nhất
                 .Include(rep => rep.Review) // Bao gồm review
-                .ThenInclude(r => r.Product) // Bao gồm sản phẩm
+                    .ThenInclude(r => r.Product) // Bao gồm sản phẩm
+                    .ThenInclude(p => p.Shop)  // Nạp thông tin shop từ sản phẩm
+                    .ThenInclude(s => s.User)  // Nạp thông tin user (chủ shop) từ shop
+                    .ThenInclude(u => u.UserInfo) // Nạp thông tin UserInfo từ User
                 .ToListAsync();
 
             if (replies == null || !replies.Any())
@@ -289,9 +294,9 @@ namespace HandmadeProductManagement.Services.Service
             var replyNotifications = replies.Select(reply => new NotificationModel
             {
                 Id = reply.Id,
-                Message = $"Bạn đã nhận được phản hồi mới cho review sản phẩm {reply.Review.Product.Name}",
+                Message = $"Bạn đã nhận được phản hồi mới cho review sản phẩm {reply.Review.Product.Shop.User.UserInfo.FullName}",
                 Tag = "Reply",
-                URL = urlroot + $"api/reply/{reply.Id}"
+                URL = Url + $"api/reply/{reply.Id}"
             }).ToList();
 
             return replyNotifications;
@@ -305,26 +310,27 @@ namespace HandmadeProductManagement.Services.Service
             {
                 throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Invalid userID");
             }
-            var reviewID = await _unitOfWork.GetRepository<Review>()
+
+            var shopID = await _unitOfWork.GetRepository<Shop>()
                 .Entities
                 .Where(r => r.UserId == userId)
                 .Select(r => r.Id)
                 .ToListAsync();
-
-            if (reviewID.IsNullOrEmpty())
+            if (shopID.IsNullOrEmpty())
             {
                 throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "User not found");
             }
 
             var twoDaysAgo = DateTime.Now.AddDays(-2);
+            
 
             var review = await _unitOfWork.GetRepository<Review>()
                 .Entities
-                .Where(r => r.UserId == userId && r.Reply == null && r.Date >= twoDaysAgo)
+                .Where(r => r.Reply == null && r.Date.Value.Date >= twoDaysAgo.Date)  // Lọc các review không có phản hồi và trong hai ngày qua
                 .Include(r => r.Product)  // Nạp thông tin sản phẩm từ review
-                .ThenInclude(p => p.Shop)  // Nạp thông tin shop từ sản phẩm
-                .ThenInclude(s => s.User)  // Nạp thông tin user (chủ shop) từ shop
-                .ThenInclude(u => u.UserInfo) // Nạp thông tin UserInfo từ User (chủ shop)
+                    .ThenInclude(p => p.Shop)  // Nạp thông tin shop từ sản phẩm
+                    .ThenInclude(s => s.User)  // Nạp thông tin user (chủ shop) từ shop
+                    .ThenInclude(u => u.UserInfo) // Nạp thông tin UserInfo từ User (chủ shop)
                 .ToListAsync();
 
             var notifications = review.Select(review => new NotificationModel
@@ -357,10 +363,12 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "User not found");
             }
 
+            var twoDaysAgo = DateTime.Now.AddDays(-2);
+
             // Lấy status của orders
             var status = await _unitOfWork.GetRepository<StatusChange>()
                 .Entities
-                .Where(s => orders.Contains(s.OrderId))
+                .Where(s => orders.Contains(s.OrderId) && s.ChangeTime.Date >= twoDaysAgo)
                 .Include(s => s.Order)
                 .ToListAsync();
 
