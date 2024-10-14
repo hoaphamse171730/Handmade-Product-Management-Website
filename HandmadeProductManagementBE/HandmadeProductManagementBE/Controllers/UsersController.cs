@@ -102,6 +102,7 @@ namespace HandmadeProductManagementAPI.Controllers
             };
             return Ok(response);
         }
+
         [Authorize(Roles = "Admin, Seller")]
         [HttpGet("notification_review")]
         public async Task<IActionResult> GetNotifications()
