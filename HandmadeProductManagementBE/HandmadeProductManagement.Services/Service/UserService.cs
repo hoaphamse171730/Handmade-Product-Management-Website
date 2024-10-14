@@ -235,27 +235,72 @@ namespace HandmadeProductManagement.Services.Service
             }
 
             var urlroot = "https://localhost:7159";
+            var fromDate = DateTime.UtcNow.AddDays(-2); // Lọc đơn hàng trong vòng 2 ngày
 
-            // Lấy danh sách đơn hàng của người dùng, sắp xếp theo LastUpdatedTime (tăng dần)
-            var orders = await _unitOfWork.GetRepository<Order>()
+            // Lấy danh sách đơn hàng trong vòng 2 ngày dựa trên ShopId của người dùng (người bán), sắp xếp theo LastUpdatedTime (tăng dần)
+            var orders = await _unitOfWork.GetRepository<OrderDetail>()
                 .Entities
-                .Where(o => o.UserId == userId)
-                .OrderBy(o => o.LastUpdatedTime) // Sắp xếp theo LastUpdatedTime tăng dần
-                .Include(o => o.User)
+                .Where(od => od.ProductItem.Product.Shop.UserId == userId && od.Order.OrderDate >= fromDate)
+                .OrderBy(od => od.Order.LastUpdatedTime) // Sắp xếp theo LastUpdatedTime tăng dần
+                .Include(od => od.Order)
+                .Include(od => od.Order.User) // Bao gồm thông tin người mua
                 .ToListAsync();
 
-            // Tạo danh sách thông báo cho các đơn hàng
-            var notifications = orders.Select(order => new NotificationModel
+            if (!orders.Any())
             {
-                Id = order.Id,
-                Message = $"Bạn có đơn hàng mới từ {order.CustomerName} với trạng thái: {order.Status} vào ngày: {order.LastUpdatedTime.ToString("dd/MM/yyyy")}",
+                return new List<NotificationModel>(); // Không có đơn hàng trong khoảng thời gian
+            }
+
+            // Tạo danh sách thông báo cho các đơn hàng
+            var notifications = orders.Select(orderDetail => new NotificationModel
+            {
+                Id = orderDetail.Order.Id,
+                Message = $"Bạn có đơn hàng mới từ {orderDetail.Order.CustomerName} với trạng thái: {orderDetail.Order.Status} vào ngày: {orderDetail.Order.LastUpdatedTime.ToString("dd/MM/yyyy")}",
                 Tag = "Order",
-                URL = urlroot + $"/api/order/{order.Id}"
+                URL = urlroot + $"/api/order/{orderDetail.Order.Id}"
             }).ToList();
 
             return notifications;
         }
 
+
+
+
+        public async Task<IList<NotificationModel>> GetNewReviewNotificationList(string Id)
+        {
+
+            if (!Guid.TryParse(Id, out Guid userId))
+            {
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Invalid userID");
+            }
+
+            var shopIds = await _unitOfWork.GetRepository<Shop>()
+                .Entities
+                .Where(shop => shop.UserId == userId)
+                .Select(shop => shop.Id)
+                .ToListAsync();
+
+            if (shopIds.IsNullOrEmpty())
+            {
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "User not found");
+            }
+
+            var review = await _unitOfWork.GetRepository<Review>()
+                .Entities
+                .Where(r => r.UserId == userId && r.Reply == null)
+                .Include(r => r.User)
+                .ToListAsync();
+
+            var notifications = review.Select(review => new NotificationModel
+            {
+                Id = review.Id,
+                Message = $"Sản phẩm của bạn đã được {review.User.UserName} review",
+                Tag = "Review",
+                URL = Url + $"/api/review/{review.Id}"
+            }).ToList();
+
+            return notifications;
+        }
         public async Task<IList<NotificationModel>> GetNewReplyNotificationList(string Id)
         {
             if (!Guid.TryParse(Id, out Guid userId))
