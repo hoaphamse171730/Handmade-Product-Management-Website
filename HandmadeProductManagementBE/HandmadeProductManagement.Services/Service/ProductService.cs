@@ -633,7 +633,7 @@ namespace HandmadeProductManagement.Services.Service
 
             var promotionExist = await _unitOfWork.GetRepository<Promotion>().Entities.FirstOrDefaultAsync(p => p.Categories.Any(c => c.Id == product.CategoryId));
 
-                await _promotionService.UpdatePromotionStatusByRealtime(promotionExist.Id);
+                //await _promotionService.UpdatePromotionStatusByRealtime(promotionExist.Id);
 
             var promotion = await _unitOfWork.GetRepository<Promotion>().Entities
                 .FirstOrDefaultAsync(p => p.Categories.Any(c => c.Id == product.CategoryId) &&

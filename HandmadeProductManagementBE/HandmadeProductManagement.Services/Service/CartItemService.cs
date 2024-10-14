@@ -5,7 +5,6 @@ using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Constants;
-using HandmadeProductManagement.Core.Utils;
 using HandmadeProductManagement.ModelViews.CartItemModelViews;
 using Microsoft.EntityFrameworkCore;
 
@@ -30,14 +29,12 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<bool> AddCartItem(CartItemForCreationDto createCartItemDto, string userId)
         {
-            // Validate the incoming DTO
             var validationResult = await _creationValidator.ValidateAsync(createCartItemDto);
             if (!validationResult.IsValid)
             {
                 throw new BaseException.BadRequestException("invalid_cart_item", validationResult.Errors.First().ErrorMessage);
             }
 
-            // Check if the product item exists
             var productItemRepo = _unitOfWork.GetRepository<ProductItem>();
             var productItem = await productItemRepo.Entities
                                                     .SingleOrDefaultAsync(pi => pi.Id == createCartItemDto.ProductItemId);
@@ -46,7 +43,6 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.NotFoundException("product_item_not_found", $"ProductItem {createCartItemDto.ProductItemId} not found.");
             }
 
-            // Check if the cart item already exists for this user
             var cartItemRepo = _unitOfWork.GetRepository<CartItem>();
             var existingCartItem = await cartItemRepo.Entities
                 .FirstOrDefaultAsync(ci => ci.ProductItemId == productItem.Id && ci.UserId == Guid.Parse(userId) && ci.DeletedTime == null);
@@ -76,7 +72,6 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<bool> UpdateCartItem(string cartItemId, CartItemForUpdateDto updateCartItemDto, string userId)
         {
-            // Validate the incoming DTO
             var validationResult = await _updateValidator.ValidateAsync(updateCartItemDto);
             if (!validationResult.IsValid)
             {
@@ -86,6 +81,11 @@ namespace HandmadeProductManagement.Services.Service
             var cartItemRepo = _unitOfWork.GetRepository<CartItem>();
             var cartItem = await cartItemRepo.Entities
                 .FirstOrDefaultAsync(ci => ci.Id == cartItemId && ci.UserId == Guid.Parse(userId) && ci.DeletedTime == null);
+
+            if(cartItem.CreatedBy != userId)
+            {
+                throw new BaseException.ForbiddenException("forbidden", "You do not have permission to access this resource.");
+            }
 
             if (cartItem == null)
             {
@@ -140,7 +140,7 @@ namespace HandmadeProductManagement.Services.Service
             {
                 var promotion = ci.ProductItem.Product.Category.Promotion;
                 var unitPrice = ci.ProductItem.Price;
-                var discountPrice = promotion != null && promotion.Status == "Active"
+                var discountPrice = promotion != null && promotion.Status == "active"
                     ? unitPrice - (int)(unitPrice * promotion.DiscountRate)
                     : unitPrice;
 
@@ -166,6 +166,11 @@ namespace HandmadeProductManagement.Services.Service
             var cartItem = await cartItemRepo.Entities
                 .FirstOrDefaultAsync(ci => ci.Id == cartItemId && ci.UserId == Guid.Parse(userId) && ci.DeletedTime == null);
 
+            if(cartItem.CreatedBy != userId)
+            {
+                throw new BaseException.ForbiddenException("forbidden", "You do not have permission to access this resource.");
+            }
+
             if (cartItem == null)
             {
                 throw new BaseException.NotFoundException("cart_item_not_found", "Cart item not found.");
@@ -178,8 +183,6 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<Decimal> GetTotalCartPrice(string userId)
         {
-            await _promotionService.UpdatePromotionStatusByRealtime(userId);
-
             if (!Guid.TryParse(userId, out Guid userIdGuid))
             {
                 throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Invalid userId");

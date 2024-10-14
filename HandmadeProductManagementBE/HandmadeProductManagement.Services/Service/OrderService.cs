@@ -17,164 +17,170 @@ namespace HandmadeProductManagement.Services.Service
         private readonly IUnitOfWork _unitOfWork;
         private readonly IStatusChangeService _statusChangeService;
         private readonly IOrderDetailService _orderDetailService;
-        //private readonly ICartItemService _cartItemService;
+        private readonly ICartItemService _cartItemService;
         private readonly IProductService _productService;
 
         public OrderService(IUnitOfWork unitOfWork, 
             IStatusChangeService statusChangeService, 
-            IOrderDetailService orderDetailService, 
-            //ICartItemService cartItemService,
+            IOrderDetailService orderDetailService,
+            ICartItemService cartItemService,
             IProductService productService)
         {
             _unitOfWork = unitOfWork;
             _statusChangeService = statusChangeService;
             _orderDetailService = orderDetailService;
-            //_cartItemService = cartItemService;
+            _cartItemService = cartItemService;
             _productService = productService;
         }
 
-        //public async Task<bool> CreateOrderAsync(string userId, CreateOrderDto createOrder)
-        //{
-        //    ValidateOrder(createOrder);
+        public async Task<bool> CreateOrderAsync(string userId, CreateOrderDto createOrder)
+        {
+            ValidateOrder(createOrder);
 
-        //    var orderRepository = _unitOfWork.GetRepository<Order>();
-        //    var cartItemRepository = _unitOfWork.GetRepository<CartItem>();
-        //    var productItemRepository = _unitOfWork.GetRepository<ProductItem>();
-        //    var productRepository = _unitOfWork.GetRepository<Product>();
+            var orderRepository = _unitOfWork.GetRepository<Order>();
+            var cartItemRepository = _unitOfWork.GetRepository<CartItem>();
+            var productItemRepository = _unitOfWork.GetRepository<ProductItem>();
+            var productRepository = _unitOfWork.GetRepository<Product>();
 
-        //    //get cart items by user id
-        //    var cartItems = await _cartItemService.GetCartItemsByUserIdAsync(userId);
-        //    if (cartItems.Count == 0)
-        //    {
-        //        throw new BaseException.NotFoundException("empty_cart", "Cart is empty.");
-        //    }
+            // get cartitems
+            var cartItems = await _cartItemService.GetCartItemsByUserIdAsync(userId);
+            if (cartItems.Count == 0)
+            {
+                throw new BaseException.NotFoundException("empty_cart", "Cart is empty.");
+            }
 
-        //    var promotionRepository = _unitOfWork.GetRepository<Promotion>();
-        //    var categoryRepository = _unitOfWork.GetRepository<Category>();
+            var promotionRepository = _unitOfWork.GetRepository<Promotion>();
+            var categoryRepository = _unitOfWork.GetRepository<Category>();
 
-        //    //get active promotions
-        //    var activePromotions = await promotionRepository.Entities
-        //        .Where(p => p.Status == "Active" && DateTime.UtcNow >= p.StartDate && DateTime.UtcNow <= p.EndDate)
-        //        .ToListAsync();
+            // get promotion
+            var activePromotions = await promotionRepository.Entities
+                .Where(p => p.Status == "Active" && DateTime.UtcNow >= p.StartDate && DateTime.UtcNow <= p.EndDate)
+                .ToListAsync();
 
-        //    var groupedOrderDetails = new List<GroupedOrderDetail>();
+            var groupedOrderDetails = new List<GroupedOrderDetail>();
 
-        //    foreach (var cartItem in cartItems)
-        //    {
-        //        var productItem = await productItemRepository.Entities
-        //            .FirstOrDefaultAsync(p => p.Id.ToString() == cartItem.ProductItemId && !p.DeletedTime.HasValue);
+            foreach (var cartItem in cartItems)
+            {
+                var productItem = await productItemRepository.Entities
+                    .FirstOrDefaultAsync(p => p.Id.ToString() == cartItem.ProductItemId && !p.DeletedTime.HasValue);
 
-        //        if (productItem == null)
-        //        {
-        //            throw new BaseException.NotFoundException("product_item_not_found", $"Product Item {cartItem.ProductItemId} not found.");
-        //        }
+                if (productItem == null)
+                {
+                    throw new BaseException.NotFoundException("product_item_not_found", $"Product Item {cartItem.ProductItemId} not found.");
+                }
 
-        //        var product = await productRepository.Entities
-        //            .FirstOrDefaultAsync(p => p.Id == productItem.ProductId && !p.DeletedTime.HasValue);
+                var product = await productRepository.Entities
+                    .FirstOrDefaultAsync(p => p.Id == productItem.ProductId && !p.DeletedTime.HasValue);
 
-        //        if (product == null)
-        //        {
-        //            throw new BaseException.NotFoundException("product_not_found", $"Product for Item {productItem.Id} not found.");
-        //        }
+                if (product == null)
+                {
+                    throw new BaseException.NotFoundException("product_not_found", $"Product for Item {productItem.Id} not found.");
+                }
 
-        //        var category = await categoryRepository.Entities
-        //            .FirstOrDefaultAsync(c => c.Id == product.CategoryId);
+                var category = await categoryRepository.Entities
+                    .FirstOrDefaultAsync(c => c.Id == product.CategoryId);
 
-        //        decimal finalPrice = productItem.Price;
-        //        if (category != null && !string.IsNullOrWhiteSpace(category.PromotionId))
-        //        {
-        //            // Check if the product has a promotion
-        //            var applicablePromotion = activePromotions
-        //                .FirstOrDefault(p => p.Id == category.PromotionId);
+                decimal finalPrice = productItem.Price;
+                if (category != null && !string.IsNullOrWhiteSpace(category.PromotionId))
+                {
+                    // check promotion
+                    var applicablePromotion = activePromotions
+                        .FirstOrDefault(p => p.Id == category.PromotionId);
 
-        //            if (applicablePromotion != null)
-        //            {
-        //                finalPrice = productItem.Price - (productItem.Price * applicablePromotion.DiscountRate);
-        //            }
-        //        }
+                    if (applicablePromotion != null)
+                    {
+                        finalPrice = productItem.Price - (productItem.Price * applicablePromotion.DiscountRate);
+                    }
+                }
 
-        //        groupedOrderDetails.Add(new GroupedOrderDetail
-        //        {
-        //            ShopId = product.ShopId,
-        //            CartItem = cartItem,
-        //            ProductItem = productItem,
-        //            DiscountPrice = finalPrice,
-        //        });
-        //    }
+                groupedOrderDetails.Add(new GroupedOrderDetail
+                {
+                    ShopId = product.ShopId,
+                    CartItem = cartItem,
+                    ProductItem = productItem,
+                    DiscountPrice = finalPrice,
+                });
+            }
 
-        //    // Groupby product by shop
-        //    var groupedByShop = groupedOrderDetails.GroupBy(x => x.ShopId).ToList();
+            // group order by shop Id
+            var groupedByShop = groupedOrderDetails.GroupBy(x => x.ShopId).ToList();
 
-        //    _unitOfWork.BeginTransaction();
+            _unitOfWork.BeginTransaction();
 
-        //    try
-        //    {
-        //        foreach (var shopGroup in groupedByShop)
-        //        {
-        //            var totalPrice = shopGroup.Sum(x => x.DiscountPrice * x.CartItem.ProductQuantity);
-        //            var order = new Order
-        //            {
-        //                TotalPrice = (decimal)totalPrice,
-        //                OrderDate = DateTime.UtcNow,
-        //                Status = "Pending",
-        //                UserId = Guid.Parse(userId),
-        //                Address = createOrder.Address,
-        //                CustomerName = createOrder.CustomerName,
-        //                Phone = createOrder.Phone,
-        //                Note = createOrder.Note,
-        //                CreatedBy = userId,
-        //                LastUpdatedBy = userId,
-        //            };
+            try
+            {
+                foreach (var shopGroup in groupedByShop)
+                {
+                    var totalPrice = shopGroup.Sum(x => x.DiscountPrice * x.CartItem.ProductQuantity);
+                    var order = new Order
+                    {
+                        TotalPrice = (decimal)totalPrice,
+                        OrderDate = DateTime.UtcNow,
+                        Status = "Pending",
+                        UserId = Guid.Parse(userId),
+                        Address = createOrder.Address,
+                        CustomerName = createOrder.CustomerName,
+                        Phone = createOrder.Phone,
+                        Note = createOrder.Note,
+                        CreatedBy = userId,
+                        LastUpdatedBy = userId,
+                    };
 
-        //            await orderRepository.InsertAsync(order);
-        //            await _unitOfWork.SaveAsync();
+                    await orderRepository.InsertAsync(order);
+                    await _unitOfWork.SaveAsync();
 
-        //            foreach (var groupedDetail in shopGroup)
-        //            {
-        //                var cartItem = groupedDetail.CartItem;
-        //                var productItem = groupedDetail.ProductItem;
+                    foreach (var groupedDetail in shopGroup)
+                    {
+                        var cartItem = groupedDetail.CartItem;
+                        var productItem = groupedDetail.ProductItem;
 
-        //                if (productItem.QuantityInStock - cartItem.ProductQuantity < 0)
-        //                {
-        //                    throw new BaseException.BadRequestException("insufficient_stock", $"Product {productItem.Id} has insufficient stock.");
-        //                }
+                        if (productItem.QuantityInStock - cartItem.ProductQuantity < 0)
+                        {
+                            throw new BaseException.BadRequestException("insufficient_stock", $"Product {productItem.Id} has insufficient stock.");
+                        }
 
-        //                productItem.QuantityInStock -= cartItem.ProductQuantity;
-        //                productItemRepository.Update(productItem);
+                        // update quantity in stock
+                        productItem.QuantityInStock -= cartItem.ProductQuantity;
+                        productItemRepository.Update(productItem);
 
-        //                var orderDetail = new OrderDetailForCreationDto
-        //                {
-        //                    OrderId = order.Id,
-        //                    ProductItemId = productItem.Id,
-        //                    ProductQuantity = cartItem.ProductQuantity,
-        //                    DiscountPrice = groupedDetail.DiscountPrice,
-        //                };
+                        var orderDetail = new OrderDetailForCreationDto
+                        {
+                            OrderId = order.Id,
+                            ProductItemId = productItem.Id,
+                            ProductQuantity = cartItem.ProductQuantity,
+                            DiscountPrice = groupedDetail.DiscountPrice,
+                        };
 
-        //                await _orderDetailService.Create(orderDetail);
-        //                await _cartItemService.DeleteCartItemByIdAsync(cartItem.Id, userId);
-        //            }
+                        // create order detail
+                        await _orderDetailService.Create(orderDetail);
 
-        //            await _unitOfWork.SaveAsync();
+                        // clear cart
+                        await _cartItemService.DeleteCartItemByIdAsync(cartItem.Id, userId);
+                    }
 
-        //            var statusChangeDto = new StatusChangeForCreationDto
-        //            {
-        //                OrderId = order.Id.ToString(),
-        //                Status = order.Status
-        //            };
+                    await _unitOfWork.SaveAsync();
 
-        //            await _statusChangeService.Create(statusChangeDto, userId);
-        //            await _unitOfWork.SaveAsync();
-        //        }
+                    // Create status change
+                    var statusChangeDto = new StatusChangeForCreationDto
+                    {
+                        OrderId = order.Id.ToString(),
+                        Status = order.Status
+                    };
 
-        //        _unitOfWork.CommitTransaction();
-        //        return true;
-        //    }
-        //    catch (Exception)
-        //    {
-        //        _unitOfWork.RollBack();
-        //        throw;
-        //    }
-        //}
+                    await _statusChangeService.Create(statusChangeDto, userId);
+                    await _unitOfWork.SaveAsync();
+                }
+
+                _unitOfWork.CommitTransaction();
+                return true;
+            }
+            catch (Exception)
+            {
+                _unitOfWork.RollBack();
+                throw;
+            }
+        }
+
 
         public async Task<PaginatedList<OrderResponseModel>> GetOrdersByPageAsync(int pageNumber, int pageSize)
         {
