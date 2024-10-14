@@ -32,7 +32,7 @@ using Microsoft.AspNetCore.Mvc;
             return Ok(BaseResponse<TotalOrdersByStatusDTO>.OkResponse(ordersByStatus));
         }
 
-        [HttpGet("stock-distribution")]
+        [HttpGet("type-distribution")]
         [Authorize]
         public async Task<IActionResult> StockDistribution()
         {
