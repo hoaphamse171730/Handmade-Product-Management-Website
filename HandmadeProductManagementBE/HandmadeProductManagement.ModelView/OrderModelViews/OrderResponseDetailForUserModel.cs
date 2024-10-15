@@ -2,7 +2,7 @@
 
 namespace HandmadeProductManagement.ModelViews.OrderModelViews
 {
-    public class OrderResponseDetailModel : OrderResponseModel
+    public class OrderResponseDetailForUserModel : OrderByUserDto
     {
         public List<OrderDetailResponseModel> OrderDetails { get; set; } = new List<OrderDetailResponseModel>();
     }

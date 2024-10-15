@@ -41,7 +41,7 @@ namespace HandmadeProductManagementAPI.Controllers
         public async Task<IActionResult> GetOrdersByPage([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             var paginatedOrders = await _orderService.GetOrdersByPageAsync(pageNumber, pageSize);
-            var response = new BaseResponse<PaginatedList<OrderResponseDetailModel>>
+            var response = new BaseResponse<PaginatedList<OrderResponseDetailForAdminModel>>
             {
                 Code = "Success",
                 StatusCode = StatusCodeHelper.OK,
@@ -57,7 +57,7 @@ namespace HandmadeProductManagementAPI.Controllers
         {
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             var orders = await _orderService.GetOrderByUserIdAsync(Guid.Parse(userId));
-            var response = new BaseResponse<IList<OrderResponseModel>>
+            var response = new BaseResponse<IList<OrderByUserDto>>
             {
                 Code = "Success",
                 StatusCode = StatusCodeHelper.OK,
@@ -73,7 +73,7 @@ namespace HandmadeProductManagementAPI.Controllers
         {
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             var orders = await _orderService.GetOrdersBySellerUserIdAsync(Guid.Parse(userId));
-            var response = new BaseResponse<IList<OrderResponseDetailModel>>
+            var response = new BaseResponse<IList<OrderResponseDetailForAdminModel>>
             {
                 Code = "Success",
                 StatusCode = StatusCodeHelper.OK,
@@ -87,7 +87,7 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpGet("admin/user/{userId}")]
         public async Task<IActionResult> GetOrderByUserIdForAdmin(Guid userId)
         {
-            var orders = await _orderService.GetOrderByUserIdAsync(userId);
+            var orders = await _orderService.GetOrderByUserIdForAdminAsync(userId);
             var response = new BaseResponse<IList<OrderResponseModel>>
             {
                 Code = "Success",
