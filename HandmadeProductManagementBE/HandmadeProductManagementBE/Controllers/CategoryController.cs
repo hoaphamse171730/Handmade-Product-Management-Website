@@ -49,7 +49,7 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [HttpPost]
-        // [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateCategory(CategoryForCreationDto categoryForCreation)
         {
 
@@ -67,7 +67,7 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [HttpPut("{categoryId}")]
-        // [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateCategory(string categoryId, CategoryForUpdateDto categoryForUpdate)
         {
             var updatedCategory = await _categoryService.Update(categoryId, categoryForUpdate);
