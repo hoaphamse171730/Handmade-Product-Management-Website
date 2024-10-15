@@ -22,7 +22,7 @@ namespace HandmadeProductManagementAPI.Controllers
         }
         //dùng để test
         [HttpGet("get-transaction-status-vnpay")]
-        [Authorize(Roles = "CUSTOMER")]
+        [Authorize(Roles = "Customer")]
         public async Task<IActionResult> GetTransactionStatusVNPay(string orderId, Guid userId, String urlReturn)
         {
             var response = new BaseResponse<string>
