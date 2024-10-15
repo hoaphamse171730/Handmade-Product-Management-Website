@@ -24,22 +24,20 @@ using Microsoft.AspNetCore.Mvc;
                 _dashboardService = dashboardService;
             }
 
-        [HttpGet("total-orders")]
+        [HttpGet("total-orders-by-status")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult>GetTotalOrders()
+        public async Task<IActionResult> GetTotalOrdersByStatus()
         {
-            int totalOrders = await _dashboardService.GetTotalOrders();
-         
-                return Ok(BaseResponse<int>.OkResponse(totalOrders)); ;
-            }
+            var ordersByStatus = await _dashboardService.GetTotalOrdersByStatus();
+            return Ok(BaseResponse<TotalOrdersByStatusDTO>.OkResponse(ordersByStatus));
+        }
 
-        [HttpGet("total-products")]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> GetTotalProducts()
+        [HttpGet("type-distribution")]
+        [Authorize]
+        public async Task<IActionResult> StockDistribution()
         {
-            int totalProduct = await _dashboardService.GetTotalProducts();
-            
-            return Ok(BaseResponse<int>.OkResponse(totalProduct)); ;
+            var stockDistribution = await _dashboardService.StockDistribution();
+            return Ok(BaseResponse<List<CategoryStockDistributionDTO>>.OkResponse(stockDistribution));
         }
 
         [HttpGet("total-sales")]
@@ -55,11 +53,10 @@ using Microsoft.AspNetCore.Mvc;
         [Authorize]
         public async Task<IActionResult> GetTop10Shops()
         {
-           List<Shop> topShops = await _dashboardService.GetTop10Shops();
-
-            return Ok(BaseResponse<List<Shop>>.OkResponse(topShops)); 
-
+            var topShops = await _dashboardService.GetTop10Shops();
+            return Ok(BaseResponse<List<TopShopDashboardDTO>>.OkResponse(topShops));
         }
+
         [HttpPost("TotalSaleByShopId")]
         public async Task<IActionResult> TotalSaleByShopId(string Id, DashboardDTO dashboardDTO)
         {

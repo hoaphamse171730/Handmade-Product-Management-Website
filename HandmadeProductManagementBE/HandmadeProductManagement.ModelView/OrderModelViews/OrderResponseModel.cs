@@ -1,6 +1,4 @@
-﻿using HandmadeProductManagement.ModelViews.OrderDetailModelViews;
-
-namespace HandmadeProductManagement.ModelViews.OrderModelViews
+﻿namespace HandmadeProductManagement.ModelViews.OrderModelViews
 {
     public class OrderResponseModel
     {
@@ -14,6 +12,5 @@ namespace HandmadeProductManagement.ModelViews.OrderModelViews
         public string? Phone { get; set; } = string.Empty;
         public string? Note { get; set; }
         public string? CancelReasonId { get; set; }
-        public List<OrderDetailDto> OrderDetails { get; set; } = new List<OrderDetailDto>();
     }
 }

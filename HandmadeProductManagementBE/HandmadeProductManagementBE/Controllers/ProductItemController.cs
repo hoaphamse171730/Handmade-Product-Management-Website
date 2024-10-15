@@ -2,8 +2,10 @@
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.ProductItemModelViews;
+using HandmadeProductManagement.ModelViews.VariationCombinationModelViews;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace HandmadeProductManagementAPI.Controllers
 {
@@ -18,39 +20,21 @@ namespace HandmadeProductManagementAPI.Controllers
             _productItemService = productItemService;
         }
 
-        // GET: api/ProductItem/{productId}
-        //[HttpGet("{productId}")]
-        //public async Task<IActionResult> GetByProductId(string productId)
-        //{
-        //    var productItem = await _productItemService.GetByProductId(productId);
+        [HttpPost]
+        [Route("{productId}/items")]
+        public async Task<IActionResult> CreateProductItem(string productId, [FromBody] List<VariationCombinationDto> variationCombinations)
+        {
 
-        //    var response = new BaseResponse<ProductItemDto>
-        //    {
-        //        Code = "Success",
-        //        StatusCode = StatusCodeHelper.OK,
-        //        Message = "Get Product Item successfully!",
-        //        Data = productItem
-        //    };
-        //    return Ok(response);
-        //}
-
-        //[Authorize(Roles = "Seller")]
-        //// POST: api/ProductItem
-        //[HttpPost]
-        //public async Task<IActionResult> CreateProductItem([FromBody] ProductItemForCreationDto productItemDto)
-        //{
-        //    var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-        //    var result = await _productItemService.Create(productItemDto, userId);
-
-        //    var response = new BaseResponse<bool>
-        //    {
-        //        Code = "Success",
-        //        StatusCode = StatusCodeHelper.OK,
-        //        Message = "Created Product Item successfully!",
-        //        Data = result
-        //    };
-        //    return Ok(response);
-        //}
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var response = new BaseResponse<bool>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Updated Product Item successfully!",
+                Data = await _productItemService.AddVariationOptionsToProduct(productId, variationCombinations, userId)
+            };
+            return Ok(response);
+        }
 
         [Authorize(Roles = "Seller")]
         // PATCH: api/ProductItem/{id}
@@ -58,13 +42,12 @@ namespace HandmadeProductManagementAPI.Controllers
         public async Task<IActionResult> UpdateProductItem(string id, [FromBody] ProductItemForUpdateDto updatedProductItemDto)
         {
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            var result = await _productItemService.Update(id, updatedProductItemDto, userId);
             var response = new BaseResponse<bool>
             {
                 Code = "Success",
                 StatusCode = StatusCodeHelper.OK,
                 Message = "Updated Product Item successfully!",
-                Data = result
+                Data = await _productItemService.Update(id, updatedProductItemDto, userId)
             };
             return Ok(response);
         }
@@ -75,14 +58,13 @@ namespace HandmadeProductManagementAPI.Controllers
         public async Task<IActionResult> SoftDeleteProductItem(string id)
         {
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            var result = await _productItemService.Delete(id, userId);
 
-            var response = new BaseResponse<string>
+            var response = new BaseResponse<bool>
             {
                 Code = "Success",
                 StatusCode = StatusCodeHelper.OK,
                 Message = $"Product Item with ID {id} has been successfully deleted.",
-                Data = null
+                Data = await _productItemService.Delete(id, userId)
             };
             return Ok(response);
         }

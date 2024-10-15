@@ -14,7 +14,6 @@
         public DateTimeOffset? LockoutEnd { get; set; }
         public bool LockoutEnabled { get; set; }
         public int AccessFailedCount { get; set; }
-        public Guid CartId { get; set; }
 
     }
 }

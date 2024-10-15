@@ -49,25 +49,23 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [HttpPost]
-        // [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateCategory(CategoryForCreationDto categoryForCreation)
         {
-
-            var createdCategory = await _categoryService.Create(categoryForCreation);
-            var response = new BaseResponse<CategoryDto>
+            await _categoryService.Create(categoryForCreation);
+            var response = new BaseResponse<bool>
             {
                 Code = "200",
                 StatusCode = StatusCodeHelper.OK,
                 Message = "Category created successfully",
-                Data = createdCategory
+                Data = true
             };
             return Ok(response);
-
-
         }
 
+
         [HttpPut("{categoryId}")]
-        // [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateCategory(string categoryId, CategoryForUpdateDto categoryForUpdate)
         {
             var updatedCategory = await _categoryService.Update(categoryId, categoryForUpdate);
@@ -80,6 +78,22 @@ namespace HandmadeProductManagementAPI.Controllers
             };
             return Ok(response);
         }
+
+        [Authorize(Roles = "Admin, Seller")]
+        [HttpPut("updatepromotion/{categoryId}")]
+        public async Task<IActionResult> UpdatePromotion(string categoryId, CategoryForUpdatePromotion categoryForUpdatePromotion)
+        {
+            var updatePromotionCategory = await _categoryService.UpdatePromotion(categoryId, categoryForUpdatePromotion);
+            var reponse = new BaseResponse<CategoryDto>
+            {
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Category updated successfully",
+                Data = updatePromotionCategory
+            };
+            return Ok(reponse);
+        }
+        
 
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]

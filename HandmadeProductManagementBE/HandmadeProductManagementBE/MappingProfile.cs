@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.ModelViews.CancelReasonModelViews;
+using HandmadeProductManagement.ModelViews.CartItemModelViews;
 using HandmadeProductManagement.ModelViews.CategoryModelViews;
 using HandmadeProductManagement.ModelViews.OrderDetailModelViews;
 using HandmadeProductManagement.ModelViews.ProductConfigurationModelViews;
@@ -64,6 +65,7 @@ public class MappingProfile : Profile
         CreateMap<Category, CategoryDto>();
         CreateMap<CategoryForCreationDto, Category>();
         CreateMap<CategoryForUpdateDto, Category>();
+        CreateMap<CategoryForUpdatePromotion, Category>();
         #endregion
 
         #region ProductItem
@@ -80,6 +82,12 @@ public class MappingProfile : Profile
         #region UserInfo
         CreateMap<UserInfo, UserInfoDto>();
         CreateMap<UserInfoForUpdateDto, UserInfo>();
+        #endregion
+
+        #region CartItem
+        CreateMap<CartItem, CartItemDto>();
+        CreateMap<CartItemForCreationDto, CartItem>();
+        CreateMap<CartItemForUpdateDto, CartItem>();
         #endregion
     }
 

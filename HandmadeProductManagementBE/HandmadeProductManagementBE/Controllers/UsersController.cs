@@ -14,10 +14,8 @@ namespace HandmadeProductManagementAPI.Controllers
     public class UsersController : ControllerBase
     {
         private readonly IUserService _userService;
-        public UsersController(IUserService userService)
-        {
-            _userService = userService;
-        }
+        public UsersController(IUserService userService) => _userService = userService;
+        
 
         // GET: api/Users
         [HttpGet]
@@ -54,22 +52,22 @@ namespace HandmadeProductManagementAPI.Controllers
 
         }
 
-
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
-
-        public async Task<IActionResult> UpdateUser(string id,  UpdateUserDTO updateUserDTO)
+        public async Task<IActionResult> UpdateUser(string id, UpdateUserDTO updateUserDTO)
         {
-          
-            var response = new BaseResponse<UpdateUserResponseModel>
+            var updateResult = await _userService.UpdateUser(id, updateUserDTO);
+            var response = new BaseResponse<bool>
             {
                 Code = "200",
                 StatusCode = StatusCodeHelper.OK,
                 Message = "Success",
-                Data = await _userService.UpdateUser(id, updateUserDTO)
+                Data = updateResult
             };
             return Ok(response);
         }
+
+
 
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
@@ -102,6 +100,7 @@ namespace HandmadeProductManagementAPI.Controllers
             };
             return Ok(response);
         }
+
         [Authorize(Roles = "Admin, Seller")]
         [HttpGet("notification_review")]
         public async Task<IActionResult> GetNotifications()

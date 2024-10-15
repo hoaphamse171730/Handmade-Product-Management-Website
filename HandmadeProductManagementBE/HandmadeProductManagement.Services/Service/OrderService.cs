@@ -18,16 +18,19 @@ namespace HandmadeProductManagement.Services.Service
         private readonly IStatusChangeService _statusChangeService;
         private readonly IOrderDetailService _orderDetailService;
         private readonly ICartItemService _cartItemService;
+        private readonly IProductService _productService;
 
         public OrderService(IUnitOfWork unitOfWork, 
             IStatusChangeService statusChangeService, 
-            IOrderDetailService orderDetailService, 
-            ICartItemService cartItemService)
+            IOrderDetailService orderDetailService,
+            ICartItemService cartItemService,
+            IProductService productService)
         {
             _unitOfWork = unitOfWork;
             _statusChangeService = statusChangeService;
             _orderDetailService = orderDetailService;
             _cartItemService = cartItemService;
+            _productService = productService;
         }
 
         public async Task<bool> CreateOrderAsync(string userId, CreateOrderDto createOrder)
@@ -39,8 +42,8 @@ namespace HandmadeProductManagement.Services.Service
             var productItemRepository = _unitOfWork.GetRepository<ProductItem>();
             var productRepository = _unitOfWork.GetRepository<Product>();
 
-            //get cart items by user id
-            var cartItems = await _cartItemService.GetCartItemsByUserIdAsync(userId);
+            // get cartitems
+            var cartItems = await _cartItemService.GetCartItemsByUserIdForOrderCreation(userId);
             if (cartItems.Count == 0)
             {
                 throw new BaseException.NotFoundException("empty_cart", "Cart is empty.");
@@ -49,9 +52,9 @@ namespace HandmadeProductManagement.Services.Service
             var promotionRepository = _unitOfWork.GetRepository<Promotion>();
             var categoryRepository = _unitOfWork.GetRepository<Category>();
 
-            //get active promotions
+            // get promotions
             var activePromotions = await promotionRepository.Entities
-                .Where(p => p.Status == "Active" && DateTime.UtcNow >= p.StartDate && DateTime.UtcNow <= p.EndDate)
+                .Where(p => (p.Status == "active" || p.Status == "Active") && DateTime.UtcNow >= p.StartDate && DateTime.UtcNow <= p.EndDate)
                 .ToListAsync();
 
             var groupedOrderDetails = new List<GroupedOrderDetail>();
@@ -80,7 +83,7 @@ namespace HandmadeProductManagement.Services.Service
                 decimal finalPrice = productItem.Price;
                 if (category != null && !string.IsNullOrWhiteSpace(category.PromotionId))
                 {
-                    // Check if the product has a promotion
+                    // check promotion
                     var applicablePromotion = activePromotions
                         .FirstOrDefault(p => p.Id == category.PromotionId);
 
@@ -99,7 +102,7 @@ namespace HandmadeProductManagement.Services.Service
                 });
             }
 
-            // Groupby product by shop
+            // group order by shop Id
             var groupedByShop = groupedOrderDetails.GroupBy(x => x.ShopId).ToList();
 
             _unitOfWork.BeginTransaction();
@@ -136,6 +139,7 @@ namespace HandmadeProductManagement.Services.Service
                             throw new BaseException.BadRequestException("insufficient_stock", $"Product {productItem.Id} has insufficient stock.");
                         }
 
+                        // update quantity in stock
                         productItem.QuantityInStock -= cartItem.ProductQuantity;
                         productItemRepository.Update(productItem);
 
@@ -147,12 +151,16 @@ namespace HandmadeProductManagement.Services.Service
                             DiscountPrice = groupedDetail.DiscountPrice,
                         };
 
-                        await _orderDetailService.Create(orderDetail);
-                        await _cartItemService.DeleteCartItemByIdAsync(cartItem.Id);
+                        // create order detail
+                        await _orderDetailService.Create(orderDetail, userId);
+
+                        // clear cart
+                        await _cartItemService.DeleteCartItemByIdAsync(cartItem.Id, userId);
                     }
 
                     await _unitOfWork.SaveAsync();
 
+                    // Create status change
                     var statusChangeDto = new StatusChangeForCreationDto
                     {
                         OrderId = order.Id.ToString(),
@@ -172,18 +180,18 @@ namespace HandmadeProductManagement.Services.Service
                 throw;
             }
         }
-
-
-        public async Task<PaginatedList<OrderResponseModel>> GetOrdersByPageAsync(int pageNumber, int pageSize)
+        public async Task<PaginatedList<OrderResponseDetailForListModel>> GetOrdersByPageAsync(int pageNumber, int pageSize)
         {
             var repository = _unitOfWork.GetRepository<Order>();
+            var orderDetailRepository = _unitOfWork.GetRepository<OrderDetail>();
+
             var query = repository.Entities.Where(order => !order.DeletedTime.HasValue);
 
             var totalItems = await query.CountAsync();
             var orders = await query
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
-                .Select(order => new OrderResponseModel
+                .Select(order => new OrderResponseDetailForListModel
                 {
                     Id = order.Id,
                     TotalPrice = order.TotalPrice,
@@ -195,12 +203,27 @@ namespace HandmadeProductManagement.Services.Service
                     Phone = order.Phone,
                     Note = order.Note,
                     CancelReasonId = order.CancelReasonId,
+                    OrderDetails = orderDetailRepository.Entities
+                        .Where(od => od.OrderId == order.Id && !od.DeletedTime.HasValue)
+                        .Select(od => new OrderDetailResponseModel
+                        {
+                            Id = od.Id,
+                            ProductItemId = od.ProductItemId,
+                            OrderId = od.OrderId,
+                            ProductQuantity = od.ProductQuantity,
+                            Price = od.DiscountPrice,
+                        }).ToList()
                 })
                 .ToListAsync();
 
-            return new PaginatedList<OrderResponseModel>(orders, totalItems, pageNumber, pageSize);
+            if (!orders.Any())
+            {
+                throw new BaseException.NotFoundException("not_found", "There is no order.");
+            }
+
+            return new PaginatedList<OrderResponseDetailForListModel>(orders, totalItems, pageNumber, pageSize);
         }
-        public async Task<OrderResponseModel> GetOrderByIdAsync(string orderId)
+        public async Task<OrderWithDetailDto> GetOrderByIdAsync(string orderId, string userId, string role)
         {
             if (string.IsNullOrWhiteSpace(orderId))
             {
@@ -221,25 +244,47 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.NotFoundException("order_not_found", "Order not found.");
             }
 
-            var orderDetailRepository = _unitOfWork.GetRepository<OrderDetail>();
-            var orderDetails = await orderDetailRepository.Entities
-                .Where(od => od.OrderId == orderId && !od.DeletedTime.HasValue)
-                .Select(od => new OrderDetailDto
+            // If user is not an admin, apply buyer/seller checks
+            if (role != "Admin")
+            {
+                // Check if the user is the buyer of the order
+                if (order.CreatedBy != userId)
                 {
-                    Id = od.Id,
-                    ProductItemId = od.ProductItemId,
-                    OrderId = od.OrderId,
-                    ProductQuantity = od.ProductQuantity,
-                    DiscountPrice = od.DiscountPrice,
-                    CreatedBy = od.CreatedBy,
-                    LastUpdatedBy = od.LastUpdatedBy,
-                    DeletedBy = od.DeletedBy,
-                    CreatedTime = od.CreatedTime,
-                    LastUpdatedTime = od.LastUpdatedTime,
-                    DeletedTime = od.DeletedTime
-                }).ToListAsync();
+                    // If the user is not the buyer, check if they are the seller of any product in the order
+                    bool isSellerOrder = await _unitOfWork.GetRepository<OrderDetail>().Entities
+                        .AnyAsync(od => od.OrderId == orderId && od.ProductItem.CreatedBy == userId && !od.DeletedTime.HasValue);
 
-            return new OrderResponseModel
+                    if (!isSellerOrder)
+                    {
+                        throw new BaseException.ForbiddenException("forbidden", "You have no permission to access this order.");
+                    }
+                }
+            }
+
+            // Retrieve order details with product config and variation option value
+            var orderDetails = await _unitOfWork.GetRepository<OrderDetail>().Entities
+                    .Where(od => od.OrderId == orderId && !od.DeletedTime.HasValue)
+                    .Select(od => new OrderInDetailDto
+                    {
+                        ProductId = od.ProductItem.Product.Id,
+                        ProductName = od.ProductItem.Product.Name,
+                        ProductQuantity = od.ProductQuantity,
+                        DiscountPrice = od.DiscountPrice,
+
+                        // Truy vấn ProductConfiguration để lấy các tùy chọn variation của sản phẩm
+                        VariationOptionValues = _unitOfWork.GetRepository<ProductConfiguration>().Entities
+                            .Where(pc => pc.ProductItemId == od.ProductItemId)
+                            .Select(pc => pc.VariationOption.Value)
+                            .ToList()
+                    })
+                    .ToListAsync();
+
+            if (!orderDetails.Any())
+            {
+                throw new BaseException.NotFoundException("order_details_not_found", "No order details found for this order.");
+            }
+
+            return new OrderWithDetailDto
             {
                 Id = order.Id,
                 TotalPrice = order.TotalPrice,
@@ -266,6 +311,11 @@ namespace HandmadeProductManagement.Services.Service
             var existingOrder = await repository.Entities
                 .FirstOrDefaultAsync(o => o.Id == orderId && !o.DeletedTime.HasValue);
 
+            if (existingOrder.CreatedBy != userId)
+            {
+                throw new BaseException.ForbiddenException("forbidden", $"You have no permission to access this resource.");
+            }
+
             if (existingOrder == null)
             {
                 throw new BaseException.NotFoundException("order_not_found", "Order not found.");
@@ -273,7 +323,7 @@ namespace HandmadeProductManagement.Services.Service
 
             if (existingOrder.Status != "Pending" && existingOrder.Status != "Awaiting Payment")
             {
-                throw new BaseException.ErrorException(400,"invalid_order_status", "Order is processing, can not update.");
+                throw new BaseException.BadRequestException("invalid_order_status", "Order is processing, can not update.");
             }
 
             if (!string.IsNullOrWhiteSpace(order.Address))
@@ -316,8 +366,41 @@ namespace HandmadeProductManagement.Services.Service
 
             return true;
         }
+        public async Task<IList<OrderByUserDto>> GetOrderByUserIdAsync(Guid userId)
+        {
+            var userRepository = _unitOfWork.GetRepository<ApplicationUser>();
+            var userExists = await userRepository.Entities
+                .AnyAsync(u => u.Id == userId && !u.DeletedTime.HasValue);
+            if (!userExists)
+            {
+                throw new BaseException.NotFoundException("user_not_found", "User not found.");
+            }
 
-        public async Task<IList<OrderResponseModel>> GetOrderByUserIdAsync(Guid userId)
+            var repository = _unitOfWork.GetRepository<Order>();
+            var orders = await repository.Entities
+                .Where(o => o.UserId == userId && !o.DeletedTime.HasValue)
+                .Select(order => new OrderByUserDto
+                {
+                    Id = order.Id,
+                    TotalPrice = order.TotalPrice,
+                    OrderDate = order.OrderDate,
+                    Status = order.Status,
+                    Address = order.Address,
+                    CustomerName = order.CustomerName,
+                    Phone = order.Phone,
+                    Note = order.Note,
+                    CancelReasonId = order.CancelReasonId
+                }).ToListAsync();
+
+            if (!orders.Any())
+            {
+                throw new BaseException.NotFoundException("not_found", "There is no order.");
+            }
+
+            return orders;
+        }
+
+        public async Task<IList<OrderResponseModel>> GetOrderByUserIdForAdminAsync(Guid userId)
         {
             var userRepository = _unitOfWork.GetRepository<ApplicationUser>();
             var userExists = await userRepository.Entities
@@ -335,8 +418,8 @@ namespace HandmadeProductManagement.Services.Service
                     Id = order.Id,
                     TotalPrice = order.TotalPrice,
                     OrderDate = order.OrderDate,
+                    UserId = userId,
                     Status = order.Status,
-                    UserId = order.UserId,
                     Address = order.Address,
                     CustomerName = order.CustomerName,
                     Phone = order.Phone,
@@ -344,9 +427,13 @@ namespace HandmadeProductManagement.Services.Service
                     CancelReasonId = order.CancelReasonId
                 }).ToListAsync();
 
+            if (!orders.Any())
+            {
+                throw new BaseException.NotFoundException("not_found", "There is no order.");
+            }
+
             return orders;
         }
-
         public async Task<bool> UpdateOrderStatusAsync(string userId, UpdateStatusOrderDto updateStatusOrderDto)
         {
             if (string.IsNullOrWhiteSpace(updateStatusOrderDto.OrderId))
@@ -480,6 +567,12 @@ namespace HandmadeProductManagement.Services.Service
                 repository.Update(existingOrder);
                 await _statusChangeService.Create(statusChangeDto, userId);
 
+                // Update product sold count if the new status is "Shipped"
+                if (updateStatusOrderDto.Status == "Shipped")
+                {
+                    await _productService.UpdateProductSoldCountAsync(updateStatusOrderDto.OrderId);
+                }
+
                 await _unitOfWork.SaveAsync();
                 _unitOfWork.CommitTransaction();
 
@@ -492,6 +585,32 @@ namespace HandmadeProductManagement.Services.Service
             }
         }
 
+        public async Task<IList<OrderResponseModel>> GetOrdersBySellerUserIdAsync(Guid userId)
+        {
+            var orderRepository = _unitOfWork.GetRepository<Order>();
+            var orders = await orderRepository.Entities
+                .Where(o => o.OrderDetails.Any(od => od.ProductItem.Product.Shop.UserId == userId && !od.ProductItem.Product.Shop.DeletedTime.HasValue))
+                .Select(order => new OrderResponseModel
+                {
+                    Id = order.Id,
+                    TotalPrice = order.TotalPrice,
+                    OrderDate = order.OrderDate,
+                    Status = order.Status,
+                    UserId = order.UserId,
+                    Address = order.Address,
+                    CustomerName = order.CustomerName,
+                    Phone = order.Phone,
+                    Note = order.Note,
+                    CancelReasonId = order.CancelReasonId
+                }).ToListAsync();
+
+            if (!orders.Any())
+            {
+                throw new BaseException.NotFoundException("not_found", "There is no order.");
+            }
+
+            return orders;
+        }
         private void ValidateOrder(CreateOrderDto order)
         {
             if (string.IsNullOrWhiteSpace(order.Address))

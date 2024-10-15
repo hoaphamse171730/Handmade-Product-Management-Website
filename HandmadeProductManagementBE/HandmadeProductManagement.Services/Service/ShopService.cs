@@ -259,16 +259,14 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.NotFoundException("shop_not_found", "Shop not found.");
             }
 
-            if (shop.Products == null || !shop.Products.Any())
+            var activeProducts = shop.Products.Where(p => p.DeletedTime == null).ToList();
+
+            if (activeProducts == null || !activeProducts.Any())
             {
-                return 0m; // Return 0 as decimal if there are no products
+                return 0m;
             }
 
-            var productRepository = _unitOfWork.GetRepository<Product>();
-            var productRatings = await productRepository.Entities
-                .Where(p => p.ShopId == shopId && !p.DeletedTime.HasValue)
-                .Select(p => p.Rating)
-                .ToListAsync();
+            var productRatings = activeProducts.Select(p => p.Rating).Where(r => r > 0).ToList();
 
             if (!productRatings.Any())
             {

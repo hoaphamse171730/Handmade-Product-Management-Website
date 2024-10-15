@@ -19,11 +19,14 @@ namespace HandmadeProductManagementAPI.Controllers
             _orderService = orderService;
         }
 
+        [Authorize]
         [HttpGet("{orderId}")]
         public async Task<IActionResult> GetOrderById(string orderId)
         {
-            var order = await _orderService.GetOrderByIdAsync(orderId);
-            var response = new BaseResponse<OrderResponseModel>
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var role = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+            var order = await _orderService.GetOrderByIdAsync(orderId, userId, role);
+            var response = new BaseResponse<OrderWithDetailDto>
             {
                 Code = "Success",
                 StatusCode = StatusCodeHelper.OK,
@@ -38,7 +41,7 @@ namespace HandmadeProductManagementAPI.Controllers
         public async Task<IActionResult> GetOrdersByPage([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             var paginatedOrders = await _orderService.GetOrdersByPageAsync(pageNumber, pageSize);
-            var response = new BaseResponse<PaginatedList<OrderResponseModel>>
+            var response = new BaseResponse<PaginatedList<OrderResponseDetailForListModel>>
             {
                 Code = "Success",
                 StatusCode = StatusCodeHelper.OK,
@@ -54,6 +57,22 @@ namespace HandmadeProductManagementAPI.Controllers
         {
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             var orders = await _orderService.GetOrderByUserIdAsync(Guid.Parse(userId));
+            var response = new BaseResponse<IList<OrderByUserDto>>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Orders retrieved successfully",
+                Data = orders
+            };
+            return Ok(response);
+        }
+
+        [Authorize(Roles = "Seller")]
+        [HttpGet("seller")]
+        public async Task<IActionResult> GetOrderForSeller()
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var orders = await _orderService.GetOrdersBySellerUserIdAsync(Guid.Parse(userId));
             var response = new BaseResponse<IList<OrderResponseModel>>
             {
                 Code = "Success",
@@ -68,7 +87,7 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpGet("admin/user/{userId}")]
         public async Task<IActionResult> GetOrderByUserIdForAdmin(Guid userId)
         {
-            var orders = await _orderService.GetOrderByUserIdAsync(userId);
+            var orders = await _orderService.GetOrderByUserIdForAdminAsync(userId);
             var response = new BaseResponse<IList<OrderResponseModel>>
             {
                 Code = "Success",
@@ -79,7 +98,7 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
-        [Authorize] 
+        [Authorize(Roles = "Seller")] 
         [HttpPatch("status")]
         public async Task<IActionResult> UpdateOrderStatus([FromBody] UpdateStatusOrderDto dto)
         {
@@ -111,7 +130,7 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
-        [Authorize]
+        [Authorize(Roles = "Seller")]
         [HttpPut("{orderId}")]
         public async Task<IActionResult> UpdateOrder(string orderId, [FromBody] UpdateOrderDto order)
         {

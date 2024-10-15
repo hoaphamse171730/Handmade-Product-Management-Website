@@ -13,11 +13,17 @@ namespace HandmadeProductManagement.Services.Service
     public class ReviewService : IReviewService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IProductService _productService;
+        private readonly IShopService _shopService;
+        DateTime vietnamTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"));
 
-        public ReviewService(IUnitOfWork unitOfWork)
+        public ReviewService(IUnitOfWork unitOfWork, IProductService productService, IShopService shopService)
         {
             _unitOfWork = unitOfWork;
+            _productService = productService;
+            _shopService = shopService;
         }
+
         public async Task<IList<ReviewModel>> GetByProductIdAsync(string productId, int pageNumber, int pageSize)
         {
             if (string.IsNullOrWhiteSpace(productId) || !Guid.TryParse(productId, out _))
@@ -224,7 +230,7 @@ namespace HandmadeProductManagement.Services.Service
             {
                 Content = reviewModel.Content,
                 Rating = reviewModel.Rating,
-                Date = DateTime.UtcNow,
+                Date = vietnamTime,
                 ProductId = reviewModel.ProductId,
                 UserId = reviewModel.UserId,
                 CreatedBy = reviewModel.UserId.ToString(),
@@ -233,6 +239,13 @@ namespace HandmadeProductManagement.Services.Service
 
             await _unitOfWork.GetRepository<Review>().InsertAsync(review);
             await _unitOfWork.SaveAsync();
+
+            // Update product rating
+            await _productService.CalculateAverageRatingAsync(reviewModel.ProductId);
+
+            // Update shop rating
+            var product = await _unitOfWork.GetRepository<Product>().GetByIdAsync(reviewModel.ProductId);
+            await _shopService.CalculateShopAverageRatingAsync(product.ShopId);
 
             return true;
         }
@@ -282,10 +295,17 @@ namespace HandmadeProductManagement.Services.Service
             }
 
             existingReview.LastUpdatedBy = existingReview.UserId.ToString();
-            existingReview.LastUpdatedTime = DateTime.UtcNow;
+            existingReview.LastUpdatedTime = vietnamTime;
 
             _unitOfWork.GetRepository<Review>().UpdateAsync(existingReview);
             await _unitOfWork.SaveAsync();
+
+            // Update product rating
+            await _productService.CalculateAverageRatingAsync(existingReview.ProductId);
+
+            // Update shop rating
+            var product = await _unitOfWork.GetRepository<Product>().GetByIdAsync(existingReview.ProductId);
+            await _shopService.CalculateShopAverageRatingAsync(product.ShopId);
 
             return true;
         }
@@ -322,6 +342,13 @@ namespace HandmadeProductManagement.Services.Service
             await _unitOfWork.GetRepository<Review>().DeleteAsync(existingReview.Id);
             await _unitOfWork.SaveAsync();
 
+            // Update product rating
+            await _productService.CalculateAverageRatingAsync(existingReview.ProductId);
+
+            // Update shop rating
+            var product = await _unitOfWork.GetRepository<Product>().GetByIdAsync(existingReview.ProductId);
+            await _shopService.CalculateShopAverageRatingAsync(product.ShopId);
+
             return true;
         }
 
@@ -347,11 +374,18 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.BadRequestException("unauthorized_review_delete", "User does not have permission to delete this review.");
             }
 
-            existingReview.DeletedTime = DateTime.UtcNow;
+            existingReview.DeletedTime = vietnamTime;
             existingReview.DeletedBy = userId.ToString();
 
             await _unitOfWork.GetRepository<Review>().UpdateAsync(existingReview);
             await _unitOfWork.SaveAsync();
+
+            // Update product rating
+            await _productService.CalculateAverageRatingAsync(existingReview.ProductId);
+
+            // Update shop rating
+            var product = await _unitOfWork.GetRepository<Product>().GetByIdAsync(existingReview.ProductId);
+            await _shopService.CalculateShopAverageRatingAsync(product.ShopId);
 
             return true;
         }

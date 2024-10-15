@@ -7,5 +7,5 @@ public interface IOrderDetailService
 {
     Task<IList<OrderDetailDto>> GetAll();
     Task<OrderDetailDto> GetById(string id);
-    Task<OrderDetailDto> Create(OrderDetailForCreationDto promotion);
+    Task<OrderDetailDto> Create(OrderDetailForCreationDto promotion, string userId);
 }

@@ -12,8 +12,10 @@ namespace HandmadeProductManagement.Contract.Services.Interface
     {
         Task<IList<CategoryDto>> GetAll();
         Task<CategoryDto> GetById(string id);
-        Task<CategoryDto> Create(CategoryForCreationDto category);
+        Task<bool> Create(CategoryForCreationDto category);
         Task<CategoryDto> Update(string id, CategoryForUpdateDto category);
         Task<bool> SoftDelete(string id);
+
+        Task<CategoryDto> UpdatePromotion(string id, CategoryForUpdatePromotion category);
     }
 }

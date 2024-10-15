@@ -1,4 +1,6 @@
-﻿namespace HandmadeProductManagement.ModelViews.UserInfoModelViews
+﻿using Microsoft.AspNetCore.Http;
+
+namespace HandmadeProductManagement.ModelViews.UserInfoModelViews
 {
     public class UserInfoForUpdateDto
     {
@@ -9,6 +11,5 @@
         public string? BankAccountName { get; set; }
         public string? Bank { get; set; }
         public string? Address { get; set; }
-        public string? AvatarUrl { get; set; }
     }
 }

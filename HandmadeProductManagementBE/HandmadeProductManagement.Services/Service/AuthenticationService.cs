@@ -1,3 +1,4 @@
+using System.IdentityModel.Tokens.Jwt;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Common;
@@ -57,7 +58,7 @@ public class AuthenticationService : IAuthenticationService
         }
         var user = await _userManager.Users
             .Include(u => u.UserInfo)
-            .Include(u => u.Cart)
+            //.Include(u => u.Cart)
             .FirstOrDefaultAsync(u => u.Email == loginModelView.Email
                                       || u.PhoneNumber == loginModelView.PhoneNumber
                                       || u.UserName == loginModelView.UserName);
@@ -291,6 +292,57 @@ public class AuthenticationService : IAuthenticationService
 
             throw new BaseException.BadRequestException("error", "Error confirming the email: " + string.Join("; ", errorMessages));
         }
+    }
+
+    public async Task<BaseResponse<string>> GoogleLoginAsync(string token)
+    {
+        return await ProcessLoginAsync(token);
+    }
+
+    public async Task<BaseResponse<string>> FacebookLoginAsync(string token)
+    {
+        return await ProcessLoginAsync(token);
+    }
+
+    private async Task<BaseResponse<string>> ProcessLoginAsync(string token)
+    {
+        var handler = new JwtSecurityTokenHandler();
+        var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
+        if (jsonToken == null)
+        {
+            return BaseResponse<string>.FailResponse("Invalid token.");
+        }
+
+        var email = jsonToken.Claims.FirstOrDefault(claim => claim.Type == "email")?.Value;
+        var name = jsonToken.Claims.FirstOrDefault(claim => claim.Type == "name")?.Value;
+        var picture = jsonToken.Claims.FirstOrDefault(claim => claim.Type == "picture")?.Value;
+
+        if (email == null || name == null)
+        {
+            return BaseResponse<string>.FailResponse("Token is missing necessary claims.");
+        }
+
+        var user = await _userManager.FindByEmailAsync(email);
+        if (user == null)
+        {
+            user = new ApplicationUser
+            {
+                Email = email,
+                UserName = email,
+                SecurityStamp = Guid.NewGuid().ToString()
+            };
+
+            var createResult = await _userManager.CreateAsync(user);
+            if (!createResult.Succeeded)
+            {
+                return BaseResponse<string>.FailResponse("Failed to create a new user.");
+            }
+
+            await _userManager.AddToRoleAsync(user, "Customer");
+        }
+
+        var userToken = await _tokenService.CreateToken(user);
+        return BaseResponse<string>.OkResponse(userToken);
     }
 
 

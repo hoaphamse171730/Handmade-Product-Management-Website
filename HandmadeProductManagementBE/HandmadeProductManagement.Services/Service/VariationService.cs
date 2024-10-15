@@ -111,9 +111,11 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.NotFoundException("variation_not_found", "Variation not found.");
             }
 
+            // Only update the fields that are present in the DTO
             variation.LastUpdatedBy = userId;
             variation.LastUpdatedTime = DateTime.UtcNow;
 
+            // Map only updated properties
             _mapper.Map(variationForUpdate, variation);
             repository.Update(variation);
             await _unitOfWork.SaveAsync();

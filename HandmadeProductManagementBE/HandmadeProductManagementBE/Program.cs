@@ -1,4 +1,4 @@
-using HandmadeProductManagement.Contract.Repositories.Entity;
+﻿using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagementAPI.Extensions;
 using HandmadeProductManagementAPI.Middlewares;
 using HandmadeProductManagementBE.API;
@@ -83,4 +83,3 @@ static async Task SeedRoles(IServiceProvider serviceProvider)
         }
     }
 }
-

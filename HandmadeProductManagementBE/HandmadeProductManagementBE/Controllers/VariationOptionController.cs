@@ -50,8 +50,8 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [Authorize(Roles = "Seller")]
-        // PUT: api/variationoption/{id}
-        [HttpPut("{id}")]
+        // PATCH: api/variationoption/{id}
+        [HttpPatch("{id}")]
         public async Task<IActionResult> UpdateVariationOption(string id, [FromBody] VariationOptionForUpdateDto variationOption)
         {
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;

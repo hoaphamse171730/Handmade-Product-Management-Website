@@ -1,6 +1,7 @@
 ﻿using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.ModelViews.ProductDetailModelViews;
 using HandmadeProductManagement.ModelViews.ProductModelViews;
+using HandmadeProductManagement.ModelViews.VariationCombinationModelViews;
 
 namespace HandmadeProductManagement.Contract.Services.Interface
 {
@@ -8,6 +9,7 @@ namespace HandmadeProductManagement.Contract.Services.Interface
     {
         Task<IEnumerable<ProductSearchVM>> SearchProductsAsync(ProductSearchFilter searchFilter, int pageNumber, int pageSize);
         //Task<IEnumerable<ProductSearchVM>> SortProductsAsync(ProductSortFilter sortFilter);
+        Task AddVariationOptionsToProduct(Product product, List<VariationCombinationDto> variationCombinations, string userId);
         Task<ProductDto> GetById(string id);
         Task<bool> Create(ProductForCreationDto product, string userId);
         Task<bool> Update(string id, ProductForUpdateDto product, string userId);
@@ -17,6 +19,8 @@ namespace HandmadeProductManagement.Contract.Services.Interface
         Task<ProductDetailResponseModel> GetProductDetailsByIdAsync(string productId);
         Task<decimal> CalculateAverageRatingAsync(string productId);
         Task<IList<ProductOverviewDto>> GetProductsByUserByPage(string userId, int pageNumber, int pageSize);
-        Task<bool> UpdateStatusProduct(string productId, string newStatus, string userId);
+        Task<bool> UpdateStatusProduct(string productId, bool isAvailable, string userId);
+
+        public Task UpdateProductSoldCountAsync(string orderId);
     }
 }
