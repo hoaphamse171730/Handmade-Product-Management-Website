@@ -14,12 +14,15 @@ namespace HandmadeProductManagement.Services.Service
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IProductService _productService;
+        private readonly IShopService _shopService;
 
-        public ReviewService(IUnitOfWork unitOfWork, IProductService productService)
+        public ReviewService(IUnitOfWork unitOfWork, IProductService productService, IShopService shopService)
         {
             _unitOfWork = unitOfWork;
             _productService = productService;
+            _shopService = shopService;
         }
+
         public async Task<IList<ReviewModel>> GetByProductIdAsync(string productId, int pageNumber, int pageSize)
         {
             if (string.IsNullOrWhiteSpace(productId) || !Guid.TryParse(productId, out _))
@@ -236,7 +239,12 @@ namespace HandmadeProductManagement.Services.Service
             await _unitOfWork.GetRepository<Review>().InsertAsync(review);
             await _unitOfWork.SaveAsync();
 
+            // Update product rating
             await _productService.CalculateAverageRatingAsync(reviewModel.ProductId);
+
+            // Update shop rating
+            var product = await _unitOfWork.GetRepository<Product>().GetByIdAsync(reviewModel.ProductId);
+            await _shopService.CalculateShopAverageRatingAsync(product.ShopId);
 
             return true;
         }
@@ -291,6 +299,13 @@ namespace HandmadeProductManagement.Services.Service
             _unitOfWork.GetRepository<Review>().UpdateAsync(existingReview);
             await _unitOfWork.SaveAsync();
 
+            // Update product rating
+            await _productService.CalculateAverageRatingAsync(existingReview.ProductId);
+
+            // Update shop rating
+            var product = await _unitOfWork.GetRepository<Product>().GetByIdAsync(existingReview.ProductId);
+            await _shopService.CalculateShopAverageRatingAsync(product.ShopId);
+
             return true;
         }
 
@@ -326,6 +341,13 @@ namespace HandmadeProductManagement.Services.Service
             await _unitOfWork.GetRepository<Review>().DeleteAsync(existingReview.Id);
             await _unitOfWork.SaveAsync();
 
+            // Update product rating
+            await _productService.CalculateAverageRatingAsync(existingReview.ProductId);
+
+            // Update shop rating
+            var product = await _unitOfWork.GetRepository<Product>().GetByIdAsync(existingReview.ProductId);
+            await _shopService.CalculateShopAverageRatingAsync(product.ShopId);
+
             return true;
         }
 
@@ -356,6 +378,13 @@ namespace HandmadeProductManagement.Services.Service
 
             await _unitOfWork.GetRepository<Review>().UpdateAsync(existingReview);
             await _unitOfWork.SaveAsync();
+
+            // Update product rating
+            await _productService.CalculateAverageRatingAsync(existingReview.ProductId);
+
+            // Update shop rating
+            var product = await _unitOfWork.GetRepository<Product>().GetByIdAsync(existingReview.ProductId);
+            await _shopService.CalculateShopAverageRatingAsync(product.ShopId);
 
             return true;
         }

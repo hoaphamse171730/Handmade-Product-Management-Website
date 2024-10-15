@@ -703,7 +703,9 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.NotFoundException("product_not_found", "Product not found.");
             }
 
-            if (product.Reviews == null || !product.Reviews.Any())
+            var activeReviews = product.Reviews.Where(r => r.DeletedTime == null).ToList();
+
+            if (activeReviews == null || !activeReviews.Any())
             {
                 return 0m;
             }
