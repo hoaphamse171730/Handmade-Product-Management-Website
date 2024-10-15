@@ -22,7 +22,8 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpGet("{orderId}")]
         public async Task<IActionResult> GetOrderById(string orderId)
         {
-            var order = await _orderService.GetOrderByIdAsync(orderId);
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var order = await _orderService.GetOrderByIdAsync(orderId, userId);
             var response = new BaseResponse<OrderResponseModel>
             {
                 Code = "Success",
@@ -95,7 +96,7 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
-        [Authorize] 
+        [Authorize(Roles = "Seller")] 
         [HttpPatch("status")]
         public async Task<IActionResult> UpdateOrderStatus([FromBody] UpdateStatusOrderDto dto)
         {

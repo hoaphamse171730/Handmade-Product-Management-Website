@@ -138,14 +138,13 @@ namespace HandmadeProductManagement.Services.Service
             return true;
         }
 
-
         public async Task<bool> UpdatePromotionStatusByRealtime(string id)
         {
             var promotion = await _unitOfWork.GetRepository<Promotion>().Entities
                 .FirstOrDefaultAsync(p => p.Id == id && p.DeletedTime == null);
             if (promotion == null)
                 throw new BaseException.NotFoundException("not_found", "Promotion Not Found!");
-            if (promotion.EndDate < promotion.StartDate)
+            if (DateTime.UtcNow < promotion.StartDate || DateTime.UtcNow > promotion.EndDate)
                 promotion.Status = "inactive";
             else promotion.Status = "active";
             await _unitOfWork.GetRepository<Promotion>().UpdateAsync(promotion);

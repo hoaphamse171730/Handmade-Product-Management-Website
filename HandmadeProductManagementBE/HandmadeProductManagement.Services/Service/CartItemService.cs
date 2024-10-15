@@ -1,171 +1,267 @@
-﻿using Microsoft.EntityFrameworkCore;
-using HandmadeProductManagement.Contract.Repositories.Interface;
-using HandmadeProductManagement.ModelViews.CartModelViews;
+﻿using AutoMapper;
+using FluentValidation;
 using HandmadeProductManagement.Contract.Repositories.Entity;
+using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
-using HandmadeProductManagement.Core.Utils;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Constants;
+using HandmadeProductManagement.ModelViews.CartItemModelViews;
+using Microsoft.EntityFrameworkCore;
 
-public class CartItemService : ICartItemService
+namespace HandmadeProductManagement.Services.Service
 {
-    private readonly IUnitOfWork _unitOfWork;
-
-    public CartItemService(IUnitOfWork unitOfWork)
+    public class CartItemService : ICartItemService
     {
-        _unitOfWork = unitOfWork;
-    }
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
+        private readonly IValidator<CartItemForCreationDto> _creationValidator;
+        private readonly IValidator<CartItemForUpdateDto> _updateValidator;
+        private readonly IPromotionService _promotionService;
 
-    public async Task<bool> AddCartItem(string cartId, CreateCartItemDto createCartItemDto, string userId)
-    {
-        Console.WriteLine($"Attempting to add item to cart: {cartId}, ProductItem: {createCartItemDto.ProductItemId}");
-
-        if (string.IsNullOrEmpty(createCartItemDto.ProductItemId))
+        public CartItemService(IUnitOfWork unitOfWork, IMapper mapper, IValidator<CartItemForCreationDto> creationValidator, IValidator<CartItemForUpdateDto> updateValidator, IPromotionService promotionService)
         {
-            throw new BaseException.BadRequestException("required_product_item_id", "Product item ID is required.");
+            _unitOfWork = unitOfWork;
+            _mapper = mapper;
+            _creationValidator = creationValidator;
+            _updateValidator = updateValidator;
+            _promotionService = promotionService;
         }
 
-        if (!int.TryParse(createCartItemDto.ProductQuantity.ToString(), out int quantity) || quantity < 0)
+        public async Task<bool> AddCartItem(CartItemForCreationDto createCartItemDto, string userId)
         {
-            throw new BaseException.BadRequestException("invalid_quantity", "Invalid product quantity. Quantity must be a non-negative integer.");
-        }
-
-        var cartRepo = _unitOfWork.GetRepository<Cart>();
-        var cart = await cartRepo.Entities
-            .Include(c => c.CartItems)
-            .ThenInclude(ci => ci.ProductItem)
-            .SingleOrDefaultAsync(c => c.Id == cartId);
-        if (cart == null)
-        {
-            throw new BaseException.NotFoundException("cart_not_found", $"Cart {cartId} not found.");
-        }
-
-        var productItemRepo = _unitOfWork.GetRepository<ProductItem>();
-        var productItem = await productItemRepo.Entities
-                                                .SingleOrDefaultAsync(pi => pi.Id == createCartItemDto.ProductItemId);
-        if (productItem == null)
-        {
-            throw new BaseException.NotFoundException("product_item_not_found", $"ProductItem {createCartItemDto.ProductItemId} not found.");
-        }
-
-        var existingCartItem = cart.CartItems.Where(ci => ci.ProductItemId == productItem.Id).FirstOrDefault();
-        if(existingCartItem != null)
-        {
-            int newQuantity = existingCartItem.ProductQuantity + quantity;
-
-            if (newQuantity > productItem.QuantityInStock)
+            var validationResult = await _creationValidator.ValidateAsync(createCartItemDto);
+            if (!validationResult.IsValid)
             {
-                throw new BaseException.BadRequestException("invalid_quantity", $"Only {productItem.QuantityInStock} items available.");
+                throw new BaseException.BadRequestException("invalid_cart_item", validationResult.Errors.First().ErrorMessage);
             }
 
-            existingCartItem.ProductQuantity = newQuantity;
-            existingCartItem.LastUpdatedTime = CoreHelper.SystemTimeNow;
-        } 
-        else
-        {
-            if (quantity > productItem.QuantityInStock)
+            var productItemRepo = _unitOfWork.GetRepository<ProductItem>();
+            var productItem = await productItemRepo.Entities
+                                                    .SingleOrDefaultAsync(pi => pi.Id == createCartItemDto.ProductItemId);
+            if (productItem == null)
             {
-                throw new BaseException.BadRequestException("invalid_quantity", $"Only {productItem.QuantityInStock} items available.");
+                throw new BaseException.NotFoundException("product_item_not_found", $"ProductItem {createCartItemDto.ProductItemId} not found.");
             }
 
-            var cartItem = new CartItem
+            var cartItemRepo = _unitOfWork.GetRepository<CartItem>();
+            var existingCartItem = await cartItemRepo.Entities
+                .FirstOrDefaultAsync(ci => ci.ProductItemId == productItem.Id && ci.UserId == Guid.Parse(userId) && ci.DeletedTime == null);
+
+            if (existingCartItem != null)
             {
-                ProductItem = productItem,
-                ProductQuantity = quantity,
-                CreatedTime = CoreHelper.SystemTimeNow,
-                LastUpdatedTime = CoreHelper.SystemTimeNow
-            };
+                existingCartItem.ProductQuantity += createCartItemDto.ProductQuantity.Value;
+                existingCartItem.LastUpdatedTime = DateTime.UtcNow;
+            }
+            else
+            {
+                var cartItem = new CartItem
+                {
+                    ProductItemId = productItem.Id,
+                    ProductQuantity = createCartItemDto.ProductQuantity.Value,
+                    UserId = Guid.Parse(userId),
+                    CreatedBy = userId,
+                    LastUpdatedBy = userId,
+                };
 
-            cart.CartItems.Add(cartItem);
-        }
+                await cartItemRepo.InsertAsync(cartItem);
+            }
 
-        try
-        {
             await _unitOfWork.SaveAsync();
             return true;
         }
-        catch
+
+        public async Task<bool> UpdateCartItem(string cartItemId, CartItemForUpdateDto updateCartItemDto, string userId)
         {
-            throw new BaseException.CoreException("server_error", "Error adding cart item. Please try again.", (int)StatusCodeHelper.ServerError);
-        }
-    }
+            var validationResult = await _updateValidator.ValidateAsync(updateCartItemDto);
+            if (!validationResult.IsValid)
+            {
+                throw new BaseException.BadRequestException("invalid_cart_item", validationResult.Errors.First().ErrorMessage);
+            }
 
-    public async Task<bool> UpdateCartItem(string cartItemId, int productQuantity, string userId)
-    {
-        if (productQuantity < 0)
-        {
-            throw new BaseException.BadRequestException("non_negative_quantity", "Product quantity must be non-negative.");
-        }
+            var cartItemRepo = _unitOfWork.GetRepository<CartItem>();
+            var cartItem = await cartItemRepo.Entities
+                .FirstOrDefaultAsync(ci => ci.Id == cartItemId && ci.UserId == Guid.Parse(userId) && ci.DeletedTime == null);
 
+            if(cartItem.CreatedBy != userId)
+            {
+                throw new BaseException.ForbiddenException("forbidden", "You do not have permission to access this resource.");
+            }
 
-        var cartItemRepo = _unitOfWork.GetRepository<CartItem>();
-        var cartItem = await cartItemRepo.Entities
-            .Where(ci => ci.Id == cartItemId && ci.DeletedTime == null)
-            .FirstOrDefaultAsync();
+            if (cartItem == null)
+            {
+                throw new BaseException.NotFoundException("cart_item_not_found", "Cart item not found.");
+            }
 
-        if (cartItem == null)
-        {
-            throw new BaseException.BadRequestException("cart_item_not_found", "Cart item not found.");
-        }
+            if (updateCartItemDto.ProductQuantity.HasValue)
+            {
+                var productItemRepo = _unitOfWork.GetRepository<ProductItem>();
+                var productItem = await productItemRepo.Entities
+                    .SingleOrDefaultAsync(pi => pi.Id == cartItem.ProductItemId);
 
-        var productItemRepo = _unitOfWork.GetRepository<ProductItem>();
-        var productItem = await productItemRepo.Entities
-        .SingleOrDefaultAsync(pi => pi.Id == cartItem.ProductItemId && pi.DeletedTime == null);
+                if (productItem == null)
+                {
+                    throw new BaseException.NotFoundException("product_item_not_found", $"ProductItem {cartItem.ProductItemId} not found.");
+                }
 
-        if (productItem == null)
-        {
-            throw new BaseException.NotFoundException("product_item_not_found", $"ProductItem {cartItem.ProductItemId} not found.");
-        }
+                // Check stock availability
+                if (updateCartItemDto.ProductQuantity.Value > productItem.QuantityInStock)
+                {
+                    throw new BaseException.BadRequestException("invalid_quantity", $"Only {productItem.QuantityInStock} items available.");
+                }
 
-        if (productQuantity > productItem.QuantityInStock)
-        {
-            throw new BaseException.BadRequestException("invalid_quantity", $"Only {productItem.QuantityInStock} items available.");
-        }
+                cartItem.ProductQuantity = updateCartItemDto.ProductQuantity.Value;
+                cartItem.LastUpdatedBy = userId;
+                cartItem.LastUpdatedTime = DateTime.UtcNow;
+            }
 
-
-        cartItem.ProductQuantity = productQuantity;
-        cartItem.LastUpdatedTime = CoreHelper.SystemTimeNow;
-
-        try
-        {
             await _unitOfWork.SaveAsync();
             return true;
         }
-        catch
+
+        public async Task<List<CartItemDto>> GetCartItemsByUserIdAsync(string userId)
         {
-            throw new BaseException.CoreException("server_error", "Internal server error updating cart item.", (int)StatusCodeHelper.ServerError);
+            var userIdGuid = Guid.Parse(userId);
+
+            var cartItems = await _unitOfWork.GetRepository<CartItem>()
+                .Entities
+                .Include(ci => ci.ProductItem)
+                    .ThenInclude(pi => pi.Product)
+                        .ThenInclude(p => p.Category)
+                            .ThenInclude(cat => cat.Promotion)
+                .Where(ci => ci.UserId == userIdGuid && ci.DeletedTime == null)
+                .ToListAsync();
+
+            if (!cartItems.Any())
+            {
+                throw new BaseException.NotFoundException("not_found", "There is nothing in your cart.");
+            }
+
+            var cartItemDtos = cartItems.Select(ci =>
+            {
+                var promotion = ci.ProductItem.Product.Category.Promotion;
+                var unitPrice = ci.ProductItem.Price;
+                var discountPrice = promotion != null && promotion.Status.Equals("active", StringComparison.OrdinalIgnoreCase)
+                    ? unitPrice - (int)(unitPrice * promotion.DiscountRate)
+                    : unitPrice;
+
+                return new CartItemDto
+                {
+                    Id = ci.Id,
+                    ProductItemId = ci.ProductItemId,
+                    ProductQuantity = ci.ProductQuantity,
+                    UnitPrice = unitPrice,
+                    DiscountPrice = discountPrice,
+                    TotalPriceEachProduct = discountPrice * ci.ProductQuantity,
+                    UserId = ci.UserId
+                };
+            }).ToList();
+
+            return cartItemDtos;
         }
-    }
 
-    public async Task<List<CartItem>> GetCartItemsByUserIdAsync(string userId)
-    {
-        var cartRepo = _unitOfWork.GetRepository<Cart>();
-        var cart = await cartRepo.Entities
-            .Include(c => c.CartItems)
-            .SingleOrDefaultAsync(c => c.UserId == Guid.Parse(userId) && !c.DeletedTime.HasValue);
-
-        if (cart == null)
+        public async Task<List<CartItem>> GetCartItemsByUserIdForOrderCreation(string userId)
         {
-            throw new BaseException.NotFoundException("cart_not_found", $"Cart for user {userId} not found.");
+            var userIdGuid = Guid.Parse(userId);
+
+            var cartItems = await _unitOfWork.GetRepository<CartItem>()
+                .Entities
+                .Include(ci => ci.ProductItem)
+                    .ThenInclude(pi => pi.Product)
+                        .ThenInclude(p => p.Category)
+                            .ThenInclude(cat => cat.Promotion)
+                .Where(ci => ci.UserId == userIdGuid && ci.DeletedTime == null)
+                .ToListAsync();
+
+            if (!cartItems.Any())
+            {
+                throw new BaseException.NotFoundException("not_found", "There is nothing in your cart.");
+            }
+
+            var cartItemDtos = cartItems.Select(ci =>
+            {
+                var promotion = ci.ProductItem.Product.Category.Promotion;
+                var unitPrice = ci.ProductItem.Price;
+                var discountPrice = promotion != null && promotion.Status.Equals("active", StringComparison.OrdinalIgnoreCase)
+                    ? unitPrice - (int)(unitPrice * promotion.DiscountRate)
+                    : unitPrice;
+
+                return new CartItem
+                {
+                    Id = ci.Id,
+                    ProductItemId = ci.ProductItemId,
+                    ProductQuantity = ci.ProductQuantity,
+                    UserId = ci.UserId
+                };
+            }).ToList();
+
+            return cartItemDtos;
         }
 
-        return cart.CartItems.ToList();
-    }
-
-    public async Task<bool> DeleteCartItemByIdAsync(string cartItemId, string userId)
-    {
-        var cartItemRepo = _unitOfWork.GetRepository<CartItem>();
-        var cartItem = await cartItemRepo.Entities
-            .FirstOrDefaultAsync(ci => ci.Id == cartItemId && ci.DeletedTime == null);
-
-        if (cartItem == null)
+        public async Task<bool> DeleteCartItemByIdAsync(string cartItemId, string userId)
         {
-            throw new BaseException.NotFoundException("cart_item_not_found", "Cart item not found.");
+            var cartItemRepo = _unitOfWork.GetRepository<CartItem>();
+            var cartItem = await cartItemRepo.Entities
+                .FirstOrDefaultAsync(ci => ci.Id == cartItemId && ci.UserId == Guid.Parse(userId) && ci.DeletedTime == null);
+
+            if(cartItem.CreatedBy != userId)
+            {
+                throw new BaseException.ForbiddenException("forbidden", "You do not have permission to access this resource.");
+            }
+
+            if (cartItem == null)
+            {
+                throw new BaseException.NotFoundException("cart_item_not_found", "Cart item not found.");
+            }
+
+            await cartItemRepo.DeleteAsync(cartItem.Id);
+            await _unitOfWork.SaveAsync();
+            return true;
         }
 
-        await cartItemRepo.DeleteAsync(cartItem.Id);
+        public async Task<Decimal> GetTotalCartPrice(string userId)
+        {
+            if (!Guid.TryParse(userId, out Guid userIdGuid))
+            {
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Invalid userId");
+            }
 
-        await _unitOfWork.SaveAsync();
-        return true;
+            var cartItems = await _unitOfWork.GetRepository<CartItem>()
+                .Entities
+                .Include(ci => ci.ProductItem)
+                .ThenInclude(pi => pi.Product)
+                .ThenInclude(p => p.Category)
+                .ThenInclude(cat => cat.Promotion)
+                .Where(ci => ci.UserId == userIdGuid && ci.DeletedTime == null)
+                .ToListAsync();
+
+            if (cartItems.Count == 0)
+            {
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "No items in the cart");
+            }
+
+            decimal totalPrice = 0;
+
+            foreach (var cartItem in cartItems)
+            {
+                var productItemPrice = cartItem.ProductItem.Price;
+                var productQuantity = cartItem.ProductQuantity;
+
+                var promotion = cartItem.ProductItem.Product.Category.Promotion;
+                decimal discountRate = 1;
+
+                if (promotion != null)
+                {
+                    await _promotionService.UpdatePromotionStatusByRealtime(promotion.Id);
+                    if (promotion.Status.Equals("active", StringComparison.OrdinalIgnoreCase))
+                    {
+                        discountRate = 1 - (decimal)promotion.DiscountRate;
+                    }
+                }
+                totalPrice += productItemPrice * productQuantity * discountRate;
+            }
+
+            return totalPrice;
+        }
+
     }
 }

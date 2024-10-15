@@ -38,6 +38,9 @@ using HandmadeProductManagement.ModelViews.VariationCombinationModelViews;
 using HandmadeProductManagement.Validation.VariationCombination;
 using HandmadeProductManagement.ModelViews.UserInfoModelViews;
 using HandmadeProductManagement.Validation.UserInfo;
+using HandmadeProductManagement.Contract.Repositories.Entity;
+using HandmadeProductManagement.ModelViews.CartItemModelViews;
+using HandmadeProductManagement.Validation.CartItem;
 
 namespace HandmadeProductManagementAPI.Extensions;
 
@@ -82,8 +85,6 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IPaymentDetailService, PaymentDetailService>();
         services.AddScoped<IPaymentService, PaymentService>();
         services.AddHostedService<PaymentExpirationBackgroundService>();
-        services.AddScoped<ICartService, CartService>();
-        services.AddScoped<ICartItemService, CartItemService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IProductService, ProductService>();
         services.AddScoped<IEmailService, EmailService>();
@@ -95,7 +96,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IProductItemService, ProductItemService>();
         services.AddScoped<IProductConfigurationService, ProductConfigurationService>();
         services.AddScoped<IUserInfoService, UserInfoService>();
-
+        services.AddScoped<ICartItemService, CartItemService>();
         return services;
     }
 
@@ -188,6 +189,11 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IValidator<UserInfoForUpdateDto>, UserInfoForUpdateDtoValidator>();
 
         #endregion
+
+        #region CartItem
+        services.AddScoped<IValidator<CartItemForCreationDto>, CartItemForCreationDtoValidator>();
+        services.AddScoped<IValidator<CartItemForUpdateDto>, CartItemForUpdateDtoValidator>();
+        #endregion
     }
 
     public static void RegisterMapsterConfiguration(this IServiceCollection services)
@@ -195,7 +201,6 @@ public static class ApplicationServiceExtensions
         TypeAdapterConfig<RegisterModelView, ApplicationUser>
             .NewConfig()
             .Map(dest => dest.UserInfo.FullName, src => src.FullName)
-            .Map(dest => dest.CartId, () => Guid.NewGuid())
             .Map(dest => dest.CreatedBy, src => src.UserName)
             .Map(dest => dest.LastUpdatedBy, src => src.UserName)
             .Map(dest => dest.Cart.CreatedBy, src => src.UserName)

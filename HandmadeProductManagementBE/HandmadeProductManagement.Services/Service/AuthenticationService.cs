@@ -58,7 +58,7 @@ public class AuthenticationService : IAuthenticationService
         }
         var user = await _userManager.Users
             .Include(u => u.UserInfo)
-            .Include(u => u.Cart)
+            //.Include(u => u.Cart)
             .FirstOrDefaultAsync(u => u.Email == loginModelView.Email
                                       || u.PhoneNumber == loginModelView.PhoneNumber
                                       || u.UserName == loginModelView.UserName);

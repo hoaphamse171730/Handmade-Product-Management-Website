@@ -22,7 +22,7 @@ namespace HandmadeProductManagement.Services.Service
 
         public OrderService(IUnitOfWork unitOfWork, 
             IStatusChangeService statusChangeService, 
-            IOrderDetailService orderDetailService, 
+            IOrderDetailService orderDetailService,
             ICartItemService cartItemService,
             IProductService productService)
         {
@@ -42,8 +42,8 @@ namespace HandmadeProductManagement.Services.Service
             var productItemRepository = _unitOfWork.GetRepository<ProductItem>();
             var productRepository = _unitOfWork.GetRepository<Product>();
 
-            //get cart items by user id
-            var cartItems = await _cartItemService.GetCartItemsByUserIdAsync(userId);
+            // get cartitems
+            var cartItems = await _cartItemService.GetCartItemsByUserIdForOrderCreation(userId);
             if (cartItems.Count == 0)
             {
                 throw new BaseException.NotFoundException("empty_cart", "Cart is empty.");
@@ -52,9 +52,9 @@ namespace HandmadeProductManagement.Services.Service
             var promotionRepository = _unitOfWork.GetRepository<Promotion>();
             var categoryRepository = _unitOfWork.GetRepository<Category>();
 
-            //get active promotions
+            // get promotions
             var activePromotions = await promotionRepository.Entities
-                .Where(p => p.Status == "Active" && DateTime.UtcNow >= p.StartDate && DateTime.UtcNow <= p.EndDate)
+                .Where(p => (p.Status == "active" || p.Status == "Active") && DateTime.UtcNow >= p.StartDate && DateTime.UtcNow <= p.EndDate)
                 .ToListAsync();
 
             var groupedOrderDetails = new List<GroupedOrderDetail>();
@@ -83,7 +83,7 @@ namespace HandmadeProductManagement.Services.Service
                 decimal finalPrice = productItem.Price;
                 if (category != null && !string.IsNullOrWhiteSpace(category.PromotionId))
                 {
-                    // Check if the product has a promotion
+                    // check promotion
                     var applicablePromotion = activePromotions
                         .FirstOrDefault(p => p.Id == category.PromotionId);
 
@@ -102,7 +102,7 @@ namespace HandmadeProductManagement.Services.Service
                 });
             }
 
-            // Groupby product by shop
+            // group order by shop Id
             var groupedByShop = groupedOrderDetails.GroupBy(x => x.ShopId).ToList();
 
             _unitOfWork.BeginTransaction();
@@ -139,6 +139,7 @@ namespace HandmadeProductManagement.Services.Service
                             throw new BaseException.BadRequestException("insufficient_stock", $"Product {productItem.Id} has insufficient stock.");
                         }
 
+                        // update quantity in stock
                         productItem.QuantityInStock -= cartItem.ProductQuantity;
                         productItemRepository.Update(productItem);
 
@@ -150,12 +151,16 @@ namespace HandmadeProductManagement.Services.Service
                             DiscountPrice = groupedDetail.DiscountPrice,
                         };
 
-                        await _orderDetailService.Create(orderDetail);
+                        // create order detail
+                        await _orderDetailService.Create(orderDetail, userId);
+
+                        // clear cart
                         await _cartItemService.DeleteCartItemByIdAsync(cartItem.Id, userId);
                     }
 
                     await _unitOfWork.SaveAsync();
 
+                    // Create status change
                     var statusChangeDto = new StatusChangeForCreationDto
                     {
                         OrderId = order.Id.ToString(),
@@ -213,7 +218,7 @@ namespace HandmadeProductManagement.Services.Service
 
             return new PaginatedList<OrderResponseModel>(orders, totalItems, pageNumber, pageSize);
         }
-        public async Task<OrderResponseModel> GetOrderByIdAsync(string orderId)
+        public async Task<OrderResponseModel> GetOrderByIdAsync(string orderId, string userId)
         {
             if (string.IsNullOrWhiteSpace(orderId))
             {
@@ -228,6 +233,11 @@ namespace HandmadeProductManagement.Services.Service
             var repository = _unitOfWork.GetRepository<Order>();
             var order = await repository.Entities
                 .FirstOrDefaultAsync(o => o.Id == orderId && !o.DeletedTime.HasValue);
+
+            if(order.CreatedBy != userId)
+            {
+                throw new BaseException.ForbiddenException("forbidden", $"You have no permission to access this resource.");
+            }
 
             if (order == null)
             {
@@ -272,6 +282,11 @@ namespace HandmadeProductManagement.Services.Service
             var existingOrder = await repository.Entities
                 .FirstOrDefaultAsync(o => o.Id == orderId && !o.DeletedTime.HasValue);
 
+            if (existingOrder.CreatedBy != userId)
+            {
+                throw new BaseException.ForbiddenException("forbidden", $"You have no permission to access this resource.");
+            }
+
             if (existingOrder == null)
             {
                 throw new BaseException.NotFoundException("order_not_found", "Order not found.");
@@ -279,7 +294,7 @@ namespace HandmadeProductManagement.Services.Service
 
             if (existingOrder.Status != "Pending" && existingOrder.Status != "Awaiting Payment")
             {
-                throw new BaseException.ErrorException(400,"invalid_order_status", "Order is processing, can not update.");
+                throw new BaseException.BadRequestException("invalid_order_status", "Order is processing, can not update.");
             }
 
             if (!string.IsNullOrWhiteSpace(order.Address))
@@ -348,6 +363,11 @@ namespace HandmadeProductManagement.Services.Service
                     Note = order.Note,
                     CancelReasonId = order.CancelReasonId
                 }).ToListAsync();
+
+            if (!orders.Any())
+            {
+                throw new BaseException.NotFoundException("not_found", "There is no order.");
+            }
 
             return orders;
         }
