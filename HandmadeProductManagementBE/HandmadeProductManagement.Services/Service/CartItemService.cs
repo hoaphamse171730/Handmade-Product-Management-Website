@@ -148,6 +148,20 @@ namespace HandmadeProductManagement.Services.Service
                             .ThenInclude(cat => cat.Promotion)
                 .Include(ci => ci.ProductItem.Product.Shop)
                 .Where(ci => ci.UserId == userIdGuid && ci.DeletedTime == null)
+                .Select(ci => new
+                {
+                    ci.Id,
+                    ci.ProductItemId,
+                    ci.ProductQuantity,
+                    ShopId = ci.ProductItem.Product.Shop.Id,
+                    ShopName = ci.ProductItem.Product.Shop.Name,
+                    UnitPrice = ci.ProductItem.Price,
+                    DiscountPrice = ci.ProductItem.Price * (1 - (ci.ProductItem.Product.Category.Promotion.Status.Equals("active", StringComparison.OrdinalIgnoreCase) ? ci.ProductItem.Product.Category.Promotion.DiscountRate : 0)),
+                    VariationOptionValues = _unitOfWork.GetRepository<ProductConfiguration>().Entities
+                        .Where(pc => pc.ProductItemId == ci.ProductItemId)
+                        .Select(pc => pc.VariationOption.Value)
+                        .ToList()
+                })
                 .ToListAsync();
 
             if (!cartItems.Any())
@@ -155,36 +169,22 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.NotFoundException("not_found", "There is nothing in your cart.");
             }
 
-            // Group cart items by ShopId
+            // Group cart items by ShopId and ShopName
             var cartItemGroups = cartItems
-                .GroupBy(ci => new { ShopId = ci.ProductItem.Product.Shop.Id, ShopName = ci.ProductItem.Product.Shop.Name })
+                .GroupBy(ci => new { ci.ShopId, ci.ShopName })
                 .Select(group => new CartItemGroupDto
                 {
                     ShopId = group.Key.ShopId,
                     ShopName = group.Key.ShopName,
-                    CartItems = group.Select(ci =>
+                    CartItems = group.Select(ci => new CartItemDto
                     {
-                        var productItem = ci.ProductItem;
-                        var product = productItem.Product;
-
-                        var promotion = product.Category.Promotion;
-                        var unitPrice = productItem.Price;
-                        var discountPrice = promotion != null && promotion.Status.Equals("active", StringComparison.OrdinalIgnoreCase)
-                            ? unitPrice - (int)(unitPrice * promotion.DiscountRate)
-                            : unitPrice;
-
-                        return new CartItemDto
-                        {
-                            Id = ci.Id,
-                            ProductItemId = ci.ProductItemId,
-                            ProductQuantity = ci.ProductQuantity,
-                            UnitPrice = unitPrice,
-                            DiscountPrice = discountPrice,
-                            TotalPriceEachProduct = discountPrice * ci.ProductQuantity,
-                            UserId = ci.UserId,
-                            ShopId = product.Shop.Id,
-                            ShopName = product.Shop.Name
-                        };
+                        Id = ci.Id,
+                        ProductItemId = ci.ProductItemId,
+                        ProductQuantity = ci.ProductQuantity,
+                        UnitPrice = ci.UnitPrice,
+                        DiscountPrice = ci.DiscountPrice,
+                        TotalPriceEachProduct = ci.DiscountPrice * ci.ProductQuantity,
+                        VariationOptionValues = ci.VariationOptionValues
                     }).ToList()
                 })
                 .ToList();
