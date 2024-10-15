@@ -23,13 +23,13 @@ namespace HandmadeProductManagementAPI.Controllers
         public async Task<IActionResult> GetOrderById(string orderId)
         {
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            var order = await _orderService.GetOrderByIdAsync(orderId, userId);
+            //var order = await _orderService.GetOrderByIdAsync(orderId, userId);
             var response = new BaseResponse<OrderResponseModel>
             {
                 Code = "Success",
                 StatusCode = StatusCodeHelper.OK,
                 Message = "Order retrieved successfully",
-                Data = order
+                //Data = order
             };
             return Ok(response);
         }

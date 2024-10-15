@@ -234,10 +234,10 @@ namespace HandmadeProductManagement.Services.Service
             var order = await repository.Entities
                 .FirstOrDefaultAsync(o => o.Id == orderId && !o.DeletedTime.HasValue);
 
-            if(order.CreatedBy != userId)
-            {
-                throw new BaseException.ForbiddenException("forbidden", $"You have no permission to access this resource.");
-            }
+            //if(order.CreatedBy != userId)
+            //{
+            //    throw new BaseException.ForbiddenException("forbidden", $"You have no permission to access this resource.");
+            //}
 
             if (order == null)
             {
