@@ -19,6 +19,7 @@ namespace HandmadeProductManagement.Services.Service
     public class ReplyService : IReplyService
     {
         private readonly IUnitOfWork _unitOfWork;
+        DateTime vietnamTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"));
 
         public ReplyService(IUnitOfWork unitOfWork)
         {
@@ -137,7 +138,7 @@ namespace HandmadeProductManagement.Services.Service
                 Content = replyModel.Content,
                 ReviewId = replyModel.ReviewId,
                 ShopId = replyModel.ShopId,
-                Date = DateTime.UtcNow,
+                Date = vietnamTime,
                 CreatedBy = replyModel.ShopId,
                 LastUpdatedBy = replyModel.ShopId
             };
@@ -206,7 +207,7 @@ namespace HandmadeProductManagement.Services.Service
             }
 
             existingReply.LastUpdatedBy = existingReply.ShopId;
-            existingReply.LastUpdatedTime = DateTimeOffset.UtcNow;
+            existingReply.LastUpdatedTime = vietnamTime;
 
             await _unitOfWork.GetRepository<Reply>().UpdateAsync(existingReply);
             await _unitOfWork.SaveAsync();
@@ -252,7 +253,7 @@ namespace HandmadeProductManagement.Services.Service
             }
 
             existingReply.LastUpdatedBy = existingReply.ShopId;
-            existingReply.DeletedTime = DateTimeOffset.UtcNow;
+            existingReply.DeletedTime = vietnamTime;
 
             await _unitOfWork.GetRepository<Reply>().DeleteAsync(replyId);
             await _unitOfWork.SaveAsync();
@@ -287,7 +288,7 @@ namespace HandmadeProductManagement.Services.Service
             }
 
 
-            existingReply.DeletedTime = DateTimeOffset.UtcNow;
+            existingReply.DeletedTime = vietnamTime;
             existingReply.DeletedBy = existingReply.ShopId;
 
             await _unitOfWork.GetRepository<Reply>().UpdateAsync(existingReply);

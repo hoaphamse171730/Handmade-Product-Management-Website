@@ -15,6 +15,7 @@ namespace HandmadeProductManagement.Services.Service
         private readonly IUnitOfWork _unitOfWork;
         private readonly IProductService _productService;
         private readonly IShopService _shopService;
+        DateTime vietnamTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"));
 
         public ReviewService(IUnitOfWork unitOfWork, IProductService productService, IShopService shopService)
         {
@@ -229,7 +230,7 @@ namespace HandmadeProductManagement.Services.Service
             {
                 Content = reviewModel.Content,
                 Rating = reviewModel.Rating,
-                Date = DateTime.UtcNow,
+                Date = vietnamTime,
                 ProductId = reviewModel.ProductId,
                 UserId = reviewModel.UserId,
                 CreatedBy = reviewModel.UserId.ToString(),
@@ -294,7 +295,7 @@ namespace HandmadeProductManagement.Services.Service
             }
 
             existingReview.LastUpdatedBy = existingReview.UserId.ToString();
-            existingReview.LastUpdatedTime = DateTime.UtcNow;
+            existingReview.LastUpdatedTime = vietnamTime;
 
             _unitOfWork.GetRepository<Review>().UpdateAsync(existingReview);
             await _unitOfWork.SaveAsync();
@@ -373,7 +374,7 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.BadRequestException("unauthorized_review_delete", "User does not have permission to delete this review.");
             }
 
-            existingReview.DeletedTime = DateTime.UtcNow;
+            existingReview.DeletedTime = vietnamTime;
             existingReview.DeletedBy = userId.ToString();
 
             await _unitOfWork.GetRepository<Review>().UpdateAsync(existingReview);
