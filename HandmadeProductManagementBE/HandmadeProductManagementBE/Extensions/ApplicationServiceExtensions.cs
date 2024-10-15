@@ -97,6 +97,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IProductConfigurationService, ProductConfigurationService>();
         services.AddScoped<IUserInfoService, UserInfoService>();
         services.AddScoped<ICartItemService, CartItemService>();
+        services.AddScoped<IVNPayService, VNPAYService>();
         return services;
     }
 
