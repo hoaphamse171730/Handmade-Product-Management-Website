@@ -7,7 +7,7 @@ public sealed class ChatHub : Hub<IChatClient>
 
     public override async Task OnConnectedAsync()
     {
-        _userNames[Context.ConnectionId] = $"User{Context.ConnectionId.Substring(0, 5)}"; // Default username
+        _userNames[Context.ConnectionId] = $"User{Context.ConnectionId.Substring(0, 5)}"; 
         await Clients.All.ReceiveMessage($"{_userNames[Context.ConnectionId]} joined the chat");
     }
     
