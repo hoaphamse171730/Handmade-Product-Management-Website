@@ -19,11 +19,13 @@ namespace HandmadeProductManagementAPI.Controllers
             _orderService = orderService;
         }
 
+        [Authorize]
         [HttpGet("{orderId}")]
         public async Task<IActionResult> GetOrderById(string orderId)
         {
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            var order = await _orderService.GetOrderByIdAsync(orderId, userId);
+            var role = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+            var order = await _orderService.GetOrderByIdAsync(orderId, userId, role);
             var response = new BaseResponse<OrderResponseModel>
             {
                 Code = "Success",
@@ -128,7 +130,7 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
-        [Authorize]
+        [Authorize(Roles = "Customer")]
         [HttpPut("{orderId}")]
         public async Task<IActionResult> UpdateOrder(string orderId, [FromBody] UpdateOrderDto order)
         {
