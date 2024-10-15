@@ -203,8 +203,6 @@ public static class ApplicationServiceExtensions
             .Map(dest => dest.UserInfo.FullName, src => src.FullName)
             .Map(dest => dest.CreatedBy, src => src.UserName)
             .Map(dest => dest.LastUpdatedBy, src => src.UserName)
-            .Map(dest => dest.Cart.CreatedBy, src => src.UserName)
-            .Map(dest => dest.Cart.LastUpdatedBy, src => src.UserName)
             ;
     }
 
