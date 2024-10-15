@@ -28,6 +28,7 @@ namespace HandmadeProductManagement.Services.Service
         public async Task<IList<CategoryDto>> GetAll()
         {
             var categories = await _unitOfWork.GetRepository<Category>().Entities
+                .Include(c => c.Promotion)
                 .Where(c => c.DeletedTime == null)
                 .ToListAsync();
             return _mapper.Map<IList<CategoryDto>>(categories);
@@ -36,6 +37,7 @@ namespace HandmadeProductManagement.Services.Service
         public async Task<CategoryDto> GetById(string id)
         {
             var category = await _unitOfWork.GetRepository<Category>().Entities
+                .Include(c => c.Promotion)
                 .FirstOrDefaultAsync(c => c.Id == id && c.DeletedTime == null);
             if (category == null)
                 throw new BaseException.NotFoundException("404", "Category not found");
