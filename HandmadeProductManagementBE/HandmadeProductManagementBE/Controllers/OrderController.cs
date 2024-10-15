@@ -31,7 +31,7 @@ namespace HandmadeProductManagementAPI.Controllers
                 Code = "Success",
                 StatusCode = StatusCodeHelper.OK,
                 Message = "Order retrieved successfully",
-                //Data = order
+                Data = order
             };
             return Ok(response);
         }
