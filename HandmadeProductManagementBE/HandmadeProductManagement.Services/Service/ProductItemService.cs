@@ -217,11 +217,6 @@ namespace HandmadeProductManagement.Services.Service
             var productEntity = await productRepo.Entities
                 .FirstOrDefaultAsync(p => p.Id == productItemEntity.ProductId);
 
-            if (productEntity.CreatedBy != userId)
-            {
-                throw new BaseException.ForbiddenException("forbidden", "You do not have permission to access this resource.");
-            }
-
             if (productEntity == null)
             {
                 throw new BaseException.NotFoundException("not_found", "Associated product not found.");
@@ -230,6 +225,11 @@ namespace HandmadeProductManagement.Services.Service
             if (productItemEntity == null)
             {
                 throw new BaseException.NotFoundException("not_found", "Product item not found");
+            }
+
+            if (productItemEntity.CreatedBy != userId)
+            {
+                throw new BaseException.ForbiddenException("forbidden", "You do not have permission to access this resource.");
             }
 
             if (productItemDto.Price.HasValue)
@@ -269,11 +269,6 @@ namespace HandmadeProductManagement.Services.Service
             var productEntity = await productRepo.Entities
                 .FirstOrDefaultAsync(p => p.Id == productItemEntity.ProductId);
 
-            if (productEntity.CreatedBy != userId)
-            {
-                throw new BaseException.ForbiddenException("forbidden", "You do not have permission to access this resource.");
-            }
-
             if (productEntity == null)
             {
                 throw new BaseException.NotFoundException("not_found", "Associated product not found.");
@@ -282,6 +277,11 @@ namespace HandmadeProductManagement.Services.Service
             if (productItemEntity == null || productItemEntity.DeletedTime.HasValue || productItemEntity.DeletedBy != null)
             {
                 throw new BaseException.NotFoundException("not_found", "Product item not found");
+            }
+
+            if (productItemEntity.CreatedBy != userId)
+            {
+                throw new BaseException.ForbiddenException("forbidden", "You do not have permission to access this resource.");
             }
 
             productItemEntity.DeletedTime = DateTime.UtcNow;

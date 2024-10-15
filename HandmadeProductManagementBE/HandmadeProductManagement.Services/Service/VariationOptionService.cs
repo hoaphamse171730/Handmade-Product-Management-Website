@@ -141,7 +141,6 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.NotFoundException("not_found", "Variation Option not found.");
             }
 
-            // Check if the current user is the creator
             if (option.CreatedBy != userId)
             {
                 throw new BaseException.ForbiddenException("forbidden", "You do not have permission to access this resource.");
