@@ -43,6 +43,11 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.NotFoundException("product_item_not_found", $"ProductItem {createCartItemDto.ProductItemId} not found.");
             }
 
+            if (productItem.CreatedBy == userId)
+            {
+                throw new BaseException.BadRequestException("cannot_add_own_product", "You cannot add your own product to the cart.");
+            }
+
             if (productItem.QuantityInStock < createCartItemDto.ProductQuantity.Value)
             {
                 throw new BaseException.BadRequestException("insufficient_stock", "Not enough quantity in stock.");
