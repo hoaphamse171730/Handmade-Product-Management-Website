@@ -2,6 +2,7 @@
 using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.Core.Utils;
 using HandmadeProductManagement.ModelViews.PaymentModelViews;
 using HandmadeProductManagement.ModelViews.ShopModelViews;
 using HandmadeProductManagement.Repositories.Entity;
@@ -19,13 +20,13 @@ namespace HandmadeProductManagement.Services.Service
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<bool> CreateShopAsync(CreateShopDto createShop)
+        public async Task<bool> CreateShopAsync(string userId, CreateShopDto createShop)
         {
             ValidateShop(createShop);
 
             var userRepository = _unitOfWork.GetRepository<ApplicationUser>();
             var userExists = await userRepository.Entities.AnyAsync(
-                u => u.Id.ToString() == createShop.UserId && !u.DeletedTime.HasValue);
+                u => u.Id.ToString() == userId && !u.DeletedTime.HasValue);
             if (!userExists)
             {
                 throw new BaseException.NotFoundException("user_not_found", "User not found.");
@@ -34,7 +35,7 @@ namespace HandmadeProductManagement.Services.Service
             var repository = _unitOfWork.GetRepository<Shop>();
 
             var existingShop = await repository.Entities
-                .FirstOrDefaultAsync(s => s.UserId.ToString() == createShop.UserId && !s.DeletedTime.HasValue);
+                .FirstOrDefaultAsync(s => s.UserId.ToString() == userId && !s.DeletedTime.HasValue);
 
             if (existingShop != null)
             {
@@ -50,7 +51,7 @@ namespace HandmadeProductManagement.Services.Service
                     existingShop.Rating = 0;
                     existingShop.DeletedBy = null;
                     existingShop.DeletedTime = null;
-                    existingShop.LastUpdatedBy = createShop.UserId.ToString();
+                    existingShop.LastUpdatedBy = userId;
                     existingShop.LastUpdatedTime = DateTime.UtcNow;
 
                     repository.Update(existingShop);
@@ -65,7 +66,9 @@ namespace HandmadeProductManagement.Services.Service
                 Name = createShop.Name,
                 Description = createShop.Description,
                 Rating = 0,
-                UserId = Guid.Parse(createShop.UserId)
+                UserId = Guid.Parse(userId),
+                CreatedBy = userId,
+                LastUpdatedBy = userId
             };
 
             await repository.InsertAsync(shop);
@@ -74,49 +77,63 @@ namespace HandmadeProductManagement.Services.Service
             return true;
         }
 
-        public async Task<bool> DeleteShopAsync(Guid userId, string id)
+        public async Task<bool> DeleteShopAsync(string userId)
         {
-            if (!Guid.TryParse(userId.ToString(), out _) || !Guid.TryParse(id, out _))
-            {
-                throw new BaseException.BadRequestException("invalid_format", "UserId or Id is not in the correct format. Ex: 123e4567-e89b-12d3-a456-426614174000.");
-            }
-
             var userRepository = _unitOfWork.GetRepository<ApplicationUser>();
-            var userExists = await userRepository.Entities.AnyAsync(u => u.Id == userId && !u.DeletedTime.HasValue);
+            var userExists = await userRepository.Entities.AnyAsync(u => u.Id.ToString() == userId && !u.DeletedTime.HasValue);
             if (!userExists)
             {
                 throw new BaseException.NotFoundException("user_not_found", "User not found.");
             }
 
-            var repository = _unitOfWork.GetRepository<Shop>();
-            var shop = await repository.Entities.FirstOrDefaultAsync(s => s.Id == id && !s.DeletedTime.HasValue);
+            var shopRepository = _unitOfWork.GetRepository<Shop>();
+            var shop = await shopRepository.Entities
+                .FirstOrDefaultAsync(s => s.UserId.ToString() == userId && !s.DeletedTime.HasValue);
+
             if (shop == null)
             {
                 throw new BaseException.NotFoundException("shop_not_found", "Shop not found.");
             }
 
-            shop.DeletedBy = userId.ToString();
+            shop.DeletedBy = userId;
             shop.DeletedTime = DateTime.UtcNow;
 
-            repository.Update(shop);
+            shopRepository.Update(shop);
             await _unitOfWork.SaveAsync();
+
             return true;
         }
 
-        public async Task<IList<ShopResponseModel>> GetAllShopsAsync()
+        public async Task<PaginatedList<ShopResponseModel>> GetShopsByPageAsync(int pageNumber, int pageSize)
         {
-            IQueryable<Shop> query = _unitOfWork.GetRepository<Shop>().Entities
-                .Where(shop => !shop.DeletedTime.HasValue);
-            var result = await query.Select(shop => new ShopResponseModel
+            if (pageNumber <= 0)
             {
-                Id = shop.Id.ToString(),
-                Name = shop.Name,
-                Description = shop.Description,
-                Rating = shop.Rating,
-                UserId = shop.UserId
-            }).ToListAsync();
+                throw new BaseException.BadRequestException("invalid_input", "Page must be greater than 0.");
+            }
 
-            return result;
+            if (pageSize <= 0)
+            {
+                throw new BaseException.BadRequestException("invalid_input", "Page size must be greater than 0.");
+            }
+
+            var repository = _unitOfWork.GetRepository<Shop>();
+            var query = repository.Entities.Where(shop => !shop.DeletedTime.HasValue);
+
+            var totalItems = await query.CountAsync();
+            var shops = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .Select(shop => new ShopResponseModel
+                {
+                    Id = shop.Id.ToString(),
+                    Name = shop.Name,
+                    Description = shop.Description,
+                    Rating = shop.Rating,
+                    UserId = shop.UserId
+                })
+                .ToListAsync();
+
+            return new PaginatedList<ShopResponseModel>(shops, totalItems, pageNumber, pageSize);
         }
 
         public async Task<ShopResponseModel> GetShopByUserIdAsync(Guid userId)
@@ -148,29 +165,48 @@ namespace HandmadeProductManagement.Services.Service
             };
         }
 
-        public async Task<bool> UpdateShopAsync(string id, CreateShopDto shop)
+        public async Task<bool> UpdateShopAsync(string userId, CreateShopDto shop)
         {
-            ValidateShop(shop);
-
-            if (string.IsNullOrWhiteSpace(id) || !Guid.TryParse(id, out _))
-            {
-                throw new BaseException.BadRequestException("invalid_format", "Id is not in the correct format. " +
-                    "Ex: 123e4567-e89b-12d3-a456-426614174000.");
-            }
-
             var repository = _unitOfWork.GetRepository<Shop>();
             var existingShop = await repository.Entities
-                .FirstOrDefaultAsync(s => s.Id == id && !s.DeletedTime.HasValue);
+                .FirstOrDefaultAsync(s => s.UserId.ToString() == userId && !s.DeletedTime.HasValue);
 
-            if (existingShop == null)
+            if (shop == null)
             {
-                throw new BaseException.NotFoundException(
-                    "shop_not_found", "Shop not found.");
+                throw new BaseException.NotFoundException("shop_not_found", "Shop not found.");
             }
 
-            existingShop.Name = shop.Name;
-            existingShop.Description = shop.Description;
-            existingShop.LastUpdatedBy = shop.UserId.ToString();
+            if (!string.IsNullOrWhiteSpace(shop.Name))
+            {
+                if (string.IsNullOrWhiteSpace(shop.Name))
+                {
+                    throw new BaseException.BadRequestException("invalid_shop_name", "Please input shop name.");
+                }
+
+                if (Regex.IsMatch(shop.Name, @"[^a-zA-Z\s]"))
+                {
+                    throw new BaseException.BadRequestException("invalid_shop_name_format", "Shop name can only contain letters and spaces.");
+                }
+
+                existingShop.Name = shop.Name;
+            }
+
+            if (!string.IsNullOrWhiteSpace(shop.Description))
+            {
+                if (string.IsNullOrWhiteSpace(shop.Description))
+                {
+                    throw new BaseException.BadRequestException("invalid_shop_description", "Please input shop description.");
+                }
+
+                if (Regex.IsMatch(shop.Description, @"[^a-zA-Z0-9\s]"))
+                {
+                    throw new BaseException.BadRequestException("invalid_shop_description_format", "Shop description cannot contain special characters.");
+                }
+
+                existingShop.Description = shop.Description;
+            }
+
+            existingShop.LastUpdatedBy = userId;
             existingShop.LastUpdatedTime = DateTime.UtcNow;
 
             repository.Update(existingShop);
@@ -181,16 +217,6 @@ namespace HandmadeProductManagement.Services.Service
 
         private void ValidateShop(CreateShopDto shop)
         {
-            if (string.IsNullOrWhiteSpace(shop.UserId))
-            {
-                throw new BaseException.BadRequestException("invalid_user_id", "Please input user id.");
-            }
-
-            if (!Guid.TryParse(shop.UserId, out _))
-            {
-                throw new BaseException.BadRequestException("invalid_user_id_format", "User ID format is invalid. Example: 123e4567-e89b-12d3-a456-426614174000.");
-            }
-
             if (string.IsNullOrWhiteSpace(shop.Name))
             {
                 throw new BaseException.BadRequestException("invalid_shop_name", "Please input shop name.");
@@ -210,7 +236,51 @@ namespace HandmadeProductManagement.Services.Service
             {
                 throw new BaseException.BadRequestException("invalid_shop_description_format", "Shop description cannot contain special characters.");
             }
+        }
 
+        public async Task<decimal> CalculateShopAverageRatingAsync(string shopId)
+        {
+            if (string.IsNullOrEmpty(shopId))
+            {
+                throw new BaseException.BadRequestException("invalid_shop_id", "Shop ID cannot be null or empty.");
+            }
+
+            if (!Guid.TryParse(shopId, out _))
+            {
+                throw new BaseException.BadRequestException("invalid_shop_id", "Shop ID is not a valid GUID.");
+            }
+
+            var shop = await _unitOfWork.GetRepository<Shop>().Entities
+                                        .Include(s => s.Products)
+                                        .FirstOrDefaultAsync(s => s.Id == shopId);
+
+            if (shop == null)
+            {
+                throw new BaseException.NotFoundException("shop_not_found", "Shop not found.");
+            }
+
+            var activeProducts = shop.Products.Where(p => p.DeletedTime == null).ToList();
+
+            if (activeProducts == null || !activeProducts.Any())
+            {
+                return 0m;
+            }
+
+            var productRatings = activeProducts.Select(p => p.Rating).Where(r => r > 0).ToList();
+
+            if (!productRatings.Any())
+            {
+                return 0m;
+            }
+
+            decimal averageRating = Math.Round(productRatings.Average(), 1);
+
+            // Update the shop's rating
+            shop.Rating = averageRating;
+            await _unitOfWork.GetRepository<Shop>().UpdateAsync(shop);
+            await _unitOfWork.SaveAsync();
+
+            return averageRating;
         }
     }
 }

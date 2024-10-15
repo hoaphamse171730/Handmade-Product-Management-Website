@@ -1,21 +1,24 @@
 ﻿using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.ModelViews.DashboardModelViews;
+using HandmadeProductManagement.ModelViews.ProductModelViews;
 
 
 namespace HandmadeProductManagement.Contract.Services.Interface
 {
     public interface IDashboardService
     {
-        Task<int> GetTotalOrders();
+        Task<TotalOrdersByStatusDTO> GetTotalOrdersByStatus();
 
-        Task<int> GetTotalProducts();
+        Task<List<CategoryStockDistributionDTO>> StockDistribution();
 
-        Task<int> GetTotalSales();
+        Task<decimal> GetTotalSales();
 
-        Task<List<Shop>> GetTop10Shops();
+        Task<List<TopShopDashboardDTO>> GetTop10Shops();
 
-        Task<int> GetTotalSaleByShopId(string Id, DashboardDTO dashboardDTO);
+        Task<decimal> GetTotalSaleByShopId(string Id, DashboardDTO dashboardDTO);
 
-        Task<List<Product>> GetTopSellingProducts();
+        Task<IList<TopSellingProducts>> GetTopSellingProducts();
+
+        Task<IList<ProductForDashboard>> GetTop10NewProducts();
     }
 }

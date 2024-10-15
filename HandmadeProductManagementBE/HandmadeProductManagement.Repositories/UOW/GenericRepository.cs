@@ -23,6 +23,13 @@ namespace HandmadeProductManagement.Repositories.UOW
             _dbSet.Remove(entity);
         }
 
+        // Delete method (async) for composite keys
+        public async Task DeleteAsync(params object[] keyValues)
+        {
+            T entity = await _dbSet.FindAsync(keyValues) ?? throw new Exception("Entity not found.");
+            _dbSet.Remove(entity);
+        }
+
         public async Task DeleteAsync(object id)
         {
             T entity = await _dbSet.FindAsync(id) ?? throw new Exception();

@@ -3,6 +3,7 @@ using HandmadeProductManagement.Core.Base;
 using Microsoft.AspNetCore.Mvc;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.StatusChangeModelViews;
+using Microsoft.AspNetCore.Authorization;
 
 namespace HandmadeProductManagementAPI.Controllers
 {
@@ -17,78 +18,83 @@ namespace HandmadeProductManagementAPI.Controllers
             _statusChangeService = statusChangeService;
         }
 
-        // GET: api/statuschange/page?page=1&pageSize=10
+        [Authorize]
         [HttpGet("page")]
-        public async Task<IActionResult> GetByPage([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetByPage([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] bool sortAsc = true)
         {
-            var response = new BaseResponse<IList<StatusChangeResponseModel>>
+            var response = new BaseResponse<IList<StatusChangeDto>>
             {
                 Code = "Success",
                 StatusCode = StatusCodeHelper.OK,
-                Message = "Get Status Change sucessfully.",
-                Data = await _statusChangeService.GetByPage(page, pageSize)
+                Message = "Get Status Change successfully!",
+                Data = await _statusChangeService.GetByPage(page, pageSize, sortAsc)
             };
             return Ok(response);
         }
 
-        // GET: api/StatusChange/Order/{orderId}
+
+        [Authorize]
         [HttpGet("Order/{orderId}")]
-        public async Task<IActionResult> GetStatusChangesByOrderId(string orderId)
+        public async Task<IActionResult> GetStatusChangesByOrderId(string orderId, [FromQuery] bool sortAsc = true)
         {
-            var response = new BaseResponse<IList<StatusChangeResponseModel>>
+            var response = new BaseResponse<IList<StatusChangeDto>>
             {
                 Code = "Success",
                 StatusCode = StatusCodeHelper.OK,
-                Message = "Get Status Change sucessfully.",
-                Data = await _statusChangeService.GetByOrderId(orderId)
+                Message = "Get Status Change successfully!",
+                Data = await _statusChangeService.GetByOrderId(orderId, sortAsc)
             };
             return Ok(response);
         }
 
-        // POST: api/statuschange
-        [HttpPost]
-        public async Task<IActionResult> CreateStatusChange([FromBody] CreateStatusChangeDto statusChange)
-        {
-            await _statusChangeService.Create(statusChange);
-            var response = new BaseResponse<StatusChangeResponseModel>
-            {
-                Code = "Success",
-                StatusCode = StatusCodeHelper.OK,
-                Message = "Created Status Change successfully.",
-                Data = null
-            };
-            return Ok(response);
-        }
 
-        // PUT: api/statuschange/{id}
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateStatusChange(string id, [FromBody] CreateStatusChangeDto updatedStatusChange)
-        {
-            await _statusChangeService.Update(id, updatedStatusChange);
-            var response = new BaseResponse<StatusChangeResponseModel>
-            {
-                Code = "Success",
-                StatusCode = StatusCodeHelper.OK,
-                Message = "Updated Status Change successfully.",
-                Data = null
-            };
-            return Ok(response);
-        }
+        //[Authorize(Roles = "Admin")]
+        //[HttpPost]
+        //public async Task<IActionResult> CreateStatusChange([FromBody] StatusChangeForCreationDto statusChange)
+        //{
+        //    var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
+        //    var result = await _statusChangeService.Create(statusChange, username);
+        //    var response = new BaseResponse<bool>
+        //    {
+        //        Code = "Success",
+        //        StatusCode = StatusCodeHelper.OK,
+        //        Message = "Created Status Change successfully!",
+        //        Data = result
+        //    };
+        //    return Ok(response);
+        //}
 
-        // DELETE: api/statuschange/{id}
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteStatusChange(string id)
-        {
-            await _statusChangeService.Delete(id);
+        //[Authorize(Roles = "Admin")]
+        //[HttpPut("{id}")]
+        //public async Task<IActionResult> UpdateStatusChange(string id, [FromBody] StatusChangeForUpdateDto updatedStatusChange)
+        //{
+        //    var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
+        //    var result = await _statusChangeService.Update(id, updatedStatusChange, username);
+        //    var response = new BaseResponse<bool>
+        //    {
+        //        Code = "Success",
+        //        StatusCode = StatusCodeHelper.OK,
+        //        Message = "Updated Status Change successfully!",
+        //        Data = result
+        //    };
+        //    return Ok(response);
+        //}
 
-            var response = new BaseResponse<string>
-            {
-                Code = "Success",
-                StatusCode = StatusCodeHelper.OK,
-                Message = $"Status Change with ID {id} has been successfully deleted.",
-                Data = null
-            };
-            return Ok(response);
-        }
+        //[Authorize(Roles = "Admin")]
+        //[HttpDelete("{id}")]
+        //public async Task<IActionResult> DeleteStatusChange(string id)
+        //{
+        //    var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
+        //    await _statusChangeService.Delete(id, username);
+
+        //    var response = new BaseResponse<string>
+        //    {
+        //        Code = "Success",
+        //        StatusCode = StatusCodeHelper.OK,
+        //        Message = $"Status Change with ID {id} has been successfully deleted.",
+        //        Data = null
+        //    };
+        //    return Ok(response);
+        //}
     }
 }

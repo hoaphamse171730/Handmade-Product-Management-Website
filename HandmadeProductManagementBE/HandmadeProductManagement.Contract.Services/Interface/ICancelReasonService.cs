@@ -5,9 +5,11 @@ namespace HandmadeProductManagement.Contract.Services.Interface
 {
     public interface ICancelReasonService
     {
-        Task<CancelReasonResponseModel> Create(CreateCancelReasonDto cancelReason);
-        Task<CancelReasonResponseModel> Update(string id, CreateCancelReasonDto cancelReason);
-        Task<bool> Delete(string id);
-        Task<IList<CancelReasonResponseModel>> GetByPage(int page, int pageSize);
+        Task<IList<CancelReasonDto>> GetAll();
+        Task<bool> Create(CancelReasonForCreationDto cancelReason, string userId);
+        Task<bool> Update(string id, CancelReasonForUpdateDto cancelReason, string userId);
+        Task<bool> Delete(string id, string userId);
+        Task<IList<CancelReason>> GetDeletedCancelReasons();
+        Task<bool> PatchReverseDelete(string id, string userId);
     }
 }

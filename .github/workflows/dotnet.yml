@@ -1,0 +1,32 @@
+# This workflow will build a .NET project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
+
+name: Handmade Product Management Website (CI/CD applied).
+
+on:
+  push:
+    branches: ["Luan"]
+  pull_request:
+    branches: ["Luan"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Install dependencies
+        run: dotnet restore
+        working-directory: HandmadeProductManagementBE
+
+      - name: Build solution
+        run: dotnet build
+        working-directory: HandmadeProductManagementBE
+
+      - name: Run tests
+        run: dotnet test
+        working-directory: HandmadeProductManagementBE

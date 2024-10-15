@@ -14,17 +14,20 @@ namespace HandmadeProductManagement.Contract.Repositories.Entity
         public string? Description { get; set; }
         public string CategoryId { get; set; } = string.Empty;
         public string ShopId { get; set; } = string.Empty ;
-        public float Rating { get; set; } 
+        public decimal Rating { get; set; } 
         public string Status { get; set; } = string.Empty;  
         public int SoldCount { get; set; }
-
-        public ICollection<ProductImage> ProductImages { get; set; } = []; 
+        [JsonIgnore]
+        public ICollection<ProductImage> ProductImages { get; set; } = [];
+        [JsonIgnore]
         public ICollection<ProductItem> ProductItems { get; set; } = [];
-        
         [JsonIgnore]
         public Category Category { get; set; }
+        [JsonIgnore]
         public Shop Shop { get; set; }
+        [JsonIgnore]
         public virtual ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
+        [JsonIgnore]
         public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
     }
 }

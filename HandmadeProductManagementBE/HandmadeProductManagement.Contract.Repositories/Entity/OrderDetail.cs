@@ -10,16 +10,13 @@ namespace HandmadeProductManagement.Contract.Repositories.Entity
 {
     public class OrderDetail : BaseEntity
     {
-        public string ProductId { get; set; }
+        public string ProductItemId { get; set; }
         public string OrderId { get; set; }
         public int ProductQuantity { get; set; }
-        public float UnitPrice { get; set; }
+        public decimal DiscountPrice { get; set; }
 
-
-        // Navigation properties
         public virtual Order? Order { get; set; }
-        public virtual Product? Product { get; set; }
+        public virtual ProductItem? ProductItem { get; set; }
 
-        //public Product Product { get; set; } = new Product();
     }
 }

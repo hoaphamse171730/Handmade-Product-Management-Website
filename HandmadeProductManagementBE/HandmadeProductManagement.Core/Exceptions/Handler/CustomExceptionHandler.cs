@@ -19,38 +19,50 @@ public class CustomExceptionHandler(ILogger<CustomExceptionHandler> logger) : IE
             ValidationException validationException => (
                 validationException.Message,
                 validationException.GetType().Name,
-                context.Response.StatusCode = StatusCodes.Status400BadRequest
+                StatusCodes.Status400BadRequest
             ),
 
             BaseException.BadRequestException badRequestException => (
                 badRequestException.ErrorDetail.ErrorMessage?.ToString() ?? exception.Message,
                 badRequestException.GetType().Name,
-                context.Response.StatusCode = StatusCodes.Status400BadRequest
+                StatusCodes.Status400BadRequest
             ),
 
             BaseException.NotFoundException notFoundException => (
                 notFoundException.ErrorDetail.ErrorMessage?.ToString() ?? exception.Message,
                 notFoundException.GetType().Name,
-                context.Response.StatusCode = StatusCodes.Status404NotFound
+                StatusCodes.Status404NotFound
+            ),
+
+            UnauthorizedAccessException unauthorizedAccessException => (
+                "Access is denied due to invalid credentials.",
+                unauthorizedAccessException.GetType().Name,
+                StatusCodes.Status401Unauthorized
             ),
 
             BaseException.UnauthorizedException unauthorizedException => (
-                unauthorizedException.ErrorDetail.ErrorMessage?.ToString() ?? exception.Message,
+                unauthorizedException.ErrorDetail.ErrorMessage?.ToString() ?? "Unauthorized access.",
                 unauthorizedException.GetType().Name,
-                context.Response.StatusCode = StatusCodes.Status401Unauthorized
+                StatusCodes.Status401Unauthorized
             ),
-            
+
+            BaseException.ForbiddenException forbiddenException => (
+                forbiddenException.ErrorDetail.ErrorMessage?.ToString() ?? "You do not have permission to perform this action.",
+                forbiddenException.GetType().Name,
+                StatusCodes.Status403Forbidden
+            ),
+
             _ => (
                 exception.Message,
                 exception.GetType().Name,
-                context.Response.StatusCode = StatusCodes.Status500InternalServerError
+                StatusCodes.Status500InternalServerError
             )
         };
 
         var problemDetails = new ProblemDetails()
         {
             Title = details.Title,
-            Detail = details.Detail, //Here we pass the correct custom error message
+            Detail = details.Detail,
             Status = details.StatusCode,
             Instance = context.Request.Path
         };

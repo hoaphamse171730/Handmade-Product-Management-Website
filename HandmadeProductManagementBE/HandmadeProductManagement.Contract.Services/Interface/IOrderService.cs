@@ -1,21 +1,17 @@
-﻿using HandmadeProductManagement.Contract.Repositories.Entity;
+﻿using HandmadeProductManagement.Core.Utils;
 using HandmadeProductManagement.ModelViews.OrderModelViews;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HandmadeProductManagement.Contract.Services.Interface
 {
     public interface IOrderService
     {
-        Task<IList<OrderResponseModel>> GetAllOrdersAsync();
-        Task<OrderResponseModel> GetOrderByIdAsync(string orderId);
-        Task<bool> CreateOrderAsync(CreateOrderDto createOrder);
-        Task<bool> UpdateOrderAsync(string orderId, CreateOrderDto order);
-        Task<bool> UpdateOrderStatusAsync(string orderId, string status);
-        Task<bool> DeleteOrderAsync(string orderId);
-        Task<IList<OrderResponseModel>> GetOrderByUserIdAsync(Guid userId);
+        Task<OrderWithDetailDto> GetOrderByIdAsync(string orderId, string userId, string role);
+        Task<bool> CreateOrderAsync(string userId, CreateOrderDto createOrder);
+        Task<bool> UpdateOrderAsync(string userId, string orderId, UpdateOrderDto order);
+        Task<bool> UpdateOrderStatusAsync(string userId, UpdateStatusOrderDto updateStatusOrderDto);
+        Task<IList<OrderByUserDto>> GetOrderByUserIdAsync(Guid userId);
+        Task<IList<OrderResponseModel>> GetOrderByUserIdForAdminAsync(Guid userId);
+        Task<PaginatedList<OrderResponseDetailForListModel>> GetOrdersByPageAsync(int pageNumber, int pageSize);
+        Task<IList<OrderResponseModel>> GetOrdersBySellerUserIdAsync(Guid userId);
     }
 }

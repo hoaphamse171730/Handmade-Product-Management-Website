@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace HandmadeProductManagement.ModelViews.UserModelViews
+﻿namespace HandmadeProductManagement.ModelViews.UserModelViews
 {
     public class UserResponseByIdModel
     {
@@ -20,7 +14,6 @@ namespace HandmadeProductManagement.ModelViews.UserModelViews
         public DateTimeOffset? LockoutEnd { get; set; }
         public bool LockoutEnabled { get; set; }
         public int AccessFailedCount { get; set; }
-        public Guid CartId { get; set; }
 
     }
 }

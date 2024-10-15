@@ -2,6 +2,7 @@
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.ReviewModelViews;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 
@@ -18,10 +19,24 @@ namespace HandmadeProductManagementAPI.Controllers
             _reviewService = reviewService;
         }
 
+        [HttpGet("product/{productId}")]
+        public async Task<IActionResult> GetByProductId([Required] string productId, int pageNumber = 1, int pageSize = 10)
+        {
+            var reviews = await _reviewService.GetByProductIdAsync(productId, pageNumber, pageSize);
+            var response = new BaseResponse<IList<ReviewModel>>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Reviews retrieved successfully.",
+                Data = reviews
+            };
+            return Ok(response);
+        }
+
         [HttpGet]
         public async Task<IActionResult> GetAll(int pageNumber = 1, int pageSize = 10)
         {
-            var reviews = await _reviewService.GetAllAsync(pageNumber, pageSize);
+            var reviews = await _reviewService.GetByPageAsync(pageNumber, pageSize);
             var response = new BaseResponse<IList<ReviewModel>>
             {
                 Code = "Success",
@@ -46,19 +61,25 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
+
+        [Authorize]
         [HttpPost]
-        public async Task<IActionResult> Create(string? content, [Required] int rating, [Required] string productId, [Required] Guid userId)
+        public async Task<IActionResult> Create(string? content, [Required] int rating, [Required] string productId, [Required] string orderId)
         {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userName = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
+
             var reviewModel = new ReviewModel
             {
                 Content = content,
                 Rating = rating,
                 ProductId = productId,
-                UserId = userId
+                UserId = Guid.Parse(userId)
             };
 
-            var createdReview = await _reviewService.CreateAsync(reviewModel);
-            var response = new BaseResponse<ReviewModel>
+            var createdReview = await _reviewService.CreateAsync(reviewModel,orderId);
+
+            var response = new BaseResponse<bool>
             {
                 Code = "Success",
                 StatusCode = StatusCodeHelper.OK,
@@ -68,14 +89,17 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
+        [Authorize]
         [HttpPut("{reviewId}")]
         public async Task<IActionResult> Update([Required] string reviewId, string? content, int? rating)
         {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
             var existingReview = await _reviewService.GetByIdAsync(reviewId);
             existingReview.Content = content;
             existingReview.Rating = rating;
 
-            var updatedReview = await _reviewService.UpdateAsync(reviewId, existingReview);
+            var updatedReview = await _reviewService.UpdateAsync(reviewId, Guid.Parse(userId), existingReview);
             var response = new BaseResponse<ReviewModel>
             {
                 Code = "Success",
@@ -85,10 +109,13 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
+        [Authorize]
         [HttpDelete("{reviewId}")]
         public async Task<IActionResult> Delete([Required] string reviewId)
         {
-            var result = await _reviewService.DeleteAsync(reviewId);
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+            var result = await _reviewService.DeleteAsync(reviewId, Guid.Parse(userId));
             var response = new BaseResponse<bool>
             {
                 Code = "Success",
@@ -98,10 +125,13 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
+        [Authorize]
         [HttpDelete("{reviewId}/softdelete")]
         public async Task<IActionResult> SoftDelete([Required] string reviewId)
         {
-            var result = await _reviewService.SoftDeleteAsync(reviewId);
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+            var result = await _reviewService.SoftDeleteAsync(reviewId, Guid.Parse(userId));
             var response = new BaseResponse<bool>
             {
                 Code = "Success",

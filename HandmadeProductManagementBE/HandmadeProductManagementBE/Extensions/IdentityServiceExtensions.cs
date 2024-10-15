@@ -1,4 +1,6 @@
+using System.Security.Claims;
 using System.Text;
+using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Repositories.Context;
 using HandmadeProductManagement.Repositories.Entity;
 using HandmadeProductManagement.Services.Service;
@@ -9,51 +11,44 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace HandmadeProductManagementAPI.Extensions;
 
-public static class IdentityServiceExtensions //NA
+public static class IdentityServiceExtensions
 {
     public static IServiceCollection AddIdentityServices(this IServiceCollection services,
         IConfiguration config)
     {
-        services.AddIdentityCore<ApplicationUser>(opt =>
-            {
-                opt.Password.RequireNonAlphanumeric = false;
-                opt.User.RequireUniqueEmail = false;
-            })
-            .AddDefaultTokenProviders() //Generate token for password recovery  
-            .AddEntityFrameworkStores<DatabaseContext>();
-        
+        services.AddIdentity<ApplicationUser, ApplicationRole>(opt =>
+        {
+            opt.Password.RequireNonAlphanumeric = false;
+            opt.User.RequireUniqueEmail = false;
+        })
+        .AddDefaultTokenProviders() 
+        .AddEntityFrameworkStores<DatabaseContext>();  
+
         var key = new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes(config["TokenKey"]!));
-        
-        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(opt =>
+
+        services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        })
+        .AddJwtBearer(options =>
+        {
+            options.TokenValidationParameters = new TokenValidationParameters
             {
-                opt.TokenValidationParameters = new TokenValidationParameters()
-                {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = key,
-                    ValidateIssuer = false,
-                    ValidateAudience = false
-                };
-                opt.Events = new JwtBearerEvents()
-                {
-                    OnMessageReceived = context =>
-                    {
-                        //fixed token key
-                        var accessToken = context.Request.Query["access_token"];
-                        var path = context.HttpContext.Request.Path;
-                        if (!string.IsNullOrEmpty(accessToken) && (path.StartsWithSegments("/chat")))
-                        {
-                            context.Token = accessToken;
-                        }
-        
-                        return Task.CompletedTask;
-                    }
-                };
-            });
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["TokenKey"])),
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                RoleClaimType = ClaimTypes.Role,  // Ensure this matches your token's role claim
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.Zero
+            };
+        });
+
+        //services.AddAuthorization();
         services.AddAuthorization();
         services.AddScoped<TokenService>();
-
         return services;
     }
 }

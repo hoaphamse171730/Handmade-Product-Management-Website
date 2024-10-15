@@ -23,6 +23,15 @@ namespace HandmadeProductManagement.Services
         {
             services.AddScoped<IProductService, ProductService>();
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<ICancelReasonService, CancelReasonService>();
+            services.AddScoped<IStatusChangeService, StatusChangeService>();
+            services.AddScoped<IVariationService, VariationService>();
+            services.AddScoped<IVariationOptionService, VariationOptionService>();
+            services.AddScoped<ICategoryService, CategoryService>();
+            services.AddScoped<IProductItemService, ProductItemService>();
+            services.AddScoped<IProductConfigurationService, ProductConfigurationService>();
+            services.AddScoped<IUserInfoService, UserInfoService>();
+            services.AddScoped<ICartItemService, CartItemService>();
         }
 
     }

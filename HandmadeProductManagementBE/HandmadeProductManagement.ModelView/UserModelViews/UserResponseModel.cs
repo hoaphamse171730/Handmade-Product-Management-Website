@@ -13,7 +13,5 @@
         public DateTimeOffset CreatedTime { get; set; }
         public DateTimeOffset LastUpdatedTime { get; set; }
         public DateTimeOffset? DeletedTime { get; set; }
-
-        public Guid CartId { get; set; }
     }
 }

@@ -20,7 +20,7 @@ namespace HandmadeProductManagement.Core.Base
 
             public Dictionary<string, object>? AdditionalData { get; set; }
         }
-        
+
         public class BadRequestException : ErrorException
         {
             public BadRequestException(string errorCode, string message)
@@ -37,15 +37,7 @@ namespace HandmadeProductManagement.Core.Base
             {
             }
         }
-        
-        public class UnauthorizedException : ErrorException
-        {
-            public UnauthorizedException(string errorCode, string message)
-                : base(401, errorCode, message)
-            {
-            }
-        }
-        
+
         public class NotFoundException : ErrorException
         {
             public NotFoundException(string errorCode, string message) : base(404, errorCode, message)
@@ -57,6 +49,21 @@ namespace HandmadeProductManagement.Core.Base
                 ErrorCode = "not_found",
                 ErrorMessage = errors
             })
+            {
+            }
+        }
+        public class UnauthorizedException : ErrorException
+        {
+            public UnauthorizedException(string errorCode, string message)
+                : base(401, errorCode, message)
+            {
+            }
+        }
+
+        public class ForbiddenException : ErrorException
+        {
+            public ForbiddenException(string errorCode, string message)
+                : base(403, errorCode, message)
             {
             }
         }

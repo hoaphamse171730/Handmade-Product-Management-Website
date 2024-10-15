@@ -1,13 +1,12 @@
 ﻿
 using Microsoft.AspNetCore.Mvc;
-using HandmadeProductManagement.Repositories.Entity;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.ModelViews.UserModelViews;
 using System.Security.Claims;
-using System.ComponentModel.DataAnnotations;
-using System.Text.RegularExpressions;
-
+using HandmadeProductManagement.Core.Constants;
+using HandmadeProductManagement.ModelViews.NotificationModelViews;
+using Microsoft.AspNetCore.Authorization;
 namespace HandmadeProductManagementAPI.Controllers
 {
     [Route("api/[controller]")]
@@ -15,100 +14,184 @@ namespace HandmadeProductManagementAPI.Controllers
     public class UsersController : ControllerBase
     {
         private readonly IUserService _userService;
-        public UsersController(IUserService userService)
-        {
-            _userService = userService;
-        }
+        public UsersController(IUserService userService) => _userService = userService;
+        
 
         // GET: api/Users
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ApplicationUser>>> GetApplicationUsers()
+        [Authorize(Roles ="Admin")]
+        public async Task<IActionResult> GetApplicationUsers()
         {
-            IList<UserResponseModel> a = await _userService.GetAll();
 
-                if (a == null)
+            var response = new BaseResponse<IList<UserResponseModel>>
             {
-                return StatusCode(404,BaseResponse<String>.FailResponse("No user found"));
-            }
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Success",
+                Data = await _userService.GetAll()
+            };
+            return Ok(response);
 
 
-            return Ok(BaseResponse<IList<UserResponseModel>>.OkResponse(a));
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<UserResponseByIdModel>> GetApplicationUsersById(String id)
+        [Authorize(Roles = "Admin")]
+
+        public async Task<IActionResult> GetApplicationUsersById(String id)
         {
-            UserResponseByIdModel userResponse = await _userService.GetById(id);
-
-            if (userResponse == null)
+            var response = new BaseResponse<UserResponseByIdModel>
             {
-                return StatusCode(404, BaseResponse<String>.FailResponse("User not found"));
-            }
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Success",
+                Data = await _userService.GetById(id)
+        };
+            return Ok(response);
 
-            return Ok(BaseResponse<UserResponseByIdModel>.OkResponse(userResponse));
+
         }
-
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateUser(string id,  UpdateUserDTO updateUserDTO)
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> UpdateUser(string id, UpdateUserDTO updateUserDTO)
         {
-            if (id == null || updateUserDTO == null)
+            var updateResult = await _userService.UpdateUser(id, updateUserDTO);
+            var response = new BaseResponse<bool>
             {
-                return StatusCode(400, BaseResponse<String>.FailResponse("Bad Request"));
-            }
-
-
-            if (!new EmailAddressAttribute().IsValid(updateUserDTO.Email))
-            {
-                return StatusCode(400, BaseResponse<string>.FailResponse("Email is not valid"));
-            }
-
-            
-            var phoneRegex = new Regex(@"^\d{10}$");  
-            if (!phoneRegex.IsMatch(updateUserDTO.PhoneNumber))
-            {
-                return StatusCode(400, BaseResponse<string>.FailResponse("Phone number is not valid"));
-            }
-
-            var updatedUser = await _userService.UpdateUser(id, updateUserDTO);
-
-            if (updatedUser == null)
-            {
-                return StatusCode(404, BaseResponse<String>.FailResponse("User not found"));
-            }
-
-            // Return the updated user in the response
-            return Ok(BaseResponse<UpdateUserResponseModel>.OkResponse(updatedUser));
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Success",
+                Data = updateResult
+            };
+            return Ok(response);
         }
+
+
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
+
         public async Task<IActionResult> DeleteUser(string id)
         {
-            // Assume you have a way to get the current user's ID or username
-            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier); // Adjust as needed
 
-            var result = await _userService.DeleteUser(id);
-
-            if (!result)
+            var response = new BaseResponse<bool>
             {
-                return StatusCode(404, BaseResponse<String>.FailResponse("User not found"));
-            }
-
-            return Ok(BaseResponse<UpdateUserResponseModel>.OkResponse("Deleted successfuly")); // Return a 204 No Content response on successful deletion
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Success",
+                Data = await _userService.DeleteUser(id)
+            };
+            return Ok(response);
         }
 
-        [HttpPost("{id}/restore")] // Assuming you want to use a POST request to restore
+        [HttpPost("{id}/restore")]
+        [Authorize(Roles = "Admin")]
+
         public async Task<IActionResult> ReverseDeleteUser(string id)
         {
-            var result = await _userService.ReverseDeleteUser(id);
 
-            if (!result)
+            var response = new BaseResponse<bool>
             {
-                return StatusCode(404, BaseResponse<String>.FailResponse("User not found or already active"));
-            }
-
-            return Ok(BaseResponse<UpdateUserResponseModel>.OkResponse(" Undo deleted successfuly"));
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Success",
+                Data = await _userService.ReverseDeleteUser(id)
+            };
+            return Ok(response);
         }
+
+        [Authorize(Roles = "Admin, Seller")]
+        [HttpGet("notification_review")]
+        public async Task<IActionResult> GetNotifications()
+        {
+            var id = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var notifications = await _userService.GetNewReviewNotificationList(id);
+
+            var response = new BaseResponse<IList<NotificationModel>>
+            {
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Data = notifications,
+                Message = "Success",
+            };
+
+            // Kiểm tra xem notifications có dữ liệu hay không
+            if (notifications != null && notifications.Any())
+            {
+                response.Data = notifications; // Thêm dữ liệu vào phản hồi nếu có
+            }
+            else
+            {
+                response.Message = "No new reviews available"; // Thay đổi thông điệp nếu không có dữ liệu
+            }
+         
+            return Ok(response);
+        }
+
+
+        [Authorize(Roles = "Admin, Customer, Seller")]
+        [HttpGet("notification_statuschange")]
+        public async Task<IActionResult> GetNewStatusChangeNotification()
+        {
+            var id = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+            var response = new BaseResponse<IList<NotificationModel>>
+            {
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Data = await _userService.GetNewStatusChangeNotificationList(id),
+                Message = "Success",
+            };
+            return Ok(response);
+        }
+
+        [HttpGet("notification/new-order")]
+        [Authorize]
+        public async Task<IActionResult> GetNewOrderNotifications()
+        {
+            // Lấy thông tin người dùng từ token
+            var userIdFromToken = User.FindFirstValue(ClaimTypes.NameIdentifier); // Giả sử NameIdentifier là claim cho userId
+            var userFullNameFromToken = User.FindFirstValue(ClaimTypes.Name); // Giả sử Name là claim cho tên đầy đủ của người dùng
+
+            // Lấy danh sách thông báo đơn hàng mới
+            var orderNotifications = await _userService.GetNewOrderNotificationList(userIdFromToken);
+
+            var response = new BaseResponse<IList<NotificationModel>>
+            {
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Data = orderNotifications,
+                Message = "Thành công",
+            };
+
+            return Ok(response);
+        }
+
+        [HttpGet("notification/new-reply")]
+        [Authorize]
+        public async Task<IActionResult> GetNewReplyNotifications()
+        {
+            // Lấy thông tin người dùng từ token
+            var userIdFromToken = User.FindFirstValue(ClaimTypes.NameIdentifier); // Giả sử NameIdentifier là claim cho userId
+
+            // Lấy danh sách thông báo phản hồi mới
+            var replyNotifications = await _userService.GetNewReplyNotificationList(userIdFromToken);
+
+            var response = new BaseResponse<IList<NotificationModel>>
+            {
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Data = replyNotifications,
+                Message = "Thành công",
+            };
+
+            return Ok(response);
+        }
+
+       
+
+
 
         // POST: api/Users
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754

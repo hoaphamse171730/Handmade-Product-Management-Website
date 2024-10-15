@@ -17,5 +17,12 @@ namespace HandmadeProductManagement.Contract.Repositories.Entity
         public string? BankAccountName { get; set; }
         [MaxLength(100)]
         public string? Bank { get; set; }
+
+        [MaxLength (200)]
+        public string? Address { get; set; }
+        [MaxLength (200)]
+        public string? AvatarUrl { get; set; }
+       
+        public ICollection<UserInfoImage> UserInfoImages { get; set; } = [];
     }
 }
