@@ -25,7 +25,7 @@ namespace HandmadeProductManagement.Controllers
         public async Task<IActionResult> GetCartItems()
         {
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            var response = new BaseResponse<List<CartItemDto>>
+            var response = new BaseResponse<List<CartItemGroupDto>>
             {
                 Code = "Success",
                 StatusCode = StatusCodeHelper.OK,

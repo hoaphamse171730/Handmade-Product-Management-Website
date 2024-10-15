@@ -9,5 +9,7 @@
         public int DiscountPrice { get; set; }
         public int TotalPriceEachProduct { get; set; }
         public Guid UserId { get; set; }
+        public string ShopId { get; set; }
+        public string ShopName { get; set; }
     }
 }

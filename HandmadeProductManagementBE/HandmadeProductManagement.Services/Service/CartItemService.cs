@@ -131,7 +131,7 @@ namespace HandmadeProductManagement.Services.Service
             return true;
         }
 
-        public async Task<List<CartItemDto>> GetCartItemsByUserIdAsync(string userId)
+        public async Task<List<CartItemGroupDto>> GetCartItemsByUserIdAsync(string userId)
         {
             var userIdGuid = Guid.Parse(userId);
 
@@ -141,6 +141,7 @@ namespace HandmadeProductManagement.Services.Service
                     .ThenInclude(pi => pi.Product)
                         .ThenInclude(p => p.Category)
                             .ThenInclude(cat => cat.Promotion)
+                .Include(ci => ci.ProductItem.Product.Shop)
                 .Where(ci => ci.UserId == userIdGuid && ci.DeletedTime == null)
                 .ToListAsync();
 
@@ -149,27 +150,41 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.NotFoundException("not_found", "There is nothing in your cart.");
             }
 
-            var cartItemDtos = cartItems.Select(ci =>
-            {
-                var promotion = ci.ProductItem.Product.Category.Promotion;
-                var unitPrice = ci.ProductItem.Price;
-                var discountPrice = promotion != null && promotion.Status.Equals("active", StringComparison.OrdinalIgnoreCase)
-                    ? unitPrice - (int)(unitPrice * promotion.DiscountRate)
-                    : unitPrice;
-
-                return new CartItemDto
+            // Group cart items by ShopId
+            var cartItemGroups = cartItems
+                .GroupBy(ci => new { ShopId = ci.ProductItem.Product.Shop.Id, ShopName = ci.ProductItem.Product.Shop.Name })
+                .Select(group => new CartItemGroupDto
                 {
-                    Id = ci.Id,
-                    ProductItemId = ci.ProductItemId,
-                    ProductQuantity = ci.ProductQuantity,
-                    UnitPrice = unitPrice,
-                    DiscountPrice = discountPrice,
-                    TotalPriceEachProduct = discountPrice * ci.ProductQuantity,
-                    UserId = ci.UserId
-                };
-            }).ToList();
+                    ShopId = group.Key.ShopId,
+                    ShopName = group.Key.ShopName,
+                    CartItems = group.Select(ci =>
+                    {
+                        var productItem = ci.ProductItem;
+                        var product = productItem.Product;
 
-            return cartItemDtos;
+                        var promotion = product.Category.Promotion;
+                        var unitPrice = productItem.Price;
+                        var discountPrice = promotion != null && promotion.Status.Equals("active", StringComparison.OrdinalIgnoreCase)
+                            ? unitPrice - (int)(unitPrice * promotion.DiscountRate)
+                            : unitPrice;
+
+                        return new CartItemDto
+                        {
+                            Id = ci.Id,
+                            ProductItemId = ci.ProductItemId,
+                            ProductQuantity = ci.ProductQuantity,
+                            UnitPrice = unitPrice,
+                            DiscountPrice = discountPrice,
+                            TotalPriceEachProduct = discountPrice * ci.ProductQuantity,
+                            UserId = ci.UserId,
+                            ShopId = product.Shop.Id,
+                            ShopName = product.Shop.Name
+                        };
+                    }).ToList()
+                })
+                .ToList();
+
+            return cartItemGroups;
         }
 
         public async Task<List<CartItem>> GetCartItemsByUserIdForOrderCreation(string userId)
