@@ -218,7 +218,7 @@ namespace HandmadeProductManagement.Services.Service
 
             return new PaginatedList<OrderResponseDetailModel>(orders, totalItems, pageNumber, pageSize);
         }
-        public async Task<OrderResponseDetailModel> GetOrderByIdAsync(string orderId)
+        public async Task<OrderResponseDetailModel> GetOrderByIdAsync(string orderId, string userId)
         {
             if (string.IsNullOrWhiteSpace(orderId))
             {
