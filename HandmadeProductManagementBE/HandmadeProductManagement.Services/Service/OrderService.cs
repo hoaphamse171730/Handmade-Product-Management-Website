@@ -218,7 +218,7 @@ namespace HandmadeProductManagement.Services.Service
 
             return new PaginatedList<OrderResponseDetailModel>(orders, totalItems, pageNumber, pageSize);
         }
-        public async Task<OrderResponseDetailModel> GetOrderByIdAsync(string orderId)
+        public async Task<OrderResponseDetailModel> GetOrderByIdAsync(string orderId, string userId, string role)
         {
             if (string.IsNullOrWhiteSpace(orderId))
             {
@@ -234,7 +234,7 @@ namespace HandmadeProductManagement.Services.Service
             var order = await repository.Entities
                 .FirstOrDefaultAsync(o => o.Id == orderId && !o.DeletedTime.HasValue);
 
-            if(order.CreatedBy != userId)
+            if(order.CreatedBy != userId && role == "Customer")
             {
                 throw new BaseException.ForbiddenException("forbidden", $"You have no permission to access this resource.");
             }
