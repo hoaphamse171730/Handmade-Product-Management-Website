@@ -12,7 +12,5 @@ namespace HandmadeProductManagement.ModelViews.CategoryModelViews
         public string Id { get; set; }
         public string Name { get; set; }
         public string? Description { get; set; }
-        public string? PromotionId { get; set; }
-        public string? PromotionStatus { get; set; }
     }
 }

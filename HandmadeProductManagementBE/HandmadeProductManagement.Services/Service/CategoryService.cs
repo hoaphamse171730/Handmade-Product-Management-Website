@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using FluentValidation;
+using FluentValidation.Results;
 using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
@@ -44,11 +45,18 @@ namespace HandmadeProductManagement.Services.Service
             return _mapper.Map<CategoryDto>(category);
         }
 
-        public async Task<CategoryDto> Create(CategoryForCreationDto category)
+        public async Task<CategoryDto> Create(string promotionId, CategoryForCreationDto category)
         {
             var validationResult = await _creationValidator.ValidateAsync(category);
             if (!validationResult.IsValid)
                 throw new ValidationException(validationResult.Errors);
+            var promotionExists = await _unitOfWork.GetRepository<Promotion>().Entities
+                .AnyAsync(p => p.Id == promotionId && p.DeletedTime == null);
+            if (!promotionExists)
+                throw new ValidationException(new List<ValidationFailure>
+                {
+                    new(nameof(promotionId), "Promotion ID does not exist.")
+                });
             var existedCategory = await _unitOfWork.GetRepository<Category>().Entities
                 .FirstOrDefaultAsync(c => c.Name == category.Name && c.DeletedTime == null);
             if (existedCategory is not null)
@@ -58,10 +66,12 @@ namespace HandmadeProductManagement.Services.Service
             categoryEntity.Status = "active";
             categoryEntity.CreatedBy = "user";
             categoryEntity.LastUpdatedBy = "user";
+            categoryEntity.PromotionId = promotionId; 
             await _unitOfWork.GetRepository<Category>().InsertAsync(categoryEntity);
             await _unitOfWork.SaveAsync();
             return _mapper.Map<CategoryDto>(categoryEntity);
         }
+
 
         public async Task<CategoryDto> Update(string id, CategoryForUpdateDto category)
         {
