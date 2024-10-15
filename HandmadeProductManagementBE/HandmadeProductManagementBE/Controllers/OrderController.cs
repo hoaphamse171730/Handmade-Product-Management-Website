@@ -26,7 +26,7 @@ namespace HandmadeProductManagementAPI.Controllers
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             var role = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
             var order = await _orderService.GetOrderByIdAsync(orderId, userId, role);
-            var response = new BaseResponse<OrderResponseModel>
+            var response = new BaseResponse<OrderWithDetailDto>
             {
                 Code = "Success",
                 StatusCode = StatusCodeHelper.OK,
@@ -130,7 +130,7 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
-        [Authorize(Roles = "Customer")]
+        [Authorize(Roles = "Seller")]
         [HttpPut("{orderId}")]
         public async Task<IActionResult> UpdateOrder(string orderId, [FromBody] UpdateOrderDto order)
         {

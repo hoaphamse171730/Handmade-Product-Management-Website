@@ -1,10 +1,12 @@
-﻿using HandmadeProductManagement.Contract.Repositories.Entity;
+﻿using Google.Apis.Storage.v1.Data;
+using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Utils;
 using HandmadeProductManagement.ModelViews.OrderDetailModelViews;
 using HandmadeProductManagement.ModelViews.OrderModelViews;
+using HandmadeProductManagement.ModelViews.ProductConfigurationModelViews;
 using HandmadeProductManagement.ModelViews.StatusChangeModelViews;
 using HandmadeProductManagement.Repositories.Entity;
 using Microsoft.EntityFrameworkCore;
@@ -203,22 +205,22 @@ namespace HandmadeProductManagement.Services.Service
                     Phone = order.Phone,
                     Note = order.Note,
                     CancelReasonId = order.CancelReasonId,
-                    OrderDetails = orderDetailRepository.Entities
-                        .Where(od => od.OrderId == order.Id && !od.DeletedTime.HasValue)
-                        .Select(od => new OrderDetailResponseModel
-                        {
-                            Id = od.Id,
-                            ProductItemId = od.ProductItemId,
-                            OrderId = od.OrderId,
-                            ProductQuantity = od.ProductQuantity,
-                            Price = od.DiscountPrice,
-                        }).ToList()
+                    //OrderDetails = orderDetailRepository.Entities
+                    //    .Where(od => od.OrderId == order.Id && !od.DeletedTime.HasValue)
+                    //    .Select(od => new OrderDetailResponseModel
+                    //    {
+                    //        Id = od.Id,
+                    //        ProductItemId = od.ProductItemId,
+                    //        OrderId = od.OrderId,
+                    //        ProductQuantity = od.ProductQuantity,
+                    //        Price = od.DiscountPrice,
+                    //    }).ToList()
                 })
                 .ToListAsync();
 
             return new PaginatedList<OrderResponseDetailModel>(orders, totalItems, pageNumber, pageSize);
         }
-        public async Task<OrderResponseDetailModel> GetOrderByIdAsync(string orderId, string userId, string role)
+        public async Task<OrderWithDetailDto> GetOrderByIdAsync(string orderId, string userId, string role)
         {
             if (string.IsNullOrWhiteSpace(orderId))
             {
@@ -234,29 +236,52 @@ namespace HandmadeProductManagement.Services.Service
             var order = await repository.Entities
                 .FirstOrDefaultAsync(o => o.Id == orderId && !o.DeletedTime.HasValue);
 
-            if(order.CreatedBy != userId && role == "Customer")
-            {
-                throw new BaseException.ForbiddenException("forbidden", $"You have no permission to access this resource.");
-            }
-
             if (order == null)
             {
                 throw new BaseException.NotFoundException("order_not_found", "Order not found.");
             }
 
-            var orderDetailRepository = _unitOfWork.GetRepository<OrderDetail>();
-            var orderDetails = await orderDetailRepository.Entities
-                .Where(od => od.OrderId == orderId && !od.DeletedTime.HasValue)
-                .Select(od => new OrderDetailResponseModel
+            // If user is not an admin, apply buyer/seller checks
+            if (role != "Admin")
+            {
+                // Check if the user is the buyer of the order
+                if (order.CreatedBy != userId)
                 {
-                    Id = od.Id,
-                    ProductItemId = od.ProductItemId,
-                    OrderId = od.OrderId,
-                    ProductQuantity = od.ProductQuantity,
-                    Price = od.DiscountPrice,
-                }).ToListAsync();
+                    // If the user is not the buyer, check if they are the seller of any product in the order
+                    bool isSellerOrder = await _unitOfWork.GetRepository<OrderDetail>().Entities
+                        .AnyAsync(od => od.OrderId == orderId && od.ProductItem.CreatedBy == userId && !od.DeletedTime.HasValue);
 
-            return new OrderResponseDetailModel
+                    if (!isSellerOrder)
+                    {
+                        throw new BaseException.ForbiddenException("forbidden", "You have no permission to access this order.");
+                    }
+                }
+            }
+
+            // Retrieve order details with product config and variation option value
+            var orderDetails = await _unitOfWork.GetRepository<OrderDetail>().Entities
+                    .Where(od => od.OrderId == orderId && !od.DeletedTime.HasValue)
+                    .Select(od => new OrderInDetailDto
+                    {
+                        ProductId = od.ProductItem.Product.Id,
+                        ProductName = od.ProductItem.Product.Name,
+                        ProductQuantity = od.ProductQuantity,
+                        DiscountPrice = od.DiscountPrice,
+
+                        // Truy vấn ProductConfiguration để lấy các tùy chọn variation của sản phẩm
+                        VariationOptionValues = _unitOfWork.GetRepository<ProductConfiguration>().Entities
+                            .Where(pc => pc.ProductItemId == od.ProductItemId)
+                            .Select(pc => pc.VariationOption.Value)
+                            .ToList()
+                    })
+                    .ToListAsync();
+
+            if (!orderDetails.Any())
+            {
+                throw new BaseException.NotFoundException("order_details_not_found", "No order details found for this order.");
+            }
+
+            return new OrderWithDetailDto
             {
                 Id = order.Id,
                 TotalPrice = order.TotalPrice,
@@ -522,6 +547,7 @@ namespace HandmadeProductManagement.Services.Service
                 throw;
             }
         }
+
         public async Task<IList<OrderResponseDetailModel>> GetOrdersBySellerUserIdAsync(Guid userId)
         {
             var orderRepository = _unitOfWork.GetRepository<Order>();
