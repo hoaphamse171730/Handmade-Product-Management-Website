@@ -188,7 +188,9 @@ namespace HandmadeProductManagement.Services.Service
             var query = repository.Entities.Where(order => !order.DeletedTime.HasValue);
 
             var totalItems = await query.CountAsync();
+
             var orders = await query
+                .OrderByDescending(order => order.CreatedTime) // Sort by the most recent orders
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .Select(order => new OrderResponseDetailForListModel
@@ -223,6 +225,7 @@ namespace HandmadeProductManagement.Services.Service
 
             return new PaginatedList<OrderResponseDetailForListModel>(orders, totalItems, pageNumber, pageSize);
         }
+
         public async Task<OrderWithDetailDto> GetOrderByIdAsync(string orderId, string userId, string role)
         {
             if (string.IsNullOrWhiteSpace(orderId))
@@ -377,8 +380,10 @@ namespace HandmadeProductManagement.Services.Service
             }
 
             var repository = _unitOfWork.GetRepository<Order>();
+
             var orders = await repository.Entities
                 .Where(o => o.UserId == userId && !o.DeletedTime.HasValue)
+                .OrderByDescending(o => o.CreatedTime) // Sort orders by CreatedTime in descending order
                 .Select(order => new OrderByUserDto
                 {
                     Id = order.Id,
@@ -590,6 +595,7 @@ namespace HandmadeProductManagement.Services.Service
             var orderRepository = _unitOfWork.GetRepository<Order>();
             var orders = await orderRepository.Entities
                 .Where(o => o.OrderDetails.Any(od => od.ProductItem.Product.Shop.UserId == userId && !od.ProductItem.Product.Shop.DeletedTime.HasValue))
+                .OrderByDescending(o => o.CreatedTime) // Sort by CreatedTime in descending order
                 .Select(order => new OrderResponseModel
                 {
                     Id = order.Id,
