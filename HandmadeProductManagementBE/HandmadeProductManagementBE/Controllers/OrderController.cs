@@ -41,7 +41,7 @@ namespace HandmadeProductManagementAPI.Controllers
         public async Task<IActionResult> GetOrdersByPage([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             var paginatedOrders = await _orderService.GetOrdersByPageAsync(pageNumber, pageSize);
-            var response = new BaseResponse<PaginatedList<OrderResponseDetailForAdminModel>>
+            var response = new BaseResponse<PaginatedList<OrderResponseDetailForListModel>>
             {
                 Code = "Success",
                 StatusCode = StatusCodeHelper.OK,
@@ -73,7 +73,7 @@ namespace HandmadeProductManagementAPI.Controllers
         {
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             var orders = await _orderService.GetOrdersBySellerUserIdAsync(Guid.Parse(userId));
-            var response = new BaseResponse<IList<OrderResponseDetailForAdminModel>>
+            var response = new BaseResponse<IList<OrderResponseModel>>
             {
                 Code = "Success",
                 StatusCode = StatusCodeHelper.OK,

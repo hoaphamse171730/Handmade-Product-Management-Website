@@ -11,7 +11,7 @@ namespace HandmadeProductManagement.Contract.Services.Interface
         Task<bool> UpdateOrderStatusAsync(string userId, UpdateStatusOrderDto updateStatusOrderDto);
         Task<IList<OrderByUserDto>> GetOrderByUserIdAsync(Guid userId);
         Task<IList<OrderResponseModel>> GetOrderByUserIdForAdminAsync(Guid userId);
-        Task<PaginatedList<OrderResponseDetailForAdminModel>> GetOrdersByPageAsync(int pageNumber, int pageSize);
-        Task<IList<OrderResponseDetailForAdminModel>> GetOrdersBySellerUserIdAsync(Guid userId);
+        Task<PaginatedList<OrderResponseDetailForListModel>> GetOrdersByPageAsync(int pageNumber, int pageSize);
+        Task<IList<OrderResponseModel>> GetOrdersBySellerUserIdAsync(Guid userId);
     }
 }
