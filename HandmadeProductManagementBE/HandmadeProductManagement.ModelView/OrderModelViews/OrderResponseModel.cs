@@ -1,6 +1,4 @@
-﻿using HandmadeProductManagement.ModelViews.OrderDetailModelViews;
-
-namespace HandmadeProductManagement.ModelViews.OrderModelViews
+﻿namespace HandmadeProductManagement.ModelViews.OrderModelViews
 {
     public class OrderResponseModel
     {
