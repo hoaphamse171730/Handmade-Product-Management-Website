@@ -182,7 +182,7 @@ namespace HandmadeProductManagement.Services.Service
                 throw;
             }
         }
-        public async Task<PaginatedList<OrderResponseDetailModel>> GetOrdersByPageAsync(int pageNumber, int pageSize)
+        public async Task<PaginatedList<OrderResponseDetailForListModel>> GetOrdersByPageAsync(int pageNumber, int pageSize)
         {
             var repository = _unitOfWork.GetRepository<Order>();
             var orderDetailRepository = _unitOfWork.GetRepository<OrderDetail>();
@@ -193,7 +193,7 @@ namespace HandmadeProductManagement.Services.Service
             var orders = await query
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
-                .Select(order => new OrderResponseDetailModel
+                .Select(order => new OrderResponseDetailForListModel
                 {
                     Id = order.Id,
                     TotalPrice = order.TotalPrice,
@@ -205,20 +205,20 @@ namespace HandmadeProductManagement.Services.Service
                     Phone = order.Phone,
                     Note = order.Note,
                     CancelReasonId = order.CancelReasonId,
-                    //OrderDetails = orderDetailRepository.Entities
-                    //    .Where(od => od.OrderId == order.Id && !od.DeletedTime.HasValue)
-                    //    .Select(od => new OrderDetailResponseModel
-                    //    {
-                    //        Id = od.Id,
-                    //        ProductItemId = od.ProductItemId,
-                    //        OrderId = od.OrderId,
-                    //        ProductQuantity = od.ProductQuantity,
-                    //        Price = od.DiscountPrice,
-                    //    }).ToList()
+                    OrderDetails = orderDetailRepository.Entities
+                        .Where(od => od.OrderId == order.Id && !od.DeletedTime.HasValue)
+                        .Select(od => new OrderDetailResponseModel
+                        {
+                            Id = od.Id,
+                            ProductItemId = od.ProductItemId,
+                            OrderId = od.OrderId,
+                            ProductQuantity = od.ProductQuantity,
+                            Price = od.DiscountPrice,
+                        }).ToList()
                 })
                 .ToListAsync();
 
-            return new PaginatedList<OrderResponseDetailModel>(orders, totalItems, pageNumber, pageSize);
+            return new PaginatedList<OrderResponseDetailForListModel>(orders, totalItems, pageNumber, pageSize);
         }
         public async Task<OrderWithDetailDto> GetOrderByIdAsync(string orderId, string userId, string role)
         {
@@ -363,7 +363,41 @@ namespace HandmadeProductManagement.Services.Service
 
             return true;
         }
-        public async Task<IList<OrderResponseModel>> GetOrderByUserIdAsync(Guid userId)
+        public async Task<IList<OrderByUserDto>> GetOrderByUserIdAsync(Guid userId)
+        {
+            var userRepository = _unitOfWork.GetRepository<ApplicationUser>();
+            var userExists = await userRepository.Entities
+                .AnyAsync(u => u.Id == userId && !u.DeletedTime.HasValue);
+            if (!userExists)
+            {
+                throw new BaseException.NotFoundException("user_not_found", "User not found.");
+            }
+
+            var repository = _unitOfWork.GetRepository<Order>();
+            var orders = await repository.Entities
+                .Where(o => o.UserId == userId && !o.DeletedTime.HasValue)
+                .Select(order => new OrderByUserDto
+                {
+                    Id = order.Id,
+                    TotalPrice = order.TotalPrice,
+                    OrderDate = order.OrderDate,
+                    Status = order.Status,
+                    Address = order.Address,
+                    CustomerName = order.CustomerName,
+                    Phone = order.Phone,
+                    Note = order.Note,
+                    CancelReasonId = order.CancelReasonId
+                }).ToListAsync();
+
+            if (!orders.Any())
+            {
+                throw new BaseException.NotFoundException("not_found", "There is no order.");
+            }
+
+            return orders;
+        }
+
+        public async Task<IList<OrderResponseModel>> GetOrderByUserIdForAdminAsync(Guid userId)
         {
             var userRepository = _unitOfWork.GetRepository<ApplicationUser>();
             var userExists = await userRepository.Entities
@@ -381,8 +415,8 @@ namespace HandmadeProductManagement.Services.Service
                     Id = order.Id,
                     TotalPrice = order.TotalPrice,
                     OrderDate = order.OrderDate,
+                    UserId = userId,
                     Status = order.Status,
-                    UserId = order.UserId,
                     Address = order.Address,
                     CustomerName = order.CustomerName,
                     Phone = order.Phone,
@@ -548,12 +582,12 @@ namespace HandmadeProductManagement.Services.Service
             }
         }
 
-        public async Task<IList<OrderResponseDetailModel>> GetOrdersBySellerUserIdAsync(Guid userId)
+        public async Task<IList<OrderResponseModel>> GetOrdersBySellerUserIdAsync(Guid userId)
         {
             var orderRepository = _unitOfWork.GetRepository<Order>();
             var orders = await orderRepository.Entities
                 .Where(o => o.OrderDetails.Any(od => od.ProductItem.Product.Shop.UserId == userId && !od.ProductItem.Product.Shop.DeletedTime.HasValue))
-                .Select(order => new OrderResponseDetailModel
+                .Select(order => new OrderResponseModel
                 {
                     Id = order.Id,
                     TotalPrice = order.TotalPrice,
@@ -564,15 +598,7 @@ namespace HandmadeProductManagement.Services.Service
                     CustomerName = order.CustomerName,
                     Phone = order.Phone,
                     Note = order.Note,
-                    CancelReasonId = order.CancelReasonId,
-                    OrderDetails = order.OrderDetails.Select(od => new OrderDetailResponseModel
-                    {
-                        Id = od.Id,
-                        ProductItemId = od.ProductItemId,
-                        OrderId = od.OrderId,
-                        ProductQuantity = od.ProductQuantity,
-                        Price = od.DiscountPrice,
-                    }).ToList()
+                    CancelReasonId = order.CancelReasonId
                 }).ToListAsync();
 
             return orders;
