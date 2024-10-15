@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 
 namespace HandmadeProductManagement.ModelViews.VNPayModelViews
 {
-    internal class VNPayResquest
+    public class VNPAYResponse
     {
+        public bool IsSucceed { get; set; }
+        public string? Text { get; set; }
     }
 }
