@@ -1,6 +1,6 @@
 ﻿using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Repositories.Entity;
-//
+
 namespace HandmadeProductManagement.Contract.Repositories.Entity
 {
     public class CartItem : BaseEntity
