@@ -43,32 +43,31 @@ namespace HandmadeProductManagement.Services.Service
             return _mapper.Map<CategoryDto>(category);
         }
 
-        public async Task<CategoryDto> Create(string promotionId, CategoryForCreationDto category)
+        public async Task<bool> Create(CategoryForCreationDto category)
         {
             var validationResult = await _creationValidator.ValidateAsync(category);
             if (!validationResult.IsValid)
                 throw new ValidationException(validationResult.Errors);
-            var promotionExists = await _unitOfWork.GetRepository<Promotion>().Entities
-                .AnyAsync(p => p.Id == promotionId && p.DeletedTime == null);
-            if (!promotionExists)
-                throw new ValidationException(new List<ValidationFailure>
-                {
-                    new(nameof(promotionId), "Promotion ID does not exist.")
-                });
+
             var existedCategory = await _unitOfWork.GetRepository<Category>().Entities
                 .FirstOrDefaultAsync(c => c.Name == category.Name && c.DeletedTime == null);
             if (existedCategory is not null)
                 throw new ValidationException("Category name already exists");
+
             var categoryEntity = _mapper.Map<Category>(category);
+            categoryEntity.PromotionId = null;
             categoryEntity.CreatedTime = DateTime.UtcNow;
             categoryEntity.Status = "active";
             categoryEntity.CreatedBy = "user";
             categoryEntity.LastUpdatedBy = "user";
-            categoryEntity.PromotionId = promotionId; 
             await _unitOfWork.GetRepository<Category>().InsertAsync(categoryEntity);
             await _unitOfWork.SaveAsync();
-            return _mapper.Map<CategoryDto>(categoryEntity);
+            _mapper.Map<CategoryDto>(categoryEntity);
+
+            return true; 
         }
+
+
 
 
         public async Task<CategoryDto> Update(string id, CategoryForUpdateDto category)

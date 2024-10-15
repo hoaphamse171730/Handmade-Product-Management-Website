@@ -50,19 +50,19 @@ namespace HandmadeProductManagementAPI.Controllers
 
         [HttpPost]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> CreateCategory(string promotionId, CategoryForCreationDto categoryForCreation)
+        public async Task<IActionResult> CreateCategory(CategoryForCreationDto categoryForCreation)
         {
-
-            var createdCategory = await _categoryService.Create(promotionId, categoryForCreation);
-            var response = new BaseResponse<CategoryDto>
+            await _categoryService.Create(categoryForCreation);
+            var response = new BaseResponse<bool>
             {
                 Code = "200",
                 StatusCode = StatusCodeHelper.OK,
                 Message = "Category created successfully",
-                Data = createdCategory
+                Data = true
             };
             return Ok(response);
         }
+
 
         [HttpPut("{categoryId}")]
         [Authorize(Roles = "Admin")]

@@ -71,6 +71,7 @@ namespace HandmadeProductManagement.Services.Service
             return _mapper.Map<PromotionDto>(promotion);
         }
 
+        
         public async Task<bool> Create(PromotionForCreationDto promotion, string userId)
         {
             var validationResult = await _creationValidator.ValidateAsync(promotion);

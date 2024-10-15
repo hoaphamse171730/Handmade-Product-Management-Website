@@ -8,16 +8,14 @@ namespace HandmadeProductManagement.Contract.Repositories.Entity
         public string Name { get; set; } = string.Empty;
         public string? Description { get; set; }
         public string? Status { get; set; }
-        
-        public ICollection<Variation> Variations { get; set; }= [];
 
-        [JsonIgnore]
-        public ICollection<Product> Products { get; set; } = [];
+        public ICollection<Variation> Variations { get; set; } = [];
+
+        [JsonIgnore] public ICollection<Product> Products { get; set; } = [];
 
         public string? PromotionId { get; set; } = string.Empty;
+        [JsonIgnore]
         public virtual Promotion? Promotion { get; set; }
-        
-        
-        
+  
     }
 }
