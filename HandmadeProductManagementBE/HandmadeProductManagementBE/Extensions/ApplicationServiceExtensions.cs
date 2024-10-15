@@ -162,7 +162,7 @@ public static class ApplicationServiceExtensions
 
         services.AddScoped<IValidator<CategoryForCreationDto>, CategoryForCreationDtoValidator>();
         services.AddScoped<IValidator<CategoryForUpdateDto>, CategoryForUpdateDtoValidator>();
-
+        services.AddScoped<IValidator<CategoryForUpdatePromotion>, CategoryForUpdatePromotionDtoValidator>();
         #endregion
 
         #region ProductItem

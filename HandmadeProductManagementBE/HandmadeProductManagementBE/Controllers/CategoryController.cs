@@ -79,6 +79,22 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
+        [Authorize(Roles = "Admin, Seller")]
+        [HttpPut("updatepromotion/{categoryId}")]
+        public async Task<IActionResult> UpdatePromotion(string categoryId, CategoryForUpdatePromotion categoryForUpdatePromotion)
+        {
+            var updatePromotionCategory = await _categoryService.UpdatePromotion(categoryId, categoryForUpdatePromotion);
+            var reponse = new BaseResponse<CategoryDto>
+            {
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Category updated successfully",
+                Data = updatePromotionCategory
+            };
+            return Ok(reponse);
+        }
+        
+
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteCategory(string id)
