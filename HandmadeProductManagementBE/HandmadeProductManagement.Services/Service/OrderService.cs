@@ -1,12 +1,10 @@
-﻿using Google.Apis.Storage.v1.Data;
-using HandmadeProductManagement.Contract.Repositories.Entity;
+﻿using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Utils;
 using HandmadeProductManagement.ModelViews.OrderDetailModelViews;
 using HandmadeProductManagement.ModelViews.OrderModelViews;
-using HandmadeProductManagement.ModelViews.ProductConfigurationModelViews;
 using HandmadeProductManagement.ModelViews.StatusChangeModelViews;
 using HandmadeProductManagement.Repositories.Entity;
 using Microsoft.EntityFrameworkCore;
@@ -217,6 +215,11 @@ namespace HandmadeProductManagement.Services.Service
                         }).ToList()
                 })
                 .ToListAsync();
+
+            if (!orders.Any())
+            {
+                throw new BaseException.NotFoundException("not_found", "There is no order.");
+            }
 
             return new PaginatedList<OrderResponseDetailForListModel>(orders, totalItems, pageNumber, pageSize);
         }
@@ -600,6 +603,11 @@ namespace HandmadeProductManagement.Services.Service
                     Note = order.Note,
                     CancelReasonId = order.CancelReasonId
                 }).ToListAsync();
+
+            if (!orders.Any())
+            {
+                throw new BaseException.NotFoundException("not_found", "There is no order.");
+            }
 
             return orders;
         }
