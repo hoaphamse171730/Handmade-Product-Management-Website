@@ -180,7 +180,7 @@ namespace HandmadeProductManagement.Services.Service
                 throw;
             }
         }
-        public async Task<PaginatedList<OrderResponseModel>> GetOrdersByPageAsync(int pageNumber, int pageSize)
+        public async Task<PaginatedList<OrderResponseDetailModel>> GetOrdersByPageAsync(int pageNumber, int pageSize)
         {
             var repository = _unitOfWork.GetRepository<Order>();
             var orderDetailRepository = _unitOfWork.GetRepository<OrderDetail>();
@@ -191,7 +191,7 @@ namespace HandmadeProductManagement.Services.Service
             var orders = await query
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
-                .Select(order => new OrderResponseModel
+                .Select(order => new OrderResponseDetailModel
                 {
                     Id = order.Id,
                     TotalPrice = order.TotalPrice,
@@ -216,9 +216,9 @@ namespace HandmadeProductManagement.Services.Service
                 })
                 .ToListAsync();
 
-            return new PaginatedList<OrderResponseModel>(orders, totalItems, pageNumber, pageSize);
+            return new PaginatedList<OrderResponseDetailModel>(orders, totalItems, pageNumber, pageSize);
         }
-        public async Task<OrderResponseModel> GetOrderByIdAsync(string orderId, string userId)
+        public async Task<OrderResponseDetailModel> GetOrderByIdAsync(string orderId)
         {
             if (string.IsNullOrWhiteSpace(orderId))
             {
@@ -256,7 +256,7 @@ namespace HandmadeProductManagement.Services.Service
                     Price = od.DiscountPrice,
                 }).ToListAsync();
 
-            return new OrderResponseModel
+            return new OrderResponseDetailModel
             {
                 Id = order.Id,
                 TotalPrice = order.TotalPrice,
@@ -521,12 +521,12 @@ namespace HandmadeProductManagement.Services.Service
                 throw;
             }
         }
-        public async Task<IList<OrderResponseModel>> GetOrdersBySellerUserIdAsync(Guid userId)
+        public async Task<IList<OrderResponseDetailModel>> GetOrdersBySellerUserIdAsync(Guid userId)
         {
             var orderRepository = _unitOfWork.GetRepository<Order>();
             var orders = await orderRepository.Entities
                 .Where(o => o.OrderDetails.Any(od => od.ProductItem.Product.Shop.UserId == userId && !od.ProductItem.Product.Shop.DeletedTime.HasValue))
-                .Select(order => new OrderResponseModel
+                .Select(order => new OrderResponseDetailModel
                 {
                     Id = order.Id,
                     TotalPrice = order.TotalPrice,
