@@ -43,13 +43,26 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.NotFoundException("product_item_not_found", $"ProductItem {createCartItemDto.ProductItemId} not found.");
             }
 
+            if (productItem.QuantityInStock < createCartItemDto.ProductQuantity.Value)
+            {
+                throw new BaseException.BadRequestException("insufficient_stock", "Not enough quantity in stock.");
+            }
+
             var cartItemRepo = _unitOfWork.GetRepository<CartItem>();
             var existingCartItem = await cartItemRepo.Entities
                 .FirstOrDefaultAsync(ci => ci.ProductItemId == productItem.Id && ci.UserId == Guid.Parse(userId) && ci.DeletedTime == null);
 
             if (existingCartItem != null)
             {
-                existingCartItem.ProductQuantity += createCartItemDto.ProductQuantity.Value;
+                var newQuantity = existingCartItem.ProductQuantity + createCartItemDto.ProductQuantity.Value;
+
+                // Check if the new quantity exceeds the quantity in stock
+                if (newQuantity > productItem.QuantityInStock)
+                {
+                    throw new BaseException.BadRequestException("insufficient_stock", "Not enough quantity in stock for the updated cart item.");
+                }
+
+                existingCartItem.ProductQuantity = newQuantity;
                 existingCartItem.LastUpdatedTime = DateTime.UtcNow;
             }
             else
@@ -82,14 +95,14 @@ namespace HandmadeProductManagement.Services.Service
             var cartItem = await cartItemRepo.Entities
                 .FirstOrDefaultAsync(ci => ci.Id == cartItemId && ci.UserId == Guid.Parse(userId) && ci.DeletedTime == null);
 
-            if(cartItem.CreatedBy != userId)
-            {
-                throw new BaseException.ForbiddenException("forbidden", "You do not have permission to access this resource.");
-            }
-
             if (cartItem == null)
             {
                 throw new BaseException.NotFoundException("cart_item_not_found", "Cart item not found.");
+            }
+
+            if (cartItem.CreatedBy != userId)
+            {
+                throw new BaseException.ForbiddenException("forbidden", "You do not have permission to access this resource.");
             }
 
             if (updateCartItemDto.ProductQuantity.HasValue)
@@ -203,14 +216,14 @@ namespace HandmadeProductManagement.Services.Service
             var cartItem = await cartItemRepo.Entities
                 .FirstOrDefaultAsync(ci => ci.Id == cartItemId && ci.UserId == Guid.Parse(userId) && ci.DeletedTime == null);
 
-            if(cartItem.CreatedBy != userId)
-            {
-                throw new BaseException.ForbiddenException("forbidden", "You do not have permission to access this resource.");
-            }
-
             if (cartItem == null)
             {
                 throw new BaseException.NotFoundException("cart_item_not_found", "Cart item not found.");
+            }
+
+            if (cartItem.CreatedBy != userId)
+            {
+                throw new BaseException.ForbiddenException("forbidden", "You do not have permission to access this resource.");
             }
 
             await cartItemRepo.DeleteAsync(cartItem.Id);
