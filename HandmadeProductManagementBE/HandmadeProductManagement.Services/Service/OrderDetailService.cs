@@ -2,13 +2,9 @@ using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.ModelViews.OrderDetailModelViews;
 using AutoMapper;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using FluentValidation;
 using HandmadeProductManagement.Contract.Repositories.Entity;
+using Microsoft.EntityFrameworkCore;
 
 namespace HandmadeProductManagement.Services.Service
 {

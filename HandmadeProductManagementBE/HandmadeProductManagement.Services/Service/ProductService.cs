@@ -8,8 +8,6 @@ using Microsoft.EntityFrameworkCore;
 using AutoMapper;
 using FluentValidation;
 using HandmadeProductManagement.ModelViews.VariationCombinationModelViews;
-using System.ComponentModel.DataAnnotations;
-using System;
 
 namespace HandmadeProductManagement.Services.Service
 {

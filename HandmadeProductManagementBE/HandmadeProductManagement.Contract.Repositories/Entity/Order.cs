@@ -1,12 +1,6 @@
 ﻿using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Repositories.Entity;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
 namespace HandmadeProductManagement.Contract.Repositories.Entity
 {

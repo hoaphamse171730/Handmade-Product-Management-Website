@@ -1,9 +1,4 @@
 ﻿using HandmadeProductManagement.ModelViews.PaymentModelViews;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HandmadeProductManagement.Contract.Services.Interface
 {

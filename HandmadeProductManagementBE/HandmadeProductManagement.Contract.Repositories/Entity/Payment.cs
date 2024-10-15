@@ -1,8 +1,5 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 using HandmadeProductManagement.Core.Base;
-using HandmadeProductManagement.Core.Utils;
 
 namespace HandmadeProductManagement.Contract.Repositories.Entity
 {

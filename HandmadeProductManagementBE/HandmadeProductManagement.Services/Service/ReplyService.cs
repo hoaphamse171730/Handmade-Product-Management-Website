@@ -3,16 +3,7 @@ using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.ModelViews.ReplyModelViews;
-using HandmadeProductManagement.ModelViews.ReviewModelViews;
-using HandmadeProductManagement.ModelViews.ShopModelViews;
-using HandmadeProductManagement.Repositories.Entity;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HandmadeProductManagement.Services.Service
 {

@@ -1,11 +1,5 @@
 ﻿using FluentValidation;
 using HandmadeProductManagement.ModelViews.CategoryModelViews;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace HandmadeProductManagement.Validation.Category
 {
     public class CategoryForUpdatePromotionDtoValidator : AbstractValidator<CategoryForUpdatePromotion>
