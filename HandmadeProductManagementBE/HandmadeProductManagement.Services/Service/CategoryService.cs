@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
+using Firebase.Auth;
 using FluentValidation;
 using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.CategoryModelViews;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,14 +17,18 @@ namespace HandmadeProductManagement.Services.Service
         private readonly IMapper _mapper;
         private readonly IValidator<CategoryForCreationDto> _creationValidator;
         private readonly IValidator<CategoryForUpdateDto> _updateValidator;
+        private readonly IValidator<CategoryForUpdatePromotion> _updatePromotionValidator;
+        
 
         public CategoryService(IUnitOfWork unitOfWork, IMapper mapper,
-            IValidator<CategoryForCreationDto> creationValidator, IValidator<CategoryForUpdateDto> updateValidator)
+            IValidator<CategoryForCreationDto> creationValidator, IValidator<CategoryForUpdateDto> updateValidator
+            ,IValidator<CategoryForUpdatePromotion> updatePromotionValidator)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _creationValidator = creationValidator;
             _updateValidator = updateValidator;
+            _updatePromotionValidator = updatePromotionValidator;
         }
 
         public async Task<IList<CategoryDto>> GetAll()
@@ -74,11 +80,48 @@ namespace HandmadeProductManagement.Services.Service
                 .FirstOrDefaultAsync(c => c.Name == category.Name && c.DeletedTime == null);
             if (existedCategory is not null)
                 throw new ValidationException("Category name already exists");
+
             _mapper.Map(category, categoryEntity);
             categoryEntity.LastUpdatedTime = DateTime.UtcNow;
             await _unitOfWork.GetRepository<Category>().UpdateAsync(categoryEntity);
             await _unitOfWork.SaveAsync();
             return _mapper.Map<CategoryDto>(categoryEntity);
+        }
+        public async Task<CategoryDto> UpdatePromotion(string id, CategoryForUpdatePromotion category)
+        {
+            if (!Guid.TryParse(id, out _))
+            {
+                throw new BaseException.BadRequestException("invalid_id_format",
+                    "The provided ID is not in a valid GUID format.");
+            }
+
+            var categoryRepo = await _unitOfWork.GetRepository<Category>()
+                .Entities
+                .FirstOrDefaultAsync(c => c.Id == id && c.DeletedTime == null);
+
+            if (categoryRepo is null)
+                throw new BaseException.NotFoundException("400", "Category not found");
+
+            var validationResult = await _updatePromotionValidator.ValidateAsync(category);
+            if(!validationResult.IsValid)
+                throw new ValidationException(validationResult.Errors);
+
+            // Kiểm tra xem promotionId có tồn tại hay không
+            var promotionExists = await _unitOfWork.GetRepository<Promotion>()
+                .Entities
+                .AnyAsync(p => p.Id == category.promotionId && p.DeletedTime == null);
+
+            if (!promotionExists)
+            {
+                throw new BaseException.NotFoundException("404", "Promotion not found");
+            }
+
+            categoryRepo.PromotionId = category.promotionId;
+            categoryRepo.LastUpdatedTime = DateTime.UtcNow;
+
+            await _unitOfWork.GetRepository<Category>().UpdateAsync(categoryRepo);
+            await _unitOfWork.SaveAsync();
+            return _mapper.Map<CategoryDto>(categoryRepo);
         }
 
         public async Task<bool> SoftDelete(string id)

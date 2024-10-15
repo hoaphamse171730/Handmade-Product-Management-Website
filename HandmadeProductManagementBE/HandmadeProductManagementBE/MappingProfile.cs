@@ -64,6 +64,7 @@ public class MappingProfile : Profile
         CreateMap<Category, CategoryDto>();
         CreateMap<CategoryForCreationDto, Category>();
         CreateMap<CategoryForUpdateDto, Category>();
+        CreateMap<CategoryForUpdatePromotion, Category>();
         #endregion
 
         #region ProductItem

@@ -15,5 +15,7 @@ namespace HandmadeProductManagement.Contract.Services.Interface
         Task<CategoryDto> Create(CategoryForCreationDto category);
         Task<CategoryDto> Update(string id, CategoryForUpdateDto category);
         Task<bool> SoftDelete(string id);
+
+        Task<CategoryDto> UpdatePromotion(string id, CategoryForUpdatePromotion category);
     }
 }
