@@ -8,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using AutoMapper;
 using FluentValidation;
 using HandmadeProductManagement.ModelViews.VariationCombinationModelViews;
+using System.ComponentModel.DataAnnotations;
+using System;
 
 namespace HandmadeProductManagement.Services.Service
 {
@@ -101,6 +103,28 @@ namespace HandmadeProductManagement.Services.Service
                     if (!variationExists)
                     {
                         throw new BaseException.NotFoundException("variation_not_found", $"Variation not found.");
+                    }
+                }
+
+                // Validate if each VariationOption belongs to the correct Variation and if its ID is a valid GUID
+                foreach (var variation in productDto.Variations)
+                {
+                    foreach (var variationOptionId in variation.VariationOptionIds)
+                    {
+                        if (!Guid.TryParse(variationOptionId, out _))
+                        {
+                            throw new BaseException.BadRequestException("invalid_variation_option_id", $"Variation Option ID must be a valid GUID.");
+                        }
+
+                        // Validate if the VariationOption belongs to the correct Variation
+                        var variationOptionExists = await _unitOfWork.GetRepository<VariationOption>().Entities
+                            .AnyAsync(vo => vo.Id == variationOptionId && vo.VariationId == variation.Id);
+
+                        if (!variationOptionExists)
+                        {
+                            throw new BaseException.NotFoundException("variation_option_not_belong_to_variation",
+                                $"Variation Option with ID {variationOptionId} does not belong to the specified Variation {variation.Id}.");
+                        }
                     }
                 }
 
