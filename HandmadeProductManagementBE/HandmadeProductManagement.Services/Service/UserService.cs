@@ -11,6 +11,7 @@ using HandmadeProductManagement.Contract.Repositories.Entity;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Http;
 using HandmadeProductManagement.Core.Utils;
+using Google.Apis.Storage.v1.Data;
 namespace HandmadeProductManagement.Services.Service
 {
     public class UserService : IUserService
@@ -395,6 +396,47 @@ namespace HandmadeProductManagement.Services.Service
             return notifications;
         }
 
+
+        public async Task<IList<NotificationModel>> NotificationForPaymentExpiration(string Id)
+        {
+            if (!Guid.TryParse(Id, out Guid userId))
+            {
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "ID người dùng không hợp lệ");
+            }
+
+            // Lấy danh sách các thanh toán của người dùng thông qua Order
+            var payments = await _unitOfWork.GetRepository<Payment>()
+                .Entities
+                .Where(p => p.Order != null && p.Order.UserId == userId) // Lọc theo UserId của Order
+                .Include(p => p.Order) // Bao gồm bảng Order
+                .ToListAsync();
+
+            if (payments == null || !payments.Any())
+            {
+                return new List<NotificationModel>(); // Nếu không có thanh toán nào thì trả về danh sách trống
+            }
+
+            var notifications = new List<NotificationModel>();
+            var urlroot = "https://localhost:7159";
+
+            foreach (var payment in payments)
+            {
+                // Kiểm tra nếu ngày hết hạn cộng thêm 15 ngày lớn hơn ngày hiện tại
+                if (payment.ExpirationDate.HasValue && payment.ExpirationDate.Value.AddDays(15) > DateTime.UtcNow)
+                {
+                    // Thêm thông báo cho thanh toán này
+                    notifications.Add(new NotificationModel
+                    {
+                        Id = payment.Id,
+                        Message = $"Thanh toán của bạn sẽ hết hạn vào ngày {payment.ExpirationDate.Value.ToString("dd/MM/yyyy")}",
+                        Tag = "PaymentExpiration",
+                        URL = urlroot + $"/api/payment/{payment.Id}"
+                    });
+                }
+            }
+
+            return notifications;
+        }
 
 
 
