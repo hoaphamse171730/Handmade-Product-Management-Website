@@ -1,4 +1,4 @@
-﻿using HandmadeProductManagement.Contract.Repositories.Entity;
+using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
@@ -580,7 +580,6 @@ namespace HandmadeProductManagement.Services.Service
                 throw;
             }
         }
-
         public async Task<IList<OrderResponseModel>> GetOrdersBySellerUserIdAsync(Guid userId)
         {
             var orderRepository = _unitOfWork.GetRepository<Order>();
