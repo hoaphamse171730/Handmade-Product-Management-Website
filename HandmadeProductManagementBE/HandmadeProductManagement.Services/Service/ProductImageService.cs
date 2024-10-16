@@ -6,6 +6,7 @@ using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Constants;
 using Microsoft.EntityFrameworkCore;
 using HandmadeProductManagement.ModelViews.ProductImageModelViews;
+using HandmadeProductManagement.Core.Common;
 
 
 namespace HandmadeProductManagement.Services.Service
@@ -21,17 +22,16 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<bool> UploadProductImage(IFormFile file, string productId)
         {
-
             if (file == null || file.Length == 0)
             {
-                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(),"File not found");
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageFileNotFound);
             }
-                
 
             var product = await _unitOfWork.GetRepository<Product>()
                 .Entities
-                .Where(p=>p.Id == productId)
-                .FirstOrDefaultAsync() ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "Product not found");
+                .FirstOrDefaultAsync(p => p.Id == productId)
+                ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageProductNotFound);
+
             var uploadImageService = new ManageFirebaseImageService();
 
             using (var stream = file.OpenReadStream())
@@ -42,20 +42,24 @@ namespace HandmadeProductManagement.Services.Service
                 var productImage = new ProductImage
                 {
                     Url = imageUrl,
-                    ProductId = productId 
+                    ProductId = productId
                 };
 
                 await _unitOfWork.GetRepository<ProductImage>().InsertAsync(productImage);
                 await _unitOfWork.SaveAsync();
             }
+
             return true;
         }
 
-        
-        public async Task<bool>DeleteProductImage(string imageId)
+        public async Task<bool> DeleteProductImage(string imageId)
         {
             var productImage = await _unitOfWork.GetRepository<ProductImage>()
-                .Entities.Where(pi=>pi.Id == imageId).FirstOrDefaultAsync() ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "Image not found");
+                .Entities
+                .Where(pi => pi.Id == imageId)
+                .FirstOrDefaultAsync()
+                ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageImageNotFound);
+
             var deleteImageService = new ManageFirebaseImageService();
             await deleteImageService.DeleteFileAsync(productImage.Url);
 

@@ -152,6 +152,8 @@ public static class Constants
     public const string ErrorMessageInvalidProductItem = "ProductItemId does not exist.";
     public const string ErrorMessageInvalidVariationOption = "VariationOptionId does not exist.";
     public const string ErrorMessageProductConfigurationNotFound = "Product Configuration not found.";
+    public const string ErrorMessageFileNotFound = "File not found";
+    public const string ErrorMessageImageNotFound = "Image not found";
 
     #endregion
 
