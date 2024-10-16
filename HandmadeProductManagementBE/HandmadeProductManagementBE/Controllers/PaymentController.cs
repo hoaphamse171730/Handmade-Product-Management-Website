@@ -19,11 +19,27 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [Authorize]
-        [HttpPost("{orderId}")]
-        public async Task<IActionResult> CreatePayment(string orderId)
+        [HttpPost("online/{orderId}")]
+        public async Task<IActionResult> CreatePaymentOnline(string orderId)
         {
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            var createdPayment = await _paymentService.CreatePaymentAsync(userId, orderId);
+            var createdPayment = await _paymentService.CreatePaymentOnlineAsync(userId, orderId);
+            var response = new BaseResponse<bool>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Payment created successfully",
+                Data = createdPayment
+            };
+            return Ok(response);
+        }
+
+        [Authorize]
+        [HttpPost("offline/{orderId}")]
+        public async Task<IActionResult> CreatePaymentOffline(string orderId)
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var createdPayment = await _paymentService.CreatePaymentOfflineAsync(userId, orderId);
             var response = new BaseResponse<bool>
             {
                 Code = "Success",

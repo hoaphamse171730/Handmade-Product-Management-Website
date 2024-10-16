@@ -19,18 +19,21 @@ namespace HandmadeProductManagement.Services.Service
         private readonly IOrderDetailService _orderDetailService;
         private readonly ICartItemService _cartItemService;
         private readonly IProductService _productService;
+        private readonly IPaymentService _paymentService;
 
         public OrderService(IUnitOfWork unitOfWork, 
             IStatusChangeService statusChangeService, 
             IOrderDetailService orderDetailService,
             ICartItemService cartItemService,
-            IProductService productService)
+            IProductService productService,
+            IPaymentService paymentService)
         {
             _unitOfWork = unitOfWork;
             _statusChangeService = statusChangeService;
             _orderDetailService = orderDetailService;
             _cartItemService = cartItemService;
             _productService = productService;
+            _paymentService = paymentService;
         }
 
         public async Task<bool> CreateOrderAsync(string userId, CreateOrderDto createOrder)
@@ -292,7 +295,6 @@ namespace HandmadeProductManagement.Services.Service
                 OrderDetails = orderDetails
             };
         }
-
         public async Task<bool> UpdateOrderAsync(string userId, string orderId, UpdateOrderDto order)
         {
             if (string.IsNullOrWhiteSpace(orderId) || !Guid.TryParse(orderId, out _))
@@ -466,6 +468,15 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.ErrorException(400, "order_closed", "Order was closed");
             }
 
+            if (updateStatusOrderDto.Status == "Shipped")
+            {
+                var payment = await _paymentService.GetPaymentByOrderIdAsync(existingOrder.Id);
+                if (payment != null && payment.Method == "Offline")
+                {
+                    await _paymentService.UpdatePaymentStatusAsync(payment.Id, "Completed", userId);
+                }
+            }
+
             // Validate Status Flow
             var validStatusTransitions = new Dictionary<string, List<string>>
             {
@@ -580,8 +591,7 @@ namespace HandmadeProductManagement.Services.Service
                 throw;
             }
         }
-
-        public async Task<IList<OrderResponseModel>> GetOrdersBySellerUserIdAsync(Guid userId)
+        public async Task<IList<OrderResponseDetailModel>> GetOrdersBySellerUserIdAsync(Guid userId)
         {
             var orderRepository = _unitOfWork.GetRepository<Order>();
             var orders = await orderRepository.Entities
