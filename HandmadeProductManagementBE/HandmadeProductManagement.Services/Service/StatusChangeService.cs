@@ -4,6 +4,8 @@ using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.Core.Common;
+using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.StatusChangeModelViews;
 using HandmadeProductManagement.Repositories.Entity;
 using Microsoft.EntityFrameworkCore;
@@ -30,18 +32,18 @@ namespace HandmadeProductManagement.Services.Service
         {
             if (page <= 0)
             {
-                throw new BaseException.BadRequestException("invalid_input", "Page must be greater than 0.");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidPageNumber);
             }
 
             if (pageSize <= 0)
             {
-                throw new BaseException.BadRequestException("invalid_input", "Page size must be greater than 0.");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidPageSize);
             }
 
             IQueryable<StatusChange> query = _unitOfWork.GetRepository<StatusChange>().Entities
                 .Where(cr => !cr.DeletedTime.HasValue || cr.DeletedBy == null);
 
-            // Sắp xếp theo sortOrder
+            // Sort by ChangeTime
             query = sortAsc
                 ? query.OrderBy(statusChange => statusChange.ChangeTime)
                 : query.OrderByDescending(statusChange => statusChange.ChangeTime);
@@ -57,26 +59,27 @@ namespace HandmadeProductManagement.Services.Service
                     ChangeTime = statusChange.ChangeTime
                 })
                 .ToListAsync();
+
             return _mapper.Map<IList<StatusChangeDto>>(statusChanges);
         }
 
         public async Task<IList<StatusChangeDto>> GetByOrderId(string orderId, bool sortAsc)
         {
             // Validate id format
-            if (!Guid.TryParse(orderId, out var guidId))
-            {
-                throw new BaseException.BadRequestException("invalid_input", "ID is not in a valid GUID format.");
-            }
-
             if (string.IsNullOrWhiteSpace(orderId))
             {
-                throw new BaseException.BadRequestException("invalid_input", "Order ID cannot be null or empty.");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageEmptyId);
+            }
+
+            if (!Guid.TryParse(orderId, out var guidId))
+            {
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat);
             }
 
             IQueryable<StatusChange> query = _unitOfWork.GetRepository<StatusChange>().Entities
                 .Where(sc => sc.OrderId == orderId && (!sc.DeletedTime.HasValue || sc.DeletedBy == null));
 
-            // Sắp xếp theo sortOrder
+            // Sort by ChangeTime
             query = sortAsc
                 ? query.OrderBy(statusChange => statusChange.ChangeTime)
                 : query.OrderByDescending(statusChange => statusChange.ChangeTime);
@@ -93,34 +96,33 @@ namespace HandmadeProductManagement.Services.Service
             // Validate id format
             if (!Guid.TryParse(createStatusChange.OrderId, out var orderGuidId))
             {
-                throw new BaseException.BadRequestException("invalid_input", "ID is not in a valid GUID format.");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat);
             }
+
             // Validate
             var validationResult = await _creationValidator.ValidateAsync(createStatusChange);
-
             if (!validationResult.IsValid)
             {
-                throw new BaseException.BadRequestException("validation_failed", validationResult.Errors.First().ErrorMessage);
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageValidationFailed);
             }
 
             // Check if OrderId exists
             var order = await _unitOfWork.GetRepository<Order>().Entities
-                .FirstOrDefaultAsync(o => o.Id == createStatusChange.OrderId && (!o.DeletedTime.HasValue || o.DeletedBy == null)) ?? throw new BaseException.NotFoundException("order_not_found", "Order not found.");
+                .FirstOrDefaultAsync(o => o.Id == createStatusChange.OrderId && (!o.DeletedTime.HasValue || o.DeletedBy == null))
+                ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageOrderNotFound);
 
-            // Validate Status Flow
+            // Validate Status Flow (commented out in original code)
             //var currentStatus = order.Status;
-
             //if (!IsValidStatusTransition(currentStatus, createStatusChange.Status))
             //{
             //    throw new BaseException.BadRequestException("invalid_status_transition", $"Cannot transition from {order.Status} to {createStatusChange.Status}.");
             //}
 
             var statusChangeEntity = _mapper.Map<StatusChange>(createStatusChange);
-
             statusChangeEntity.ChangeTime = DateTime.UtcNow;
 
             // Set metadata
-            statusChangeEntity.CreatedBy = userId; 
+            statusChangeEntity.CreatedBy = userId;
             statusChangeEntity.LastUpdatedBy = userId;
 
             await _unitOfWork.GetRepository<StatusChange>().InsertAsync(statusChangeEntity);
