@@ -477,11 +477,19 @@ namespace HandmadeProductManagement.Services.Service
                     await _paymentService.UpdatePaymentStatusAsync(payment.Id, "Completed", userId);
                 }
             }
-            
-            // Validate Status Flow
-            var validStatusTransitions = new Dictionary<string, List<string>>
+
+            if (updateStatusOrderDto.Status == "Awaiting Payment")
             {
-                { "Pending", new List<string> { "Canceled", "Awaiting Payment" } },
+                var payment = await _paymentService.GetPaymentByOrderIdAsync(existingOrder.Id);
+                if (payment != null && payment.Method == "Offline")
+                {
+                    updateStatusOrderDto.Status = "Processing";
+                }
+
+                // Validate Status Flow
+                var validStatusTransitions = new Dictionary<string, List<string>>
+            {
+                { "Pending", new List<string> { "Canceled", "Awaiting Payment" , "Processing" } },
                 { "Awaiting Payment", new List<string> { "Canceled", "Processing" } },
                 { "Processing", new List<string> { "Delivering" } },
                 { "Delivering", new List<string> { "Shipped", "Delivery Failed" } },
