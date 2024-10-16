@@ -21,18 +21,23 @@ namespace HandmadeProductManagement.Services.Service
     public class PaymentService : IPaymentService
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IOrderService _orderService;
+        private readonly Lazy<IOrderService> _orderService;
         private readonly ICancelReasonService _cancelReasonService;
 
-        public PaymentService(IUnitOfWork unitOfWork, IOrderService orderService, ICancelReasonService cancelReasonService)
+        public PaymentService(
+            IUnitOfWork unitOfWork,
+            Lazy<IOrderService> orderService,  
+            ICancelReasonService cancelReasonService)
         {
             _unitOfWork = unitOfWork;
             _orderService = orderService;
             _cancelReasonService = cancelReasonService;
         }
 
+        private IOrderService OrderService => _orderService.Value;
 
-        public async Task<bool> CreatePaymentAsync(string userId, string orderId)
+
+        public async Task<bool> CreatePaymentOnlineAsync(string userId, string orderId)
         {
             if (string.IsNullOrWhiteSpace(orderId))
             {
@@ -42,14 +47,6 @@ namespace HandmadeProductManagement.Services.Service
             if (!Guid.TryParse(orderId, out _))
             {
                 throw new BaseException.BadRequestException("invalid_order_id_format", "Order ID format is invalid. Example: 123e4567-e89b-12d3-a456-426614174000.");
-            }
-
-            var userRepository = _unitOfWork.GetRepository<ApplicationUser>();
-            var userExists = await userRepository.Entities
-                .AnyAsync(u => u.Id.ToString() == userId && !u.DeletedTime.HasValue);
-            if (!userExists)
-            {
-                throw new BaseException.NotFoundException("user_not_found", "User not found.");
             }
 
             var orderRepository = _unitOfWork.GetRepository<Order>();
@@ -88,7 +85,69 @@ namespace HandmadeProductManagement.Services.Service
                 OrderId = orderId,
                 TotalAmount = order.TotalPrice,
                 Status = "Pending",
-                ExpirationDate = expirationDate
+                ExpirationDate = expirationDate,
+                Method = "Online"
+            };
+
+            payment.CreatedBy = userId;
+            payment.LastUpdatedBy = userId;
+
+            await paymentRepository.InsertAsync(payment);
+            await _unitOfWork.SaveAsync();
+
+            return true;
+        }
+
+        public async Task<bool> CreatePaymentOfflineAsync(string userId, string orderId)
+        {
+            if (string.IsNullOrWhiteSpace(orderId))
+            {
+                throw new BaseException.BadRequestException("invalid_order_id", "Please input order id.");
+            }
+
+            if (!Guid.TryParse(orderId, out _))
+            {
+                throw new BaseException.BadRequestException("invalid_order_id_format", "Order ID format is invalid. Example: 123e4567-e89b-12d3-a456-426614174000.");
+            }
+
+            var orderRepository = _unitOfWork.GetRepository<Order>();
+            var order = await orderRepository.Entities
+                .FirstOrDefaultAsync(o => o.Id == orderId && !o.DeletedTime.HasValue);
+            if (order == null)
+            {
+                throw new BaseException.NotFoundException("order_not_found", "Order not found.");
+            }
+
+            if (order.Status != "Pending")
+            {
+                throw new BaseException.BadRequestException("invalid_order_status", "Order status must be 'Pending'.");
+            }
+
+            if (order.UserId.ToString() != userId)
+            {
+                throw new BaseException.BadRequestException("user_not_owner", "User does not own the order.");
+            }
+
+            var paymentRepository = _unitOfWork.GetRepository<Payment>();
+            var existingPayment = await paymentRepository.Entities
+                .AnyAsync(p => p.OrderId == orderId && !p.DeletedTime.HasValue);
+            if (existingPayment)
+            {
+                throw new BaseException.BadRequestException("payment_already_exists", "A payment for this order already exists.");
+            }
+            var expirationDate = DateTime.UtcNow.AddDays(50);
+            expirationDate = new DateTime(expirationDate.Year,
+                                        expirationDate.Month,
+                                        expirationDate.Day,
+                                        expirationDate.Hour, 0, 0);
+
+            var payment = new Payment
+            {
+                OrderId = orderId,
+                TotalAmount = order.TotalPrice,
+                Status = "Pending",
+                ExpirationDate = expirationDate,
+                Method = "Offline"
             };
 
             payment.CreatedBy = userId;
@@ -137,14 +196,14 @@ namespace HandmadeProductManagement.Services.Service
                     $"Cannot transition from {payment.Status} to {newStatus}.");
             }
 
-            if (newStatus == "Completed")
+            if (newStatus == "Completed" && payment.Method == "Online")
             {
                 var dto = new UpdateStatusOrderDto
                 {
                     OrderId = payment.OrderId,
                     Status = "Processing"
                 };
-                await _orderService.UpdateOrderStatusAsync(userId,dto);
+                await OrderService.UpdateOrderStatusAsync(userId,dto);
             }
 
             //will update when the CancelReason table has data
@@ -172,7 +231,7 @@ namespace HandmadeProductManagement.Services.Service
                         Status = "Canceled",
                         CancelReasonId = cancelReason.Id,
                     };
-                    await _orderService.UpdateOrderStatusAsync(userId, dto);
+                    await OrderService.UpdateOrderStatusAsync(userId, dto);
                 }
 
             payment.Status = newStatus;
@@ -231,6 +290,7 @@ namespace HandmadeProductManagement.Services.Service
                 TotalAmount = payment.TotalAmount,
                 Status = payment.Status,
                 ExpirationDate = payment.ExpirationDate,
+                Method = payment.Method,
                 PaymentDetails = paymentDetails
             };
         }
@@ -238,10 +298,14 @@ namespace HandmadeProductManagement.Services.Service
         public async Task CheckAndExpirePaymentsAsync()
         {
             var paymentRepository = _unitOfWork.GetRepository<Payment>();
-            var orderRepository = _unitOfWork.GetRepository<Order>();
             var today = DateTime.UtcNow.Date;
             var expiredPayments = await paymentRepository.Entities
-                .Where(p => p.ExpirationDate.Date == today && p.Status != "Expired" && p.Status != "Completed" && !p.DeletedTime.HasValue)
+                .Where(p => p.ExpirationDate.HasValue && 
+                    p.ExpirationDate.Value.Date == today && 
+                    p.Status != "Expired" && 
+                    p.Status != "Completed" && 
+                    p.Method == "Online" && 
+                    !p.DeletedTime.HasValue)
                 .ToListAsync();
 
             foreach (var payment in expiredPayments)
