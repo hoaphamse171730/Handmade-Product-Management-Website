@@ -79,7 +79,6 @@ public static class Constants
     public const string ErrorMessageForbidden = "You have no permission to access this order.";
     public const string OrderNotFoundMessage = "Order not found.";
     public const string ErrorMessageEmptyOrderId = "Order ID is required.";
-    public const string ErrorMessageInvalidOrderIdFormat = "Order ID format is invalid.";
     public const string ErrorMessageOrderNotFound = "Order not found.";
     public const string ErrorMessageForbiddenAccess = "You have no permission to access this order.";
     public const string ErrorMessageOrderDetailsNotFound = "No order details found for this order.";
@@ -133,16 +132,13 @@ public static class Constants
     public const string ErrorMessageInsufficientStockForUpdate = "Not enough quantity in stock for the updated cart item.";
     public const string ErrorMessageCartItemNotFound = "Cart item not found.";
     public const string ErrorMessageCategoryNameExists = "Category name already exists";
-    public const string ErrorMessageInvalidIdFormat = "The provided ID is not in a valid GUID format.";
     public const string ErrorMessagePromotionNotFound = "Promotion not found.";
     public const string ErrorMessageInvalidShopId = "Invalid shopId";
     public const string ErrorMessageInvalidDateRange = "toDate must be after fromDate";
     public const string ErrorMessageNoItemsInCart = "No items found in the cart.";
-    public const string ErrorMessageInvalidUserId = "The provided user ID is invalid.";
     public const string ErrorMessagePaymentNotFound = "Payment not found.";
     public const string ErrorMessageInvalidPaymentStatus = "Cannot create payment detail for payment with status '{0}'.";
     public const string ErrorMessageInvalidPaymentId = "Please input payment id.";
-    public const string ErrorMessageInvalidPaymentIdFormat = "Payment ID format is invalid. Example: 123e4567-e89b-12d3-a456-426614174000.";
     public const string ErrorMessagePleaseInputStatus = "Please input status.";
     public const string ErrorMessageInvalidStatusFormat = "Status must be Success or Failed.";
     public const string ErrorMessagePleaseInputMethod = "Please input method.";
@@ -152,6 +148,10 @@ public static class Constants
     public const string ErrorMessageUserNotOwner = "User does not own the order.";
     public const string ErrorMessagePaymentAlreadyExists = "A payment for this order already exists.";
     public const string ErrorMessageInvalidStatusTransition = "Cannot transition from {0} to {1}.";
+    public const string ErrorMessageValidationFailed = "Validation failed.";
+    public const string ErrorMessageInvalidProductItem = "ProductItemId does not exist.";
+    public const string ErrorMessageInvalidVariationOption = "VariationOptionId does not exist.";
+    public const string ErrorMessageProductConfigurationNotFound = "Product Configuration not found.";
 
     #endregion
 

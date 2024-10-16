@@ -216,7 +216,7 @@ namespace HandmadeProductManagement.Services.Service
 
             if (!Guid.TryParse(orderId, out _))
             {
-                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidOrderIdFormat);
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat);
             }
 
             var repository = _unitOfWork.GetRepository<Order>();
@@ -279,7 +279,7 @@ namespace HandmadeProductManagement.Services.Service
         {
             if (string.IsNullOrWhiteSpace(orderId) || !Guid.TryParse(orderId, out _))
             {
-                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidOrderIdFormat);
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat);
             }
 
             var repository = _unitOfWork.GetRepository<Order>();
@@ -410,7 +410,7 @@ namespace HandmadeProductManagement.Services.Service
 
             if (!Guid.TryParse(updateStatusOrderDto.OrderId, out _))
             {
-                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidOrderIdFormat);
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat);
             }
 
             if (string.IsNullOrWhiteSpace(updateStatusOrderDto.Status))

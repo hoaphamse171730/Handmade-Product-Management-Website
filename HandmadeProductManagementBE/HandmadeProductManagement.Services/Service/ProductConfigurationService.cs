@@ -4,6 +4,8 @@ using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.Core.Common;
+using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.ProductConfigurationModelViews;
 using Microsoft.EntityFrameworkCore;
 
@@ -28,7 +30,7 @@ namespace HandmadeProductManagement.Services.Service
             var validationResult = await _creationValidator.ValidateAsync(productConfigurationDto);
             if (!validationResult.IsValid)
             {
-                throw new BaseException.BadRequestException("validation_failed", validationResult.Errors.First().ErrorMessage);
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageValidationFailed);
             }
 
             // Check if ProductItemId exists
@@ -36,7 +38,7 @@ namespace HandmadeProductManagement.Services.Service
                 .AnyAsync(p => p.Id == productConfigurationDto.ProductItemId);
             if (!productItemExists)
             {
-                throw new BaseException.BadRequestException("invalid_product_item", "ProductItemId does not exist.");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidProductItem);
             }
 
             // Check if VariationOptionId exists
@@ -44,7 +46,7 @@ namespace HandmadeProductManagement.Services.Service
                 .AnyAsync(v => v.Id == productConfigurationDto.VariationOptionId);
             if (!variationOptionExists)
             {
-                throw new BaseException.BadRequestException("invalid_variation_option", "VariationOptionId does not exist.");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidVariationOption);
             }
 
             var productConfigurationEntity = _mapper.Map<ProductConfiguration>(productConfigurationDto);
@@ -60,16 +62,19 @@ namespace HandmadeProductManagement.Services.Service
         {
             if (!Guid.TryParse(productItemId, out _))
             {
-                throw new BaseException.BadRequestException("invalid_input", "ID is not in a valid GUID format.");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat);
             }
 
             if (!Guid.TryParse(variationOptionId, out _))
             {
-                throw new BaseException.BadRequestException("invalid_input", "ID is not in a valid GUID format.");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat);
             }
+
             var productConfigurationRepo = _unitOfWork.GetRepository<ProductConfiguration>();
             var productConfigurationEntity = await productConfigurationRepo.Entities
-                .FirstOrDefaultAsync(x => x.ProductItemId == productItemId && x.VariationOptionId == variationOptionId) ?? throw new BaseException.NotFoundException("not_found", "Product Configuration not found");
+                .FirstOrDefaultAsync(x => x.ProductItemId == productItemId && x.VariationOptionId == variationOptionId)
+                ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageProductConfigurationNotFound);
+
             await productConfigurationRepo.DeleteAsync(productItemId, variationOptionId);
             await _unitOfWork.SaveAsync();
 

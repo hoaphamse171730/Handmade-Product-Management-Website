@@ -76,7 +76,7 @@ namespace HandmadeProductManagement.Services.Service
 
             if (!Guid.TryParse(createPaymentDetailDto.PaymentId, out _))
             {
-                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidPaymentIdFormat);
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat);
             }
 
             if (string.IsNullOrWhiteSpace(createPaymentDetailDto.Status))

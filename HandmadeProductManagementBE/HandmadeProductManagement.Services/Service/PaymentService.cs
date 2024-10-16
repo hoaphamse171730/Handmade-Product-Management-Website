@@ -41,7 +41,7 @@ namespace HandmadeProductManagement.Services.Service
 
             if (!Guid.TryParse(orderId, out _))
             {
-                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidOrderIdFormat);
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat);
             }
 
             var orderRepository = _unitOfWork.GetRepository<Order>();
@@ -99,7 +99,7 @@ namespace HandmadeProductManagement.Services.Service
 
             if (!Guid.TryParse(orderId, out _))
             {
-                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidOrderIdFormat);
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat);
             }
 
             var orderRepository = _unitOfWork.GetRepository<Order>();
@@ -239,7 +239,7 @@ namespace HandmadeProductManagement.Services.Service
 
             if (!Guid.TryParse(orderId, out Guid parsedOrderId))
             {
-                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidOrderIdFormat);
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat);
             }
 
             var orderRepository = _unitOfWork.GetRepository<Order>();
@@ -307,7 +307,7 @@ namespace HandmadeProductManagement.Services.Service
 
             if (!Guid.TryParse(paymentId, out _))
             {
-                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidPaymentIdFormat);
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat);
             }
 
             if (string.IsNullOrWhiteSpace(status) || !Regex.IsMatch(status, @"^[a-zA-Z]+$"))
