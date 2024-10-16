@@ -5,6 +5,7 @@ using AutoMapper;
 using FluentValidation;
 using HandmadeProductManagement.Contract.Repositories.Entity;
 using Microsoft.EntityFrameworkCore;
+using HandmadeProductManagement.Core.Base;
 
 namespace HandmadeProductManagement.Services.Service
 {
@@ -41,7 +42,7 @@ namespace HandmadeProductManagement.Services.Service
         {
             var validationResult = await _creationValidator.ValidateAsync(orderDetailForCreation);
             if (!validationResult.IsValid)
-                throw new ValidationException(validationResult.Errors);
+                throw new BaseException.BadRequestException("validation_failed", validationResult.Errors.First().ErrorMessage);
             var orderDetailEntity = _mapper.Map<OrderDetail>(orderDetailForCreation);
             orderDetailEntity.CreatedBy = userId;
             orderDetailEntity.LastUpdatedBy = userId;

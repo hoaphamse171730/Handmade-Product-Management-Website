@@ -28,7 +28,7 @@ namespace HandmadeProductManagement.Services.Service
             var validationResult = await _creationValidator.ValidateAsync(productConfigurationDto);
             if (!validationResult.IsValid)
             {
-                throw new BaseException.BadRequestException("validation_failed", validationResult.Errors.Select(e => e.ErrorMessage).FirstOrDefault());
+                throw new BaseException.BadRequestException("validation_failed", validationResult.Errors.First().ErrorMessage);
             }
 
             // Check if ProductItemId exists

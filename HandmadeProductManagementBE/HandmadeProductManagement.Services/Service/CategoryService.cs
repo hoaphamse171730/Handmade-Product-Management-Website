@@ -55,7 +55,7 @@ namespace HandmadeProductManagement.Services.Service
         {
             var validationResult = await _creationValidator.ValidateAsync(category);
             if (!validationResult.IsValid)
-                throw new ValidationException(validationResult.Errors);
+                throw new BaseException.BadRequestException("validation_failed", validationResult.Errors.First().ErrorMessage);
 
             var existedCategory = await _unitOfWork.GetRepository<Category>().Entities
                 .FirstOrDefaultAsync(c => c.Name == category.Name && c.DeletedTime == null);
@@ -82,11 +82,11 @@ namespace HandmadeProductManagement.Services.Service
         {
             var validationResult = await _updateValidator.ValidateAsync(category);
             if (!validationResult.IsValid)
-                throw new ValidationException(validationResult.Errors);
+                throw new BaseException.BadRequestException("validation_failed", validationResult.Errors.First().ErrorMessage);
+
             var categoryEntity = await _unitOfWork.GetRepository<Category>().Entities
-                .FirstOrDefaultAsync(c => c.Id == id && c.DeletedTime == null);
-            if (categoryEntity == null)
-                throw new KeyNotFoundException("Category not found");
+                .FirstOrDefaultAsync(c => c.Id == id && c.DeletedTime == null) ?? throw new KeyNotFoundException("Category not found");
+
             var existedCategory = await _unitOfWork.GetRepository<Category>().Entities
                 .FirstOrDefaultAsync(c => c.Name == category.Name && c.DeletedTime == null);
             if (existedCategory is not null)

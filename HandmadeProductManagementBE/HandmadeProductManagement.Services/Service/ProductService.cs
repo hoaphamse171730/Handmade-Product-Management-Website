@@ -38,7 +38,7 @@ namespace HandmadeProductManagement.Services.Service
             var validationResult = await _creationValidator.ValidateAsync(productDto);
             if (!validationResult.IsValid)
             {
-                throw new BaseException.BadRequestException("validation_failed", validationResult.Errors.Select(e => e.ErrorMessage).FirstOrDefault());
+                throw new BaseException.BadRequestException("validation_failed", validationResult.Errors.First().ErrorMessage);
             }
 
             // Step 2: Validate VariationCombinationDtos
@@ -47,7 +47,7 @@ namespace HandmadeProductManagement.Services.Service
                 var variationCombinationValidationResult = await _variationCombinationValidator.ValidateAsync(variationCombination);
                 if (!variationCombinationValidationResult.IsValid)
                 {
-                    throw new BaseException.BadRequestException("validation_failed", variationCombinationValidationResult.Errors.Select(e => e.ErrorMessage).FirstOrDefault());
+                    throw new BaseException.BadRequestException("invalid_product", validationResult.Errors.First().ErrorMessage);
                 }
             }
 
@@ -464,7 +464,7 @@ namespace HandmadeProductManagement.Services.Service
             var validationResult = await _updateValidator.ValidateAsync(product);
             if (!validationResult.IsValid)
             {
-                throw new BaseException.BadRequestException("validation_failed", validationResult.Errors.Select(e => e.ErrorMessage).FirstOrDefault());
+                throw new BaseException.BadRequestException("validation_failed", validationResult.Errors.First().ErrorMessage);
             }
 
             // Fetch product and check if it exists

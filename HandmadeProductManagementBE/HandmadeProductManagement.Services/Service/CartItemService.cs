@@ -32,11 +32,10 @@ namespace HandmadeProductManagement.Services.Service
             var validationResult = await _creationValidator.ValidateAsync(createCartItemDto);
             if (!validationResult.IsValid)
             {
-                throw new BaseException.BadRequestException("invalid_cart_item", validationResult.Errors.First().ErrorMessage);
+                throw new BaseException.BadRequestException("validation_failed", validationResult.Errors.First().ErrorMessage);
             }
 
-            var productItemRepo = _unitOfWork.GetRepository<ProductItem>();
-            var productItem = await productItemRepo.Entities
+            var productItem = await _unitOfWork.GetRepository<ProductItem>().Entities
                                                     .SingleOrDefaultAsync(pi => pi.Id == createCartItemDto.ProductItemId);
             if (productItem == null)
             {
@@ -93,7 +92,7 @@ namespace HandmadeProductManagement.Services.Service
             var validationResult = await _updateValidator.ValidateAsync(updateCartItemDto);
             if (!validationResult.IsValid)
             {
-                throw new BaseException.BadRequestException("invalid_cart_item", validationResult.Errors.First().ErrorMessage);
+                throw new BaseException.BadRequestException("validation_failed", validationResult.Errors.First().ErrorMessage);
             }
 
             var cartItemRepo = _unitOfWork.GetRepository<CartItem>();
