@@ -8,9 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using FluentValidation;
 using HandmadeProductManagement.ModelViews.NotificationModelViews;
 using HandmadeProductManagement.Contract.Repositories.Entity;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Http;
-using HandmadeProductManagement.Core.Utils;
+using HandmadeProductManagement.Core.Common;
 namespace HandmadeProductManagement.Services.Service
 {
     public class UserService : IUserService
@@ -49,13 +48,14 @@ namespace HandmadeProductManagement.Services.Service
 
         }
 
-        public async Task<UserResponseByIdModel> GetById(string Id)
+        public async Task<UserResponseByIdModel> GetById(string id)
         {
             // Ensure the id is a valid Guid
-            if (!Guid.TryParse(Id, out Guid userId))
+            if (!Guid.TryParse(id, out Guid userId))
             {
-                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Invalid userID");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat);
             }
+
             var user = await _unitOfWork.GetRepository<ApplicationUser>()
                 .Entities
                 .Where(u => u.Id == userId)
@@ -73,37 +73,40 @@ namespace HandmadeProductManagement.Services.Service
                     LockoutEnd = user.LockoutEnd,
                     LockoutEnabled = user.LockoutEnabled,
                     AccessFailedCount = user.AccessFailedCount,
-
                 })
-                .FirstOrDefaultAsync() ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "user not found");
-            return user;
+                .FirstOrDefaultAsync() ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageUserNotFound);
 
+            return user;
         }
+
         public async Task<bool> UpdateUser(string id, UpdateUserDTO updateUserDTO)
         {
             if (!Guid.TryParse(id, out Guid userId))
             {
-                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Invalid userID");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat);
             }
-            //query
+
+            // Query user
             var user = await _unitOfWork.GetRepository<ApplicationUser>()
                 .Entities
                 .Where(u => u.Id == userId)
-                .FirstOrDefaultAsync() ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "user not found");
-            // check format DTO by fluent validation
+                .FirstOrDefaultAsync() ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageUserNotFound);
+
+            // Check format DTO by fluent validation
             var updateValidation = _updateValidator.Validate(updateUserDTO);
             if (!updateValidation.IsValid)
             {
                 throw new ValidationException(updateValidation.Errors);
             }
-            // check existing unique fields
+
+            // Check existing unique fields
             if (!string.IsNullOrWhiteSpace(updateUserDTO.UserName))
             {
                 var existingUsername = await _unitOfWork.GetRepository<ApplicationUser>().Entities
                     .AnyAsync(u => u.UserName == updateUserDTO.UserName && u.Id != userId);
                 if (existingUsername)
                 {
-                    throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Username already exists");
+                    throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageUsernameExists);
                 }
                 user.UserName = updateUserDTO.UserName;
                 user.NormalizedUserName = updateUserDTO.UserName.ToUpper();
@@ -116,7 +119,7 @@ namespace HandmadeProductManagement.Services.Service
                     .AnyAsync(u => u.Email == updateUserDTO.Email && u.Id != userId);
                 if (existingUserWithSameEmail)
                 {
-                    throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Email already exists");
+                    throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageEmailExists);
                 }
                 user.Email = updateUserDTO.Email;
                 user.NormalizedEmail = updateUserDTO.Email.ToUpper();
@@ -129,23 +132,25 @@ namespace HandmadeProductManagement.Services.Service
                     .AnyAsync(u => u.PhoneNumber == updateUserDTO.PhoneNumber && u.Id != userId);
                 if (existingUserWithSamePhoneNumber)
                 {
-                    throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Phone number already exists");
+                    throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessagePhoneNumberExists);
                 }
                 user.PhoneNumber = updateUserDTO.PhoneNumber;
-            } 
+            }
+
             user.TwoFactorEnabled = updateUserDTO.TwoFactorEnabled;
             user.LastUpdatedTime = DateTime.UtcNow;
+
             await _unitOfWork.GetRepository<ApplicationUser>().UpdateAsync(user);
             await _unitOfWork.SaveAsync();
+
             return true;
         }
-
 
         public async Task<bool> DeleteUser(string Id)
         {
             if (!Guid.TryParse(Id, out Guid userId))
             {
-                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Invalid userID");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat);
             }
 
             var user = await _unitOfWork.GetRepository<ApplicationUser>()
@@ -153,48 +158,45 @@ namespace HandmadeProductManagement.Services.Service
                .Where(u => u.Id == userId)
                .FirstOrDefaultAsync();
 
-
-            if (user == null || user.Status == "Inactive")
+            if (user == null || user.Status == Constants.UserInactiveStatus)
             {
-                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "User not found");
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageUserNotFound);
             }
 
-            user.Status = "Inactive";
-            user.DeletedBy = "admin";
+            user.Status = Constants.UserInactiveStatus;
+            user.DeletedBy = Constants.RoleAdmin;
             user.DeletedTime = DateTime.UtcNow;
-
 
             _unitOfWork.GetRepository<ApplicationUser>().Update(user);
             await _unitOfWork.SaveAsync();
 
-
             return true;
         }
-
 
         public async Task<IList<NotificationModel>> GetNotificationList(string Id)
         {
             if (!Guid.TryParse(Id, out Guid userId))
             {
-                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Invalid userID");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat);
             }
 
             var shopIds = await _unitOfWork.GetRepository<Shop>()
                 .Entities
                 .Where(shop => shop.UserId == userId)
                 .Select(shop => shop.Id)
-                .ToListAsync() ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "User not found");
-            var review = await _unitOfWork.GetRepository<Review>()
+                .ToListAsync() ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageUserNotFound);
+
+            var reviews = await _unitOfWork.GetRepository<Review>()
                 .Entities
                 .Where(r => r.UserId == userId && r.Reply == null)
                 .Include(r => r.User)
                 .ToListAsync();
 
-            var notifications = review.Select(review => new NotificationModel
+            var notifications = reviews.Select(review => new NotificationModel
             {
                 Id = review.Id,
                 Message = $"Sản phẩm của bạn đã được {review.User.UserName} review",
-                Tag = "Review",
+                Tag = Constants.NotificationTagReview,
                 URL = $"/api/review/{review.Id}"
             }).ToList();
 
@@ -205,28 +207,28 @@ namespace HandmadeProductManagement.Services.Service
         {
             if (!Guid.TryParse(Id, out Guid userId))
             {
-                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Invalid userID");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat);
             }
 
-            var urlroot = "https://localhost:7159";
-            var fromDate = DateTime.UtcNow.AddDays(-2); // Lọc đơn hàng trong vòng 2 ngày
+            var urlRoot = Constants.ApiBaseUrl; // Use constant for URL root
+            var fromDate = DateTime.UtcNow.AddDays(-2); // Filter orders from the last 2 days
 
-            // Lấy danh sách đơn hàng trong vòng 2 ngày dựa trên ShopId của người dùng (người bán), sắp xếp theo LastUpdatedTime (tăng dần)
+            // Get the list of orders in the last 2 days based on the ShopId of the user (seller), sorted by LastUpdatedTime (ascending)
             var orders = await _unitOfWork.GetRepository<OrderDetail>()
                 .Entities
                 .Where(od => od.ProductItem.Product.Shop.UserId == userId && od.Order.OrderDate >= fromDate)
-                .OrderBy(od => od.Order.LastUpdatedTime) // Sắp xếp theo LastUpdatedTime tăng dần
+                .OrderBy(od => od.Order.LastUpdatedTime) // Sort by LastUpdatedTime ascending
                 .Include(od => od.Order)
-                .Include(od => od.Order.User) // Bao gồm thông tin người mua
+                .Include(od => od.Order.User) // Include buyer information
                 .ToListAsync();
 
-            // Tạo danh sách thông báo cho các đơn hàng
+            // Create notification list for the orders
             var notifications = orders.Select(orderDetail => new NotificationModel
             {
                 Id = orderDetail.Order.Id,
                 Message = $"Bạn có đơn hàng mới từ {orderDetail.Order.CustomerName} với trạng thái: {orderDetail.Order.Status} vào ngày: {orderDetail.Order.LastUpdatedTime.ToString("dd/MM/yyyy")}",
-                Tag = "Order",
-                URL = urlroot + $"/api/order/{orderDetail.Order.Id}"
+                Tag = Constants.NotificationTagOrder,
+                URL = urlRoot + $"/api/order/{orderDetail.Order.Id}"
             }).ToList();
 
             return notifications;
@@ -236,10 +238,10 @@ namespace HandmadeProductManagement.Services.Service
         {
             if (!Guid.TryParse(Id, out Guid userId))
             {
-                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Invalid userID");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat);
             }
 
-            // Lấy danh sách các review của người dùng
+            // Get the list of reviews for the user
             var reviews = await _unitOfWork.GetRepository<Review>()
                 .Entities
                 .Where(r => r.UserId == userId)
@@ -249,18 +251,18 @@ namespace HandmadeProductManagement.Services.Service
             {
                 return new List<NotificationModel>();
             }
-            var twoDaysAgo = DateTime.Now.AddDays(-2);
 
-            
-            // Lấy tất cả các reply mới cho những review của khách hàng
+            var twoDaysAgo = DateTime.UtcNow.AddDays(-2); // Use UTC for consistency
+
+            // Get all new replies for the user's reviews in the last 2 days
             var replies = await _unitOfWork.GetRepository<Reply>()
                 .Entities
-                .Where(rep => reviews.Select(r => r.Id).Contains(rep.ReviewId) && rep.Date.Value.Date >= twoDaysAgo.Date) // Lọc theo thời gian tạo reply trong 2 ngày gần nhất
-                .Include(rep => rep.Review) // Bao gồm review
-                    .ThenInclude(r => r.Product) // Bao gồm sản phẩm
-                    .ThenInclude(p => p.Shop)  // Nạp thông tin shop từ sản phẩm
-                    .ThenInclude(s => s.User)  // Nạp thông tin user (chủ shop) từ shop
-                    .ThenInclude(u => u.UserInfo) // Nạp thông tin UserInfo từ User
+                .Where(rep => reviews.Select(r => r.Id).Contains(rep.ReviewId) && rep.Date.Value.Date >= twoDaysAgo.Date) // Filter by reply creation date
+                .Include(rep => rep.Review) // Include review
+                    .ThenInclude(r => r.Product) // Include product
+                    .ThenInclude(p => p.Shop)  // Load shop information from product
+                    .ThenInclude(s => s.User)  // Load user (shop owner) from shop
+                    .ThenInclude(u => u.UserInfo) // Load UserInfo from User
                 .ToListAsync();
 
             if (replies == null || !replies.Any())
@@ -268,13 +270,13 @@ namespace HandmadeProductManagement.Services.Service
                 return new List<NotificationModel>();
             }
 
-            // Tạo thông báo cho từng phản hồi mới
+            // Create notifications for each new reply
             var replyNotifications = replies.Select(reply => new NotificationModel
             {
                 Id = reply.Id,
                 Message = $"Bạn đã nhận được phản hồi mới cho review sản phẩm {reply.Review.Product.Shop.User.UserInfo.FullName}",
-                Tag = "Reply",
-                URL = Url + $"api/reply/{reply.Id}"
+                Tag = Constants.NotificationTagReply,
+                URL = Constants.ApiBaseUrl + $"api/reply/{reply.Id}"
             }).ToList();
 
             return replyNotifications;
@@ -282,10 +284,9 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<IList<NotificationModel>> GetNewReviewNotificationList(string Id)
         {
-
             if (!Guid.TryParse(Id, out Guid userId))
             {
-                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Invalid userID");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat);
             }
 
             var shopID = await _unitOfWork.GetRepository<Shop>()
@@ -293,28 +294,27 @@ namespace HandmadeProductManagement.Services.Service
                 .Where(r => r.UserId == userId)
                 .Select(r => r.Id)
                 .ToListAsync();
-            if (shopID == null)
+
+            if (shopID == null || !shopID.Any())
             {
-                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "User not found");
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageUserNotFound);
             }
 
-            var twoDaysAgo = DateTime.Now.AddDays(-2);
+            var twoDaysAgo = DateTime.UtcNow.AddDays(-2); // Use UTC for consistency
 
             var review = await _unitOfWork.GetRepository<Review>()
                  .Entities
-                 .Where(r => r.Reply == null && r.Date.Value.Date >= twoDaysAgo.Date)  // Lọc các review không có phản hồi và trong hai ngày qua
-                 .Include(r => r.User)  // Nạp thông tin người dùng từ review
-                    .ThenInclude(u => u.UserInfo)  // Nạp thông tin UserInfo từ User của người viết review
-                 //.Include(r => r.Product)  // Nạp thông tin sản phẩm từ review
-                 //   .ThenInclude(p => p.Shop)  // Nạp thông tin shop từ sản phẩm
+                 .Where(r => r.Reply == null && r.Date.Value.Date >= twoDaysAgo.Date) // Filter reviews without replies in the last two days
+                 .Include(r => r.User) // Include user information from review
+                    .ThenInclude(u => u.UserInfo) // Include UserInfo from the reviewer's user
                  .ToListAsync();
 
             var notifications = review.Select(r => new NotificationModel
             {
                 Id = r.Id,
-                Message = $"Sản phẩm của bạn đã được {r.User.UserInfo.FullName} review",  // Lấy FullName từ người dùng trong Review
-                Tag = "Review",
-                URL = Url + $"api/review/{r.Id}"
+                Message = $"Sản phẩm của bạn đã được {r.User.UserInfo.FullName} review", // Get FullName from review user
+                Tag = Constants.NotificationTagReview,
+                URL = Constants.ApiBaseUrl + $"api/review/{r.Id}"
             }).ToList();
 
             return notifications;
@@ -324,10 +324,10 @@ namespace HandmadeProductManagement.Services.Service
         {
             if (!Guid.TryParse(Id, out Guid userId))
             {
-                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Invalid userID");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat);
             }
 
-            // Lấy danh sách order của người dùng
+            // Retrieve the list of orders for the user
             var orders = await _unitOfWork.GetRepository<Order>()
                 .Entities
                 .Where(o => o.UserId == userId)
@@ -336,48 +336,44 @@ namespace HandmadeProductManagement.Services.Service
 
             if (orders == null || !orders.Any())
             {
-                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "User not found");
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageUserNotFound);
             }
 
-            var twoDaysAgo = DateTime.Now.AddDays(-2);
+            var twoDaysAgo = DateTime.UtcNow.AddDays(-2); // Use UTC for consistency
 
-            // Lấy status của orders
-            var status = await _unitOfWork.GetRepository<StatusChange>()
+            // Get the status changes for the orders
+            var statusChanges = await _unitOfWork.GetRepository<StatusChange>()
                 .Entities
                 .Where(s => orders.Contains(s.OrderId) && s.ChangeTime.Date >= twoDaysAgo)
                 .Include(s => s.Order)
-                .OrderBy(s => s.ChangeTime) // Sắp xếp theo thời gian thay đổi trạng thái (tăng dần)
+                .OrderBy(s => s.ChangeTime) // Order by change time ascending
                 .ToListAsync();
 
-            // Định nghĩa múi giờ UTC+7 (Vietnam)
+            // Define UTC+7 timezone (Vietnam)
             var vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
 
-            // Tạo thông báo phản hồi
-            var notifications = status.Select(status => {
-                // Chuyển đổi thời gian từ UTC sang UTC+7
+            // Create response notifications
+            var notifications = statusChanges.Select(status => {
+                // Convert time from UTC to UTC+7
                 var changeTimeInVietnam = TimeZoneInfo.ConvertTimeFromUtc(status.ChangeTime, vietnamTimeZone);
 
                 return new NotificationModel
                 {
                     Id = status.Id,
                     Message = $"Đơn hàng của bạn được {status.Status} lúc {changeTimeInVietnam.ToString("dd/MM/yyyy HH:mm")}",
-                    Tag = "StatusChange",
-                    URL = Url + $"/api/statuschange/order/{status.OrderId}"
+                    Tag = Constants.NotificationTagStatusChange, // Use constant for tag
+                    URL = Constants.ApiBaseUrl + $"/api/statuschange/order/{status.OrderId}" // Use constant for URL base
                 };
             }).ToList();
 
             return notifications;
         }
 
-
-
-
-
         public async Task<bool> ReverseDeleteUser(string Id)
         {
             if (!Guid.TryParse(Id, out Guid userId))
             {
-                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Invalid userID");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat);
             }
 
             var user = await _unitOfWork.GetRepository<ApplicationUser>()
@@ -385,12 +381,12 @@ namespace HandmadeProductManagement.Services.Service
                .Where(u => u.Id == userId)
                .FirstOrDefaultAsync();
 
-            if (user == null || user.Status == "Active")
+            if (user == null || user.Status == Constants.UserActiveStatus)
             {
-                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "User not found or already active");
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageUserNotFoundOrActive);
             }
 
-            user.Status = "Active";
+            user.Status = Constants.UserActiveStatus;
             user.DeletedBy = null;
             user.DeletedTime = null;
 
@@ -404,18 +400,20 @@ namespace HandmadeProductManagement.Services.Service
         {
             if (!Guid.TryParse(id, out Guid userId))
             {
-                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Invalid userID");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat);
             }
 
             var user = await _unitOfWork.GetRepository<ApplicationUser>()
                 .Entities
                 .Where(u => u.Id == userId)
-                .FirstOrDefaultAsync() ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "User not found");
-            if (!(updateUserProfileDTO.UserName == null))
+                .FirstOrDefaultAsync() ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageUserNotFound);
+
+            if (updateUserProfileDTO.UserName != null)
             {
                 user.UserName = updateUserProfileDTO.UserName;
                 user.NormalizedUserName = updateUserProfileDTO.UserName.ToUpper();
             }
+
             _unitOfWork.GetRepository<ApplicationUser>().Update(user);
             await _unitOfWork.SaveAsync();
 
@@ -432,17 +430,25 @@ namespace HandmadeProductManagement.Services.Service
 
         private async Task<string> SaveAvatarFile(IFormFile avatarFile)
         {
-            // Implement logic to save the avatar file locally or in cloud storage (e.g., AWS S3, Azure Blob Storage)
-            // Return the URL to the saved file
-            var filePath = Path.Combine("wwwroot/images/avatars", avatarFile.FileName);
+            // Define the directory for saving avatars
+            var directoryPath = Path.Combine("wwwroot", "images", "avatars");
+
+            // Ensure the directory exists
+            if (!Directory.Exists(directoryPath))
+            {
+                Directory.CreateDirectory(directoryPath);
+            }
+
+            var filePath = Path.Combine(directoryPath, avatarFile.FileName);
 
             using (var stream = new FileStream(filePath, FileMode.Create))
             {
                 await avatarFile.CopyToAsync(stream);
             }
 
-            return $"/images/avatars/{avatarFile.FileName}"; // Return the relative path or URL of the image
+            return $"{Constants.AvatarBaseUrl}/{avatarFile.FileName}"; // Return the relative path or URL of the image
         }
+
 
     }
 }

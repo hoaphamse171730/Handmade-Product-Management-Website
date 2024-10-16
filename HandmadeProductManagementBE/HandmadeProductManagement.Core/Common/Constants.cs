@@ -2,6 +2,13 @@ namespace HandmadeProductManagement.Core.Common;
 
 public static class Constants
 {
+    #region Base
+
+    public const string ApiBaseUrl = "https://localhost:7159";
+    public const string AvatarBaseUrl = "/images/avatars";
+
+    #endregion
+
     #region User Status
 
     public const string UserActiveStatus = "Active";
@@ -71,6 +78,15 @@ public static class Constants
     public const string RoleAdmin = "Admin";
     public const string RoleSeller = "Seller";
     public const string RoleCustomer = "Customer";
+
+    #endregion
+
+    #region Notification Tag
+
+    public const string NotificationTagOrder = "Order";
+    public const string NotificationTagReview = "Review";
+    public const string NotificationTagReply = "Reply";
+    public const string NotificationTagStatusChange = "StatusChange";
 
     #endregion
 
@@ -187,6 +203,10 @@ public static class Constants
     public const string ErrorMessageInvalidShopDescriptionFormat = "Shop description cannot contain special characters.";
     public const string ErrorMessageUserInfoNotFound = "UserInfo not found for this user.";
     public const string ErrorMessageInvalidFileType = "The uploaded file is not a valid image.";
+    public const string ErrorMessageUsernameExists = "Username already exists.";
+    public const string ErrorMessageEmailExists = "Email already exists.";
+    public const string ErrorMessagePhoneNumberExists = "Phone number already exists.";
+    public const string ErrorMessageUserNotFoundOrActive = "User not found or already active.";
 
 
     #endregion
