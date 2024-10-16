@@ -163,6 +163,7 @@ public static class Constants
     public const string ErrorMessageInvalidPageSize = "Page Size must be greater than zero.";
     public const string ErrorMessageMinRatingOutOfRange = "MinRating must be between 0 and 5.";
     public const string ErrorMessageProductAlreadyHasStatus = "The product already has {0} status.";
+    public const string ErrorMessageNameInUse = "Name is already in use.";
 
     #endregion
 
