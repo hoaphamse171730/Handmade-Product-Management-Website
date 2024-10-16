@@ -185,6 +185,8 @@ public static class Constants
     public const string ErrorMessageInvalidShopNameFormat = "Shop name can only contain letters and spaces.";
     public const string ErrorMessageInvalidShopDescription = "Please input shop description.";
     public const string ErrorMessageInvalidShopDescriptionFormat = "Shop description cannot contain special characters.";
+    public const string ErrorMessageUserInfoNotFound = "UserInfo not found for this user.";
+    public const string ErrorMessageInvalidFileType = "The uploaded file is not a valid image.";
 
 
     #endregion

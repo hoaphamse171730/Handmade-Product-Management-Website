@@ -78,7 +78,7 @@ namespace HandmadeProductManagement.Services.Service
         {
             var validationResult = await _creationValidator.ValidateAsync(promotion);
             if (!validationResult.IsValid)
-                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageValidationFailed);
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), validationResult.Errors.First().ErrorMessage);
 
             var isNameDuplicated = await _unitOfWork.GetRepository<Promotion>().Entities
                 .AnyAsync(p => p.Name == promotion.Name && p.DeletedTime == null);
@@ -109,8 +109,7 @@ namespace HandmadeProductManagement.Services.Service
 
             var validationResult = await _updateValidator.ValidateAsync(promotion);
             if (!validationResult.IsValid)
-                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(),
-                    Constants.ErrorMessageValidationFailed);
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), validationResult.Errors.First().ErrorMessage);
 
             var promotionEntity = await _unitOfWork.GetRepository<Promotion>().Entities
                 .FirstOrDefaultAsync(p => p.Id == id && p.DeletedTime == null)
