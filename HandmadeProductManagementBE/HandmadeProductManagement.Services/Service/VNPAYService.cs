@@ -1,8 +1,11 @@
-﻿using HandmadeProductManagement.Contract.Repositories.Entity;
+﻿using Firebase.Auth;
+using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Constants;
+using HandmadeProductManagement.ModelViews.OrderModelViews;
+using HandmadeProductManagement.ModelViews.StatusChangeModelViews;
 using HandmadeProductManagement.ModelViews.VNPayModelViews;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
@@ -15,13 +18,14 @@ namespace HandmadeProductManagement.Services.Service
     {
         private readonly IOrderService _orderService;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IStatusChangeService _statusChangeService;
 
 
-
-        public VNPAYService(IUnitOfWork unitOfWork, IOrderService orderService)
+        public VNPAYService(IUnitOfWork unitOfWork, IOrderService orderService, IStatusChangeService statusChangeService)
         {
             _unitOfWork = unitOfWork;
             _orderService = orderService;
+            _statusChangeService = statusChangeService;
         }
 
         public string vnp_PayUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
@@ -271,8 +275,15 @@ namespace HandmadeProductManagement.Services.Service
                     order.Status = "Processing";
                     await _unitOfWork.GetRepository<Order>().UpdateAsync(order);
                     await _unitOfWork.SaveAsync();
+
+                    var statusChangeDto = new StatusChangeForCreationDto
+                    {
+                        OrderId = order.Id,
+                        Status = "Processing"
+                    };
+                    await _statusChangeService.Create(statusChangeDto, order.UserId.ToString());
                 }
-                    else
+                else
                 {
                     
                     //tao payment detail
