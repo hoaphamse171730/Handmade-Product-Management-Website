@@ -169,12 +169,12 @@ namespace HandmadeProductManagement.Services.Service
                .FirstOrDefaultAsync();
 
 
-            if (user == null || user.Status == "inactive")
+            if (user == null || user.Status == "Inactive")
             {
                 throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "User not found");
             }
 
-            user.Status = "inactive";
+            user.Status = "Inactive";
             user.DeletedBy = "admin";
             user.DeletedTime = DateTime.UtcNow;
 
@@ -411,12 +411,12 @@ namespace HandmadeProductManagement.Services.Service
                .Where(u => u.Id == userId)
                .FirstOrDefaultAsync();
 
-            if (user == null || user.Status == "active")
+            if (user == null || user.Status == "Active")
             {
                 throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "User not found or already active");
             }
 
-            user.Status = "active";
+            user.Status = "Active";
             user.DeletedBy = null;
             user.DeletedTime = null;
 

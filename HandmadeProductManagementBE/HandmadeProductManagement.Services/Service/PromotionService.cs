@@ -86,7 +86,7 @@ namespace HandmadeProductManagement.Services.Service
                 });
             var promotionEntity = _mapper.Map<Promotion>(promotion);
             promotionEntity.CreatedTime = DateTime.UtcNow;
-            promotionEntity.Status = promotion.StartDate > DateTime.UtcNow ? "inactive" : "active";
+            promotionEntity.Status = promotion.StartDate > DateTime.UtcNow ? "Inactive" : "Active";
             promotionEntity.CreatedBy = userId;
             promotionEntity.LastUpdatedBy = userId;
             promotionEntity.LastUpdatedTime = DateTime.UtcNow;
@@ -131,7 +131,7 @@ namespace HandmadeProductManagement.Services.Service
             var promotionEntity = await promotionRepo.Entities.FirstOrDefaultAsync(p => p.Id == id);
             if (promotionEntity is null)
                 throw new BaseException.NotFoundException("400", "Promotions not found");
-            promotionEntity.Status = "inactive";
+            promotionEntity.Status = "Inactive";
             promotionEntity.LastUpdatedBy = "user";
             promotionEntity.DeletedTime = DateTime.UtcNow;
             await promotionRepo.UpdateAsync(promotionEntity);
@@ -146,8 +146,8 @@ namespace HandmadeProductManagement.Services.Service
             if (promotion == null)
                 throw new BaseException.NotFoundException("not_found", "Promotion Not Found!");
             if (DateTime.UtcNow < promotion.StartDate || DateTime.UtcNow > promotion.EndDate)
-                promotion.Status = "inactive";
-            else promotion.Status = "active";
+                promotion.Status = "Inactive";
+            else promotion.Status = "Active";
             await _unitOfWork.GetRepository<Promotion>().UpdateAsync(promotion);
             await _unitOfWork.SaveAsync();
             return true;

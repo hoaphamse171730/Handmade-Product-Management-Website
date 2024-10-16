@@ -156,7 +156,7 @@ namespace HandmadeProductManagement.Services.Service
                     ShopId = ci.ProductItem.Product.Shop.Id,
                     ShopName = ci.ProductItem.Product.Shop.Name,
                     UnitPrice = ci.ProductItem.Price,
-                    DiscountPrice = ci.ProductItem.Price * (1 - (ci.ProductItem.Product.Category.Promotion.Status.Equals("active", StringComparison.OrdinalIgnoreCase) ? ci.ProductItem.Product.Category.Promotion.DiscountRate : 0)),
+                    DiscountPrice = ci.ProductItem.Price * (1 - (ci.ProductItem.Product.Category.Promotion.Status.Equals("Active", StringComparison.OrdinalIgnoreCase) ? ci.ProductItem.Product.Category.Promotion.DiscountRate : 0)),
                     VariationOptionValues = _unitOfWork.GetRepository<ProductConfiguration>().Entities
                         .Where(pc => pc.ProductItemId == ci.ProductItemId)
                         .Select(pc => pc.VariationOption.Value)
@@ -214,7 +214,7 @@ namespace HandmadeProductManagement.Services.Service
             {
                 var promotion = ci.ProductItem.Product.Category.Promotion;
                 var unitPrice = ci.ProductItem.Price;
-                var discountPrice = promotion != null && promotion.Status.Equals("active", StringComparison.OrdinalIgnoreCase)
+                var discountPrice = promotion != null && promotion.Status.Equals("Active", StringComparison.OrdinalIgnoreCase)
                     ? unitPrice - (int)(unitPrice * promotion.DiscountRate)
                     : unitPrice;
 
@@ -285,7 +285,7 @@ namespace HandmadeProductManagement.Services.Service
                 if (promotion != null)
                 {
                     await _promotionService.UpdatePromotionStatusByRealtime(promotion.Id);
-                    if (promotion.Status.Equals("active", StringComparison.OrdinalIgnoreCase))
+                    if (promotion.Status.Equals("Active", StringComparison.OrdinalIgnoreCase))
                     {
                         discountRate = 1 - (decimal)promotion.DiscountRate;
                     }

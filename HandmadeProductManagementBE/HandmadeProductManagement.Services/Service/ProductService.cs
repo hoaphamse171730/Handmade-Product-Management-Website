@@ -653,7 +653,7 @@ namespace HandmadeProductManagement.Services.Service
 
             var promotion = await _unitOfWork.GetRepository<Promotion>().Entities
                 .FirstOrDefaultAsync(p => p.Categories.Any(c => c.Id == product.CategoryId) &&
-                                          p.Status == "active");
+                                          p.Status == "Active");
 
             var response = new ProductDetailResponseModel
             {

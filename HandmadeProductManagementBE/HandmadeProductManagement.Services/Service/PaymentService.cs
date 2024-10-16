@@ -2,6 +2,7 @@
 using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.Core.Common;
 using HandmadeProductManagement.ModelViews.CancelReasonModelViews;
 using HandmadeProductManagement.ModelViews.OrderModelViews;
 using HandmadeProductManagement.ModelViews.PaymentDetailModelViews;
@@ -169,9 +170,10 @@ namespace HandmadeProductManagement.Services.Service
             // Validate Status Flow
             var validStatusTransitions = new Dictionary<string, List<string>>
             {
-                { "Pending", new List<string> { "Completed", "Expired" } },
-                { "Completed", new List<string> { "Refunded" } }
+                { Constants.PaymentStatusPending, new List<string> { Constants.PaymentStatusCompleted, Constants.PaymentStatusExpired } },
+                { Constants.PaymentStatusCompleted, new List<string> { Constants.PaymentStatusRefunded } }
             };
+
 
             var allValidStatuses = validStatusTransitions.Keys
                 .Concat(validStatusTransitions.Values.SelectMany(v => v))
