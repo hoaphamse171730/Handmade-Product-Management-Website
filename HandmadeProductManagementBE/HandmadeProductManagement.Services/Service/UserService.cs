@@ -404,10 +404,10 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "ID người dùng không hợp lệ");
             }
 
-            // Lấy danh sách các thanh toán của người dùng thông qua Order
+            // Lấy danh sách các thanh toán của người dùng thông qua Order và kiểm tra trạng thái chưa hoàn thành
             var payments = await _unitOfWork.GetRepository<Payment>()
                 .Entities
-                .Where(p => p.Order != null && p.Order.UserId == userId) // Lọc theo UserId của Order
+                .Where(p => p.Order != null && p.Order.UserId == userId && p.Status != "Completed") // Lọc theo UserId của Order và status != "Completed"
                 .Include(p => p.Order) // Bao gồm bảng Order
                 .ToListAsync();
 
@@ -437,6 +437,7 @@ namespace HandmadeProductManagement.Services.Service
 
             return notifications;
         }
+
 
 
 
