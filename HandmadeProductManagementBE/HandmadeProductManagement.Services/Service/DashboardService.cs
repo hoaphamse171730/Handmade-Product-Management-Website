@@ -91,7 +91,7 @@ namespace HandmadeProductManagement.Services.Service
         {
             if (!Guid.TryParse(Id, out Guid userId))
             {
-                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidShopId);
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat);
             }
 
             var shop = await _unitOfWork.GetRepository<Shop>()

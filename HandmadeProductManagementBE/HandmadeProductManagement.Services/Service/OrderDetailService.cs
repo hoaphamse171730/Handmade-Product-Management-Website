@@ -33,7 +33,7 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<OrderDetailDto> GetById(string id)
         {
-            var orderDetail = await _unitOfWork.GetRepository<OrderDetail>().Entities.FirstOrDefaultAsync(p => p.Id == id && p.DeletedTime == null) ?? throw new KeyNotFoundException("Order Detail not found");
+            var orderDetail = await _unitOfWork.GetRepository<OrderDetail>().Entities.FirstOrDefaultAsync(p => p.Id == id && p.DeletedTime == null) ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "Order Detail not found");
             return _mapper.Map<OrderDetailDto>(orderDetail);
         }
 

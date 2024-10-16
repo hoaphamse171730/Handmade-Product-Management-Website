@@ -5,6 +5,7 @@ using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.PromotionModelViews;
 using Microsoft.EntityFrameworkCore;
 
@@ -64,7 +65,7 @@ namespace HandmadeProductManagement.Services.Service
                     "The provided ID is not in a valid GUID format.");
             var promotion = await _unitOfWork.GetRepository<Promotion>().Entities
                 .FirstOrDefaultAsync(p => p.Id == id && p.DeletedTime == null);
-            return promotion == null ? throw new KeyNotFoundException("Promotion not found") : _mapper.Map<PromotionDto>(promotion);
+            return promotion == null ? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "Promotion not found") : _mapper.Map<PromotionDto>(promotion);
         }
 
 
@@ -100,7 +101,7 @@ namespace HandmadeProductManagement.Services.Service
             if (!validationResult.IsValid)
                 throw new BaseException.BadRequestException("validation_failed", validationResult.Errors.First().ErrorMessage);
             var promotionEntity = await _unitOfWork.GetRepository<Promotion>().Entities
-                .FirstOrDefaultAsync(p => p.Id == id && p.DeletedTime == null) ?? throw new KeyNotFoundException("Promotion not found");
+                .FirstOrDefaultAsync(p => p.Id == id && p.DeletedTime == null) ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "Promotion not found");
             var isNameDuplicated = await _unitOfWork.GetRepository<Promotion>().Entities
                 .AnyAsync(p => p.Name == promotion.Name && p.DeletedTime == null);
             if (isNameDuplicated)

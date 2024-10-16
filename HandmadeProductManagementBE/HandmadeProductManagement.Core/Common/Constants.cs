@@ -78,7 +78,7 @@ public static class Constants
 
     public const string ErrorMessageForbidden = "You have no permission to access this order.";
     public const string OrderNotFoundMessage = "Order not found.";
-    public const string ErrorMessageEmptyOrderId = "Order ID is required.";
+    public const string ErrorMessageEmptyId = "ID is required.";
     public const string ErrorMessageOrderNotFound = "Order not found.";
     public const string ErrorMessageForbiddenAccess = "You have no permission to access this order.";
     public const string ErrorMessageOrderDetailsNotFound = "No order details found for this order.";
@@ -133,7 +133,6 @@ public static class Constants
     public const string ErrorMessageCartItemNotFound = "Cart item not found.";
     public const string ErrorMessageCategoryNameExists = "Category name already exists";
     public const string ErrorMessagePromotionNotFound = "Promotion not found.";
-    public const string ErrorMessageInvalidShopId = "Invalid shopId";
     public const string ErrorMessageInvalidDateRange = "toDate must be after fromDate";
     public const string ErrorMessageNoItemsInCart = "No items found in the cart.";
     public const string ErrorMessagePaymentNotFound = "Payment not found.";
@@ -144,7 +143,6 @@ public static class Constants
     public const string ErrorMessagePleaseInputMethod = "Please input method.";
     public const string ErrorMessageInvalidMethodFormat = "Method cannot contain numbers or special characters.";
     public const string ErrorMessageInvalidExternalTransactionFormat = "External transaction can only contain alphanumeric characters.";
-    public const string ErrorMessageInvalidOrderId = "Please input order id.";
     public const string ErrorMessageUserNotOwner = "User does not own the order.";
     public const string ErrorMessagePaymentAlreadyExists = "A payment for this order already exists.";
     public const string ErrorMessageInvalidStatusTransition = "Cannot transition from {0} to {1}.";
@@ -158,7 +156,13 @@ public static class Constants
     public const string ErrorMessageDuplicateCombination = "All provided variation options are already associated with the product.";
     public const string ErrorMessageInvalidCombination = "A combination cannot have multiple options from the same variation.";
     public const string ErrorMessageIncompleteCombinations = "The provided combination is missing options from other variations.";
-
+    public const string ErrorMessageInvalidProduct = "Invalid product.";
+    public const string ErrorMessageVariationNotFound = "Variation not found.";
+    public const string ErrorMessageVariationOptionNotBelongToVariation = "Variation Option with ID {0} does not belong to the specified Variation {1}.";
+    public const string ErrorMessageInvalidPageNumber = "Page Number must be greater than zero.";
+    public const string ErrorMessageInvalidPageSize = "Page Size must be greater than zero.";
+    public const string ErrorMessageMinRatingOutOfRange = "MinRating must be between 0 and 5.";
+    public const string ErrorMessageProductAlreadyHasStatus = "The product already has {0} status.";
 
     #endregion
 
