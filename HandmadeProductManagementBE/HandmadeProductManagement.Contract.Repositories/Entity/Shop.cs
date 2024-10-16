@@ -13,6 +13,6 @@ namespace HandmadeProductManagement.Contract.Repositories.Entity
         [JsonIgnore]
         public ApplicationUser? User { get; set; }
 
-        public virtual ICollection<Product> Products{ get; set; } = new List<Product>();
+        public virtual ICollection<Product> Products{ get; set; } = [];
     }
 }

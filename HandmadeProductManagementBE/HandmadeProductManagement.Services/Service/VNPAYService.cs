@@ -165,12 +165,9 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<VNPAYResponse> VNPAYPayment(VNPAYRequest request)
         {
-            VNPAYResponse response = new VNPAYResponse();
-
-
+            VNPAYResponse response = new();
 
             var fields = new Dictionary<string, string>();
-
 
             var totalPrice = request.VnpAmount;
             var bankCode = request.VnpBankCode;
@@ -190,6 +187,17 @@ namespace HandmadeProductManagement.Services.Service
 
             var order = await _unitOfWork.GetRepository<Order>().Entities
               .Where(o => o.Id == orderInfo).FirstOrDefaultAsync();
+            
+            if (payment == null)
+            {
+                throw new BaseException.NotFoundException("not_found", "Payment Not Found");
+
+            }
+            if (order == null)
+            {
+                throw new BaseException.NotFoundException("not_found", "Order Not Found");
+
+            }
 
             if (response == null) {
                 //tao payment detail
@@ -209,8 +217,11 @@ namespace HandmadeProductManagement.Services.Service
                 await _unitOfWork.GetRepository<Order>().UpdateAsync(order);
                 await _unitOfWork.SaveAsync();
 
-                response.IsSucceed = false;
-                response.Text = "Payment approve failed";
+                response = new VNPAYResponse
+                {
+                    IsSucceed = false,
+                    Text = "Payment approve failed"
+                };
                 return response;
             }
 

@@ -142,24 +142,29 @@ namespace HandmadeProductManagement.Services.Service
 
             var cartItems = await _unitOfWork.GetRepository<CartItem>()
                 .Entities
-                .Include(ci => ci.ProductItem)
-                    .ThenInclude(pi => pi.Product)
-                        .ThenInclude(p => p.Category)
+                .Include(ci => ci.ProductItem!)
+                    .ThenInclude(pi => pi.Product!)
+                        .ThenInclude(p => p.Category!)
                             .ThenInclude(cat => cat.Promotion)
-                .Include(ci => ci.ProductItem.Product.Shop)
-                .Where(ci => ci.UserId == userIdGuid && ci.DeletedTime == null)
+                .Include(ci => ci.ProductItem!.Product!.Shop)
+                .Where(ci => ci.UserId == userIdGuid 
+                    && ci.DeletedTime == null 
+                    && ci.ProductItem != null
+                    && ci.ProductItem.Product != null
+                    && ci.ProductItem.Product.Shop != null
+                    && ci.ProductItem.Product.Category != null)
                 .Select(ci => new
                 {
                     ci.Id,
                     ci.ProductItemId,
                     ci.ProductQuantity,
-                    ShopId = ci.ProductItem.Product.Shop.Id,
+                    ShopId = ci.ProductItem!.Product!.Shop!.Id,
                     ShopName = ci.ProductItem.Product.Shop.Name,
                     UnitPrice = ci.ProductItem.Price,
-                    DiscountPrice = ci.ProductItem.Price * (1 - (ci.ProductItem.Product.Category.Promotion != null && ci.ProductItem.Product.Category.Promotion.Status.Equals("active", StringComparison.OrdinalIgnoreCase) ? ci.ProductItem.Product.Category.Promotion.DiscountRate : 0)),
+                    DiscountPrice = ci.ProductItem.Price * (1 - (ci.ProductItem.Product!.Category!.Promotion != null && ci.ProductItem.Product.Category.Promotion.Status.Equals("active", StringComparison.OrdinalIgnoreCase) ? ci.ProductItem.Product.Category.Promotion.DiscountRate : 0)),
                     VariationOptionValues = _unitOfWork.GetRepository<ProductConfiguration>().Entities
                         .Where(pc => pc.ProductItemId == ci.ProductItemId)
-                        .Select(pc => pc.VariationOption.Value)
+                        .Select(pc => pc.VariationOption!.Value)
                         .ToList()
                 })
                 .ToListAsync();
@@ -199,9 +204,9 @@ namespace HandmadeProductManagement.Services.Service
             var cartItems = await _unitOfWork.GetRepository<CartItem>()
                 .Entities
                 .Include(ci => ci.ProductItem)
-                    .ThenInclude(pi => pi.Product)
-                        .ThenInclude(p => p.Category)
-                            .ThenInclude(cat => cat.Promotion)
+                    .ThenInclude(pi => pi!.Product)
+                        .ThenInclude(p => p!.Category)
+                            .ThenInclude(cat => cat!.Promotion)
                 .Where(ci => ci.UserId == userIdGuid && ci.DeletedTime == null)
                 .ToListAsync();
 
@@ -212,7 +217,7 @@ namespace HandmadeProductManagement.Services.Service
 
             var cartItemDtos = cartItems.Select(ci =>
             {
-                var promotion = ci.ProductItem.Product.Category.Promotion;
+                var promotion = ci.ProductItem!.Product!.Category!.Promotion;
                 var unitPrice = ci.ProductItem.Price;
                 var discountPrice = promotion != null && promotion.Status.Equals("active", StringComparison.OrdinalIgnoreCase)
                     ? unitPrice - (int)(unitPrice * promotion.DiscountRate)
@@ -261,9 +266,9 @@ namespace HandmadeProductManagement.Services.Service
             var cartItems = await _unitOfWork.GetRepository<CartItem>()
                 .Entities
                 .Include(ci => ci.ProductItem)
-                .ThenInclude(pi => pi.Product)
-                .ThenInclude(p => p.Category)
-                .ThenInclude(cat => cat.Promotion)
+                .ThenInclude(pi => pi!.Product)
+                .ThenInclude(p => p!.Category)
+                .ThenInclude(cat => cat!.Promotion)
                 .Where(ci => ci.UserId == userIdGuid && ci.DeletedTime == null)
                 .ToListAsync();
 
@@ -276,10 +281,10 @@ namespace HandmadeProductManagement.Services.Service
 
             foreach (var cartItem in cartItems)
             {
-                var productItemPrice = cartItem.ProductItem.Price;
+                var productItemPrice = cartItem.ProductItem!.Price;
                 var productQuantity = cartItem.ProductQuantity;
 
-                var promotion = cartItem.ProductItem.Product.Category.Promotion;
+                var promotion = cartItem.ProductItem!.Product!.Category!.Promotion;
                 decimal discountRate = 1;
 
                 if (promotion != null)

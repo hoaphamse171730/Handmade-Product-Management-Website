@@ -215,7 +215,7 @@ namespace HandmadeProductManagement.Services.Service
             var notifications = review.Select(review => new NotificationModel
             {
                 Id = review.Id,
-                Message = $"Sản phẩm của bạn đã được {review.User.UserName} review",
+                Message = $"Sản phẩm của bạn đã được {(review.User?.UserName ?? "một người dùng không xác định")} review",
                 Tag = "Review",
                 URL = $"/api/review/{review.Id}"
             }).ToList();

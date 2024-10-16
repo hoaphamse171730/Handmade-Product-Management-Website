@@ -194,8 +194,7 @@ namespace HandmadeProductManagementAPI.Controllers
         public async Task<IActionResult> GetPaymentExpirationNotifications()
         {
             // Lấy thông tin người dùng từ token
-            var userIdFromToken = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
+            var userIdFromToken = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? throw new BaseException.NotFoundException("not_found", "user not found");
             // Lấy danh sách thông báo thanh toán sắp hết hạn
             var paymentNotifications = await _userService.NotificationForPaymentExpiration(userIdFromToken);
 

@@ -64,7 +64,7 @@ namespace HandmadeProductManagement.Services.Service
 
             // Step 5: Check if each provided variation option already exists in the product
             var existingProductConfigurations = await _unitOfWork.GetRepository<ProductConfiguration>().Entities
-                .Where(pc => pc.ProductItem.ProductId.ToString() == productId && allVariationOptionIds.Contains(pc.VariationOptionId))
+                .Where(pc => pc.ProductItem != null && pc.ProductItem.ProductId.ToString() == productId && allVariationOptionIds.Contains(pc.VariationOptionId))
                 .Select(pc => pc.VariationOptionId)
                 .ToListAsync();
 
@@ -130,20 +130,22 @@ namespace HandmadeProductManagement.Services.Service
         {
             var productConfigurations = await _unitOfWork.GetRepository<ProductConfiguration>().Entities
                 .Include(pc => pc.VariationOption)
-                .ThenInclude(vo => vo.Variation)
-                .Where(pc => pc.ProductItem.ProductId.ToString() == productId)
+                .ThenInclude(vo => vo!.Variation)
+                .Where(pc => pc.ProductItem != null && pc.ProductItem.ProductId.ToString() == productId)
+
                 .ToListAsync();
 
             // Group by VariationId to collect all VariationOptions for each Variation
             var variationsWithOptions = productConfigurations
-                .GroupBy(pc => pc.VariationOption.VariationId)
+                .Where(pc => pc.VariationOption != null && pc.VariationOption.Variation != null)
+                .GroupBy(pc => pc.VariationOption!.VariationId)
                 .Select(g => new VariationWithOptionsDto
                 {
                     Id = g.Key,
-                    Name = g.First().VariationOption.Variation.Name,
+                    Name = g.First().VariationOption!.Variation!.Name,
                     Options = g.Select(pc => new OptionsDto
                     {
-                        Id = pc.VariationOption.Id,
+                        Id = pc.VariationOption!.Id,
                         Name = pc.VariationOption.Value 
                     }).ToList()
                 })
@@ -210,7 +212,7 @@ namespace HandmadeProductManagement.Services.Service
             }
 
             var productItemEntity = await _unitOfWork.GetRepository<ProductItem>().Entities
-                .FirstOrDefaultAsync(p => p.Id == id && (!p.DeletedTime.HasValue || p.DeletedBy == null));
+                .FirstOrDefaultAsync(p => p.Id == id && (!p.DeletedTime.HasValue || p.DeletedBy == null)) ?? throw new BaseException.NotFoundException("not_found", "Product Item Not Found");
 
             // Get the associated product to check the shop ownership
             var productRepo = _unitOfWork.GetRepository<Product>();

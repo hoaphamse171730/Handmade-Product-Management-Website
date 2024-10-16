@@ -22,7 +22,7 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpPost("online/{orderId}")]
         public async Task<IActionResult> CreatePaymentOnline(string orderId)
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userId = (User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value) ?? throw new BaseException.NotFoundException("not_found", "User not found");
             var createdPayment = await _paymentService.CreatePaymentOnlineAsync(userId, orderId);
             var response = new BaseResponse<bool>
             {
