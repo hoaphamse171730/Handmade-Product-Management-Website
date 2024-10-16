@@ -61,14 +61,9 @@ public class AuthenticationService : IAuthenticationService
             .Include(u => u.UserInfo)
             .FirstOrDefaultAsync(u => u.Email == loginModelView.Email
                                       || u.PhoneNumber == loginModelView.PhoneNumber
-                                      || u.UserName == loginModelView.UserName);
+                                      || u.UserName == loginModelView.UserName) ?? throw new BaseException.UnauthorizedException(StatusCodeHelper.Unauthorized.ToString(),
 
-        if (user is null)
-        {
-            throw new BaseException.UnauthorizedException(StatusCodeHelper.Unauthorized.ToString(),
                 Constants.ErrorMessageUnauthorized);
-        }
-
         if (user.Status != Constants.UserActiveStatus)
         {
             throw new BaseException.UnauthorizedException(StatusCodeHelper.Unauthorized.ToString(),
@@ -191,31 +186,31 @@ public class AuthenticationService : IAuthenticationService
     {
         if (!IsValidEmail(registerModelView.Email))
         {
-            throw new BaseException.BadRequestException(Constants.ErrorCodeInvalidEmailFormat,
+            throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(),
                 Constants.ErrorMessageInvalidEmailFormat);
         }
 
         if (!IsValidUsername(registerModelView.UserName))
         {
-            throw new BaseException.BadRequestException(Constants.ErrorCodeInvalidUsernameFormat,
+            throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(),
                 Constants.ErrorMessageInvalidUsernameFormat);
         }
 
         if (!ValidationHelper.IsValidNames(CustomRegex.FullNameRegex, registerModelView.FullName))
         {
-            throw new BaseException.BadRequestException(Constants.ErrorCodeInvalidFullnameFormat,
+            throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(),
                 Constants.ErrorMessageInvalidFullnameFormat);
         }
 
         if (!IsValidPhoneNumber(registerModelView.PhoneNumber))
         {
-            throw new BaseException.BadRequestException(Constants.ErrorCodeInvalidPhoneFormat,
+            throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(),
                 Constants.ErrorMessageInvalidPhoneFormat);
         }
 
         if (string.IsNullOrWhiteSpace(registerModelView.Password) || !IsValidPassword(registerModelView.Password))
         {
-            throw new BaseException.BadRequestException(Constants.ErrorCodeWeakPassword,
+            throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(),
                 Constants.ErrorMessageWeakPassword);
         }
     }
@@ -225,7 +220,7 @@ public class AuthenticationService : IAuthenticationService
         var user = await _userManager.FindByEmailAsync(forgotPasswordModelView.Email);
         if (user == null || !user.EmailConfirmed)
         {
-            throw new BaseException.BadRequestException(Constants.ErrorCodeInvalidEmail,
+            throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(),
                 Constants.ErrorMessageInvalidEmail);
         }
 
@@ -245,7 +240,7 @@ public class AuthenticationService : IAuthenticationService
     public async Task<BaseResponse<string>> ResetPasswordAsync(ResetPasswordModelView resetPasswordModelView)
     {
         var user = await _userManager.FindByEmailAsync(resetPasswordModelView.Email)
-                    ?? throw new BaseException.BadRequestException(Constants.ErrorCodeInvalidEmail, Constants.ErrorMessageInvalidEmail);
+                    ?? throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidEmail);
 
         var decodedToken = HttpUtility.UrlDecode(resetPasswordModelView.Token);
         var result = await _userManager.ResetPasswordAsync(user, decodedToken, resetPasswordModelView.NewPassword);
@@ -259,18 +254,18 @@ public class AuthenticationService : IAuthenticationService
             };
         }
 
-        throw new BaseException.BadRequestException(Constants.ErrorCodeResetPasswordError, Constants.ErrorMessageResetPasswordError);
+        throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageResetPasswordError);
     }
 
     public async Task<BaseResponse<string>> ConfirmEmailAsync(ConfirmEmailModelView confirmEmailModelView)
     {
         if (string.IsNullOrWhiteSpace(confirmEmailModelView.Email) || !IsValidEmail(confirmEmailModelView.Email))
         {
-            throw new BaseException.BadRequestException(Constants.ErrorCodeInvalidEmail, Constants.ErrorMessageInvalidEmail);
+            throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidEmail);
         }
 
         var user = await _userManager.FindByEmailAsync(confirmEmailModelView.Email)
-                    ?? throw new BaseException.NotFoundException(Constants.ErrorCodeUserNotFound, Constants.ErrorMessageUserNotFound);
+                    ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageUserNotFound);
 
         var decodedToken = HttpUtility.UrlDecode(confirmEmailModelView.Token);
         var result = await _userManager.ConfirmEmailAsync(user, decodedToken);
@@ -291,7 +286,7 @@ public class AuthenticationService : IAuthenticationService
                 .Select(e => e.Description)
                 .ToList();
 
-            throw new BaseException.BadRequestException(Constants.ErrorCodeEmailConfirmationError,
+            throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(),
                 $"{Constants.ErrorMessageEmailConfirmationError}: {string.Join("; ", errorMessages)}");
         }
     }

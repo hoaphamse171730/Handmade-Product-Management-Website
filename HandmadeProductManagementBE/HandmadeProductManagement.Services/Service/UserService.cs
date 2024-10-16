@@ -97,7 +97,7 @@ namespace HandmadeProductManagement.Services.Service
                 throw new ValidationException(updateValidation.Errors);
             }
             // check existing unique fields
-            if (!string.IsNullOrEmpty(updateUserDTO.UserName))
+            if (!string.IsNullOrWhiteSpace(updateUserDTO.UserName))
             {
                 var existingUsername = await _unitOfWork.GetRepository<ApplicationUser>().Entities
                     .AnyAsync(u => u.UserName == updateUserDTO.UserName && u.Id != userId);
@@ -109,7 +109,7 @@ namespace HandmadeProductManagement.Services.Service
                 user.NormalizedUserName = updateUserDTO.UserName.ToUpper();
             }
 
-            if (!string.IsNullOrEmpty(updateUserDTO.Email))
+            if (!string.IsNullOrWhiteSpace(updateUserDTO.Email))
             {
                 var existingUserWithSameEmail = await _unitOfWork.GetRepository<ApplicationUser>()
                     .Entities
@@ -122,7 +122,7 @@ namespace HandmadeProductManagement.Services.Service
                 user.NormalizedEmail = updateUserDTO.Email.ToUpper();
             }
 
-            if (!string.IsNullOrEmpty(updateUserDTO.PhoneNumber))
+            if (!string.IsNullOrWhiteSpace(updateUserDTO.PhoneNumber))
             {
                 var existingUserWithSamePhoneNumber = await _unitOfWork.GetRepository<ApplicationUser>()
                     .Entities
@@ -293,7 +293,7 @@ namespace HandmadeProductManagement.Services.Service
                 .Where(r => r.UserId == userId)
                 .Select(r => r.Id)
                 .ToListAsync();
-            if (shopID.IsNullOrEmpty())
+            if (shopID == null)
             {
                 throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "User not found");
             }
@@ -411,7 +411,7 @@ namespace HandmadeProductManagement.Services.Service
                 .Entities
                 .Where(u => u.Id == userId)
                 .FirstOrDefaultAsync() ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "User not found");
-            if (!string.IsNullOrEmpty(updateUserProfileDTO.UserName))
+            if (!(updateUserProfileDTO.UserName == null))
             {
                 user.UserName = updateUserProfileDTO.UserName;
                 user.NormalizedUserName = updateUserProfileDTO.UserName.ToUpper();

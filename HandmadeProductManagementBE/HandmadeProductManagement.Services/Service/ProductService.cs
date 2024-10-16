@@ -280,7 +280,7 @@ namespace HandmadeProductManagement.Services.Service
                                     .AsQueryable();
 
             // Apply Search Filters
-            if (!string.IsNullOrEmpty(searchFilter.Name))
+            if (!string.IsNullOrWhiteSpace(searchFilter.Name))
             {
                 query = query.Where(p => p.Name.Contains(searchFilter.Name));
             }
@@ -582,7 +582,7 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<ProductDetailResponseModel> GetProductDetailsByIdAsync(string productId)
         {
-            if (string.IsNullOrEmpty(productId) || !IsValidGuid(productId))
+            if (string.IsNullOrWhiteSpace(productId) || !IsValidGuid(productId))
             {
                 throw new BaseException.BadRequestException("invalid_product_id", "Product ID is invalid or empty.");
             }
@@ -648,7 +648,7 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<decimal> CalculateAverageRatingAsync(string productId)
         {
-            if (string.IsNullOrEmpty(productId))
+            if (string.IsNullOrWhiteSpace(productId))
             {
                 throw new BaseException.BadRequestException("invalid_product_id",
                     "Product ID cannot be null or empty.");

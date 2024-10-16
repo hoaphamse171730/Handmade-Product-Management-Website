@@ -88,7 +88,7 @@ namespace HandmadeProductManagement.Services.Service
             foreach (var fieldName in fieldNames)
             {
                 var fieldValue = vnp_Params[fieldName];
-                if (!string.IsNullOrEmpty(fieldValue))
+                if (!(fieldValue == null))
                 {
                     hashData.Append(fieldName)
                             .Append('=')
@@ -226,7 +226,7 @@ namespace HandmadeProductManagement.Services.Service
 
                 foreach (var fieldName in sortedFieldNames)
                 {
-                    if (fields.TryGetValue(fieldName, out var fieldValue) && !string.IsNullOrEmpty(fieldValue))
+                    if (fields.TryGetValue(fieldName, out var fieldValue) && !(fieldValue == null))
                     {
                         if (sb.Length > 0)
                         {

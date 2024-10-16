@@ -11,11 +11,11 @@ namespace HandmadeProductManagement.Validation.Promotion
             RuleFor(x => x.Description)
                 .NotEmpty().WithMessage("Description is required!")
                 .MaximumLength(500).WithMessage("Description can not exceed 500 characters!")
-                .When(x => !string.IsNullOrEmpty(x.Description));
+                .When(x => !string.IsNullOrWhiteSpace(x.Description));
             RuleFor(x => x.Name)
                 .NotEmpty().WithMessage("Name is required!")
                 .MaximumLength(255).WithMessage("Name can not exceed 255 characters!")
-                .When(x => !string.IsNullOrEmpty(x.Name));
+                .When(x => !string.IsNullOrWhiteSpace(x.Name));
             RuleFor(x => x.DiscountRate);
 
             RuleFor(x => x.DiscountRate)

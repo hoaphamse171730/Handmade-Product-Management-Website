@@ -571,32 +571,32 @@ namespace HandmadeProductManagement.Services.Service
         {
             if (string.IsNullOrWhiteSpace(order.Address))
             {
-                throw new BaseException.BadRequestException(Constants.ErrorCodeInvalidAddress, Constants.ErrorMessageInvalidAddress);
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidAddress);
             }
 
             if (Regex.IsMatch(order.Address, @"[^a-zA-Z0-9\s,\.]"))
             {
-                throw new BaseException.BadRequestException(Constants.ErrorCodeInvalidAddressFormat, Constants.ErrorMessageInvalidAddressFormat);
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidAddressFormat);
             }
 
             if (string.IsNullOrWhiteSpace(order.CustomerName))
             {
-                throw new BaseException.BadRequestException(Constants.ErrorCodeInvalidCustomerName, Constants.ErrorMessageInvalidCustomerName);
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidCustomerName);
             }
 
             if (Regex.IsMatch(order.CustomerName, @"[^a-zA-Z\s]"))
             {
-                throw new BaseException.BadRequestException(Constants.ErrorCodeInvalidCustomerNameFormat, Constants.ErrorMessageInvalidCustomerNameFormat);
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidCustomerNameFormat);
             }
 
             if (string.IsNullOrWhiteSpace(order.Phone))
             {
-                throw new BaseException.BadRequestException(Constants.ErrorCodeInvalidPhone, Constants.ErrorMessageInvalidPhone);
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidPhone);
             }
 
             if (!Regex.IsMatch(order.Phone, @"^0\d{9,10}$"))
             {
-                throw new BaseException.BadRequestException(Constants.ErrorCodeInvalidPhoneFormat, Constants.ErrorMessageInvalidPhoneFormat);
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidPhoneFormat);
             }
         }
 

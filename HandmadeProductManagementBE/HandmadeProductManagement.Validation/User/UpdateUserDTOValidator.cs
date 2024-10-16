@@ -8,15 +8,15 @@ namespace HandmadeProductManagement.Validation.User
         public UpdateUserDTOValidator() {
             RuleFor(x => x.Email)
                 .EmailAddress().WithMessage("Invalid email format")
-                .When(x => !string.IsNullOrEmpty(x.Email));
-
+                .When(x => !string.IsNullOrWhiteSpace(x.Email));
+                
             RuleFor(x => x.PhoneNumber)
                 .Matches(@"^\d{10}$").WithMessage("Invalid phone number")
-                .When(x => !string.IsNullOrEmpty(x.PhoneNumber));
+                .When(x => !string.IsNullOrWhiteSpace(x.PhoneNumber));
 
             RuleFor(x => x.UserName)
                 .Matches(CustomRegex.UsernameRegex).WithMessage("Invalid Username")
-                .When(x => !string.IsNullOrEmpty(x.UserName));
+                .When(x => !string.IsNullOrWhiteSpace(x.UserName));
 
 
         }

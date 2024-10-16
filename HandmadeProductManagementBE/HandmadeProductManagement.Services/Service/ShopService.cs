@@ -229,7 +229,7 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<decimal> CalculateShopAverageRatingAsync(string shopId)
         {
-            if (string.IsNullOrEmpty(shopId))
+            if (string.IsNullOrWhiteSpace(shopId))
             {
                 throw new BaseException.BadRequestException("invalid_shop_id", "Shop ID cannot be null or empty.");
             }
