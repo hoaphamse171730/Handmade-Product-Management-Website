@@ -3,6 +3,7 @@ using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Common;
+using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.Core.Utils;
 using HandmadeProductManagement.ModelViews.OrderDetailModelViews;
 using HandmadeProductManagement.ModelViews.OrderModelViews;
@@ -47,7 +48,7 @@ namespace HandmadeProductManagement.Services.Service
             var cartItems = await _cartItemService.GetCartItemsByUserIdForOrderCreation(userId);
             if (cartItems.Count == 0)
             {
-                throw new BaseException.NotFoundException(Constants.ErrorCodeEmptyCart, Constants.ErrorMessageEmptyCart);
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageEmptyCart);
             }
 
             var promotionRepository = _unitOfWork.GetRepository<Promotion>();
@@ -63,11 +64,16 @@ namespace HandmadeProductManagement.Services.Service
             foreach (var cartItem in cartItems)
             {
                 var productItem = await productItemRepository.Entities
-                    .FirstOrDefaultAsync(p => p.Id.ToString() == cartItem.ProductItemId && (!p.DeletedTime.HasValue || p.DeletedBy == null)) ?? throw new BaseException.NotFoundException(Constants.ErrorCodeProductItemNotFound, Constants.ErrorMessageProductItemNotFound);
+                    .FirstOrDefaultAsync(p => p.Id.ToString() == cartItem.ProductItemId && (!p.DeletedTime.HasValue || p.DeletedBy == null))
+                    ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageProductItemNotFound);
+
                 var product = await productRepository.Entities
-                    .FirstOrDefaultAsync(p => p.Id == productItem.ProductId && (!p.DeletedTime.HasValue || p.DeletedBy == null)) ?? throw new BaseException.NotFoundException(Constants.ErrorCodeProductNotFound, Constants.ErrorMessageProductNotFound);
+                    .FirstOrDefaultAsync(p => p.Id == productItem.ProductId && (!p.DeletedTime.HasValue || p.DeletedBy == null))
+                    ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageProductNotFound);
+
                 var category = await categoryRepository.Entities
-                    .FirstOrDefaultAsync(c => c.Id == product.CategoryId && (!c.DeletedTime.HasValue || c.DeletedBy == null))?? throw new BaseException.NotFoundException(Constants.ErrorCodeCategoryNotFound, Constants.ErrorMessageCategoryNotFound);
+                    .FirstOrDefaultAsync(c => c.Id == product.CategoryId && (!c.DeletedTime.HasValue || c.DeletedBy == null))
+                    ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageCategoryNotFound);
 
                 decimal finalPrice = productItem.Price;
                 if (category != null && !string.IsNullOrWhiteSpace(category.PromotionId))
@@ -125,7 +131,7 @@ namespace HandmadeProductManagement.Services.Service
 
                         if (productItem.QuantityInStock - cartItem.ProductQuantity < 0)
                         {
-                            throw new BaseException.BadRequestException(Constants.ErrorCodeInsufficientStock, Constants.ErrorMessageInsufficientStock);
+                            throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInsufficientStock);
                         }
 
                         // Update quantity in stock
@@ -163,10 +169,10 @@ namespace HandmadeProductManagement.Services.Service
                 _unitOfWork.CommitTransaction();
                 return true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 _unitOfWork.RollBack();
-                throw;
+                throw new BaseException.CoreException(StatusCodeHelper.ServerError.ToString(), ex.Message);
             }
         }
 
@@ -205,17 +211,18 @@ namespace HandmadeProductManagement.Services.Service
         {
             if (string.IsNullOrWhiteSpace(orderId))
             {
-                throw new BaseException.BadRequestException(Constants.ErrorCodeEmptyOrderId, Constants.ErrorMessageEmptyOrderId);
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageEmptyOrderId);
             }
 
             if (!Guid.TryParse(orderId, out _))
             {
-                throw new BaseException.BadRequestException(Constants.ErrorCodeInvalidOrderIdFormat, Constants.ErrorMessageInvalidOrderIdFormat);
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidOrderIdFormat);
             }
 
             var repository = _unitOfWork.GetRepository<Order>();
             var order = await repository.Entities
-                .FirstOrDefaultAsync(o => o.Id == orderId && !o.DeletedTime.HasValue) ?? throw new BaseException.NotFoundException(Constants.ErrorCodeOrderNotFound, Constants.ErrorMessageOrderNotFound);
+                .FirstOrDefaultAsync(o => o.Id == orderId && !o.DeletedTime.HasValue)
+                ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageOrderNotFound);
 
             // If user is not an admin, apply buyer/seller checks
             if (role != Constants.RoleAdmin)
@@ -229,28 +236,28 @@ namespace HandmadeProductManagement.Services.Service
 
                     if (!isSellerOrder)
                     {
-                        throw new BaseException.ForbiddenException(Constants.ErrorCodeForbiddenAccess, Constants.ErrorMessageForbiddenAccess);
+                        throw new BaseException.ForbiddenException(StatusCodeHelper.ForbiddenAcess.ToString(), Constants.ErrorMessageForbiddenAccess);
                     }
                 }
             }
 
             // Retrieve order details with product config and variation option value
             var orderDetails = await _unitOfWork.GetRepository<OrderDetail>().Entities
-                    .Where(od => od.OrderId == orderId && !od.DeletedTime.HasValue)
-                    .Select(od => new OrderInDetailDto
-                    {
-                        ProductId = od.ProductItem.Product.Id,
-                        ProductName = od.ProductItem.Product.Name,
-                        ProductQuantity = od.ProductQuantity,
-                        DiscountPrice = od.DiscountPrice,
+                .Where(od => od.OrderId == orderId && !od.DeletedTime.HasValue)
+                .Select(od => new OrderInDetailDto
+                {
+                    ProductId = od.ProductItem.Product.Id,
+                    ProductName = od.ProductItem.Product.Name,
+                    ProductQuantity = od.ProductQuantity,
+                    DiscountPrice = od.DiscountPrice,
 
-                        // Query ProductConfiguration to get variation options of the product
-                        VariationOptionValues = _unitOfWork.GetRepository<ProductConfiguration>().Entities
-                            .Where(pc => pc.ProductItemId == od.ProductItemId)
-                            .Select(pc => pc.VariationOption.Value)
-                            .ToList()
-                    })
-                    .ToListAsync();
+                    // Query ProductConfiguration to get variation options of the product
+                    VariationOptionValues = _unitOfWork.GetRepository<ProductConfiguration>().Entities
+                        .Where(pc => pc.ProductItemId == od.ProductItemId)
+                        .Select(pc => pc.VariationOption.Value)
+                        .ToList()
+                })
+                .ToListAsync();
 
             return new OrderWithDetailDto
             {
@@ -272,28 +279,29 @@ namespace HandmadeProductManagement.Services.Service
         {
             if (string.IsNullOrWhiteSpace(orderId) || !Guid.TryParse(orderId, out _))
             {
-                throw new BaseException.BadRequestException(Constants.ErrorCodeInvalidOrderId, Constants.ErrorMessageInvalidOrderIdFormat);
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidOrderIdFormat);
             }
 
             var repository = _unitOfWork.GetRepository<Order>();
             var existingOrder = await repository.Entities
-                .FirstOrDefaultAsync(o => o.Id == orderId && !o.DeletedTime.HasValue) ?? throw new BaseException.NotFoundException(Constants.ErrorCodeOrderNotFound, Constants.ErrorMessageOrderNotFound);
-            
+                .FirstOrDefaultAsync(o => o.Id == orderId && !o.DeletedTime.HasValue)
+                ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageOrderNotFound);
+
             if (existingOrder.CreatedBy != userId)
             {
-                throw new BaseException.ForbiddenException(Constants.ErrorCodeForbidden, Constants.ErrorMessageForbiddenAccess);
+                throw new BaseException.ForbiddenException(StatusCodeHelper.ForbiddenAcess.ToString(), Constants.ErrorMessageForbiddenAccess);
             }
 
             if (existingOrder.Status != Constants.OrderStatusPending && existingOrder.Status != Constants.OrderStatusAwaitingPayment)
             {
-                throw new BaseException.BadRequestException(Constants.ErrorCodeInvalidOrderStatus, Constants.ErrorMessageInvalidOrderStatus);
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidOrderStatus);
             }
 
             if (!string.IsNullOrWhiteSpace(order.Address))
             {
                 if (Regex.IsMatch(order.Address, @"[^a-zA-Z0-9\s,\.]"))
                 {
-                    throw new BaseException.BadRequestException(Constants.ErrorCodeInvalidAddressFormat, Constants.ErrorMessageInvalidAddressFormat);
+                    throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidAddressFormat);
                 }
                 existingOrder.Address = order.Address;
             }
@@ -302,7 +310,7 @@ namespace HandmadeProductManagement.Services.Service
             {
                 if (Regex.IsMatch(order.CustomerName, @"[^a-zA-Z\s]"))
                 {
-                    throw new BaseException.BadRequestException(Constants.ErrorCodeInvalidCustomerNameFormat, Constants.ErrorMessageInvalidCustomerNameFormat);
+                    throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidCustomerNameFormat);
                 }
                 existingOrder.CustomerName = order.CustomerName;
             }
@@ -311,7 +319,7 @@ namespace HandmadeProductManagement.Services.Service
             {
                 if (!Regex.IsMatch(order.Phone, @"^0\d{9,10}$"))
                 {
-                    throw new BaseException.BadRequestException(Constants.ErrorCodeInvalidPhoneFormat, Constants.ErrorMessageInvalidPhoneFormat);
+                    throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidPhoneFormat);
                 }
                 existingOrder.Phone = order.Phone;
             }
@@ -338,7 +346,7 @@ namespace HandmadeProductManagement.Services.Service
 
             if (!userExists)
             {
-                throw new BaseException.NotFoundException(Constants.ErrorCodeUserNotFound, Constants.ErrorMessageUserNotFound);
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageUserNotFound);
             }
 
             var repository = _unitOfWork.GetRepository<Order>();
@@ -369,7 +377,7 @@ namespace HandmadeProductManagement.Services.Service
 
             if (!userExists)
             {
-                throw new BaseException.NotFoundException(Constants.ErrorCodeUserNotFound, Constants.ErrorMessageUserNotFound);
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageUserNotFound);
             }
 
             var repository = _unitOfWork.GetRepository<Order>();
@@ -397,51 +405,52 @@ namespace HandmadeProductManagement.Services.Service
         {
             if (string.IsNullOrWhiteSpace(updateStatusOrderDto.OrderId))
             {
-                throw new BaseException.BadRequestException(Constants.ErrorCodeEmptyOrderId, Constants.ErrorMessageEmptyOrderId);
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageEmptyOrderId);
             }
 
             if (!Guid.TryParse(updateStatusOrderDto.OrderId, out _))
             {
-                throw new BaseException.BadRequestException(Constants.ErrorCodeInvalidOrderIdFormat, Constants.ErrorMessageInvalidOrderIdFormat);
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidOrderIdFormat);
             }
 
             if (string.IsNullOrWhiteSpace(updateStatusOrderDto.Status))
             {
-                throw new BaseException.BadRequestException(Constants.ErrorCodeInvalidStatus, Constants.ErrorMessageInvalidStatus);
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidStatus);
             }
 
             if (updateStatusOrderDto.Status != Constants.OrderStatusCanceled && updateStatusOrderDto.CancelReasonId != null)
             {
-                throw new BaseException.BadRequestException(Constants.ErrorCodeInvalidInput, $"CancelReasonId must be null when status is not {Constants.OrderStatusCanceled}");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), $"CancelReasonId must be null when status is not {Constants.OrderStatusCanceled}");
             }
 
             var repository = _unitOfWork.GetRepository<Order>();
             var existingOrder = await repository.Entities
-                .FirstOrDefaultAsync(o => o.Id == updateStatusOrderDto.OrderId && !o.DeletedTime.HasValue) ?? throw new BaseException.NotFoundException(Constants.ErrorCodeOrderNotFound, Constants.ErrorMessageOrderNotFound);
+                .FirstOrDefaultAsync(o => o.Id == updateStatusOrderDto.OrderId && !o.DeletedTime.HasValue)
+                ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageOrderNotFound);
 
             if (existingOrder.Status == Constants.OrderStatusClosed)
             {
-                throw new BaseException.ErrorException(400, Constants.ErrorCodeOrderClosed, Constants.ErrorMessageOrderClosed);
+                throw new BaseException.ErrorException(400, StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageOrderClosed);
             }
 
             // Validate Status Flow
             var validStatusTransitions = new Dictionary<string, List<string>>
-            {
-                { Constants.OrderStatusPending, new List<string> { Constants.OrderStatusCanceled, Constants.OrderStatusAwaitingPayment } },
-                { Constants.OrderStatusAwaitingPayment, new List<string> { Constants.OrderStatusCanceled, Constants.OrderStatusProcessing } },
-                { Constants.OrderStatusProcessing, new List<string> { Constants.OrderStatusDelivering } },
-                { Constants.OrderStatusDelivering, new List<string> { Constants.OrderStatusShipped, Constants.OrderStatusDeliveryFailed } },
-                { Constants.OrderStatusDeliveryFailed, new List<string> { Constants.OrderStatusOnHold } },
-                { Constants.OrderStatusOnHold, new List<string> { Constants.OrderStatusDeliveringRetry, Constants.OrderStatusRefundRequested } },
-                { Constants.OrderStatusRefundRequested, new List<string> { Constants.OrderStatusRefundDenied, Constants.OrderStatusRefundApprove } },
-                { Constants.OrderStatusRefundApprove, new List<string> { Constants.OrderStatusReturning } },
-                { Constants.OrderStatusReturning, new List<string> { Constants.OrderStatusReturnFailed, Constants.OrderStatusReturned } },
-                { Constants.OrderStatusReturnFailed, new List<string> { Constants.OrderStatusOnHold } },
-                { Constants.OrderStatusReturned, new List<string> { Constants.OrderStatusRefunded } },
-                { Constants.OrderStatusRefunded, new List<string> { Constants.OrderStatusClosed } },
-                { Constants.OrderStatusCanceled, new List<string> { Constants.OrderStatusClosed } },
-                { Constants.OrderStatusDeliveringRetry, new List<string> { Constants.OrderStatusDelivering } }
-            };
+    {
+        { Constants.OrderStatusPending, new List<string> { Constants.OrderStatusCanceled, Constants.OrderStatusAwaitingPayment } },
+        { Constants.OrderStatusAwaitingPayment, new List<string> { Constants.OrderStatusCanceled, Constants.OrderStatusProcessing } },
+        { Constants.OrderStatusProcessing, new List<string> { Constants.OrderStatusDelivering } },
+        { Constants.OrderStatusDelivering, new List<string> { Constants.OrderStatusShipped, Constants.OrderStatusDeliveryFailed } },
+        { Constants.OrderStatusDeliveryFailed, new List<string> { Constants.OrderStatusOnHold } },
+        { Constants.OrderStatusOnHold, new List<string> { Constants.OrderStatusDeliveringRetry, Constants.OrderStatusRefundRequested } },
+        { Constants.OrderStatusRefundRequested, new List<string> { Constants.OrderStatusRefundDenied, Constants.OrderStatusRefundApprove } },
+        { Constants.OrderStatusRefundApprove, new List<string> { Constants.OrderStatusReturning } },
+        { Constants.OrderStatusReturning, new List<string> { Constants.OrderStatusReturnFailed, Constants.OrderStatusReturned } },
+        { Constants.OrderStatusReturnFailed, new List<string> { Constants.OrderStatusOnHold } },
+        { Constants.OrderStatusReturned, new List<string> { Constants.OrderStatusRefunded } },
+        { Constants.OrderStatusRefunded, new List<string> { Constants.OrderStatusClosed } },
+        { Constants.OrderStatusCanceled, new List<string> { Constants.OrderStatusClosed } },
+        { Constants.OrderStatusDeliveringRetry, new List<string> { Constants.OrderStatusDelivering } }
+    };
 
             var allValidStatuses = validStatusTransitions.Keys
                 .Concat(validStatusTransitions.Values.SelectMany(v => v))
@@ -450,14 +459,13 @@ namespace HandmadeProductManagement.Services.Service
 
             if (!allValidStatuses.Contains(updateStatusOrderDto.Status))
             {
-                throw new BaseException.BadRequestException(Constants.ErrorCodeInvalidStatus, $"Status {updateStatusOrderDto.Status} is not a valid status.");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), $"Status {updateStatusOrderDto.Status} is not a valid status.");
             }
 
             if (!(validStatusTransitions.ContainsKey(existingOrder.Status) &&
                 validStatusTransitions[existingOrder.Status].Contains(updateStatusOrderDto.Status)))
             {
-                throw new BaseException.BadRequestException(Constants.ErrorCodeInvalidStatusTransition,
-                    $"Cannot transition from {existingOrder.Status} to {updateStatusOrderDto.Status}.");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), $"Cannot transition from {existingOrder.Status} to {updateStatusOrderDto.Status}.");
             }
 
             _unitOfWork.BeginTransaction();
@@ -469,11 +477,12 @@ namespace HandmadeProductManagement.Services.Service
                 {
                     if (string.IsNullOrWhiteSpace(updateStatusOrderDto.CancelReasonId))
                     {
-                        throw new BaseException.BadRequestException(Constants.ErrorCodeValidationFailed, "CancelReasonId is required when updating status to {Canceled}.");
+                        throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "CancelReasonId is required when updating status to {Canceled}.");
                     }
 
-                    var cancelReason = await _unitOfWork.GetRepository<CancelReason>().GetByIdAsync(updateStatusOrderDto.CancelReasonId) ?? throw new BaseException.NotFoundException(Constants.ErrorCodeCancelReasonNotFound, $"Cancel Reason not found. {existingOrder.CancelReasonId}");
-                    
+                    var cancelReason = await _unitOfWork.GetRepository<CancelReason>().GetByIdAsync(updateStatusOrderDto.CancelReasonId)
+                        ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), $"Cancel Reason not found. {existingOrder.CancelReasonId}");
+
                     existingOrder.CancelReasonId = updateStatusOrderDto.CancelReasonId;
 
                     // Retrieve the order details to update product stock
@@ -488,8 +497,9 @@ namespace HandmadeProductManagement.Services.Service
                     foreach (var detail in orderDetails)
                     {
                         var productItem = await productItemRepository.Entities
-                            .FirstOrDefaultAsync(p => p.Id == detail.ProductItemId && !p.DeletedTime.HasValue) ?? throw new BaseException.NotFoundException(Constants.ErrorCodeProductItemNotFound, $"Product Item {detail.ProductItemId} not found.");
-                        
+                            .FirstOrDefaultAsync(p => p.Id == detail.ProductItemId && !p.DeletedTime.HasValue)
+                            ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), $"Product Item {detail.ProductItemId} not found.");
+
                         productItem.QuantityInStock += detail.ProductQuantity;
 
                         productItemRepository.Update(productItem);
@@ -531,9 +541,12 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<IList<OrderResponseModel>> GetOrdersBySellerUserIdAsync(Guid userId)
         {
+            // Validate if the shop exists for the given seller user ID
             var shop = await _unitOfWork.GetRepository<Shop>().Entities
-                    .FirstOrDefaultAsync(s => s.UserId == userId) ?? throw new BaseException.NotFoundException(Constants.ErrorCodeShopNotFound, Constants.ErrorMessageShopNotFound);
+                .FirstOrDefaultAsync(s => s.UserId == userId)
+                ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageShopNotFound);
 
+            // Fetch orders associated with the products from the seller's shop
             var orders = await _unitOfWork.GetRepository<Order>().Entities
                 .Where(o => o.OrderDetails.Any(od => od.ProductItem.Product.Shop.UserId == userId && !od.ProductItem.Product.Shop.DeletedTime.HasValue))
                 .OrderByDescending(o => o.CreatedTime) // Sort by CreatedTime in descending order

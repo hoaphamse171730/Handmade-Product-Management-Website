@@ -61,39 +61,6 @@ public static class Constants
 
     #endregion
 
-    #region Error Codes
-
-    public const string ErrorCodeEmptyOrderId = "empty_order_id";
-    public const string ErrorCodeInvalidOrderIdFormat = "invalid_order_id_format";
-    public const string ErrorCodeOrderNotFound = "order_not_found";
-    public const string ErrorCodeForbiddenAccess = "forbidden";
-    public const string ErrorCodeOrderDetailsNotFound = "order_details_not_found";
-    public const string ErrorCodeEmptyCart = "empty_cart";
-    public const string ErrorCodeProductItemNotFound = "product_item_not_found";
-    public const string ErrorCodeProductNotFound = "product_not_found";
-    public const string ErrorCodeInsufficientStock = "insufficient_stock";
-    public const string ErrorCodeInvalidOrderId = "invalid_order_id";
-    public const string ErrorCodeForbidden = "forbidden";
-    public const string ErrorCodeInvalidOrderStatus = "invalid_order_status";
-    public const string ErrorCodeInvalidAddressFormat = "invalid_address_format";
-    public const string ErrorCodeInvalidCustomerNameFormat = "invalid_customer_name_format";
-    public const string ErrorCodeInvalidPhoneFormat = "invalid_phone_format";
-    public const string ErrorCodeUserNotFound = "user_not_found";
-    public const string ErrorCodeNoOrdersFound = "no_orders_found";
-    public const string ErrorCodeInvalidStatus = "invalid_status";
-    public const string ErrorCodeInvalidInput = "invalid_input";
-    public const string ErrorCodeOrderClosed = "order_closed";
-    public const string ErrorCodeInvalidStatusTransition = "invalid_status_transition";
-    public const string ErrorCodeValidationFailed = "validation_failed";
-    public const string ErrorCodeCancelReasonNotFound = "cancel_reason_not_found";
-    public const string ErrorCodeShopNotFound = "shop_not_found";
-    public const string ErrorCodeInvalidAddress = "invalid_address";
-    public const string ErrorCodeInvalidCustomerName = "invalid_customer_name";
-    public const string ErrorCodeInvalidPhone = "invalid_phone";
-    public const string ErrorCodeCategoryNotFound = "category_not_found";
-
-    #endregion
-
     #region Error Messages
 
     public const string ForbiddenAccessMessage = "You have no permission to access this order.";
@@ -124,6 +91,29 @@ public static class Constants
     public const string ErrorMessageInvalidCustomerName = "Customer name cannot be null or empty.";
     public const string ErrorMessageInvalidPhone = "Phone number cannot be null or empty.";
     public const string ErrorMessageCategoryNotFound = "Category not found.";
+    public const string ErrorMessageMissingLoginIdentifier = "At least one of Phone Number, Email, or Username is required for login.";
+    public const string ErrorMessageInvalidEmailFormat = "Invalid Email format.";
+    public const string ErrorMessageInvalidUsernameFormat = "Invalid Username format. Special characters are not allowed.";
+    public const string ErrorMessageAccountDisabled = "This account has been disabled.";
+    public const string ErrorMessageUnauthorized = "Incorrect user login credentials";
+    public const string ErrorMessageIncorrectPassword = "Incorrect password";
+    public const string ErrorMessageUsernameTaken = "Username is already taken.";
+    public const string ErrorMessageEmailTaken = "Email is already taken.";
+    public const string ErrorMessagePhoneTaken = "Phone number is already taken.";
+    public const string ErrorMessageUserCreationFailed = "User creation failed: ";
+    public const string ErrorMessageInvalidFullnameFormat = "Full Name contains invalid characters.";
+    public const string ErrorMessageWeakPassword = "Password is too weak. It must be at least 8 characters long, contain uppercase, lowercase, a special character, and a digit.";
+    public const string ErrorMessageInvalidEmail = "Email is invalid or not confirmed.";
+    public const string MessagePasswordResetLinkSent = "Password reset link has been sent to your email.";
+    public const string MessagePasswordResetSuccess = "Password has been reset successfully.";
+    public const string ErrorMessageResetPasswordError = "Error resetting the password.";
+    public const string MessageEmailConfirmedSuccess = "Email confirmed successfully.";
+    public const string ErrorMessageEmailConfirmationError = "Error confirming the email";
+    public const string ErrorMessageInvalidToken = "Invalid token.";
+    public const string ErrorMessageMissingClaims = "Token is missing necessary claims.";
+    public const string UserNotFoundErrorMessage = "User not found.";
+    public const string RoleAssignmentFailedErrorMessage = "Failed to add role to user";
+    public const string ErrorMessageRoleAssignmentFailed = "Failed to assign role to the user";
 
     #endregion
 
