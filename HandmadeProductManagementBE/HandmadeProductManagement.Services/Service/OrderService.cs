@@ -485,7 +485,7 @@ namespace HandmadeProductManagement.Services.Service
                 {
                     updateStatusOrderDto.Status = "Processing";
                 }
-
+            }
                 // Validate Status Flow
                 var validStatusTransitions = new Dictionary<string, List<string>>
             {
@@ -600,41 +600,13 @@ namespace HandmadeProductManagement.Services.Service
                     throw;
                 }
             }
-            public async Task<IList<OrderResponseModel>> GetOrdersBySellerUserIdAsync(Guid userId)
-            {
-                var orderRepository = _unitOfWork.GetRepository<Order>();
-                var orders = await orderRepository.Entities
-                    .Where(o => o.OrderDetails.Any(od => od.ProductItem.Product.Shop.UserId == userId && !od.ProductItem.Product.Shop.DeletedTime.HasValue))
-                    .OrderByDescending(o => o.CreatedTime) // Sort by CreatedTime in descending order
-                    .Select(order => new OrderResponseModel
-                    {
-                        Id = order.Id,
-                        TotalPrice = order.TotalPrice,
-                        OrderDate = order.OrderDate,
-                        Status = order.Status,
-                        UserId = order.UserId,
-                        Address = order.Address,
-                        CustomerName = order.CustomerName,
-                        Phone = order.Phone,
-                        Note = order.Note,
-                        CancelReasonId = order.CancelReasonId
-                    }).ToListAsync();
-
-                if (!orders.Any())
-                {
-                    throw new BaseException.NotFoundException("not_found", "There is no order.");
-                }
-
-                return orders;
-            }
-            private void ValidateOrder(CreateOrderDto order)
-            {
-                if (string.IsNullOrWhiteSpace(order.Address))
-                {
-                    throw new BaseException.BadRequestException("invalid_address", "Address cannot be null or empty.");
-                }
-
-                if (Regex.IsMatch(order.Address, @"[^a-zA-Z0-9\s,\.]"))
+        public async Task<IList<OrderResponseModel>> GetOrdersBySellerUserIdAsync(Guid userId)
+        {
+            var orderRepository = _unitOfWork.GetRepository<Order>();
+            var orders = await orderRepository.Entities
+                .Where(o => o.OrderDetails.Any(od => od.ProductItem.Product.Shop.UserId == userId && !od.ProductItem.Product.Shop.DeletedTime.HasValue))
+                .OrderByDescending(o => o.CreatedTime) // Sort by CreatedTime in descending order
+                .Select(order => new OrderResponseModel
                 {
                     throw new BaseException.BadRequestException("invalid_address_format", "Address cannot contain special characters except commas and periods.");
                 }
@@ -661,5 +633,38 @@ namespace HandmadeProductManagement.Services.Service
             }
 
         }
+        private void ValidateOrder(CreateOrderDto order)
+        {
+            if (string.IsNullOrWhiteSpace(order.Address))
+            {
+                throw new BaseException.BadRequestException("invalid_address", "Address cannot be null or empty.");
+            }
+
+            if (Regex.IsMatch(order.Address, @"[^a-zA-Z0-9\s,\.]"))
+            {
+                throw new BaseException.BadRequestException("invalid_address_format", "Address cannot contain special characters except commas and periods.");
+            }
+
+            if (string.IsNullOrWhiteSpace(order.CustomerName))
+            {
+                throw new BaseException.BadRequestException("invalid_customer_name", "Customer name cannot be null or empty.");
+            }
+
+            if (Regex.IsMatch(order.CustomerName, @"[^a-zA-Z\s]"))
+            {
+                throw new BaseException.BadRequestException("invalid_customer_name_format", "Customer name can only contain letters and spaces.");
+            }
+
+            if (string.IsNullOrWhiteSpace(order.Phone))
+            {
+                throw new BaseException.BadRequestException("invalid_phone", "Phone number cannot be null or empty.");
+            }
+
+            if (!Regex.IsMatch(order.Phone, @"^0\d{9,10}$"))
+            {
+                throw new BaseException.BadRequestException("invalid_phone_format", "Phone number must be numeric, start with 0, and be 10 or 11 digits long.");
+            }
+        }
     }
+}
 }
