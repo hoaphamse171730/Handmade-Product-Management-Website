@@ -1,11 +1,4 @@
-﻿using HandmadeProductManagement.Contract.Repositories.Entity;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace HandmadeProductManagement.ModelViews.CategoryModelViews
+﻿namespace HandmadeProductManagement.ModelViews.CategoryModelViews
 {
     public class CategoryDto
     {

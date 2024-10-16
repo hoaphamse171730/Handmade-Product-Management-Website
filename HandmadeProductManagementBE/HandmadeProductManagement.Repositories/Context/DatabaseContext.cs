@@ -252,11 +252,14 @@ namespace HandmadeProductManagement.Repositories.Context
                 entity.Property(e => e.OrderId)
                       .IsRequired();
                 entity.Property(e => e.ExpirationDate)
-                      .IsRequired();
+                      .IsRequired(false);
                 entity.Property(e => e.TotalAmount)
                       .IsRequired()
                       .HasColumnType("decimal(18, 2)");
                 entity.Property(e => e.Status)
+                      .IsRequired()
+                      .HasMaxLength(20);
+                entity.Property(e => e.Method)
                       .IsRequired()
                       .HasMaxLength(20);
                 entity.HasOne(e => e.Order)

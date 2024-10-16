@@ -19,18 +19,21 @@ namespace HandmadeProductManagement.Services.Service
         private readonly IOrderDetailService _orderDetailService;
         private readonly ICartItemService _cartItemService;
         private readonly IProductService _productService;
+        private readonly IPaymentService _paymentService;
 
         public OrderService(IUnitOfWork unitOfWork, 
             IStatusChangeService statusChangeService, 
             IOrderDetailService orderDetailService,
             ICartItemService cartItemService,
-            IProductService productService)
+            IProductService productService,
+            IPaymentService paymentService)
         {
             _unitOfWork = unitOfWork;
             _statusChangeService = statusChangeService;
             _orderDetailService = orderDetailService;
             _cartItemService = cartItemService;
             _productService = productService;
+            _paymentService = paymentService;
         }
 
         public async Task<bool> CreateOrderAsync(string userId, CreateOrderDto createOrder)
@@ -180,7 +183,7 @@ namespace HandmadeProductManagement.Services.Service
                 throw;
             }
         }
-        public async Task<PaginatedList<OrderResponseDetailForListModel>> GetOrdersByPageAsync(int pageNumber, int pageSize)
+        public async Task<PaginatedList<OrderResponseModel>> GetOrdersByPageAsync(int pageNumber, int pageSize)
         {
             var repository = _unitOfWork.GetRepository<Order>();
             var orderDetailRepository = _unitOfWork.GetRepository<OrderDetail>();
@@ -188,10 +191,12 @@ namespace HandmadeProductManagement.Services.Service
             var query = repository.Entities.Where(order => !order.DeletedTime.HasValue);
 
             var totalItems = await query.CountAsync();
+
             var orders = await query
+                .OrderByDescending(order => order.CreatedTime) // Sort by the most recent orders
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
-                .Select(order => new OrderResponseDetailForListModel
+                .Select(order => new OrderResponseModel
                 {
                     Id = order.Id,
                     TotalPrice = order.TotalPrice,
@@ -202,17 +207,7 @@ namespace HandmadeProductManagement.Services.Service
                     CustomerName = order.CustomerName,
                     Phone = order.Phone,
                     Note = order.Note,
-                    CancelReasonId = order.CancelReasonId,
-                    OrderDetails = orderDetailRepository.Entities
-                        .Where(od => od.OrderId == order.Id && !od.DeletedTime.HasValue)
-                        .Select(od => new OrderDetailResponseModel
-                        {
-                            Id = od.Id,
-                            ProductItemId = od.ProductItemId,
-                            OrderId = od.OrderId,
-                            ProductQuantity = od.ProductQuantity,
-                            Price = od.DiscountPrice,
-                        }).ToList()
+                    CancelReasonId = order.CancelReasonId
                 })
                 .ToListAsync();
 
@@ -221,8 +216,9 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.NotFoundException("not_found", "There is no order.");
             }
 
-            return new PaginatedList<OrderResponseDetailForListModel>(orders, totalItems, pageNumber, pageSize);
+            return new PaginatedList<OrderResponseModel>(orders, totalItems, pageNumber, pageSize);
         }
+
         public async Task<OrderWithDetailDto> GetOrderByIdAsync(string orderId, string userId, string role)
         {
             if (string.IsNullOrWhiteSpace(orderId))
@@ -299,7 +295,6 @@ namespace HandmadeProductManagement.Services.Service
                 OrderDetails = orderDetails
             };
         }
-
         public async Task<bool> UpdateOrderAsync(string userId, string orderId, UpdateOrderDto order)
         {
             if (string.IsNullOrWhiteSpace(orderId) || !Guid.TryParse(orderId, out _))
@@ -377,8 +372,10 @@ namespace HandmadeProductManagement.Services.Service
             }
 
             var repository = _unitOfWork.GetRepository<Order>();
+
             var orders = await repository.Entities
                 .Where(o => o.UserId == userId && !o.DeletedTime.HasValue)
+                .OrderByDescending(o => o.CreatedTime) // Sort orders by CreatedTime in descending order
                 .Select(order => new OrderByUserDto
                 {
                     Id = order.Id,
@@ -413,6 +410,7 @@ namespace HandmadeProductManagement.Services.Service
             var repository = _unitOfWork.GetRepository<Order>();
             var orders = await repository.Entities
                 .Where(o => o.UserId == userId && !o.DeletedTime.HasValue)
+                .OrderByDescending(o => o.CreatedTime) // Sort orders by CreatedTime in descending order
                 .Select(order => new OrderResponseModel
                 {
                     Id = order.Id,
@@ -468,6 +466,15 @@ namespace HandmadeProductManagement.Services.Service
             if (existingOrder.Status == "Closed")
             {
                 throw new BaseException.ErrorException(400, "order_closed", "Order was closed");
+            }
+
+            if (updateStatusOrderDto.Status == "Shipped")
+            {
+                var payment = await _paymentService.GetPaymentByOrderIdAsync(existingOrder.Id);
+                if (payment != null && payment.Method == "Offline")
+                {
+                    await _paymentService.UpdatePaymentStatusAsync(payment.Id, "Completed", userId);
+                }
             }
 
             // Validate Status Flow
@@ -584,12 +591,12 @@ namespace HandmadeProductManagement.Services.Service
                 throw;
             }
         }
-
-        public async Task<IList<OrderResponseModel>> GetOrdersBySellerUserIdAsync(Guid userId)
+        public async Task<IList<OrderResponseDetailModel>> GetOrdersBySellerUserIdAsync(Guid userId)
         {
             var orderRepository = _unitOfWork.GetRepository<Order>();
             var orders = await orderRepository.Entities
                 .Where(o => o.OrderDetails.Any(od => od.ProductItem.Product.Shop.UserId == userId && !od.ProductItem.Product.Shop.DeletedTime.HasValue))
+                .OrderByDescending(o => o.CreatedTime) // Sort by CreatedTime in descending order
                 .Select(order => new OrderResponseModel
                 {
                     Id = order.Id,
