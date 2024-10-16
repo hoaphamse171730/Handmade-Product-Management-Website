@@ -23,6 +23,8 @@ namespace HandmadeProductManagement.Contract.Services.Interface
         Task<IList<NotificationModel>> GetNewOrderNotificationList(string Id);
         Task<IList<NotificationModel>> GetNewStatusChangeNotificationList(string Id);
         Task<IList<NotificationModel>> GetNewReplyNotificationList(string Id);
+
+        Task<IList<NotificationModel>> NotificationForPaymentExpiration(string Id);
     }
 }
 
