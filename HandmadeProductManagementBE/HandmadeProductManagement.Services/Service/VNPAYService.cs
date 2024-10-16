@@ -108,22 +108,55 @@ namespace HandmadeProductManagement.Services.Service
             var vnp_SecureHash = HmacSHA512(vnp_HashSecret, hashData.ToString());
             queryUrl += "&vnp_SecureHash=" + vnp_SecureHash;
 
+        
+
+            var existedPayment = await _unitOfWork.GetRepository<Payment>().Entities
+                .Where(p => p.OrderId == orderId).FirstOrDefaultAsync();
+
+            if(existedPayment != null)
+            {
+                if(existedPayment.ExpirationDate < now) {
+                    throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Payment Expired");
+                }
+                
+                existedPayment.Status = "Processing";
+                await _unitOfWork.GetRepository<Payment>().UpdateAsync(existedPayment);
+                await _unitOfWork.SaveAsync();
+
+                order.Status = "Awaiting Payment";
+                await _unitOfWork.GetRepository<Order>().UpdateAsync(order);
+                await _unitOfWork.SaveAsync();
+                return vnp_PayUrl + "?" + queryUrl;
+            }
+
+           
+
             Payment payment = new()
             {
                 OrderId = orderId,
                 CreatedTime = now,
-                ExpirationDate = now.AddMinutes(15),
+                ExpirationDate = now.AddHours(24),
                 TotalAmount = order.TotalPrice,
-                Status = "Pending",
+                Status = "Processing",
+                Method = "VNPay_banking"
+
             };
             await _unitOfWork.GetRepository<Payment>().InsertAsync(payment);
             await _unitOfWork.SaveAsync();
+           
+
+            order.Status = "Awaiting Payment";
+            await _unitOfWork.GetRepository<Order>().UpdateAsync(order);
+            await _unitOfWork.SaveAsync();
+
             return vnp_PayUrl + "?" + queryUrl;
         }
 
         public async Task<VNPAYResponse> VNPAYPayment(VNPAYRequest request)
         {
             VNPAYResponse response = new VNPAYResponse();
+
+
 
             var fields = new Dictionary<string, string>();
 
@@ -140,6 +173,36 @@ namespace HandmadeProductManagement.Services.Service
             var transactionStatus = request.VnpTransactionStatus;
             var vnpSecureHash = request.VnpSecureHash;
             var tnxRef = request.VnpTxnRef;
+
+            var payment = await _unitOfWork.GetRepository<Payment>().Entities
+                                  .Where(p => p.OrderId == orderInfo).FirstOrDefaultAsync();
+
+            var order = await _unitOfWork.GetRepository<Order>().Entities
+              .Where(o => o.Id == orderInfo).FirstOrDefaultAsync();
+
+            if (response == null) {
+                //tao payment detail
+                PaymentDetail paymentDetail = new()
+                {
+                    PaymentId = payment.Id,
+                    Status = "Failed",
+                    Method = "Transfer",
+                    ExternalTransaction = "VNPAY",
+                    CreatedTime = DateTime.Now,
+                    CreatedBy = "VNPAY"
+                };
+                await _unitOfWork.GetRepository<PaymentDetail>().InsertAsync(paymentDetail);
+                await _unitOfWork.SaveAsync();
+
+                order.Status = "Payment Failed";
+                await _unitOfWork.GetRepository<Order>().UpdateAsync(order);
+                await _unitOfWork.SaveAsync();
+
+                response.IsSucceed = false;
+                response.Text = "Payment approve failed";
+                return response;
+            }
+
 
             if (totalPrice == null || !double.TryParse(totalPrice, out _))
             {
@@ -158,8 +221,7 @@ namespace HandmadeProductManagement.Services.Service
             //var returnUrl = $"(url trang web sau khi deploy/{orderInfo}";
             var returnUrl = vnp_ReturnUrl;//dung de test
 
-            var order = await _unitOfWork.GetRepository<Order>().Entities
-                .Where(o => o.Id == orderInfo).FirstOrDefaultAsync();
+          
 
 
             fields.Add("vnp_Amount", totalPrice ?? string.Empty);
@@ -177,16 +239,16 @@ namespace HandmadeProductManagement.Services.Service
 
 
             var signValue = HashAllFields(fields);
+            
             if (signValue.Equals(vnpSecureHash))
             {
                     if("00".Equals(request.VnpTransactionStatus)) {
-                    var payment  = await _unitOfWork.GetRepository<Payment>().Entities
-                                   .Where(p => p.OrderId == orderInfo).FirstOrDefaultAsync();
+                   
                     //tao payment detail
                     PaymentDetail paymentDetail = new()
                     {
                         PaymentId = payment.Id,
-                        Status = "Paid",
+                        Status = "Success",
                         Method = "Transfer",
                         ExternalTransaction = "VNPAY",
                         CreatedTime = DateTime.Now,
@@ -195,16 +257,40 @@ namespace HandmadeProductManagement.Services.Service
                     await _unitOfWork.GetRepository<PaymentDetail>().InsertAsync(paymentDetail);
                     await _unitOfWork.SaveAsync();
 
-                    payment.Status = "Paid";
+                    payment.Status = "Success";
                     await _unitOfWork.GetRepository<Payment>().UpdateAsync(payment);
+                    await _unitOfWork.SaveAsync();
+
+                    order.Status = "Processing";
+                    await _unitOfWork.GetRepository<Order>().UpdateAsync(order);
                     await _unitOfWork.SaveAsync();
                 }
                     else
                 {
+                    
+                    //tao payment detail
+                    PaymentDetail paymentDetail = new()
+                    {
+                        PaymentId = payment.Id,
+                        Status = "Failed",
+                        Method = "Transfer",
+                        ExternalTransaction = "VNPAY",
+                        CreatedTime = DateTime.Now,
+                        CreatedBy = "VNPAY"
+                    };
+                    await _unitOfWork.GetRepository<PaymentDetail>().InsertAsync(paymentDetail);
+                    await _unitOfWork.SaveAsync();
+
+                    order.Status = "Payment Failed";
+                    await _unitOfWork.GetRepository<Order>().UpdateAsync(order);
+                    await _unitOfWork.SaveAsync();
+
                     response.IsSucceed = false;
                     response.Text = "Payment approve failed";
                     return response;
                 }
+
+
                 response.IsSucceed = true;  
                 response.Text = returnUrl;
                 return response;
@@ -212,6 +298,23 @@ namespace HandmadeProductManagement.Services.Service
             }
             else
             {
+                //tao payment detail
+                PaymentDetail paymentDetail = new()
+                {
+                    PaymentId = payment.Id,
+                    Status = "Failed",
+                    Method = "Transfer",
+                    ExternalTransaction = "VNPAY",
+                    CreatedTime = DateTime.Now,
+                    CreatedBy = "VNPAY"
+                };
+                await _unitOfWork.GetRepository<PaymentDetail>().InsertAsync(paymentDetail);
+                await _unitOfWork.SaveAsync();
+
+                order.Status = "Payment Failed";
+                await _unitOfWork.GetRepository<Order>().UpdateAsync(order);
+                await _unitOfWork.SaveAsync();
+
                 response.IsSucceed = false;
                 response.Text = "Payment approve failed";
                 return response;
