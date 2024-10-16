@@ -253,17 +253,18 @@ namespace HandmadeProductManagement.Services.Service
             
             if (signValue.Equals(vnpSecureHash))
             {
-                    if("00".Equals(request.VnpTransactionStatus)) {
-                   
+                if ("00".Equals(request.VnpTransactionStatus))
+                {
+
                     //tao payment detail
-                    if (payment != null)
+                    PaymentDetail paymentDetail = new()
                     {
                         PaymentId = payment.Id,
                         Status = "Success",
                         Method = "Transfer",
                         ExternalTransaction = "VNPAY",
                         CreatedTime = DateTime.Now,
-                        CreatedBy   = "VNPAY"
+                        CreatedBy = "VNPAY"
                     };
                     await _unitOfWork.GetRepository<PaymentDetail>().InsertAsync(paymentDetail);
                     await _unitOfWork.SaveAsync();
@@ -283,6 +284,7 @@ namespace HandmadeProductManagement.Services.Service
                     };
                     await _statusChangeService.Create(statusChangeDto, order.UserId.ToString());
                 }
+
                 else
                 {
                     

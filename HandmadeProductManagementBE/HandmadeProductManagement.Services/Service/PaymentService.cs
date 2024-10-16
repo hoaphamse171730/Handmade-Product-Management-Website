@@ -227,9 +227,9 @@ namespace HandmadeProductManagement.Services.Service
                             Status = "Canceled",
                             CancelReasonId = cancelReason.Id,
                         };
-                        await _orderService.UpdateOrderStatusAsync(userId, dto);
+                        await OrderService.UpdateOrderStatusAsync(userId, dto);
                 }
-                }
+            }
 
             payment.Status = newStatus;
             payment.LastUpdatedTime = DateTime.UtcNow;
