@@ -470,7 +470,7 @@ namespace HandmadeProductManagement.Services.Service
             // Check if the user has permission to update the product
             if (productEntity.CreatedBy != userId)
             {
-                throw new BaseException.ForbiddenException(StatusCodeHelper.Forbidden.ToString(), Constants.ErrorMessageForbiddenAccess);
+                throw new BaseException.ForbiddenException(StatusCodeHelper.Forbidden.ToString(), Constants.ErrorMessageForbidden);
             }
 
             // Update fields if provided
@@ -509,7 +509,7 @@ namespace HandmadeProductManagement.Services.Service
             // Check if the user has permission to delete the product
             if (productEntity.CreatedBy != userId)
             {
-                throw new BaseException.ForbiddenException(StatusCodeHelper.Forbidden.ToString(), Constants.ErrorMessageForbiddenAccess);
+                throw new BaseException.ForbiddenException(StatusCodeHelper.Forbidden.ToString(), Constants.ErrorMessageForbidden);
             }
 
             // Mark as soft deleted

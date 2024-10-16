@@ -100,7 +100,7 @@ namespace HandmadeProductManagement.Services.Service
 
             if (cartItem.CreatedBy != userId)
             {
-                throw new BaseException.ForbiddenException(StatusCodeHelper.Forbidden.ToString(), Constants.ErrorMessageForbiddenAccess);
+                throw new BaseException.ForbiddenException(StatusCodeHelper.Forbidden.ToString(), Constants.ErrorMessageForbidden);
             }
 
             if (updateCartItemDto.ProductQuantity.HasValue)

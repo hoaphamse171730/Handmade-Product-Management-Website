@@ -219,7 +219,7 @@ namespace HandmadeProductManagement.Services.Service
 
             if (productItemEntity.CreatedBy != userId)
             {
-                throw new BaseException.ForbiddenException(StatusCodeHelper.Forbidden.ToString(), Constants.ErrorMessageForbiddenAccess);
+                throw new BaseException.ForbiddenException(StatusCodeHelper.Forbidden.ToString(), Constants.ErrorMessageForbidden);
             }
 
             if (productItemDto.Price.HasValue)
@@ -266,7 +266,7 @@ namespace HandmadeProductManagement.Services.Service
 
             if (productItemEntity.CreatedBy != userId)
             {
-                throw new BaseException.ForbiddenException(StatusCodeHelper.Forbidden.ToString(), Constants.ErrorMessageForbiddenAccess);
+                throw new BaseException.ForbiddenException(StatusCodeHelper.Forbidden.ToString(), Constants.ErrorMessageForbidden);
             }
 
             productItemEntity.DeletedTime = DateTime.UtcNow;

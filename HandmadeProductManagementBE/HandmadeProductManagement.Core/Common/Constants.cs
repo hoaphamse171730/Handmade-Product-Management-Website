@@ -76,11 +76,10 @@ public static class Constants
 
     #region Error Messages
 
-    public const string ErrorMessageForbidden = "You have no permission to access this order.";
+    public const string ErrorMessageForbidden = "You have no permission to access this resource.";
     public const string OrderNotFoundMessage = "Order not found.";
     public const string ErrorMessageEmptyId = "ID is required.";
     public const string ErrorMessageOrderNotFound = "Order not found.";
-    public const string ErrorMessageForbiddenAccess = "You have no permission to access this order.";
     public const string ErrorMessageOrderDetailsNotFound = "No order details found for this order.";
     public const string ErrorMessageEmptyCart = "Cart is empty.";
     public const string ErrorMessageProductItemNotFound = "Product Item not found.";
@@ -174,6 +173,12 @@ public static class Constants
     public const string ErrorMessageReplyNotFound = "Reply not found.";
     public const string ErrorMessageUnauthorizedUpdate = "User does not own the shop associated with this reply.";
     public const string ErrorMessageSoftDeletedReply = "Cannot update the review which has been soft-deleted.";
+    public const string ErrorMessageProductSoftDeleted = "Product not found as it has been soft-deleted.";
+    public const string ErrorMessageUnauthorizedOrderAccess = "User does not own this order.";
+    public const string ErrorMessageOrderNotShipped = "Review can only be created if the order is 'Shipped'.";
+    public const string ErrorMessageReviewAlreadyExists = "User has already reviewed this product.";
+    public const string ErrorMessageInvalidRating = "Invalid rating. It must be between 1 and 5.";
+    public const string ErrorMessageReviewNotFoundSoftDeleted = "Cannot update the review which has been soft-delete.";
 
     #endregion
 
