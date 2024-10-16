@@ -36,7 +36,7 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [HttpPut("update-status/{id}")]
-        [Authorize(Roles = "Seller")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateStatusProduct(string id, [FromQuery] bool isAvailable = false)
         {
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
