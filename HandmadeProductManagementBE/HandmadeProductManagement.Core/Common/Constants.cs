@@ -46,7 +46,7 @@ public static class Constants
 
     #endregion
 
-    #region Payment Status
+    #region Payment
 
     public const string PaymentStatusPending = "Pending";
     public const string PaymentStatusCompleted = "Completed";
@@ -54,6 +54,8 @@ public static class Constants
     public const string PaymentStatusRefunded = "Refunded";
     public const string PaymentStatusSuccess = "Success";
     public const string PaymentStatusFailed = "Failed";
+    public const string PaymentMethodOnline = "Online";
+    public const string PaymentMethodOffline = "Offline";
 
     #endregion
 
@@ -146,6 +148,10 @@ public static class Constants
     public const string ErrorMessagePleaseInputMethod = "Please input method.";
     public const string ErrorMessageInvalidMethodFormat = "Method cannot contain numbers or special characters.";
     public const string ErrorMessageInvalidExternalTransactionFormat = "External transaction can only contain alphanumeric characters.";
+    public const string ErrorMessageInvalidOrderId = "Please input order id.";
+    public const string ErrorMessageUserNotOwner = "User does not own the order.";
+    public const string ErrorMessagePaymentAlreadyExists = "A payment for this order already exists.";
+    public const string ErrorMessageInvalidStatusTransition = "Cannot transition from {0} to {1}.";
 
     #endregion
 
