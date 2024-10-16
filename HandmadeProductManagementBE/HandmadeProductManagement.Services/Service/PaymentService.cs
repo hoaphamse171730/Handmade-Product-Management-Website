@@ -112,9 +112,9 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.NotFoundException("order_not_found", "Order not found.");
             }
 
-            if (order.Status != "Pending")
+            if (order.Status != "Awaiting Payment")
             {
-                throw new BaseException.BadRequestException("invalid_order_status", "Order status must be 'Pending'.");
+                throw new BaseException.BadRequestException("invalid_order_status", "Order status must be 'Awaiting Payment'.");
             }
 
             if (order.UserId.ToString() != userId)
