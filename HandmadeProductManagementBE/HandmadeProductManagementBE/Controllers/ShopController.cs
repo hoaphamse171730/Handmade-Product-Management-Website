@@ -23,7 +23,7 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateShop([FromBody] CreateShopDto shop)
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
             var createdShop = await _shopService.CreateShopAsync(userId, shop);
             var response = new BaseResponse<bool>
             {
@@ -39,7 +39,7 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpDelete]
         public async Task<IActionResult> DeleteShop()
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
             var result = await _shopService.DeleteShopAsync(userId);
             var response = new BaseResponse<bool>
             {
@@ -85,7 +85,7 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpGet("user")]
         public async Task<IActionResult> GetShopByUserId()
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
             var shop = await _shopService.GetShopByUserIdAsync(Guid.Parse(userId));
             var response = new BaseResponse<ShopResponseModel>
             {
@@ -101,7 +101,7 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpPut("update")]
         public async Task<IActionResult> UpdateShop([FromBody] CreateShopDto shop)
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
             var updatedShop = await _shopService.UpdateShopAsync(userId, shop);
             var response = new BaseResponse<bool>
             {

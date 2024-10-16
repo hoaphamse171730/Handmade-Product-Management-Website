@@ -48,7 +48,7 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.BadRequestException("cannot_add_own_product", "You cannot add your own product to the cart.");
             }
 
-            if (productItem.QuantityInStock < createCartItemDto.ProductQuantity.Value)
+            if (productItem.QuantityInStock < createCartItemDto.ProductQuantity)
             {
                 throw new BaseException.BadRequestException("insufficient_stock", "Not enough quantity in stock.");
             }
@@ -59,7 +59,7 @@ namespace HandmadeProductManagement.Services.Service
 
             if (existingCartItem != null)
             {
-                var newQuantity = existingCartItem.ProductQuantity + createCartItemDto.ProductQuantity.Value;
+                var newQuantity = existingCartItem.ProductQuantity + createCartItemDto.ProductQuantity;
 
                 // Check if the new quantity exceeds the quantity in stock
                 if (newQuantity > productItem.QuantityInStock)
@@ -75,7 +75,7 @@ namespace HandmadeProductManagement.Services.Service
                 var cartItem = new CartItem
                 {
                     ProductItemId = productItem.Id,
-                    ProductQuantity = createCartItemDto.ProductQuantity.Value,
+                    ProductQuantity = createCartItemDto.ProductQuantity,
                     UserId = Guid.Parse(userId),
                     CreatedBy = userId,
                     LastUpdatedBy = userId,

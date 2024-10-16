@@ -22,7 +22,7 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> CreatePaymentDetail([FromBody] CreatePaymentDetailDto createPaymentDetailDto)
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
             var createdPaymentDetail = await _paymentDetailService.CreatePaymentDetailAsync(userId, createPaymentDetailDto);
             var response = new BaseResponse<bool>
             {

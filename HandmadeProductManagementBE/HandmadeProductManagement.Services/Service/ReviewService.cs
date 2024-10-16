@@ -245,7 +245,10 @@ namespace HandmadeProductManagement.Services.Service
 
             // Update shop rating
             var product = await _unitOfWork.GetRepository<Product>().GetByIdAsync(reviewModel.ProductId);
-            await _shopService.CalculateShopAverageRatingAsync(product.ShopId);
+            if (product != null)
+            {
+                await _shopService.CalculateShopAverageRatingAsync(product.ShopId);
+            }
 
             return true;
         }
@@ -297,7 +300,7 @@ namespace HandmadeProductManagement.Services.Service
             existingReview.LastUpdatedBy = existingReview.UserId.ToString();
             existingReview.LastUpdatedTime = vietnamTime;
 
-            _unitOfWork.GetRepository<Review>().UpdateAsync(existingReview);
+            await _unitOfWork.GetRepository<Review>().UpdateAsync(existingReview);
             await _unitOfWork.SaveAsync();
 
             // Update product rating
@@ -305,8 +308,10 @@ namespace HandmadeProductManagement.Services.Service
 
             // Update shop rating
             var product = await _unitOfWork.GetRepository<Product>().GetByIdAsync(existingReview.ProductId);
-            await _shopService.CalculateShopAverageRatingAsync(product.ShopId);
-
+            if (product != null)
+            {
+                await _shopService.CalculateShopAverageRatingAsync(product.ShopId);
+            }
             return true;
         }
 
@@ -347,7 +352,10 @@ namespace HandmadeProductManagement.Services.Service
 
             // Update shop rating
             var product = await _unitOfWork.GetRepository<Product>().GetByIdAsync(existingReview.ProductId);
-            await _shopService.CalculateShopAverageRatingAsync(product.ShopId);
+            if(product!=null)
+            {
+                await _shopService.CalculateShopAverageRatingAsync(product.ShopId);
+            }
 
             return true;
         }
@@ -385,7 +393,10 @@ namespace HandmadeProductManagement.Services.Service
 
             // Update shop rating
             var product = await _unitOfWork.GetRepository<Product>().GetByIdAsync(existingReview.ProductId);
-            await _shopService.CalculateShopAverageRatingAsync(product.ShopId);
+            if (product != null)
+            {
+                await _shopService.CalculateShopAverageRatingAsync(product.ShopId);
+            }
 
             return true;
         }

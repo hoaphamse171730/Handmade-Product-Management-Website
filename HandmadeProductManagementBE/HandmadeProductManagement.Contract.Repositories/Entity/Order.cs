@@ -21,7 +21,7 @@ namespace HandmadeProductManagement.Contract.Repositories.Entity
         public CancelReason? CancelReason { get; set; }
         [JsonIgnore]
         public Payment? Payment { get; set; }
-        public ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
+        public ICollection<OrderDetail> OrderDetails { get; set; } = [];
         public ICollection<StatusChange> StatusChanges { get; set; } = [];
     }
 }

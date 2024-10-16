@@ -7,7 +7,7 @@ namespace HandmadeProductManagement.Contract.Repositories.Entity
     {
         public string? Content { get; set; }
         public int? Rating { get; set; }
-        public DateTime? Date { get; set; }
+        public DateTime Date { get; set; }
 
         // Foreign key to the Product entity
         public string ProductId { get; set; } = string.Empty;

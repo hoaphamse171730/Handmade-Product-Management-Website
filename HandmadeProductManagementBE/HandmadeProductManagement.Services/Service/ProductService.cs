@@ -38,7 +38,7 @@ namespace HandmadeProductManagement.Services.Service
             var validationResult = await _creationValidator.ValidateAsync(productDto);
             if (!validationResult.IsValid)
             {
-                throw new BaseException.BadRequestException("validation_failed", validationResult.Errors.Select(e => e.ErrorMessage).FirstOrDefault());
+                throw new BaseException.BadRequestException("validation_failed", validationResult.Errors.Select(e => e.ErrorMessage).FirstOrDefault() ?? string.Empty);
             }
 
             // Step 2: Validate VariationCombinationDtos
@@ -47,7 +47,7 @@ namespace HandmadeProductManagement.Services.Service
                 var variationCombinationValidationResult = await _variationCombinationValidator.ValidateAsync(variationCombination);
                 if (!variationCombinationValidationResult.IsValid)
                 {
-                    throw new BaseException.BadRequestException("validation_failed", variationCombinationValidationResult.Errors.Select(e => e.ErrorMessage).FirstOrDefault());
+                    throw new BaseException.BadRequestException("validation_failed", variationCombinationValidationResult.Errors.Select(e => e.ErrorMessage).FirstOrDefault() ?? string.Empty);
                 }
             }
 
@@ -483,7 +483,7 @@ namespace HandmadeProductManagement.Services.Service
             var validationResult = await _updateValidator.ValidateAsync(product);
             if (!validationResult.IsValid)
             {
-                throw new BaseException.BadRequestException("validation_failed", validationResult.Errors.Select(e => e.ErrorMessage).FirstOrDefault());
+                throw new BaseException.BadRequestException("validation_failed", validationResult.Errors.Select(e => e.ErrorMessage).FirstOrDefault() ?? string.Empty);
             }
 
             // Fetch product and check if it exists
@@ -659,7 +659,7 @@ namespace HandmadeProductManagement.Services.Service
             {
                 Id = product.Id,
                 Name = product.Name,
-                Description = product.Description,
+                Description = product.Description ?? string.Empty,
                 CategoryId = product.CategoryId,
                 CategoryName = product.Category.Name,
                 ShopId = product.ShopId,

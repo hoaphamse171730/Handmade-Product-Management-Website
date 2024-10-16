@@ -10,7 +10,7 @@ namespace HandmadeProductManagement.ModelViews.PaymentModelViews
         public DateTime ExpirationDate { get; set; }
         public decimal TotalAmount { get; set; }
         public string Status { get; set; } = string.Empty;
-        public List<PaymentDetailResponseModel> PaymentDetails { get; set; } = new List<PaymentDetailResponseModel>();
+        public List<PaymentDetailResponseModel> PaymentDetails { get; set; } = [];
 
     }
 }

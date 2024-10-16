@@ -55,7 +55,7 @@ namespace HandmadeProductManagement.Services.Service
             var validationResult = await _creationValidator.ValidateAsync(variationForCreation);
             if (!validationResult.IsValid)
             {
-                throw new BaseException.BadRequestException("validation_failed", validationResult.Errors.Select(e => e.ErrorMessage).FirstOrDefault());
+                throw new BaseException.BadRequestException("validation_failed", validationResult.Errors.Select(e => e.ErrorMessage).FirstOrDefault() ?? string.Empty);
             }
 
             // Check if the CategoryId exists in the Categories table
@@ -99,7 +99,7 @@ namespace HandmadeProductManagement.Services.Service
             var validationResult = await _updateValidator.ValidateAsync(variationForUpdate);
             if (!validationResult.IsValid)
             {
-                throw new BaseException.BadRequestException("validation_failed", validationResult.Errors.Select(e => e.ErrorMessage).FirstOrDefault());
+                throw new BaseException.BadRequestException("validation_failed", validationResult.Errors.Select(e => e.ErrorMessage).FirstOrDefault() ?? string.Empty);
             }
 
             var repository = _unitOfWork.GetRepository<Variation>();

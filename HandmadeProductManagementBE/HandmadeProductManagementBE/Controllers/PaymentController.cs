@@ -22,7 +22,7 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpPost("{orderId}")]
         public async Task<IActionResult> CreatePayment(string orderId)
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
             var createdPayment = await _paymentService.CreatePaymentAsync(userId, orderId);
             var response = new BaseResponse<bool>
             {
@@ -38,7 +38,7 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpPut("{paymentId}/status")]
         public async Task<IActionResult> UpdatePaymentStatus(string paymentId, [FromBody] string status)
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
             var updatedPayment = await _paymentService.UpdatePaymentStatusAsync(paymentId, status, userId);
             var response = new BaseResponse<bool>
             {

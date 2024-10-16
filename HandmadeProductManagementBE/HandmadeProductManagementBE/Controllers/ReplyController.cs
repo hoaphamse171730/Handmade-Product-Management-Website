@@ -53,7 +53,7 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([Required] string content, [Required] string reviewId)
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
 
             var replyModel = new ReplyModel
             {
@@ -73,7 +73,7 @@ namespace HandmadeProductManagementAPI.Controllers
                 };
                 return Ok(response);
             }
-            catch (BaseException.UnauthorizedException ex)
+            catch (BaseException.UnauthorizedException)
             {
                 var response = new BaseResponse<string>
                 {
@@ -89,7 +89,7 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpPut("{replyId}")]
         public async Task<IActionResult> Update([Required] string replyId, [Required] string content)
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
 
             var replyModel = new ReplyModel
             {
@@ -107,7 +107,7 @@ namespace HandmadeProductManagementAPI.Controllers
                 };
                 return Ok(response);
             }
-            catch (BaseException.UnauthorizedException ex)
+            catch (BaseException.UnauthorizedException)
             {
                 var response = new BaseResponse<string>
                 {
@@ -123,7 +123,7 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpDelete("{replyId}")]
         public async Task<IActionResult> Delete([Required] string replyId)
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
 
             try
             {
@@ -136,7 +136,7 @@ namespace HandmadeProductManagementAPI.Controllers
                 };
                 return Ok(response);
             }
-            catch (BaseException.UnauthorizedException ex)
+            catch (BaseException.UnauthorizedException)
             {
                 var response = new BaseResponse<string>
                 {
@@ -152,7 +152,7 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpDelete("{replyId}/soft-delete")]
         public async Task<IActionResult> SoftDelete([Required] string replyId)
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
 
             try
             {
@@ -165,7 +165,7 @@ namespace HandmadeProductManagementAPI.Controllers
                 };
                 return Ok(response);
             }
-            catch (BaseException.UnauthorizedException ex)
+            catch (BaseException.UnauthorizedException)
             {
                 var response = new BaseResponse<string>
                 {

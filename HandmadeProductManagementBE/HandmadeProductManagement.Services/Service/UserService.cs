@@ -291,14 +291,14 @@ namespace HandmadeProductManagement.Services.Service
 
             if (replies == null || !replies.Any())
             {
-                return new List<NotificationModel>();
+                return [];
             }
 
             // Tạo thông báo cho từng phản hồi mới
             var replyNotifications = replies.Select(reply => new NotificationModel
             {
                 Id = reply.Id,
-                Message = $"Bạn đã nhận được phản hồi mới cho review sản phẩm {reply.Review.Product.Shop.User.UserInfo.FullName}",
+                Message = $"Bạn đã nhận được phản hồi mới cho review sản phẩm {reply.Review.Product.Shop.User?.UserInfo.FullName}",
                 Tag = "Reply",
                 URL = Url + $"api/reply/{reply.Id}"
             }).ToList();
@@ -328,7 +328,7 @@ namespace HandmadeProductManagement.Services.Service
 
             var review = await _unitOfWork.GetRepository<Review>()
                  .Entities
-                 .Where(r => r.Reply == null && r.Date.Value.Date >= twoDaysAgo.Date)  // Lọc các review không có phản hồi và trong hai ngày qua
+                 .Where(r => r.Reply == null && r.Date.Date >= twoDaysAgo.Date)  // Lọc các review không có phản hồi và trong hai ngày qua
                  .Include(r => r.User)  // Nạp thông tin người dùng từ review
                     .ThenInclude(u => u.UserInfo)  // Nạp thông tin UserInfo từ User của người viết review
                  //.Include(r => r.Product)  // Nạp thông tin sản phẩm từ review
@@ -426,7 +426,7 @@ namespace HandmadeProductManagement.Services.Service
             return true;
         }
 
-        public async Task<UpdateUserResponseModel?> UpdateUserProfile(string id, UpdateUserDTO updateUserProfileDTO)
+        public async Task<UpdateUserResponseModel> UpdateUserProfile(string id, UpdateUserDTO updateUserProfileDTO)
         {
             if (!Guid.TryParse(id, out Guid userId))
             {

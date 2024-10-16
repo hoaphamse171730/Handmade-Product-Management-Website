@@ -183,21 +183,25 @@ namespace HandmadeProductManagement.Services.Service
                     var payment  = await _unitOfWork.GetRepository<Payment>().Entities
                                    .Where(p => p.OrderId == orderInfo).FirstOrDefaultAsync();
                     //tao payment detail
-                    PaymentDetail paymentDetail = new()
+                    if (payment != null)
                     {
-                        PaymentId = payment.Id,
-                        Status = "Paid",
-                        Method = "Transfer",
-                        ExternalTransaction = "VNPAY",
-                        CreatedTime = DateTime.Now,
-                        CreatedBy   = "VNPAY"
-                    };
-                    await _unitOfWork.GetRepository<PaymentDetail>().InsertAsync(paymentDetail);
-                    await _unitOfWork.SaveAsync();
+                        PaymentDetail paymentDetail = new()
+                        {
+                            PaymentId = payment.Id,
+                            Status = "Paid",
+                            Method = "Transfer",
+                            ExternalTransaction = "VNPAY",
+                            CreatedTime = DateTime.Now,
+                            CreatedBy = "VNPAY"
+                        };
 
-                    payment.Status = "Paid";
-                    await _unitOfWork.GetRepository<Payment>().UpdateAsync(payment);
-                    await _unitOfWork.SaveAsync();
+                        await _unitOfWork.GetRepository<PaymentDetail>().InsertAsync(paymentDetail);
+                        await _unitOfWork.SaveAsync();
+
+                        payment.Status = "Paid";
+                        await _unitOfWork.GetRepository<Payment>().UpdateAsync(payment);
+                        await _unitOfWork.SaveAsync();
+                    }
                 }
                     else
                 {

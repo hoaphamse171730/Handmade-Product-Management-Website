@@ -160,13 +160,16 @@ namespace HandmadeProductManagement.Services.Service
                                                                     cr.Description.Contains("Payment failed"));
                     }
 
-                    var dto = new UpdateStatusOrderDto
+                    if (cancelReason != null)
                     {
-                        OrderId = payment.OrderId,
-                        Status = "Canceled",
-                        CancelReasonId = cancelReason.Id,
-                    };
-                    await _orderService.UpdateOrderStatusAsync(userId, dto);
+                        var dto = new UpdateStatusOrderDto
+                        {
+                            OrderId = payment.OrderId,
+                            Status = "Canceled",
+                            CancelReasonId = cancelReason.Id,
+                        };
+                        await _orderService.UpdateOrderStatusAsync(userId, dto);
+                }
                 }
 
             payment.Status = newStatus;
