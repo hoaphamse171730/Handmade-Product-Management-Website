@@ -207,7 +207,7 @@ public static class Constants
     public const string ErrorMessageEmailExists = "Email already exists.";
     public const string ErrorMessagePhoneNumberExists = "Phone number already exists.";
     public const string ErrorMessageUserNotFoundOrActive = "User not found or already active.";
-
+    public const string ErrorMessageDuplicateVariationName = "Variation name already exists in this category.";
 
     #endregion
 
