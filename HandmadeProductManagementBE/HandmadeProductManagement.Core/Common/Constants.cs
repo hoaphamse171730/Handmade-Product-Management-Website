@@ -117,6 +117,9 @@ public static class Constants
     public const string ErrorMessageValidationFailed = "Validation failed.";
     public const string ErrorMessageInvalidGuidFormat = "ID is not in a valid GUID format.";
     public const string ErrorMessageCancelReasonNotFound = "Cancel Reason not found.";
+    public const string ErrorMessageCannotAddOwnProduct = "You cannot add your own product to the cart.";
+    public const string ErrorMessageInsufficientStockForUpdate = "Not enough quantity in stock for the updated cart item.";
+    public const string ErrorMessageCartItemNotFound = "Cart item not found.";
 
     #endregion
 

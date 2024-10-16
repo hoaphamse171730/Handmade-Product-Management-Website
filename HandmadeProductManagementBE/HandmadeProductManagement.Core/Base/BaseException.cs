@@ -63,7 +63,7 @@ namespace HandmadeProductManagement.Core.Base
         public class ForbiddenException : ErrorException
         {
             public ForbiddenException(string errorCode, string message)
-                : base(((int)StatusCodeHelper.ForbiddenAcess), errorCode, message)
+                : base(((int)StatusCodeHelper.Forbidden), errorCode, message)
             {
             }
         }

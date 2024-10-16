@@ -236,7 +236,7 @@ namespace HandmadeProductManagement.Services.Service
 
                     if (!isSellerOrder)
                     {
-                        throw new BaseException.ForbiddenException(StatusCodeHelper.ForbiddenAcess.ToString(), Constants.ErrorMessageForbiddenAccess);
+                        throw new BaseException.ForbiddenException(StatusCodeHelper.Forbidden.ToString(), Constants.ErrorMessageForbiddenAccess);
                     }
                 }
             }
@@ -289,7 +289,7 @@ namespace HandmadeProductManagement.Services.Service
 
             if (existingOrder.CreatedBy != userId)
             {
-                throw new BaseException.ForbiddenException(StatusCodeHelper.ForbiddenAcess.ToString(), Constants.ErrorMessageForbiddenAccess);
+                throw new BaseException.ForbiddenException(StatusCodeHelper.Forbidden.ToString(), Constants.ErrorMessageForbiddenAccess);
             }
 
             if (existingOrder.Status != Constants.OrderStatusPending && existingOrder.Status != Constants.OrderStatusAwaitingPayment)

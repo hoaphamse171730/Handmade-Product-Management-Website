@@ -4,6 +4,7 @@ using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.Core.Common;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.CartItemModelViews;
 using Microsoft.EntityFrameworkCore;
@@ -32,20 +33,21 @@ namespace HandmadeProductManagement.Services.Service
             var validationResult = await _creationValidator.ValidateAsync(createCartItemDto);
             if (!validationResult.IsValid)
             {
-                throw new BaseException.BadRequestException("validation_failed", validationResult.Errors.First().ErrorMessage);
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageValidationFailed);
             }
 
             var productItem = await _unitOfWork.GetRepository<ProductItem>().Entities
-                                                    .SingleOrDefaultAsync(pi => pi.Id == createCartItemDto.ProductItemId) ?? throw new BaseException.NotFoundException("product_item_not_found", $"ProductItem {createCartItemDto.ProductItemId} not found.");
-            
+                                                    .SingleOrDefaultAsync(pi => pi.Id == createCartItemDto.ProductItemId)
+                                                    ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageProductItemNotFound);
+
             if (productItem.CreatedBy == userId)
             {
-                throw new BaseException.BadRequestException("cannot_add_own_product", "You cannot add your own product to the cart.");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageCannotAddOwnProduct);
             }
 
             if (productItem.QuantityInStock < createCartItemDto.ProductQuantity.Value)
             {
-                throw new BaseException.BadRequestException("insufficient_stock", "Not enough quantity in stock.");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInsufficientStock);
             }
 
             var cartItemRepo = _unitOfWork.GetRepository<CartItem>();
@@ -59,7 +61,7 @@ namespace HandmadeProductManagement.Services.Service
                 // Check if the new quantity exceeds the quantity in stock
                 if (newQuantity > productItem.QuantityInStock)
                 {
-                    throw new BaseException.BadRequestException("insufficient_stock", "Not enough quantity in stock for the updated cart item.");
+                    throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInsufficientStockForUpdate);
                 }
 
                 existingCartItem.ProductQuantity = newQuantity;
@@ -82,33 +84,37 @@ namespace HandmadeProductManagement.Services.Service
             await _unitOfWork.SaveAsync();
             return true;
         }
-
+        
         public async Task<bool> UpdateCartItem(string cartItemId, CartItemForUpdateDto updateCartItemDto, string userId)
         {
             var validationResult = await _updateValidator.ValidateAsync(updateCartItemDto);
             if (!validationResult.IsValid)
             {
-                throw new BaseException.BadRequestException("validation_failed", validationResult.Errors.First().ErrorMessage);
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageValidationFailed);
             }
 
             var cartItemRepo = _unitOfWork.GetRepository<CartItem>();
             var cartItem = await cartItemRepo.Entities
-                .FirstOrDefaultAsync(ci => ci.Id == cartItemId && ci.UserId == Guid.Parse(userId) && ci.DeletedTime == null) ?? throw new BaseException.NotFoundException("cart_item_not_found", "Cart item not found.");
+                .FirstOrDefaultAsync(ci => ci.Id == cartItemId && ci.UserId == Guid.Parse(userId) && ci.DeletedTime == null)
+                ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageCartItemNotFound);
+
             if (cartItem.CreatedBy != userId)
             {
-                throw new BaseException.ForbiddenException("forbidden", "You do not have permission to access this resource.");
+                throw new BaseException.ForbiddenException(StatusCodeHelper.Forbidden.ToString(), Constants.ErrorMessageForbiddenAccess);
             }
 
             if (updateCartItemDto.ProductQuantity.HasValue)
             {
                 var productItemRepo = _unitOfWork.GetRepository<ProductItem>();
                 var productItem = await productItemRepo.Entities
-                    .SingleOrDefaultAsync(pi => pi.Id == cartItem.ProductItemId) ?? throw new BaseException.NotFoundException("product_item_not_found", $"ProductItem {cartItem.ProductItemId} not found.");
+                    .SingleOrDefaultAsync(pi => pi.Id == cartItem.ProductItemId)
+                    ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageProductItemNotFound);
 
                 // Check stock availability
                 if (updateCartItemDto.ProductQuantity.Value > productItem.QuantityInStock)
                 {
-                    throw new BaseException.BadRequestException("invalid_quantity", $"Only {productItem.QuantityInStock} items available.");
+                    throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(),
+                        string.Format(Constants.ErrorMessageInsufficientStock, productItem.QuantityInStock));
                 }
 
                 cartItem.ProductQuantity = updateCartItemDto.ProductQuantity.Value;
@@ -140,13 +146,16 @@ namespace HandmadeProductManagement.Services.Service
                     ShopId = ci.ProductItem.Product.Shop.Id,
                     ShopName = ci.ProductItem.Product.Shop.Name,
                     UnitPrice = ci.ProductItem.Price,
-                    DiscountPrice = ci.ProductItem.Price * (1 - (ci.ProductItem.Product.Category.Promotion.Status.Equals("Active", StringComparison.OrdinalIgnoreCase) ? ci.ProductItem.Product.Category.Promotion.DiscountRate : 0)),
+                    DiscountPrice = ci.ProductItem.Price *
+                        (1 - (ci.ProductItem.Product.Category.Promotion.Status.Equals(Constants.PromotionStatusActive, StringComparison.OrdinalIgnoreCase)
+                        ? ci.ProductItem.Product.Category.Promotion.DiscountRate : 0)),
                     VariationOptionValues = _unitOfWork.GetRepository<ProductConfiguration>().Entities
                         .Where(pc => pc.ProductItemId == ci.ProductItemId)
                         .Select(pc => pc.VariationOption.Value)
                         .ToList()
                 })
                 .ToListAsync();
+
             // Group cart items by ShopId and ShopName
             var cartItemGroups = cartItems
                 .GroupBy(ci => new { ci.ShopId, ci.ShopName })
@@ -187,7 +196,8 @@ namespace HandmadeProductManagement.Services.Service
             {
                 var promotion = ci.ProductItem.Product.Category.Promotion;
                 var unitPrice = ci.ProductItem.Price;
-                var discountPrice = promotion != null && promotion.Status.Equals("Active", StringComparison.OrdinalIgnoreCase)
+
+                var discountPrice = promotion != null && promotion.Status.Equals(Constants.PromotionStatusActive, StringComparison.OrdinalIgnoreCase)
                     ? unitPrice - (int)(unitPrice * promotion.DiscountRate)
                     : unitPrice;
 
@@ -196,7 +206,7 @@ namespace HandmadeProductManagement.Services.Service
                     Id = ci.Id,
                     ProductItemId = ci.ProductItemId,
                     ProductQuantity = ci.ProductQuantity,
-                    UserId = ci.UserId
+                    UserId = ci.UserId, 
                 };
             }).ToList();
 
@@ -207,11 +217,12 @@ namespace HandmadeProductManagement.Services.Service
         {
             var cartItemRepo = _unitOfWork.GetRepository<CartItem>();
             var cartItem = await cartItemRepo.Entities
-                .FirstOrDefaultAsync(ci => ci.Id == cartItemId && ci.UserId == Guid.Parse(userId) && ci.DeletedTime == null) ?? throw new BaseException.NotFoundException("cart_item_not_found", "Cart item not found.");
-            
+                .FirstOrDefaultAsync(ci => ci.Id == cartItemId && ci.UserId == Guid.Parse(userId) && ci.DeletedTime == null)
+                ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageCartItemNotFound);
+
             if (cartItem.CreatedBy != userId)
             {
-                throw new BaseException.ForbiddenException("forbidden", "You do not have permission to access this resource.");
+                throw new BaseException.ForbiddenException(StatusCodeHelper.Forbidden.ToString(), Constants.ErrorMessageForbidden);
             }
 
             await cartItemRepo.DeleteAsync(cartItem.Id);
@@ -219,11 +230,11 @@ namespace HandmadeProductManagement.Services.Service
             return true;
         }
 
-        public async Task<Decimal> GetTotalCartPrice(string userId)
+        public async Task<decimal> GetTotalCartPrice(string userId)
         {
             if (!Guid.TryParse(userId, out Guid userIdGuid))
             {
-                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Invalid userId");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidUserId);
             }
 
             var cartItems = await _unitOfWork.GetRepository<CartItem>()
@@ -237,7 +248,7 @@ namespace HandmadeProductManagement.Services.Service
 
             if (cartItems.Count == 0)
             {
-                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "No items in the cart");
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageNoItemsInCart);
             }
 
             decimal totalPrice = 0;
