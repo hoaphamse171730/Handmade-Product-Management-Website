@@ -78,7 +78,7 @@ namespace HandmadeProductManagement.Services.Service
 
 
 
-        public async Task<CategoryDto> Update(string id, CategoryForUpdateDto category)
+        public async Task<bool> Update(string id, CategoryForUpdateDto category)
         {
             var validationResult = await _updateValidator.ValidateAsync(category);
             if (!validationResult.IsValid)
@@ -96,7 +96,8 @@ namespace HandmadeProductManagement.Services.Service
             categoryEntity.LastUpdatedTime = DateTime.UtcNow;
             await _unitOfWork.GetRepository<Category>().UpdateAsync(categoryEntity);
             await _unitOfWork.SaveAsync();
-            return _mapper.Map<CategoryDto>(categoryEntity);
+            _mapper.Map<CategoryDto>(categoryEntity);
+            return true;
         }
         public async Task<CategoryDto> UpdatePromotion(string id, CategoryForUpdatePromotion category)
         {
@@ -112,16 +113,12 @@ namespace HandmadeProductManagement.Services.Service
 
             if (categoryRepo is null)
                 throw new BaseException.NotFoundException("400", "Category not found");
-
             var validationResult = await _updatePromotionValidator.ValidateAsync(category);
             if(!validationResult.IsValid)
                 throw new ValidationException(validationResult.Errors);
-
-            // Kiểm tra xem promotionId có tồn tại hay không
             var promotionExists = await _unitOfWork.GetRepository<Promotion>()
                 .Entities
                 .AnyAsync(p => p.Id == category.promotionId && p.DeletedTime == null);
-
             if (!promotionExists)
             {
                 throw new BaseException.NotFoundException("404", "Promotion not found");

@@ -34,7 +34,7 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [HttpGet("{id}")]
-        // [Authorize]
+        [Authorize]
         public async Task<IActionResult> GetCategory(string id)
         {
             var category = await _categoryService.GetById(id);
@@ -68,13 +68,13 @@ namespace HandmadeProductManagementAPI.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateCategory(string categoryId, CategoryForUpdateDto categoryForUpdate)
         {
-            var updatedCategory = await _categoryService.Update(categoryId, categoryForUpdate);
-            var response = new BaseResponse<CategoryDto>
+            await _categoryService.Update(categoryId, categoryForUpdate);
+            var response = new BaseResponse<bool>
             {
                 Code = "200",
                 StatusCode = StatusCodeHelper.OK,
                 Message = "Category updated successfully",
-                Data = updatedCategory
+                Data = true
             };
             return Ok(response);
         }
