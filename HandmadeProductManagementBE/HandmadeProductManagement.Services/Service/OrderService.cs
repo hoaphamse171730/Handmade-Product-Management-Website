@@ -591,7 +591,7 @@ namespace HandmadeProductManagement.Services.Service
                 throw;
             }
         }
-        public async Task<IList<OrderResponseDetailModel>> GetOrdersBySellerUserIdAsync(Guid userId)
+        public async Task<IList<OrderResponseModel>> GetOrdersBySellerUserIdAsync(Guid userId)
         {
             var orderRepository = _unitOfWork.GetRepository<Order>();
             var orders = await orderRepository.Entities
