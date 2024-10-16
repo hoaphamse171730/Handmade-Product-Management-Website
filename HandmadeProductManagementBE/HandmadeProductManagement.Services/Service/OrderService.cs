@@ -485,7 +485,7 @@ namespace HandmadeProductManagement.Services.Service
                 {
                     updateStatusOrderDto.Status = "Processing";
                 }
-
+            }
                 // Validate Status Flow
                 var validStatusTransitions = new Dictionary<string, List<string>>
             {
@@ -505,101 +505,101 @@ namespace HandmadeProductManagement.Services.Service
                 { "Delivering Retry", new List<string> { "Delivering" } }
             };
 
-            var allValidStatuses = validStatusTransitions.Keys
-                .Concat(validStatusTransitions.Values.SelectMany(v => v))
-                .Distinct()
-                .ToList();
+                var allValidStatuses = validStatusTransitions.Keys
+                    .Concat(validStatusTransitions.Values.SelectMany(v => v))
+                    .Distinct()
+                    .ToList();
 
-            if (!allValidStatuses.Contains(updateStatusOrderDto.Status))
-            {
-                throw new BaseException.BadRequestException("invalid_status", $"Status {updateStatusOrderDto.Status} is not a valid status.");
-            }
-
-            if (!validStatusTransitions.ContainsKey(existingOrder.Status) ||
-                !validStatusTransitions[existingOrder.Status].Contains(updateStatusOrderDto.Status))
-            {
-                throw new BaseException.BadRequestException("invalid_status_transition",
-                    $"Cannot transition from {existingOrder.Status} to {updateStatusOrderDto.Status}.");
-            }
-
-            _unitOfWork.BeginTransaction();
-
-            try
-            {
-                // Validate if updatedStatus is Canceled
-                if (updateStatusOrderDto.Status == "Canceled")
+                if (!allValidStatuses.Contains(updateStatusOrderDto.Status))
                 {
-                    if (string.IsNullOrWhiteSpace(updateStatusOrderDto.CancelReasonId))
+                    throw new BaseException.BadRequestException("invalid_status", $"Status {updateStatusOrderDto.Status} is not a valid status.");
+                }
+
+                if (!validStatusTransitions.ContainsKey(existingOrder.Status) ||
+                    !validStatusTransitions[existingOrder.Status].Contains(updateStatusOrderDto.Status))
+                {
+                    throw new BaseException.BadRequestException("invalid_status_transition",
+                        $"Cannot transition from {existingOrder.Status} to {updateStatusOrderDto.Status}.");
+                }
+
+                _unitOfWork.BeginTransaction();
+
+                try
+                {
+                    // Validate if updatedStatus is Canceled
+                    if (updateStatusOrderDto.Status == "Canceled")
                     {
-                        throw new BaseException.BadRequestException("validation_failed", "CancelReasonId is required when updating status to {Canceled}.");
-                    }
-
-                    var cancelReason = await _unitOfWork.GetRepository<CancelReason>().GetByIdAsync(updateStatusOrderDto.CancelReasonId);
-
-                    if (cancelReason == null)
-                    {
-                        throw new BaseException.NotFoundException("not_found", $"Cancel Reason not found. {existingOrder.CancelReasonId}");
-                    }
-
-                    existingOrder.CancelReasonId = updateStatusOrderDto.CancelReasonId;
-
-                    // Retrieve the order details to update product stock
-                    var orderDetailRepository = _unitOfWork.GetRepository<OrderDetail>();
-                    var orderDetails = await orderDetailRepository.Entities
-                        .Where(od => od.OrderId == updateStatusOrderDto.OrderId && !od.DeletedTime.HasValue)
-                        .ToListAsync();
-
-                    var productItemRepository = _unitOfWork.GetRepository<ProductItem>();
-
-                    // Add back the product quantities to the stock
-                    foreach (var detail in orderDetails)
-                    {
-                        var productItem = await productItemRepository.Entities
-                            .FirstOrDefaultAsync(p => p.Id == detail.ProductItemId && !p.DeletedTime.HasValue);
-
-                        if (productItem == null)
+                        if (string.IsNullOrWhiteSpace(updateStatusOrderDto.CancelReasonId))
                         {
-                            throw new BaseException.NotFoundException("product_item_not_found", $"Product Item {detail.ProductItemId} not found.");
+                            throw new BaseException.BadRequestException("validation_failed", "CancelReasonId is required when updating status to {Canceled}.");
                         }
 
-                        productItem.QuantityInStock += detail.ProductQuantity;
+                        var cancelReason = await _unitOfWork.GetRepository<CancelReason>().GetByIdAsync(updateStatusOrderDto.CancelReasonId);
 
-                        productItemRepository.Update(productItem);
+                        if (cancelReason == null)
+                        {
+                            throw new BaseException.NotFoundException("not_found", $"Cancel Reason not found. {existingOrder.CancelReasonId}");
+                        }
+
+                        existingOrder.CancelReasonId = updateStatusOrderDto.CancelReasonId;
+
+                        // Retrieve the order details to update product stock
+                        var orderDetailRepository = _unitOfWork.GetRepository<OrderDetail>();
+                        var orderDetails = await orderDetailRepository.Entities
+                            .Where(od => od.OrderId == updateStatusOrderDto.OrderId && !od.DeletedTime.HasValue)
+                            .ToListAsync();
+
+                        var productItemRepository = _unitOfWork.GetRepository<ProductItem>();
+
+                        // Add back the product quantities to the stock
+                        foreach (var detail in orderDetails)
+                        {
+                            var productItem = await productItemRepository.Entities
+                                .FirstOrDefaultAsync(p => p.Id == detail.ProductItemId && !p.DeletedTime.HasValue);
+
+                            if (productItem == null)
+                            {
+                                throw new BaseException.NotFoundException("product_item_not_found", $"Product Item {detail.ProductItemId} not found.");
+                            }
+
+                            productItem.QuantityInStock += detail.ProductQuantity;
+
+                            productItemRepository.Update(productItem);
+                        }
                     }
+
+                    // Update order status
+                    existingOrder.Status = updateStatusOrderDto.Status;
+                    existingOrder.LastUpdatedBy = userId;
+                    existingOrder.LastUpdatedTime = DateTime.UtcNow;
+
+                    // Create a new status change record after updating the order status
+                    var statusChangeDto = new StatusChangeForCreationDto
+                    {
+                        OrderId = updateStatusOrderDto.OrderId,
+                        Status = updateStatusOrderDto.Status
+                    };
+
+                    repository.Update(existingOrder);
+                    await _statusChangeService.Create(statusChangeDto, userId);
+
+                    // Update product sold count if the new status is "Shipped"
+                    if (updateStatusOrderDto.Status == "Shipped")
+                    {
+                        await _productService.UpdateProductSoldCountAsync(updateStatusOrderDto.OrderId);
+                    }
+
+                    await _unitOfWork.SaveAsync();
+                    _unitOfWork.CommitTransaction();
+
+                    return true;
                 }
-
-                // Update order status
-                existingOrder.Status = updateStatusOrderDto.Status;
-                existingOrder.LastUpdatedBy = userId;
-                existingOrder.LastUpdatedTime = DateTime.UtcNow;
-
-                // Create a new status change record after updating the order status
-                var statusChangeDto = new StatusChangeForCreationDto
+                catch (Exception)
                 {
-                    OrderId = updateStatusOrderDto.OrderId,
-                    Status = updateStatusOrderDto.Status
-                };
-
-                repository.Update(existingOrder);
-                await _statusChangeService.Create(statusChangeDto, userId);
-
-                // Update product sold count if the new status is "Shipped"
-                if (updateStatusOrderDto.Status == "Shipped")
-                {
-                    await _productService.UpdateProductSoldCountAsync(updateStatusOrderDto.OrderId);
+                    _unitOfWork.RollBack();
+                    throw;
                 }
-
-                await _unitOfWork.SaveAsync();
-                _unitOfWork.CommitTransaction();
-
-                return true;
             }
-            catch (Exception)
-            {
-                _unitOfWork.RollBack();
-                throw;
-            }
-        }
         public async Task<IList<OrderResponseModel>> GetOrdersBySellerUserIdAsync(Guid userId)
         {
             var orderRepository = _unitOfWork.GetRepository<Order>();
@@ -659,6 +659,5 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.BadRequestException("invalid_phone_format", "Phone number must be numeric, start with 0, and be 10 or 11 digits long.");
             }
         }
-
     }
 }
