@@ -4,6 +4,8 @@ using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.Core.Common;
+using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.ProductItemModelViews;
 using HandmadeProductManagement.ModelViews.VariationCombinationModelViews;
 using HandmadeProductManagement.ModelViews.VariationModelViews;
@@ -33,11 +35,12 @@ namespace HandmadeProductManagement.Services.Service
         {
             // Step 1: Get the product entity
             var product = await _unitOfWork.GetRepository<Product>().Entities
-                .FirstOrDefaultAsync(p => p.Id.ToString() == productId && (!p.DeletedTime.HasValue || p.DeletedBy == null)) ?? throw new BaseException.NotFoundException("product_not_found", $"Product with ID {productId} not found.");
+                .FirstOrDefaultAsync(p => p.Id.ToString() == productId && (!p.DeletedTime.HasValue || p.DeletedBy == null))
+                ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageProductNotFound);
 
             if (product.CreatedBy != userId)
             {
-                throw new BaseException.ForbiddenException("forbidden", $"You have no permission to access this resource.");
+                throw new BaseException.ForbiddenException(StatusCodeHelper.Forbidden.ToString(), Constants.ErrorMessageForbidden);
             }
 
             // Step 2: Get all existing variation options for this product
@@ -54,7 +57,7 @@ namespace HandmadeProductManagement.Services.Service
 
             if (variationOptionExists.Count != allVariationOptionIds.Count)
             {
-                throw new BaseException.NotFoundException("variation_option_not_found", "Some variation options do not exist.");
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageVariationOptionNotFound);
             }
 
             // Step 5: Check if each provided variation option already exists in the product
@@ -70,7 +73,7 @@ namespace HandmadeProductManagement.Services.Service
 
             if (!newVariationCombinations.Any())
             {
-                throw new BaseException.BadRequestException("duplicate_combination", "All provided variation options are already associated with the product.");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageDuplicateCombination);
             }
 
             // Step 7: Validate the new combinations and ensure they are valid
@@ -87,7 +90,7 @@ namespace HandmadeProductManagement.Services.Service
 
                 if (variationOptionIds.Count != variationIds.Count)
                 {
-                    throw new BaseException.BadRequestException("invalid_combination", "A combination cannot have multiple options from the same variation.");
+                    throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidCombination);
                 }
 
                 // Step 7.2: Ensure that the new options are fully combined with all other existing options
@@ -98,7 +101,7 @@ namespace HandmadeProductManagement.Services.Service
                     var missingVariationOptions = existingVariation.Options.Select(opt => opt.Id).ToList();
                     if (!variationOptionIds.Any(id => missingVariationOptions.Contains(id)))
                     {
-                        throw new BaseException.BadRequestException("incomplete_combinations", "The provided combination is missing options from other variations.");
+                        throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageIncompleteCombinations);
                     }
                 }
 
@@ -112,7 +115,7 @@ namespace HandmadeProductManagement.Services.Service
 
                 if (existingProductItem != null)
                 {
-                    throw new BaseException.BadRequestException("duplicate_combination", "This product variation combination already exists.");
+                    throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageDuplicateCombination);
                 }
             }
 
@@ -153,12 +156,13 @@ namespace HandmadeProductManagement.Services.Service
             // Validate id format
             if (!Guid.TryParse(productId, out var guidProductId))
             {
-                throw new BaseException.BadRequestException("invalid_input", "Product ID is not in a valid GUID format.");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat);
             }
 
             var productItemEntity = await _unitOfWork.GetRepository<ProductItem>().Entities
-                .FirstOrDefaultAsync(pi => pi.ProductId == productId && (!pi.DeletedTime.HasValue || pi.DeletedBy == null)) ?? throw new BaseException.NotFoundException("not_found", "Product item not found");
-           
+                .FirstOrDefaultAsync(pi => pi.ProductId == productId && (!pi.DeletedTime.HasValue || pi.DeletedBy == null))
+                ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageProductItemNotFound);
+
             var productItemDto = _mapper.Map<ProductItemDto>(productItemEntity);
             return productItemDto;
         }
@@ -170,7 +174,7 @@ namespace HandmadeProductManagement.Services.Service
             var validationResult = await _creationValidator.ValidateAsync(productItemDto);
             if (!validationResult.IsValid)
             {
-                throw new BaseException.BadRequestException("validation_failed", validationResult.Errors.First().ErrorMessage);
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageValidationFailed);
             }
 
             var productItemEntity = _mapper.Map<ProductItem>(productItemDto);
@@ -190,13 +194,13 @@ namespace HandmadeProductManagement.Services.Service
             // Validate id format
             if (!Guid.TryParse(id, out var guidId))
             {
-                throw new BaseException.BadRequestException("invalid_input", "ID is not in a valid GUID format.");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat);
             }
 
             var validationResult = await _updateValidator.ValidateAsync(productItemDto);
             if (!validationResult.IsValid)
             {
-                throw new BaseException.BadRequestException("validation_failed", validationResult.Errors.First().ErrorMessage);
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageValidationFailed);
             }
 
             var productItemEntity = await _unitOfWork.GetRepository<ProductItem>().Entities
@@ -205,16 +209,17 @@ namespace HandmadeProductManagement.Services.Service
             // Get the associated product to check the shop ownership
             var productRepo = _unitOfWork.GetRepository<Product>();
             var productEntity = await productRepo.Entities
-                .FirstOrDefaultAsync(p => p.Id == productItemEntity.ProductId) ?? throw new BaseException.NotFoundException("not_found", "Associated product not found.");
+                .FirstOrDefaultAsync(p => p.Id == productItemEntity.ProductId)
+                ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageProductNotFound);
 
             if (productItemEntity == null)
             {
-                throw new BaseException.NotFoundException("not_found", "Product item not found");
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageProductItemNotFound);
             }
 
             if (productItemEntity.CreatedBy != userId)
             {
-                throw new BaseException.ForbiddenException("forbidden", "You do not have permission to access this resource.");
+                throw new BaseException.ForbiddenException(StatusCodeHelper.Forbidden.ToString(), Constants.ErrorMessageForbiddenAccess);
             }
 
             if (productItemDto.Price.HasValue)
@@ -237,14 +242,13 @@ namespace HandmadeProductManagement.Services.Service
             return true;
         }
 
-
         // Soft delete a product item
         public async Task<bool> Delete(string id, string userId)
         {
             // Validate id format
             if (!Guid.TryParse(id, out var guidId))
             {
-                throw new BaseException.BadRequestException("invalid_input", "ID is not in a valid GUID format.");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat);
             }
 
             var productItemRepo = _unitOfWork.GetRepository<ProductItem>();
@@ -252,16 +256,17 @@ namespace HandmadeProductManagement.Services.Service
 
             var productRepo = _unitOfWork.GetRepository<Product>();
             var productEntity = await productRepo.Entities
-                .FirstOrDefaultAsync(p => p.Id == productItemEntity.ProductId) ?? throw new BaseException.NotFoundException("not_found", "Associated product not found.");
+                .FirstOrDefaultAsync(p => p.Id == productItemEntity.ProductId)
+                ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageProductNotFound);
 
             if (productItemEntity == null || productItemEntity.DeletedTime.HasValue || productItemEntity.DeletedBy != null)
             {
-                throw new BaseException.NotFoundException("not_found", "Product item not found");
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageProductItemNotFound);
             }
 
             if (productItemEntity.CreatedBy != userId)
             {
-                throw new BaseException.ForbiddenException("forbidden", "You do not have permission to access this resource.");
+                throw new BaseException.ForbiddenException(StatusCodeHelper.Forbidden.ToString(), Constants.ErrorMessageForbiddenAccess);
             }
 
             productItemEntity.DeletedTime = DateTime.UtcNow;
@@ -272,5 +277,6 @@ namespace HandmadeProductManagement.Services.Service
 
             return true;
         }
+
     }
 }

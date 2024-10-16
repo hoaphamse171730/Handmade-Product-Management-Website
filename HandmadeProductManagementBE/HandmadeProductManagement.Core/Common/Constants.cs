@@ -154,6 +154,11 @@ public static class Constants
     public const string ErrorMessageProductConfigurationNotFound = "Product Configuration not found.";
     public const string ErrorMessageFileNotFound = "File not found";
     public const string ErrorMessageImageNotFound = "Image not found";
+    public const string ErrorMessageVariationOptionNotFound = "Some variation options do not exist.";
+    public const string ErrorMessageDuplicateCombination = "All provided variation options are already associated with the product.";
+    public const string ErrorMessageInvalidCombination = "A combination cannot have multiple options from the same variation.";
+    public const string ErrorMessageIncompleteCombinations = "The provided combination is missing options from other variations.";
+
 
     #endregion
 
