@@ -52,6 +52,8 @@ public static class Constants
     public const string PaymentStatusCompleted = "Completed";
     public const string PaymentStatusExpired = "Expired";
     public const string PaymentStatusRefunded = "Refunded";
+    public const string PaymentStatusSuccess = "Success";
+    public const string PaymentStatusFailed = "Failed";
 
     #endregion
 
@@ -135,7 +137,15 @@ public static class Constants
     public const string ErrorMessageInvalidDateRange = "toDate must be after fromDate";
     public const string ErrorMessageNoItemsInCart = "No items found in the cart.";
     public const string ErrorMessageInvalidUserId = "The provided user ID is invalid.";
-
+    public const string ErrorMessagePaymentNotFound = "Payment not found.";
+    public const string ErrorMessageInvalidPaymentStatus = "Cannot create payment detail for payment with status '{0}'.";
+    public const string ErrorMessageInvalidPaymentId = "Please input payment id.";
+    public const string ErrorMessageInvalidPaymentIdFormat = "Payment ID format is invalid. Example: 123e4567-e89b-12d3-a456-426614174000.";
+    public const string ErrorMessagePleaseInputStatus = "Please input status.";
+    public const string ErrorMessageInvalidStatusFormat = "Status must be Success or Failed.";
+    public const string ErrorMessagePleaseInputMethod = "Please input method.";
+    public const string ErrorMessageInvalidMethodFormat = "Method cannot contain numbers or special characters.";
+    public const string ErrorMessageInvalidExternalTransactionFormat = "External transaction can only contain alphanumeric characters.";
 
     #endregion
 
