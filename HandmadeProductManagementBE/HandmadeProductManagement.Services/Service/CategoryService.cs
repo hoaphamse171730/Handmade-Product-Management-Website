@@ -113,7 +113,7 @@ namespace HandmadeProductManagement.Services.Service
 
             var validationResult = await _updatePromotionValidator.ValidateAsync(category);
             if (!validationResult.IsValid)
-                throw new ValidationException(validationResult.Errors);
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), validationResult.Errors.First().ErrorMessage);
 
             // Kiểm tra xem promotionId có tồn tại hay không
             var promotionExists = await _unitOfWork.GetRepository<Promotion>()

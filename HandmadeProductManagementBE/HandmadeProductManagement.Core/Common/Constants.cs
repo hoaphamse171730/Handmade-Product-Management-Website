@@ -123,7 +123,6 @@ public static class Constants
     public const string UserNotFoundErrorMessage = "User not found.";
     public const string RoleAssignmentFailedErrorMessage = "Failed to add role to user";
     public const string ErrorMessageRoleAssignmentFailed = "Failed to assign role to the user";
-    public const string ErrorMessageValidationFailed = "Validation failed.";
     public const string ErrorMessageInvalidGuidFormat = "ID is not in a valid GUID format.";
     public const string ErrorMessageCancelReasonNotFound = "Cancel Reason not found.";
     public const string ErrorMessageCannotAddOwnProduct = "You cannot add your own product to the cart.";
