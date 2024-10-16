@@ -179,6 +179,13 @@ public static class Constants
     public const string ErrorMessageReviewAlreadyExists = "User has already reviewed this product.";
     public const string ErrorMessageInvalidRating = "Invalid rating. It must be between 1 and 5.";
     public const string ErrorMessageReviewNotFoundSoftDeleted = "Cannot update the review which has been soft-delete.";
+    public const string ErrorMessageUserActiveShop = "User already has an active shop.";
+    public const string ErrorMessageShopNotFoundForUser = "Shop not found for the given user.";
+    public const string ErrorMessageInvalidShopName = "Please input shop name.";
+    public const string ErrorMessageInvalidShopNameFormat = "Shop name can only contain letters and spaces.";
+    public const string ErrorMessageInvalidShopDescription = "Please input shop description.";
+    public const string ErrorMessageInvalidShopDescriptionFormat = "Shop description cannot contain special characters.";
+
 
     #endregion
 

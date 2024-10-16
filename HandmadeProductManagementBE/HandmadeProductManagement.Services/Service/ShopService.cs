@@ -2,6 +2,8 @@
 using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.Core.Common;
+using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.Core.Utils;
 using HandmadeProductManagement.ModelViews.PaymentModelViews;
 using HandmadeProductManagement.ModelViews.ShopModelViews;
@@ -29,7 +31,7 @@ namespace HandmadeProductManagement.Services.Service
                 u => u.Id.ToString() == userId && !u.DeletedTime.HasValue);
             if (!userExists)
             {
-                throw new BaseException.NotFoundException("user_not_found", "User not found.");
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageUserNotFound);
             }
 
             var repository = _unitOfWork.GetRepository<Shop>();
@@ -42,7 +44,7 @@ namespace HandmadeProductManagement.Services.Service
                 if (existingShop.DeletedTime == null)
                 {
                     throw new BaseException.BadRequestException(
-                        "user_active_shop", "User already has an active shop.");
+                        StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageUserActiveShop);
                 }
                 else
                 {
@@ -83,12 +85,14 @@ namespace HandmadeProductManagement.Services.Service
             var userExists = await userRepository.Entities.AnyAsync(u => u.Id.ToString() == userId && !u.DeletedTime.HasValue);
             if (!userExists)
             {
-                throw new BaseException.NotFoundException("user_not_found", "User not found.");
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageUserNotFound);
             }
 
             var shopRepository = _unitOfWork.GetRepository<Shop>();
             var shop = await shopRepository.Entities
-                .FirstOrDefaultAsync(s => s.UserId.ToString() == userId && !s.DeletedTime.HasValue) ?? throw new BaseException.NotFoundException("shop_not_found", "Shop not found.");
+                .FirstOrDefaultAsync(s => s.UserId.ToString() == userId && !s.DeletedTime.HasValue)
+                ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageShopNotFound);
+
             shop.DeletedBy = userId;
             shop.DeletedTime = DateTime.UtcNow;
 
@@ -102,12 +106,12 @@ namespace HandmadeProductManagement.Services.Service
         {
             if (pageNumber <= 0)
             {
-                throw new BaseException.BadRequestException("invalid_input", "Page must be greater than 0.");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidPageNumber);
             }
 
             if (pageSize <= 0)
             {
-                throw new BaseException.BadRequestException("invalid_input", "Page size must be greater than 0.");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidPageSize);
             }
 
             var repository = _unitOfWork.GetRepository<Shop>();
@@ -136,13 +140,13 @@ namespace HandmadeProductManagement.Services.Service
             var userExists = await userRepository.Entities.AnyAsync(u => u.Id == userId && !u.DeletedTime.HasValue);
             if (!userExists)
             {
-                throw new BaseException.NotFoundException("user_not_found", "User not found.");
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageUserNotFound);
             }
 
             var repository = _unitOfWork.GetRepository<Shop>();
             var shop = await repository.Entities
-                .FirstOrDefaultAsync(s => s.UserId == userId && !s.DeletedTime.HasValue) ?? throw new BaseException.NotFoundException(
-                    "shop_not_found", "Shop not found for the given user.");
+                .FirstOrDefaultAsync(s => s.UserId == userId && !s.DeletedTime.HasValue)
+                ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageShopNotFoundForUser);
 
             return new ShopResponseModel
             {
@@ -160,21 +164,21 @@ namespace HandmadeProductManagement.Services.Service
             var existingShop = await repository.Entities
                 .FirstOrDefaultAsync(s => s.UserId.ToString() == userId && !s.DeletedTime.HasValue);
 
-            if (shop == null)
+            if (existingShop == null)
             {
-                throw new BaseException.NotFoundException("shop_not_found", "Shop not found.");
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageShopNotFound);
             }
 
             if (!string.IsNullOrWhiteSpace(shop.Name))
             {
                 if (string.IsNullOrWhiteSpace(shop.Name))
                 {
-                    throw new BaseException.BadRequestException("invalid_shop_name", "Please input shop name.");
+                    throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidShopName);
                 }
 
                 if (Regex.IsMatch(shop.Name, @"[^a-zA-Z\s]"))
                 {
-                    throw new BaseException.BadRequestException("invalid_shop_name_format", "Shop name can only contain letters and spaces.");
+                    throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidShopNameFormat);
                 }
 
                 existingShop.Name = shop.Name;
@@ -184,12 +188,12 @@ namespace HandmadeProductManagement.Services.Service
             {
                 if (string.IsNullOrWhiteSpace(shop.Description))
                 {
-                    throw new BaseException.BadRequestException("invalid_shop_description", "Please input shop description.");
+                    throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidShopDescription);
                 }
 
                 if (Regex.IsMatch(shop.Description, @"[^a-zA-Z0-9\s]"))
                 {
-                    throw new BaseException.BadRequestException("invalid_shop_description_format", "Shop description cannot contain special characters.");
+                    throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidShopDescriptionFormat);
                 }
 
                 existingShop.Description = shop.Description;
@@ -208,22 +212,22 @@ namespace HandmadeProductManagement.Services.Service
         {
             if (string.IsNullOrWhiteSpace(shop.Name))
             {
-                throw new BaseException.BadRequestException("invalid_shop_name", "Please input shop name.");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidShopName);
             }
 
             if (Regex.IsMatch(shop.Name, @"[^a-zA-Z\s]"))
             {
-                throw new BaseException.BadRequestException("invalid_shop_name_format", "Shop name can only contain letters and spaces.");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidShopNameFormat);
             }
 
             if (string.IsNullOrWhiteSpace(shop.Description))
             {
-                throw new BaseException.BadRequestException("invalid_shop_description", "Please input shop description.");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidShopDescription);
             }
 
             if (Regex.IsMatch(shop.Description, @"[^a-zA-Z0-9\s]"))
             {
-                throw new BaseException.BadRequestException("invalid_shop_description_format", "Shop description cannot contain special characters.");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidShopDescriptionFormat);
             }
         }
 
@@ -231,17 +235,18 @@ namespace HandmadeProductManagement.Services.Service
         {
             if (string.IsNullOrWhiteSpace(shopId))
             {
-                throw new BaseException.BadRequestException("invalid_shop_id", "Shop ID cannot be null or empty.");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageEmptyId);
             }
 
             if (!Guid.TryParse(shopId, out _))
             {
-                throw new BaseException.BadRequestException("invalid_shop_id", "Shop ID is not a valid GUID.");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat);
             }
 
             var shop = await _unitOfWork.GetRepository<Shop>().Entities
                                         .Include(s => s.Products)
-                                        .FirstOrDefaultAsync(s => s.Id == shopId) ?? throw new BaseException.NotFoundException("shop_not_found", "Shop not found.");
+                                        .FirstOrDefaultAsync(s => s.Id == shopId) ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageShopNotFound);
+
             var activeProducts = shop.Products.Where(p => p.DeletedTime == null).ToList();
 
             if (activeProducts == null || !activeProducts.Any())
