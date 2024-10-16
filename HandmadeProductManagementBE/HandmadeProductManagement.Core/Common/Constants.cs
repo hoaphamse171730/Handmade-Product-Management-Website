@@ -26,6 +26,7 @@ public static class Constants
     public const string OrderStatusReturnFailed = "Return Failed";
     public const string OrderStatusReturned = "Returned";
     public const string OrderStatusRefunded = "Refunded";
+    public const string OrderStatusPaymentFailed = "Payment Failed";
     public const string OrderStatusCanceled = "Canceled";
     public const string OrderStatusClosed = "Closed";
 
@@ -71,7 +72,7 @@ public static class Constants
 
     #region Error Messages
 
-    public const string ForbiddenAccessMessage = "You have no permission to access this order.";
+    public const string ErrorMessageForbidden = "You have no permission to access this order.";
     public const string OrderNotFoundMessage = "Order not found.";
     public const string ErrorMessageEmptyOrderId = "Order ID is required.";
     public const string ErrorMessageInvalidOrderIdFormat = "Order ID format is invalid.";
@@ -131,6 +132,11 @@ public static class Constants
     public const string ErrorMessageCategoryNameExists = "Category name already exists";
     public const string ErrorMessageInvalidIdFormat = "The provided ID is not in a valid GUID format.";
     public const string ErrorMessagePromotionNotFound = "Promotion not found.";
+    public const string ErrorMessageInvalidShopId = "Invalid shopId";
+    public const string ErrorMessageInvalidDateRange = "toDate must be after fromDate";
+    public const string ErrorMessageNoItemsInCart = "No items found in the cart.";
+    public const string ErrorMessageInvalidUserId = "The provided user ID is invalid.";
+
 
     #endregion
 

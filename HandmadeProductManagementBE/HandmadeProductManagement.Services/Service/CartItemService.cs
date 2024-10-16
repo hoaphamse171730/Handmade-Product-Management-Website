@@ -264,11 +264,12 @@ namespace HandmadeProductManagement.Services.Service
                 if (promotion != null)
                 {
                     await _promotionService.UpdatePromotionStatusByRealtime(promotion.Id);
-                    if (promotion.Status.Equals("Active", StringComparison.OrdinalIgnoreCase))
+                    if (promotion.Status.Equals(Constants.PromotionStatusActive, StringComparison.OrdinalIgnoreCase))
                     {
                         discountRate = 1 - (decimal)promotion.DiscountRate;
                     }
                 }
+
                 totalPrice += productItemPrice * productQuantity * discountRate;
             }
 
