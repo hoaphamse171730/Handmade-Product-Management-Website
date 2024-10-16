@@ -121,7 +121,7 @@ public class AuthenticationService : IAuthenticationService
             }
 
             await _emailService.SendEmailConfirmationAsync(user.Email!, registerModelView.ClientUri);
-            await AssignRoleToUser(user.Id.ToString(), "Seller");
+            await AssignRoleToUser(user.Id.ToString(), Constants.RoleSeller);
 
             return BaseResponse<string>.OkResponse(user.Id.ToString());
         }
@@ -335,7 +335,7 @@ public class AuthenticationService : IAuthenticationService
                 return BaseResponse<string>.FailResponse(Constants.ErrorMessageUserCreationFailed);
             }
 
-            await _userManager.AddToRoleAsync(user, "Customer");
+            await _userManager.AddToRoleAsync(user, Constants.RoleCustomer);
         }
 
         var userToken = await _tokenService.CreateToken(user);

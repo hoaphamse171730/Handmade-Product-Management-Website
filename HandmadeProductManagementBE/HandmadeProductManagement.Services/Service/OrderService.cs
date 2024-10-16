@@ -420,7 +420,8 @@ namespace HandmadeProductManagement.Services.Service
 
             if (updateStatusOrderDto.Status != Constants.OrderStatusCanceled && updateStatusOrderDto.CancelReasonId != null)
             {
-                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), $"CancelReasonId must be null when status is not {Constants.OrderStatusCanceled}");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(),
+                    Constants.ErrorMessageInvalidCancelReason);
             }
 
             var repository = _unitOfWork.GetRepository<Order>();
@@ -435,22 +436,22 @@ namespace HandmadeProductManagement.Services.Service
 
             // Validate Status Flow
             var validStatusTransitions = new Dictionary<string, List<string>>
-    {
-        { Constants.OrderStatusPending, new List<string> { Constants.OrderStatusCanceled, Constants.OrderStatusAwaitingPayment } },
-        { Constants.OrderStatusAwaitingPayment, new List<string> { Constants.OrderStatusCanceled, Constants.OrderStatusProcessing } },
-        { Constants.OrderStatusProcessing, new List<string> { Constants.OrderStatusDelivering } },
-        { Constants.OrderStatusDelivering, new List<string> { Constants.OrderStatusShipped, Constants.OrderStatusDeliveryFailed } },
-        { Constants.OrderStatusDeliveryFailed, new List<string> { Constants.OrderStatusOnHold } },
-        { Constants.OrderStatusOnHold, new List<string> { Constants.OrderStatusDeliveringRetry, Constants.OrderStatusRefundRequested } },
-        { Constants.OrderStatusRefundRequested, new List<string> { Constants.OrderStatusRefundDenied, Constants.OrderStatusRefundApprove } },
-        { Constants.OrderStatusRefundApprove, new List<string> { Constants.OrderStatusReturning } },
-        { Constants.OrderStatusReturning, new List<string> { Constants.OrderStatusReturnFailed, Constants.OrderStatusReturned } },
-        { Constants.OrderStatusReturnFailed, new List<string> { Constants.OrderStatusOnHold } },
-        { Constants.OrderStatusReturned, new List<string> { Constants.OrderStatusRefunded } },
-        { Constants.OrderStatusRefunded, new List<string> { Constants.OrderStatusClosed } },
-        { Constants.OrderStatusCanceled, new List<string> { Constants.OrderStatusClosed } },
-        { Constants.OrderStatusDeliveringRetry, new List<string> { Constants.OrderStatusDelivering } }
-    };
+            {
+                { Constants.OrderStatusPending, new List<string> { Constants.OrderStatusCanceled, Constants.OrderStatusAwaitingPayment } },
+                { Constants.OrderStatusAwaitingPayment, new List<string> { Constants.OrderStatusCanceled, Constants.OrderStatusProcessing } },
+                { Constants.OrderStatusProcessing, new List<string> { Constants.OrderStatusDelivering } },
+                { Constants.OrderStatusDelivering, new List<string> { Constants.OrderStatusShipped, Constants.OrderStatusDeliveryFailed } },
+                { Constants.OrderStatusDeliveryFailed, new List<string> { Constants.OrderStatusOnHold } },
+                { Constants.OrderStatusOnHold, new List<string> { Constants.OrderStatusDeliveringRetry, Constants.OrderStatusRefundRequested } },
+                { Constants.OrderStatusRefundRequested, new List<string> { Constants.OrderStatusRefundDenied, Constants.OrderStatusRefundApprove } },
+                { Constants.OrderStatusRefundApprove, new List<string> { Constants.OrderStatusReturning } },
+                { Constants.OrderStatusReturning, new List<string> { Constants.OrderStatusReturnFailed, Constants.OrderStatusReturned } },
+                { Constants.OrderStatusReturnFailed, new List<string> { Constants.OrderStatusOnHold } },
+                { Constants.OrderStatusReturned, new List<string> { Constants.OrderStatusRefunded } },
+                { Constants.OrderStatusRefunded, new List<string> { Constants.OrderStatusClosed } },
+                { Constants.OrderStatusCanceled, new List<string> { Constants.OrderStatusClosed } },
+                { Constants.OrderStatusDeliveringRetry, new List<string> { Constants.OrderStatusDelivering } }
+            };
 
             var allValidStatuses = validStatusTransitions.Keys
                 .Concat(validStatusTransitions.Values.SelectMany(v => v))
@@ -459,13 +460,15 @@ namespace HandmadeProductManagement.Services.Service
 
             if (!allValidStatuses.Contains(updateStatusOrderDto.Status))
             {
-                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), $"Status {updateStatusOrderDto.Status} is not a valid status.");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(),
+                    string.Format(Constants.ErrorMessageInvalidStatus, updateStatusOrderDto.Status));
             }
 
             if (!(validStatusTransitions.ContainsKey(existingOrder.Status) &&
                 validStatusTransitions[existingOrder.Status].Contains(updateStatusOrderDto.Status)))
             {
-                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), $"Cannot transition from {existingOrder.Status} to {updateStatusOrderDto.Status}.");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(),
+                    string.Format(Constants.ErrorMessageCannotTransition, existingOrder.Status, updateStatusOrderDto.Status));
             }
 
             _unitOfWork.BeginTransaction();
@@ -477,11 +480,13 @@ namespace HandmadeProductManagement.Services.Service
                 {
                     if (string.IsNullOrWhiteSpace(updateStatusOrderDto.CancelReasonId))
                     {
-                        throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "CancelReasonId is required when updating status to {Canceled}.");
+                        throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(),
+                            Constants.ErrorMessageCancelReasonRequired);
                     }
 
                     var cancelReason = await _unitOfWork.GetRepository<CancelReason>().GetByIdAsync(updateStatusOrderDto.CancelReasonId)
-                        ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), $"Cancel Reason not found. {existingOrder.CancelReasonId}");
+                        ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(),
+                            string.Format(Constants.ErrorMessageCancelReasonNotFound, existingOrder.CancelReasonId));
 
                     existingOrder.CancelReasonId = updateStatusOrderDto.CancelReasonId;
 
@@ -498,7 +503,8 @@ namespace HandmadeProductManagement.Services.Service
                     {
                         var productItem = await productItemRepository.Entities
                             .FirstOrDefaultAsync(p => p.Id == detail.ProductItemId && !p.DeletedTime.HasValue)
-                            ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), $"Product Item {detail.ProductItemId} not found.");
+                            ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(),
+                                string.Format(Constants.ErrorMessageProductItemNotFound, detail.ProductItemId));
 
                         productItem.QuantityInStock += detail.ProductQuantity;
 

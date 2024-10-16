@@ -38,6 +38,13 @@ public static class Constants
 
     #endregion
 
+    #region Category Status
+
+    public const string CategoryStatusActive = "Active";
+    public const string CategoryStatusInactive = "Inactive";
+
+    #endregion
+
     #region Payment Status
 
     public const string PaymentStatusPending = "Pending";
@@ -58,6 +65,7 @@ public static class Constants
 
     public const string RoleAdmin = "Admin";
     public const string RoleSeller = "Seller";
+    public const string RoleCustomer = "Customer";
 
     #endregion
 
@@ -80,11 +88,11 @@ public static class Constants
     public const string ErrorMessageInvalidCustomerNameFormat = "Customer name can only contain letters and spaces.";
     public const string ErrorMessageInvalidPhoneFormat = "Phone number must be numeric, start with 0, and be 10 or 11 digits long.";
     public const string ErrorMessageUserNotFound = "User not found.";
+    public const string ErrorMessageCannotTransition = "Cannot transition from {0} to {1}.";
     public const string ErrorMessageNoOrdersFound = "There are no orders for this user.";
     public const string ErrorMessageInvalidStatus = "Status cannot be null or empty.";
     public const string ErrorMessageInvalidCancelReason = "CancelReasonId must be null when status is not Canceled.";
     public const string ErrorMessageOrderClosed = "Order was closed.";
-    public const string ErrorMessageInvalidStatusTransition = "Cannot transition from {0} to {1}.";
     public const string ErrorMessageCancelReasonRequired = "CancelReasonId is required when updating status to Canceled.";
     public const string ErrorMessageShopNotFound = "Shop not found for the provided user.";
     public const string ErrorMessageInvalidAddress = "Address cannot be null or empty.";
@@ -120,6 +128,9 @@ public static class Constants
     public const string ErrorMessageCannotAddOwnProduct = "You cannot add your own product to the cart.";
     public const string ErrorMessageInsufficientStockForUpdate = "Not enough quantity in stock for the updated cart item.";
     public const string ErrorMessageCartItemNotFound = "Cart item not found.";
+    public const string ErrorMessageCategoryNameExists = "Category name already exists";
+    public const string ErrorMessageInvalidIdFormat = "The provided ID is not in a valid GUID format.";
+    public const string ErrorMessagePromotionNotFound = "Promotion not found.";
 
     #endregion
 
