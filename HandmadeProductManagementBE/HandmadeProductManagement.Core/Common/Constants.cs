@@ -164,6 +164,16 @@ public static class Constants
     public const string ErrorMessageMinRatingOutOfRange = "MinRating must be between 0 and 5.";
     public const string ErrorMessageProductAlreadyHasStatus = "The product already has {0} status.";
     public const string ErrorMessageNameInUse = "Name is already in use.";
+    public const string ErrorMessageNullReplyModel = "Reply model cannot be null.";
+    public const string ErrorMessageInvalidReviewIdFormat = "Invalid reviewId format.";
+    public const string ErrorMessageReviewNotFound = "Review not found.";
+    public const string ErrorMessageUnauthorizedShopAccess = "User does not own this shop.";
+    public const string ErrorMessageShopCannotReply = "The specified shop cannot reply to this review.";
+    public const string ErrorMessageReplyAlreadyExists = "This review already has a reply.";
+    public const string ErrorMessageInvalidReplyIdFormat = "Invalid replyId format.";
+    public const string ErrorMessageReplyNotFound = "Reply not found.";
+    public const string ErrorMessageUnauthorizedUpdate = "User does not own the shop associated with this reply.";
+    public const string ErrorMessageSoftDeletedReply = "Cannot update the review which has been soft-deleted.";
 
     #endregion
 

@@ -2,6 +2,8 @@
 using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.Core.Common;
+using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.ReplyModelViews;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,16 +23,17 @@ namespace HandmadeProductManagement.Services.Service
         {
             if (pageNumber <= 0)
             {
-                throw new BaseException.BadRequestException("invalid_page_number", "Page Number must be greater than zero.");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidPageNumber);
             }
+
             if (pageSize <= 0)
             {
-                throw new BaseException.BadRequestException("invalid_page_size", "Page Size must be greater than zero.");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidPageSize);
             }
 
             var replies = await _unitOfWork.GetRepository<Reply>()
                                            .Entities
-                                           .Where(r => r.DeletedTime == null) 
+                                           .Where(r => r.DeletedTime == null)
                                            .Skip((pageNumber - 1) * pageSize)
                                            .Take(pageSize)
                                            .Select(r => new ReplyModel
@@ -50,17 +53,18 @@ namespace HandmadeProductManagement.Services.Service
         {
             if (string.IsNullOrWhiteSpace(replyId) || !Guid.TryParse(replyId, out _))
             {
-                throw new BaseException.BadRequestException("invalid_review_id_format", "Invalid reviewId format.");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat);
             }
 
             if (string.IsNullOrWhiteSpace(replyId))
             {
-                throw new BaseException.BadRequestException("invalid_reply_id", "Reply ID cannot be null or empty.");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageEmptyId);
             }
 
             var reply = await _unitOfWork.GetRepository<Reply>().Entities
-                                 .Where(r => r.Id == replyId && r.DeletedTime == null) 
-                                 .FirstOrDefaultAsync() ?? throw new BaseException.NotFoundException("reply_not_found", "Reply not found.");
+                                 .Where(r => r.Id == replyId && r.DeletedTime == null)
+                                 .FirstOrDefaultAsync() ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageReplyNotFound);
+
             return new ReplyModel
             {
                 Id = reply.Id,
@@ -73,36 +77,43 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<bool> CreateAsync(ReplyModel replyModel, Guid userId)
         {
-            if (string.IsNullOrWhiteSpace(userId.ToString()) || !Guid.TryParse(userId.ToString(), out _))
+            if (!Guid.TryParse(userId.ToString(), out _))
             {
-                throw new BaseException.BadRequestException("invalid_user_id_format", "Invalid userId format.");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat);
             }
 
             if (replyModel == null)
             {
-                throw new BaseException.BadRequestException("null_reply_model", "Reply model cannot be null.");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageNullReplyModel);
             }
 
             if (string.IsNullOrWhiteSpace(replyModel.ReviewId) || !Guid.TryParse(replyModel.ReviewId, out _))
             {
-                throw new BaseException.BadRequestException("invalid_review_id_format", "Invalid reviewId format.");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidReviewIdFormat);
             }
 
-            var review = await _unitOfWork.GetRepository<Review>().GetByIdAsync(replyModel.ReviewId) ?? throw new BaseException.NotFoundException("review_not_found", "Review not found.");
+            var review = await _unitOfWork.GetRepository<Review>().GetByIdAsync(replyModel.ReviewId)
+                ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageReviewNotFound);
+
             var shop = await _unitOfWork.GetRepository<Shop>()
-                             .Entities
-                             .FirstOrDefaultAsync(s => s.UserId == userId) ?? throw new BaseException.UnauthorizedException("unauthorized_shop_access", "User does not own this shop.");
+                .Entities
+                .FirstOrDefaultAsync(s => s.UserId == userId)
+                ?? throw new BaseException.UnauthorizedException(StatusCodeHelper.Unauthorized.ToString(), Constants.ErrorMessageUnauthorizedShopAccess);
+
             replyModel.ShopId = shop.Id;
 
             var product = await _unitOfWork.GetRepository<Product>()
-                                           .Entities
-                                           .FirstOrDefaultAsync(p => p.Id == review.ProductId && p.ShopId == shop.Id) ?? throw new BaseException.BadRequestException("shop_cannot_reply", "The specified shop cannot reply to this review.");
+                .Entities
+                .FirstOrDefaultAsync(p => p.Id == review.ProductId && p.ShopId == shop.Id)
+                ?? throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageShopCannotReply);
+
             var existingReply = await _unitOfWork.GetRepository<Reply>()
-                                       .Entities
-                                       .FirstOrDefaultAsync(r => r.ReviewId == replyModel.ReviewId);
+                .Entities
+                .FirstOrDefaultAsync(r => r.ReviewId == replyModel.ReviewId);
+
             if (existingReply != null)
             {
-                throw new BaseException.BadRequestException("reply_already_exists", "This review already has a reply.");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageReplyAlreadyExists);
             }
 
             var reply = new Reply
@@ -123,36 +134,37 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<bool> UpdateAsync(string replyId, Guid userId, ReplyModel updatedReply)
         {
-            if (string.IsNullOrWhiteSpace(userId.ToString()) || !Guid.TryParse(userId.ToString(), out _))
+            if (!Guid.TryParse(userId.ToString(), out _))
             {
-                throw new BaseException.BadRequestException("invalid_user_id_format", "Invalid userId format.");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat);
             }
 
             if (string.IsNullOrWhiteSpace(replyId) || !Guid.TryParse(replyId, out _))
             {
-                throw new BaseException.BadRequestException("invalid_review_id_format", "Invalid reviewId format.");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidReplyIdFormat);
             }
 
-            if (string.IsNullOrWhiteSpace(replyId))
-            {
-                throw new BaseException.BadRequestException("invalid_reply_id", "Reply ID cannot be null or empty.");
-            }
+            var existingReply = await _unitOfWork.GetRepository<Reply>().GetByIdAsync(replyId)
+                ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageReplyNotFound);
 
-            var existingReply = await _unitOfWork.GetRepository<Reply>().GetByIdAsync(replyId) ?? throw new BaseException.NotFoundException("reply_not_found", "Reply not found.");
             var shop = await _unitOfWork.GetRepository<Shop>()
                              .Entities
                              .FirstOrDefaultAsync(s => s.UserId == userId);
 
             if (shop == null || shop.Id != existingReply.ShopId)
             {
-                throw new BaseException.UnauthorizedException("unauthorized_update", "User does not own the shop associated with this reply.");
+                throw new BaseException.UnauthorizedException(StatusCodeHelper.Unauthorized.ToString(), Constants.ErrorMessageUnauthorizedUpdate);
             }
 
             // Validate that the reply belongs to the product associated with the review
-            var review = await _unitOfWork.GetRepository<Review>().GetByIdAsync(existingReply.ReviewId) ?? throw new BaseException.NotFoundException("review_not_found", "Review not found.");
+            var review = await _unitOfWork.GetRepository<Review>().GetByIdAsync(existingReply.ReviewId)
+                ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageReviewNotFound);
+
             var product = await _unitOfWork.GetRepository<Product>()
                                            .Entities
-                                           .FirstOrDefaultAsync(p => p.Id == review.ProductId && p.ShopId == shop.Id) ?? throw new BaseException.BadRequestException("unauthorized_update", "The specified shop cannot update this reply as it doesn't belong to the product of the review.");
+                                           .FirstOrDefaultAsync(p => p.Id == review.ProductId && p.ShopId == shop.Id)
+                ?? throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageUnauthorizedUpdate);
+
             if (!string.IsNullOrWhiteSpace(updatedReply.Content))
             {
                 existingReply.Content = updatedReply.Content;
@@ -160,7 +172,7 @@ namespace HandmadeProductManagement.Services.Service
 
             if (existingReply.DeletedTime != null)
             {
-                throw new BaseException.NotFoundException("review_not_found", "Cannot update the review which has been soft-delete.");
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageSoftDeletedReply);
             }
 
             existingReply.LastUpdatedBy = existingReply.ShopId;
@@ -176,32 +188,29 @@ namespace HandmadeProductManagement.Services.Service
         {
             if (string.IsNullOrWhiteSpace(replyId) || !Guid.TryParse(replyId, out _))
             {
-                throw new BaseException.BadRequestException("invalid_review_id_format", "Invalid reviewId format.");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidReplyIdFormat);
             }
 
-            if (string.IsNullOrWhiteSpace(userId.ToString()) || !Guid.TryParse(userId.ToString(), out _))
+            if (!Guid.TryParse(userId.ToString(), out _))
             {
-                throw new BaseException.BadRequestException("invalid_user_id_format", "Invalid userId format.");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat);
             }
 
-            if (string.IsNullOrWhiteSpace(replyId))
-            {
-                throw new BaseException.BadRequestException("invalid_reply_id", "Reply ID cannot be null or empty.");
-            }
+            var existingReply = await _unitOfWork.GetRepository<Reply>().GetByIdAsync(replyId)
+                ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageReplyNotFound);
 
-            var existingReply = await _unitOfWork.GetRepository<Reply>().GetByIdAsync(replyId) ?? throw new BaseException.NotFoundException("reply_not_found", "Reply not found.");
             var shop = await _unitOfWork.GetRepository<Shop>()
                              .Entities
                              .FirstOrDefaultAsync(s => s.UserId == userId);
 
             if (shop == null || shop.Id != existingReply.ShopId)
             {
-                throw new BaseException.UnauthorizedException("unauthorized_delete", "User does not own the shop associated with this reply.");
+                throw new BaseException.ForbiddenException(StatusCodeHelper.Forbidden.ToString(), Constants.ErrorMessageForbidden);
             }
 
             if (existingReply.DeletedTime != null)
             {
-                throw new BaseException.NotFoundException("review_not_found", "Cannot update the review which has been soft-delete.");
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageSoftDeletedReply);
             }
 
             existingReply.LastUpdatedBy = existingReply.ShopId;
@@ -216,24 +225,25 @@ namespace HandmadeProductManagement.Services.Service
         {
             if (string.IsNullOrWhiteSpace(replyId) || !Guid.TryParse(replyId, out _))
             {
-                throw new BaseException.BadRequestException("invalid_review_id_format", "Invalid reviewId format.");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidReplyIdFormat);
             }
 
             if (string.IsNullOrWhiteSpace(replyId))
             {
-                throw new BaseException.BadRequestException("invalid_reply_id", "Reply ID cannot be null or empty.");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat);
             }
 
-            var existingReply = await _unitOfWork.GetRepository<Reply>().GetByIdAsync(replyId) ?? throw new BaseException.NotFoundException("reply_not_found", "Reply not found.");
+            var existingReply = await _unitOfWork.GetRepository<Reply>().GetByIdAsync(replyId)
+                ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageReplyNotFound);
+
             var shop = await _unitOfWork.GetRepository<Shop>()
                              .Entities
                              .FirstOrDefaultAsync(s => s.UserId == userId);
 
             if (shop == null || shop.Id != existingReply.ShopId)
             {
-                throw new BaseException.UnauthorizedException("unauthorized_delete", "User does not own the shop associated with this reply.");
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageSoftDeletedReply);
             }
-
 
             existingReply.DeletedTime = vietnamTime;
             existingReply.DeletedBy = existingReply.ShopId;
