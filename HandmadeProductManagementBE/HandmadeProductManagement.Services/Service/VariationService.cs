@@ -36,11 +36,6 @@ namespace HandmadeProductManagement.Services.Service
                 .Where(v => v.CategoryId == id && (!v.DeletedTime.HasValue || v.DeletedBy == null))
                 .ToListAsync();
 
-            if (variations.Count == 0)
-            {
-                throw new BaseException.NotFoundException("not_found", "No variations found for the specified category.");
-            }
-
             return _mapper.Map<IList<VariationDto>>(variations);
         }
 
@@ -162,12 +157,6 @@ namespace HandmadeProductManagement.Services.Service
                 })
                 .Where(v => v.DeletedTime.HasValue && v.DeletedBy != null)
                 .ToListAsync();
-
-            if (!deletedVariations.Any())
-            {
-                throw new BaseException.NotFoundException("not_found", "No deleted variations found.");
-            }
-
             return _mapper.Map<IList<Variation>>(deletedVariations);
         }
 

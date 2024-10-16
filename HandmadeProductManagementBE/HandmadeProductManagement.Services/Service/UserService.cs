@@ -45,11 +45,6 @@ namespace HandmadeProductManagement.Services.Service
                 })
                 .ToListAsync();
 
-            if (users == null || !users.Any())
-            {
-                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Please check UserID");
-            }
-
             return users;
 
         }
@@ -200,7 +195,7 @@ namespace HandmadeProductManagement.Services.Service
                 .Select(shop => shop.Id)
                 .ToListAsync();
 
-            if (shopIds.IsNullOrEmpty())
+            if (shopIds == null)
             {
                 throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "User not found");
             }
@@ -240,11 +235,6 @@ namespace HandmadeProductManagement.Services.Service
                 .Include(od => od.Order)
                 .Include(od => od.Order.User) // Bao gồm thông tin người mua
                 .ToListAsync();
-
-            if (!orders.Any())
-            {
-                return new List<NotificationModel>(); // Không có đơn hàng trong khoảng thời gian
-            }
 
             // Tạo danh sách thông báo cho các đơn hàng
             var notifications = orders.Select(orderDetail => new NotificationModel

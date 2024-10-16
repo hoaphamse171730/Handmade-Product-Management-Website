@@ -54,8 +54,6 @@ namespace HandmadeProductManagement.Services.Service
             var promotions = await _unitOfWork.GetRepository<Promotion>().Entities
                 .Where(p => p.DeletedTime == null && p.EndDate < DateTime.UtcNow)
                 .ToListAsync();
-            if (promotions is null)
-                throw new BaseException.NotFoundException("400", "Promotions not found");
             return _mapper.Map<IList<PromotionDto>>(promotions);
         }
 

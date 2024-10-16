@@ -283,10 +283,6 @@ namespace HandmadeProductManagement.Services.Service
                                     .Include(p => p.ProductItems)
                                     .Where(p => !p.DeletedTime.HasValue || p.DeletedBy == null)
                                     .AsQueryable();
-            if (!query.Any())
-            {
-                throw new BaseException.NotFoundException("not_found", "There is no products.");
-            }
 
             // Apply Search Filters
             if (!string.IsNullOrEmpty(searchFilter.Name))
@@ -350,11 +346,6 @@ namespace HandmadeProductManagement.Services.Service
                     LowestPrice = p.ProductItems.Any() ? p.ProductItems.Min(pi => pi.Price) : 0
                 })
                 .ToListAsync();
-
-            if (!productSearchVMs.Any())
-            {
-                throw new BaseException.NotFoundException("not_found", "Product Not Found");
-            }
 
             // Return the paginated result and total items count
             return productSearchVMs;
@@ -425,24 +416,14 @@ namespace HandmadeProductManagement.Services.Service
             }
 
             var shop = await _unitOfWork.GetRepository<Shop>().Entities
-                    .FirstOrDefaultAsync(s => s.UserId == Guid.Parse(userId) && (s.DeletedBy == null || !s.DeletedTime.HasValue));
-
-            if (shop == null)
-            {
-                throw new BaseException.NotFoundException("shop_not_found", $"You don't own a shop.");
-            }
-
+                    .FirstOrDefaultAsync(s => s.UserId == Guid.Parse(userId) && (s.DeletedBy == null || !s.DeletedTime.HasValue)) ?? throw new BaseException.NotFoundException("shop_not_found", $"You don't own a shop.");
+            
             var productsQuery = _unitOfWork.GetRepository<Product>().Entities
                 .Where(p => p.ShopId == shop.Id &&
                             (!p.DeletedTime.HasValue || p.DeletedBy == null))
                 .Include(p => p.ProductImages)
                 .Include(p => p.ProductItems)
                 .AsQueryable();
-
-            if (!productsQuery.Any())
-            {
-                throw new BaseException.NotFoundException("not_found", "Product not found");
-            }
 
             var totalItems = await productsQuery.CountAsync();
             var products = await productsQuery
@@ -557,10 +538,6 @@ namespace HandmadeProductManagement.Services.Service
                 .Where(p => p.DeletedTime.HasValue || p.DeletedBy != null);
 
             var totalRecords = await deletedProductsQuery.CountAsync();
-            if (totalRecords == 0)
-            {
-                throw new BaseException.NotFoundException("not_found", "No deleted products found.");
-            }
 
             var deletedProducts = await deletedProductsQuery
                 .Skip((pageNumber - 1) * pageSize)

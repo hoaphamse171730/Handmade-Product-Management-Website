@@ -84,11 +84,6 @@ namespace HandmadeProductManagement.Services.Service
                     Id = pi.Id,
                     Url = pi.Url,
                 }).ToListAsync();
-
-            if( images == null || !images.Any())
-            {
-                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "No Images found for this product");
-            }
             return images;
         }
     }

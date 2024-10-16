@@ -39,13 +39,7 @@ namespace HandmadeProductManagement.Services.Service
                 })
                 .ToListAsync();
 
-            if (!cancelReasons.Any())
-            {
-                throw new BaseException.NotFoundException("not_found", "There is no cancel reasons.");
-            }
-
-            var cancelReasonDto = _mapper.Map<IList<CancelReasonDto>>(cancelReasons);
-            return cancelReasonDto;
+            return _mapper.Map<IList<CancelReasonDto>>(cancelReasons);
         }
 
         // Create a new cancel reason
@@ -155,12 +149,6 @@ namespace HandmadeProductManagement.Services.Service
                     DeletedTime = cancelReason.DeletedTime,
                 })
                 .ToListAsync();
-
-            if (!cancelReasons.Any())
-            {
-                throw new BaseException.NotFoundException("not_found", "There is no cancel reasons.");
-            }
-
             return cancelReasons;
         }
 

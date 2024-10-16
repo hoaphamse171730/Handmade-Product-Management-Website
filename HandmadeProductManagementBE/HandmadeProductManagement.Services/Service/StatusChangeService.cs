@@ -57,12 +57,6 @@ namespace HandmadeProductManagement.Services.Service
                     ChangeTime = statusChange.ChangeTime
                 })
                 .ToListAsync();
-
-            if (statusChanges == null || !statusChanges.Any())
-            {
-                throw new BaseException.NotFoundException("not_found", "No status changes found for the specified page.");
-            }
-
             return _mapper.Map<IList<StatusChangeDto>>(statusChanges);
         }
 
@@ -88,11 +82,6 @@ namespace HandmadeProductManagement.Services.Service
                 : query.OrderByDescending(statusChange => statusChange.ChangeTime);
 
             var statusChanges = await query.ToListAsync();
-
-            if (!statusChanges.Any())
-            {
-                throw new BaseException.NotFoundException("not_found", "No status changes found for the given OrderId.");
-            }
 
             return _mapper.Map<IList<StatusChangeDto>>(statusChanges);
         }

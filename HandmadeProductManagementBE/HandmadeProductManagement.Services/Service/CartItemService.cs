@@ -163,12 +163,6 @@ namespace HandmadeProductManagement.Services.Service
                         .ToList()
                 })
                 .ToListAsync();
-
-            if (!cartItems.Any())
-            {
-                throw new BaseException.NotFoundException("not_found", "There is nothing in your cart.");
-            }
-
             // Group cart items by ShopId and ShopName
             var cartItemGroups = cartItems
                 .GroupBy(ci => new { ci.ShopId, ci.ShopName })
@@ -204,11 +198,6 @@ namespace HandmadeProductManagement.Services.Service
                             .ThenInclude(cat => cat.Promotion)
                 .Where(ci => ci.UserId == userIdGuid && ci.DeletedTime == null)
                 .ToListAsync();
-
-            if (!cartItems.Any())
-            {
-                throw new BaseException.NotFoundException("not_found", "There is nothing in your cart.");
-            }
 
             var cartItemDtos = cartItems.Select(ci =>
             {
