@@ -129,24 +129,24 @@ namespace HandmadeProductManagement.Services.Service
             {
                 throw new BaseException.BadRequestException("payment_already_exists", "A payment for this order already exists.");
             }
-            var expirationDate = DateTime.UtcNow.AddDays(50);
-            expirationDate = new DateTime(expirationDate.Year,
-                                        expirationDate.Month,
-                                        expirationDate.Day,
-                                        expirationDate.Hour, 0, 0);
 
             var payment = new Payment
             {
                 OrderId = orderId,
                 TotalAmount = order.TotalPrice,
                 Status = "Pending",
-                ExpirationDate = expirationDate,
+                ExpirationDate = null,
                 Method = "Offline"
             };
 
             payment.CreatedBy = userId;
             payment.LastUpdatedBy = userId;
 
+            await OrderService.UpdateOrderStatusAsync(userId, new UpdateStatusOrderDto
+            {
+                OrderId = orderId,
+                Status = "Processing"
+            });
             await paymentRepository.InsertAsync(payment);
             await _unitOfWork.SaveAsync();
 
