@@ -23,8 +23,8 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpGet("{orderId}")]
         public async Task<IActionResult> GetOrderById(string orderId)
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            var role = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
+            var role = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value ?? string.Empty;
             var order = await _orderService.GetOrderByIdAsync(orderId, userId, role);
             var response = new BaseResponse<OrderWithDetailDto>
             {
@@ -55,7 +55,7 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpGet("user")]
         public async Task<IActionResult> GetOrderByUserId()
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
             var orders = await _orderService.GetOrderByUserIdAsync(Guid.Parse(userId));
             var response = new BaseResponse<IList<OrderByUserDto>>
             {
@@ -71,7 +71,7 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpGet("seller")]
         public async Task<IActionResult> GetOrderForSeller()
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
             var orders = await _orderService.GetOrdersBySellerUserIdAsync(Guid.Parse(userId));
             var response = new BaseResponse<IList<OrderResponseModel>>
             {
@@ -102,7 +102,7 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpPatch("status")]
         public async Task<IActionResult> UpdateOrderStatus([FromBody] UpdateStatusOrderDto dto)
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
             var updatedOrder = await _orderService.UpdateOrderStatusAsync(userId,dto);
             var response = new BaseResponse<bool>
             {
@@ -118,7 +118,7 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateOrder([FromBody] CreateOrderDto createOrder)
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
             var order = await _orderService.CreateOrderAsync(userId, createOrder);
             var response = new BaseResponse<bool>
             {
@@ -134,7 +134,7 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpPut("{orderId}")]
         public async Task<IActionResult> UpdateOrder(string orderId, [FromBody] UpdateOrderDto order)
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
             var updatedOrder = await _orderService.UpdateOrderAsync(userId, orderId, order);
             var response = new BaseResponse<bool>
             {

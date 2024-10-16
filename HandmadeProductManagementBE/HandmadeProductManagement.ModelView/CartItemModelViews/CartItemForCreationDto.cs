@@ -2,7 +2,7 @@
 {
     public class CartItemForCreationDto
     {
-        public string? ProductItemId { get; set; }
-        public int? ProductQuantity { get; set; }
+        public string ProductItemId { get; set; }
+        public int ProductQuantity { get; set; }
     }
 }

@@ -4,6 +4,6 @@ namespace HandmadeProductManagement.ModelViews.OrderModelViews
 {
     public class OrderWithDetailDto : OrderResponseModel
     {
-        public List<OrderInDetailDto> OrderDetails { get; set; } = new List<OrderInDetailDto>();
+        public List<OrderInDetailDto> OrderDetails { get; set; } = [];
     }
 }

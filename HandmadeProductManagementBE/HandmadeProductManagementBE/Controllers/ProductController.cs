@@ -23,7 +23,7 @@ namespace HandmadeProductManagementAPI.Controllers
         [Authorize(Roles = "Seller")]
         public async Task<IActionResult> GetProductsByUser([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
 
             var response = new BaseResponse<IList<ProductOverviewDto>>
             {
@@ -39,7 +39,7 @@ namespace HandmadeProductManagementAPI.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateStatusProduct(string id, [FromQuery] bool isAvailable = false)
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
             var response = new BaseResponse<bool>
             {
                 Code = "200",
@@ -98,7 +98,7 @@ namespace HandmadeProductManagementAPI.Controllers
         [Authorize(Roles = "Seller")]
         public async Task<IActionResult> CreateProduct(ProductForCreationDto productForCreation)
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
 
             var response = new BaseResponse<bool>
             {
@@ -115,7 +115,7 @@ namespace HandmadeProductManagementAPI.Controllers
         [Authorize(Roles = "Seller")]
         public async Task<IActionResult> UpdateProduct(string id, [FromBody] ProductForUpdateDto product)
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
             var response = new BaseResponse<bool>
             {
                 Code = "200",
@@ -132,7 +132,7 @@ namespace HandmadeProductManagementAPI.Controllers
         [Authorize(Roles = "Admin, Seller")] 
         public async Task<IActionResult> SoftDeleteProduct(string id)
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
             var response = new BaseResponse<bool>
             {
                 Code = "200",
@@ -164,7 +164,7 @@ namespace HandmadeProductManagementAPI.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> RecoverProduct(string id)
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
 
             var response = new BaseResponse<bool>
             {

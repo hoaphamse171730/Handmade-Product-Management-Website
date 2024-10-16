@@ -105,7 +105,7 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpGet("notification_review")]
         public async Task<IActionResult> GetNotifications()
         {
-            var id = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var id = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
             var notifications = await _userService.GetNewReviewNotificationList(id);
 
             var response = new BaseResponse<IList<NotificationModel>>
@@ -134,7 +134,7 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpGet("notification_statuschange")]
         public async Task<IActionResult> GetNewStatusChangeNotification()
         {
-            var id = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var id = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
 
             var response = new BaseResponse<IList<NotificationModel>>
             {
@@ -151,8 +151,8 @@ namespace HandmadeProductManagementAPI.Controllers
         public async Task<IActionResult> GetNewOrderNotifications()
         {
             // Lấy thông tin người dùng từ token
-            var userIdFromToken = User.FindFirstValue(ClaimTypes.NameIdentifier); // Giả sử NameIdentifier là claim cho userId
-            var userFullNameFromToken = User.FindFirstValue(ClaimTypes.Name); // Giả sử Name là claim cho tên đầy đủ của người dùng
+            var userIdFromToken = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty; // Giả sử NameIdentifier là claim cho userId
+            //var userFullNameFromToken = User.FindFirstValue(ClaimTypes.Name); // Giả sử Name là claim cho tên đầy đủ của người dùng
 
             // Lấy danh sách thông báo đơn hàng mới
             var orderNotifications = await _userService.GetNewOrderNotificationList(userIdFromToken);
@@ -173,7 +173,7 @@ namespace HandmadeProductManagementAPI.Controllers
         public async Task<IActionResult> GetNewReplyNotifications()
         {
             // Lấy thông tin người dùng từ token
-            var userIdFromToken = User.FindFirstValue(ClaimTypes.NameIdentifier); // Giả sử NameIdentifier là claim cho userId
+            var userIdFromToken = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty; // Giả sử NameIdentifier là claim cho userId
 
             // Lấy danh sách thông báo phản hồi mới
             var replyNotifications = await _userService.GetNewReplyNotificationList(userIdFromToken);

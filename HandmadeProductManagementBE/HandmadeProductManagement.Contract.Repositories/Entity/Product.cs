@@ -21,8 +21,8 @@ namespace HandmadeProductManagement.Contract.Repositories.Entity
         [JsonIgnore]
         public Shop Shop { get; set; }
         [JsonIgnore]
-        public virtual ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
+        public virtual ICollection<OrderDetail> OrderDetails { get; set; } = [];
         [JsonIgnore]
-        public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
+        public virtual ICollection<Review> Reviews { get; set; } = [];
     }
 }

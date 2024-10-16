@@ -111,7 +111,7 @@ namespace HandmadeProductManagement.Services.Service
 
             if (!validationResult.IsValid)
             {
-                throw new BaseException.BadRequestException("validation_failed", validationResult.Errors.Select(e => e.ErrorMessage).FirstOrDefault());
+                throw new BaseException.BadRequestException("validation_failed", validationResult.Errors.Select(e => e.ErrorMessage).FirstOrDefault() ?? string.Empty);
             }
 
             // Check if OrderId exists

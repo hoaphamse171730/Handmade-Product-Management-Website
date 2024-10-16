@@ -256,7 +256,7 @@ namespace HandmadeProductManagement.Services.Service
                     if("00".Equals(request.VnpTransactionStatus)) {
                    
                     //tao payment detail
-                    PaymentDetail paymentDetail = new()
+                    if (payment != null)
                     {
                         PaymentId = payment.Id,
                         Status = "Success",

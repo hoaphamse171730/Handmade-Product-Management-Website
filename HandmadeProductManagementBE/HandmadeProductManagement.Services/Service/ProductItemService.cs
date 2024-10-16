@@ -180,7 +180,7 @@ namespace HandmadeProductManagement.Services.Service
             var validationResult = await _creationValidator.ValidateAsync(productItemDto);
             if (!validationResult.IsValid)
             {
-                throw new BaseException.BadRequestException("validation_failed", validationResult.Errors.Select(e => e.ErrorMessage).FirstOrDefault());
+                throw new BaseException.BadRequestException("validation_failed", validationResult.Errors.Select(e => e.ErrorMessage).FirstOrDefault() ?? string.Empty);
             }
 
             var productItemEntity = _mapper.Map<ProductItem>(productItemDto);
@@ -206,7 +206,7 @@ namespace HandmadeProductManagement.Services.Service
             var validationResult = await _updateValidator.ValidateAsync(productItemDto);
             if (!validationResult.IsValid)
             {
-                throw new BaseException.BadRequestException("validation_failed", validationResult.Errors.Select(e => e.ErrorMessage).FirstOrDefault());
+                throw new BaseException.BadRequestException("validation_failed", validationResult.Errors.Select(e => e.ErrorMessage).FirstOrDefault() ?? string.Empty);
             }
 
             var productItemEntity = await _unitOfWork.GetRepository<ProductItem>().Entities
@@ -265,18 +265,17 @@ namespace HandmadeProductManagement.Services.Service
             var productItemRepo = _unitOfWork.GetRepository<ProductItem>();
             var productItemEntity = await productItemRepo.Entities.FirstOrDefaultAsync(p => p.Id == id);
 
-            var productRepo = _unitOfWork.GetRepository<Product>();
-            var productEntity = await productRepo.Entities
-                .FirstOrDefaultAsync(p => p.Id == productItemEntity.ProductId);
-
-            if (productEntity == null)
-            {
-                throw new BaseException.NotFoundException("not_found", "Associated product not found.");
-            }
-
             if (productItemEntity == null || productItemEntity.DeletedTime.HasValue || productItemEntity.DeletedBy != null)
             {
                 throw new BaseException.NotFoundException("not_found", "Product item not found");
+            }
+
+            var productRepo = _unitOfWork.GetRepository<Product>();
+            var productEntity = await productRepo.Entities
+                                    .FirstOrDefaultAsync(p => p.Id == productItemEntity.ProductId);
+            if (productEntity == null)
+            {
+                throw new BaseException.NotFoundException("not_found", "Associated product not found.");
             }
 
             if (productItemEntity.CreatedBy != userId)

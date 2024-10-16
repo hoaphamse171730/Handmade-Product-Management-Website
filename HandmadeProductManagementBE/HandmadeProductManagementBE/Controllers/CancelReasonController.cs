@@ -40,7 +40,7 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateCancelReason([FromBody] CancelReasonForCreationDto reason)
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
             var result = await _cancelReasonService.Create(reason, userId);
             var response = new BaseResponse<bool>
             {
@@ -57,7 +57,7 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpPatch("{id}")]
         public async Task<IActionResult> PatchCancelReason(string id, [FromBody] CancelReasonForUpdateDto updatedReason)
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
             var result = await _cancelReasonService.Update(id, updatedReason, userId);
             var response = new BaseResponse<bool>
             {
@@ -74,7 +74,7 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult> SoftDeleteCancelReason(string id)
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
             await _cancelReasonService.Delete(id, userId);
 
             var response = new BaseResponse<string>
@@ -107,7 +107,7 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpPatch("reverse-delete/{id}")]
         public async Task<IActionResult> PatchReverseDeleteCancelReason(string id)
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
             var result = await _cancelReasonService.PatchReverseDelete(id, userId);
 
             var response = new BaseResponse<bool>

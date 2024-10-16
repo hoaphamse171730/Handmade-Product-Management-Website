@@ -104,7 +104,7 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "Shop not found");
             }
 
-            if(dashboardDTO.to  < dashboardDTO.from)
+            if(dashboardDTO.To  < dashboardDTO.From)
             {
                 throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "toDate must be after fromDate");
             }
@@ -114,8 +114,8 @@ namespace HandmadeProductManagement.Services.Service
             .Entities
             .Where(order => order.OrderDetails
                 .Any(od => od.ProductItem.Product.ShopId == Id)
-                && order.OrderDate >= dashboardDTO.from
-                && order.OrderDate <= dashboardDTO.to
+                && order.OrderDate >= dashboardDTO.From
+                && order.OrderDate <= dashboardDTO.To
                 && order.Status == "Shipped")
             .SumAsync(order => order.TotalPrice);
 
