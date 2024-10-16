@@ -148,7 +148,7 @@ namespace HandmadeProductManagement.Services.Service
                     Constants.ErrorMessagePromotionNotFound);
 
             promotionEntity.Status = Constants.PromotionStatusInactive;
-            promotionEntity.LastUpdatedBy = "user"; // Replace "user" with the actual user ID or context if applicable
+            promotionEntity.LastUpdatedBy = "user";
             promotionEntity.DeletedTime = DateTime.UtcNow;
 
             await promotionRepo.UpdateAsync(promotionEntity);

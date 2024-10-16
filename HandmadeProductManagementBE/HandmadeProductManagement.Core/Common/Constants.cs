@@ -6,6 +6,7 @@ public static class Constants
 
     public const string ApiBaseUrl = "https://localhost:7159";
     public const string AvatarBaseUrl = "/images/avatars";
+    public const string VNPAY = "VNPAY";
 
     #endregion
 
@@ -56,6 +57,7 @@ public static class Constants
     #region Payment
 
     public const string PaymentStatusPending = "Pending";
+    public const string PaymentStatusPaid = "Paid";
     public const string PaymentStatusCompleted = "Completed";
     public const string PaymentStatusExpired = "Expired";
     public const string PaymentStatusRefunded = "Refunded";
@@ -63,6 +65,9 @@ public static class Constants
     public const string PaymentStatusFailed = "Failed";
     public const string PaymentMethodOnline = "Online";
     public const string PaymentMethodOffline = "Offline";
+    public const string PaymentDescriptionFailed = "Failed";
+    public const string PaymentMethodTransfer = "Transfer";
+    public const string PaymentApproveFailed = "Payment approve failed";
 
     #endregion
 
@@ -78,6 +83,7 @@ public static class Constants
     public const string RoleAdmin = "Admin";
     public const string RoleSeller = "Seller";
     public const string RoleCustomer = "Customer";
+    public const string RoleSystem = "System";
 
     #endregion
 
@@ -208,6 +214,7 @@ public static class Constants
     public const string ErrorMessagePhoneNumberExists = "Phone number already exists.";
     public const string ErrorMessageUserNotFoundOrActive = "User not found or already active.";
     public const string ErrorMessageDuplicateVariationName = "Variation name already exists in this category.";
+    public const string ErrorMessageOrderPriceNotFound = "Order price not found.";
 
     #endregion
 

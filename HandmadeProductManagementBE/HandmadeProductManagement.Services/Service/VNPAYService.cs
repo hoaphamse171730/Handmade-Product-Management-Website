@@ -2,6 +2,7 @@
 using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.Core.Common;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.VNPayModelViews;
 using Microsoft.EntityFrameworkCore;
@@ -41,8 +42,12 @@ namespace HandmadeProductManagement.Services.Service
             var order = await _unitOfWork.GetRepository<Order>().Entities
                 .Where(o => o.Id == orderId).FirstOrDefaultAsync();
 
-            if (order == null || order.UserId != userId) {
-                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "Order not found");
+            if (order == null || order.UserId != userId)
+            {
+                throw new BaseException.NotFoundException(
+                    StatusCodeHelper.NotFound.ToString(),
+                    Constants.ErrorMessageOrderNotFound
+                );
             }
 
             string vnp_TxnRef = GetRandomNumber(8);
@@ -114,7 +119,7 @@ namespace HandmadeProductManagement.Services.Service
                 CreatedTime = now,
                 ExpirationDate = now.AddMinutes(15),
                 TotalAmount = order.TotalPrice,
-                Status = "Pending",
+                Status = Constants.PaymentStatusPaid,
             };
             await _unitOfWork.GetRepository<Payment>().InsertAsync(payment);
             await _unitOfWork.SaveAsync();
@@ -144,14 +149,14 @@ namespace HandmadeProductManagement.Services.Service
             if (totalPrice == null || !double.TryParse(totalPrice, out _))
             {
                 response.IsSucceed = false;
-                response.Text = "Order price not found";
+                response.Text = Constants.ErrorMessageOrderPriceNotFound;
                 return response;
             }
 
-            if (orderInfo == null)  
+            if (orderInfo == null)
             {
                 response.IsSucceed = false;
-                response.Text = "Order not found";
+                response.Text = Constants.ErrorMessageOrderNotFound;
             }
 
             var amount = double.Parse(totalPrice) / 100;
@@ -186,23 +191,23 @@ namespace HandmadeProductManagement.Services.Service
                     PaymentDetail paymentDetail = new()
                     {
                         PaymentId = payment.Id,
-                        Status = "Paid",
-                        Method = "Transfer",
-                        ExternalTransaction = "VNPAY",
+                        Status = Constants.PaymentStatusPaid,
+                        Method = Constants.PaymentMethodTransfer,
+                        ExternalTransaction = Constants.VNPAY,
                         CreatedTime = DateTime.Now,
-                        CreatedBy   = "VNPAY"
+                        CreatedBy   = Constants.VNPAY
                     };
                     await _unitOfWork.GetRepository<PaymentDetail>().InsertAsync(paymentDetail);
                     await _unitOfWork.SaveAsync();
 
-                    payment.Status = "Paid";
+                    payment.Status = Constants.PaymentStatusPaid;
                     await _unitOfWork.GetRepository<Payment>().UpdateAsync(payment);
                     await _unitOfWork.SaveAsync();
                 }
                     else
                 {
                     response.IsSucceed = false;
-                    response.Text = "Payment approve failed";
+                    response.Text = Constants.PaymentApproveFailed;
                     return response;
                 }
                 response.IsSucceed = true;  
@@ -213,7 +218,7 @@ namespace HandmadeProductManagement.Services.Service
             else
             {
                 response.IsSucceed = false;
-                response.Text = "Payment approve failed";
+                response.Text = Constants.PaymentApproveFailed;
                 return response;
             }
         }

@@ -171,7 +171,7 @@ public class AuthenticationService : IAuthenticationService
             }
 
             await _emailService.SendEmailConfirmationAsync(user.Email!, registerModelView.ClientUri);
-            await AssignRoleToUser(user.Id.ToString(), "Admin");
+            await AssignRoleToUser(user.Id.ToString(), Constants.RoleAdmin);
 
             return BaseResponse<string>.OkResponse(user.Id.ToString());
         }

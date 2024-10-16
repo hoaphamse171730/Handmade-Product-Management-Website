@@ -187,7 +187,7 @@ namespace HandmadeProductManagement.Services.Service
                 var dto = new UpdateStatusOrderDto
                 {
                     OrderId = payment.OrderId,
-                    Status = "Processing"
+                    Status = Constants.OrderStatusProcessing
                 };
                 await OrderService.UpdateOrderStatusAsync(userId, dto);
             }
@@ -197,24 +197,24 @@ namespace HandmadeProductManagement.Services.Service
             {
                 var cancelReasons = await _cancelReasonService.GetAll();
                 var cancelReason = cancelReasons.FirstOrDefault(cr => cr.Description != null &&
-                                                                    cr.Description.Contains("Payment failed"));
+                                                                    cr.Description.Contains(Constants.PaymentDescriptionFailed));
                 if (cancelReason == null)
                 {
                     var crDto = new CancelReasonForCreationDto
                     {
-                        Description = "Payment failed",
+                        Description = Constants.PaymentDescriptionFailed,
                         RefundRate = 0
                     };
-                    await _cancelReasonService.Create(crDto, "System");
+                    await _cancelReasonService.Create(crDto, Constants.RoleSystem);
                     cancelReasons = await _cancelReasonService.GetAll();
                     cancelReason = cancelReasons.FirstOrDefault(cr => cr.Description != null &&
-                                                                    cr.Description.Contains("Payment failed"));
+                                                                    cr.Description.Contains(Constants.PaymentDescriptionFailed));
                 }
 
                 var dto = new UpdateStatusOrderDto
                 {
                     OrderId = payment.OrderId,
-                    Status = "Canceled",
+                    Status = Constants.OrderStatusCanceled,
                     CancelReasonId = cancelReason.Id,
                 };
                 await OrderService.UpdateOrderStatusAsync(userId, dto);
@@ -292,7 +292,7 @@ namespace HandmadeProductManagement.Services.Service
 
             foreach (var payment in expiredPayments)
             {
-                await UpdatePaymentStatusAsync(payment.Id.ToString(), Constants.PaymentStatusExpired, "System");
+                await UpdatePaymentStatusAsync(payment.Id.ToString(), Constants.PaymentStatusExpired, Constants.RoleSystem);
             }
 
             await _unitOfWork.SaveAsync();

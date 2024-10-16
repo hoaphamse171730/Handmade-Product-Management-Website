@@ -697,7 +697,8 @@ namespace HandmadeProductManagement.Services.Service
 
             if (order.Status != Constants.OrderStatusShipped)
             {
-                return; // Only update soldCount when the order status is "Shipped"
+                return; // Only update soldCount when the order status is
+                        // Shipped"
             }
 
             foreach (var orderDetail in order.OrderDetails)
