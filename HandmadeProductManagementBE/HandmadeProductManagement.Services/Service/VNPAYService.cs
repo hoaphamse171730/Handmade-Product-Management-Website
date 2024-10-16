@@ -41,8 +41,15 @@ namespace HandmadeProductManagement.Services.Service
             var order = await _unitOfWork.GetRepository<Order>().Entities
                 .Where(o => o.Id == orderId).FirstOrDefaultAsync();
 
+           
+
             if (order == null || order.UserId != userId) {
                 throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "Order not found");
+            }
+
+            if (order.Status == "Processing")
+            {
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Order's already paid");
             }
 
             string vnp_TxnRef = GetRandomNumber(8);
@@ -257,7 +264,7 @@ namespace HandmadeProductManagement.Services.Service
                     await _unitOfWork.GetRepository<PaymentDetail>().InsertAsync(paymentDetail);
                     await _unitOfWork.SaveAsync();
 
-                    payment.Status = "Success";
+                    payment.Status = "Completed";
                     await _unitOfWork.GetRepository<Payment>().UpdateAsync(payment);
                     await _unitOfWork.SaveAsync();
 
