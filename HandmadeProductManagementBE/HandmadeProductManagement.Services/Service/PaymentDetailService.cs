@@ -33,12 +33,8 @@ namespace HandmadeProductManagement.Services.Service
 
             var paymentRepository = _unitOfWork.GetRepository<Payment>();
             var payment = await paymentRepository.Entities
-                        .FirstOrDefaultAsync(p => p.Id == createPaymentDetailDto.PaymentId && !p.DeletedTime.HasValue);
-            if (payment == null)
-            {
-                throw new BaseException.NotFoundException("payment_not_found", "Payment not found.");
-            }
-
+                        .FirstOrDefaultAsync(p => p.Id == createPaymentDetailDto.PaymentId && !p.DeletedTime.HasValue) ?? throw new BaseException.NotFoundException("payment_not_found", "Payment not found.");
+            
             var invalidStatuses = new[] { "Completed", "Expired", "Refunded"};
             if (invalidStatuses.Contains(payment.Status))
             {

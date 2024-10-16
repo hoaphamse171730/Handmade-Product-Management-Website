@@ -45,12 +45,6 @@ namespace HandmadeProductManagement.Services.Service
                 .Where(vo => vo.VariationId == variationId && (!vo.DeletedTime.HasValue || vo.DeletedBy == null))
                 .ToListAsync();
 
-            // Check if the list is empty, throw not found exception
-            if (options == null || options.Count == 0)
-            {
-                throw new BaseException.NotFoundException("not_found", "No variation options found for the specified variation.");
-            }
-
             return _mapper.Map<IList<VariationOptionDto>>(options);
         }
 
@@ -103,13 +97,8 @@ namespace HandmadeProductManagement.Services.Service
             }
 
             var existingOption = await _unitOfWork.GetRepository<VariationOption>().Entities
-                .FirstOrDefaultAsync(vo => vo.Id == id && (!vo.DeletedTime.HasValue || vo.DeletedBy == null));
-
-            if (existingOption == null)
-            {
-                throw new BaseException.NotFoundException("not_found", "Variation Option not found.");
-            }
-
+                .FirstOrDefaultAsync(vo => vo.Id == id && (!vo.DeletedTime.HasValue || vo.DeletedBy == null)) ?? throw new BaseException.NotFoundException("not_found", "Variation Option not found.");
+            
             if (existingOption.CreatedBy != userId)
             {
                 throw new BaseException.ForbiddenException("forbidden", "You do not have permission to access this resource.");

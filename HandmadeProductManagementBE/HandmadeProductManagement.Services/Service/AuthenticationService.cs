@@ -236,13 +236,7 @@ public class AuthenticationService : IAuthenticationService
 
     public async Task<BaseResponse<string>> ResetPasswordAsync(ResetPasswordModelView resetPasswordModelView)
     {
-        var user = await _userManager.FindByEmailAsync(resetPasswordModelView.Email);
-        if (user == null)
-        {
-            throw new BaseException.BadRequestException("invalid_email", "Email is invalid.");
-        }
-
-
+        var user = await _userManager.FindByEmailAsync(resetPasswordModelView.Email) ?? throw new BaseException.BadRequestException("invalid_email", "Email is invalid.");
         var decodedToken = HttpUtility.UrlDecode(resetPasswordModelView.Token);
         var result = await _userManager.ResetPasswordAsync(user, decodedToken, resetPasswordModelView.NewPassword);
 
@@ -265,12 +259,7 @@ public class AuthenticationService : IAuthenticationService
             throw new BaseException.BadRequestException("invalid_email", "The email address is not valid.");
         }
 
-        var user = await _userManager.FindByEmailAsync(confirmEmailModelView.Email);
-        if (user == null)
-        {
-            throw new BaseException.NotFoundException("not_found", "User not found.");
-        }
-
+        var user = await _userManager.FindByEmailAsync(confirmEmailModelView.Email) ?? throw new BaseException.NotFoundException("not_found", "User not found.");
         var decodedToken = HttpUtility.UrlDecode(confirmEmailModelView.Token);
         var result = await _userManager.ConfirmEmailAsync(user, decodedToken);
 
@@ -360,12 +349,7 @@ public class AuthenticationService : IAuthenticationService
 
     public async Task<bool> AssignRoleToUser(string userId, string role)
     {
-        var user = await _userManager.FindByIdAsync(userId);
-        if (user == null)
-        {
-            throw new Exception("User not found");
-        }
-
+        var user = await _userManager.FindByIdAsync(userId) ?? throw new Exception("User not found");
         if (!await _userManager.IsInRoleAsync(user, role))
         {
             var result = await _userManager.AddToRoleAsync(user, role);

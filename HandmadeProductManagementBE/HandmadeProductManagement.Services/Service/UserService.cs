@@ -75,12 +75,7 @@ namespace HandmadeProductManagement.Services.Service
                     AccessFailedCount = user.AccessFailedCount,
 
                 })
-                .FirstOrDefaultAsync();
-
-            if (user == null)
-            {
-                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "user not found");
-            }
+                .FirstOrDefaultAsync() ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "user not found");
             return user;
 
         }
@@ -94,12 +89,7 @@ namespace HandmadeProductManagement.Services.Service
             var user = await _unitOfWork.GetRepository<ApplicationUser>()
                 .Entities
                 .Where(u => u.Id == userId)
-                .FirstOrDefaultAsync();
-            //check user found
-            if (user == null)
-            {
-                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "user not found");
-            }
+                .FirstOrDefaultAsync() ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "user not found");
             // check format DTO by fluent validation
             var updateValidation = _updateValidator.Validate(updateUserDTO);
             if (!updateValidation.IsValid)
@@ -193,13 +183,7 @@ namespace HandmadeProductManagement.Services.Service
                 .Entities
                 .Where(shop => shop.UserId == userId)
                 .Select(shop => shop.Id)
-                .ToListAsync();
-
-            if (shopIds == null)
-            {
-                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "User not found");
-            }
-
+                .ToListAsync() ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "User not found");
             var review = await _unitOfWork.GetRepository<Review>()
                 .Entities
                 .Where(r => r.UserId == userId && r.Reply == null)
@@ -426,13 +410,7 @@ namespace HandmadeProductManagement.Services.Service
             var user = await _unitOfWork.GetRepository<ApplicationUser>()
                 .Entities
                 .Where(u => u.Id == userId)
-                .FirstOrDefaultAsync();
-
-            if (user == null)
-            {
-                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "User not found");
-            }
-
+                .FirstOrDefaultAsync() ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "User not found");
             if (!string.IsNullOrEmpty(updateUserProfileDTO.UserName))
             {
                 user.UserName = updateUserProfileDTO.UserName;

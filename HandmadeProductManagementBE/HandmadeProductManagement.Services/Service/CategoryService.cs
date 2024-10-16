@@ -46,9 +46,9 @@ namespace HandmadeProductManagement.Services.Service
             var category = await _unitOfWork.GetRepository<Category>().Entities
                 .Include(c => c.Promotion)
                 .FirstOrDefaultAsync(c => c.Id == id && c.DeletedTime == null);
-            if (category == null)
-                throw new BaseException.NotFoundException("404", "Category not found");
-            return _mapper.Map<CategoryDto>(category);
+            return category == null
+                ? throw new BaseException.NotFoundException("404", "Category not found")
+                : _mapper.Map<CategoryDto>(category);
         }
 
         public async Task<bool> Create(CategoryForCreationDto category)
@@ -138,9 +138,7 @@ namespace HandmadeProductManagement.Services.Service
         public async Task<bool> SoftDelete(string id)
         {
             var categoryRepo = _unitOfWork.GetRepository<Category>();
-            var categoryEntity = await categoryRepo.Entities.FirstOrDefaultAsync(c => c.Id == id);
-            if (categoryEntity == null)
-                throw new KeyNotFoundException("Category not found");
+            var categoryEntity = await categoryRepo.Entities.FirstOrDefaultAsync(c => c.Id == id) ?? throw new KeyNotFoundException("Category not found");
             categoryEntity.DeletedTime = DateTime.UtcNow;
             await categoryRepo.UpdateAsync(categoryEntity);
             await _unitOfWork.SaveAsync();

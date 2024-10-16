@@ -46,12 +46,8 @@ namespace HandmadeProductManagement.Services.Service
 
             var orderRepository = _unitOfWork.GetRepository<Order>();
             var order = await orderRepository.Entities
-                .FirstOrDefaultAsync(o => o.Id == orderId && !o.DeletedTime.HasValue);
-            if (order == null)
-            {
-                throw new BaseException.NotFoundException("order_not_found", "Order not found.");
-            }
-
+                .FirstOrDefaultAsync(o => o.Id == orderId && !o.DeletedTime.HasValue) ?? throw new BaseException.NotFoundException("order_not_found", "Order not found.");
+            
             if (order.Status != "Awaiting Payment")
             {
                 throw new BaseException.BadRequestException("invalid_order_status", "Order status must be 'Awaiting Payment'.");
@@ -107,12 +103,7 @@ namespace HandmadeProductManagement.Services.Service
 
             var orderRepository = _unitOfWork.GetRepository<Order>();
             var order = await orderRepository.Entities
-                .FirstOrDefaultAsync(o => o.Id == orderId && !o.DeletedTime.HasValue);
-            if (order == null)
-            {
-                throw new BaseException.NotFoundException("order_not_found", "Order not found.");
-            }
-
+                .FirstOrDefaultAsync(o => o.Id == orderId && !o.DeletedTime.HasValue) ?? throw new BaseException.NotFoundException("order_not_found", "Order not found.");
             if (order.Status != "Pending")
             {
                 throw new BaseException.BadRequestException("invalid_order_status", "Order status must be 'Pending'.");
@@ -160,12 +151,7 @@ namespace HandmadeProductManagement.Services.Service
 
             var paymentRepository = _unitOfWork.GetRepository<Payment>();
             var payment = await paymentRepository.Entities
-                .FirstOrDefaultAsync(p => p.Id == paymentId && !p.DeletedTime.HasValue);
-
-            if (payment == null)
-            {
-                throw new BaseException.NotFoundException("payment_not_found", "Payment not found.");
-            }
+                .FirstOrDefaultAsync(p => p.Id == paymentId && !p.DeletedTime.HasValue) ?? throw new BaseException.NotFoundException("payment_not_found", "Payment not found.");
 
             // Validate Status Flow
             var validStatusTransitions = new Dictionary<string, List<string>>
@@ -263,13 +249,7 @@ namespace HandmadeProductManagement.Services.Service
             var paymentRepository = _unitOfWork.GetRepository<Payment>();
             var payment = await paymentRepository.Entities
                 .Include(p => p.PaymentDetails)
-                .FirstOrDefaultAsync(p => p.OrderId == orderId && !p.DeletedTime.HasValue);
-
-            if (payment == null)
-            {
-                throw new BaseException.NotFoundException("payment_not_found", "Payment not found.");
-            }
-
+                .FirstOrDefaultAsync(p => p.OrderId == orderId && !p.DeletedTime.HasValue) ?? throw new BaseException.NotFoundException("payment_not_found", "Payment not found.");
             var paymentDetails = payment.PaymentDetails.Select(pd => new PaymentDetailResponseModel
             {
                 Id = pd.Id,

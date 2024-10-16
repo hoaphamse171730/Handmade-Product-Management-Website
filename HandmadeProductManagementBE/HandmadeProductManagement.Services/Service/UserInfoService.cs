@@ -37,12 +37,8 @@ namespace HandmadeProductManagement.Services.Service
 
             var applicationUser = await _unitOfWork.GetRepository<ApplicationUser>().Entities
                 .Include(au => au.UserInfo)
-                .FirstOrDefaultAsync(au => au.Id == Guid.Parse(id));
+                .FirstOrDefaultAsync(au => au.Id == Guid.Parse(id)) ?? throw new BaseException.NotFoundException("not_found", "User not found.");
 
-            if (applicationUser == null)
-            {
-                throw new BaseException.NotFoundException("not_found", "User not found.");
-            }
             if (applicationUser.UserInfo == null)
             {
                 throw new BaseException.NotFoundException("not_found", "UserInfo not found for this user.");
@@ -75,12 +71,7 @@ namespace HandmadeProductManagement.Services.Service
             }
             var applicationUser = await _unitOfWork.GetRepository<ApplicationUser>().Entities
                 .Include(au => au.UserInfo)
-                .FirstOrDefaultAsync(au => au.Id == Guid.Parse(id));
-
-            if (applicationUser == null)
-            {
-                throw new BaseException.NotFoundException("not_found", "User not found.");
-            }
+                .FirstOrDefaultAsync(au => au.Id == Guid.Parse(id)) ?? throw new BaseException.NotFoundException("not_found", "User not found.");
 
             var userInfo = applicationUser.UserInfo;
 

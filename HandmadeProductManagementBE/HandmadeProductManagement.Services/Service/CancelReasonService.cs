@@ -81,12 +81,7 @@ namespace HandmadeProductManagement.Services.Service
 
             // Find the entity to be updated
             var cancelReasonEntity = await _unitOfWork.GetRepository<CancelReason>().Entities
-                .FirstOrDefaultAsync(p => p.Id == id && (!p.DeletedTime.HasValue || p.DeletedBy == null));
-
-            if (cancelReasonEntity == null)
-            {
-                throw new BaseException.NotFoundException("not_found", "Cancel Reason not found");
-            }
+                .FirstOrDefaultAsync(p => p.Id == id && (!p.DeletedTime.HasValue || p.DeletedBy == null)) ?? throw new BaseException.NotFoundException("not_found", "Cancel Reason not found");
 
             // Map only updated properties, keeping old values for null or unchanged fields
             if (!string.IsNullOrWhiteSpace(cancelReason.Description))
@@ -163,13 +158,8 @@ namespace HandmadeProductManagement.Services.Service
 
             var cancelReasonRepo = _unitOfWork.GetRepository<CancelReason>();
             var cancelReasonEntity = await cancelReasonRepo.Entities
-                .FirstOrDefaultAsync(cr => cr.Id == id && cr.DeletedTime.HasValue && cr.DeletedBy != null);
-
-            if (cancelReasonEntity == null)
-            {
-                throw new BaseException.NotFoundException("not_found", "Cancel Reason not found or not deleted.");
-            }
-
+                .FirstOrDefaultAsync(cr => cr.Id == id && cr.DeletedTime.HasValue && cr.DeletedBy != null) ?? throw new BaseException.NotFoundException("not_found", "Cancel Reason not found or not deleted.");
+            
             cancelReasonEntity.DeletedTime = null;
             cancelReasonEntity.DeletedBy = null;
 

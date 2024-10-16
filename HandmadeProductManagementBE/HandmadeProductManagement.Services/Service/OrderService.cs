@@ -472,13 +472,8 @@ namespace HandmadeProductManagement.Services.Service
                         throw new BaseException.BadRequestException(Constants.ErrorCodeValidationFailed, "CancelReasonId is required when updating status to {Canceled}.");
                     }
 
-                    var cancelReason = await _unitOfWork.GetRepository<CancelReason>().GetByIdAsync(updateStatusOrderDto.CancelReasonId);
-
-                    if (cancelReason == null)
-                    {
-                        throw new BaseException.NotFoundException(Constants.ErrorCodeCancelReasonNotFound, $"Cancel Reason not found. {existingOrder.CancelReasonId}");
-                    }
-
+                    var cancelReason = await _unitOfWork.GetRepository<CancelReason>().GetByIdAsync(updateStatusOrderDto.CancelReasonId) ?? throw new BaseException.NotFoundException(Constants.ErrorCodeCancelReasonNotFound, $"Cancel Reason not found. {existingOrder.CancelReasonId}");
+                    
                     existingOrder.CancelReasonId = updateStatusOrderDto.CancelReasonId;
 
                     // Retrieve the order details to update product stock

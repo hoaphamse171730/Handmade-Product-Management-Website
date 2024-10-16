@@ -99,12 +99,7 @@ namespace HandmadeProductManagement.Services.Service
 
             var repository = _unitOfWork.GetRepository<Variation>();
             var variation = await repository.Entities
-                .FirstOrDefaultAsync(v => v.Id == id && (!v.DeletedTime.HasValue || v.DeletedBy == null));
-
-            if (variation == null)
-            {
-                throw new BaseException.NotFoundException("variation_not_found", "Variation not found.");
-            }
+                .FirstOrDefaultAsync(v => v.Id == id && (!v.DeletedTime.HasValue || v.DeletedBy == null)) ?? throw new BaseException.NotFoundException("variation_not_found", "Variation not found.");
 
             // Only update the fields that are present in the DTO
             variation.LastUpdatedBy = userId;
@@ -169,14 +164,9 @@ namespace HandmadeProductManagement.Services.Service
 
             var repository = _unitOfWork.GetRepository<Variation>();
             var variation = await repository.Entities
-                .FirstOrDefaultAsync(v => v.Id == id && v.DeletedTime.HasValue && v.DeletedBy != null);
+                .FirstOrDefaultAsync(v => v.Id == id && v.DeletedTime.HasValue && v.DeletedBy != null) ?? throw new BaseException.NotFoundException("not_found", "Deleted variation not found.");  
 
-            if (variation == null)
-            {
-                throw new BaseException.NotFoundException("not_found", "Deleted variation not found.");
-            }
-
-            variation.DeletedBy = null;
+            variation.DeletedBy = null; 
             variation.DeletedTime = null;
             variation.LastUpdatedBy = userId;
             variation.LastUpdatedTime = DateTime.UtcNow;

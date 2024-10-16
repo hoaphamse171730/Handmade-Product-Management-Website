@@ -88,13 +88,7 @@ namespace HandmadeProductManagement.Services.Service
 
             var shopRepository = _unitOfWork.GetRepository<Shop>();
             var shop = await shopRepository.Entities
-                .FirstOrDefaultAsync(s => s.UserId.ToString() == userId && !s.DeletedTime.HasValue);
-
-            if (shop == null)
-            {
-                throw new BaseException.NotFoundException("shop_not_found", "Shop not found.");
-            }
-
+                .FirstOrDefaultAsync(s => s.UserId.ToString() == userId && !s.DeletedTime.HasValue) ?? throw new BaseException.NotFoundException("shop_not_found", "Shop not found.");
             shop.DeletedBy = userId;
             shop.DeletedTime = DateTime.UtcNow;
 
@@ -147,13 +141,8 @@ namespace HandmadeProductManagement.Services.Service
 
             var repository = _unitOfWork.GetRepository<Shop>();
             var shop = await repository.Entities
-                .FirstOrDefaultAsync(s => s.UserId == userId && !s.DeletedTime.HasValue);
-
-            if (shop == null)
-            {
-                throw new BaseException.NotFoundException(
+                .FirstOrDefaultAsync(s => s.UserId == userId && !s.DeletedTime.HasValue) ?? throw new BaseException.NotFoundException(
                     "shop_not_found", "Shop not found for the given user.");
-            }
 
             return new ShopResponseModel
             {
@@ -252,13 +241,7 @@ namespace HandmadeProductManagement.Services.Service
 
             var shop = await _unitOfWork.GetRepository<Shop>().Entities
                                         .Include(s => s.Products)
-                                        .FirstOrDefaultAsync(s => s.Id == shopId);
-
-            if (shop == null)
-            {
-                throw new BaseException.NotFoundException("shop_not_found", "Shop not found.");
-            }
-
+                                        .FirstOrDefaultAsync(s => s.Id == shopId) ?? throw new BaseException.NotFoundException("shop_not_found", "Shop not found.");
             var activeProducts = shop.Products.Where(p => p.DeletedTime == null).ToList();
 
             if (activeProducts == null || !activeProducts.Any())

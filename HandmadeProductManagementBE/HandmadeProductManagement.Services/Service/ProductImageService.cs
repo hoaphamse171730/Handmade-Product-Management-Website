@@ -31,11 +31,7 @@ namespace HandmadeProductManagement.Services.Service
             var product = await _unitOfWork.GetRepository<Product>()
                 .Entities
                 .Where(p=>p.Id == productId)
-                .FirstOrDefaultAsync();
-
-            if (product == null)
-                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "Product not found");
-
+                .FirstOrDefaultAsync() ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "Product not found");
             var uploadImageService = new ManageFirebaseImageService();
 
             using (var stream = file.OpenReadStream())
@@ -59,13 +55,7 @@ namespace HandmadeProductManagement.Services.Service
         public async Task<bool>DeleteProductImage(string imageId)
         {
             var productImage = await _unitOfWork.GetRepository<ProductImage>()
-                .Entities.Where(pi=>pi.Id == imageId).FirstOrDefaultAsync();
-
-            if (productImage == null)
-            {
-                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "Image not found");
-            }
-
+                .Entities.Where(pi=>pi.Id == imageId).FirstOrDefaultAsync() ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "Image not found");
             var deleteImageService = new ManageFirebaseImageService();
             await deleteImageService.DeleteFileAsync(productImage.Url);
 

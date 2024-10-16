@@ -70,12 +70,7 @@ namespace HandmadeProductManagement.Services.Service
 
                 // Step 4: Get the ShopId based on userId
                 var shop = await _unitOfWork.GetRepository<Shop>().Entities
-                    .FirstOrDefaultAsync(s => s.UserId == Guid.Parse(userId));
-
-                if (shop == null)
-                {
-                    throw new BaseException.NotFoundException("shop_not_found", $"Shop not found for the provided user.");
-                }
+                    .FirstOrDefaultAsync(s => s.UserId == Guid.Parse(userId)) ?? throw new BaseException.NotFoundException("shop_not_found", $"Shop not found for the provided user.");
 
                 // Step 5: Map the product DTO to the Product entity
                 var productEntity = _mapper.Map<Product>(productDto);
@@ -449,10 +444,7 @@ namespace HandmadeProductManagement.Services.Service
         public async Task<ProductDto> GetById(string id)
         {
             var product = await _unitOfWork.GetRepository<Product>().Entities
-                .FirstOrDefaultAsync(p => p.Id == id && (!p.DeletedTime.HasValue || p.DeletedBy == null));
-
-            if (product == null)
-                throw new KeyNotFoundException("Product not found");
+                .FirstOrDefaultAsync(p => p.Id == id && (!p.DeletedTime.HasValue || p.DeletedBy == null)) ?? throw new KeyNotFoundException("Product not found");
 
             var productToReturn = _mapper.Map<ProductDto>(product);
             return productToReturn;
@@ -469,11 +461,7 @@ namespace HandmadeProductManagement.Services.Service
 
             // Fetch product and check if it exists
             var productEntity = await _unitOfWork.GetRepository<Product>().Entities
-                .FirstOrDefaultAsync(p => p.Id == id);
-            if (productEntity == null)
-            {
-                throw new KeyNotFoundException("Product not found");
-            }
+                .FirstOrDefaultAsync(p => p.Id == id) ?? throw new KeyNotFoundException("Product not found");
 
             // Check if the user has permission to update the product
             if (productEntity.CreatedBy != userId)
@@ -510,11 +498,7 @@ namespace HandmadeProductManagement.Services.Service
         {
             // Fetch product and check if it exists
             var productRepo = _unitOfWork.GetRepository<Product>();
-            var productEntity = await productRepo.Entities.FirstOrDefaultAsync(p => p.Id == id);
-            if (productEntity == null)
-            {
-                throw new KeyNotFoundException("Product not found");
-            }
+            var productEntity = await productRepo.Entities.FirstOrDefaultAsync(p => p.Id == id) ?? throw new KeyNotFoundException("Product not found");
 
             // Check if the user has permission to delete the product
             if (productEntity.CreatedBy != userId)
@@ -569,12 +553,7 @@ namespace HandmadeProductManagement.Services.Service
         {
             // Retrieve the product
             var productEntity = await _unitOfWork.GetRepository<Product>().Entities
-                .FirstOrDefaultAsync(p => p.Id == productId && (!p.DeletedTime.HasValue || p.DeletedBy == null));
-
-            if (productEntity == null)
-            {
-                throw new BaseException.NotFoundException("product_not_found", "Product not found.");
-            }
+                .FirstOrDefaultAsync(p => p.Id == productId && (!p.DeletedTime.HasValue || p.DeletedBy == null)) ?? throw new BaseException.NotFoundException("product_not_found", "Product not found.");
 
             // Check if the current user is the creator of the product
             if (productEntity.CreatedBy != userId)
@@ -617,13 +596,7 @@ namespace HandmadeProductManagement.Services.Service
                 .ThenInclude(p => p.ProductConfigurations)
                 .ThenInclude(p => p.VariationOption)
                 .ThenInclude(v => v.Variation)
-                .FirstOrDefaultAsync(p => p.Id == productId);
-
-            if (product == null)
-            {
-                throw new BaseException.NotFoundException("product_not_found", "Product not found.");
-            }
-
+                .FirstOrDefaultAsync(p => p.Id == productId) ?? throw new BaseException.NotFoundException("product_not_found", "Product not found.");
             var promotionExist = await _unitOfWork.GetRepository<Promotion>().Entities.FirstOrDefaultAsync(p => p.Categories.Any(c => c.Id == product.CategoryId));
 
                 //await _promotionService.UpdatePromotionStatusByRealtime(promotionExist.Id);
@@ -689,13 +662,7 @@ namespace HandmadeProductManagement.Services.Service
 
             var product = await _unitOfWork.GetRepository<Product>().Entities
                 .Include(p => p.Reviews)
-                .FirstOrDefaultAsync(p => p.Id == productId);
-
-            if (product == null)
-            {
-                throw new BaseException.NotFoundException("product_not_found", "Product not found.");
-            }
-
+                .FirstOrDefaultAsync(p => p.Id == productId) ?? throw new BaseException.NotFoundException("product_not_found", "Product not found.");
             var activeReviews = product.Reviews.Where(r => r.DeletedTime == null).ToList();
 
             if (activeReviews == null || !activeReviews.Any())
@@ -718,12 +685,7 @@ namespace HandmadeProductManagement.Services.Service
                 .Include(o => o.OrderDetails)
                 .ThenInclude(od => od.ProductItem)
                 .ThenInclude(pi => pi.Product)
-                .FirstOrDefaultAsync(o => o.Id == orderId);
-
-            if (order == null)
-            {
-                throw new BaseException.NotFoundException("order_not_found", "Order not found.");
-            }
+                .FirstOrDefaultAsync(o => o.Id == orderId) ?? throw new BaseException.NotFoundException("order_not_found", "Order not found.");
 
             if (order.Status != "Shipped")
             {

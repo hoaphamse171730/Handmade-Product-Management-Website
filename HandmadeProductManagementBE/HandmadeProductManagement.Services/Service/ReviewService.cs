@@ -39,12 +39,7 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.BadRequestException("invalid_page_size", "Page Size must be greater than zero.");
             }
 
-            var productExists = await _unitOfWork.GetRepository<Product>().GetByIdAsync(productId);
-            if (productExists == null)
-            {
-                throw new BaseException.NotFoundException("product_not_found", "Product not found.");
-            }
-
+            var productExists = await _unitOfWork.GetRepository<Product>().GetByIdAsync(productId) ?? throw new BaseException.NotFoundException("product_not_found", "Product not found.");
             if (productExists.DeletedTime != null)
             {
                 throw new BaseException.NotFoundException("product_not_found", "Product not found as it has been soft-delete.");
@@ -126,13 +121,7 @@ namespace HandmadeProductManagement.Services.Service
             var review = await _unitOfWork.GetRepository<Review>()
                                           .Entities
                                           .Include(r => r.Reply)
-                                          .FirstOrDefaultAsync(r => r.Id == reviewId && r.DeletedTime == null);
-
-            if (review == null)
-            {
-                throw new BaseException.NotFoundException("review_not_found", "Review not found.");
-            }
-
+                                          .FirstOrDefaultAsync(r => r.Id == reviewId && r.DeletedTime == null) ?? throw new BaseException.NotFoundException("review_not_found", "Review not found.");
             return new ReviewModel
             {
                 Id = review.Id,
@@ -160,13 +149,7 @@ namespace HandmadeProductManagement.Services.Service
             }
 
             // Check if the productId exists in the database
-            var productExists = await _unitOfWork.GetRepository<Product>().GetByIdAsync(reviewModel.ProductId);
-            if (productExists == null)
-            {
-                throw new BaseException.NotFoundException("product_not_found", "Product not found.");
-            }
-
-
+            var productExists = await _unitOfWork.GetRepository<Product>().GetByIdAsync(reviewModel.ProductId) ?? throw new BaseException.NotFoundException("product_not_found", "Product not found.");
             if (string.IsNullOrWhiteSpace(orderId) || !Guid.TryParse(orderId, out _))
             {
                 throw new BaseException.BadRequestException("invalid_order_id_format", "Invalid orderId format.");
@@ -176,11 +159,7 @@ namespace HandmadeProductManagement.Services.Service
             var order = await _unitOfWork.GetRepository<Order>()
                                          .Entities
                                          .Include(o => o.OrderDetails)
-                                         .FirstOrDefaultAsync(o => o.Id == orderId);
-            if (order == null)
-            {
-                throw new BaseException.NotFoundException("order_not_found", "Order not found.");
-            }
+                                         .FirstOrDefaultAsync(o => o.Id == orderId) ?? throw new BaseException.NotFoundException("order_not_found", "Order not found.");
 
             // Check if the user owns the order
             if (order.UserId != reviewModel.UserId)
@@ -217,12 +196,7 @@ namespace HandmadeProductManagement.Services.Service
             var user = await _unitOfWork.GetRepository<ApplicationUser>()
                                          .Entities
                                          //.Include(u => u.UserInfo)
-                                         .FirstOrDefaultAsync(u => u.Id == reviewModel.UserId);
-
-            if (user == null)
-            {
-                throw new BaseException.NotFoundException("user_not_found", "User not found.");
-            }
+                                         .FirstOrDefaultAsync(u => u.Id == reviewModel.UserId) ?? throw new BaseException.NotFoundException("user_not_found", "User not found.");
 
             //var userFullName = user.UserInfo.FullName;
 
@@ -261,11 +235,7 @@ namespace HandmadeProductManagement.Services.Service
             var existingReview = await _unitOfWork.GetRepository<Review>()
                                                   .Entities
                                                   .Include(r => r.User)
-                                                  .FirstOrDefaultAsync(r => r.Id == reviewId);
-            if (existingReview == null)
-            {
-                throw new BaseException.NotFoundException("review_not_found", "Review not found.");
-            }
+                                                  .FirstOrDefaultAsync(r => r.Id == reviewId) ?? throw new BaseException.NotFoundException("review_not_found", "Review not found.");
 
             // Check if the user has permission to update the review
             if (existingReview.UserId != userId)
@@ -320,11 +290,7 @@ namespace HandmadeProductManagement.Services.Service
             // Check if the review exists
             var existingReview = await _unitOfWork.GetRepository<Review>()
                                                   .Entities
-                                                  .FirstOrDefaultAsync(r => r.Id == reviewId);
-            if (existingReview == null)
-            {
-                throw new BaseException.NotFoundException("review_not_found", "Review not found.");
-            }
+                                                  .FirstOrDefaultAsync(r => r.Id == reviewId) ?? throw new BaseException.NotFoundException("review_not_found", "Review not found.");
 
             // Check if the user has permission to delete the review
             if (existingReview.UserId != userId)
@@ -362,11 +328,7 @@ namespace HandmadeProductManagement.Services.Service
             // Check if the review exists
             var existingReview = await _unitOfWork.GetRepository<Review>()
                                                   .Entities
-                                                  .FirstOrDefaultAsync(r => r.Id == reviewId);
-            if (existingReview == null)
-            {
-                throw new BaseException.NotFoundException("review_not_found", "Review not found.");
-            }
+                                                  .FirstOrDefaultAsync(r => r.Id == reviewId) ?? throw new BaseException.NotFoundException("review_not_found", "Review not found.");
 
             // Check if the user has permission to delete the review
             if (existingReview.UserId != userId)

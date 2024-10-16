@@ -36,12 +36,8 @@ namespace HandmadeProductManagement.Services.Service
             }
 
             var productItem = await _unitOfWork.GetRepository<ProductItem>().Entities
-                                                    .SingleOrDefaultAsync(pi => pi.Id == createCartItemDto.ProductItemId);
-            if (productItem == null)
-            {
-                throw new BaseException.NotFoundException("product_item_not_found", $"ProductItem {createCartItemDto.ProductItemId} not found.");
-            }
-
+                                                    .SingleOrDefaultAsync(pi => pi.Id == createCartItemDto.ProductItemId) ?? throw new BaseException.NotFoundException("product_item_not_found", $"ProductItem {createCartItemDto.ProductItemId} not found.");
+            
             if (productItem.CreatedBy == userId)
             {
                 throw new BaseException.BadRequestException("cannot_add_own_product", "You cannot add your own product to the cart.");
@@ -97,13 +93,7 @@ namespace HandmadeProductManagement.Services.Service
 
             var cartItemRepo = _unitOfWork.GetRepository<CartItem>();
             var cartItem = await cartItemRepo.Entities
-                .FirstOrDefaultAsync(ci => ci.Id == cartItemId && ci.UserId == Guid.Parse(userId) && ci.DeletedTime == null);
-
-            if (cartItem == null)
-            {
-                throw new BaseException.NotFoundException("cart_item_not_found", "Cart item not found.");
-            }
-
+                .FirstOrDefaultAsync(ci => ci.Id == cartItemId && ci.UserId == Guid.Parse(userId) && ci.DeletedTime == null) ?? throw new BaseException.NotFoundException("cart_item_not_found", "Cart item not found.");
             if (cartItem.CreatedBy != userId)
             {
                 throw new BaseException.ForbiddenException("forbidden", "You do not have permission to access this resource.");
@@ -113,12 +103,7 @@ namespace HandmadeProductManagement.Services.Service
             {
                 var productItemRepo = _unitOfWork.GetRepository<ProductItem>();
                 var productItem = await productItemRepo.Entities
-                    .SingleOrDefaultAsync(pi => pi.Id == cartItem.ProductItemId);
-
-                if (productItem == null)
-                {
-                    throw new BaseException.NotFoundException("product_item_not_found", $"ProductItem {cartItem.ProductItemId} not found.");
-                }
+                    .SingleOrDefaultAsync(pi => pi.Id == cartItem.ProductItemId) ?? throw new BaseException.NotFoundException("product_item_not_found", $"ProductItem {cartItem.ProductItemId} not found.");
 
                 // Check stock availability
                 if (updateCartItemDto.ProductQuantity.Value > productItem.QuantityInStock)
@@ -222,13 +207,8 @@ namespace HandmadeProductManagement.Services.Service
         {
             var cartItemRepo = _unitOfWork.GetRepository<CartItem>();
             var cartItem = await cartItemRepo.Entities
-                .FirstOrDefaultAsync(ci => ci.Id == cartItemId && ci.UserId == Guid.Parse(userId) && ci.DeletedTime == null);
-
-            if (cartItem == null)
-            {
-                throw new BaseException.NotFoundException("cart_item_not_found", "Cart item not found.");
-            }
-
+                .FirstOrDefaultAsync(ci => ci.Id == cartItemId && ci.UserId == Guid.Parse(userId) && ci.DeletedTime == null) ?? throw new BaseException.NotFoundException("cart_item_not_found", "Cart item not found.");
+            
             if (cartItem.CreatedBy != userId)
             {
                 throw new BaseException.ForbiddenException("forbidden", "You do not have permission to access this resource.");

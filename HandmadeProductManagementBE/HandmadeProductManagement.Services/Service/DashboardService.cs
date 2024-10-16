@@ -97,14 +97,8 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Invalid shopId");
             }
 
-            var shop = await _unitOfWork.GetRepository<Shop>().Entities.Where(s=>s.Id == Id).FirstOrDefaultAsync();
-
-            if (shop == null)
-            {
-                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "Shop not found");
-            }
-
-            if(dashboardDTO.to  < dashboardDTO.from)
+            var shop = await _unitOfWork.GetRepository<Shop>().Entities.Where(s=>s.Id == Id).FirstOrDefaultAsync() ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "Shop not found");
+            if (dashboardDTO.to  < dashboardDTO.from)
             {
                 throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "toDate must be after fromDate");
             }

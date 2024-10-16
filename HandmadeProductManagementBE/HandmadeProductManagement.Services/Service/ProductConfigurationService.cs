@@ -69,13 +69,7 @@ namespace HandmadeProductManagement.Services.Service
             }
             var productConfigurationRepo = _unitOfWork.GetRepository<ProductConfiguration>();
             var productConfigurationEntity = await productConfigurationRepo.Entities
-                .FirstOrDefaultAsync(x => x.ProductItemId == productItemId && x.VariationOptionId == variationOptionId);
-
-            if (productConfigurationEntity == null)
-            {
-                throw new BaseException.NotFoundException("not_found", "Product Configuration not found");
-            }
-
+                .FirstOrDefaultAsync(x => x.ProductItemId == productItemId && x.VariationOptionId == variationOptionId) ?? throw new BaseException.NotFoundException("not_found", "Product Configuration not found");
             await productConfigurationRepo.DeleteAsync(productItemId, variationOptionId);
             await _unitOfWork.SaveAsync();
 

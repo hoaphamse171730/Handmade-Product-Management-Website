@@ -105,12 +105,7 @@ namespace HandmadeProductManagement.Services.Service
 
             // Check if OrderId exists
             var order = await _unitOfWork.GetRepository<Order>().Entities
-                .FirstOrDefaultAsync(o => o.Id == createStatusChange.OrderId && (!o.DeletedTime.HasValue || o.DeletedBy == null));
-
-            if (order == null)
-            {
-                throw new BaseException.NotFoundException("order_not_found", "Order not found.");
-            }
+                .FirstOrDefaultAsync(o => o.Id == createStatusChange.OrderId && (!o.DeletedTime.HasValue || o.DeletedBy == null)) ?? throw new BaseException.NotFoundException("order_not_found", "Order not found.");
 
             // Validate Status Flow
             //var currentStatus = order.Status;

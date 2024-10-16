@@ -64,12 +64,10 @@ namespace HandmadeProductManagement.Services.Service
                     "The provided ID is not in a valid GUID format.");
             var promotion = await _unitOfWork.GetRepository<Promotion>().Entities
                 .FirstOrDefaultAsync(p => p.Id == id && p.DeletedTime == null);
-            if (promotion == null)
-                throw new KeyNotFoundException("Promotion not found");
-            return _mapper.Map<PromotionDto>(promotion);
+            return promotion == null ? throw new KeyNotFoundException("Promotion not found") : _mapper.Map<PromotionDto>(promotion);
         }
 
-        
+
         public async Task<bool> Create(PromotionForCreationDto promotion, string userId)
         {
             var validationResult = await _creationValidator.ValidateAsync(promotion);
@@ -102,9 +100,7 @@ namespace HandmadeProductManagement.Services.Service
             if (!validationResult.IsValid)
                 throw new BaseException.BadRequestException("validation_failed", validationResult.Errors.First().ErrorMessage);
             var promotionEntity = await _unitOfWork.GetRepository<Promotion>().Entities
-                .FirstOrDefaultAsync(p => p.Id == id && p.DeletedTime == null);
-            if (promotionEntity == null)
-                throw new KeyNotFoundException("Promotion not found");
+                .FirstOrDefaultAsync(p => p.Id == id && p.DeletedTime == null) ?? throw new KeyNotFoundException("Promotion not found");
             var isNameDuplicated = await _unitOfWork.GetRepository<Promotion>().Entities
                 .AnyAsync(p => p.Name == promotion.Name && p.DeletedTime == null);
             if (isNameDuplicated)
@@ -140,9 +136,7 @@ namespace HandmadeProductManagement.Services.Service
         public async Task<bool> UpdatePromotionStatusByRealtime(string id)
         {
             var promotion = await _unitOfWork.GetRepository<Promotion>().Entities
-                .FirstOrDefaultAsync(p => p.Id == id && p.DeletedTime == null);
-            if (promotion == null)
-                throw new BaseException.NotFoundException("not_found", "Promotion Not Found!");
+                .FirstOrDefaultAsync(p => p.Id == id && p.DeletedTime == null) ?? throw new BaseException.NotFoundException("not_found", "Promotion Not Found!");
             if (DateTime.UtcNow < promotion.StartDate || DateTime.UtcNow > promotion.EndDate)
                 promotion.Status = "Inactive";
             else promotion.Status = "Active";
