@@ -234,26 +234,25 @@ namespace HandmadeProductManagement.Services.Service
             var fromDate = DateTime.UtcNow.AddDays(-2); // Lọc đơn hàng trong vòng 2 ngày
 
             // Lấy danh sách đơn hàng trong vòng 2 ngày dựa trên ShopId của người dùng (người bán), sắp xếp theo LastUpdatedTime (tăng dần)
-            var orders = await _unitOfWork.GetRepository<OrderDetail>()
+            var orders = await _unitOfWork.GetRepository<Order>()
                 .Entities
-                .Where(od => od.ProductItem.Product.Shop.UserId == userId && od.Order.OrderDate >= fromDate)
-                .OrderBy(od => od.Order.LastUpdatedTime) // Sắp xếp theo LastUpdatedTime tăng dần
-                .Include(od => od.Order)
-                .Include(od => od.Order.User) // Bao gồm thông tin người mua
+                .Where(o => o.OrderDetails.Any(od => od.ProductItem.Product.Shop.UserId == userId) && o.OrderDate >= fromDate)
+                .OrderBy(o => o.LastUpdatedTime) // Sắp xếp theo LastUpdatedTime tăng dần
+                .Include(o => o.User) // Bao gồm thông tin người mua
                 .ToListAsync();
 
             if (!orders.Any())
             {
-                return new List<NotificationModel>(); // Không có đơn hàng trong khoảng thời gian
+                return []; // Không có đơn hàng trong khoảng thời gian
             }
 
             // Tạo danh sách thông báo cho các đơn hàng
-            var notifications = orders.Select(orderDetail => new NotificationModel
+            var notifications = orders.Select(order => new NotificationModel
             {
-                Id = orderDetail.Order.Id,
-                Message = $"Bạn có đơn hàng mới từ {orderDetail.Order.CustomerName} với trạng thái: {orderDetail.Order.Status} vào ngày: {orderDetail.Order.LastUpdatedTime.ToString("dd/MM/yyyy")}",
+                Id = order.Id,
+                Message = $"Bạn có đơn hàng mới từ {order.CustomerName} với trạng thái: {order.Status} vào ngày: {order.LastUpdatedTime.ToString("dd/MM/yyyy")}",
                 Tag = "Order",
-                URL = urlroot + $"/api/order/{orderDetail.Order.Id}"
+                URL = urlroot + $"/api/order/{order.Id}"
             }).ToList();
 
             return notifications;
