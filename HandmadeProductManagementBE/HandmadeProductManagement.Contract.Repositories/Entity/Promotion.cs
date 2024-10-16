@@ -9,8 +9,8 @@ namespace HandmadeProductManagement.Contract.Repositories.Entity
         public decimal DiscountRate { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
-        public string? Status { get; set; }
-        public virtual ICollection<Category> Categories { get; set; } = new List<Category>();
+        public string Status { get; set; } = string.Empty;
+        public virtual ICollection<Category> Categories { get; set; } = [];
         
     }
 }

@@ -13,7 +13,7 @@ namespace HandmadeProductManagement.Contract.Repositories.Entity
 
         [JsonIgnore] public ICollection<Product> Products { get; set; } = [];
 
-        public string? PromotionId { get; set; } = string.Empty;
+        public string PromotionId { get; set; } = string.Empty;
         [JsonIgnore]
         public virtual Promotion? Promotion { get; set; }
   
