@@ -194,7 +194,7 @@ namespace HandmadeProductManagement.Services.Service
             var notifications = reviews.Select(review => new NotificationModel
             {
                 Id = review.Id,
-                Message = $"Sản phẩm của bạn đã được {(review.User?.UserName ?? "một người dùng không xác định")} review",
+                Message = $"Your product has been reviewed by {(review.User?.UserName ?? "Uknown User")}.",
                 Tag = Constants.NotificationTagReview,
                 URL = $"/api/review/{review.Id}"
             }).ToList();
@@ -233,7 +233,7 @@ namespace HandmadeProductManagement.Services.Service
             var notifications = orders.Select(order => new NotificationModel
             {
                 Id = order.Id,
-                Message = $"Bạn có đơn hàng mới từ {order.CustomerName} với trạng thái: {order.Status} vào ngày: {order.LastUpdatedTime.ToString("dd/MM/yyyy")}",
+                Message = $"You have a new Order {order.CustomerName} with status: {order.Status} on: {order.LastUpdatedTime.ToString("dd/MM/yyyy")}",
                 Tag = Constants.NotificationTagOrder,
                 URL = Constants.ApiBaseUrl + $"/api/order/{order.Id}"
             }).ToList();
@@ -281,7 +281,7 @@ namespace HandmadeProductManagement.Services.Service
             var replyNotifications = replies.Select(reply => new NotificationModel
             {
                 Id = reply.Id,
-                Message = $"Bạn đã nhận được phản hồi mới cho review sản phẩm {reply?.Review?.Product?.Shop?.User?.UserInfo.FullName??"Unknown User"}",
+                Message = $"You have a new reply from {reply?.Review?.Product?.Shop?.User?.UserInfo.FullName??"Unknown User"}",
                 Tag =Constants.NotificationTagReply,
                 URL = Constants.ApiBaseUrl + $"api/reply/{reply!.Id}"
             }).ToList();
@@ -321,7 +321,7 @@ namespace HandmadeProductManagement.Services.Service
             var notifications = review.Select(r => new NotificationModel
             {
                 Id = r.Id,
-                Message = $"Sản phẩm của bạn đã được {r.User?.UserInfo.FullName??"Unknown User"} review",  // Lấy FullName từ người dùng trong Review
+                Message = $"Your product have a new review from {r.User?.UserInfo.FullName??"Unknown User"}",  // Lấy FullName từ người dùng trong Review
                 Tag = Constants.NotificationTagReview,
                 URL = Constants.ApiBaseUrl + $"api/review/{r.Id}"
             }).ToList();
@@ -369,7 +369,7 @@ namespace HandmadeProductManagement.Services.Service
                 return new NotificationModel
                 {
                     Id = status.Id,
-                    Message = $"Đơn hàng của bạn được {status.Status} lúc {changeTimeInVietnam.ToString(Constants.DateTimeFormat)}",
+                    Message = $"Your order have change status into {status.Status} at {changeTimeInVietnam.ToString(Constants.DateTimeFormat)}",
                     Tag = Constants.NotificationTagStatusChange, // Use constant for notification tag
                     URL = Constants.ApiBaseUrl + $"/api/statuschange/order/{status.OrderId}"
                 };
@@ -409,7 +409,7 @@ namespace HandmadeProductManagement.Services.Service
                     notifications.Add(new NotificationModel
                     {
                         Id = payment.Id,
-                        Message = $"Thanh toán của bạn sẽ hết hạn vào ngày {payment.ExpirationDate.Value.ToString(Constants.DateTimeFormat)}",
+                        Message = $"Your payment will expired at {payment.ExpirationDate.Value.ToString(Constants.DateTimeFormat)}",
                         Tag = Constants.NotificationTagPaymentExpiration,
                         URL = urlroot + $"/api/payment/{payment.Id}"
                     });

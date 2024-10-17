@@ -83,16 +83,26 @@ namespace HandmadeProductManagement.Services.Service
 
             var categoryEntity = await _unitOfWork.GetRepository<Category>().Entities
                 .FirstOrDefaultAsync(c => c.Id == id && c.DeletedTime == null) ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageCategoryNotFound);
+            
+            if (!string.IsNullOrEmpty(category.Name))
+            {
+                var existedCategory = await _unitOfWork.GetRepository<Category>().Entities
+                    .FirstOrDefaultAsync(c => c.Name == category.Name && c.DeletedTime == null);
+                if (existedCategory is not null)
+                    throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageCategoryNameExists);
 
-            var existedCategory = await _unitOfWork.GetRepository<Category>().Entities
-                .FirstOrDefaultAsync(c => c.Name == category.Name && c.DeletedTime == null);
-            if (existedCategory is not null)
-                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageCategoryNameExists);
+                categoryEntity.Name = category.Name;
+            }
 
-            _mapper.Map(category, categoryEntity);
+            if (!string.IsNullOrEmpty(category.Description))
+            {
+                categoryEntity.Description = category.Description;
+            }
             categoryEntity.LastUpdatedTime = DateTime.UtcNow;
+
             await _unitOfWork.GetRepository<Category>().UpdateAsync(categoryEntity);
             await _unitOfWork.SaveAsync();
+
             return _mapper.Map<CategoryDto>(categoryEntity);
         }
 
