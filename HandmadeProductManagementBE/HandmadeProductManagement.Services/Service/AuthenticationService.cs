@@ -64,7 +64,7 @@ public class AuthenticationService : IAuthenticationService
                                       || u.UserName == loginModelView.UserName) ?? throw new BaseException.UnauthorizedException(StatusCodeHelper.Unauthorized.ToString(),
 
                 Constants.ErrorMessageUnauthorized);
-        if (user.Status != Constants.UserActiveStatus)
+        if (!user.Status.Equals(Constants.UserActiveStatus, StringComparison.OrdinalIgnoreCase))
         {
             throw new BaseException.UnauthorizedException(StatusCodeHelper.Unauthorized.ToString(),
                 Constants.ErrorMessageAccountDisabled);

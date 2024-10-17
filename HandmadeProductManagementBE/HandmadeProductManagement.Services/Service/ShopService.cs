@@ -37,7 +37,7 @@ namespace HandmadeProductManagement.Services.Service
             var repository = _unitOfWork.GetRepository<Shop>();
 
             var existingShop = await repository.Entities
-                .FirstOrDefaultAsync(s => s.UserId.ToString() == userId && !s.DeletedTime.HasValue);
+                .FirstOrDefaultAsync(s => s.UserId.ToString() == userId);
 
             if (existingShop != null)
             {
@@ -50,7 +50,6 @@ namespace HandmadeProductManagement.Services.Service
                 {
                     existingShop.Name = createShop.Name;
                     existingShop.Description = createShop.Description;
-                    existingShop.Rating = 0;
                     existingShop.DeletedBy = null;
                     existingShop.DeletedTime = null;
                     existingShop.LastUpdatedBy = userId;
