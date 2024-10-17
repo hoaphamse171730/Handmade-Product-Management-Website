@@ -18,21 +18,21 @@ namespace HandmadeProductManagementAPI.Controllers
             _paymentService = paymentService;
         }
 
-        [Authorize]
-        [HttpPost("online/{orderId}")]
-        public async Task<IActionResult> CreatePaymentOnline(string orderId)
-        {
-            var userId = (User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value) ?? throw new BaseException.NotFoundException("not_found", "User not found");
-            var createdPayment = await _paymentService.CreatePaymentOnlineAsync(userId, orderId);
-            var response = new BaseResponse<bool>
-            {
-                Code = "Success",
-                StatusCode = StatusCodeHelper.OK,
-                Message = "Payment created successfully",
-                Data = createdPayment
-            };
-            return Ok(response);
-        }
+        //[Authorize]
+        //[HttpPost("online/{orderId}")]
+        //public async Task<IActionResult> CreatePaymentOnline(string orderId)
+        //{
+        //    var userId = (User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value) ?? throw new BaseException.NotFoundException("not_found", "User not found");
+        //    var createdPayment = await _paymentService.CreatePaymentOnlineAsync(userId, orderId);
+        //    var response = new BaseResponse<bool>
+        //    {
+        //        Code = "Success",
+        //        StatusCode = StatusCodeHelper.OK,
+        //        Message = "Payment created successfully",
+        //        Data = createdPayment
+        //    };
+        //    return Ok(response);
+        //}
 
         [Authorize]
         [HttpPost("offline/{orderId}")]
