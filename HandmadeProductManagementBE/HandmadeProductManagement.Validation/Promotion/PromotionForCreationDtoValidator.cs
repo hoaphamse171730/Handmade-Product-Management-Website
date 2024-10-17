@@ -16,8 +16,8 @@ namespace HandmadeProductManagement.Validation.Promotion
             RuleFor(x => x.DiscountRate);
 
             RuleFor(x => x.DiscountRate)
-                .InclusiveBetween(0m, 100m)  
-                .WithMessage("Discount percentage must be a float between 0 and 100.");
+                .InclusiveBetween(0,1)  
+                .WithMessage("Discount percentage must be a float between 0 and 1.");
             
             RuleFor(x => x.StartDate)
                 .LessThan(x => x.EndDate)

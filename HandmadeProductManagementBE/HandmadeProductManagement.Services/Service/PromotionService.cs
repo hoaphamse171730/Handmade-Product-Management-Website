@@ -141,14 +141,14 @@ namespace HandmadeProductManagement.Services.Service
                     Constants.ErrorMessageInvalidGuidFormat);
 
             var promotionRepo = _unitOfWork.GetRepository<Promotion>();
-            var promotionEntity = await promotionRepo.Entities.FirstOrDefaultAsync(p => p.Id == id);
+            var promotionEntity = await promotionRepo.Entities.FirstOrDefaultAsync(p => p.Id == id && p.DeletedTime == null);
 
             if (promotionEntity is null)
                 throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(),
                     Constants.ErrorMessagePromotionNotFound);
 
             promotionEntity.Status = Constants.PromotionStatusInactive;
-            promotionEntity.LastUpdatedBy = "user";
+            promotionEntity.LastUpdatedBy = Constants.RoleAdmin;
             promotionEntity.DeletedTime = DateTime.UtcNow;
 
             await promotionRepo.UpdateAsync(promotionEntity);
