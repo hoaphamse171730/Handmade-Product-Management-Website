@@ -10,8 +10,6 @@ using HandmadeProductManagement.ModelViews.NotificationModelViews;
 using HandmadeProductManagement.Contract.Repositories.Entity;
 using Microsoft.AspNetCore.Http;
 using HandmadeProductManagement.Core.Common;
-using HandmadeProductManagement.Core.Utils;
-using Google.Apis.Storage.v1.Data;
 namespace HandmadeProductManagement.Services.Service
 {
     public class UserService : IUserService
@@ -212,7 +210,7 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat);
             }
 
-            var urlRoot = Constants.ApiBaseUrl; // Use constant for URL root
+            var urlRoot = Constants.ApiBaseUrl;
             var fromDate = DateTime.UtcNow.AddDays(-2); // Filter orders from the last 2 days
 
             // Lấy danh sách đơn hàng trong vòng 2 ngày dựa trên ShopId của người dùng (người bán), sắp xếp theo LastUpdatedTime (tăng dần)
@@ -234,7 +232,7 @@ namespace HandmadeProductManagement.Services.Service
                 Id = order.Id,
                 Message = $"Bạn có đơn hàng mới từ {order.CustomerName} với trạng thái: {order.Status} vào ngày: {order.LastUpdatedTime.ToString("dd/MM/yyyy")}",
                 Tag = "Order",
-                URL = urlroot + $"/api/order/{order.Id}"
+                URL = urlRoot + $"/api/order/{order.Id}"
             }).ToList();
 
             return notifications;
@@ -330,7 +328,7 @@ namespace HandmadeProductManagement.Services.Service
         {
             if (!Guid.TryParse(Id, out Guid userId))
             {
-                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat);
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat); // Use constant for invalid GUID format
             }
 
             // Retrieve the list of orders for the user
@@ -342,7 +340,7 @@ namespace HandmadeProductManagement.Services.Service
 
             if (orders == null || !orders.Any())
             {
-                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageUserNotFound);
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageUserNotFound); // Use constant for user not found
             }
 
             var twoDaysAgo = DateTime.UtcNow.AddDays(-2); // Use UTC for consistency
@@ -356,7 +354,7 @@ namespace HandmadeProductManagement.Services.Service
                 .ToListAsync();
 
             // Define UTC+7 timezone (Vietnam)
-            var vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+            var vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById(Constants.TimeZoneSEAsiaStandard);
 
             // Create response notifications
             var notifications = statusChanges.Select(status => {
@@ -366,27 +364,26 @@ namespace HandmadeProductManagement.Services.Service
                 return new NotificationModel
                 {
                     Id = status.Id,
-                    Message = $"Đơn hàng của bạn được {status.Status} lúc {changeTimeInVietnam.ToString("dd/MM/yyyy HH:mm")}",
-                    Tag = Constants.NotificationTagStatusChange, // Use constant for tag
-                    URL = Constants.ApiBaseUrl + $"/api/statuschange/order/{status.OrderId}" // Use constant for URL base
+                    Message = $"Đơn hàng của bạn được {status.Status} lúc {changeTimeInVietnam.ToString(Constants.DateTimeFormat)}",
+                    Tag = Constants.NotificationTagStatusChange, // Use constant for notification tag
+                    URL = Constants.ApiBaseUrl + $"/api/statuschange/order/{status.OrderId}"
                 };
             }).ToList();
 
             return notifications;
         }
 
-
         public async Task<IList<NotificationModel>> NotificationForPaymentExpiration(string Id)
         {
             if (!Guid.TryParse(Id, out Guid userId))
             {
-                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "ID người dùng không hợp lệ");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat);
             }
 
             // Lấy danh sách các thanh toán của người dùng thông qua Order và kiểm tra trạng thái chưa hoàn thành
             var payments = await _unitOfWork.GetRepository<Payment>()
                 .Entities
-                .Where(p => p.Order != null && p.Order.UserId == userId && p.Status != "Completed") // Lọc theo UserId của Order và status != "Completed"
+                .Where(p => p.Order != null && p.Order.UserId == userId && p.Status != Constants.PaymentStatusPending)
                 .Include(p => p.Order) // Bao gồm bảng Order
                 .ToListAsync();
 
@@ -396,19 +393,19 @@ namespace HandmadeProductManagement.Services.Service
             }
 
             var notifications = new List<NotificationModel>();
-            var urlroot = "https://localhost:7159";
+            var urlroot = Constants.ApiBaseUrl;
 
             foreach (var payment in payments)
             {
                 // Kiểm tra nếu ngày hết hạn cộng thêm 15 ngày lớn hơn ngày hiện tại
-                if (payment.ExpirationDate.HasValue && payment.ExpirationDate.Value.AddDays(15) > DateTime.UtcNow)
+                if (payment.ExpirationDate.HasValue && payment.ExpirationDate.Value.AddDays(Constants.PaymentExpirationDays) > DateTime.UtcNow) 
                 {
                     // Thêm thông báo cho thanh toán này
                     notifications.Add(new NotificationModel
                     {
                         Id = payment.Id,
-                        Message = $"Thanh toán của bạn sẽ hết hạn vào ngày {payment.ExpirationDate.Value.ToString("dd/MM/yyyy")}",
-                        Tag = "PaymentExpiration",
+                        Message = $"Thanh toán của bạn sẽ hết hạn vào ngày {payment.ExpirationDate.Value.ToString(Constants.DateTimeFormat)}",
+                        Tag = Constants.NotificationTagPaymentExpiration,
                         URL = urlroot + $"/api/payment/{payment.Id}"
                     });
                 }
