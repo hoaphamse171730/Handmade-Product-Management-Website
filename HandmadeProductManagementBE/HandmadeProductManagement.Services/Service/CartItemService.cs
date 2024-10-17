@@ -146,9 +146,7 @@ namespace HandmadeProductManagement.Services.Service
                     ShopId = ci.ProductItem.Product.Shop.Id,
                     ShopName = ci.ProductItem.Product.Shop.Name,
                     UnitPrice = ci.ProductItem.Price,
-                    DiscountPrice = ci.ProductItem.Price *
-                        (1 - (ci.ProductItem.Product.Category.Promotion.Status.Equals(Constants.PromotionStatusActive, StringComparison.OrdinalIgnoreCase)
-                        ? ci.ProductItem.Product.Category.Promotion.DiscountRate : 0)),
+                    DiscountPrice = ci.ProductItem.Price * (1 - (ci.ProductItem.Product.Category.Promotion != null && ci.ProductItem.Product.Category.Promotion.Status.Equals("active", StringComparison.OrdinalIgnoreCase) ? ci.ProductItem.Product.Category.Promotion.DiscountRate : 0)),
                     VariationOptionValues = _unitOfWork.GetRepository<ProductConfiguration>().Entities
                         .Where(pc => pc.ProductItemId == ci.ProductItemId)
                         .Select(pc => pc.VariationOption.Value)

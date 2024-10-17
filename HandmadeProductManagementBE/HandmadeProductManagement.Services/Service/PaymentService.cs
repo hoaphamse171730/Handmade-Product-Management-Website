@@ -143,6 +143,11 @@ namespace HandmadeProductManagement.Services.Service
             payment.CreatedBy = userId;
             payment.LastUpdatedBy = userId;
 
+            await OrderService.UpdateOrderStatusAsync(userId, new UpdateStatusOrderDto
+            {
+                OrderId = orderId,
+                Status = "Processing"
+            });
             await paymentRepository.InsertAsync(payment);
             await _unitOfWork.SaveAsync();
 

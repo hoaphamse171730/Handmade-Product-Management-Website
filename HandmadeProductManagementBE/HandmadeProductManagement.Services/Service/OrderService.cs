@@ -1,4 +1,4 @@
-﻿using HandmadeProductManagement.Contract.Repositories.Entity;
+using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
@@ -434,8 +434,8 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.ErrorException(400, StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageOrderClosed);
             }
 
-            // Validate Status Flow
-            var validStatusTransitions = new Dictionary<string, List<string>>
+                // Validate Status Flow
+                var validStatusTransitions = new Dictionary<string, List<string>>
             {
                 { Constants.OrderStatusPending, new List<string> { Constants.OrderStatusCanceled, Constants.OrderStatusAwaitingPayment } },
                 { Constants.OrderStatusAwaitingPayment, new List<string> { Constants.OrderStatusCanceled, Constants.OrderStatusProcessing } },
@@ -605,6 +605,5 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidPhoneFormat);
             }
         }
-
     }
 }

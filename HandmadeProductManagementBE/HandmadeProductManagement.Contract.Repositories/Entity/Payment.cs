@@ -10,7 +10,6 @@ namespace HandmadeProductManagement.Contract.Repositories.Entity
         public decimal TotalAmount { get; set; }
         public string Status { get; set; } = string.Empty;
         public string Method { get; set; } = string.Empty;
-
         [JsonIgnore]
         public Order? Order { get; set; }
 

@@ -10,6 +10,8 @@ using HandmadeProductManagement.ModelViews.NotificationModelViews;
 using HandmadeProductManagement.Contract.Repositories.Entity;
 using Microsoft.AspNetCore.Http;
 using HandmadeProductManagement.Core.Common;
+using HandmadeProductManagement.Core.Utils;
+using Google.Apis.Storage.v1.Data;
 namespace HandmadeProductManagement.Services.Service
 {
     public class UserService : IUserService
@@ -213,22 +215,26 @@ namespace HandmadeProductManagement.Services.Service
             var urlRoot = Constants.ApiBaseUrl; // Use constant for URL root
             var fromDate = DateTime.UtcNow.AddDays(-2); // Filter orders from the last 2 days
 
-            // Get the list of orders in the last 2 days based on the ShopId of the user (seller), sorted by LastUpdatedTime (ascending)
-            var orders = await _unitOfWork.GetRepository<OrderDetail>()
+            // Lấy danh sách đơn hàng trong vòng 2 ngày dựa trên ShopId của người dùng (người bán), sắp xếp theo LastUpdatedTime (tăng dần)
+            var orders = await _unitOfWork.GetRepository<Order>()
                 .Entities
-                .Where(od => od.ProductItem.Product.Shop.UserId == userId && od.Order.OrderDate >= fromDate)
-                .OrderBy(od => od.Order.LastUpdatedTime) // Sort by LastUpdatedTime ascending
-                .Include(od => od.Order)
-                .Include(od => od.Order.User) // Include buyer information
+                .Where(o => o.OrderDetails.Any(od => od.ProductItem.Product.Shop.UserId == userId) && o.OrderDate >= fromDate)
+                .OrderBy(o => o.LastUpdatedTime) // Sắp xếp theo LastUpdatedTime tăng dần
+                .Include(o => o.User) // Bao gồm thông tin người mua
                 .ToListAsync();
 
-            // Create notification list for the orders
-            var notifications = orders.Select(orderDetail => new NotificationModel
+            if (!orders.Any())
             {
-                Id = orderDetail.Order.Id,
-                Message = $"Bạn có đơn hàng mới từ {orderDetail.Order.CustomerName} với trạng thái: {orderDetail.Order.Status} vào ngày: {orderDetail.Order.LastUpdatedTime.ToString("dd/MM/yyyy")}",
-                Tag = Constants.NotificationTagOrder,
-                URL = urlRoot + $"/api/order/{orderDetail.Order.Id}"
+                return []; // Không có đơn hàng trong khoảng thời gian
+            }
+
+            // Tạo danh sách thông báo cho các đơn hàng
+            var notifications = orders.Select(order => new NotificationModel
+            {
+                Id = order.Id,
+                Message = $"Bạn có đơn hàng mới từ {order.CustomerName} với trạng thái: {order.Status} vào ngày: {order.LastUpdatedTime.ToString("dd/MM/yyyy")}",
+                Tag = "Order",
+                URL = urlroot + $"/api/order/{order.Id}"
             }).ToList();
 
             return notifications;
@@ -365,6 +371,48 @@ namespace HandmadeProductManagement.Services.Service
                     URL = Constants.ApiBaseUrl + $"/api/statuschange/order/{status.OrderId}" // Use constant for URL base
                 };
             }).ToList();
+
+            return notifications;
+        }
+
+
+        public async Task<IList<NotificationModel>> NotificationForPaymentExpiration(string Id)
+        {
+            if (!Guid.TryParse(Id, out Guid userId))
+            {
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "ID người dùng không hợp lệ");
+            }
+
+            // Lấy danh sách các thanh toán của người dùng thông qua Order và kiểm tra trạng thái chưa hoàn thành
+            var payments = await _unitOfWork.GetRepository<Payment>()
+                .Entities
+                .Where(p => p.Order != null && p.Order.UserId == userId && p.Status != "Completed") // Lọc theo UserId của Order và status != "Completed"
+                .Include(p => p.Order) // Bao gồm bảng Order
+                .ToListAsync();
+
+            if (payments == null || !payments.Any())
+            {
+                return new List<NotificationModel>(); // Nếu không có thanh toán nào thì trả về danh sách trống
+            }
+
+            var notifications = new List<NotificationModel>();
+            var urlroot = "https://localhost:7159";
+
+            foreach (var payment in payments)
+            {
+                // Kiểm tra nếu ngày hết hạn cộng thêm 15 ngày lớn hơn ngày hiện tại
+                if (payment.ExpirationDate.HasValue && payment.ExpirationDate.Value.AddDays(15) > DateTime.UtcNow)
+                {
+                    // Thêm thông báo cho thanh toán này
+                    notifications.Add(new NotificationModel
+                    {
+                        Id = payment.Id,
+                        Message = $"Thanh toán của bạn sẽ hết hạn vào ngày {payment.ExpirationDate.Value.ToString("dd/MM/yyyy")}",
+                        Tag = "PaymentExpiration",
+                        URL = urlroot + $"/api/payment/{payment.Id}"
+                    });
+                }
+            }
 
             return notifications;
         }

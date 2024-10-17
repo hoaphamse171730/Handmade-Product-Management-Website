@@ -189,7 +189,27 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
-       
+        [HttpGet("notification/payments")]
+        [Authorize]
+        public async Task<IActionResult> GetPaymentExpirationNotifications()
+        {
+            // Lấy thông tin người dùng từ token
+            var userIdFromToken = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            // Lấy danh sách thông báo thanh toán sắp hết hạn
+            var paymentNotifications = await _userService.NotificationForPaymentExpiration(userIdFromToken);
+
+            var response = new BaseResponse<IList<NotificationModel>>
+            {
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Data = paymentNotifications,
+                Message = "Thành công",
+            };
+
+            return Ok(response);
+        }
+
 
 
 
