@@ -38,7 +38,7 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] VariationForCreationDto variation)
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
             var result = await _variationService.Create(variation, userId);
 
             var response = new BaseResponse<bool>
@@ -56,7 +56,7 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpPatch("{id}")]
         public async Task<IActionResult> Patch(string id, [FromBody] VariationForUpdateDto variation)
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
             var result = await _variationService.Update(id, variation, userId);
 
             var response = new BaseResponse<bool>
@@ -75,7 +75,7 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(string id)
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
             var result = await _variationService.Delete(id, userId);
 
             var response = new BaseResponse<bool>
@@ -108,7 +108,7 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpPut("recover/{id}")]
         public async Task<IActionResult> Recover(string id)
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
             var result = await _variationService.Recover(id, userId);
 
             var response = new BaseResponse<bool>

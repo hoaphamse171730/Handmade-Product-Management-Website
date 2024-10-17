@@ -21,7 +21,7 @@ namespace HandmadeProductManagement.Services.Service
 
         public PaymentService(
             IUnitOfWork unitOfWork,
-            Lazy<IOrderService> orderService,  
+            Lazy<IOrderService> orderService,
             ICancelReasonService cancelReasonService)
         {
             _unitOfWork = unitOfWork;
@@ -213,18 +213,20 @@ namespace HandmadeProductManagement.Services.Service
                     await _cancelReasonService.Create(crDto, Constants.RoleSystem);
                     cancelReasons = await _cancelReasonService.GetAll();
                     cancelReason = cancelReasons.FirstOrDefault(cr => cr.Description != null &&
-                                                                    cr.Description.Contains(Constants.PaymentDescriptionFailed));
+                                                                cr.Description.Contains(Constants.PaymentDescriptionFailed));
                 }
 
-                var dto = new UpdateStatusOrderDto
+                if (cancelReason != null)
                 {
-                    OrderId = payment.OrderId,
-                    Status = Constants.OrderStatusCanceled,
-                    CancelReasonId = cancelReason.Id,
-                };
-                await OrderService.UpdateOrderStatusAsync(userId, dto);
+                    var dto = new UpdateStatusOrderDto
+                    {
+                        OrderId = payment.OrderId,
+                        Status = Constants.OrderStatusCanceled,
+                        CancelReasonId = cancelReason.Id,
+                    };
+                    await OrderService.UpdateOrderStatusAsync(userId, dto);
+                }
             }
-
             payment.Status = newStatus;
             payment.LastUpdatedTime = DateTime.UtcNow;
             payment.LastUpdatedBy = userId;

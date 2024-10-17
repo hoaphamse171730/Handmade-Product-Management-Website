@@ -222,7 +222,10 @@ namespace HandmadeProductManagement.Services.Service
 
             // Update shop rating
             var product = await _unitOfWork.GetRepository<Product>().GetByIdAsync(reviewModel.ProductId);
-            await _shopService.CalculateShopAverageRatingAsync(product.ShopId);
+            if (product != null)
+            {
+                await _shopService.CalculateShopAverageRatingAsync(product.ShopId);
+            }
 
             return true;
         }
@@ -254,14 +257,11 @@ namespace HandmadeProductManagement.Services.Service
             }
 
             // Update Rating only if it's within valid range
-            if (updatedReview.Rating.HasValue)
+            if (updatedReview.Rating < 1 || updatedReview.Rating > 5)
             {
-                if (updatedReview.Rating < 1 || updatedReview.Rating > 5)
-                {
                     throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidRating);
-                }
-                existingReview.Rating = updatedReview.Rating;
             }
+            existingReview.Rating = updatedReview.Rating;
 
             if (existingReview.DeletedTime != null)
             {
@@ -279,8 +279,10 @@ namespace HandmadeProductManagement.Services.Service
 
             // Update shop rating
             var product = await _unitOfWork.GetRepository<Product>().GetByIdAsync(existingReview.ProductId);
-            await _shopService.CalculateShopAverageRatingAsync(product.ShopId);
-
+            if (product != null)
+            {
+                await _shopService.CalculateShopAverageRatingAsync(product.ShopId);
+            }
             return true;
         }
 
@@ -318,7 +320,10 @@ namespace HandmadeProductManagement.Services.Service
 
             // Update shop rating
             var product = await _unitOfWork.GetRepository<Product>().GetByIdAsync(existingReview.ProductId);
-            await _shopService.CalculateShopAverageRatingAsync(product.ShopId);
+            if(product!=null)
+            {
+                await _shopService.CalculateShopAverageRatingAsync(product.ShopId);
+            }
 
             return true;
         }
@@ -353,7 +358,10 @@ namespace HandmadeProductManagement.Services.Service
 
             // Update shop rating
             var product = await _unitOfWork.GetRepository<Product>().GetByIdAsync(existingReview.ProductId);
-            await _shopService.CalculateShopAverageRatingAsync(product.ShopId);
+            if (product != null)
+            {
+                await _shopService.CalculateShopAverageRatingAsync(product.ShopId);
+            }
 
             return true;
         }

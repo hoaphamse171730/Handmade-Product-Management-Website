@@ -40,7 +40,7 @@ namespace HandmadeProductManagement.Services.Service
             var validationResult = await _creationValidator.ValidateAsync(productDto);
             if (!validationResult.IsValid)
             {
-                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), validationResult.Errors.First().ErrorMessage);
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), validationResult.Errors.Select(e => e.ErrorMessage).FirstOrDefault() ?? string.Empty);
             }
 
             // Step 2: Validate VariationCombinationDtos
@@ -49,7 +49,7 @@ namespace HandmadeProductManagement.Services.Service
                 var variationCombinationValidationResult = await _variationCombinationValidator.ValidateAsync(variationCombination);
                 if (!variationCombinationValidationResult.IsValid)
                 {
-                    throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), validationResult.Errors.First().ErrorMessage);
+                    throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), variationCombinationValidationResult.Errors.Select(e => e.ErrorMessage).FirstOrDefault() ?? string.Empty);
                 }
             }
 
@@ -339,7 +339,7 @@ namespace HandmadeProductManagement.Services.Service
                     Rating = p.Rating,
                     Status = p.Status,
                     SoldCount = p.SoldCount,
-                    ProductImageUrl = p.ProductImages.FirstOrDefault() != null ? p.ProductImages.FirstOrDefault().Url : string.Empty,
+                    ProductImageUrl = p.ProductImages.FirstOrDefault() != null ? p.ProductImages.FirstOrDefault()!.Url : string.Empty,
                     LowestPrice = p.ProductItems.Any() ? p.ProductItems.Min(pi => pi.Price) : 0
                 })
                 .ToListAsync();
@@ -460,7 +460,7 @@ namespace HandmadeProductManagement.Services.Service
             var validationResult = await _updateValidator.ValidateAsync(product);
             if (!validationResult.IsValid)
             {
-                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), validationResult.Errors.First().ErrorMessage);
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), validationResult.Errors.Select(e => e.ErrorMessage).FirstOrDefault() ?? string.Empty);
             }
 
             // Fetch product and check if it exists
@@ -598,14 +598,14 @@ namespace HandmadeProductManagement.Services.Service
 
             var product = await _unitOfWork.GetRepository<Product>().Entities
                 .Include(p => p.Category)
-                .ThenInclude(p => p.Promotion)
+                .ThenInclude(p => p!.Promotion)
                 .Include(p => p.Shop)
                 .Include(p => p.ProductImages)
                 .Include(p => p.ProductItems)
                 .ThenInclude(p => p.ProductConfigurations)
                 .ThenInclude(p => p.VariationOption)
-                .ThenInclude(v => v.Variation)
-                .FirstOrDefaultAsync(p => p.Id == productId)
+                .ThenInclude(v => v!.Variation)
+                .FirstOrDefaultAsync(p => p.Id == productId)                
                 ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageProductNotFound);
 
             var promotion = await _unitOfWork.GetRepository<Promotion>().Entities
@@ -616,11 +616,11 @@ namespace HandmadeProductManagement.Services.Service
             {
                 Id = product.Id,
                 Name = product.Name,
-                Description = product.Description,
+                Description = product.Description ?? string.Empty,
                 CategoryId = product.CategoryId,
-                CategoryName = product.Category.Name,
+                CategoryName = product.Category?.Name??"",
                 ShopId = product.ShopId,
-                ShopName = product.Shop.Name,
+                ShopName = product.Shop?.Name??"",
                 Rating = product.Rating,
                 Status = product.Status,
                 SoldCount = product.SoldCount,
@@ -633,22 +633,20 @@ namespace HandmadeProductManagement.Services.Service
                     DiscountedPrice = promotion != null ? (int)(pi.Price * (1 - promotion.DiscountRate)) : null,
                     Configurations = pi.ProductConfigurations.Select(pc => new ProductConfigurationDetailModel
                     {
-                        VariationName = pc.VariationOption.Variation.Name,
-                        OptionName = pc.VariationOption.Value
+                        VariationName = pc.VariationOption?.Variation?.Name??"",
+                        OptionName = pc.VariationOption?.Value??""
                     }).ToList()
                 }).ToList(),
-                Promotion = promotion != null
-                    ? new PromotionDetailModel
+                Promotion = promotion == null ? new PromotionDetailModel() : new PromotionDetailModel
                     {
                         Id = promotion.Id,
                         Name = promotion.Name,
-                        Description = promotion.Description,
+                        Description = promotion.Description??"",
                         DiscountRate = promotion.DiscountRate,
                         StartDate = promotion.StartDate,
                         EndDate = promotion.EndDate,
                         Status = promotion.Status
                     }
-                    : null
             };
             return response;
         }
@@ -676,7 +674,7 @@ namespace HandmadeProductManagement.Services.Service
                 return 0m;
             }
 
-            decimal averageRating = Math.Round((decimal)product.Reviews.Average(r => r.Rating), 1);
+            decimal averageRating = product.Reviews.Any() ? Math.Round((decimal)product.Reviews.Average(r => r.Rating), 1) : 0;
 
             // Update the product's rating
             product.Rating = averageRating;
@@ -691,7 +689,7 @@ namespace HandmadeProductManagement.Services.Service
             var order = await _unitOfWork.GetRepository<Order>().Entities
                 .Include(o => o.OrderDetails)
                 .ThenInclude(od => od.ProductItem)
-                .ThenInclude(pi => pi.Product)
+                .ThenInclude(pi => pi!.Product)
                 .FirstOrDefaultAsync(o => o.Id == orderId)
                 ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageOrderNotFound);
 
@@ -703,8 +701,8 @@ namespace HandmadeProductManagement.Services.Service
 
             foreach (var orderDetail in order.OrderDetails)
             {
-                var product = orderDetail.ProductItem.Product;
-                product.SoldCount += orderDetail.ProductQuantity;
+                var product = orderDetail.ProductItem!.Product;
+                product!.SoldCount += orderDetail.ProductQuantity;
                 await _unitOfWork.GetRepository<Product>().UpdateAsync(product);
             }
 

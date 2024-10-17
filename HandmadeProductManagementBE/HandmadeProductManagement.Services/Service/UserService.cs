@@ -16,7 +16,6 @@ namespace HandmadeProductManagement.Services.Service
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IValidator<UpdateUserDTO> _updateValidator;
-        private string Url = "https://" + "localhost:44328/";
         public UserService(IUnitOfWork unitOfWork, IValidator<UpdateUserDTO> updateValidator)
         {
             _unitOfWork = unitOfWork;
@@ -195,7 +194,7 @@ namespace HandmadeProductManagement.Services.Service
             var notifications = reviews.Select(review => new NotificationModel
             {
                 Id = review.Id,
-                Message = $"Sản phẩm của bạn đã được {review.User.UserName} review",
+                Message = $"Sản phẩm của bạn đã được {(review.User?.UserName ?? "một người dùng không xác định")} review",
                 Tag = Constants.NotificationTagReview,
                 URL = $"/api/review/{review.Id}"
             }).ToList();
@@ -215,7 +214,12 @@ namespace HandmadeProductManagement.Services.Service
             // Lấy danh sách đơn hàng trong vòng 2 ngày dựa trên ShopId của người dùng (người bán), sắp xếp theo LastUpdatedTime (tăng dần)
             var orders = await _unitOfWork.GetRepository<Order>()
                 .Entities
-                .Where(o => o.OrderDetails.Any(od => od.ProductItem.Product.Shop.UserId == userId) && o.OrderDate >= fromDate)
+                .Where(o => o.OrderDetails.Any(od =>
+                                            od.ProductItem != null
+                                         && od.ProductItem.Product != null
+                                         && od.ProductItem.Product.Shop != null 
+                                         && od.ProductItem.Product.Shop.UserId == userId) 
+                                && o.OrderDate >= fromDate)
                 .OrderBy(o => o.LastUpdatedTime) // Sắp xếp theo LastUpdatedTime tăng dần
                 .Include(o => o.User) // Bao gồm thông tin người mua
                 .ToListAsync();
@@ -230,7 +234,7 @@ namespace HandmadeProductManagement.Services.Service
             {
                 Id = order.Id,
                 Message = $"Bạn có đơn hàng mới từ {order.CustomerName} với trạng thái: {order.Status} vào ngày: {order.LastUpdatedTime.ToString("dd/MM/yyyy")}",
-                Tag = "Order",
+                Tag = Constants.NotificationTagOrder,
                 URL = Constants.ApiBaseUrl + $"/api/order/{order.Id}"
             }).ToList();
 
@@ -260,26 +264,26 @@ namespace HandmadeProductManagement.Services.Service
             // Get all new replies for the user's reviews in the last 2 days
             var replies = await _unitOfWork.GetRepository<Reply>()
                 .Entities
-                .Where(rep => reviews.Select(r => r.Id).Contains(rep.ReviewId) && rep.Date.Value.Date >= twoDaysAgo.Date) // Filter by reply creation date
-                .Include(rep => rep.Review) // Include review
-                    .ThenInclude(r => r.Product) // Include product
-                    .ThenInclude(p => p.Shop)  // Load shop information from product
-                    .ThenInclude(s => s.User)  // Load user (shop owner) from shop
-                    .ThenInclude(u => u.UserInfo) // Load UserInfo from User
+                .Where(rep => reviews.Select(r => r.Id).Contains(rep.ReviewId) && (rep.Date.HasValue && rep.Date.Value.Date >= twoDaysAgo.Date)) // Lọc theo thời gian tạo reply trong 2 ngày gần nhất
+                .Include(rep => rep.Review) // Bao gồm review
+                    .ThenInclude(r => r!.Product) // Bao gồm sản phẩm
+                    .ThenInclude(p => p!.Shop)  // Nạp thông tin shop từ sản phẩm
+                    .ThenInclude(s => s!.User)  // Nạp thông tin user (chủ shop) từ shop
+                    .ThenInclude(u => u!.UserInfo) // Nạp thông tin UserInfo từ User
                 .ToListAsync();
 
-            if (replies == null || !replies.Any())
+            if (replies == null || replies.Count == 0)
             {
-                return new List<NotificationModel>();
+                return [];
             }
 
             // Create notifications for each new reply
             var replyNotifications = replies.Select(reply => new NotificationModel
             {
                 Id = reply.Id,
-                Message = $"Bạn đã nhận được phản hồi mới cho review sản phẩm {reply.Review.Product.Shop.User.UserInfo.FullName}",
-                Tag = Constants.NotificationTagReply,
-                URL = Constants.ApiBaseUrl + $"api/reply/{reply.Id}"
+                Message = $"Bạn đã nhận được phản hồi mới cho review sản phẩm {reply?.Review?.Product?.Shop?.User?.UserInfo.FullName??"Unknown User"}",
+                Tag =Constants.NotificationTagReply,
+                URL = Constants.ApiBaseUrl + $"api/reply/{reply!.Id}"
             }).ToList();
 
             return replyNotifications;
@@ -307,15 +311,17 @@ namespace HandmadeProductManagement.Services.Service
 
             var review = await _unitOfWork.GetRepository<Review>()
                  .Entities
-                 .Where(r => r.Reply == null && r.Date.Value.Date >= twoDaysAgo.Date) // Filter reviews without replies in the last two days
-                 .Include(r => r.User) // Include user information from review
-                    .ThenInclude(u => u.UserInfo) // Include UserInfo from the reviewer's user
+                 .Where(r => r.Reply == null && r.Date.Date >= twoDaysAgo.Date )  // Lọc các review không có phản hồi và trong hai ngày qua
+                 .Include(r => r.User)  // Nạp thông tin người dùng từ review
+                    .ThenInclude(u => u!.UserInfo)  // Nạp thông tin UserInfo từ User của người viết review
+                 //.Include(r => r.Product)  // Nạp thông tin sản phẩm từ review
+                 //   .ThenInclude(p => p.Shop)  // Nạp thông tin shop từ sản phẩm
                  .ToListAsync();
 
             var notifications = review.Select(r => new NotificationModel
             {
                 Id = r.Id,
-                Message = $"Sản phẩm của bạn đã được {r.User.UserInfo.FullName} review", // Get FullName from review user
+                Message = $"Sản phẩm của bạn đã được {r.User?.UserInfo.FullName??"Unknown User"} review",  // Lấy FullName từ người dùng trong Review
                 Tag = Constants.NotificationTagReview,
                 URL = Constants.ApiBaseUrl + $"api/review/{r.Id}"
             }).ToList();
@@ -440,7 +446,7 @@ namespace HandmadeProductManagement.Services.Service
             return true;
         }
 
-        public async Task<UpdateUserResponseModel?> UpdateUserProfile(string id, UpdateUserDTO updateUserProfileDTO)
+        public async Task<UpdateUserResponseModel> UpdateUserProfile(string id, UpdateUserDTO updateUserProfileDTO)
         {
             if (!Guid.TryParse(id, out Guid userId))
             {

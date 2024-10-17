@@ -4,8 +4,8 @@ namespace HandmadeProductManagement.Contract.Repositories.Entity
 {
     public class OrderDetail : BaseEntity
     {
-        public string ProductItemId { get; set; }
-        public string OrderId { get; set; }
+        public string ProductItemId { get; set; } = string.Empty;
+        public string OrderId { get; set; } = string.Empty;
         public int ProductQuantity { get; set; }
         public decimal DiscountPrice { get; set; }
 

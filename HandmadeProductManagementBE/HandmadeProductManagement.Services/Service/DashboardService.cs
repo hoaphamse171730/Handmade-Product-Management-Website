@@ -99,19 +99,19 @@ namespace HandmadeProductManagement.Services.Service
                 .FirstOrDefaultAsync(s => s.Id == Id)
                 ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageShopNotFound);
 
-            if (dashboardDTO.to < dashboardDTO.from)
+            if (dashboardDTO.To < dashboardDTO.From)
             {
                 throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidDateRange);
             }
 
             decimal totalSales = await _unitOfWork.GetRepository<Order>()
-                .Entities
-                .Where(order => order.OrderDetails
-                    .Any(od => od.ProductItem.Product.ShopId == Id)
-                    && order.OrderDate >= dashboardDTO.from
-                    && order.OrderDate <= dashboardDTO.to
-                    && order.Status == Constants.OrderStatusShipped)
-                .SumAsync(order => order.TotalPrice);
+            .Entities
+            .Where(order => order.OrderDetails
+                .Any(od => od.ProductItem != null && od.ProductItem.Product != null && od.ProductItem.Product.ShopId == Id)
+                && order.OrderDate >= dashboardDTO.From
+                && order.OrderDate <= dashboardDTO.To
+                && order.Status == Constants.OrderStatusShipped)
+            .SumAsync(order => order.TotalPrice);
 
             return totalSales;
         }
@@ -127,8 +127,8 @@ namespace HandmadeProductManagement.Services.Service
                                                       .Select(p => new TopSellingProducts
                                                       { 
                                                             Name = p.Name,
-                                                            CategoryName = p.Category.Name,
-                                                            Price = p.ProductItems.FirstOrDefault() != null ? p.ProductItems.FirstOrDefault().Price : 0,
+                                                            CategoryName = p.Category != null ? p.Category.Name : "",
+                                                            Price = p.ProductItems.FirstOrDefault() != null ? p.ProductItems.FirstOrDefault()!.Price : 0,
                                                             ImageUrls = p.ProductImages.Select(pi => pi.Url).ToList(),
                                                             SoldCount = p.SoldCount
                                                       })
@@ -149,8 +149,8 @@ namespace HandmadeProductManagement.Services.Service
                                                .Select(p => new ProductForDashboard
                                                 {
                                                     Name = p.Name,
-                                                    CategoryName = p.Category.Name,
-                                                    Price = p.ProductItems.FirstOrDefault() != null ? p.ProductItems.FirstOrDefault().Price : 0,
+                                                    CategoryName = p.Category != null ? p.Category.Name : "",
+                                                    Price = p.ProductItems.FirstOrDefault() != null ? p.ProductItems.FirstOrDefault()!.Price : 0,
                                                     ImageUrls = p.ProductImages.Select(pi => pi.Url).ToList()
                                                })
                                               .ToListAsync();

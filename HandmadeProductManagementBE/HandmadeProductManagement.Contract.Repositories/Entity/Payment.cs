@@ -13,6 +13,6 @@ namespace HandmadeProductManagement.Contract.Repositories.Entity
         [JsonIgnore]
         public Order? Order { get; set; }
 
-        public ICollection<PaymentDetail> PaymentDetails { get; set; } = new List<PaymentDetail>();
+        public ICollection<PaymentDetail> PaymentDetails { get; set; } = [];
     }
 }

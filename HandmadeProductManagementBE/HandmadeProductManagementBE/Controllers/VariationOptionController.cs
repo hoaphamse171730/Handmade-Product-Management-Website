@@ -37,7 +37,7 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateVariationOption([FromBody] VariationOptionForCreationDto variationOption)
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
             var result = await _variationOptionService.Create(variationOption, userId);
             var response = new BaseResponse<bool>
             {
@@ -54,7 +54,7 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpPatch("{id}")]
         public async Task<IActionResult> UpdateVariationOption(string id, [FromBody] VariationOptionForUpdateDto variationOption)
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
             var result = await _variationOptionService.Update(id, variationOption, userId);
             var response = new BaseResponse<bool>
             {
@@ -71,7 +71,7 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteVariationOption(string id)
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
             await _variationOptionService.Delete(id, userId);
 
             var response = new BaseResponse<string>
