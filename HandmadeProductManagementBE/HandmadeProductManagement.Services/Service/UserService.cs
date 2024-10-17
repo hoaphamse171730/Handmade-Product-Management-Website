@@ -210,7 +210,6 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat);
             }
 
-            var urlRoot = Constants.ApiBaseUrl;
             var fromDate = DateTime.UtcNow.AddDays(-2); // Filter orders from the last 2 days
 
             // Lấy danh sách đơn hàng trong vòng 2 ngày dựa trên ShopId của người dùng (người bán), sắp xếp theo LastUpdatedTime (tăng dần)
@@ -232,7 +231,7 @@ namespace HandmadeProductManagement.Services.Service
                 Id = order.Id,
                 Message = $"Bạn có đơn hàng mới từ {order.CustomerName} với trạng thái: {order.Status} vào ngày: {order.LastUpdatedTime.ToString("dd/MM/yyyy")}",
                 Tag = "Order",
-                URL = urlRoot + $"/api/order/{order.Id}"
+                URL = Constants.ApiBaseUrl + $"/api/order/{order.Id}"
             }).ToList();
 
             return notifications;
