@@ -20,6 +20,7 @@ namespace HandmadeProductManagementAPI.Controllers
             _productItemService = productItemService;
         }
 
+        [Authorize(Roles = "Seller")]
         [HttpPost]
         [Route("{productId}/items")]
         public async Task<IActionResult> CreateProductItem(string productId, [FromBody] List<VariationCombinationDto> variationCombinations)
