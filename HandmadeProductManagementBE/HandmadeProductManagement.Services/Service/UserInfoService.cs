@@ -55,14 +55,15 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<bool> PatchUserInfoAsync(string id, UserInfoUpdateRequest request)
         {
-            var patchDto = request.UserInfo;
-            var avtFile = request.AvtFile;
-
+            var patchDto = request.UserInfo!;
+            var avtFile = request.AvtFile!;
+            
             // Validate
             var validationResult = await _updateValidator.ValidateAsync(patchDto);
+
             if (!validationResult.IsValid)
             {
-                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), validationResult.Errors.First().ErrorMessage);
+                    throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), validationResult.Errors.Select(e => e.ErrorMessage).FirstOrDefault() ?? string.Empty);
             }
 
             if (!Guid.TryParse(id, out _))

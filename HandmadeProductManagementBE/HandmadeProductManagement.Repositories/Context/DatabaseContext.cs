@@ -295,8 +295,8 @@ namespace HandmadeProductManagement.Repositories.Context
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Content).IsRequired(false).HasMaxLength(1000);
-                entity.Property(e => e.Rating).IsRequired(false);
-                entity.Property(e => e.Date).IsRequired(false).HasDefaultValueSql("GETDATE()");
+                entity.Property(e => e.Rating).IsRequired(true);
+                entity.Property(e => e.Date).IsRequired(true).HasDefaultValueSql("GETDATE()");
                 entity.Property(e => e.ProductId).IsRequired();
                 entity.Property(e => e.UserId).IsRequired();
 

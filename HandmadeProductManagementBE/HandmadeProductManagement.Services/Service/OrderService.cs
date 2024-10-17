@@ -224,6 +224,8 @@ namespace HandmadeProductManagement.Services.Service
                 .FirstOrDefaultAsync(o => o.Id == orderId && !o.DeletedTime.HasValue)
                 ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageOrderNotFound);
 
+            
+
             // If user is not an admin, apply buyer/seller checks
             if (role != Constants.RoleAdmin)
             {
@@ -232,7 +234,7 @@ namespace HandmadeProductManagement.Services.Service
                 {
                     // If the user is not the buyer, check if they are the seller of any product in the order
                     bool isSellerOrder = await _unitOfWork.GetRepository<OrderDetail>().Entities
-                        .AnyAsync(od => od.OrderId == orderId && od.ProductItem.CreatedBy == userId && !od.DeletedTime.HasValue);
+                        .AnyAsync(od => od.OrderId == orderId && od.ProductItem != null && od.ProductItem.CreatedBy == userId && !od.DeletedTime.HasValue);
 
                     if (!isSellerOrder)
                     {
@@ -243,21 +245,26 @@ namespace HandmadeProductManagement.Services.Service
 
             // Retrieve order details with product config and variation option value
             var orderDetails = await _unitOfWork.GetRepository<OrderDetail>().Entities
-                .Where(od => od.OrderId == orderId && !od.DeletedTime.HasValue)
-                .Select(od => new OrderInDetailDto
-                {
-                    ProductId = od.ProductItem.Product.Id,
-                    ProductName = od.ProductItem.Product.Name,
-                    ProductQuantity = od.ProductQuantity,
-                    DiscountPrice = od.DiscountPrice,
+                    .Where(od => od.OrderId == orderId && !od.DeletedTime.HasValue)
+                    .Select(od => new OrderInDetailDto
+                    {
+                        ProductId = od.ProductItem != null && od.ProductItem.Product != null? od.ProductItem.Product.Id :  Guid.Empty.ToString(),
+                        ProductName = od.ProductItem != null && od.ProductItem.Product != null ? od.ProductItem.Product.Name : "",
+                        ProductQuantity = od.ProductQuantity,
+                        DiscountPrice = od.DiscountPrice,
 
-                    // Query ProductConfiguration to get variation options of the product
-                    VariationOptionValues = _unitOfWork.GetRepository<ProductConfiguration>().Entities
-                        .Where(pc => pc.ProductItemId == od.ProductItemId)
-                        .Select(pc => pc.VariationOption.Value)
-                        .ToList()
-                })
-                .ToListAsync();
+                        // Truy vấn ProductConfiguration để lấy các tùy chọn variation của sản phẩm
+                        VariationOptionValues = _unitOfWork.GetRepository<ProductConfiguration>().Entities
+                            .Where(pc => pc.ProductItemId == od.ProductItemId && pc.VariationOption != null)
+                            .Select(pc => pc.VariationOption!.Value)
+                            .ToList()
+                    })
+                    .ToListAsync();
+
+            if (!orderDetails.Any())
+            {
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "No order details found for this order.");
+            }
 
             return new OrderWithDetailDto
             {
@@ -284,8 +291,7 @@ namespace HandmadeProductManagement.Services.Service
 
             var repository = _unitOfWork.GetRepository<Order>();
             var existingOrder = await repository.Entities
-                .FirstOrDefaultAsync(o => o.Id == orderId && !o.DeletedTime.HasValue)
-                ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageOrderNotFound);
+                .FirstOrDefaultAsync(o => o.Id == orderId && !o.DeletedTime.HasValue) ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "Order not found.");
 
             if (existingOrder.CreatedBy != userId)
             {
@@ -552,9 +558,14 @@ namespace HandmadeProductManagement.Services.Service
                 .FirstOrDefaultAsync(s => s.UserId == userId)
                 ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageShopNotFound);
 
-            // Fetch orders associated with the products from the seller's shop
-            var orders = await _unitOfWork.GetRepository<Order>().Entities
-                .Where(o => o.OrderDetails.Any(od => od.ProductItem.Product.Shop.UserId == userId && !od.ProductItem.Product.Shop.DeletedTime.HasValue))
+            var orderRepository = _unitOfWork.GetRepository<Order>();
+            var orders = await orderRepository.Entities
+                .Where(o => o.OrderDetails.Any(od =>
+                                        od.ProductItem != null 
+                                        && od.ProductItem.Product != null 
+                                        && od.ProductItem.Product.Shop != null 
+                                        && od.ProductItem.Product.Shop.UserId == userId 
+                                        && !od.ProductItem.Product.Shop.DeletedTime.HasValue))
                 .OrderByDescending(o => o.CreatedTime) // Sort by CreatedTime in descending order
                 .Select(order => new OrderResponseModel
                 {

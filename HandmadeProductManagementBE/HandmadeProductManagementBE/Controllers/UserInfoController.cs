@@ -21,7 +21,7 @@ namespace HandmadeProductManagementAPI.Controllers
         [Authorize]
         public async Task<IActionResult> GetUserInfoById()
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
             var response = new BaseResponse<UserInfoDto>
             {
                 Code = "200",
@@ -37,7 +37,7 @@ namespace HandmadeProductManagementAPI.Controllers
         [Authorize]
         public async Task<IActionResult> PatchUserInfo([FromForm]UserInfoUpdateRequest request)
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
             var updatedUserInfo = await _userInfoService.PatchUserInfoAsync(userId, request);
             var response = new BaseResponse<bool>
             {

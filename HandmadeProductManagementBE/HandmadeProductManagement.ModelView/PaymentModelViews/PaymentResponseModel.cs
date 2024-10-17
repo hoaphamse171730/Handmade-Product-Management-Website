@@ -10,7 +10,7 @@ namespace HandmadeProductManagement.ModelViews.PaymentModelViews
         public decimal TotalAmount { get; set; }
         public string Method { get; set; } = string.Empty;
         public string Status { get; set; } = string.Empty;
-        public List<PaymentDetailResponseModel> PaymentDetails { get; set; } = new List<PaymentDetailResponseModel>();
+        public List<PaymentDetailResponseModel> PaymentDetails { get; set; } = [];
 
     }
 }

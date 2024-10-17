@@ -207,14 +207,28 @@ namespace HandmadeProductManagement.Services.Service
                 {
                     var crDto = new CancelReasonForCreationDto
                     {
-                        Description = Constants.PaymentDescriptionFailed,
-                        RefundRate = 0
-                    };
-                    await _cancelReasonService.Create(crDto, Constants.RoleSystem);
-                    cancelReasons = await _cancelReasonService.GetAll();
-                    cancelReason = cancelReasons.FirstOrDefault(cr => cr.Description != null &&
+                        var crDto = new CancelReasonForCreationDto
+                        {
+                            Description = Constants.PaymentDescriptionFailed,
+                            RefundRate = 0
+                        };
+                        await _cancelReasonService.Create(crDto, Constants.RoleSystem);
+                        cancelReasons = await _cancelReasonService.GetAll();
+                        cancelReason = cancelReasons.FirstOrDefault(cr => cr.Description != null &&
                                                                     cr.Description.Contains(Constants.PaymentDescriptionFailed));
+                    }
+
+                    if (cancelReason != null)
+                    {
+                        var dto = new UpdateStatusOrderDto
+                        {
+                            OrderId = payment.OrderId,
+                            Status = Constants.OrderStatusCanceled,
+                            CancelReasonId = cancelReason.Id,
+                        };
+                        await OrderService.UpdateOrderStatusAsync(userId, dto);
                 }
+            }
 
                 var dto = new UpdateStatusOrderDto
                 {

@@ -13,7 +13,7 @@ namespace HandmadeProductManagement.Repositories.Entity
         public DateTimeOffset CreatedTime { get; set; }
         public DateTimeOffset LastUpdatedTime { get; set; }
         public DateTimeOffset? DeletedTime { get; set; }
-        public ICollection<CartItem> CartItems { get; set; }
+        public ICollection<CartItem> CartItems { get; set; } = [];
         public string Status { get; set; } = "Active";
 
         public ICollection<Review> Reviews { get; set; } = new List<Review>();

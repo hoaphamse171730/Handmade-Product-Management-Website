@@ -24,7 +24,7 @@ namespace HandmadeProductManagement.Controllers
         [HttpGet]
         public async Task<IActionResult> GetCartItems()
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
             var response = new BaseResponse<List<CartItemGroupDto>>
             {
                 Code = "Success",
@@ -40,7 +40,7 @@ namespace HandmadeProductManagement.Controllers
         [HttpPost]
         public async Task<IActionResult> AddCartItem(CartItemForCreationDto createCartItemDto)
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
             try
             {
                 var response = new BaseResponse<bool>
@@ -71,7 +71,7 @@ namespace HandmadeProductManagement.Controllers
         {
             try
             {
-                var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
                 var response = new BaseResponse<bool>
                 {
                     Code = "Success",
@@ -100,7 +100,7 @@ namespace HandmadeProductManagement.Controllers
         {
             try
             {
-                var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
                 var response = new BaseResponse<bool>
                 {
                     Code = "Success",
@@ -128,7 +128,7 @@ namespace HandmadeProductManagement.Controllers
         [HttpGet("total")]
         public async Task<IActionResult> GetTotalCartPrice()
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
             var totalPrice = await _cartItemService.GetTotalCartPrice(userId);
             var response = new BaseResponse<decimal>
             {
