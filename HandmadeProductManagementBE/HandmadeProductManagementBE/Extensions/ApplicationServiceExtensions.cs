@@ -96,6 +96,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IUserInfoService, UserInfoService>();
         services.AddScoped<ICartItemService, CartItemService>();
         services.AddScoped<IVNPayService, VNPAYService>();
+        services.AddScoped<INotificationService, NotificationService>();
         services.AddScoped(provider => new Lazy<IOrderService>(() => provider.GetRequiredService<IOrderService>()));
 
         services.AddHostedService<PaymentExpirationBackgroundService>();
