@@ -99,7 +99,7 @@ namespace HandmadeProductManagement.Services.Service
                 .FirstOrDefaultAsync(s => s.Id == Id)
                 ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageShopNotFound);
 
-            if (dashboardDTO.to < dashboardDTO.from)
+            if (dashboardDTO.To < dashboardDTO.From)
             {
                 throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidDateRange);
             }
@@ -112,8 +112,6 @@ namespace HandmadeProductManagement.Services.Service
                 && order.OrderDate <= dashboardDTO.To
                 && order.Status == Constants.OrderStatusShipped)
             .SumAsync(order => order.TotalPrice);
-
-                 return totalSales;
 
             return totalSales;
         }

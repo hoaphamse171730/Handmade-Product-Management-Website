@@ -21,7 +21,7 @@ namespace HandmadeProductManagement.Services.Service
 
         public PaymentService(
             IUnitOfWork unitOfWork,
-            Lazy<IOrderService> orderService,  
+            Lazy<IOrderService> orderService,
             ICancelReasonService cancelReasonService)
         {
             _unitOfWork = unitOfWork;
@@ -207,38 +207,26 @@ namespace HandmadeProductManagement.Services.Service
                 {
                     var crDto = new CancelReasonForCreationDto
                     {
-                        var crDto = new CancelReasonForCreationDto
-                        {
-                            Description = Constants.PaymentDescriptionFailed,
-                            RefundRate = 0
-                        };
-                        await _cancelReasonService.Create(crDto, Constants.RoleSystem);
-                        cancelReasons = await _cancelReasonService.GetAll();
-                        cancelReason = cancelReasons.FirstOrDefault(cr => cr.Description != null &&
-                                                                    cr.Description.Contains(Constants.PaymentDescriptionFailed));
-                    }
+                        Description = Constants.PaymentDescriptionFailed,
+                        RefundRate = 0
+                    };
+                    await _cancelReasonService.Create(crDto, Constants.RoleSystem);
+                    cancelReasons = await _cancelReasonService.GetAll();
+                    cancelReason = cancelReasons.FirstOrDefault(cr => cr.Description != null &&
+                                                                cr.Description.Contains(Constants.PaymentDescriptionFailed));
+                }
 
-                    if (cancelReason != null)
+                if (cancelReason != null)
+                {
+                    var dto = new UpdateStatusOrderDto
                     {
-                        var dto = new UpdateStatusOrderDto
-                        {
-                            OrderId = payment.OrderId,
-                            Status = Constants.OrderStatusCanceled,
-                            CancelReasonId = cancelReason.Id,
-                        };
-                        await OrderService.UpdateOrderStatusAsync(userId, dto);
+                        OrderId = payment.OrderId,
+                        Status = Constants.OrderStatusCanceled,
+                        CancelReasonId = cancelReason.Id,
+                    };
+                    await OrderService.UpdateOrderStatusAsync(userId, dto);
                 }
             }
-
-                var dto = new UpdateStatusOrderDto
-                {
-                    OrderId = payment.OrderId,
-                    Status = Constants.OrderStatusCanceled,
-                    CancelReasonId = cancelReason.Id,
-                };
-                await OrderService.UpdateOrderStatusAsync(userId, dto);
-            }
-
             payment.Status = newStatus;
             payment.LastUpdatedTime = DateTime.UtcNow;
             payment.LastUpdatedBy = userId;

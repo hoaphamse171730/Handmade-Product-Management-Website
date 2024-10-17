@@ -18,7 +18,6 @@ namespace HandmadeProductManagement.Services.Service
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IValidator<UpdateUserDTO> _updateValidator;
-        private string Url = "https://" + "localhost:44328/";
         public UserService(IUnitOfWork unitOfWork, IValidator<UpdateUserDTO> updateValidator)
         {
             _unitOfWork = unitOfWork;
@@ -212,7 +211,6 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat);
             }
 
-            var urlRoot = Constants.ApiBaseUrl; // Use constant for URL root
             var fromDate = DateTime.UtcNow.AddDays(-2); // Filter orders from the last 2 days
 
             // Lấy danh sách đơn hàng trong vòng 2 ngày dựa trên ShopId của người dùng (người bán), sắp xếp theo LastUpdatedTime (tăng dần)
@@ -239,7 +237,7 @@ namespace HandmadeProductManagement.Services.Service
                 Id = order.Id,
                 Message = $"Bạn có đơn hàng mới từ {order.CustomerName} với trạng thái: {order.Status} vào ngày: {order.LastUpdatedTime.ToString("dd/MM/yyyy")}",
                 Tag = Constants.NotificationTagOrder,
-                URL = urlroot + $"/api/order/{order.Id}"
+                URL = Constants.ApiBaseUrl + $"/api/order/{order.Id}"
             }).ToList();
 
             return notifications;
