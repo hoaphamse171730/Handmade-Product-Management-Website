@@ -68,6 +68,7 @@ public static class Constants
     public const string PaymentDescriptionFailed = "Failed";
     public const string PaymentMethodTransfer = "Transfer";
     public const string PaymentApproveFailed = "Payment approve failed";
+    public const string VNPayBanking = "VNPay_banking";
 
     #endregion
 

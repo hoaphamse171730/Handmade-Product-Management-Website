@@ -152,7 +152,7 @@ namespace HandmadeProductManagement.Services.Service
                 ExpirationDate = now.AddHours(24),
                 TotalAmount = order.TotalPrice,
                 Status = Constants.PaymentStatusPaid,
-                Method = "VNPay_banking"
+                Method = Constants.VNPayBanking
 
             };
             await _unitOfWork.GetRepository<Payment>().InsertAsync(payment);
