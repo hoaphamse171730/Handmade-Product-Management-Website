@@ -106,7 +106,7 @@ namespace HandmadeProductManagement.Services.Service
                     .AnyAsync(u => u.UserName == updateUserDTO.UserName && u.Id != userId);
                 if (existingUsername)
                 {
-                    throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageUsernameExists);
+                    throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageUsernameTaken);
                 }
                 user.UserName = updateUserDTO.UserName;
                 user.NormalizedUserName = updateUserDTO.UserName.ToUpper();
@@ -119,7 +119,7 @@ namespace HandmadeProductManagement.Services.Service
                     .AnyAsync(u => u.Email == updateUserDTO.Email && u.Id != userId);
                 if (existingUserWithSameEmail)
                 {
-                    throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageEmailExists);
+                    throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageEmailTaken);
                 }
                 user.Email = updateUserDTO.Email;
                 user.NormalizedEmail = updateUserDTO.Email.ToUpper();
@@ -132,7 +132,7 @@ namespace HandmadeProductManagement.Services.Service
                     .AnyAsync(u => u.PhoneNumber == updateUserDTO.PhoneNumber && u.Id != userId);
                 if (existingUserWithSamePhoneNumber)
                 {
-                    throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessagePhoneNumberExists);
+                    throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessagePhoneTaken);
                 }
                 user.PhoneNumber = updateUserDTO.PhoneNumber;
             }
@@ -428,7 +428,7 @@ namespace HandmadeProductManagement.Services.Service
 
             if (user == null || user.Status == Constants.UserActiveStatus)
             {
-                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageUserNotFoundOrActive);
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageUserNotFound);
             }
 
             user.Status = Constants.UserActiveStatus;
