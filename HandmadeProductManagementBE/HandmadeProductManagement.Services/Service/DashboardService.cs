@@ -113,7 +113,7 @@ namespace HandmadeProductManagement.Services.Service
             decimal totalSales = await _unitOfWork.GetRepository<Order>()
             .Entities
             .Where(order => order.OrderDetails
-                .Any(od => od.ProductItem.Product.ShopId == Id)
+                .Any(od => od.ProductItem != null && od.ProductItem.Product != null && od.ProductItem.Product.ShopId == Id)
                 && order.OrderDate >= dashboardDTO.From
                 && order.OrderDate <= dashboardDTO.To
                 && order.Status == "Shipped")
@@ -134,8 +134,8 @@ namespace HandmadeProductManagement.Services.Service
                                                       .Select(p => new TopSellingProducts
                                                       { 
                                                             Name = p.Name,
-                                                            CategoryName = p.Category.Name,
-                                                            Price = p.ProductItems.FirstOrDefault() != null ? p.ProductItems.FirstOrDefault().Price : 0,
+                                                            CategoryName = p.Category != null ? p.Category.Name : "",
+                                                            Price = p.ProductItems.FirstOrDefault() != null ? p.ProductItems.FirstOrDefault()!.Price : 0,
                                                             ImageUrls = p.ProductImages.Select(pi => pi.Url).ToList(),
                                                             SoldCount = p.SoldCount
                                                       })
@@ -156,8 +156,8 @@ namespace HandmadeProductManagement.Services.Service
                                                .Select(p => new ProductForDashboard
                                                 {
                                                     Name = p.Name,
-                                                    CategoryName = p.Category.Name,
-                                                    Price = p.ProductItems.FirstOrDefault() != null ? p.ProductItems.FirstOrDefault().Price : 0,
+                                                    CategoryName = p.Category != null ? p.Category.Name : "",
+                                                    Price = p.ProductItems.FirstOrDefault() != null ? p.ProductItems.FirstOrDefault()!.Price : 0,
                                                     ImageUrls = p.ProductImages.Select(pi => pi.Url).ToList()
                                                })
                                               .ToListAsync();

@@ -236,7 +236,12 @@ namespace HandmadeProductManagement.Services.Service
             // Lấy danh sách đơn hàng trong vòng 2 ngày dựa trên ShopId của người dùng (người bán), sắp xếp theo LastUpdatedTime (tăng dần)
             var orders = await _unitOfWork.GetRepository<Order>()
                 .Entities
-                .Where(o => o.OrderDetails.Any(od => od.ProductItem.Product.Shop.UserId == userId) && o.OrderDate >= fromDate)
+                .Where(o => o.OrderDetails.Any(od =>
+                                            od.ProductItem != null
+                                         && od.ProductItem.Product != null
+                                         && od.ProductItem.Product.Shop != null 
+                                         && od.ProductItem.Product.Shop.UserId == userId) 
+                                && o.OrderDate >= fromDate)
                 .OrderBy(o => o.LastUpdatedTime) // Sắp xếp theo LastUpdatedTime tăng dần
                 .Include(o => o.User) // Bao gồm thông tin người mua
                 .ToListAsync();

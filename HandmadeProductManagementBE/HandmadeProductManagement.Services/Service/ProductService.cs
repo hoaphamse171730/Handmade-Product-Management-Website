@@ -346,7 +346,7 @@ namespace HandmadeProductManagement.Services.Service
                     Rating = p.Rating,
                     Status = p.Status,
                     SoldCount = p.SoldCount,
-                    ProductImageUrl = p.ProductImages.FirstOrDefault() != null ? p.ProductImages.FirstOrDefault().Url : string.Empty,
+                    ProductImageUrl = p.ProductImages.FirstOrDefault() != null ? p.ProductImages.FirstOrDefault()!.Url : string.Empty,
                     LowestPrice = p.ProductItems.Any() ? p.ProductItems.Min(pi => pi.Price) : 0
                 })
                 .ToListAsync();

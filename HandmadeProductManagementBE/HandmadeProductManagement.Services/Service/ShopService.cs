@@ -171,7 +171,7 @@ namespace HandmadeProductManagement.Services.Service
             var existingShop = await repository.Entities
                 .FirstOrDefaultAsync(s => s.UserId.ToString() == userId && !s.DeletedTime.HasValue);
 
-            if (shop == null)
+            if (shop == null || existingShop == null) 
             {
                 throw new BaseException.NotFoundException("shop_not_found", "Shop not found.");
             }

@@ -240,6 +240,8 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.NotFoundException("order_not_found", "Order not found.");
             }
 
+            
+
             // If user is not an admin, apply buyer/seller checks
             if (role != "Admin")
             {
@@ -248,7 +250,7 @@ namespace HandmadeProductManagement.Services.Service
                 {
                     // If the user is not the buyer, check if they are the seller of any product in the order
                     bool isSellerOrder = await _unitOfWork.GetRepository<OrderDetail>().Entities
-                        .AnyAsync(od => od.OrderId == orderId && od.ProductItem.CreatedBy == userId && !od.DeletedTime.HasValue);
+                        .AnyAsync(od => od.OrderId == orderId && od.ProductItem != null && od.ProductItem.CreatedBy == userId && !od.DeletedTime.HasValue);
 
                     if (!isSellerOrder)
                     {
@@ -262,15 +264,15 @@ namespace HandmadeProductManagement.Services.Service
                     .Where(od => od.OrderId == orderId && !od.DeletedTime.HasValue)
                     .Select(od => new OrderInDetailDto
                     {
-                        ProductId = od.ProductItem.Product.Id,
-                        ProductName = od.ProductItem.Product.Name,
+                        ProductId = od.ProductItem != null && od.ProductItem.Product != null? od.ProductItem.Product.Id :  Guid.Empty.ToString(),
+                        ProductName = od.ProductItem != null && od.ProductItem.Product != null ? od.ProductItem.Product.Name : "",
                         ProductQuantity = od.ProductQuantity,
                         DiscountPrice = od.DiscountPrice,
 
                         // Truy vấn ProductConfiguration để lấy các tùy chọn variation của sản phẩm
                         VariationOptionValues = _unitOfWork.GetRepository<ProductConfiguration>().Entities
-                            .Where(pc => pc.ProductItemId == od.ProductItemId)
-                            .Select(pc => pc.VariationOption.Value)
+                            .Where(pc => pc.ProductItemId == od.ProductItemId && pc.VariationOption != null)
+                            .Select(pc => pc.VariationOption!.Value)
                             .ToList()
                     })
                     .ToListAsync();
