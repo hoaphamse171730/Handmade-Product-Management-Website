@@ -111,7 +111,7 @@ namespace HandmadeProductManagement.Services.Service
         {
             if (!Guid.TryParse(id, out _))
             {
-                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat);
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageCategoryNotFound);
             }
 
             var categoryRepo = await _unitOfWork.GetRepository<Category>()
