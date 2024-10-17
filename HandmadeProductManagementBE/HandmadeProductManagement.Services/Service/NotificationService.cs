@@ -14,6 +14,7 @@ using HandmadeProductManagement.Core.Base;
 using System.Reflection.Metadata;
 using Microsoft.EntityFrameworkCore;
 using HandmadeProductManagement.Core.Common;
+using Google.Apis.Storage.v1.Data;
 
 namespace HandmadeProductManagement.Services.Service
 {
@@ -38,9 +39,13 @@ namespace HandmadeProductManagement.Services.Service
                 .Select(r => r.Id)
                 .ToListAsync();
 
+            //if (shopID == null || !shopID.Any())
+            //{
+            //    throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageUserNotFound);
+            //}
             if (shopID == null || !shopID.Any())
             {
-                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageUserNotFound);
+                return new List<NotificationModel>();
             }
 
             var twoDaysAgo = DateTime.UtcNow.AddDays(-2); // Use UTC for consistency
