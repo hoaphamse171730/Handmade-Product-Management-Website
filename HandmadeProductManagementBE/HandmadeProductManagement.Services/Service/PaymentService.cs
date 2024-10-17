@@ -1,4 +1,5 @@
-﻿using HandmadeProductManagement.Contract.Repositories.Entity;
+﻿using Google.Apis.Storage.v1.Data;
+using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
@@ -107,7 +108,7 @@ namespace HandmadeProductManagement.Services.Service
                 .FirstOrDefaultAsync(o => o.Id == orderId && !o.DeletedTime.HasValue)
                 ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageOrderNotFound);
 
-            if (order.Status != Constants.OrderStatusPending)
+            if (order.Status != Constants.OrderStatusAwaitingPayment)
             {
                 throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidOrderStatus);
             }
@@ -237,7 +238,7 @@ namespace HandmadeProductManagement.Services.Service
             return true;
         }
 
-        public async Task<PaymentResponseModel> GetPaymentByOrderIdAsync(string orderId)
+        public async Task<PaymentResponseModel> GetPaymentByOrderIdAsync(string orderId, string userId)
         {
             if (string.IsNullOrWhiteSpace(orderId))
             {
@@ -250,12 +251,18 @@ namespace HandmadeProductManagement.Services.Service
             }
 
             var orderRepository = _unitOfWork.GetRepository<Order>();
-            var orderExists = await orderRepository.Entities
-                .AnyAsync(o => o.Id == orderId && !o.DeletedTime.HasValue);
-            if (!orderExists)
+            var order = await orderRepository.Entities
+                .FirstOrDefaultAsync(o => o.Id == orderId && !o.DeletedTime.HasValue);
+
+            if (order == null)
             {
                 throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageOrderNotFound);
             }
+            if (order.UserId.ToString() != userId)
+            {
+                throw new BaseException.ForbiddenException(StatusCodeHelper.Forbidden.ToString(), Constants.ErrorMessageForbidden);
+            }
+
 
             var paymentRepository = _unitOfWork.GetRepository<Payment>();
             var payment = await paymentRepository.Entities
