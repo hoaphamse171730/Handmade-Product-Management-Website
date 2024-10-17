@@ -286,15 +286,15 @@ namespace HandmadeProductManagement.Services.Service
             // Lấy tất cả các reply mới cho những review của khách hàng
             var replies = await _unitOfWork.GetRepository<Reply>()
                 .Entities
-                .Where(rep => reviews.Select(r => r.Id).Contains(rep.ReviewId) && rep.Date.Value.Date >= twoDaysAgo.Date) // Lọc theo thời gian tạo reply trong 2 ngày gần nhất
+                .Where(rep => reviews.Select(r => r.Id).Contains(rep.ReviewId) && (rep.Date.HasValue && rep.Date.Value.Date >= twoDaysAgo.Date)) // Lọc theo thời gian tạo reply trong 2 ngày gần nhất
                 .Include(rep => rep.Review) // Bao gồm review
-                    .ThenInclude(r => r.Product) // Bao gồm sản phẩm
-                    .ThenInclude(p => p.Shop)  // Nạp thông tin shop từ sản phẩm
-                    .ThenInclude(s => s.User)  // Nạp thông tin user (chủ shop) từ shop
-                    .ThenInclude(u => u.UserInfo) // Nạp thông tin UserInfo từ User
+                    .ThenInclude(r => r!.Product) // Bao gồm sản phẩm
+                    .ThenInclude(p => p!.Shop)  // Nạp thông tin shop từ sản phẩm
+                    .ThenInclude(s => s!.User)  // Nạp thông tin user (chủ shop) từ shop
+                    .ThenInclude(u => u!.UserInfo) // Nạp thông tin UserInfo từ User
                 .ToListAsync();
 
-            if (replies == null || !replies.Any())
+            if (replies == null || replies.Count == 0)
             {
                 return [];
             }
@@ -303,9 +303,9 @@ namespace HandmadeProductManagement.Services.Service
             var replyNotifications = replies.Select(reply => new NotificationModel
             {
                 Id = reply.Id,
-                Message = $"Bạn đã nhận được phản hồi mới cho review sản phẩm {reply.Review.Product.Shop.User?.UserInfo.FullName}",
+                Message = $"Bạn đã nhận được phản hồi mới cho review sản phẩm {reply?.Review?.Product?.Shop?.User?.UserInfo.FullName??"Unknown User"}",
                 Tag = "Reply",
-                URL = Url + $"api/reply/{reply.Id}"
+                URL = Url + $"api/reply/{reply!.Id}"
             }).ToList();
 
             return replyNotifications;
@@ -333,9 +333,9 @@ namespace HandmadeProductManagement.Services.Service
 
             var review = await _unitOfWork.GetRepository<Review>()
                  .Entities
-                 .Where(r => r.Reply == null && r.Date.Date >= twoDaysAgo.Date)  // Lọc các review không có phản hồi và trong hai ngày qua
+                 .Where(r => r.Reply == null && r.Date.Date >= twoDaysAgo.Date )  // Lọc các review không có phản hồi và trong hai ngày qua
                  .Include(r => r.User)  // Nạp thông tin người dùng từ review
-                    .ThenInclude(u => u.UserInfo)  // Nạp thông tin UserInfo từ User của người viết review
+                    .ThenInclude(u => u!.UserInfo)  // Nạp thông tin UserInfo từ User của người viết review
                  //.Include(r => r.Product)  // Nạp thông tin sản phẩm từ review
                  //   .ThenInclude(p => p.Shop)  // Nạp thông tin shop từ sản phẩm
                  .ToListAsync();
@@ -343,7 +343,7 @@ namespace HandmadeProductManagement.Services.Service
             var notifications = review.Select(r => new NotificationModel
             {
                 Id = r.Id,
-                Message = $"Sản phẩm của bạn đã được {r.User.UserInfo.FullName} review",  // Lấy FullName từ người dùng trong Review
+                Message = $"Sản phẩm của bạn đã được {r.User?.UserInfo.FullName??"Unknown User"} review",  // Lấy FullName từ người dùng trong Review
                 Tag = "Review",
                 URL = Url + $"api/review/{r.Id}"
             }).ToList();

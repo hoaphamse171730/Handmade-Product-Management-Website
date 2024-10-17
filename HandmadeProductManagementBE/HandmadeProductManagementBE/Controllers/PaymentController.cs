@@ -38,7 +38,7 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpPost("offline/{orderId}")]
         public async Task<IActionResult> CreatePaymentOffline(string orderId)
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userId = (User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value) ?? throw new BaseException.NotFoundException("not_found", "user not found");
             var createdPayment = await _paymentService.CreatePaymentOfflineAsync(userId, orderId);
             var response = new BaseResponse<bool>
             {

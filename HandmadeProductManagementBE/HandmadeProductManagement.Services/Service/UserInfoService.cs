@@ -55,9 +55,9 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<bool> PatchUserInfoAsync(string id, UserInfoUpdateRequest request)
         {
-            var patchDto = request.UserInfo;
-            var avtFile = request.AvtFile;
-
+            var patchDto = request.UserInfo!;
+            var avtFile = request.AvtFile!;
+            
             // Validate
             var validationResult = await _updateValidator.ValidateAsync(patchDto);
 

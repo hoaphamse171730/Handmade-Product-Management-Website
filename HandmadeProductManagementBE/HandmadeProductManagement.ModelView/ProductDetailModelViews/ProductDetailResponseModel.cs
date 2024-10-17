@@ -14,6 +14,6 @@
         public int SoldCount { get; set; }
         public List<string> ProductImageUrls { get; set; }
         public List<ProductItemDetailModel> ProductItems { get; set; }
-        public PromotionDetailModel Promotion { get; set; }
+        public PromotionDetailModel? Promotion { get; set; }
     }
 }

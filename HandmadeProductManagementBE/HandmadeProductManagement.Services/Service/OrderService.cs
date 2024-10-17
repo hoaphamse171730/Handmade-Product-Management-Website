@@ -308,16 +308,16 @@ namespace HandmadeProductManagement.Services.Service
             var repository = _unitOfWork.GetRepository<Order>();
             var existingOrder = await repository.Entities
                 .FirstOrDefaultAsync(o => o.Id == orderId && !o.DeletedTime.HasValue);
+            if (existingOrder == null)
+            {
+                throw new BaseException.NotFoundException("order_not_found", "Order not found.");
+            }
 
             if (existingOrder.CreatedBy != userId)
             {
                 throw new BaseException.ForbiddenException("forbidden", $"You have no permission to access this resource.");
             }
 
-            if (existingOrder == null)
-            {
-                throw new BaseException.NotFoundException("order_not_found", "Order not found.");
-            }
 
             if (existingOrder.Status != "Pending" && existingOrder.Status != "Awaiting Payment")
             {
@@ -598,7 +598,12 @@ namespace HandmadeProductManagement.Services.Service
         {
             var orderRepository = _unitOfWork.GetRepository<Order>();
             var orders = await orderRepository.Entities
-                .Where(o => o.OrderDetails.Any(od => od.ProductItem.Product.Shop.UserId == userId && !od.ProductItem.Product.Shop.DeletedTime.HasValue))
+                .Where(o => o.OrderDetails.Any(od =>
+                                        od.ProductItem != null 
+                                        && od.ProductItem.Product != null 
+                                        && od.ProductItem.Product.Shop != null 
+                                        && od.ProductItem.Product.Shop.UserId == userId 
+                                        && !od.ProductItem.Product.Shop.DeletedTime.HasValue))
                 .OrderByDescending(o => o.CreatedTime) // Sort by CreatedTime in descending order
                 .Select(order => new OrderResponseModel
                 {

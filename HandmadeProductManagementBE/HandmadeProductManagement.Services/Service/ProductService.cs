@@ -633,13 +633,13 @@ namespace HandmadeProductManagement.Services.Service
 
             var product = await _unitOfWork.GetRepository<Product>().Entities
                 .Include(p => p.Category)
-                .ThenInclude(p => p.Promotion)
+                .ThenInclude(p => p!.Promotion)
                 .Include(p => p.Shop)
                 .Include(p => p.ProductImages)
                 .Include(p => p.ProductItems)
                 .ThenInclude(p => p.ProductConfigurations)
                 .ThenInclude(p => p.VariationOption)
-                .ThenInclude(v => v.Variation)
+                .ThenInclude(v => v!.Variation)
                 .FirstOrDefaultAsync(p => p.Id == productId);
 
             if (product == null)
@@ -661,9 +661,9 @@ namespace HandmadeProductManagement.Services.Service
                 Name = product.Name,
                 Description = product.Description ?? string.Empty,
                 CategoryId = product.CategoryId,
-                CategoryName = product.Category.Name,
+                CategoryName = product.Category?.Name??"",
                 ShopId = product.ShopId,
-                ShopName = product.Shop.Name,
+                ShopName = product.Shop?.Name??"",
                 Rating = product.Rating,
                 Status = product.Status,
                 SoldCount = product.SoldCount,
@@ -676,22 +676,20 @@ namespace HandmadeProductManagement.Services.Service
                     DiscountedPrice = promotion != null ? (int)(pi.Price * (1 - promotion.DiscountRate)) : null,
                     Configurations = pi.ProductConfigurations.Select(pc => new ProductConfigurationDetailModel
                     {
-                        VariationName = pc.VariationOption.Variation.Name,
-                        OptionName = pc.VariationOption.Value
+                        VariationName = pc.VariationOption?.Variation?.Name??"",
+                        OptionName = pc.VariationOption?.Value??""
                     }).ToList()
                 }).ToList(),
-                Promotion = promotion != null
-                    ? new PromotionDetailModel
+                Promotion = promotion == null ? new PromotionDetailModel() : new PromotionDetailModel
                     {
                         Id = promotion.Id,
                         Name = promotion.Name,
-                        Description = promotion.Description,
+                        Description = promotion.Description??"",
                         DiscountRate = promotion.DiscountRate,
                         StartDate = promotion.StartDate,
                         EndDate = promotion.EndDate,
                         Status = promotion.Status
                     }
-                    : null
             };
             return response;
         }
@@ -726,7 +724,7 @@ namespace HandmadeProductManagement.Services.Service
                 return 0m;
             }
 
-            decimal averageRating = Math.Round((decimal)product.Reviews.Average(r => r.Rating), 1);
+            decimal averageRating = product.Reviews.Any() ? Math.Round((decimal)product.Reviews.Average(r => r.Rating), 1) : 0;
 
             // Update the product's rating
             product.Rating = averageRating;
@@ -740,7 +738,7 @@ namespace HandmadeProductManagement.Services.Service
             var order = await _unitOfWork.GetRepository<Order>().Entities
                 .Include(o => o.OrderDetails)
                 .ThenInclude(od => od.ProductItem)
-                .ThenInclude(pi => pi.Product)
+                .ThenInclude(pi => pi!.Product)
                 .FirstOrDefaultAsync(o => o.Id == orderId);
 
             if (order == null)
@@ -755,8 +753,8 @@ namespace HandmadeProductManagement.Services.Service
 
             foreach (var orderDetail in order.OrderDetails)
             {
-                var product = orderDetail.ProductItem.Product;
-                product.SoldCount += orderDetail.ProductQuantity;
+                var product = orderDetail.ProductItem!.Product;
+                product!.SoldCount += orderDetail.ProductQuantity;
                 await _unitOfWork.GetRepository<Product>().UpdateAsync(product);
             }
 

@@ -283,14 +283,11 @@ namespace HandmadeProductManagement.Services.Service
             }
 
             // Update Rating only if it's within valid range
-            if (updatedReview.Rating.HasValue)
+            if (updatedReview.Rating < 1 || updatedReview.Rating > 5)
             {
-                if (updatedReview.Rating < 1 || updatedReview.Rating > 5)
-                {
-                    throw new BaseException.BadRequestException("invalid_rating", "Rating must be between 1 and 5.");
-                }
-                existingReview.Rating = updatedReview.Rating;
+                throw new BaseException.BadRequestException("invalid_rating", "Rating must be between 1 and 5.");
             }
+            existingReview.Rating = updatedReview.Rating;
 
             if (existingReview.DeletedTime != null)
             {
