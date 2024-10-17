@@ -283,7 +283,7 @@ namespace HandmadeProductManagement.Services.Service
                     await _unitOfWork.GetRepository<PaymentDetail>().InsertAsync(paymentDetail);
                     await _unitOfWork.SaveAsync();
 
-                    payment.Status = Constants.PaymentStatusPaid;
+                    payment.Status = Constants.PaymentStatusCompleted;
                     await _unitOfWork.GetRepository<Payment>().UpdateAsync(payment);
                     await _unitOfWork.SaveAsync();
 
