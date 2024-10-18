@@ -155,5 +155,25 @@ namespace HandmadeProductManagement.Services.Service
             await _unitOfWork.SaveAsync();
             return true;
         }
+
+        public async Task<bool> RestoreCategory(string id, string userId)
+        {
+            var categoryRepo = _unitOfWork.GetRepository<Category>();
+            var categoryEntity = await categoryRepo.Entities.FirstOrDefaultAsync(x => x.Id == id);
+
+            // Check if the category exists and has been deleted
+            if (categoryEntity == null || categoryEntity.DeletedBy == null && !categoryEntity.DeletedTime.HasValue)
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageCategoryNotFound);
+
+            // Recover the category
+            categoryEntity.DeletedTime = null;
+            categoryEntity.DeletedBy = null;
+            categoryEntity.LastUpdatedBy = userId;
+
+            await categoryRepo.UpdateAsync(categoryEntity);
+            await _unitOfWork.SaveAsync();
+
+            return true;
+        }
     }
 }

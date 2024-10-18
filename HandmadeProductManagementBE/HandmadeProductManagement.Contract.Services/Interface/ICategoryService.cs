@@ -12,5 +12,8 @@ namespace HandmadeProductManagement.Contract.Services.Interface
         Task<bool> SoftDelete(string id);
 
         Task<CategoryDto> UpdatePromotion(string id, CategoryForUpdatePromotion category);
+
+        Task<bool> RestoreCategory(string id, string userId);
+
     }
 }

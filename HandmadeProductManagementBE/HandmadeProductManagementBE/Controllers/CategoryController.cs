@@ -109,5 +109,21 @@ namespace HandmadeProductManagementAPI.Controllers
             };
             return Ok(response);
         }
+
+        [HttpPatch("restore/{id}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> RestoreCategory(string id)
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
+            var isRestored = await _categoryService.RestoreCategory(id, userId);
+            var response = new BaseResponse<bool>
+            {
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Category restored successfully",
+                Data = isRestored
+            };
+            return Ok(response);
+        }
     }
 }
