@@ -151,7 +151,7 @@ namespace HandmadeProductManagement.Services.Service
                 CreatedTime = now,
                 ExpirationDate = now.AddHours(24),
                 TotalAmount = order.TotalPrice,
-                Status = Constants.PaymentStatusPaid,
+                Status = "Processing",
                 Method = Constants.VNPayBanking
 
             };
@@ -274,7 +274,7 @@ namespace HandmadeProductManagement.Services.Service
                     PaymentDetail paymentDetail = new()
                     {
                         PaymentId = payment.Id,
-                        Status = Constants.PaymentStatusPaid,
+                        Status = Constants.PaymentStatusSuccess,
                         Method = Constants.PaymentMethodTransfer,
                         ExternalTransaction = Constants.VNPAY,
                         CreatedTime = DateTime.Now,
