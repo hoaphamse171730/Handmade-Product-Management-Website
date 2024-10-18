@@ -11,5 +11,6 @@ namespace HandmadeProductManagement.Contract.Services.Interface
         Task<bool> UpdateAsync(string reviewId, Guid userId, ReviewModel updatedReview);
         Task<bool> DeleteAsync(string reviewId, Guid userId);
         Task<bool> SoftDeleteAsync(string reviewId, Guid userId);
+        Task<bool> RecoverDeletedReviewAsync(string reviewId, Guid userId);
     }
 }

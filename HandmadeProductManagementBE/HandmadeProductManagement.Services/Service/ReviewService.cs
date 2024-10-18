@@ -365,5 +365,60 @@ namespace HandmadeProductManagement.Services.Service
 
             return true;
         }
+
+        public async Task<bool> RecoverDeletedReviewAsync(string reviewId, Guid userId)
+        {
+            if (string.IsNullOrWhiteSpace(reviewId) || !Guid.TryParse(reviewId, out _))
+            {
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidReviewIdFormat);
+            }
+
+            // Check if the review exists
+            var existingReview = await _unitOfWork.GetRepository<Review>()
+                                                  .Entities
+                                                  .FirstOrDefaultAsync(r => r.Id == reviewId)
+                ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageReviewNotFound);
+
+            // Check if the user has permission to recover the review
+            if (existingReview.UserId != userId)
+            {
+                throw new BaseException.ForbiddenException(StatusCodeHelper.Forbidden.ToString(), Constants.ErrorMessageForbidden);
+            }
+
+            // Check if the review is actually soft-deleted
+            if (existingReview.DeletedTime == null)
+            {
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Review is not deleted");
+            }
+
+            // Check if the associated product still exists and is not deleted
+            var product = await _unitOfWork.GetRepository<Product>().GetByIdAsync(existingReview.ProductId)
+                ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageProductNotFound);
+
+            if (product.DeletedTime != null)
+            {
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageProductSoftDeleted);
+            }
+
+            // Recover the review
+            existingReview.DeletedTime = null;
+            existingReview.DeletedBy = null;
+            existingReview.LastUpdatedTime = vietnamTime;
+            existingReview.LastUpdatedBy = userId.ToString();
+
+            await _unitOfWork.GetRepository<Review>().UpdateAsync(existingReview);
+            await _unitOfWork.SaveAsync();
+
+            // Update product rating
+            await _productService.CalculateAverageRatingAsync(existingReview.ProductId);
+
+            // Update shop rating
+            if (product != null)
+            {
+                await _shopService.CalculateShopAverageRatingAsync(product.ShopId);
+            }
+
+            return true;
+        }
     }
 }
