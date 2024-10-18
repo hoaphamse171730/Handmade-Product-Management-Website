@@ -140,5 +140,22 @@ namespace HandmadeProductManagementAPI.Controllers
             };
             return Ok(response);
         }
+
+        [Authorize]
+        [HttpPut("{reviewId}/recover")]
+        public async Task<IActionResult> RecoverDeletedReview([Required] string reviewId)
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
+
+            var result = await _reviewService.RecoverDeletedReviewAsync(reviewId, Guid.Parse(userId));
+            var response = new BaseResponse<bool>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Review recovered successfully.",
+                Data = result
+            };
+            return Ok(response);
+        }
     }
 }

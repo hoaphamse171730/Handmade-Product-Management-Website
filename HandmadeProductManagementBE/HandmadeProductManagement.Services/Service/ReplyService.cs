@@ -253,5 +253,69 @@ namespace HandmadeProductManagement.Services.Service
 
             return true;
         }
+
+        public async Task<bool> RecoverDeletedReplyAsync(string replyId, Guid userId)
+        {
+            if (string.IsNullOrWhiteSpace(replyId) || !Guid.TryParse(replyId, out _))
+            {
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidReplyIdFormat);
+            }
+
+            if (!Guid.TryParse(userId.ToString(), out _))
+            {
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat);
+            }
+
+            // Check if the reply exists
+            var existingReply = await _unitOfWork.GetRepository<Reply>().GetByIdAsync(replyId)
+                ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageReplyNotFound);
+
+            // Verify shop ownership and authorization
+            var shop = await _unitOfWork.GetRepository<Shop>()
+                             .Entities
+                             .FirstOrDefaultAsync(s => s.UserId == userId);
+
+            if (shop == null || shop.Id != existingReply.ShopId)
+            {
+                throw new BaseException.UnauthorizedException(StatusCodeHelper.Unauthorized.ToString(), Constants.ErrorMessageUnauthorizedUpdate);
+            }
+
+            // Check if the reply is actually soft-deleted
+            if (existingReply.DeletedTime == null)
+            {
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Reply is not deleted");
+            }
+
+            // Verify that the associated review still exists and is not deleted
+            var review = await _unitOfWork.GetRepository<Review>().GetByIdAsync(existingReply.ReviewId)
+                ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageReviewNotFound);
+
+            if (review.DeletedTime != null)
+            {
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Cannot recover reply for a deleted review");
+            }
+
+            // Verify that the product still exists and belongs to the shop
+            var product = await _unitOfWork.GetRepository<Product>()
+                                           .Entities
+                                           .FirstOrDefaultAsync(p => p.Id == review.ProductId && p.ShopId == shop.Id)
+                ?? throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageUnauthorizedUpdate);
+
+            if (product.DeletedTime != null)
+            {
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Cannot recover reply for a deleted product");
+            }
+
+            // Recover the reply
+            existingReply.DeletedTime = null;
+            existingReply.DeletedBy = null;
+            existingReply.LastUpdatedTime = vietnamTime;
+            existingReply.LastUpdatedBy = existingReply.ShopId;
+
+            await _unitOfWork.GetRepository<Reply>().UpdateAsync(existingReply);
+            await _unitOfWork.SaveAsync();
+
+            return true;
+        }
     }
 }
