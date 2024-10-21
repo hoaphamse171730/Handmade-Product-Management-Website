@@ -283,7 +283,7 @@ namespace HandmadeProductManagement.Services.Service
             // Check if the reply is actually soft-deleted
             if (existingReply.DeletedTime == null)
             {
-                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Reply is not deleted");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageReplyIsNotDeletedYet);
             }
 
             // Verify that the associated review still exists and is not deleted
@@ -292,7 +292,7 @@ namespace HandmadeProductManagement.Services.Service
 
             if (review.DeletedTime != null)
             {
-                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Cannot recover reply for a deleted review");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageDeletedReplyOfDeletedReview);
             }
 
             // Verify that the product still exists and belongs to the shop
@@ -303,7 +303,7 @@ namespace HandmadeProductManagement.Services.Service
 
             if (product.DeletedTime != null)
             {
-                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Cannot recover reply for a deleted product");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageDeletedReplyOfDeletedProduct);
             }
 
             // Recover the reply
@@ -316,6 +316,23 @@ namespace HandmadeProductManagement.Services.Service
             await _unitOfWork.SaveAsync();
 
             return true;
+        }
+
+        public async Task<IList<DeletedReplyModel>> GetAllDeletedRepliesAsync(Guid userId)
+        {
+            var deletedReplies = await _unitOfWork.GetRepository<Reply>()
+                                                  .Entities
+                                                  .Where(r => r.DeletedTime != null)
+                                                  .Select(r => new DeletedReplyModel
+                                                  {
+                                                      Id = r.Id,
+                                                      Content = r.Content,
+                                                      ReviewId = r.Id,
+                                                      DeletedDate = r.DeletedTime!.Value,
+                                                      ShopId = r.ShopId
+                                                  })
+                                                  .ToListAsync();
+            return deletedReplies;
         }
     }
 }

@@ -206,5 +206,35 @@ namespace HandmadeProductManagementAPI.Controllers
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
         }
+
+        [Authorize]
+        [HttpGet("getDeleted")]
+        public async Task<IActionResult> GetAllDeletedReplies()
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
+
+            try
+            {
+                var result = await _replyService.GetAllDeletedRepliesAsync(Guid.Parse(userId));
+                var response = new BaseResponse<IList<DeletedReplyModel>>
+                {
+                    Code = "Success",
+                    StatusCode = StatusCodeHelper.OK,
+                    Message = "Reply recovered successfully.",
+                    Data = result
+                };
+                return Ok(response);
+            }
+            catch (BaseException.UnauthorizedException)
+            {
+                var response = new BaseResponse<string>
+                {
+                    Code = "Unauthorized",
+                    StatusCode = StatusCodeHelper.Forbidden,
+                    Message = "The user of this shop doesn't have permission to access to this reply"
+                };
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+        }
     }
 }
