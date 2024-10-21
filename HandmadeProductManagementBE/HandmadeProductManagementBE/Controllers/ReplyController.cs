@@ -119,7 +119,7 @@ namespace HandmadeProductManagementAPI.Controllers
             }
         }
 
-        [Authorize]
+        /*[Authorize]
         [HttpDelete("{replyId}")]
         public async Task<IActionResult> Delete([Required] string replyId)
         {
@@ -146,7 +146,7 @@ namespace HandmadeProductManagementAPI.Controllers
                 };
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
-        }
+        }*/
 
         [Authorize]
         [HttpDelete("{replyId}/soft-delete")]
