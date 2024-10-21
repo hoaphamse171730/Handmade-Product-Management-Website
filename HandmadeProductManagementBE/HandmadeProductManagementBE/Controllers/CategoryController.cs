@@ -127,7 +127,7 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [HttpGet("GetAllDelete")]
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAllDeletedCategories()
         {
             var deletedCategories = await _categoryService.GetAllDeleted();
