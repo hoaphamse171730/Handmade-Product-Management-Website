@@ -22,10 +22,10 @@ public static class IdentityServiceExtensions
             opt.User.RequireUniqueEmail = false;
         })
         .AddDefaultTokenProviders() 
-        .AddEntityFrameworkStores<DatabaseContext>();  
+        .AddEntityFrameworkStores<DatabaseContext>();
 
         var key = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(config["TokenKey"]!));
+            Encoding.UTF8.GetBytes(s: config["TokenKey"] ?? string.Empty));
 
         services.AddAuthentication(options =>
         {
