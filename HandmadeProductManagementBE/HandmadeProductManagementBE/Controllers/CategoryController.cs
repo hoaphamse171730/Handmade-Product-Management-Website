@@ -125,5 +125,22 @@ namespace HandmadeProductManagementAPI.Controllers
             };
             return Ok(response);
         }
+
+        [HttpGet("GetAllDelete")]
+        [Authorize]
+        public async Task<IActionResult> GetAllDeletedCategories()
+        {
+            var deletedCategories = await _categoryService.GetAllDeleted();
+            var response = new BaseResponse<IList<CategoryDto>>
+            {
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Get the successfully deleted categories",
+                Data = deletedCategories
+            };
+            return Ok(response);
+        }
+
+
     }
 }
