@@ -163,8 +163,12 @@ namespace HandmadeProductManagement.Services.Service
 
             var cancelReasonRepo = _unitOfWork.GetRepository<CancelReason>();
             var cancelReasonEntity = await cancelReasonRepo.Entities
-                .FirstOrDefaultAsync(cr => cr.Id == id && cr.DeletedTime.HasValue && cr.DeletedBy != null)
-                ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageCancelReasonNotFound);
+                .FirstOrDefaultAsync(cr => cr.Id == id) ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageCancelReasonNotFound);
+            
+            if (cancelReasonEntity.DeletedTime.HasValue && cancelReasonEntity.DeletedBy != null)
+            {
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageCancelReasonDeleted);
+            }
 
             // Restore the soft-deleted entity
             cancelReasonEntity.DeletedTime = null;

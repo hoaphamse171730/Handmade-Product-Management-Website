@@ -217,6 +217,10 @@ public static class Constants
     public const string ErrorMessageInvalidFileType = "The file type is not supported.";
     public const string ErrorMessageDuplicateVariationName = "A variation with this name already exists.";
     public const string ErrorMessageProductItemAlreadyActive = "A product item already active.";
+    public const string ErrorMessageCancelReasonDeleted = "This cancel reason is not deleted.";
+    public const string ErrorMessageProductDeleted = "This product is not deleted.";
+    public const string ErrorMessageVariationDeleted = "This variation is not deleted.";
+    public const string ErrorMessageUserAlreadyActive = "This user is already active.";
 
     #endregion
 

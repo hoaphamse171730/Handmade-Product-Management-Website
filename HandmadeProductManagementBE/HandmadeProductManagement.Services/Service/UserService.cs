@@ -10,6 +10,7 @@ using HandmadeProductManagement.ModelViews.NotificationModelViews;
 using HandmadeProductManagement.Contract.Repositories.Entity;
 using Microsoft.AspNetCore.Http;
 using HandmadeProductManagement.Core.Common;
+using Firebase.Auth;
 namespace HandmadeProductManagement.Services.Service
 {
     public class UserService : IUserService
@@ -419,6 +420,29 @@ namespace HandmadeProductManagement.Services.Service
             return notifications;
         }
 
+        public async Task<IList<UserResponseModel>> GetInactiveUsers()
+        {
+            var users = await _unitOfWork.GetRepository<ApplicationUser>()
+                .Entities
+                .Where(user => user.Status == Constants.UserInactiveStatus)
+                .Select(user => new UserResponseModel
+                {
+                    Id = user.Id,
+                    UserName = user.UserName,
+                    Email = user.Email,
+                    PhoneNumber = user.PhoneNumber,
+                    CreatedBy = user.CreatedBy,
+                    LastUpdatedBy = user.LastUpdatedBy,
+                    DeletedBy = user.DeletedBy,
+                    CreatedTime = user.CreatedTime,
+                    LastUpdatedTime = user.LastUpdatedTime,
+                    DeletedTime = user.DeletedTime,
+                    Status = user.Status,
+                })
+                .ToListAsync();
+            return users;
+        }
+
         public async Task<bool> ReverseDeleteUser(string Id)
         {
             if (!Guid.TryParse(Id, out Guid userId))
@@ -431,9 +455,14 @@ namespace HandmadeProductManagement.Services.Service
                .Where(u => u.Id == userId)
                .FirstOrDefaultAsync();
 
-            if (user == null || user.Status == Constants.UserActiveStatus)
+            if (user == null)
             {
                 throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageUserNotFound);
+            }
+
+            if (user.Status == Constants.UserActiveStatus)
+            {
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageUserAlreadyActive);
             }
 
             user.Status = Constants.UserActiveStatus;
