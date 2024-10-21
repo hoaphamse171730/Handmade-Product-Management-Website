@@ -106,7 +106,7 @@ namespace HandmadeProductManagementAPI.Controllers
             };
             return Ok(response);
         }
-        [Authorize(Roles = "Admin, Seller")]
+        [Authorize(Roles = "Admin")]
         [HttpPut("{promotionId}/recover")]
         public async Task<IActionResult> RecoverDeletedReview([Required] string promotionId)
         {
