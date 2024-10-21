@@ -21,8 +21,6 @@ namespace HandmadeProductManagement.Services.Service
         private readonly IMapper _mapper;
         private readonly IValidator<PromotionForCreationDto> _creationValidator;
         private readonly IValidator<PromotionForUpdateDto> _updateValidator;
-        private readonly IProductService _productService;
-        private readonly IUserService _userService;
         DateTime vietnamTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"));
 
 
@@ -219,8 +217,7 @@ namespace HandmadeProductManagement.Services.Service
             var user = await _unitOfWork.GetRepository<ApplicationUser>()
                 .Entities
                 .Include(u => u.UserInfo)
-                .FirstOrDefaultAsync(u => u.Id == userId);
-
+                .FirstOrDefaultAsync(u => u.Id == userId) ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageUserNotFound);
             existingPromotion.DeletedTime = null;
             existingPromotion.DeletedBy = null;
             existingPromotion.LastUpdatedTime = vietnamTime;
