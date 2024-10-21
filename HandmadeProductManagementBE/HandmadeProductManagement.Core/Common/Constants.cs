@@ -216,8 +216,9 @@ public static class Constants
     public const string ErrorMessageInvalidShopDescriptionFormat = "The shop description contains invalid characters.";
     public const string ErrorMessageInvalidFileType = "The file type is not supported.";
     public const string ErrorMessageDuplicateVariationName = "A variation with this name already exists.";
-
+    public const string ErrorMessageDeletedReviews = "Review is not deleted";
+    public const string ErrorMessageDeletedReplyOfDeletedProduct = "Cannot recover reply for a deleted product";
+    public const string ErrorMessageDeletedReplyOfDeletedReview = "Cannot recover reply for a deleted review";
+    public const string ErrorMessageReplyIsNotDeletedYet = "Reply is not deleted";
     #endregion
-
-
 }
