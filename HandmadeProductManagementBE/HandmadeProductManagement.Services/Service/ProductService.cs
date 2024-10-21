@@ -540,11 +540,13 @@ namespace HandmadeProductManagement.Services.Service
         public async Task<bool> RecoverProduct(string id, string userId)
         {
             var productRepo = _unitOfWork.GetRepository<Product>();
-            var productEntity = await productRepo.Entities.FirstOrDefaultAsync(x => x.Id == id);
 
-            // Check if the product exists and has been deleted
-            if (productEntity == null || productEntity.DeletedBy == null || !productEntity.DeletedTime.HasValue)
-                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageProductNotFound);
+            var productEntity = await productRepo.Entities.FirstOrDefaultAsync(x => x.Id == id) ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageProductNotFound);
+            
+            if (productEntity.DeletedBy == null || !productEntity.DeletedTime.HasValue)
+            {
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageProductDeleted);
+            }
 
             // Recover the product
             productEntity.DeletedTime = null;

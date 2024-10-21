@@ -103,8 +103,7 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [Authorize(Roles = "Admin")]
-        // PATCH: api/CancelReason/reverse-delete/{id}
-        [HttpPatch("reverse-delete/{id}")]
+        [HttpPatch("{id}/recover")]
         public async Task<IActionResult> PatchReverseDeleteCancelReason(string id)
         {
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
@@ -114,7 +113,7 @@ namespace HandmadeProductManagementAPI.Controllers
             {
                 Code = "Success",
                 StatusCode = StatusCodeHelper.OK,
-                Message = $"Cancel Reason with ID {id} has been successfully restored.",
+                Message = $"Cancel Reason has been successfully recovered.",
                 Data = result
             };
             return Ok(response);

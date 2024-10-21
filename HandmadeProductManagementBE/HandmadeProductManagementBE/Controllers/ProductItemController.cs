@@ -69,5 +69,37 @@ namespace HandmadeProductManagementAPI.Controllers
             };
             return Ok(response);
         }
+
+        [Authorize]
+        // POST: api/ProductItem/restore/{id}
+        [HttpPatch("restore/{id}")]
+        public async Task<IActionResult> RestoreProductItem(string id)
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
+
+            var response = new BaseResponse<bool>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = $"Product Item with ID {id} has been successfully restored.",
+                Data = await _productItemService.Restore(id, userId)
+            };
+            return Ok(response);
+        }
+
+        [Authorize(Roles = "Seller, Admin")]
+        // GET: api/ProductItem/deleted
+        [HttpGet("deleted")]
+        public async Task<IActionResult> GetAllDeletedProductItems()
+        {
+            var response = new BaseResponse<List<ProductItemDto>>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Retrieved all deleted product items successfully.",
+                Data = await _productItemService.GetAllDeletedAsync()
+            };
+            return Ok(response);
+        }
     }
 }

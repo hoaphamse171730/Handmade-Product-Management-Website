@@ -6,6 +6,8 @@ using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Common;
 using HandmadeProductManagement.Core.Constants;
+using HandmadeProductManagement.Core.Utils;
+using HandmadeProductManagement.ModelViews.OrderModelViews;
 using HandmadeProductManagement.ModelViews.ProductItemModelViews;
 using HandmadeProductManagement.ModelViews.VariationCombinationModelViews;
 using HandmadeProductManagement.ModelViews.VariationModelViews;
@@ -144,7 +146,7 @@ namespace HandmadeProductManagement.Services.Service
                     Options = g.Select(pc => new OptionsDto
                     {
                         Id = pc.VariationOption!.Id,
-                        Name = pc.VariationOption.Value 
+                        Name = pc.VariationOption.Value
                     }).ToList()
                 })
                 .ToList();
@@ -280,5 +282,58 @@ namespace HandmadeProductManagement.Services.Service
             return true;
         }
 
+        public async Task<bool> Restore(string id, string userId)
+        {
+            // Validate id format
+            if (!Guid.TryParse(id, out var guidId))
+            {
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat);
+            }
+
+            var productItemRepo = _unitOfWork.GetRepository<ProductItem>();
+            var productItemEntity = await productItemRepo.Entities.FirstOrDefaultAsync(p => p.Id == id);
+
+            if (productItemEntity == null)
+            {
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageProductItemNotFound);
+            }
+
+            if (!productItemEntity.DeletedTime.HasValue)
+            {
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageProductItemAlreadyActive);
+            }
+
+            var productRepo = _unitOfWork.GetRepository<Product>();
+            var productEntity = await productRepo.Entities
+                .FirstOrDefaultAsync(p => p.Id == productItemEntity.ProductId)
+                ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageProductNotFound);
+
+            if (productItemEntity.CreatedBy != userId)
+            {
+                throw new BaseException.ForbiddenException(StatusCodeHelper.Forbidden.ToString(), Constants.ErrorMessageForbidden);
+            }
+
+            productItemEntity.DeletedTime = null;
+            productItemEntity.DeletedBy = null;
+            productItemEntity.LastUpdatedBy = userId;
+            productItemEntity.LastUpdatedTime = DateTime.UtcNow;
+
+            await productItemRepo.UpdateAsync(productItemEntity);
+            await _unitOfWork.SaveAsync();
+
+            return true;
+
+        }
+
+        public async Task<List<ProductItemDto>> GetAllDeletedAsync()
+        {
+            var deletedProductItems = await _unitOfWork.GetRepository<ProductItem>().Entities
+                .Where(p => p.DeletedTime.HasValue)
+                .ToListAsync();
+
+            var productItemDtos = _mapper.Map<List<ProductItemDto>>(deletedProductItems);
+
+            return productItemDtos;
+        }
     }
 }

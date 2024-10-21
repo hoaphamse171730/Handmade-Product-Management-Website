@@ -105,7 +105,7 @@ namespace HandmadeProductManagementAPI.Controllers
 
         [Authorize(Roles = "Admin")]
         // PUT: api/variation/recover/{id}
-        [HttpPut("recover/{id}")]
+        [HttpPut("{id}/recover")]
         public async Task<IActionResult> Recover(string id)
         {
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;

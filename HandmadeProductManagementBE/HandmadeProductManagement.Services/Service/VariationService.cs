@@ -190,11 +190,23 @@ namespace HandmadeProductManagement.Services.Service
 
             var repository = _unitOfWork.GetRepository<Variation>();
             var variation = await repository.Entities
-                .FirstOrDefaultAsync(v => v.Id == id && v.DeletedTime.HasValue && v.DeletedBy != null)
-                ?? throw new BaseException.NotFoundException(
+                .FirstOrDefaultAsync(v => v.Id == id);
+
+            if (variation == null)
+            {
+                throw new BaseException.NotFoundException(
                     StatusCodeHelper.NotFound.ToString(),
                     Constants.ErrorMessageVariationNotFound
                 );
+            }
+
+            if (variation.DeletedTime.HasValue && variation.DeletedBy != null)
+            {
+                throw new BaseException.BadRequestException(
+                    StatusCodeHelper.BadRequest.ToString(),
+                    Constants.ErrorMessageVariationDeleted
+                );
+            }
 
             variation.DeletedBy = null;
             variation.DeletedTime = null;

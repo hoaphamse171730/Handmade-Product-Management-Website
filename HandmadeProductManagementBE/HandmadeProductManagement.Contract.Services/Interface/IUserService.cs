@@ -1,4 +1,5 @@
-﻿using HandmadeProductManagement.Contract.Repositories.Interface;
+﻿using HandmadeProductManagement.Contract.Repositories.Entity;
+using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.ModelViews.NotificationModelViews;
 using HandmadeProductManagement.ModelViews.UserModelViews;
@@ -14,6 +15,7 @@ namespace HandmadeProductManagement.Contract.Services.Interface
         Task<bool> UpdateUser(string id, UpdateUserDTO updateUserDTO);
 
         Task<bool> DeleteUser(string Id);
+        Task<IList<UserResponseModel>> GetInactiveUsers();
 
         Task<bool> ReverseDeleteUser(string Id);
 

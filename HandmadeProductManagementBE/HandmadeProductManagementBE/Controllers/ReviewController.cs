@@ -1,4 +1,5 @@
-﻿using HandmadeProductManagement.Contract.Services.Interface;
+﻿using HandmadeProductManagement.Contract.Repositories.Entity;
+using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.ReviewModelViews;
@@ -109,7 +110,7 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
-        [Authorize]
+        /*[Authorize]
         [HttpDelete("{reviewId}")]
         public async Task<IActionResult> Delete([Required] string reviewId)
         {
@@ -123,7 +124,7 @@ namespace HandmadeProductManagementAPI.Controllers
                 Message = "Review deleted successfully."
             };
             return Ok(response);
-        }
+        }*/
 
         [Authorize]
         [HttpDelete("{reviewId}/softdelete")]
@@ -153,6 +154,23 @@ namespace HandmadeProductManagementAPI.Controllers
                 Code = "Success",
                 StatusCode = StatusCodeHelper.OK,
                 Message = "Review recovered successfully.",
+                Data = result
+            };
+            return Ok(response);
+        }
+
+        [Authorize]
+        [HttpGet("getDeleted")]
+        public async Task<IActionResult> GetDeletedReviews()
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
+
+            var result = await _reviewService.GetAllDeletedReviewsAsync(Guid.Parse(userId));
+            var response = new BaseResponse<IList<DeletedReviewModel>>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Retrieve deleted review successfully.",
                 Data = result
             };
             return Ok(response);

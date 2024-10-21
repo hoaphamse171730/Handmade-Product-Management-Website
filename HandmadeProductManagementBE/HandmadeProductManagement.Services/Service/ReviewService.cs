@@ -310,6 +310,18 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageReviewNotFoundSoftDeleted);
             }
 
+            // Get all associated replies
+            var associatedReplies = await _unitOfWork.GetRepository<Reply>()
+                .Entities
+                .Where(r => r.ReviewId == reviewId)
+                .ToListAsync();
+
+            // Delete all associated replies
+            foreach (var reply in associatedReplies)
+            {
+                await _unitOfWork.GetRepository<Reply>().DeleteAsync(reply.Id);
+            }
+
             existingReview.DeletedBy = userId.ToString();
 
             await _unitOfWork.GetRepository<Review>().DeleteAsync(existingReview.Id);
@@ -345,6 +357,20 @@ namespace HandmadeProductManagement.Services.Service
             if (existingReview.UserId != userId)
             {
                 throw new BaseException.ForbiddenException(StatusCodeHelper.Forbidden.ToString(), Constants.ErrorMessageForbidden);
+            }
+
+            // Get all associated replies that aren't already soft-deleted
+            var associatedReplies = await _unitOfWork.GetRepository<Reply>()
+                .Entities
+                .Where(r => r.ReviewId == reviewId && r.DeletedTime == null)
+                .ToListAsync();
+
+            // Soft delete all associated replies
+            foreach (var reply in associatedReplies)
+            {
+                reply.DeletedTime = vietnamTime;
+                reply.DeletedBy = reply.ShopId;
+                await _unitOfWork.GetRepository<Reply>().UpdateAsync(reply);
             }
 
             existingReview.DeletedTime = vietnamTime;
@@ -388,7 +414,7 @@ namespace HandmadeProductManagement.Services.Service
             // Check if the review is actually soft-deleted
             if (existingReview.DeletedTime == null)
             {
-                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Review is not deleted");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageDeletedReviews);
             }
 
             // Check if the associated product still exists and is not deleted
@@ -419,6 +445,24 @@ namespace HandmadeProductManagement.Services.Service
             }
 
             return true;
+        }
+
+        public async Task<IList<DeletedReviewModel>> GetAllDeletedReviewsAsync(Guid userId)
+        {
+            var deletedReviews = await _unitOfWork.GetRepository<Review>()
+                                            .Entities
+                                            .Where(r => r.DeletedTime != null)
+                                            .Select(r => new DeletedReviewModel
+                                            {
+                                                Id = r.Id,
+                                                DeletedTime = r.DeletedTime!.Value,
+                                                Content = r.Content,
+                                                Rating = r.Rating,
+                                                ProductId = r.ProductId,
+                                                UserId = r.UserId
+                                            })
+                                            .ToListAsync();
+            return deletedReviews;
         }
     }
 }

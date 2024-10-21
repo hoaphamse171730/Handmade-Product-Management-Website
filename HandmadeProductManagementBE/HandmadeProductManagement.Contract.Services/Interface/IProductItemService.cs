@@ -9,5 +9,7 @@ namespace HandmadeProductManagement.Contract.Services.Interface
         Task<bool> AddVariationOptionsToProduct(string productId, List<VariationCombinationDto> variationCombinations, string userId);
         Task<bool> Update(string id, ProductItemForUpdateDto productItemDto, string userId);
         Task<bool> Delete(string id, string userId);
+        Task<bool> Restore(string id, string userId);
+        Task<List<ProductItemDto>> GetAllDeletedAsync();
     }
 }
