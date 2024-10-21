@@ -110,7 +110,7 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
-        [Authorize]
+        /*[Authorize]
         [HttpDelete("{reviewId}")]
         public async Task<IActionResult> Delete([Required] string reviewId)
         {
@@ -124,7 +124,7 @@ namespace HandmadeProductManagementAPI.Controllers
                 Message = "Review deleted successfully."
             };
             return Ok(response);
-        }
+        }*/
 
         [Authorize]
         [HttpDelete("{reviewId}/softdelete")]
