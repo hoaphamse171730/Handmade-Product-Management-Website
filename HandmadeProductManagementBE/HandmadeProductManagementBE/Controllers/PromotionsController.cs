@@ -30,8 +30,21 @@ namespace HandmadeProductManagementAPI.Controllers
             };
             return Ok(response);
         }
-        
-        
+
+        [HttpGet("GetDeletedPromotions")]
+        public async Task<IActionResult> GetDeletedPromotions(int pageNumber = 1, int pageSize = 10)
+        {
+            var result = await _promotionService.GetAllDeleted(pageNumber, pageSize);
+            var response = new BaseResponse<IList<PromotionDto>>
+            {
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Deleted promotions retrieved successfully.",
+                Data = result
+            };
+            return Ok(response);
+        }
+
         [HttpGet( "GetExpiredPromotions")]
         public async Task<IActionResult> GetExpiredPromotions(int pageNumber = 1, int pageSize = 10)
         {

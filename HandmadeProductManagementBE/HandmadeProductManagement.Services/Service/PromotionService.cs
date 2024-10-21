@@ -53,6 +53,24 @@ namespace HandmadeProductManagement.Services.Service
             return _mapper.Map<IList<PromotionDto>>(promotions);
         }
 
+        public async Task<IList<PromotionDto>> GetAllDeleted(int pageNumber, int pageSize)
+        {
+            if (pageNumber <= 0)
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidPageNumber);
+
+            if (pageSize <= 0)
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidPageSize);
+
+            var deletedPromotions = await _unitOfWork.GetRepository<Promotion>().Entities
+                .Where(p => p.DeletedTime != null)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return _mapper.Map<IList<PromotionDto>>(deletedPromotions);
+        }
+
+
         public async Task<IList<PromotionDto>> GetExpiredPromotions(int pageNumber, int pageSize)
         {
             if (pageNumber <= 0)

@@ -75,14 +75,9 @@ namespace HandmadeProductManagement.Services.Service
             return true;
         }
 
-<<<<<<< HEAD
 
-
-
-        public async Task<bool> Update(string id, CategoryForUpdateDto category)
-=======
         public async Task<CategoryDto> Update(string id, CategoryForUpdateDto category)
->>>>>>> 0ec24f9fc345fbc66919fc79c957a82dfd21f448
+
         {
             var validationResult = await _updateValidator.ValidateAsync(category);
             if (!validationResult.IsValid)
@@ -109,13 +104,10 @@ namespace HandmadeProductManagement.Services.Service
 
             await _unitOfWork.GetRepository<Category>().UpdateAsync(categoryEntity);
             await _unitOfWork.SaveAsync();
-<<<<<<< HEAD
-            _mapper.Map<CategoryDto>(categoryEntity);
-            return true;
-=======
+
 
             return _mapper.Map<CategoryDto>(categoryEntity);
->>>>>>> 0ec24f9fc345fbc66919fc79c957a82dfd21f448
+
         }
 
 
@@ -131,12 +123,7 @@ namespace HandmadeProductManagement.Services.Service
                 .FirstOrDefaultAsync(c => c.Id == id && c.DeletedTime == null);
 
             if (categoryRepo is null)
-<<<<<<< HEAD
-                throw new BaseException.NotFoundException("400", "Category not found");
-            var validationResult = await _updatePromotionValidator.ValidateAsync(category);
-            if(!validationResult.IsValid)
-                throw new ValidationException(validationResult.Errors);
-=======
+
                 throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageCategoryNotFound);
 
             var validationResult = await _updatePromotionValidator.ValidateAsync(category);
@@ -144,7 +131,7 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), validationResult.Errors.First().ErrorMessage);
 
             // Kiểm tra xem promotionId có tồn tại hay không
->>>>>>> 0ec24f9fc345fbc66919fc79c957a82dfd21f448
+
             var promotionExists = await _unitOfWork.GetRepository<Promotion>()
                 .Entities
                 .AnyAsync(p => p.Id == category.promotionId && p.DeletedTime == null);
@@ -193,15 +180,5 @@ namespace HandmadeProductManagement.Services.Service
 
             return true;
         }
-
-        public async Task<IList<CategoryDto>> GetAllDeleted()
-        {
-            var deletedCategories = await _unitOfWork.GetRepository<Category>().Entities
-                .Include(c => c.Promotion)
-                .Where(c => c.DeletedTime != null)
-                .ToListAsync();
-            return _mapper.Map<IList<CategoryDto>>(deletedCategories);
-        }
-
     }
 }
