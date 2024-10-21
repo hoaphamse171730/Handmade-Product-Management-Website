@@ -13,8 +13,8 @@ namespace HandmadeProductManagement.Core.Constants
         [CustomName("Unauthorized")]
         Unauthorized = 401,
 
-        [CustomName("ForbiddenAcess")]
-        ForbiddenAcess = 403,
+        [CustomName("Forbidden")]
+        Forbidden = 403,
 
         [CustomName("Not Found")]
         NotFound = 404,

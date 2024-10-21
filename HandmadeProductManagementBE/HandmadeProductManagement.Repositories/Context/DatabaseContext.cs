@@ -252,11 +252,14 @@ namespace HandmadeProductManagement.Repositories.Context
                 entity.Property(e => e.OrderId)
                       .IsRequired();
                 entity.Property(e => e.ExpirationDate)
-                      .IsRequired();
+                      .IsRequired(false);
                 entity.Property(e => e.TotalAmount)
                       .IsRequired()
                       .HasColumnType("decimal(18, 2)");
                 entity.Property(e => e.Status)
+                      .IsRequired()
+                      .HasMaxLength(20);
+                entity.Property(e => e.Method)
                       .IsRequired()
                       .HasMaxLength(20);
                 entity.HasOne(e => e.Order)
@@ -292,8 +295,8 @@ namespace HandmadeProductManagement.Repositories.Context
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Content).IsRequired(false).HasMaxLength(1000);
-                entity.Property(e => e.Rating).IsRequired(false);
-                entity.Property(e => e.Date).IsRequired(false).HasDefaultValueSql("GETDATE()");
+                entity.Property(e => e.Rating).IsRequired(true);
+                entity.Property(e => e.Date).IsRequired(true).HasDefaultValueSql("GETDATE()");
                 entity.Property(e => e.ProductId).IsRequired();
                 entity.Property(e => e.UserId).IsRequired();
 

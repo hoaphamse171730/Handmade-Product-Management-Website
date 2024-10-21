@@ -4,8 +4,6 @@ using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.PaymentModelViews;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Threading.Tasks;
 
 namespace HandmadeProductManagementAPI.Controllers
 {
@@ -20,12 +18,28 @@ namespace HandmadeProductManagementAPI.Controllers
             _paymentService = paymentService;
         }
 
+        //[Authorize]
+        //[HttpPost("online/{orderId}")]
+        //public async Task<IActionResult> CreatePaymentOnline(string orderId)
+        //{
+        //    var userId = (User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value) ?? throw new BaseException.NotFoundException("not_found", "User not found");
+        //    var createdPayment = await _paymentService.CreatePaymentOnlineAsync(userId, orderId);
+        //    var response = new BaseResponse<bool>
+        //    {
+        //        Code = "Success",
+        //        StatusCode = StatusCodeHelper.OK,
+        //        Message = "Payment created successfully",
+        //        Data = createdPayment
+        //    };
+        //    return Ok(response);
+        //}
+
         [Authorize]
-        [HttpPost("{orderId}")]
-        public async Task<IActionResult> CreatePayment(string orderId)
+        [HttpPost("offline/{orderId}")]
+        public async Task<IActionResult> CreatePaymentOffline(string orderId)
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            var createdPayment = await _paymentService.CreatePaymentAsync(userId, orderId);
+            var userId = (User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value) ?? throw new BaseException.NotFoundException("not_found", "user not found");
+            var createdPayment = await _paymentService.CreatePaymentOfflineAsync(userId, orderId);
             var response = new BaseResponse<bool>
             {
                 Code = "Success",
@@ -36,27 +50,28 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
-        [Authorize]
-        [HttpPut("{paymentId}/status")]
-        public async Task<IActionResult> UpdatePaymentStatus(string paymentId, [FromBody] string status)
-        {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            var updatedPayment = await _paymentService.UpdatePaymentStatusAsync(paymentId, status, userId);
-            var response = new BaseResponse<bool>
-            {
-                Code = "Success",
-                StatusCode = StatusCodeHelper.OK,
-                Message = "Payment status updated successfully",
-                Data = updatedPayment
-            };
-            return Ok(response);
-        }
+        //[Authorize]
+        //[HttpPut("{paymentId}/status")]
+        //public async Task<IActionResult> UpdatePaymentStatus(string paymentId, [FromBody] string status)
+        //{
+        //    var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
+        //    var updatedPayment = await _paymentService.UpdatePaymentStatusAsync(paymentId, status, userId);
+        //    var response = new BaseResponse<bool>
+        //    {
+        //        Code = "Success",
+        //        StatusCode = StatusCodeHelper.OK,
+        //        Message = "Payment status updated successfully",
+        //        Data = updatedPayment
+        //    };
+        //    return Ok(response);
+        //}
 
         [Authorize]
         [HttpGet("order/{orderId}")]
         public async Task<IActionResult> GetPaymentByOrderId(string orderId)
         {
-            var payment = await _paymentService.GetPaymentByOrderIdAsync(orderId);
+            var userId = (User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value) ?? throw new BaseException.NotFoundException("not_found", "user not found");
+            var payment = await _paymentService.GetPaymentByOrderIdAsync(orderId, userId);
             var response = new BaseResponse<PaymentResponseModel>
             {
                 Code = "Success",

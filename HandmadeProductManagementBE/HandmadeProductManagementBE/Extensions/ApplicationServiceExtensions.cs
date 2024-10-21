@@ -46,31 +46,31 @@ namespace HandmadeProductManagementAPI.Extensions;
 
 public static class ApplicationServiceExtensions
 {
-    public static IServiceCollection AddApplicationServices(this IServiceCollection services,
-        IConfiguration config)
+    public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration config)
     {
         services.AddControllers();
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen();
         services.AddHttpContextAccessor();
+
         services.AddDbContext<DatabaseContext>(options =>
             options.UseSqlServer(config.GetConnectionString("BloggingDatabase"),
                 b => b.MigrationsAssembly("HandmadeProductManagementAPI")));
 
         services.AddCors(opt =>
         {
-            opt.AddPolicy("CorsPolicy",
-                policy =>
-                {
-                    policy
-                        .AllowAnyHeader()
-                        .AllowAnyMethod()
-                        .AllowCredentials()
-                        .WithOrigins("https://localhost:7159");
-                });
+            opt.AddPolicy("CorsPolicy", policy =>
+            {
+                policy
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowCredentials()
+                    .WithOrigins("https://localhost:7159");
+            });
         });
 
         services.AddExceptionHandler<CustomExceptionHandler>();
+
         services.AddScoped<ICancelReasonService, CancelReasonService>();
         services.AddScoped<IAuthenticationService, AuthenticationService>();
         services.AddScoped<IStatusChangeService, StatusChangeService>();
@@ -84,9 +84,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IReplyService, ReplyService>();
         services.AddScoped<IPaymentDetailService, PaymentDetailService>();
         services.AddScoped<IPaymentService, PaymentService>();
-        services.AddHostedService<PaymentExpirationBackgroundService>();
         services.AddScoped<IUserService, UserService>();
-        services.AddScoped<IProductService, ProductService>();
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IUserAgentService, UserAgentService>();
         services.AddScoped<IDashboardService, DashboardService>();
@@ -98,97 +96,76 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IUserInfoService, UserInfoService>();
         services.AddScoped<ICartItemService, CartItemService>();
         services.AddScoped<IVNPayService, VNPAYService>();
+        services.AddScoped<INotificationService, NotificationService>();
+        services.AddScoped(provider => new Lazy<IOrderService>(() => provider.GetRequiredService<IOrderService>()));
+
+        services.AddHostedService<PaymentExpirationBackgroundService>();
+
         return services;
     }
 
     public static void ConfigureFluentValidation(this IServiceCollection services)
     {
         #region Promotion
-
         services.AddScoped<IValidator<PromotionForCreationDto>, PromotionForCreationDtoValidator>();
         services.AddScoped<IValidator<PromotionForUpdateDto>, PromotionForUpdateDtoValidator>();
-
         #endregion
 
         #region Product
-
         services.AddScoped<IValidator<ProductForCreationDto>, ProductForCreationDtoValidator>();
         services.AddScoped<IValidator<ProductForUpdateDto>, ProductForUpdateDtoValidator>();
-
         #endregion
 
         #region OrderDetail
-
         services.AddScoped<IValidator<OrderDetailForCreationDto>, OrderDetailForCreationDtoValidator>();
         services.AddScoped<IValidator<OrderDetailForUpdateDto>, OrderDetailForUpdateDtoValidator>();
-
         #endregion
 
         #region User
-
         services.AddScoped<IValidator<UpdateUserDTO>, UpdateUserDTOValidator>();
-
         #endregion
 
         #region CancelReason
-
         services.AddScoped<IValidator<CancelReasonForCreationDto>, CancelReasonForCreationDtoValidator>();
         services.AddScoped<IValidator<CancelReasonForUpdateDto>, CancelReasonForUpdateDtoValidator>();
-
         #endregion
 
         #region StatusChange
-
         services.AddScoped<IValidator<StatusChangeForCreationDto>, StatusChangeForCreationDtoValidator>();
         services.AddScoped<IValidator<StatusChangeForUpdateDto>, StatusChangeForUpdateDtoValidator>();
-
         #endregion
 
         #region Variation
-
         services.AddScoped<IValidator<VariationForCreationDto>, VariationForCreationDtoValidator>();
         services.AddScoped<IValidator<VariationForUpdateDto>, VariationForUpdateDtoValidator>();
-
         #endregion
 
         #region VariationOption
-
         services.AddScoped<IValidator<VariationOptionForCreationDto>, VariationOptionForCreationDtoValidator>();
         services.AddScoped<IValidator<VariationOptionForUpdateDto>, VariationOptionForUpdateDtoValidator>();
-
         #endregion
 
         #region Category
-
         services.AddScoped<IValidator<CategoryForCreationDto>, CategoryForCreationDtoValidator>();
         services.AddScoped<IValidator<CategoryForUpdateDto>, CategoryForUpdateDtoValidator>();
         services.AddScoped<IValidator<CategoryForUpdatePromotion>, CategoryForUpdatePromotionDtoValidator>();
         #endregion
 
         #region ProductItem
-
         services.AddScoped<IValidator<ProductItemForCreationDto>, ProductItemForCreationDtoValidator>();
         services.AddScoped<IValidator<ProductItemForUpdateDto>, ProductItemForUpdateDtoValidator>();
-
         #endregion
 
         #region ProductConfiguration
-
-        services
-            .AddScoped<IValidator<ProductConfigurationForCreationDto>, ProductConfigurationForCreationDtoValidator>();
-
+        services.AddScoped<IValidator<ProductConfigurationForCreationDto>, ProductConfigurationForCreationDtoValidator>();
         #endregion
 
         #region VariationCombination
-
         services.AddScoped<IValidator<VariationCombinationDto>, VariationCombinationDtoValidator>();
-
         #endregion
 
         #region UserInfo
-
         services.AddScoped<IValidator<UserInfoForUpdateDto>, UserInfoForUpdateDtoValidator>();
-
         #endregion
 
         #region CartItem
@@ -203,8 +180,6 @@ public static class ApplicationServiceExtensions
             .NewConfig()
             .Map(dest => dest.UserInfo.FullName, src => src.FullName)
             .Map(dest => dest.CreatedBy, src => src.UserName)
-            .Map(dest => dest.LastUpdatedBy, src => src.UserName)
-            ;
+            .Map(dest => dest.LastUpdatedBy, src => src.UserName);
     }
-
 }

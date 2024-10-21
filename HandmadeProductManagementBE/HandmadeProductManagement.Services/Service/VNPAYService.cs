@@ -1,8 +1,12 @@
-﻿using HandmadeProductManagement.Contract.Repositories.Entity;
+using Firebase.Auth;
+using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.Core.Common;
 using HandmadeProductManagement.Core.Constants;
+using HandmadeProductManagement.ModelViews.OrderModelViews;
+using HandmadeProductManagement.ModelViews.StatusChangeModelViews;
 using HandmadeProductManagement.ModelViews.VNPayModelViews;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
@@ -15,13 +19,14 @@ namespace HandmadeProductManagement.Services.Service
     {
         private readonly IOrderService _orderService;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IStatusChangeService _statusChangeService;
 
 
-
-        public VNPAYService(IUnitOfWork unitOfWork, IOrderService orderService)
+        public VNPAYService(IUnitOfWork unitOfWork, IOrderService orderService, IStatusChangeService statusChangeService)
         {
             _unitOfWork = unitOfWork;
             _orderService = orderService;
+            _statusChangeService = statusChangeService;
         }
 
         public string vnp_PayUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
@@ -41,8 +46,17 @@ namespace HandmadeProductManagement.Services.Service
             var order = await _unitOfWork.GetRepository<Order>().Entities
                 .Where(o => o.Id == orderId).FirstOrDefaultAsync();
 
-            if (order == null || order.UserId != userId) {
-                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "Order not found");
+            if (order == null || order.UserId != userId)
+            {
+                throw new BaseException.NotFoundException(
+                    StatusCodeHelper.NotFound.ToString(),
+                    Constants.ErrorMessageOrderNotFound
+                );
+            }
+
+            if (order.Status == "Processing")
+            {
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Order's already paid");
             }
 
             string vnp_TxnRef = GetRandomNumber(8);
@@ -88,7 +102,7 @@ namespace HandmadeProductManagement.Services.Service
             foreach (var fieldName in fieldNames)
             {
                 var fieldValue = vnp_Params[fieldName];
-                if (!string.IsNullOrEmpty(fieldValue))
+                if (!(fieldValue == null))
                 {
                     hashData.Append(fieldName)
                             .Append('=')
@@ -108,25 +122,55 @@ namespace HandmadeProductManagement.Services.Service
             var vnp_SecureHash = HmacSHA512(vnp_HashSecret, hashData.ToString());
             queryUrl += "&vnp_SecureHash=" + vnp_SecureHash;
 
+        
+
+            var existedPayment = await _unitOfWork.GetRepository<Payment>().Entities
+                .Where(p => p.OrderId == orderId).FirstOrDefaultAsync();
+
+            if(existedPayment != null)
+            {
+                if(existedPayment.ExpirationDate < now) {
+                    throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Payment Expired");
+                }
+                
+                existedPayment.Status = "Processing";
+                await _unitOfWork.GetRepository<Payment>().UpdateAsync(existedPayment);
+                await _unitOfWork.SaveAsync();
+
+                order.Status = "Awaiting Payment";
+                await _unitOfWork.GetRepository<Order>().UpdateAsync(order);
+                await _unitOfWork.SaveAsync();
+                return vnp_PayUrl + "?" + queryUrl;
+            }
+
+           
+
             Payment payment = new()
             {
                 OrderId = orderId,
                 CreatedTime = now,
-                ExpirationDate = now.AddMinutes(15),
+                ExpirationDate = now.AddHours(24),
                 TotalAmount = order.TotalPrice,
-                Status = "Pending",
+                Status = "Processing",
+                Method = Constants.VNPayBanking
+
             };
             await _unitOfWork.GetRepository<Payment>().InsertAsync(payment);
             await _unitOfWork.SaveAsync();
+           
+
+            order.Status = "Awaiting Payment";
+            await _unitOfWork.GetRepository<Order>().UpdateAsync(order);
+            await _unitOfWork.SaveAsync();
+
             return vnp_PayUrl + "?" + queryUrl;
         }
 
         public async Task<VNPAYResponse> VNPAYPayment(VNPAYRequest request)
         {
-            VNPAYResponse response = new VNPAYResponse();
+            VNPAYResponse response = new();
 
             var fields = new Dictionary<string, string>();
-
 
             var totalPrice = request.VnpAmount;
             var bankCode = request.VnpBankCode;
@@ -141,25 +185,68 @@ namespace HandmadeProductManagement.Services.Service
             var vnpSecureHash = request.VnpSecureHash;
             var tnxRef = request.VnpTxnRef;
 
-            if (totalPrice == null || !double.TryParse(totalPrice, out _))
+            var payment = await _unitOfWork.GetRepository<Payment>().Entities
+                                  .Where(p => p.OrderId == orderInfo).FirstOrDefaultAsync();
+
+            var order = await _unitOfWork.GetRepository<Order>().Entities
+              .Where(o => o.Id == orderInfo).FirstOrDefaultAsync();
+            
+            if (payment == null)
             {
-                response.IsSucceed = false;
-                response.Text = "Order price not found";
+                throw new BaseException.NotFoundException("not_found", "Payment Not Found");
+
+            }
+            if (order == null)
+            {
+                throw new BaseException.NotFoundException("not_found", "Order Not Found");
+
+            }
+
+            if (response == null) {
+                //tao payment detail
+                PaymentDetail paymentDetail = new()
+                {
+                    PaymentId = payment.Id,
+                    Status = "Failed",
+                    Method = "Transfer",
+                    ExternalTransaction = "VNPAY",
+                    CreatedTime = DateTime.Now,
+                    CreatedBy = "VNPAY"
+                };
+                await _unitOfWork.GetRepository<PaymentDetail>().InsertAsync(paymentDetail);
+                await _unitOfWork.SaveAsync();
+
+                order.Status = "Payment Failed";
+                await _unitOfWork.GetRepository<Order>().UpdateAsync(order);
+                await _unitOfWork.SaveAsync();
+
+                response = new VNPAYResponse
+                {
+                    IsSucceed = false,
+                    Text = "Payment approve failed"
+                };
                 return response;
             }
 
-            if (orderInfo == null)  
+
+            if (totalPrice == null || !double.TryParse(totalPrice, out _))
             {
                 response.IsSucceed = false;
-                response.Text = "Order not found";
+                response.Text = Constants.ErrorMessageOrderPriceNotFound;
+                return response;
+            }
+
+            if (orderInfo == null)
+            {
+                response.IsSucceed = false;
+                response.Text = Constants.ErrorMessageOrderNotFound;
             }
 
             var amount = double.Parse(totalPrice) / 100;
             //var returnUrl = $"(url trang web sau khi deploy/{orderInfo}";
             var returnUrl = vnp_ReturnUrl;//dung de test
 
-            var order = await _unitOfWork.GetRepository<Order>().Entities
-                .Where(o => o.Id == orderInfo).FirstOrDefaultAsync();
+          
 
 
             fields.Add("vnp_Amount", totalPrice ?? string.Empty);
@@ -177,34 +264,67 @@ namespace HandmadeProductManagement.Services.Service
 
 
             var signValue = HashAllFields(fields);
+            
             if (signValue.Equals(vnpSecureHash))
             {
-                    if("00".Equals(request.VnpTransactionStatus)) {
-                    var payment  = await _unitOfWork.GetRepository<Payment>().Entities
-                                   .Where(p => p.OrderId == orderInfo).FirstOrDefaultAsync();
+                if ("00".Equals(request.VnpTransactionStatus))
+                {
+
                     //tao payment detail
                     PaymentDetail paymentDetail = new()
                     {
                         PaymentId = payment.Id,
-                        Status = "Paid",
-                        Method = "Transfer",
-                        ExternalTransaction = "VNPAY",
+                        Status = Constants.PaymentStatusSuccess,
+                        Method = Constants.PaymentMethodTransfer,
+                        ExternalTransaction = Constants.VNPAY,
                         CreatedTime = DateTime.Now,
-                        CreatedBy   = "VNPAY"
+                        CreatedBy   = Constants.VNPAY
                     };
                     await _unitOfWork.GetRepository<PaymentDetail>().InsertAsync(paymentDetail);
                     await _unitOfWork.SaveAsync();
 
-                    payment.Status = "Paid";
+                    payment.Status = Constants.PaymentStatusCompleted;
                     await _unitOfWork.GetRepository<Payment>().UpdateAsync(payment);
                     await _unitOfWork.SaveAsync();
+
+                    order.Status = "Processing";
+                    await _unitOfWork.GetRepository<Order>().UpdateAsync(order);
+                    await _unitOfWork.SaveAsync();
+
+                    var statusChangeDto = new StatusChangeForCreationDto
+                    {
+                        OrderId = order.Id,
+                        Status = "Processing"
+                    };
+                    await _statusChangeService.Create(statusChangeDto, order.UserId.ToString());
                 }
-                    else
+
+                else
                 {
+                    
+                    //tao payment detail
+                    PaymentDetail paymentDetail = new()
+                    {
+                        PaymentId = payment.Id,
+                        Status = "Failed",
+                        Method = "Transfer",
+                        ExternalTransaction = "VNPAY",
+                        CreatedTime = DateTime.Now,
+                        CreatedBy = "VNPAY"
+                    };
+                    await _unitOfWork.GetRepository<PaymentDetail>().InsertAsync(paymentDetail);
+                    await _unitOfWork.SaveAsync();
+
+                    order.Status = "Payment Failed";
+                    await _unitOfWork.GetRepository<Order>().UpdateAsync(order);
+                    await _unitOfWork.SaveAsync();
+
                     response.IsSucceed = false;
-                    response.Text = "Payment approve failed";
+                    response.Text = Constants.PaymentApproveFailed;
                     return response;
                 }
+
+
                 response.IsSucceed = true;  
                 response.Text = returnUrl;
                 return response;
@@ -212,8 +332,25 @@ namespace HandmadeProductManagement.Services.Service
             }
             else
             {
+                //tao payment detail
+                PaymentDetail paymentDetail = new()
+                {
+                    PaymentId = payment.Id,
+                    Status = "Failed",
+                    Method = "Transfer",
+                    ExternalTransaction = "VNPAY",
+                    CreatedTime = DateTime.Now,
+                    CreatedBy = "VNPAY"
+                };
+                await _unitOfWork.GetRepository<PaymentDetail>().InsertAsync(paymentDetail);
+                await _unitOfWork.SaveAsync();
+
+                order.Status = "Payment Failed";
+                await _unitOfWork.GetRepository<Order>().UpdateAsync(order);
+                await _unitOfWork.SaveAsync();
+
                 response.IsSucceed = false;
-                response.Text = "Payment approve failed";
+                response.Text = Constants.PaymentApproveFailed;
                 return response;
             }
         }
@@ -226,7 +363,7 @@ namespace HandmadeProductManagement.Services.Service
 
                 foreach (var fieldName in sortedFieldNames)
                 {
-                    if (fields.TryGetValue(fieldName, out var fieldValue) && !string.IsNullOrEmpty(fieldValue))
+                    if (fields.TryGetValue(fieldName, out var fieldValue) && !(fieldValue == null))
                     {
                         if (sb.Length > 0)
                         {

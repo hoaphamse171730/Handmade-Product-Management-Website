@@ -11,7 +11,7 @@ namespace HandmadeProductManagement.ModelViews.ProductModelViews
         public string? CategoryId { get; set; } = string.Empty;
         [JsonIgnore]
         public string? ShopId { get; set; } = string.Empty;
-        public List<VariationForProductCreationDto> Variations { get; set; } = new List<VariationForProductCreationDto>();
-        public List<VariationCombinationDto> VariationCombinations { get; set; } = new List<VariationCombinationDto>();
+        public List<VariationForProductCreationDto> Variations { get; set; } = [];
+        public List<VariationCombinationDto> VariationCombinations { get; set; } = [];
     }
 }

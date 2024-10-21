@@ -1,9 +1,4 @@
 ﻿using HandmadeProductManagement.ModelViews.PaymentDetailModelViews;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HandmadeProductManagement.ModelViews.PaymentModelViews
 {
@@ -11,11 +6,11 @@ namespace HandmadeProductManagement.ModelViews.PaymentModelViews
     {
         public string Id { get; set; } = string.Empty;
         public string OrderId { get; set; } = string.Empty;
-        public DateTime CreatedDate { get; set; }
-        public DateTime ExpirationDate { get; set; }
+        public DateTime? ExpirationDate { get; set; }
         public decimal TotalAmount { get; set; }
+        public string Method { get; set; } = string.Empty;
         public string Status { get; set; } = string.Empty;
-        public List<PaymentDetailResponseModel> PaymentDetails { get; set; } = new List<PaymentDetailResponseModel>();
+        public List<PaymentDetailResponseModel> PaymentDetails { get; set; } = [];
 
     }
 }

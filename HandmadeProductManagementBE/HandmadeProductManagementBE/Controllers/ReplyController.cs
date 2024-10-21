@@ -53,7 +53,7 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([Required] string content, [Required] string reviewId)
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
 
             var replyModel = new ReplyModel
             {
@@ -73,12 +73,12 @@ namespace HandmadeProductManagementAPI.Controllers
                 };
                 return Ok(response);
             }
-            catch (BaseException.UnauthorizedException ex)
+            catch (BaseException.UnauthorizedException)
             {
                 var response = new BaseResponse<string>
                 {
                     Code = "Unauthorized",
-                    StatusCode = StatusCodeHelper.ForbiddenAcess,
+                    StatusCode = StatusCodeHelper.Forbidden,
                     Message = "The user of this shop doesn't have permission to access to this reply"
                 };
                 return StatusCode(StatusCodes.Status403Forbidden, response);
@@ -89,7 +89,7 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpPut("{replyId}")]
         public async Task<IActionResult> Update([Required] string replyId, [Required] string content)
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
 
             var replyModel = new ReplyModel
             {
@@ -107,12 +107,12 @@ namespace HandmadeProductManagementAPI.Controllers
                 };
                 return Ok(response);
             }
-            catch (BaseException.UnauthorizedException ex)
+            catch (BaseException.UnauthorizedException)
             {
                 var response = new BaseResponse<string>
                 {
                     Code = "Unauthorized",
-                    StatusCode = StatusCodeHelper.ForbiddenAcess,
+                    StatusCode = StatusCodeHelper.Forbidden,
                     Message = "The user of this shop doesn't have permission to access to this reply"
                 };
                 return StatusCode(StatusCodes.Status403Forbidden, response);
@@ -123,7 +123,7 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpDelete("{replyId}")]
         public async Task<IActionResult> Delete([Required] string replyId)
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
 
             try
             {
@@ -136,12 +136,12 @@ namespace HandmadeProductManagementAPI.Controllers
                 };
                 return Ok(response);
             }
-            catch (BaseException.UnauthorizedException ex)
+            catch (BaseException.UnauthorizedException)
             {
                 var response = new BaseResponse<string>
                 {
                     Code = "Unauthorized",
-                    StatusCode = StatusCodeHelper.ForbiddenAcess,
+                    StatusCode = StatusCodeHelper.Forbidden,
                     Message = "The user of this shop doesn't have permission to access to this reply"
                 };
                 return StatusCode(StatusCodes.Status403Forbidden, response);
@@ -152,7 +152,7 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpDelete("{replyId}/soft-delete")]
         public async Task<IActionResult> SoftDelete([Required] string replyId)
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
 
             try
             {
@@ -165,12 +165,42 @@ namespace HandmadeProductManagementAPI.Controllers
                 };
                 return Ok(response);
             }
-            catch (BaseException.UnauthorizedException ex)
+            catch (BaseException.UnauthorizedException)
             {
                 var response = new BaseResponse<string>
                 {
                     Code = "Unauthorized",
-                    StatusCode = StatusCodeHelper.ForbiddenAcess,
+                    StatusCode = StatusCodeHelper.Forbidden,
+                    Message = "The user of this shop doesn't have permission to access to this reply"
+                };
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+        }
+
+        [Authorize]
+        [HttpPut("{replyId}/recover")]
+        public async Task<IActionResult> RecoverDeletedReply([Required] string replyId)
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
+
+            try
+            {
+                var result = await _replyService.RecoverDeletedReplyAsync(replyId, Guid.Parse(userId));
+                var response = new BaseResponse<bool>
+                {
+                    Code = "Success",
+                    StatusCode = StatusCodeHelper.OK,
+                    Message = "Reply recovered successfully.",
+                    Data = result
+                };
+                return Ok(response);
+            }
+            catch (BaseException.UnauthorizedException)
+            {
+                var response = new BaseResponse<string>
+                {
+                    Code = "Unauthorized",
+                    StatusCode = StatusCodeHelper.Forbidden,
                     Message = "The user of this shop doesn't have permission to access to this reply"
                 };
                 return StatusCode(StatusCodes.Status403Forbidden, response);

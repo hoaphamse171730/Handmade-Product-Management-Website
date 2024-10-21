@@ -2,13 +2,11 @@
 using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.Core.Common;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.DashboardModelViews;
 using HandmadeProductManagement.ModelViews.ProductModelViews;
-using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-
 
 namespace HandmadeProductManagement.Services.Service
 {
@@ -27,25 +25,25 @@ namespace HandmadeProductManagement.Services.Service
 
             return new TotalOrdersByStatusDTO
             {
-                Pending = orders.Count(o => o.Status == "Pending"),
-                Cancelled = orders.Count(o => o.Status == "Cancelled"),
-                AwaitingPayment = orders.Count(o => o.Status == "Awaiting Payment"),
-                PaymentFailed = orders.Count(o => o.Status == "Payment Failed"),
-                Processing = orders.Count(o => o.Status == "Processing"),
-                Delivering = orders.Count(o => o.Status == "Delivering"),
-                Shipped = orders.Count(o => o.Status == "Shipped"),
-                DeliveryFailed = orders.Count(o => o.Status == "Delivery Failed"),
-                OnHold = orders.Count(o => o.Status == "On Hold"),
-                DeliveringRetry = orders.Count(o => o.Status == "Delivering Retry"),
-                RefundRequested = orders.Count(o => o.Status == "Refund Requested"),
-                RefundApproved = orders.Count(o => o.Status == "Refund Approved"),
-                RefundDenied = orders.Count(o => o.Status == "Refund Denied"),
-                Returning = orders.Count(o => o.Status == "Returning"),
-                ReturnFailed = orders.Count(o => o.Status == "Return Failed"),
-                Returned = orders.Count(o => o.Status == "Returned"),
-                Refunded = orders.Count(o => o.Status == "Refunded"),
-                RefundCancelled = orders.Count(o => o.Status == "Refund Cancelled"),
-                Closed = orders.Count(o => o.Status == "Closed"),
+                Pending = orders.Count(o => o.Status == Constants.OrderStatusPending),
+                Cancelled = orders.Count(o => o.Status == Constants.OrderStatusCanceled),
+                AwaitingPayment = orders.Count(o => o.Status == Constants.OrderStatusAwaitingPayment),
+                PaymentFailed = orders.Count(o => o.Status == Constants.OrderStatusPaymentFailed),
+                Processing = orders.Count(o => o.Status == Constants.OrderStatusProcessing),
+                Delivering = orders.Count(o => o.Status == Constants.OrderStatusDelivering),
+                Shipped = orders.Count(o => o.Status == Constants.OrderStatusShipped),
+                DeliveryFailed = orders.Count(o => o.Status == Constants.OrderStatusDeliveryFailed),
+                OnHold = orders.Count(o => o.Status == Constants.OrderStatusOnHold),
+                DeliveringRetry = orders.Count(o => o.Status == Constants.OrderStatusDeliveringRetry),
+                RefundRequested = orders.Count(o => o.Status == Constants.OrderStatusRefundRequested),
+                RefundApproved = orders.Count(o => o.Status == Constants.OrderStatusRefundApprove),
+                RefundDenied = orders.Count(o => o.Status == Constants.OrderStatusRefundDenied),
+                Returning = orders.Count(o => o.Status == Constants.OrderStatusReturning),
+                ReturnFailed = orders.Count(o => o.Status == Constants.OrderStatusReturnFailed),
+                Returned = orders.Count(o => o.Status == Constants.OrderStatusReturned),
+                Refunded = orders.Count(o => o.Status == Constants.OrderStatusRefunded),
+                RefundCancelled = orders.Count(o => o.Status == Constants.OrderStatusCanceled),
+                Closed = orders.Count(o => o.Status == Constants.OrderStatusClosed),
             };
         }
 
@@ -67,7 +65,7 @@ namespace HandmadeProductManagement.Services.Service
         public async Task<decimal> GetTotalSales()
         {
             decimal totalSales = await _unitOfWork.GetRepository<Order>().Entities
-                                     .Where(o => o.Status == "Shipped")
+                                     .Where(o => o.Status == Constants.OrderStatusShipped)
                                      .SumAsync(o => o.TotalPrice);
 
             return totalSales;
@@ -89,38 +87,33 @@ namespace HandmadeProductManagement.Services.Service
             return topShops;
         }
 
-
         public async Task<decimal> GetTotalSaleByShopId(string Id, DashboardDTO dashboardDTO)
         {
             if (!Guid.TryParse(Id, out Guid userId))
             {
-                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Invalid shopId");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat);
             }
 
-            var shop = await _unitOfWork.GetRepository<Shop>().Entities.Where(s=>s.Id == Id).FirstOrDefaultAsync();
+            var shop = await _unitOfWork.GetRepository<Shop>()
+                .Entities
+                .FirstOrDefaultAsync(s => s.Id == Id)
+                ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageShopNotFound);
 
-            if (shop == null)
+            if (dashboardDTO.To < dashboardDTO.From)
             {
-                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "Shop not found");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidDateRange);
             }
-
-            if(dashboardDTO.to  < dashboardDTO.from)
-            {
-                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "toDate must be after fromDate");
-            }
-
 
             decimal totalSales = await _unitOfWork.GetRepository<Order>()
             .Entities
             .Where(order => order.OrderDetails
-                .Any(od => od.ProductItem.Product.ShopId == Id)
-                && order.OrderDate >= dashboardDTO.from
-                && order.OrderDate <= dashboardDTO.to
-                && order.Status == "Shipped")
+                .Any(od => od.ProductItem != null && od.ProductItem.Product != null && od.ProductItem.Product.ShopId == Id)
+                && order.OrderDate >= dashboardDTO.From
+                && order.OrderDate <= dashboardDTO.To
+                && order.Status == Constants.OrderStatusShipped)
             .SumAsync(order => order.TotalPrice);
 
-                 return totalSales;
-
+            return totalSales;
         }
 
         public async Task<IList<TopSellingProducts>> GetTopSellingProducts()
@@ -134,8 +127,8 @@ namespace HandmadeProductManagement.Services.Service
                                                       .Select(p => new TopSellingProducts
                                                       { 
                                                             Name = p.Name,
-                                                            CategoryName = p.Category.Name,
-                                                            Price = p.ProductItems.FirstOrDefault() != null ? p.ProductItems.FirstOrDefault().Price : 0,
+                                                            CategoryName = p.Category != null ? p.Category.Name : "",
+                                                            Price = p.ProductItems.FirstOrDefault() != null ? p.ProductItems.FirstOrDefault()!.Price : 0,
                                                             ImageUrls = p.ProductImages.Select(pi => pi.Url).ToList(),
                                                             SoldCount = p.SoldCount
                                                       })
@@ -156,8 +149,8 @@ namespace HandmadeProductManagement.Services.Service
                                                .Select(p => new ProductForDashboard
                                                 {
                                                     Name = p.Name,
-                                                    CategoryName = p.Category.Name,
-                                                    Price = p.ProductItems.FirstOrDefault() != null ? p.ProductItems.FirstOrDefault().Price : 0,
+                                                    CategoryName = p.Category != null ? p.Category.Name : "",
+                                                    Price = p.ProductItems.FirstOrDefault() != null ? p.ProductItems.FirstOrDefault()!.Price : 0,
                                                     ImageUrls = p.ProductImages.Select(pi => pi.Url).ToList()
                                                })
                                               .ToListAsync();

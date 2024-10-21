@@ -2,8 +2,9 @@
 using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.Core.Common;
+using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.PaymentDetailModelViews;
-using HandmadeProductManagement.ModelViews.PaymentModelViews;
 using HandmadeProductManagement.Repositories.Entity;
 using Microsoft.EntityFrameworkCore;
 using System.Text.RegularExpressions;
@@ -28,21 +29,19 @@ namespace HandmadeProductManagement.Services.Service
             var userExists = await userRepository.Entities.AnyAsync(u => u.Id.ToString() == userId && !u.DeletedTime.HasValue);
             if (!userExists)
             {
-                throw new BaseException.NotFoundException("user_not_found", "User not found.");
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageUserNotFound);
             }
 
             var paymentRepository = _unitOfWork.GetRepository<Payment>();
             var payment = await paymentRepository.Entities
-                        .FirstOrDefaultAsync(p => p.Id == createPaymentDetailDto.PaymentId && !p.DeletedTime.HasValue);
-            if (payment == null)
-            {
-                throw new BaseException.NotFoundException("payment_not_found", "Payment not found.");
-            }
+                        .FirstOrDefaultAsync(p => p.Id == createPaymentDetailDto.PaymentId && !p.DeletedTime.HasValue)
+                        ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessagePaymentNotFound);
 
-            var invalidStatuses = new[] { "Completed", "Expired", "Refunded"};
+            var invalidStatuses = new[] { Constants.PaymentStatusCompleted, Constants.PaymentStatusExpired, Constants.PaymentStatusRefunded };
             if (invalidStatuses.Contains(payment.Status))
             {
-                throw new BaseException.BadRequestException("invalid_payment_status", $"Cannot create payment detail for payment with status '{payment.Status}'.");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(),
+                    string.Format(Constants.ErrorMessageInvalidPaymentStatus, payment.Status));
             }
 
             var paymentDetailRepository = _unitOfWork.GetRepository<PaymentDetail>();
@@ -60,48 +59,49 @@ namespace HandmadeProductManagement.Services.Service
             await paymentDetailRepository.InsertAsync(paymentDetail);
             await _unitOfWork.SaveAsync();
 
-            if (createPaymentDetailDto.Status == "Success")
+            if (createPaymentDetailDto.Status == Constants.PaymentStatusSuccess)
             {
-                await _paymentService.UpdatePaymentStatusAsync(createPaymentDetailDto.PaymentId, "Completed", userId);
+                await _paymentService.UpdatePaymentStatusAsync(createPaymentDetailDto.PaymentId, Constants.PaymentStatusCompleted, userId);
             }
 
             return true;
         }
+
         private void ValidatePaymentDetail(CreatePaymentDetailDto createPaymentDetailDto)
         {
             if (string.IsNullOrWhiteSpace(createPaymentDetailDto.PaymentId))
             {
-                throw new BaseException.BadRequestException("invalid_payment_id", "Please input payment id.");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidPaymentId);
             }
 
             if (!Guid.TryParse(createPaymentDetailDto.PaymentId, out _))
             {
-                throw new BaseException.BadRequestException("invalid_payment_id_format", "Payment ID format is invalid. Example: 123e4567-e89b-12d3-a456-426614174000.");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat);
             }
 
             if (string.IsNullOrWhiteSpace(createPaymentDetailDto.Status))
             {
-                throw new BaseException.BadRequestException("invalid_status", "Please input status.");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessagePleaseInputStatus);
             }
 
-            if (createPaymentDetailDto.Status != "Success" && createPaymentDetailDto.Status != "Failed")
+            if (createPaymentDetailDto.Status != Constants.PaymentStatusSuccess && createPaymentDetailDto.Status != Constants.PaymentStatusFailed)
             {
-                throw new BaseException.BadRequestException("invalid_status_format", "Status must be Success or Failed.");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidStatusFormat);
             }
 
             if (string.IsNullOrWhiteSpace(createPaymentDetailDto.Method))
             {
-                throw new BaseException.BadRequestException("invalid_method", "Please input method.");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessagePleaseInputMethod);
             }
 
             if (Regex.IsMatch(createPaymentDetailDto.Method, @"[^a-zA-Z\s]"))
             {
-                throw new BaseException.BadRequestException("invalid_method_format", "Method cannot contain numbers or special characters.");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidMethodFormat);
             }
 
             if (!string.IsNullOrWhiteSpace(createPaymentDetailDto.ExternalTransaction) && !Regex.IsMatch(createPaymentDetailDto.ExternalTransaction, @"^[a-zA-Z0-9]+$"))
             {
-                throw new BaseException.BadRequestException("invalid_external_transaction_format", "External transaction can only contain alphanumeric characters.");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidExternalTransactionFormat);
             }
         }
     }

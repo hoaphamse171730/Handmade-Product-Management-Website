@@ -4,6 +4,8 @@ using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.Core.Common;
+using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.CancelReasonModelViews;
 using Microsoft.EntityFrameworkCore;
 
@@ -39,13 +41,7 @@ namespace HandmadeProductManagement.Services.Service
                 })
                 .ToListAsync();
 
-            if (!cancelReasons.Any())
-            {
-                throw new BaseException.NotFoundException("not_found", "There is no cancel reasons.");
-            }
-
-            var cancelReasonDto = _mapper.Map<IList<CancelReasonDto>>(cancelReasons);
-            return cancelReasonDto;
+            return _mapper.Map<IList<CancelReasonDto>>(cancelReasons);
         }
 
         // Create a new cancel reason
@@ -55,7 +51,7 @@ namespace HandmadeProductManagement.Services.Service
             var validationResult = await _creationValidator.ValidateAsync(cancelReason);
             if (!validationResult.IsValid)
             {
-                throw new BaseException.BadRequestException("validation_failed", validationResult.Errors.Select(e => e.ErrorMessage).FirstOrDefault());
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), validationResult.Errors.First().ErrorMessage);
             }
 
             var cancelReasonEntity = _mapper.Map<CancelReason>(cancelReason);
@@ -76,23 +72,19 @@ namespace HandmadeProductManagement.Services.Service
             // Validate id format
             if (!Guid.TryParse(id, out var guidId))
             {
-                throw new BaseException.BadRequestException("invalid_input", "ID is not in a valid GUID format.");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat);
             }
 
             var validationResult = await _updateValidator.ValidateAsync(cancelReason);
             if (!validationResult.IsValid)
             {
-                throw new BaseException.BadRequestException("validation_failed", validationResult.Errors.Select(e => e.ErrorMessage).FirstOrDefault());
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), validationResult.Errors.First().ErrorMessage);
             }
 
             // Find the entity to be updated
             var cancelReasonEntity = await _unitOfWork.GetRepository<CancelReason>().Entities
-                .FirstOrDefaultAsync(p => p.Id == id && (!p.DeletedTime.HasValue || p.DeletedBy == null));
-
-            if (cancelReasonEntity == null)
-            {
-                throw new BaseException.NotFoundException("not_found", "Cancel Reason not found");
-            }
+                .FirstOrDefaultAsync(p => p.Id == id && (!p.DeletedTime.HasValue || p.DeletedBy == null))
+                ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageCancelReasonNotFound);
 
             // Map only updated properties, keeping old values for null or unchanged fields
             if (!string.IsNullOrWhiteSpace(cancelReason.Description))
@@ -122,15 +114,17 @@ namespace HandmadeProductManagement.Services.Service
             // Validate id format
             if (!Guid.TryParse(id, out var guidId))
             {
-                throw new BaseException.BadRequestException("invalid_input", "ID is not in a valid GUID format.");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat);
             }
 
             var cancelReasonRepo = _unitOfWork.GetRepository<CancelReason>();
             var cancelReasonEntity = await cancelReasonRepo.Entities.FirstOrDefaultAsync(x => x.Id == id);
             if (cancelReasonEntity == null || cancelReasonEntity.DeletedTime.HasValue || cancelReasonEntity.DeletedBy != null)
             {
-                throw new BaseException.NotFoundException("not_found", "Cancel Reason not found");
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageCancelReasonNotFound);
             }
+
+            // Mark the entity as deleted
             cancelReasonEntity.DeletedTime = DateTime.UtcNow;
             cancelReasonEntity.DeletedBy = userId;
 
@@ -155,12 +149,6 @@ namespace HandmadeProductManagement.Services.Service
                     DeletedTime = cancelReason.DeletedTime,
                 })
                 .ToListAsync();
-
-            if (!cancelReasons.Any())
-            {
-                throw new BaseException.NotFoundException("not_found", "There is no cancel reasons.");
-            }
-
             return cancelReasons;
         }
 
@@ -170,21 +158,19 @@ namespace HandmadeProductManagement.Services.Service
             // Validate id format
             if (!Guid.TryParse(id, out var guidId))
             {
-                throw new BaseException.BadRequestException("invalid_input", "ID is not in a valid GUID format.");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat);
             }
 
             var cancelReasonRepo = _unitOfWork.GetRepository<CancelReason>();
             var cancelReasonEntity = await cancelReasonRepo.Entities
-                .FirstOrDefaultAsync(cr => cr.Id == id && cr.DeletedTime.HasValue && cr.DeletedBy != null);
+                .FirstOrDefaultAsync(cr => cr.Id == id && cr.DeletedTime.HasValue && cr.DeletedBy != null)
+                ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageCancelReasonNotFound);
 
-            if (cancelReasonEntity == null)
-            {
-                throw new BaseException.NotFoundException("not_found", "Cancel Reason not found or not deleted.");
-            }
-
+            // Restore the soft-deleted entity
             cancelReasonEntity.DeletedTime = null;
             cancelReasonEntity.DeletedBy = null;
 
+            // Update metadata
             cancelReasonEntity.LastUpdatedTime = DateTime.UtcNow;
             cancelReasonEntity.LastUpdatedBy = userId;
 
@@ -193,5 +179,6 @@ namespace HandmadeProductManagement.Services.Service
 
             return true;
         }
+
     }
 }

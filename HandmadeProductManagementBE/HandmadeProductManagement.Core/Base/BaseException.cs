@@ -24,12 +24,12 @@ namespace HandmadeProductManagement.Core.Base
         public class BadRequestException : ErrorException
         {
             public BadRequestException(string errorCode, string message)
-                : base(400, errorCode, message)
+                : base(((int)StatusCodeHelper.BadRequest), errorCode, message)
             {
             }
 
             public BadRequestException(ICollection<KeyValuePair<string, ICollection<string>>> errors)
-                : base(400, new ErrorDetail
+                : base(((int)StatusCodeHelper.BadRequest), new ErrorDetail
                 {
                     ErrorCode = "bad_request",
                     ErrorMessage = errors
@@ -40,11 +40,11 @@ namespace HandmadeProductManagement.Core.Base
 
         public class NotFoundException : ErrorException
         {
-            public NotFoundException(string errorCode, string message) : base(404, errorCode, message)
+            public NotFoundException(string errorCode, string message) : base(((int)StatusCodeHelper.NotFound), errorCode, message)
             {
             }
 
-            public NotFoundException(ICollection<KeyValuePair<string, ICollection<string>>> errors) : base(404, new ErrorDetail
+            public NotFoundException(ICollection<KeyValuePair<string, ICollection<string>>> errors) : base(((int)StatusCodeHelper.NotFound), new ErrorDetail
             {
                 ErrorCode = "not_found",
                 ErrorMessage = errors
@@ -55,7 +55,7 @@ namespace HandmadeProductManagement.Core.Base
         public class UnauthorizedException : ErrorException
         {
             public UnauthorizedException(string errorCode, string message)
-                : base(401, errorCode, message)
+                : base(((int)StatusCodeHelper.Unauthorized), errorCode, message)
             {
             }
         }
@@ -63,7 +63,7 @@ namespace HandmadeProductManagement.Core.Base
         public class ForbiddenException : ErrorException
         {
             public ForbiddenException(string errorCode, string message)
-                : base(403, errorCode, message)
+                : base(((int)StatusCodeHelper.Forbidden), errorCode, message)
             {
             }
         }

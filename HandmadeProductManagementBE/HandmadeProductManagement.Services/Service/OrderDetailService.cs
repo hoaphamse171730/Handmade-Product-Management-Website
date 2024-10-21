@@ -2,13 +2,11 @@ using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.ModelViews.OrderDetailModelViews;
 using AutoMapper;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using FluentValidation;
 using HandmadeProductManagement.Contract.Repositories.Entity;
+using Microsoft.EntityFrameworkCore;
+using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.Core.Constants;
 
 namespace HandmadeProductManagement.Services.Service
 {
@@ -35,9 +33,7 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<OrderDetailDto> GetById(string id)
         {
-            var orderDetail = await _unitOfWork.GetRepository<OrderDetail>().Entities.FirstOrDefaultAsync(p => p.Id == id && p.DeletedTime == null);
-            if (orderDetail == null)
-                throw new KeyNotFoundException("Order Detail not found");
+            var orderDetail = await _unitOfWork.GetRepository<OrderDetail>().Entities.FirstOrDefaultAsync(p => p.Id == id && p.DeletedTime == null) ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "Order Detail not found");
             return _mapper.Map<OrderDetailDto>(orderDetail);
         }
 
@@ -45,12 +41,15 @@ namespace HandmadeProductManagement.Services.Service
         {
             var validationResult = await _creationValidator.ValidateAsync(orderDetailForCreation);
             if (!validationResult.IsValid)
-                throw new ValidationException(validationResult.Errors);
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), validationResult.Errors.First().ErrorMessage);
+
             var orderDetailEntity = _mapper.Map<OrderDetail>(orderDetailForCreation);
             orderDetailEntity.CreatedBy = userId;
             orderDetailEntity.LastUpdatedBy = userId;
+
             await _unitOfWork.GetRepository<OrderDetail>().InsertAsync(orderDetailEntity);
             await _unitOfWork.SaveAsync();
+
             return _mapper.Map<OrderDetailDto>(orderDetailEntity);
         }
     }

@@ -66,7 +66,7 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(string? content, [Required] int rating, [Required] string productId, [Required] string orderId)
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
             var userName = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
 
             var reviewModel = new ReviewModel
@@ -93,11 +93,11 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpPut("{reviewId}")]
         public async Task<IActionResult> Update([Required] string reviewId, string? content, int? rating)
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
 
             var existingReview = await _reviewService.GetByIdAsync(reviewId);
             existingReview.Content = content;
-            existingReview.Rating = rating;
+            existingReview.Rating = rating ?? existingReview.Rating;
 
             var updatedReview = await _reviewService.UpdateAsync(reviewId, Guid.Parse(userId), existingReview);
             var response = new BaseResponse<ReviewModel>
@@ -113,7 +113,7 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpDelete("{reviewId}")]
         public async Task<IActionResult> Delete([Required] string reviewId)
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
 
             var result = await _reviewService.DeleteAsync(reviewId, Guid.Parse(userId));
             var response = new BaseResponse<bool>
@@ -129,7 +129,7 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpDelete("{reviewId}/softdelete")]
         public async Task<IActionResult> SoftDelete([Required] string reviewId)
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
 
             var result = await _reviewService.SoftDeleteAsync(reviewId, Guid.Parse(userId));
             var response = new BaseResponse<bool>
@@ -137,6 +137,23 @@ namespace HandmadeProductManagementAPI.Controllers
                 Code = "Success",
                 StatusCode = StatusCodeHelper.OK,
                 Message = "Review soft deleted successfully."
+            };
+            return Ok(response);
+        }
+
+        [Authorize]
+        [HttpPut("{reviewId}/recover")]
+        public async Task<IActionResult> RecoverDeletedReview([Required] string reviewId)
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
+
+            var result = await _reviewService.RecoverDeletedReviewAsync(reviewId, Guid.Parse(userId));
+            var response = new BaseResponse<bool>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Review recovered successfully.",
+                Data = result
             };
             return Ok(response);
         }

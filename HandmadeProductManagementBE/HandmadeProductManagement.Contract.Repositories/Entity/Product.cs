@@ -1,10 +1,5 @@
 ﻿using HandmadeProductManagement.Core.Base;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
 namespace HandmadeProductManagement.Contract.Repositories.Entity
 {
@@ -22,12 +17,12 @@ namespace HandmadeProductManagement.Contract.Repositories.Entity
         [JsonIgnore]
         public ICollection<ProductItem> ProductItems { get; set; } = [];
         [JsonIgnore]
-        public Category Category { get; set; }
+        public Category? Category { get; set; }
         [JsonIgnore]
-        public Shop Shop { get; set; }
+        public Shop? Shop { get; set; }
         [JsonIgnore]
-        public virtual ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
+        public virtual ICollection<OrderDetail> OrderDetails { get; set; } = [];
         [JsonIgnore]
-        public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
+        public virtual ICollection<Review> Reviews { get; set; } = [];
     }
 }

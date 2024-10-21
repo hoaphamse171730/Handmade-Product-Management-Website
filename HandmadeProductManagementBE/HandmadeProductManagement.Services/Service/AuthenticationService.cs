@@ -35,49 +35,47 @@ public class AuthenticationService : IAuthenticationService
             string.IsNullOrWhiteSpace(loginModelView.UserName) ||
             string.IsNullOrWhiteSpace(loginModelView.Password))
         {
-            throw new BaseException.BadRequestException("missing_login_identifier",
-                "At least one of Phone Number, Email, or Username is required for login.");
+            throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(),
+                Constants.ErrorMessageMissingLoginIdentifier);
         }
 
         if (!string.IsNullOrWhiteSpace(loginModelView.Email) && !IsValidEmail(loginModelView.Email))
         {
-            throw new BaseException.BadRequestException("invalid_email_format",
-                "Invalid Email format.");
+            throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(),
+                Constants.ErrorMessageInvalidEmailFormat);
         }
 
         if (!string.IsNullOrWhiteSpace(loginModelView.UserName) && !IsValidUsername(loginModelView.UserName))
         {
-            throw new BaseException.BadRequestException("invalid_username_format",
-                "Invalid Username format. Special characters are not allowed.");
+            throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(),
+                Constants.ErrorMessageInvalidUsernameFormat);
         }
 
         if (!string.IsNullOrWhiteSpace(loginModelView.PhoneNumber) && !IsValidPhoneNumber(loginModelView.PhoneNumber))
         {
-            throw new BaseException.BadRequestException("invalid_phone_format",
-                "Invalid Phone Number format. Phone number must be between 10 to 11 digits and start with 0.");
+            throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(),
+                Constants.ErrorMessageInvalidPhoneFormat);
         }
+
         var user = await _userManager.Users
             .Include(u => u.UserInfo)
-            //.Include(u => u.Cart)
             .FirstOrDefaultAsync(u => u.Email == loginModelView.Email
                                       || u.PhoneNumber == loginModelView.PhoneNumber
-                                      || u.UserName == loginModelView.UserName);
+                                      || u.UserName == loginModelView.UserName) ?? throw new BaseException.UnauthorizedException(StatusCodeHelper.Unauthorized.ToString(),
 
-        if (user is null)
+                Constants.ErrorMessageUnauthorized);
+        if (!user.Status.Equals(Constants.UserActiveStatus, StringComparison.OrdinalIgnoreCase))
         {
-            throw new BaseException.UnauthorizedException("unauthorized", "Incorrect user login credentials");
-        }
-
-        if (user.Status != Constants.UserActiveStatus) 
-        {
-            throw new BaseException.UnauthorizedException("unauthorized", "This account has been disabled.");
+            throw new BaseException.UnauthorizedException(StatusCodeHelper.Unauthorized.ToString(),
+                Constants.ErrorMessageAccountDisabled);
         }
 
         var success = await _userManager.CheckPasswordAsync(user, loginModelView.Password);
 
         if (!success)
         {
-            throw new BaseException.UnauthorizedException("incorrect_password", "Incorrect password");
+            throw new BaseException.UnauthorizedException(StatusCodeHelper.Unauthorized.ToString(),
+                Constants.ErrorMessageIncorrectPassword);
         }
 
         var userResponse = await CreateUserResponse(user);
@@ -90,19 +88,21 @@ public class AuthenticationService : IAuthenticationService
 
         if (await _userManager.Users.AnyAsync(u => u.UserName == registerModelView.UserName))
         {
-            throw new BaseException.BadRequestException("username_taken", "Username is already taken.");
+            throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(),
+                Constants.ErrorMessageUsernameTaken);
         }
 
         if (await _userManager.Users.AnyAsync(u => u.Email == registerModelView.Email))
         {
-            throw new BaseException.BadRequestException("email_taken", "Email is already taken.");
+            throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(),
+                Constants.ErrorMessageEmailTaken);
         }
 
         if (await _userManager.Users.AnyAsync(u => u.PhoneNumber == registerModelView.PhoneNumber))
         {
-            throw new BaseException.BadRequestException("phone_taken", "Phone number is already taken.");
+            throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(),
+                Constants.ErrorMessagePhoneTaken);
         }
-
 
         var user = registerModelView.Adapt<ApplicationUser>();
 
@@ -116,12 +116,12 @@ public class AuthenticationService : IAuthenticationService
                     .Select(e => e.Description)
                     .ToList();
 
-                throw new BaseException.BadRequestException("user_creation_failed",
-                    "User creation failed: " + string.Join("; ", errorMessages));
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(),
+                    Constants.ErrorMessageUserCreationFailed + string.Join("; ", errorMessages));
             }
 
             await _emailService.SendEmailConfirmationAsync(user.Email!, registerModelView.ClientUri);
-            await AssignRoleToUser(user.Id.ToString(), "Seller");
+            await AssignRoleToUser(user.Id.ToString(), Constants.RoleSeller);
 
             return BaseResponse<string>.OkResponse(user.Id.ToString());
         }
@@ -138,19 +138,21 @@ public class AuthenticationService : IAuthenticationService
 
         if (await _userManager.Users.AnyAsync(u => u.UserName == registerModelView.UserName))
         {
-            throw new BaseException.BadRequestException("username_taken", "Username is already taken.");
+            throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(),
+                Constants.ErrorMessageUsernameTaken);
         }
 
         if (await _userManager.Users.AnyAsync(u => u.Email == registerModelView.Email))
         {
-            throw new BaseException.BadRequestException("email_taken", "Email is already taken.");
+            throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(),
+                Constants.ErrorMessageEmailTaken);
         }
 
         if (await _userManager.Users.AnyAsync(u => u.PhoneNumber == registerModelView.PhoneNumber))
         {
-            throw new BaseException.BadRequestException("phone_taken", "Phone number is already taken.");
+            throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(),
+                Constants.ErrorMessagePhoneTaken);
         }
-
 
         var user = registerModelView.Adapt<ApplicationUser>();
 
@@ -164,12 +166,12 @@ public class AuthenticationService : IAuthenticationService
                     .Select(e => e.Description)
                     .ToList();
 
-                throw new BaseException.BadRequestException("user_creation_failed",
-                    "User creation failed: " + string.Join("; ", errorMessages));
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(),
+                    Constants.ErrorMessageUserCreationFailed + string.Join("; ", errorMessages));
             }
 
             await _emailService.SendEmailConfirmationAsync(user.Email!, registerModelView.ClientUri);
-            await AssignRoleToUser(user.Id.ToString(), "Admin");
+            await AssignRoleToUser(user.Id.ToString(), Constants.RoleAdmin);
 
             return BaseResponse<string>.OkResponse(user.Id.ToString());
         }
@@ -184,32 +186,32 @@ public class AuthenticationService : IAuthenticationService
     {
         if (!IsValidEmail(registerModelView.Email))
         {
-            throw new BaseException.BadRequestException("invalid_email_format",
-                "Invalid Email format.");
+            throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(),
+                Constants.ErrorMessageInvalidEmailFormat);
         }
 
         if (!IsValidUsername(registerModelView.UserName))
         {
-            throw new BaseException.BadRequestException("invalid_username_format",
-                "Invalid Username format. Special characters are not allowed.");
+            throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(),
+                Constants.ErrorMessageInvalidUsernameFormat);
         }
 
         if (!ValidationHelper.IsValidNames(CustomRegex.FullNameRegex, registerModelView.FullName))
         {
-            throw new BaseException.BadRequestException("invalid_fullname_format",
-                "Full Name contains invalid characters.");
+            throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(),
+                Constants.ErrorMessageInvalidFullnameFormat);
         }
 
         if (!IsValidPhoneNumber(registerModelView.PhoneNumber))
         {
-            throw new BaseException.BadRequestException("invalid_phone_format",
-                "Invalid Phone Number format. Phone number must be between 10 to 11 digits and start with 0.");
+            throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(),
+                Constants.ErrorMessageInvalidPhoneFormat);
         }
 
         if (string.IsNullOrWhiteSpace(registerModelView.Password) || !IsValidPassword(registerModelView.Password))
         {
-            throw new BaseException.BadRequestException("weak_password",
-                "Password is too weak. It must be at least 8 characters long, contain uppercase, lowercase, a special character, and a digit.");
+            throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(),
+                Constants.ErrorMessageWeakPassword);
         }
     }
 
@@ -218,7 +220,8 @@ public class AuthenticationService : IAuthenticationService
         var user = await _userManager.FindByEmailAsync(forgotPasswordModelView.Email);
         if (user == null || !user.EmailConfirmed)
         {
-            throw new BaseException.BadRequestException("invalid_email","Email is invalid or not confirmed.");
+            throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(),
+                Constants.ErrorMessageInvalidEmail);
         }
 
         var resetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
@@ -230,18 +233,14 @@ public class AuthenticationService : IAuthenticationService
         return new BaseResponse<string>()
         {
             StatusCode = StatusCodeHelper.OK,
-            Message = "Password reset link has been sent to your email."
+            Message = Constants.MessagePasswordResetLinkSent
         };
     }
 
     public async Task<BaseResponse<string>> ResetPasswordAsync(ResetPasswordModelView resetPasswordModelView)
     {
-        var user = await _userManager.FindByEmailAsync(resetPasswordModelView.Email);
-        if (user == null)
-        {
-            throw new BaseException.BadRequestException("invalid_email", "Email is invalid.");
-        }
-
+        var user = await _userManager.FindByEmailAsync(resetPasswordModelView.Email)
+                    ?? throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidEmail);
 
         var decodedToken = HttpUtility.UrlDecode(resetPasswordModelView.Token);
         var result = await _userManager.ResetPasswordAsync(user, decodedToken, resetPasswordModelView.NewPassword);
@@ -251,25 +250,22 @@ public class AuthenticationService : IAuthenticationService
             return new BaseResponse<string>()
             {
                 StatusCode = StatusCodeHelper.OK,
-                Message = "Password has been reset successfully."
+                Message = Constants.MessagePasswordResetSuccess
             };
         }
 
-        throw new BaseException.BadRequestException("error", "Error resetting the password.");
+        throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageResetPasswordError);
     }
 
     public async Task<BaseResponse<string>> ConfirmEmailAsync(ConfirmEmailModelView confirmEmailModelView)
     {
         if (string.IsNullOrWhiteSpace(confirmEmailModelView.Email) || !IsValidEmail(confirmEmailModelView.Email))
         {
-            throw new BaseException.BadRequestException("invalid_email", "The email address is not valid.");
+            throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidEmail);
         }
 
-        var user = await _userManager.FindByEmailAsync(confirmEmailModelView.Email);
-        if (user == null)
-        {
-            throw new BaseException.NotFoundException("not_found", "User not found.");
-        }
+        var user = await _userManager.FindByEmailAsync(confirmEmailModelView.Email)
+                    ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageUserNotFound);
 
         var decodedToken = HttpUtility.UrlDecode(confirmEmailModelView.Token);
         var result = await _userManager.ConfirmEmailAsync(user, decodedToken);
@@ -281,7 +277,7 @@ public class AuthenticationService : IAuthenticationService
             return new BaseResponse<string>()
             {
                 StatusCode = StatusCodeHelper.OK,
-                Message = "Email confirmed successfully."
+                Message = Constants.MessageEmailConfirmedSuccess
             };
         }
         else
@@ -290,7 +286,8 @@ public class AuthenticationService : IAuthenticationService
                 .Select(e => e.Description)
                 .ToList();
 
-            throw new BaseException.BadRequestException("error", "Error confirming the email: " + string.Join("; ", errorMessages));
+            throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(),
+                $"{Constants.ErrorMessageEmailConfirmationError}: {string.Join("; ", errorMessages)}");
         }
     }
 
@@ -310,7 +307,7 @@ public class AuthenticationService : IAuthenticationService
         var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
         if (jsonToken == null)
         {
-            return BaseResponse<string>.FailResponse("Invalid token.");
+            return BaseResponse<string>.FailResponse(Constants.ErrorMessageInvalidToken);
         }
 
         var email = jsonToken.Claims.FirstOrDefault(claim => claim.Type == "email")?.Value;
@@ -319,7 +316,7 @@ public class AuthenticationService : IAuthenticationService
 
         if (email == null || name == null)
         {
-            return BaseResponse<string>.FailResponse("Token is missing necessary claims.");
+            return BaseResponse<string>.FailResponse(Constants.ErrorMessageMissingClaims);
         }
 
         var user = await _userManager.FindByEmailAsync(email);
@@ -335,16 +332,15 @@ public class AuthenticationService : IAuthenticationService
             var createResult = await _userManager.CreateAsync(user);
             if (!createResult.Succeeded)
             {
-                return BaseResponse<string>.FailResponse("Failed to create a new user.");
+                return BaseResponse<string>.FailResponse(Constants.ErrorMessageUserCreationFailed);
             }
 
-            await _userManager.AddToRoleAsync(user, "Customer");
+            await _userManager.AddToRoleAsync(user, Constants.RoleCustomer);
         }
 
         var userToken = await _tokenService.CreateToken(user);
         return BaseResponse<string>.OkResponse(userToken);
     }
-
 
     private async Task<UserLoginResponseModel> CreateUserResponse(ApplicationUser user)
     {
@@ -360,18 +356,15 @@ public class AuthenticationService : IAuthenticationService
 
     public async Task<bool> AssignRoleToUser(string userId, string role)
     {
-        var user = await _userManager.FindByIdAsync(userId);
-        if (user == null)
-        {
-            throw new Exception("User not found");
-        }
+        var user = await _userManager.FindByIdAsync(userId) ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageUserNotFound);
 
         if (!await _userManager.IsInRoleAsync(user, role))
         {
             var result = await _userManager.AddToRoleAsync(user, role);
             if (!result.Succeeded)
             {
-                throw new Exception($"Failed to add role to user: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(),
+                    $"{Constants.ErrorMessageRoleAssignmentFailed}: {string.Join(", ", result.Errors.Select(e => e.Description))}");
             }
         }
 
