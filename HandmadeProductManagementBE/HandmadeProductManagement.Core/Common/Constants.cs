@@ -221,6 +221,7 @@ public static class Constants
     public const string ErrorMessageProductDeleted = "This product is not deleted.";
     public const string ErrorMessageVariationDeleted = "This variation is not deleted.";
     public const string ErrorMessageUserAlreadyActive = "This user is already active.";
+    public const string ErrorMeassagePromotionIsNotDeleted = "Promotion is not deleted";
 
     public const string ErrorMessageDeletedReviews = "Review is not deleted";
     public const string ErrorMessageDeletedReplyOfDeletedProduct = "Cannot recover reply for a deleted product";

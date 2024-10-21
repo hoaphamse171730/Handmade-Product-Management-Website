@@ -5,6 +5,7 @@ using HandmadeProductManagement.ModelViews.PromotionModelViews;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using HandmadeProductManagement.Services.Service;
+using System.ComponentModel.DataAnnotations;
 
 namespace HandmadeProductManagementAPI.Controllers
 {
@@ -101,6 +102,22 @@ namespace HandmadeProductManagementAPI.Controllers
                 Code = "200",
                 StatusCode = StatusCodeHelper.OK,
                 Message = "Promotion soft-deleted successfully.",
+                Data = result
+            };
+            return Ok(response);
+        }
+        [Authorize(Roles = "Admin, Seller")]
+        [HttpPut("{promotionId}/recover")]
+        public async Task<IActionResult> RecoverDeletedReview([Required] string promotionId)
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
+
+            var result = await _promotionService.RecoverDeletedPromotionAsync(promotionId, Guid.Parse(userId));
+            var response = new BaseResponse<bool>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Promotion recovered successfully.",
                 Data = result
             };
             return Ok(response);
