@@ -455,9 +455,14 @@ namespace HandmadeProductManagement.Services.Service
                .Where(u => u.Id == userId)
                .FirstOrDefaultAsync();
 
-            if (user == null || user.Status == Constants.UserActiveStatus)
+            if (user == null)
             {
                 throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageUserNotFound);
+            }
+
+            if (user.Status == Constants.UserActiveStatus)
+            {
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageUserAlreadyActive);
             }
 
             user.Status = Constants.UserActiveStatus;
