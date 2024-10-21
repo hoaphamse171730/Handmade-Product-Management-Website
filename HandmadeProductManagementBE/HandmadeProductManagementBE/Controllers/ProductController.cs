@@ -160,7 +160,7 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
-        [HttpPut("recover/{id}")]
+        [HttpPut("{id}/recover")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> RecoverProduct(string id)
         {

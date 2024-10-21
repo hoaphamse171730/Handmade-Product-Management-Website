@@ -7,6 +7,8 @@ using System.Security.Claims;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.NotificationModelViews;
 using Microsoft.AspNetCore.Authorization;
+using HandmadeProductManagement.Contract.Repositories.Entity;
+using HandmadeProductManagement.Services.Service;
 namespace HandmadeProductManagementAPI.Controllers
 {
     [Route("api/[controller]")]
@@ -81,6 +83,20 @@ namespace HandmadeProductManagementAPI.Controllers
                 StatusCode = StatusCodeHelper.OK,
                 Message = "Success",
                 Data = await _userService.DeleteUser(id)
+            };
+            return Ok(response);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet("deleted")]
+        public async Task<IActionResult> GetInactiveUsers()
+        {
+            var response = new BaseResponse<IList<UserResponseModel>>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Get all inactive users successfully!",
+                Data = await _userService.GetInactiveUsers()
             };
             return Ok(response);
         }
