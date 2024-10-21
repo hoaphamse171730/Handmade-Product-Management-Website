@@ -216,7 +216,7 @@ namespace HandmadeProductManagementAPI.Controllers
             try
             {
                 var result = await _replyService.GetAllDeletedRepliesAsync(Guid.Parse(userId));
-                var response = new BaseResponse<IList<ReplyModel>>
+                var response = new BaseResponse<IList<DeletedReplyModel>>
                 {
                     Code = "Success",
                     StatusCode = StatusCodeHelper.OK,

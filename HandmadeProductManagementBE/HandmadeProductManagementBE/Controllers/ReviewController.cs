@@ -166,7 +166,7 @@ namespace HandmadeProductManagementAPI.Controllers
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
 
             var result = await _reviewService.GetAllDeletedReviewsAsync(Guid.Parse(userId));
-            var response = new BaseResponse<IList<ReviewModel>>
+            var response = new BaseResponse<IList<DeletedReviewModel>>
             {
                 Code = "Success",
                 StatusCode = StatusCodeHelper.OK,

@@ -318,17 +318,17 @@ namespace HandmadeProductManagement.Services.Service
             return true;
         }
 
-        public async Task<IList<ReplyModel>> GetAllDeletedRepliesAsync(Guid userId)
+        public async Task<IList<DeletedReplyModel>> GetAllDeletedRepliesAsync(Guid userId)
         {
             var deletedReplies = await _unitOfWork.GetRepository<Reply>()
                                                   .Entities
                                                   .Where(r => r.DeletedTime != null)
-                                                  .Select(r => new ReplyModel
+                                                  .Select(r => new DeletedReplyModel
                                                   {
                                                       Id = r.Id,
                                                       Content = r.Content,
                                                       ReviewId = r.Id,
-                                                      Date = r.Date,
+                                                      DeletedDate = r.DeletedTime!.Value,
                                                       ShopId = r.ShopId
                                                   })
                                                   .ToListAsync();

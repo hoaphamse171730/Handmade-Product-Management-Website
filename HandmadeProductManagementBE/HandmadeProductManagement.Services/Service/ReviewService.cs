@@ -447,26 +447,18 @@ namespace HandmadeProductManagement.Services.Service
             return true;
         }
 
-        public async Task<IList<ReviewModel>> GetAllDeletedReviewsAsync(Guid userId)
+        public async Task<IList<DeletedReviewModel>> GetAllDeletedReviewsAsync(Guid userId)
         {
             var deletedReviews = await _unitOfWork.GetRepository<Review>()
                                             .Entities
                                             .Where(r => r.DeletedTime != null)
-                                            .Select(r => new ReviewModel
+                                            .Select(r => new DeletedReviewModel
                                             {
                                                 Id = r.Id,
+                                                DeletedTime = r.DeletedTime!.Value,
                                                 Content = r.Content,
                                                 Rating = r.Rating,
-                                                Date = r.Date,
                                                 ProductId = r.ProductId,
-                                                Reply = r.Reply == null ? null : new ReplyModel
-                                                {
-                                                    Id = r.Reply.Id,
-                                                    Content = r.Reply.Content,
-                                                    Date = r.Reply.Date,
-                                                    ReviewId = r.Reply.ReviewId,
-                                                    ShopId = r.Reply.ShopId
-                                                },
                                                 UserId = r.UserId
                                             })
                                             .ToListAsync();
