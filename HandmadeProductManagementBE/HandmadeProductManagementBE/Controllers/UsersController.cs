@@ -88,7 +88,7 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [Authorize(Roles = "Admin")]
-        [HttpGet("deleted")]
+        [HttpGet("inactive")]
         public async Task<IActionResult> GetInactiveUsers()
         {
             var response = new BaseResponse<IList<UserResponseModel>>
