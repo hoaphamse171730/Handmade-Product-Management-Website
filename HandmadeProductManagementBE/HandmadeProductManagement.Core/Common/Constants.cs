@@ -216,6 +216,7 @@ public static class Constants
     public const string ErrorMessageInvalidShopDescriptionFormat = "The shop description contains invalid characters.";
     public const string ErrorMessageInvalidFileType = "The file type is not supported.";
     public const string ErrorMessageDuplicateVariationName = "A variation with this name already exists.";
+    public const string ErrorMessageProductItemAlreadyActive = "A product item already active.";
 
     #endregion
 
