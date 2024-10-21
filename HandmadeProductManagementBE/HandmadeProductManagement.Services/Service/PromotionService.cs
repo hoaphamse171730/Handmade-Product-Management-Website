@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Firebase.Auth;
 using FluentValidation;
 using FluentValidation.Results;
 using HandmadeProductManagement.Contract.Repositories.Entity;
@@ -7,7 +8,9 @@ using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Common;
 using HandmadeProductManagement.Core.Constants;
+using HandmadeProductManagement.Core.Utils;
 using HandmadeProductManagement.ModelViews.PromotionModelViews;
+using HandmadeProductManagement.Repositories.Entity;
 using Microsoft.EntityFrameworkCore;
 
 namespace HandmadeProductManagement.Services.Service
@@ -18,6 +21,10 @@ namespace HandmadeProductManagement.Services.Service
         private readonly IMapper _mapper;
         private readonly IValidator<PromotionForCreationDto> _creationValidator;
         private readonly IValidator<PromotionForUpdateDto> _updateValidator;
+        private readonly IProductService _productService;
+        private readonly IUserService _userService;
+        DateTime vietnamTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"));
+
 
 
         public PromotionService(IUnitOfWork unitOfWork, IMapper mapper,
@@ -163,7 +170,7 @@ namespace HandmadeProductManagement.Services.Service
                 ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessagePromotionNotFound);
 
             if (DateTime.UtcNow < promotion.StartDate || DateTime.UtcNow > promotion.EndDate)
-                promotion.Status = Constants.PromotionStatusInactive; 
+                promotion.Status = Constants.PromotionStatusInactive;
             else
                 promotion.Status = Constants.PromotionStatusActive;
 
@@ -171,6 +178,41 @@ namespace HandmadeProductManagement.Services.Service
             await _unitOfWork.SaveAsync();
             return true;
         }
+        public async Task<bool> RecoverDeletedPromotionAsync(string id, Guid userId)
+        {
+            // Check if the promotions exists
+            var existingPromotion = await _unitOfWork.GetRepository<Promotion>()
+                                               .Entities
+                                               .FirstOrDefaultAsync(r => r.Id == id);
 
+            if (existingPromotion == null || !Guid.TryParse(id, out _))
+            {
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(),
+                                    Constants.ErrorMessagePromotionNotFound);
+            }
+
+            // Check if the review is actually soft-deleted
+            if (existingPromotion.DeletedTime == null)
+            {
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMeassagePromotionIsNotDeleted);
+            }
+
+            // Lấy thông tin người dùng từ cơ sở dữ liệu
+            var user = await _unitOfWork.GetRepository<ApplicationUser>()
+                .Entities
+                .Include(u => u.UserInfo)
+                .FirstOrDefaultAsync(u => u.Id == userId);
+
+            existingPromotion.DeletedTime = null;
+            existingPromotion.DeletedBy = null;
+            existingPromotion.LastUpdatedTime = vietnamTime;
+            existingPromotion.Status = Constants.PromotionStatusActive;
+            existingPromotion.LastUpdatedBy = user.UserInfo.FullName;
+
+            await _unitOfWork.GetRepository<Promotion>().UpdateAsync(existingPromotion);
+            await _unitOfWork.SaveAsync();
+
+            return true;
+        }
     }
 }
