@@ -4,6 +4,8 @@ using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.Core.Common;
+using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.VariationOptionModelViews;
 using Microsoft.EntityFrameworkCore;
 
@@ -33,23 +35,23 @@ namespace HandmadeProductManagement.Services.Service
             // Validate id format
             if (!Guid.TryParse(variationId, out var guidId))
             {
-                throw new BaseException.BadRequestException("invalid_input", "ID is not in a valid GUID format.");
+                throw new BaseException.BadRequestException(
+                    StatusCodeHelper.BadRequest.ToString(),
+                    Constants.ErrorMessageInvalidGuidFormat
+                );
             }
 
             if (string.IsNullOrWhiteSpace(variationId))
             {
-                throw new BaseException.BadRequestException("invalid_input", "Variation ID cannot be null or empty.");
+                throw new BaseException.BadRequestException(
+                    StatusCodeHelper.BadRequest.ToString(),
+                    Constants.ErrorMessageEmptyId
+                );
             }
 
             var options = await _unitOfWork.GetRepository<VariationOption>().Entities
                 .Where(vo => vo.VariationId == variationId && (!vo.DeletedTime.HasValue || vo.DeletedBy == null))
                 .ToListAsync();
-
-            // Check if the list is empty, throw not found exception
-            if (options == null || options.Count == 0)
-            {
-                throw new BaseException.NotFoundException("not_found", "No variation options found for the specified variation.");
-            }
 
             return _mapper.Map<IList<VariationOptionDto>>(options);
         }
@@ -59,13 +61,16 @@ namespace HandmadeProductManagement.Services.Service
             // Validate if the VariationId is a valid GUID
             if (!Guid.TryParse(option.VariationId, out var guidId))
             {
-                throw new BaseException.BadRequestException("invalid_input", "Variation ID is not in a valid GUID format.");
+                throw new BaseException.BadRequestException(
+                    StatusCodeHelper.BadRequest.ToString(),
+                    Constants.ErrorMessageInvalidGuidFormat
+                );
             }
 
             var validationResult = await _creationValidator.ValidateAsync(option);
             if (!validationResult.IsValid)
             {
-                throw new BaseException.BadRequestException("validation_failed", validationResult.Errors.Select(e => e.ErrorMessage).FirstOrDefault());
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), validationResult.Errors.Select(e => e.ErrorMessage).FirstOrDefault() ?? string.Empty);
             }
 
             // Check if the VariationId exists
@@ -73,7 +78,10 @@ namespace HandmadeProductManagement.Services.Service
                 .Entities.AnyAsync(v => v.Id == option.VariationId);
             if (!variationExists)
             {
-                throw new BaseException.NotFoundException("not_found", "Variation not found.");
+                throw new BaseException.NotFoundException(
+                    StatusCodeHelper.NotFound.ToString(),
+                    Constants.ErrorMessageVariationNotFound
+                );
             }
 
             var optionEntity = _mapper.Map<VariationOption>(option);
@@ -92,27 +100,32 @@ namespace HandmadeProductManagement.Services.Service
             // Validate id format
             if (!Guid.TryParse(id, out var guidId))
             {
-                throw new BaseException.BadRequestException("invalid_input", "ID is not in a valid GUID format.");
+                throw new BaseException.BadRequestException(
+                    StatusCodeHelper.BadRequest.ToString(),
+                    Constants.ErrorMessageInvalidGuidFormat
+                );
             }
 
             // Validate the input data
             var validationResult = await _updateValidator.ValidateAsync(option);
             if (!validationResult.IsValid)
             {
-                throw new BaseException.BadRequestException("validation_failed", validationResult.Errors.Select(e => e.ErrorMessage).FirstOrDefault());
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), validationResult.Errors.Select(e => e.ErrorMessage).FirstOrDefault() ?? string.Empty);
             }
 
             var existingOption = await _unitOfWork.GetRepository<VariationOption>().Entities
-                .FirstOrDefaultAsync(vo => vo.Id == id && (!vo.DeletedTime.HasValue || vo.DeletedBy == null));
-
-            if (existingOption == null)
-            {
-                throw new BaseException.NotFoundException("not_found", "Variation Option not found.");
-            }
+                .FirstOrDefaultAsync(vo => vo.Id == id && (!vo.DeletedTime.HasValue || vo.DeletedBy == null))
+                ?? throw new BaseException.NotFoundException(
+                    StatusCodeHelper.NotFound.ToString(),
+                    Constants.ErrorMessageVariationOptionNotFound
+                );
 
             if (existingOption.CreatedBy != userId)
             {
-                throw new BaseException.ForbiddenException("forbidden", "You do not have permission to access this resource.");
+                throw new BaseException.ForbiddenException(
+                    StatusCodeHelper.Forbidden.ToString(),
+                    Constants.ErrorMessageForbidden
+                );
             }
 
             existingOption.LastUpdatedBy = userId;
@@ -130,7 +143,10 @@ namespace HandmadeProductManagement.Services.Service
             // Validate id format
             if (!Guid.TryParse(id, out var guidId))
             {
-                throw new BaseException.BadRequestException("invalid_input", "ID is not in a valid GUID format.");
+                throw new BaseException.BadRequestException(
+                    StatusCodeHelper.BadRequest.ToString(),
+                    Constants.ErrorMessageInvalidGuidFormat
+                );
             }
 
             var option = await _unitOfWork.GetRepository<VariationOption>().Entities
@@ -138,12 +154,18 @@ namespace HandmadeProductManagement.Services.Service
 
             if (option == null || option.DeletedTime.HasValue || option.DeletedBy != null)
             {
-                throw new BaseException.NotFoundException("not_found", "Variation Option not found.");
+                throw new BaseException.NotFoundException(
+                    StatusCodeHelper.NotFound.ToString(),
+                    Constants.ErrorMessageVariationOptionNotFound
+                );
             }
 
             if (option.CreatedBy != userId)
             {
-                throw new BaseException.ForbiddenException("forbidden", "You do not have permission to access this resource.");
+                throw new BaseException.ForbiddenException(
+                    StatusCodeHelper.Forbidden.ToString(),
+                    Constants.ErrorMessageForbidden
+                );
             }
 
             // Perform the soft delete
@@ -155,7 +177,6 @@ namespace HandmadeProductManagement.Services.Service
 
             return true;
         }
-
 
     }
 }

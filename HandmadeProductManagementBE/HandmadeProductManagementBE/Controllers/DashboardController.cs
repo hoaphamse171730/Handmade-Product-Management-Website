@@ -33,7 +33,7 @@ using Microsoft.AspNetCore.Mvc;
         }
 
         [HttpGet("type-distribution")]
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> StockDistribution()
         {
             var stockDistribution = await _dashboardService.StockDistribution();
@@ -41,7 +41,7 @@ using Microsoft.AspNetCore.Mvc;
         }
 
         [HttpGet("total-sales")]
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetTotalSales()
         {
             decimal totalSales = await _dashboardService.GetTotalSales();
@@ -50,7 +50,6 @@ using Microsoft.AspNetCore.Mvc;
         }
 
         [HttpGet("top10-shops")]
-        [Authorize]
         public async Task<IActionResult> GetTop10Shops()
         {
             var topShops = await _dashboardService.GetTop10Shops();
@@ -58,6 +57,7 @@ using Microsoft.AspNetCore.Mvc;
         }
 
         [HttpPost("TotalSaleByShopId")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> TotalSaleByShopId(string Id, DashboardDTO dashboardDTO)
         {
             decimal totalSale = await _dashboardService.GetTotalSaleByShopId(Id, dashboardDTO);

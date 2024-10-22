@@ -4,6 +4,8 @@ using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.Core.Common;
+using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.UserInfoModelViews;
 using HandmadeProductManagement.Repositories.Entity;
 using Microsoft.AspNetCore.Http;
@@ -28,24 +30,22 @@ namespace HandmadeProductManagement.Services.Service
         {
             if (!Guid.TryParse(id, out _))
             {
-                throw new BaseException.BadRequestException("invalid_input", "ID is not in a valid GUID format.");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat);
             }
+
             if (string.IsNullOrWhiteSpace(id))
             {
-                throw new BaseException.BadRequestException("bad_request", "User Id cannot be null or empty.");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageEmptyId);
             }
 
             var applicationUser = await _unitOfWork.GetRepository<ApplicationUser>().Entities
                 .Include(au => au.UserInfo)
-                .FirstOrDefaultAsync(au => au.Id == Guid.Parse(id));
+                .FirstOrDefaultAsync(au => au.Id == Guid.Parse(id))
+                ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageUserNotFound);
 
-            if (applicationUser == null)
-            {
-                throw new BaseException.NotFoundException("not_found", "User not found.");
-            }
             if (applicationUser.UserInfo == null)
             {
-                throw new BaseException.NotFoundException("not_found", "UserInfo not found for this user.");
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageUserInfoNotFound);
             }
 
             var userInfoDto = _mapper.Map<UserInfoDto>(applicationUser.UserInfo);
@@ -55,32 +55,31 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<bool> PatchUserInfoAsync(string id, UserInfoUpdateRequest request)
         {
-            var patchDto = request.UserInfo;
-            var avtFile = request.AvtFile;
-
+            var patchDto = request.UserInfo!;
+            var avtFile = request.AvtFile!;
+            
             // Validate
             var validationResult = await _updateValidator.ValidateAsync(patchDto);
+
             if (!validationResult.IsValid)
             {
-                throw new BaseException.BadRequestException("validation_failed", validationResult.Errors.Select(e => e.ErrorMessage).FirstOrDefault());
+                    throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), validationResult.Errors.Select(e => e.ErrorMessage).FirstOrDefault() ?? string.Empty);
             }
 
             if (!Guid.TryParse(id, out _))
             {
-                throw new BaseException.BadRequestException("invalid_input", "ID is not in a valid GUID format.");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat);
             }
+
             if (string.IsNullOrWhiteSpace(id))
             {
-                throw new BaseException.BadRequestException("bad_request", "User Id cannot be null or empty.");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageEmptyId);
             }
+
             var applicationUser = await _unitOfWork.GetRepository<ApplicationUser>().Entities
                 .Include(au => au.UserInfo)
-                .FirstOrDefaultAsync(au => au.Id == Guid.Parse(id));
-
-            if (applicationUser == null)
-            {
-                throw new BaseException.NotFoundException("not_found", "User not found.");
-            }
+                .FirstOrDefaultAsync(au => au.Id == Guid.Parse(id))
+                ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageUserNotFound);
 
             var userInfo = applicationUser.UserInfo;
 
@@ -108,11 +107,11 @@ namespace HandmadeProductManagement.Services.Service
 
             if (avtFile != null && avtFile.Length > 0)
             {
-                //check file type is valid image
+                // Check file type is valid image
                 var allowedMimeTypes = new[] { "image/jpeg", "image/png", "image/gif" };
                 if (!allowedMimeTypes.Contains(avtFile.ContentType.ToLower()))
                 {
-                    throw new BaseException.BadRequestException("invalid_file_type", "The uploaded file is not a valid image.");
+                    throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidFileType);
                 }
 
                 var uploadImageService = new ManageFirebaseImageService();

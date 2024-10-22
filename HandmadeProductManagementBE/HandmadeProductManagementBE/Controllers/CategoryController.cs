@@ -34,7 +34,7 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [HttpGet("{id}")]
-        // [Authorize]
+        [Authorize]
         public async Task<IActionResult> GetCategory(string id)
         {
             var category = await _categoryService.GetById(id);
@@ -68,13 +68,13 @@ namespace HandmadeProductManagementAPI.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateCategory(string categoryId, CategoryForUpdateDto categoryForUpdate)
         {
-            var updatedCategory = await _categoryService.Update(categoryId, categoryForUpdate);
-            var response = new BaseResponse<CategoryDto>
+            await _categoryService.Update(categoryId, categoryForUpdate);
+            var response = new BaseResponse<bool>
             {
                 Code = "200",
                 StatusCode = StatusCodeHelper.OK,
                 Message = "Category updated successfully",
-                Data = updatedCategory
+                Data = true
             };
             return Ok(response);
         }
@@ -109,5 +109,38 @@ namespace HandmadeProductManagementAPI.Controllers
             };
             return Ok(response);
         }
+
+        [HttpPatch("restore/{id}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> RestoreCategory(string id)
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
+            var isRestored = await _categoryService.RestoreCategory(id, userId);
+            var response = new BaseResponse<bool>
+            {
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Category restored successfully",
+                Data = isRestored
+            };
+            return Ok(response);
+        }
+
+        [HttpGet("GetAllDelete")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetAllDeletedCategories()
+        {
+            var deletedCategories = await _categoryService.GetAllDeleted();
+            var response = new BaseResponse<IList<CategoryDto>>
+            {
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Get the successfully deleted categories",
+                Data = deletedCategories
+            };
+            return Ok(response);
+        }
+
+
     }
 }

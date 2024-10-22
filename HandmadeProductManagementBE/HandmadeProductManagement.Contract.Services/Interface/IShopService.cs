@@ -1,12 +1,5 @@
-﻿using HandmadeProductManagement.Contract.Repositories.Entity;
-using HandmadeProductManagement.Core.Base;
-using HandmadeProductManagement.Core.Utils;
+﻿using HandmadeProductManagement.Core.Utils;
 using HandmadeProductManagement.ModelViews.ShopModelViews;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HandmadeProductManagement.Contract.Services.Interface
 {

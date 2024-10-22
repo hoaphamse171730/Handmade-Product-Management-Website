@@ -1,11 +1,10 @@
 ﻿using AutoMapper;
-using Firebase.Auth;
 using FluentValidation;
-using FluentValidation.Results;
 using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.Core.Common;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.CategoryModelViews;
 using Microsoft.EntityFrameworkCore;
@@ -46,64 +45,77 @@ namespace HandmadeProductManagement.Services.Service
             var category = await _unitOfWork.GetRepository<Category>().Entities
                 .Include(c => c.Promotion)
                 .FirstOrDefaultAsync(c => c.Id == id && c.DeletedTime == null);
-            if (category == null)
-                throw new BaseException.NotFoundException("404", "Category not found");
-            return _mapper.Map<CategoryDto>(category);
+
+            return category == null
+                ? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageCategoryNotFound)
+                : _mapper.Map<CategoryDto>(category);
         }
 
         public async Task<bool> Create(CategoryForCreationDto category)
         {
             var validationResult = await _creationValidator.ValidateAsync(category);
             if (!validationResult.IsValid)
-                throw new ValidationException(validationResult.Errors);
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), validationResult.Errors.First().ErrorMessage);
 
             var existedCategory = await _unitOfWork.GetRepository<Category>().Entities
                 .FirstOrDefaultAsync(c => c.Name == category.Name && c.DeletedTime == null);
             if (existedCategory is not null)
-                throw new ValidationException("Category name already exists");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageCategoryNameExists);
 
             var categoryEntity = _mapper.Map<Category>(category);
             categoryEntity.PromotionId = null;
             categoryEntity.CreatedTime = DateTime.UtcNow;
-            categoryEntity.Status = "active";
-            categoryEntity.CreatedBy = "user";
-            categoryEntity.LastUpdatedBy = "user";
+            categoryEntity.Status = Constants.CategoryStatusActive;
+            categoryEntity.CreatedBy = Constants.RoleAdmin;
+            categoryEntity.LastUpdatedBy = Constants.RoleAdmin;
             await _unitOfWork.GetRepository<Category>().InsertAsync(categoryEntity);
             await _unitOfWork.SaveAsync();
             _mapper.Map<CategoryDto>(categoryEntity);
 
-            return true; 
+            return true;
         }
-
-
 
 
         public async Task<CategoryDto> Update(string id, CategoryForUpdateDto category)
+
         {
             var validationResult = await _updateValidator.ValidateAsync(category);
             if (!validationResult.IsValid)
-                throw new ValidationException(validationResult.Errors);
-            var categoryEntity = await _unitOfWork.GetRepository<Category>().Entities
-                .FirstOrDefaultAsync(c => c.Id == id && c.DeletedTime == null);
-            if (categoryEntity == null)
-                throw new KeyNotFoundException("Category not found");
-            var existedCategory = await _unitOfWork.GetRepository<Category>().Entities
-                .FirstOrDefaultAsync(c => c.Name == category.Name && c.DeletedTime == null);
-            if (existedCategory is not null)
-                throw new ValidationException("Category name already exists");
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), validationResult.Errors.First().ErrorMessage);
 
-            _mapper.Map(category, categoryEntity);
+            var categoryEntity = await _unitOfWork.GetRepository<Category>().Entities
+                .FirstOrDefaultAsync(c => c.Id == id && c.DeletedTime == null) ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageCategoryNotFound);
+            
+            if (!string.IsNullOrEmpty(category.Name))
+            {
+                var existedCategory = await _unitOfWork.GetRepository<Category>().Entities
+                    .FirstOrDefaultAsync(c => c.Name == category.Name && c.DeletedTime == null);
+                if (existedCategory is not null)
+                    throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageCategoryNameExists);
+
+                categoryEntity.Name = category.Name;
+            }
+
+            if (!string.IsNullOrEmpty(category.Description))
+            {
+                categoryEntity.Description = category.Description;
+            }
             categoryEntity.LastUpdatedTime = DateTime.UtcNow;
+
             await _unitOfWork.GetRepository<Category>().UpdateAsync(categoryEntity);
             await _unitOfWork.SaveAsync();
+
+
             return _mapper.Map<CategoryDto>(categoryEntity);
+
         }
+
+
         public async Task<CategoryDto> UpdatePromotion(string id, CategoryForUpdatePromotion category)
         {
             if (!Guid.TryParse(id, out _))
             {
-                throw new BaseException.BadRequestException("invalid_id_format",
-                    "The provided ID is not in a valid GUID format.");
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageCategoryNotFound);
             }
 
             var categoryRepo = await _unitOfWork.GetRepository<Category>()
@@ -111,20 +123,21 @@ namespace HandmadeProductManagement.Services.Service
                 .FirstOrDefaultAsync(c => c.Id == id && c.DeletedTime == null);
 
             if (categoryRepo is null)
-                throw new BaseException.NotFoundException("400", "Category not found");
+
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageCategoryNotFound);
 
             var validationResult = await _updatePromotionValidator.ValidateAsync(category);
-            if(!validationResult.IsValid)
-                throw new ValidationException(validationResult.Errors);
+            if (!validationResult.IsValid)
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), validationResult.Errors.First().ErrorMessage);
 
             // Kiểm tra xem promotionId có tồn tại hay không
+
             var promotionExists = await _unitOfWork.GetRepository<Promotion>()
                 .Entities
                 .AnyAsync(p => p.Id == category.promotionId && p.DeletedTime == null);
-
             if (!promotionExists)
             {
-                throw new BaseException.NotFoundException("404", "Promotion not found");
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessagePromotionNotFound);
             }
 
             categoryRepo.PromotionId = category.promotionId;
@@ -138,13 +151,45 @@ namespace HandmadeProductManagement.Services.Service
         public async Task<bool> SoftDelete(string id)
         {
             var categoryRepo = _unitOfWork.GetRepository<Category>();
-            var categoryEntity = await categoryRepo.Entities.FirstOrDefaultAsync(c => c.Id == id);
-            if (categoryEntity == null)
-                throw new KeyNotFoundException("Category not found");
+            var categoryEntity = await categoryRepo.Entities
+                .FirstOrDefaultAsync(c => c.Id == id)
+                ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageCategoryNotFound);
+
             categoryEntity.DeletedTime = DateTime.UtcNow;
             await categoryRepo.UpdateAsync(categoryEntity);
             await _unitOfWork.SaveAsync();
             return true;
         }
+
+        public async Task<bool> RestoreCategory(string id, string userId)
+        {
+            var categoryRepo = _unitOfWork.GetRepository<Category>();
+            var categoryEntity = await categoryRepo.Entities.FirstOrDefaultAsync(x => x.Id == id);
+
+            // Check if the category exists and has been deleted
+            if (categoryEntity == null || categoryEntity.DeletedBy == null && !categoryEntity.DeletedTime.HasValue)
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageCategoryNotFound);
+
+            // Recover the category
+            categoryEntity.DeletedTime = null;
+            categoryEntity.DeletedBy = null;
+            categoryEntity.LastUpdatedBy = userId;
+
+            await categoryRepo.UpdateAsync(categoryEntity);
+            await _unitOfWork.SaveAsync();
+
+            return true;
+        }
+
+        public async Task<IList<CategoryDto>> GetAllDeleted()
+        {
+            var deletedCategories = await _unitOfWork.GetRepository<Category>().Entities
+                .Include(c => c.Promotion)
+                .Where(c => c.DeletedTime != null)
+                .ToListAsync();
+            return _mapper.Map<IList<CategoryDto>>(deletedCategories);
+        }
+
+
     }
 }

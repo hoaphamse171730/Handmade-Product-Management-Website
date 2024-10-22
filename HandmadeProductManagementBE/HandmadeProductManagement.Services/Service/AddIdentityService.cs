@@ -21,7 +21,7 @@ public static class AddIdentityService
             .AddEntityFrameworkStores<DatabaseContext>();
 
         var key = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(config["TokenKey"]));
+            Encoding.UTF8.GetBytes(s: config["TokenKey"] ?? string.Empty));
 
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(opt =>
@@ -40,7 +40,7 @@ public static class AddIdentityService
                         //fixed token key
                         var accessToken = context.Request.Query["access_token"];
                         var path = context.HttpContext.Request.Path;
-                        if (!string.IsNullOrEmpty(accessToken) && (path.StartsWithSegments("/chat")))
+                        if (!string.IsNullOrWhiteSpace(accessToken) && (path.StartsWithSegments("/chat")))
                         {
                             context.Token = accessToken;
                         }

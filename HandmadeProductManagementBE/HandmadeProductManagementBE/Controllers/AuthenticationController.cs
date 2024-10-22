@@ -17,9 +17,9 @@ namespace HandmadeProductManagementAPI.Controllers;
 [Route("api/[controller]")]
 [ApiController]
 public class AuthenticationController(
-    UserManager<ApplicationUser> userManager,
-    TokenService tokenService,
-    IEmailService emailService,
+    /*UserManager<ApplicationUser> userManager,*/
+    /*TokenService tokenService,*/
+    /*IEmailService emailService,*/
     IAuthenticationService authenticationService
 )
     : ControllerBase

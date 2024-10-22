@@ -1,4 +1,6 @@
 ﻿using Firebase.Storage;
+using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.Core.Constants;
 
 namespace HandmadeProductManagement.Services.Service
 {
@@ -16,9 +18,18 @@ namespace HandmadeProductManagement.Services.Service
                 memoryStream.Position = 0; 
 
                 string[] data = fileName.Split('.');
-                string mediaType = data.Length > 1 ? data[1] : "jpg"; 
-                fileName = Guid.NewGuid().ToString() + "." + mediaType; 
+                string mediaType = data.Length > 1 ? data[1].ToLower() : "jpg";
+                string[] validImageExtensions = { "jpg", "jpeg", "png", "gif", "bmp", "tiff", "webp" };
 
+
+                if (!validImageExtensions.Contains(mediaType))
+                {
+                    throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Only Image file allowed");
+                }
+
+                fileName = Guid.NewGuid().ToString() + "." + mediaType;
+
+                
                 var task = new FirebaseStorage(_bucketName)
                     .Child($"product-Image/{fileName}")
                     .PutAsync(memoryStream);

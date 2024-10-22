@@ -22,10 +22,10 @@ public static class IdentityServiceExtensions
             opt.User.RequireUniqueEmail = false;
         })
         .AddDefaultTokenProviders() 
-        .AddEntityFrameworkStores<DatabaseContext>();  
+        .AddEntityFrameworkStores<DatabaseContext>();
 
         var key = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(config["TokenKey"]!));
+            Encoding.UTF8.GetBytes(s: config["TokenKey"] ?? string.Empty));
 
         services.AddAuthentication(options =>
         {
@@ -37,7 +37,7 @@ public static class IdentityServiceExtensions
             options.TokenValidationParameters = new TokenValidationParameters
             {
                 ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["TokenKey"])),
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["TokenKey"] ?? string.Empty)),
                 ValidateIssuer = false,
                 ValidateAudience = false,
                 RoleClaimType = ClaimTypes.Role,  // Ensure this matches your token's role claim

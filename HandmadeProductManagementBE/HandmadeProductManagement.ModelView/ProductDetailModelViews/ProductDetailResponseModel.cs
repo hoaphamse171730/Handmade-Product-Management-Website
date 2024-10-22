@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace HandmadeProductManagement.ModelViews.ProductDetailModelViews
+﻿namespace HandmadeProductManagement.ModelViews.ProductDetailModelViews
 {
     public class ProductDetailResponseModel
     {
@@ -20,6 +14,6 @@ namespace HandmadeProductManagement.ModelViews.ProductDetailModelViews
         public int SoldCount { get; set; }
         public List<string> ProductImageUrls { get; set; }
         public List<ProductItemDetailModel> ProductItems { get; set; }
-        public PromotionDetailModel Promotion { get; set; }
+        public PromotionDetailModel? Promotion { get; set; }
     }
 }

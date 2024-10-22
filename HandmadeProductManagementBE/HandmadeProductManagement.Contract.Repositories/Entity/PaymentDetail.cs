@@ -1,7 +1,4 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
-using HandmadeProductManagement.Core.Base;
-using HandmadeProductManagement.Core.Utils;
+﻿using HandmadeProductManagement.Core.Base;
 
 
 namespace HandmadeProductManagement.Contract.Repositories.Entity

@@ -20,12 +20,13 @@ namespace HandmadeProductManagementAPI.Controllers
             _productItemService = productItemService;
         }
 
+        [Authorize(Roles = "Seller")]
         [HttpPost]
         [Route("{productId}/items")]
         public async Task<IActionResult> CreateProductItem(string productId, [FromBody] List<VariationCombinationDto> variationCombinations)
         {
 
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
             var response = new BaseResponse<bool>
             {
                 Code = "Success",
@@ -41,7 +42,7 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpPatch("{id}")]
         public async Task<IActionResult> UpdateProductItem(string id, [FromBody] ProductItemForUpdateDto updatedProductItemDto)
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
             var response = new BaseResponse<bool>
             {
                 Code = "Success",
@@ -57,7 +58,7 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> SoftDeleteProductItem(string id)
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
 
             var response = new BaseResponse<bool>
             {
@@ -65,6 +66,38 @@ namespace HandmadeProductManagementAPI.Controllers
                 StatusCode = StatusCodeHelper.OK,
                 Message = $"Product Item with ID {id} has been successfully deleted.",
                 Data = await _productItemService.Delete(id, userId)
+            };
+            return Ok(response);
+        }
+
+        [Authorize]
+        // POST: api/ProductItem/restore/{id}
+        [HttpPatch("restore/{id}")]
+        public async Task<IActionResult> RestoreProductItem(string id)
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
+
+            var response = new BaseResponse<bool>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = $"Product Item with ID {id} has been successfully restored.",
+                Data = await _productItemService.Restore(id, userId)
+            };
+            return Ok(response);
+        }
+
+        [Authorize(Roles = "Seller, Admin")]
+        // GET: api/ProductItem/deleted
+        [HttpGet("deleted")]
+        public async Task<IActionResult> GetAllDeletedProductItems()
+        {
+            var response = new BaseResponse<List<ProductItemDto>>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Retrieved all deleted product items successfully.",
+                Data = await _productItemService.GetAllDeletedAsync()
             };
             return Ok(response);
         }

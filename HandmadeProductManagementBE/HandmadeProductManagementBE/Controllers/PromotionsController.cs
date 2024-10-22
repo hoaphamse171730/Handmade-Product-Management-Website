@@ -5,6 +5,7 @@ using HandmadeProductManagement.ModelViews.PromotionModelViews;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using HandmadeProductManagement.Services.Service;
+using System.ComponentModel.DataAnnotations;
 
 namespace HandmadeProductManagementAPI.Controllers
 {
@@ -29,8 +30,22 @@ namespace HandmadeProductManagementAPI.Controllers
             };
             return Ok(response);
         }
-        
-        
+
+        [HttpGet("GetDeletedPromotions")]
+        [Authorize(Roles ="Admin")]
+        public async Task<IActionResult> GetDeletedPromotions(int pageNumber = 1, int pageSize = 10)
+        {
+            var result = await _promotionService.GetAllDeleted(pageNumber, pageSize);
+            var response = new BaseResponse<IList<PromotionDto>>
+            {
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Deleted promotions retrieved successfully.",
+                Data = result
+            };
+            return Ok(response);
+        }
+
         [HttpGet( "GetExpiredPromotions")]
         public async Task<IActionResult> GetExpiredPromotions(int pageNumber = 1, int pageSize = 10)
         {
@@ -63,7 +78,7 @@ namespace HandmadeProductManagementAPI.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreatePromotion(PromotionForCreationDto promotionForCreation)
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
             var result = await _promotionService.Create(promotionForCreation, userId);
             var response = new BaseResponse<bool>
             {
@@ -75,11 +90,11 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
-        [HttpPut("{id}")]
+        [HttpPatch("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdatePromotion(string id, PromotionForUpdateDto promotionForUpdate)
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
             var result = await _promotionService.Update(id, promotionForUpdate, userId);
             var response = new BaseResponse<bool>
             {
@@ -101,6 +116,22 @@ namespace HandmadeProductManagementAPI.Controllers
                 Code = "200",
                 StatusCode = StatusCodeHelper.OK,
                 Message = "Promotion soft-deleted successfully.",
+                Data = result
+            };
+            return Ok(response);
+        }
+        [Authorize(Roles = "Admin")]
+        [HttpPut("{promotionId}/recover")]
+        public async Task<IActionResult> RecoverDeletedReview([Required] string promotionId)
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
+
+            var result = await _promotionService.RecoverDeletedPromotionAsync(promotionId, Guid.Parse(userId));
+            var response = new BaseResponse<bool>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Promotion recovered successfully.",
                 Data = result
             };
             return Ok(response);
