@@ -6,6 +6,8 @@ using HandmadeProductManagement.Repositories.Context;
 using HandmadeProductManagement.Repositories.Entity;
 using HandmadeProductManagement.Services;
 using HandmadeProductManagement.Services.Service;
+using HandmadeProductManagement.Core.Store;
+using HandmadeProductManagementAPI.Extensions;
 
 namespace HandmadeProductManagementBE.API
 {

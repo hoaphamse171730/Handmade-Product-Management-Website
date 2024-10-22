@@ -1,4 +1,7 @@
+using HandmadeProductManagement.Core.Store;
+
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddScoped<ApiResponseHelper>();
 
 // Add services to the container.
 builder.Services.AddRazorPages();

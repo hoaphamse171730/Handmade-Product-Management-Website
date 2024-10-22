@@ -1,5 +1,9 @@
 using HandmadeProductManagement.Contract.Repositories.Entity;
+using HandmadeProductManagement.Core.Constants;
+using HandmadeProductManagement.Core.Store;
+using HandmadeProductManagement.ModelViews.ProductModelViews;
 using HandmadeProductManagementBE;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Text.Json;
 
@@ -7,28 +11,26 @@ namespace UI.Pages
 {
     public class IndexModel : PageModel
     {
-        private readonly HttpClient _httpClient;
+        private readonly ApiResponseHelper _apiResponseHelper;
 
-        public IndexModel(HttpClient httpClient)
+        public IndexModel(ApiResponseHelper apiResponseHelper)
         {
-            _httpClient = httpClient;
+            _apiResponseHelper = apiResponseHelper ?? throw new ArgumentNullException(nameof(apiResponseHelper));
         }
-        public List<WeatherForecast> WeatherForecasts { get; set; }
 
-        public async Task OnGet()
+        public List<ProductSearchVM>? products { get; set; }
+
+        public async Task OnGetAsync()
         {
-            var response = await _httpClient.GetAsync("https://localhost:7159/weatherforecast");
-            if (response.IsSuccessStatusCode)
+            var response = await _apiResponseHelper.GetAsync<List<ProductSearchVM>>("https://localhost:7159/api/product/search");
+
+            if (response.StatusCode == StatusCodeHelper.OK && response.Data != null)
             {
-                var responseData = await response.Content.ReadAsStringAsync();
-                WeatherForecasts = JsonSerializer.Deserialize<List<WeatherForecast>>(responseData, new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                });
+                products = response.Data;
             }
             else
             {
-                WeatherForecasts = [];
+                ModelState.AddModelError(string.Empty, response.Message ?? "An error occurred while fetching weather forecasts.");
             }
         }
     }

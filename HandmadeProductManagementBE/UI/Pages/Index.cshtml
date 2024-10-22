@@ -8,7 +8,7 @@
     <h1>Welcome to the Handmade Product Management System</h1>
     <p>Use the navigation to interact with various functionalities.</p>
 
-    @if (Model.WeatherForecasts == null || !Model.WeatherForecasts.Any())
+    @if (Model.products == null || !Model.products.Any())
     {
         <p>No WeatherForecasts Found</p>
     }
@@ -17,20 +17,16 @@
         <table>
             <thead>
                 <tr>
-                    <th>Date</th>
-                    <th>Temperature (C*)</th>
-                    <th>Temperature (F*)</th>
-                    <th>Summary</th>
+                    <th>Name</th>
+                    <th>Rating</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach (var weather in Model.WeatherForecasts)
+                @foreach (var product in Model.products)
                 {
                     <tr>
-                        <td>@weather.Date</td>
-                        <td>@weather.TemperatureC</td>
-                        <td>@weather.TemperatureF</td>
-                        <td>@weather.Summary</td>
+                        <td>@product.Name</td>
+                        <td>@product.Rating</td>
                     </tr>
                 }
             </tbody>

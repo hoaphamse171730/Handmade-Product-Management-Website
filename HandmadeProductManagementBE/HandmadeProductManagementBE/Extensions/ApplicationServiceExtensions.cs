@@ -41,6 +41,7 @@ using HandmadeProductManagement.Validation.UserInfo;
 using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.ModelViews.CartItemModelViews;
 using HandmadeProductManagement.Validation.CartItem;
+using HandmadeProductManagement.Core.Store;
 
 namespace HandmadeProductManagementAPI.Extensions;
 
@@ -64,10 +65,12 @@ public static class ApplicationServiceExtensions
                 policy
                     .AllowAnyHeader()
                     .AllowAnyMethod()
-                    .AllowCredentials()
-                    .WithOrigins("https://localhost:7159", "https://localhost:7072");
+                    .AllowCredentials();
             });
         });
+        services.AddScoped<ApiResponseHelper>();
+
+        services.AddHttpClient<ApiResponseHelper>();
 
         services.AddExceptionHandler<CustomExceptionHandler>();
 

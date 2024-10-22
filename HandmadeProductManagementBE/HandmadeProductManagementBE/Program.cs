@@ -1,4 +1,5 @@
 ﻿using HandmadeProductManagement.Contract.Repositories.Entity;
+using HandmadeProductManagement.Core.Store;
 using HandmadeProductManagementAPI.Extensions;
 using HandmadeProductManagementAPI.Middlewares;
 using HandmadeProductManagementBE.API;
@@ -33,6 +34,7 @@ builder.Services.AddConfig(builder.Configuration);
 builder.Services.RegisterMapsterConfiguration();
 builder.Services.ConfigureFluentValidation();
 builder.Services.AddFireBaseServices();
+builder.Services.AddHttpClient<ApiResponseHelper>();
 
 builder.Services.ConfigureSwaggerServices();
 
