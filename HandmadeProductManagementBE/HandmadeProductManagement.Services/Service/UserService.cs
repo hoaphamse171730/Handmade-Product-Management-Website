@@ -305,7 +305,7 @@ namespace HandmadeProductManagement.Services.Service
 
             if (shopID == null || !shopID.Any())
             {
-                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageUserNotFound);
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageShopNotFound);
             }
 
             var twoDaysAgo = DateTime.UtcNow.AddDays(-2); // Use UTC for consistency
@@ -346,7 +346,7 @@ namespace HandmadeProductManagement.Services.Service
 
             if (orders == null || !orders.Any())
             {
-                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageUserNotFound); // Use constant for user not found
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageShopNotFound); // Use constant for user not found
             }
 
             var twoDaysAgo = DateTime.UtcNow.AddDays(-2); // Use UTC for consistency
