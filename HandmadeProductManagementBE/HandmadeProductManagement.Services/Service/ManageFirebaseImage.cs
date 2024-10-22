@@ -10,38 +10,30 @@ namespace HandmadeProductManagement.Services.Service
 
         public async Task<string> UploadFileAsync(Stream fileStream, string fileName)
         {
-            try
+            using var memoryStream = new MemoryStream();
+            await fileStream.CopyToAsync(memoryStream);
+            memoryStream.Position = 0;
+
+            string[] data = fileName.Split('.');
+            string mediaType = data.Length > 1 ? data[1].ToLower() : "jpg";
+            string[] validImageExtensions = { "jpg", "jpeg", "png", "gif", "bmp", "tiff", "webp" };
+
+
+            if (!validImageExtensions.Contains(mediaType))
             {
-
-                using var memoryStream = new MemoryStream();
-                await fileStream.CopyToAsync(memoryStream);
-                memoryStream.Position = 0; 
-
-                string[] data = fileName.Split('.');
-                string mediaType = data.Length > 1 ? data[1].ToLower() : "jpg";
-                string[] validImageExtensions = { "jpg", "jpeg", "png", "gif", "bmp", "tiff", "webp" };
-
-
-                if (!validImageExtensions.Contains(mediaType))
-                {
-                    throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Only Image file allowed");
-                }
-
-                fileName = Guid.NewGuid().ToString() + "." + mediaType;
-
-                
-                var task = new FirebaseStorage(_bucketName)
-                    .Child($"product-Image/{fileName}")
-                    .PutAsync(memoryStream);
-
-                var downloadUrl = await task; 
-
-                return downloadUrl; 
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Only Image file allowed");
             }
-            catch (Exception ex)
-            {
-                throw new Exception($"Error uploading file to Firebase: {ex.Message}");
-            }
+
+            fileName = Guid.NewGuid().ToString() + "." + mediaType;
+
+
+            var task = new FirebaseStorage(_bucketName)
+                .Child($"product-Image/{fileName}")
+                .PutAsync(memoryStream);
+
+            var downloadUrl = await task;
+
+            return downloadUrl;
         }
 
         public async Task DeleteFileAsync(string fileUrl)
