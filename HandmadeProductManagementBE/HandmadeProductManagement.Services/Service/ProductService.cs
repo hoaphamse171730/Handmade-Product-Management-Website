@@ -422,6 +422,7 @@ namespace HandmadeProductManagement.Services.Service
                             (!p.DeletedTime.HasValue || p.DeletedBy == null))
                 .Include(p => p.ProductImages)
                 .Include(p => p.ProductItems)
+                .OrderByDescending(p => p.CreatedTime)
                 .AsQueryable();
 
             var totalItems = await productsQuery.CountAsync();

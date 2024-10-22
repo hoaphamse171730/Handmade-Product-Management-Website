@@ -30,7 +30,8 @@ namespace HandmadeProductManagement.Services.Service
         public async Task<IList<CancelReasonDto>> GetAll()
         {
             IQueryable<CancelReason> query = _unitOfWork.GetRepository<CancelReason>().Entities
-                .Where(cr => !cr.DeletedTime.HasValue || cr.DeletedBy == null);
+                .Where(cr => !cr.DeletedTime.HasValue || cr.DeletedBy == null)
+                .OrderByDescending(cr => cr.CreatedTime); // Sort by CreatedBy in descending order
 
             var cancelReasons = await query
                 .Select(cancelReason => new CancelReasonDto
@@ -41,7 +42,7 @@ namespace HandmadeProductManagement.Services.Service
                 })
                 .ToListAsync();
 
-            return _mapper.Map<IList<CancelReasonDto>>(cancelReasons);
+            return cancelReasons;
         }
 
         // Create a new cancel reason
