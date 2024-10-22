@@ -148,6 +148,7 @@ namespace HandmadeProductManagement.Services.Service
                     ci.Id,
                     ci.ProductItemId,
                     ci.ProductQuantity,
+                    ci.CreatedTime, // Include CreatedBy for sorting
                     ShopId = ci.ProductItem!.Product!.Shop!.Id,
                     ShopName = ci.ProductItem.Product.Shop.Name,
                     UnitPrice = ci.ProductItem.Price,
@@ -157,6 +158,7 @@ namespace HandmadeProductManagement.Services.Service
                         .Select(pc => pc.VariationOption!.Value)
                         .ToList()
                 })
+                .OrderByDescending(ci => ci.CreatedTime) // Sort by CreatedBy in descending order
                 .ToListAsync();
 
             // Group cart items by ShopId and ShopName

@@ -8,7 +8,6 @@ using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Common;
 using HandmadeProductManagement.Core.Constants;
-using HandmadeProductManagement.Core.Utils;
 using HandmadeProductManagement.ModelViews.PromotionModelViews;
 using HandmadeProductManagement.Repositories.Entity;
 using Microsoft.EntityFrameworkCore;
@@ -44,6 +43,7 @@ namespace HandmadeProductManagement.Services.Service
 
             var promotions = await _unitOfWork.GetRepository<Promotion>().Entities
                 .Where(p => p.DeletedTime == null)
+                .OrderByDescending(p => p.CreatedTime) // Sorting by CreatedTime in descending order
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
@@ -61,13 +61,13 @@ namespace HandmadeProductManagement.Services.Service
 
             var deletedPromotions = await _unitOfWork.GetRepository<Promotion>().Entities
                 .Where(p => p.DeletedTime != null)
+                .OrderByDescending(p => p.CreatedTime) // Sorting by CreatedTime in descending order
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
 
             return _mapper.Map<IList<PromotionDto>>(deletedPromotions);
         }
-
 
         public async Task<IList<PromotionDto>> GetExpiredPromotions(int pageNumber, int pageSize)
         {
@@ -79,11 +79,13 @@ namespace HandmadeProductManagement.Services.Service
 
             var promotions = await _unitOfWork.GetRepository<Promotion>().Entities
                 .Where(p => p.DeletedTime == null && p.EndDate < DateTime.UtcNow)
+                .OrderByDescending(p => p.CreatedTime) // Sorting by CreatedTime in descending order
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
 
             return _mapper.Map<IList<PromotionDto>>(promotions);
         }
-
         public async Task<PromotionDto> GetById(string id)
         {
             if (!Guid.TryParse(id, out _))
@@ -139,16 +141,30 @@ namespace HandmadeProductManagement.Services.Service
                 ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(),
                     Constants.ErrorMessagePromotionNotFound);
 
-            var isNameDuplicated = await _unitOfWork.GetRepository<Promotion>().Entities
-                .AnyAsync(p => p.Name == promotion.Name && p.DeletedTime == null);
+            var isNameDuplicated = promotionEntity.Name == promotion.Name;
 
             if (isNameDuplicated)
-                throw new ValidationException(new List<ValidationFailure>
-        {
-            new(nameof(promotion.Name), Constants.ErrorMessageNameInUse)
-        });
+                throw new ValidationException(
+            [
+                new(nameof(promotion.Name), Constants.ErrorMessageNameInUse)
+            ]);
 
-            _mapper.Map(promotion, promotionEntity);
+            // Update fields only if they are not null or provided
+            if (!string.IsNullOrEmpty(promotion.Name))
+                promotionEntity.Name = promotion.Name;
+
+            if (!string.IsNullOrEmpty(promotion.Description))
+                promotionEntity.Description = promotion.Description;
+
+            if (promotion.DiscountRate.HasValue)
+                promotionEntity.DiscountRate = promotion.DiscountRate.Value;
+
+            if (promotion.StartDate.HasValue)
+                promotionEntity.StartDate = promotion.StartDate.Value;
+
+            if (promotion.EndDate.HasValue)
+                promotionEntity.EndDate = promotion.EndDate.Value;
+
             promotionEntity.LastUpdatedTime = DateTime.UtcNow;
             promotionEntity.LastUpdatedBy = userId;
 

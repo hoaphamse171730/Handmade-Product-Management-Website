@@ -433,6 +433,23 @@ namespace HandmadeProductManagement.Services.Service
             existingReview.LastUpdatedBy = userId.ToString();
 
             await _unitOfWork.GetRepository<Review>().UpdateAsync(existingReview);
+
+            // Check if there's an associated reply to recover
+            var reply = await _unitOfWork.GetRepository<Reply>()
+                                         .Entities
+                                         .FirstOrDefaultAsync(r => r.ReviewId == reviewId && r.DeletedTime != null);
+
+            if (reply != null)
+            {
+                // Recover the reply
+                reply.DeletedTime = null;
+                reply.DeletedBy = null;
+                reply.LastUpdatedTime = vietnamTime;
+                reply.LastUpdatedBy = reply.ShopId;
+
+                await _unitOfWork.GetRepository<Reply>().UpdateAsync(reply);
+            }
+
             await _unitOfWork.SaveAsync();
 
             // Update product rating
