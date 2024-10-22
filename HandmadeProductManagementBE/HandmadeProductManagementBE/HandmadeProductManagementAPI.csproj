@@ -29,6 +29,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.10" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.8">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -50,11 +51,21 @@
     <ProjectReference Include="..\HandmadeProductManagement.Services\HandmadeProductManagement.Services.csproj" />
     <ProjectReference Include="..\HandmadeProductManagement.Validation\HandmadeProductManagement.Validation.csproj" />
   </ItemGroup>
-
+	
+	<ItemGroup>
+		<None Update="appsettings.Development.json">
+			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+		</None>
+	</ItemGroup>
+	
   <ItemGroup>
     <Content Update="handmade-product-bde7a-firebase-adminsdk-g3y5r-fd05db8476.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+	
+  <ItemGroup>
+    <Folder Include="Properties\ServiceDependencies\" />
   </ItemGroup>
 
 </Project>
