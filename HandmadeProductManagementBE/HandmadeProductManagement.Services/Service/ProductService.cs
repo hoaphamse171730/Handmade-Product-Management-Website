@@ -472,7 +472,7 @@ namespace HandmadeProductManagement.Services.Service
                     .Select(g => new VariationForProductCreationDto
                     {
                         Id = g.First().VariationOption!.VariationId, // Safe to access due to null check
-                        VariationOptionIds = g.Select(pc => pc.VariationOptionId).ToList()
+                        VariationOptionIds = g.Select(pc => pc.VariationOptionId).Distinct().ToList()
                     })
                     .ToList();
 
