@@ -1,0 +1,41 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+<div class="text-center">
+    <h1>Welcome to the Handmade Product Management System</h1>
+    <p>Use the navigation to interact with various functionalities.</p>
+
+    @if (Model.WeatherForecasts == null || !Model.WeatherForecasts.Any())
+    {
+        <p>No WeatherForecasts Found</p>
+    }
+    else
+    {
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Temperature (C*)</th>
+                    <th>Temperature (F*)</th>
+                    <th>Summary</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var weather in Model.WeatherForecasts)
+                {
+                    <tr>
+                        <td>@weather.Date</td>
+                        <td>@weather.TemperatureC</td>
+                        <td>@weather.TemperatureF</td>
+                        <td>@weather.Summary</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+    }
+
+</div>

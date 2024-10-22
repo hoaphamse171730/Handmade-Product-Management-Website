@@ -65,7 +65,7 @@ public static class ApplicationServiceExtensions
                     .AllowAnyHeader()
                     .AllowAnyMethod()
                     .AllowCredentials()
-                    .WithOrigins("https://localhost:7159");
+                    .WithOrigins("https://localhost:7159", "https://localhost:7072");
             });
         });
 
