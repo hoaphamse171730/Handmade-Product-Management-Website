@@ -1,0 +1,15 @@
+{
+  "dependencies": {
+    "apis1": {
+      "resourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/Microsoft.ApiManagement/service/HandmadeProductManagementAPIapi/apis/HandmadeProductManagementAPI",
+      "type": "apis.azure"
+    },
+    "mssql1": {
+      "serviceConnectorResourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/Microsoft.Web/sites/handmadeProductManagement/providers/Microsoft.ServiceLinker/linkers/BloggingDatabase_CF5F10AB0F",
+      "secretStore": "AzureAppSettings",
+      "resourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/Microsoft.Sql/servers/handmadeproductmanagementapidbserver/databases/HandmadeProductManagementDB",
+      "type": "mssql.azure",
+      "connectionId": "BloggingDatabase"
+    }
+  }
+}
