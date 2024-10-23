@@ -18,7 +18,7 @@ namespace UI.Pages
 
         public List<TopSellingProducts> Top10SellingProducts { get; set; }
         public List<ProductForDashboard> Top10NewProducts { get; set; }
-        public List<CategoryDto> Categories { get; set; } = new List<CategoryDto>();
+        public List<CategoryDto> Categories { get; set; } = [];
 
         public void OnGet()
         {
