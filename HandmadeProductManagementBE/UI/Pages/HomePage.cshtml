@@ -4,49 +4,15 @@
     ViewData["Title"] = "Home page";
 }
 
-<div>
-    <!-- Top 10 Selling Products Swiper -->
-    <div class="swiper-container selling-products-swiper mb-10">
-        <h2 class="mb-4 text-center text-lg font-bold text-blue-600">Top 10 Selling Products</h2>
-        <div class="swiper-wrapper">
-            @foreach (var product in Model.Top10SellingProducts)
-            {
-                <div class="swiper-slide">
-                    <div class="text-center">
-                        <img class="mx-auto mb-2 h-40 w-40" src="@product.ImageUrls.FirstOrDefault()" alt="@product.Name" />
-                        <h3 class="text-md font-semibold">@product.Name</h3>
-                        <p class="text-sm text-gray-600">@product.Price $</p>
-                    </div>
-                </div>
-            }
-        </div>
-        <!-- Pagination -->
-        <div class="swiper-pagination"></div>
-        <!-- Navigation -->
-        <div class="swiper-button-next"></div>
-        <div class="swiper-button-prev"></div>
+<div class="flex px-40">
+    <div class="mb-10 w-1/2 overflow-hidden bg-orange-300">
+        @await Html.PartialAsync("_Top10SellingProducts", Model.Top10SellingProducts)
     </div>
 
-    <!-- Top 10 New Products Swiper -->
-    <div class="swiper-container new-products-swiper">
-        <h2 class="mb-4 text-center text-lg font-bold text-blue-600">Top 10 New Products</h2>
-        <div class="swiper-wrapper">
-            @foreach (var product in Model.Top10NewProducts)
-            {
-                <div class="swiper-slide">
-                    <div class="text-center">
-                        <img class="mx-auto mb-2 h-40 w-40" src="@product.ImageUrls.FirstOrDefault()" alt="@product.Name" />
-                        <h3 class="text-md font-semibold">@product.Name</h3>
-                        <p class="text-sm text-gray-600">@product.Price $</p>
-                    </div>
-                </div>
-            }
-        </div>
-        <!-- Pagination -->
-        <div class="swiper-pagination"></div>
-        <!-- Navigation -->
-        <div class="swiper-button-next"></div>
-        <div class="swiper-button-prev"></div>
+    <div class="h-10"></div>
+
+    <div class="w-1/2 overflow-hidden">
+        @await Html.PartialAsync("_Top10NewProducts", Model.Top10NewProducts)
     </div>
 </div>
 
@@ -56,6 +22,7 @@
         var sellingSwiper = new Swiper('.selling-products-swiper', {
             slidesPerView: 1,
             spaceBetween: 30,
+            loop: true,
             pagination: {
                 el: '.selling-products-swiper .swiper-pagination',
                 clickable: true,
@@ -72,6 +39,7 @@
         var newProductsSwiper = new Swiper('.new-products-swiper', {
             slidesPerView: 1,
             spaceBetween: 30,
+            loop: true,
             pagination: {
                 el: '.new-products-swiper .swiper-pagination',
                 clickable: true,
