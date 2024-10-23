@@ -1,0 +1,17 @@
+﻿@page
+@model UI.Pages.HomePageModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+<div class="flex flex-row items-center justify-between px-40">
+    <div class="mr-10 text-center">
+        <h2 class="mb-4 text-lg font-bold text-blue-600">Top 10 Selling Products</h2>
+        @await Html.PartialAsync("_Top10SellingProducts", Model.Top10SellingProducts)
+    </div>
+
+    <div class="text-center">
+        <h2 class="mb-4 text-lg font-bold text-blue-600">Top 10 New Products</h2>
+        @await Html.PartialAsync("_Top10NewProducts", Model.Top10NewProducts)
+    </div>
+</div>
