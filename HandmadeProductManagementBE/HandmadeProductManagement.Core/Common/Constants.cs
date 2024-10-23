@@ -11,6 +11,11 @@ public static class Constants
     public const string DateTimeFormat = "dd/MM/yyyy HH:mm";
 
     #endregion
+    #region SortOption
+
+    #endregion
+    public const string SortByPrice = "SortByPrice";
+    public const string SortByRating = "SortByRating";
 
     #region User Status
 
