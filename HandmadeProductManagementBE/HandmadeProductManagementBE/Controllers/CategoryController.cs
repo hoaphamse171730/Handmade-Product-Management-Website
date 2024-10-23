@@ -19,7 +19,6 @@ namespace HandmadeProductManagementAPI.Controllers
         public CategoryController(ICategoryService categoryService) => _categoryService = categoryService;
 
         [HttpGet]
-        [Authorize]
         public async Task<IActionResult> GetCategories()
         {
             var categories = await _categoryService.GetAll();
