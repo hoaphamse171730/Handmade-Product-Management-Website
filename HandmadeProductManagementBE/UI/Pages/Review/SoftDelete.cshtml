@@ -1,0 +1,15 @@
+﻿@page "{reviewId}"
+@model UI.Pages.Review.SoftDeleteModel
+@{
+    ViewData["Title"] = "Soft Delete Review";
+}
+
+<h2>Soft Delete Review</h2>
+
+<div>
+    <h4>Are you sure you want to soft delete this review?</h4>
+    <form method="post">
+        <button type="submit" class="btn btn-danger">Yes, Soft Delete</button>
+        <a asp-page="Index" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
