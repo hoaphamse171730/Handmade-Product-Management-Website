@@ -448,7 +448,7 @@ namespace HandmadeProductManagement.Services.Service
                 { Constants.OrderStatusProcessing, new List<string> { Constants.OrderStatusDelivering } },
                 { Constants.OrderStatusDelivering, new List<string> { Constants.OrderStatusShipped, Constants.OrderStatusDeliveryFailed } },
                 { Constants.OrderStatusDeliveryFailed, new List<string> { Constants.OrderStatusOnHold } },
-                { Constants.OrderStatusOnHold, new List<string> { Constants.OrderStatusDeliveringRetry, Constants.OrderStatusRefundRequested } },
+                { Constants.OrderStatusOnHold, new List<string> { Constants.OrderStatusDeliveringRetry, Constants.OrderStatusRefundRequested, Constants.OrderStatusReturning } },
                 { Constants.OrderStatusRefundRequested, new List<string> { Constants.OrderStatusRefundDenied, Constants.OrderStatusRefundApprove } },
                 { Constants.OrderStatusRefundApprove, new List<string> { Constants.OrderStatusReturning } },
                 { Constants.OrderStatusReturning, new List<string> { Constants.OrderStatusReturnFailed, Constants.OrderStatusReturned } },

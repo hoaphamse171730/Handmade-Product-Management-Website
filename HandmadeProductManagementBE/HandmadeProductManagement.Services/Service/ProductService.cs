@@ -10,6 +10,7 @@ using FluentValidation;
 using HandmadeProductManagement.ModelViews.VariationCombinationModelViews;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.Core.Common;
+using HandmadeProductManagement.ModelViews.VariationModelViews;
 
 namespace HandmadeProductManagement.Services.Service
 {
@@ -422,6 +423,7 @@ namespace HandmadeProductManagement.Services.Service
                             (!p.DeletedTime.HasValue || p.DeletedBy == null))
                 .Include(p => p.ProductImages)
                 .Include(p => p.ProductItems)
+                .OrderByDescending(p => p.CreatedTime)
                 .AsQueryable();
 
             var totalItems = await productsQuery.CountAsync();
@@ -448,10 +450,35 @@ namespace HandmadeProductManagement.Services.Service
         public async Task<ProductDto> GetById(string id)
         {
             var product = await _unitOfWork.GetRepository<Product>().Entities
+                .Include(p => p.ProductItems)
+                    .ThenInclude(pi => pi.ProductConfigurations)
+                        .ThenInclude(pc => pc.VariationOption)
+                            .ThenInclude(vo => vo!.Variation)
                 .FirstOrDefaultAsync(p => p.Id == id && (!p.DeletedTime.HasValue || p.DeletedBy == null))
-                ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString() ,Constants.ErrorMessageProductNotFound);
+                ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageProductNotFound);
 
+            // Map the basic properties of the product
             var productToReturn = _mapper.Map<ProductDto>(product);
+
+            // Check if ProductItems is not null and has any items
+            if (product.ProductItems != null && product.ProductItems.Any())
+            {
+                // Map variations if ProductConfigurations and VariationOption are available
+                var variations = product.ProductItems
+                    .Where(pi => pi.ProductConfigurations != null && pi.ProductConfigurations.Any()) // Ensure ProductConfigurations exist
+                    .SelectMany(pi => pi.ProductConfigurations!)
+                    .Where(pc => pc.VariationOption != null && pc.VariationOption.Variation != null) // Ensure VariationOption and Variation are not null
+                    .GroupBy(pc => pc.VariationOption!.VariationId)
+                    .Select(g => new VariationForProductCreationDto
+                    {
+                        Id = g.First().VariationOption!.VariationId, // Safe to access due to null check
+                        VariationOptionIds = g.Select(pc => pc.VariationOptionId).Distinct().ToList()
+                    })
+                    .ToList();
+
+                productToReturn.Variations = variations;
+            }
+
             return productToReturn;
         }
 

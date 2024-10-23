@@ -32,6 +32,7 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [HttpGet("GetDeletedPromotions")]
+        [Authorize(Roles ="Admin")]
         public async Task<IActionResult> GetDeletedPromotions(int pageNumber = 1, int pageSize = 10)
         {
             var result = await _promotionService.GetAllDeleted(pageNumber, pageSize);
@@ -89,7 +90,7 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
-        [HttpPut("{id}")]
+        [HttpPatch("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdatePromotion(string id, PromotionForUpdateDto promotionForUpdate)
         {

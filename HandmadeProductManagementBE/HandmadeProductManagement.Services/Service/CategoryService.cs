@@ -185,5 +185,16 @@ namespace HandmadeProductManagement.Services.Service
 
             return true;
         }
+
+        public async Task<IList<CategoryDto>> GetAllDeleted()
+        {
+            var deletedCategories = await _unitOfWork.GetRepository<Category>().Entities
+                .Include(c => c.Promotion)
+                .Where(c => c.DeletedTime != null)
+                .ToListAsync();
+            return _mapper.Map<IList<CategoryDto>>(deletedCategories);
+        }
+
+
     }
 }
