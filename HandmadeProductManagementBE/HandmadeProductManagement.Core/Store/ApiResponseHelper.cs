@@ -1,4 +1,5 @@
 ﻿using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
@@ -13,15 +14,27 @@ namespace HandmadeProductManagement.Core.Store;
 public class ApiResponseHelper
 {
     private readonly HttpClient _httpClient;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public ApiResponseHelper(HttpClient httpClient)
+    public ApiResponseHelper(HttpClient httpClient, IHttpContextAccessor httpContextAccessor)
     {
         _httpClient = httpClient;
+        _httpContextAccessor = httpContextAccessor;
+    }
+    // Add JWT Authorization header to the HttpClient
+    private void AddAuthorizationHeader()
+    {
+        var token = _httpContextAccessor.HttpContext?.Session.GetString("JwtToken");
+        if (!string.IsNullOrEmpty(token))
+        {
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        }
     }
 
     // Generic method to handle GET requests
     public async Task<BaseResponse<T>> GetAsync<T>(string url)
     {
+        AddAuthorizationHeader();
         var response = await _httpClient.GetAsync(url);
         return await HandleApiResponse<T>(response);
     }
@@ -29,6 +42,8 @@ public class ApiResponseHelper
     // Generic method to handle POST requests
     public async Task<BaseResponse<T>> PostAsync<T>(string url, object payload)
     {
+        AddAuthorizationHeader();
+
         var response = await _httpClient.PostAsJsonAsync(url, payload);
         return await HandleApiResponse<T>(response);
     }
@@ -36,6 +51,7 @@ public class ApiResponseHelper
     // Generic method to handle PUT requests
     public async Task<BaseResponse<T>> PutAsync<T>(string url, object payload)
     {
+        AddAuthorizationHeader();
         var response = await _httpClient.PutAsJsonAsync(url, payload);
         return await HandleApiResponse<T>(response);
     }
@@ -43,6 +59,7 @@ public class ApiResponseHelper
     // Generic method to handle DELETE requests
     public async Task<BaseResponse<T>> DeleteAsync<T>(string url)
     {
+        AddAuthorizationHeader();
         var response = await _httpClient.DeleteAsync(url);
         return await HandleApiResponse<T>(response);
     }
