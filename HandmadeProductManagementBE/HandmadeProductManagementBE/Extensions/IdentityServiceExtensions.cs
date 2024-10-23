@@ -45,7 +45,6 @@ public static class IdentityServiceExtensions
                 ClockSkew = TimeSpan.Zero
             };
         });
-
         //services.AddAuthorization();
         services.AddAuthorization();
         services.AddScoped<TokenService>();

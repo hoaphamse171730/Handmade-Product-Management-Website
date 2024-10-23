@@ -51,11 +51,6 @@ namespace HandmadeProductManagement.Services.Service
                 : _mapper.Map<CategoryDto>(category);
         }
 
-        public async Task<IList<CategoryDto>> GetAllDeleted()
-        {
-            throw new NotImplementedException();
-        }
-
         public async Task<bool> Create(CategoryForCreationDto category)
         {
             var validationResult = await _creationValidator.ValidateAsync(category);

@@ -1,0 +1,32 @@
+﻿<div class="flex min-h-screen w-full items-center justify-center dark:bg-gray-950">
+	<div class="max-w-md rounded-lg bg-white px-8 py-6 shadow-md dark:bg-gray-900">
+		<h1 class="mb-4 text-center text-2xl font-bold dark:text-gray-200">Welcome Back!</h1>
+		<form action="/Login" method="post">
+			<div class="mb-4">
+				<label for="email" class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Email Address</label>
+				<input type="email" id="email" name="email" class="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="your@email.com" required>
+			</div>
+			<div class="mb-4">
+				<label for="password" class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
+				<input type="password" id="password" name="password" class="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="Enter your password" required>
+				<a href="#"
+				   class="text-xs text-gray-600 hover:text-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+					Forgot
+					Password?
+				</a>
+			</div>
+			<div class="mb-4 flex items-center justify-between">
+				<div class="flex items-center">
+					<input type="checkbox" id="remember" name="remember" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 focus:outline-none" checked>
+					<label for="remember" class="ml-2 block text-sm text-gray-700 dark:text-gray-300">Remember me</label>
+				</div>
+				<a href="#"
+				   class="text-xs text-indigo-500 hover:text-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+					Create
+					Account
+				</a>
+			</div>
+			<button onclick="alert('hello')" type="submit" class="flex w-full justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Login</button>
+		</form>
+	</div>
+</div>
