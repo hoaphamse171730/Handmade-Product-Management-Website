@@ -1,0 +1,93 @@
+﻿@page "ProductList"
+@model UI.Pages.Product.ProductListModel
+@{
+    ViewData["Title"] = "Product List";
+}
+<h1>Product List</h1>
+
+<div class="search-filter">
+    <form method="get">
+        <input type="text" name="Name" placeholder="Search by name" value="@Request.Query["Name"]" />
+        <select name="CategoryId">
+            <option value="">Select Category</option>
+            @if (Model.Categories != null && Model.Categories.Any())
+            {
+                @foreach (var category in Model.Categories)
+                {
+                    var isSelected = Request.Query["CategoryId"] == category.Id.ToString() ? "selected" : string.Empty;
+                    <option value="@category.Id" isSelected>@category.Name</option>
+                }
+            }
+        </select>
+        <select name="Status">
+            <option value="">Select Status</option>
+            <option value="Available">Available</option>
+            <option value="OutOfStock">Out Of Stock</option>
+        </select>
+        <input type="number" name="MinRating" placeholder="Min Rating" min="0" max="5" value="@Request.Query["MinRating"]" />
+        <label>
+            Sort by Price:
+            <input type="checkbox" id="sortByPrice" name="SortByPrice" value="true"
+            @(Request.Query["SortByPrice"] == "true" ? "checked" : "") />
+        </label>
+        <label>
+            Sort by Rating:
+            <input type="checkbox" id="sortByRating" name="SortByRating" value="true"
+            @(Request.Query["SortByRating"] == "true" ? "checked" : "") />
+        </label>
+        <label>
+            Sort Descending: <input type="checkbox" name="SortDescending" value="true" @(Request.Query["SortDescending"] == "true" ? "checked" : "") />
+        </label>
+        <button type="submit">Search</button>
+    </form>
+</div>
+
+@if (Model.Products != null && Model.Products.Any())
+{
+    <div class="product-list">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Image</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Lowest Price</th>
+                    <th>Rating</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var product in Model.Products)
+                {
+                    <tr>
+                        <td>
+                            <img src="@product.ProductImageUrl" alt="@product.Name" width="100" />
+                        </td>
+                        <td>@product.Name</td>
+                        <td>@product.Description</td>
+                        <td>@product.LowestPrice</td>
+                        <td>@product.Rating</td>
+                        <td>@product.Status</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else
+{
+    <p>No products found matching your criteria.</p>
+}
+<script>
+    document.getElementById('sortByPrice').addEventListener('change', function () {
+        if (this.checked) {
+            document.getElementById('sortByRating').checked = false;
+        }
+    });
+
+    document.getElementById('sortByRating').addEventListener('change', function () {
+        if (this.checked) {
+            document.getElementById('sortByPrice').checked = false;
+        }
+    });
+</script>
