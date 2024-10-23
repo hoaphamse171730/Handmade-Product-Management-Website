@@ -8,9 +8,17 @@
         {
             <div class="swiper-slide">
                 <div class="mb-10 text-center">
-                    <img class="mx-auto mb-2 h-40 w-40" src="@product.ImageUrls.FirstOrDefault()" alt="@product.Name" />
-                    <h3 class="text-md font-semibold">@product.Name</h3>
-                    <p class="text-sm text-gray-600">@product.Price $</p>
+                    <a href="/Product/Details/@product.Id" class="block transform transition-transform hover:scale-105">
+                        <div class="relative inline-block">
+                            <img class="mx-auto h-40 w-40" src="@product.ImageUrls.LastOrDefault()" alt="@product.Name" />
+                            <!-- Sold Count Overlay -->
+                            <div class="bg-opacity-50text-center bg-gray-700 text-sm text-white">
+                                Sold: @product.SoldCount
+                            </div>
+                        </div>
+                        <h3 class="text-md font-semibold">@product.Name</h3>
+                        <p class="text-sm text-gray-600">₫@product.Price</p>
+                    </a>
                 </div>
             </div>
         }

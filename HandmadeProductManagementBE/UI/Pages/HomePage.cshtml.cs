@@ -1,6 +1,7 @@
 ﻿using HandmadeProductManagement.Core.Common;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.Core.Store;
+using HandmadeProductManagement.ModelViews.CategoryModelViews;
 using HandmadeProductManagement.ModelViews.ProductModelViews;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -17,11 +18,13 @@ namespace UI.Pages
 
         public List<TopSellingProducts> Top10SellingProducts { get; set; }
         public List<ProductForDashboard> Top10NewProducts { get; set; }
+        public List<CategoryDto> Categories { get; set; } = new List<CategoryDto>();
 
         public void OnGet()
         {
             Top10SellingProducts = GetTop10SellingProducts();
             Top10NewProducts = GetTop10NewProducts();
+            Categories = GetCategories();
         }
 
         private List<TopSellingProducts> GetTop10SellingProducts()
@@ -42,6 +45,16 @@ namespace UI.Pages
                 return response.Data;
             }
             return new List<ProductForDashboard>();
+        }
+
+        private List<CategoryDto> GetCategories()
+        {
+            var response = _apiResponseHelper.GetAsync<List<CategoryDto>>(Constants.ApiBaseUrl + "/api/category").Result;
+            if (response.StatusCode == StatusCodeHelper.OK && response.Data != null)
+            {
+                return response.Data;
+            }
+            return new List<CategoryDto>();
         }
     }
 
