@@ -22,7 +22,7 @@ namespace UI.Pages
 
         public async Task OnGetAsync()
         {
-            var response = await _apiResponseHelper.GetAsync<List<ProductSearchVM>>("https://localhost:7159/api/product/search");
+            var response = await _apiResponseHelper.GetAsync<List<ProductSearchVM>>("https://localhost:44329/api/product/search");
 
             if (response.StatusCode == StatusCodeHelper.OK && response.Data != null)
             {
