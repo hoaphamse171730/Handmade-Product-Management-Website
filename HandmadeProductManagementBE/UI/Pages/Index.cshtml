@@ -5,6 +5,26 @@
 }
 
 <div class="text-center">
+    @if (Model.categories == null || !Model.categories.Any())
+    {
+        <p>No Found</p>
+    }
+    else
+    {
+        <h2>Category List</h2>
+            <tbody>
+                <ul>
+                    @foreach (var category in Model.categories)
+                    {
+                        <li>
+                            @category.Name
+                        </li>
+                    }
+                </ul>
+
+            </tbody>
+    }
+
     <h1 class="text-blue-700">Welcome to the Handmade Product Management System</h1>
     <p>Use the navigation to interact with various functionalities.</p>
 

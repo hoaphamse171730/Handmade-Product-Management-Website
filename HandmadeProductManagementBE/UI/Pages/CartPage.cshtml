@@ -1,0 +1,53 @@
+﻿@page
+@model UI.Pages.CartPageModel
+@{
+    ViewData["Title"] = "Cart page";
+}
+
+<div class="text-center">
+    <h1>Your Cart</h1>
+
+    @if (Model.CartItems == null || !Model.CartItems.Any())
+    {
+        <p>Your cart is empty</p>
+    }
+    else
+    {
+        <table>
+            <thead>
+                <tr>
+                    <th>Product Name</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Total</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.CartItems)
+                {
+                    <tr>
+                        <td>@item.Id</td>
+                        <td>@item.ProductQuantity</td>
+                        <td>@item.TotalPriceEachProduct.ToString("C")</td>
+                        <td>@(item.ProductQuantity * item.TotalPriceEachProduct).ToString("C")</td>
+                        <td>
+                            <form method="post" asp-page-handler="EditItem">
+                                <input type="hidden" name="productId" value="@item.ProductItemId" />
+                                <input type="number" name="newQuantity" value="@item.ProductQuantity" min="1" />
+                                <button type="submit">Update</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <h3>Total: @Model.TotalAmount.ToString("C")</h3>
+
+        <form method="post" asp-page-handler="Checkout">
+            <button type="submit">Checkout</button>
+        </form>
+    }
+
+</div>

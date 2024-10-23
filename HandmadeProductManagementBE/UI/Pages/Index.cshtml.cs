@@ -1,7 +1,8 @@
-using HandmadeProductManagement.Contract.Repositories.Entity;
+﻿using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Core.Common;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.Core.Store;
+using HandmadeProductManagement.ModelViews.CategoryModelViews;
 using HandmadeProductManagement.ModelViews.ProductModelViews;
 using HandmadeProductManagementBE;
 using Microsoft.AspNetCore.Mvc;
@@ -22,6 +23,8 @@ namespace UI.Pages
 
         public List<ProductSearchVM>? products { get; set; }
 
+        public List<CategoryDto>? categories { get; set; }
+
         public async Task OnGetAsync()
         {
             var response = await _apiResponseHelper.GetAsync<List<ProductSearchVM>>((Constants.ApiBaseUrl + "/api/product/search"));
@@ -33,6 +36,21 @@ namespace UI.Pages
             else
             {
                 ModelState.AddModelError(string.Empty, response.Message ?? "An error occurred while fetching weather forecasts.");
+            }
+
+            
+        }
+        public async Task OnGetcategoryAsync()
+        {
+            var categoryresponse = await _apiResponseHelper.GetAsync<List<CategoryDto>>((Constants.ApiBaseUrl + "/api/category"));
+
+            if (categoryresponse.StatusCode == StatusCodeHelper.OK && categoryresponse.Data != null)
+            {
+                categories = categoryresponse.Data;
+            }
+            else
+            {
+                ModelState.AddModelError(string.Empty, categoryresponse.Message ?? "An error occurred while fetching weather forecasts.");
             }
         }
     }
