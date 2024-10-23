@@ -1,0 +1,33 @@
+﻿@model List<HandmadeProductManagement.ModelViews.ProductModelViews.ProductForDashboard>
+
+<div class="text-center">
+    @if (Model == null || !Model.Any())
+    {
+        <p>No New Products Found</p>
+    }
+    else
+    {
+        <table>
+            <thead>
+                <tr>
+
+                    <th class="border border-gray-300 px-4 py-2">Image</th>
+                    <th class="border border-gray-300 px-4 py-2">Name</th>
+                    <th class="border border-gray-300 px-4 py-2">Price</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var product in Model)
+                {
+                    <tr class="text-left">
+                        <td class="border border-gray-300 px-4 py-2">
+                            <img class="h-20 w-20" src="@product.ImageUrls.LastOrDefault()" alt="@product.Name" />
+                        </td>
+                        <td class="border border-gray-300 px-4 py-2">@product.Name</td>
+                        <td class="border border-gray-300 px-4 py-2">@product.Price</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>

@@ -227,5 +227,7 @@ public static class Constants
     public const string ErrorMessageDeletedReplyOfDeletedProduct = "Cannot recover reply for a deleted product";
     public const string ErrorMessageDeletedReplyOfDeletedReview = "Cannot recover reply for a deleted review";
     public const string ErrorMessageReplyIsNotDeletedYet = "Reply is not deleted";
+
+    public const string ErrorMessageFetchingFailed = "An error occurred while fetching data.";
     #endregion
 }

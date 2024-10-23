@@ -64,14 +64,14 @@ using Microsoft.AspNetCore.Mvc;
 
             return Ok(BaseResponse<decimal>.OkResponse(totalSale)); 
         }
-        [HttpPost("TopSellingProducts")]
+        [HttpGet("top-10-selling-products")]
         public async Task<IActionResult> TopSellingProducts()
         {
             var topSellingProducts = await _dashboardService.GetTopSellingProducts();
             return Ok(BaseResponse<IList<TopSellingProducts>>.OkResponse(topSellingProducts));
         }
 
-        [HttpGet("GetTop10NewProduct")]
+        [HttpGet("top-10-new-products")]
         public async Task<IActionResult> Top10NewProducts()
         {
             var products = await _dashboardService.GetTop10NewProducts();
