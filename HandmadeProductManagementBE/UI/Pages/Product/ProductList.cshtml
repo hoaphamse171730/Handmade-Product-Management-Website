@@ -3,12 +3,14 @@
 @{
     ViewData["Title"] = "Product List";
 }
-<h1>Product List</h1>
+
+
+<h1 class="text-3xl font-bold mb-4">Product List</h1>
 
 <div class="search-filter">
-    <form method="get">
-        <input type="text" name="Name" placeholder="Search by name" value="@Request.Query["Name"]" />
-        <select name="CategoryId">
+    <form method="get" class="flex space-x-4 items-center">
+        <input class="border border-gray-300 rounded-md p-2" type="text" name="Name" placeholder="Search by name" value="@Request.Query["Name"]" />
+        <select name="CategoryId" class="border border-gray-300 rounded-md p-2">
             <option value="">Select Category</option>
             @if (Model.Categories != null && Model.Categories.Any())
             {
@@ -19,65 +21,68 @@
                 }
             }
         </select>
-        <select name="Status">
+        <select name="Status" class="border border-gray-300 rounded-md p-2">
             <option value="">Select Status</option>
             <option value="Available">Available</option>
             <option value="OutOfStock">Out Of Stock</option>
         </select>
-        <input type="number" name="MinRating" placeholder="Min Rating" min="0" max="5" value="@Request.Query["MinRating"]" />
-        <label>
-            Sort by Price:
-            <input type="checkbox" id="sortByPrice" name="SortByPrice" value="true"
-            @(Request.Query["SortByPrice"] == "true" ? "checked" : "") />
+        <input class="border border-gray-300 rounded-md p-2" type="number" name="MinRating" placeholder="Min Rating" min="0" max="5" value="@Request.Query["MinRating"]" />
+
+        <label class="flex items-center">
+            <span class="mr-2">Sort by Price:</span>
+            <input type="checkbox" id="sortByPrice" name="SortByPrice" value="true" @(Request.Query["SortByPrice"] == "true" ? "checked" : "") />
         </label>
-        <label>
-            Sort by Rating:
-            <input type="checkbox" id="sortByRating" name="SortByRating" value="true"
-            @(Request.Query["SortByRating"] == "true" ? "checked" : "") />
+
+        <label class="flex items-center">
+            <span class="mr-2">Sort by Rating:</span>
+            <input type="checkbox" id="sortByRating" name="SortByRating" value="true" @(Request.Query["SortByRating"] == "true" ? "checked" : "") />
         </label>
-        <label>
-            Sort Descending: <input type="checkbox" name="SortDescending" value="true" @(Request.Query["SortDescending"] == "true" ? "checked" : "") />
+
+        <label class="flex items-center">
+            <span class="mr-2">Sort Descending:</span>
+            <input type="checkbox" name="SortDescending" value="true" @(Request.Query["SortDescending"] == "true" ? "checked" : "") />
         </label>
-        <button type="submit">Search</button>
+        <button type="submit" class="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600">Search</button>
     </form>
 </div>
 
+<!-- Product Grid -->
 @if (Model.Products != null && Model.Products.Any())
 {
-    <div class="product-list">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Image</th>
-                    <th>Name</th>
-                    <th>Description</th>
-                    <th>Lowest Price</th>
-                    <th>Rating</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
+    <div class="bg-gray-900 py-16">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-white mb-8">Introducing Our Latest Products</h2>
+
+            <!-- Responsive Grid Layout: 1 column on mobile, 2 columns on small screens, 4 columns on larger screens -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                 @foreach (var product in Model.Products)
                 {
-                    <tr>
-                        <td>
-                            <img src="@product.ProductImageUrl" alt="@product.Name" width="100" />
-                        </td>
-                        <td>@product.Name</td>
-                        <td>@product.Description</td>
-                        <td>@product.LowestPrice</td>
-                        <td>@product.Rating</td>
-                        <td>@product.Status</td>
-                    </tr>
+                    <div class="bg-white rounded-lg shadow-lg p-6 border-2 border-red-500">
+                        <div class="relative overflow-hidden h-48">
+                            <img class="object-cover w-full h-full" src="@product.ProductImageUrl" alt="@product.Name" />
+                            <div class="absolute inset-0 bg-black opacity-40"></div>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <button class="bg-white text-gray-900 py-2 px-6 rounded-full font-bold hover:bg-gray-300">View Product</button>
+                            </div>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mt-4">@product.Name</h3>
+                        <p class="text-gray-500 text-sm mt-2">@product.Description</p>
+                        <div class="flex items-center justify-between mt-4">
+                            <span class="text-gray-900 font-bold text-lg">$@product.LowestPrice</span>
+                            <button class="bg-gray-900 text-white py-2 px-4 rounded-full font-bold hover:bg-gray-800">Add to Cart</button>
+                        </div>
+                        <div class="text-sm text-gray-500 mt-2">Rating: @product.Rating | Status: @product.Status</div>
+                    </div>
                 }
-            </tbody>
-        </table>
+            </div>
+        </div>
     </div>
 }
 else
 {
     <p>No products found matching your criteria.</p>
 }
+
 <script>
     document.getElementById('sortByPrice').addEventListener('change', function () {
         if (this.checked) {
