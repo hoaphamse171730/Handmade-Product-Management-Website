@@ -1,0 +1,85 @@
+﻿@page
+@model UI.Pages.HomePageModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+<div>
+    <!-- Top 10 Selling Products Swiper -->
+    <div class="swiper-container selling-products-swiper mb-10">
+        <h2 class="mb-4 text-center text-lg font-bold text-blue-600">Top 10 Selling Products</h2>
+        <div class="swiper-wrapper">
+            @foreach (var product in Model.Top10SellingProducts)
+            {
+                <div class="swiper-slide">
+                    <div class="text-center">
+                        <img class="mx-auto mb-2 h-40 w-40" src="@product.ImageUrls.FirstOrDefault()" alt="@product.Name" />
+                        <h3 class="text-md font-semibold">@product.Name</h3>
+                        <p class="text-sm text-gray-600">@product.Price $</p>
+                    </div>
+                </div>
+            }
+        </div>
+        <!-- Pagination -->
+        <div class="swiper-pagination"></div>
+        <!-- Navigation -->
+        <div class="swiper-button-next"></div>
+        <div class="swiper-button-prev"></div>
+    </div>
+
+    <!-- Top 10 New Products Swiper -->
+    <div class="swiper-container new-products-swiper">
+        <h2 class="mb-4 text-center text-lg font-bold text-blue-600">Top 10 New Products</h2>
+        <div class="swiper-wrapper">
+            @foreach (var product in Model.Top10NewProducts)
+            {
+                <div class="swiper-slide">
+                    <div class="text-center">
+                        <img class="mx-auto mb-2 h-40 w-40" src="@product.ImageUrls.FirstOrDefault()" alt="@product.Name" />
+                        <h3 class="text-md font-semibold">@product.Name</h3>
+                        <p class="text-sm text-gray-600">@product.Price $</p>
+                    </div>
+                </div>
+            }
+        </div>
+        <!-- Pagination -->
+        <div class="swiper-pagination"></div>
+        <!-- Navigation -->
+        <div class="swiper-button-next"></div>
+        <div class="swiper-button-prev"></div>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- Swiper Initialization for Selling Products -->
+    <script>
+        var sellingSwiper = new Swiper('.selling-products-swiper', {
+            slidesPerView: 1,
+            spaceBetween: 30,
+            pagination: {
+                el: '.selling-products-swiper .swiper-pagination',
+                clickable: true,
+            },
+            navigation: {
+                nextEl: '.selling-products-swiper .swiper-button-next',
+                prevEl: '.selling-products-swiper .swiper-button-prev',
+            },
+        });
+    </script>
+
+    <!-- Swiper Initialization for New Products -->
+    <script>
+        var newProductsSwiper = new Swiper('.new-products-swiper', {
+            slidesPerView: 1,
+            spaceBetween: 30,
+            pagination: {
+                el: '.new-products-swiper .swiper-pagination',
+                clickable: true,
+            },
+            navigation: {
+                nextEl: '.new-products-swiper .swiper-button-next',
+                prevEl: '.new-products-swiper .swiper-button-prev',
+            },
+        });
+    </script>
+}
