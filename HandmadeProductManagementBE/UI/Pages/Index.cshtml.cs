@@ -1,10 +1,12 @@
 using HandmadeProductManagement.Contract.Repositories.Entity;
+using HandmadeProductManagement.Core.Common;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.Core.Store;
 using HandmadeProductManagement.ModelViews.ProductModelViews;
 using HandmadeProductManagementBE;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using System.Reflection.Metadata;
 using System.Text.Json;
 
 namespace UI.Pages
@@ -22,7 +24,8 @@ namespace UI.Pages
 
         public async Task OnGetAsync()
         {
-            var response = await _apiResponseHelper.GetAsync<List<ProductSearchVM>>("https://localhost:44329/api/product/search");
+
+            var response = await _apiResponseHelper.GetAsync<List<ProductSearchVM>>((Constants.ApiBaseUrl + "/api/product/search"));
 
             if (response.StatusCode == StatusCodeHelper.OK && response.Data != null)
             {
