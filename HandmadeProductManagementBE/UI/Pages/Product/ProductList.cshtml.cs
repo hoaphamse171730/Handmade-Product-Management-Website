@@ -23,7 +23,7 @@ namespace UI.Pages.Product
         public List<ProductSearchVM>? Products { get; set; }
         public List<CategoryDto>? Categories { get; set; }
 
-        public async Task OnGetAsync([FromQuery] string? Name, [FromQuery] string? CategoryId, [FromQuery] string? Status, [FromQuery] decimal? MinRating, [FromQuery] bool SortByPrice, [FromQuery] bool SortByRating, [FromQuery] bool SortDescending)
+        public async Task OnGetAsync([FromQuery] string? Name, [FromQuery] string? CategoryId, [FromQuery] string? Status, [FromQuery] decimal? MinRating, [FromQuery] string SortOption, [FromQuery] bool SortDescending)
         {
             await LoadCategoriesAsync();
 
@@ -33,9 +33,8 @@ namespace UI.Pages.Product
                 CategoryId = CategoryId,
                 Status = Status,
                 MinRating = MinRating,
-                SortByPrice = SortByPrice,
-                SortByRating = SortByRating,
-                SortDescending = SortDescending
+                SortOption = SortOption,
+                sortDescending = SortDescending
             };
 
             var response = await _apiResponseHelper.GetAsync<List<ProductSearchVM>>((Constants.ApiBaseUrl + "/api/product/search"), searchFilter);
