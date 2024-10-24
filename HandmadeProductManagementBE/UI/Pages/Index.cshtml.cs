@@ -19,12 +19,16 @@ namespace UI.Pages
         public List<TopSellingProducts> Top10SellingProducts { get; set; }
         public List<ProductForDashboard> Top10NewProducts { get; set; }
         public List<CategoryDto> Categories { get; set; } = [];
+        public string Token { get; set; }
 
         public void OnGet()
         {
             Top10SellingProducts = GetTop10SellingProducts();
             Top10NewProducts = GetTop10NewProducts();
             Categories = GetCategories();
+
+            Token = HttpContext.Session.GetString("Token");
+
         }
 
         private List<TopSellingProducts> GetTop10SellingProducts()
