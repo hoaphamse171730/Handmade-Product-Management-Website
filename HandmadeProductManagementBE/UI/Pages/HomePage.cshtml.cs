@@ -24,7 +24,6 @@ namespace UI.Pages
         {
             Top10SellingProducts = GetTop10SellingProducts();
             Top10NewProducts = GetTop10NewProducts();
-            Categories = GetCategories();
         }
 
         private List<TopSellingProducts> GetTop10SellingProducts()
@@ -45,16 +44,6 @@ namespace UI.Pages
                 return response.Data;
             }
             return new List<ProductForDashboard>();
-        }
-
-        private List<CategoryDto> GetCategories()
-        {
-            var response = _apiResponseHelper.GetAsync<List<CategoryDto>>(Constants.ApiBaseUrl + "/api/category").Result;
-            if (response.StatusCode == StatusCodeHelper.OK && response.Data != null)
-            {
-                return response.Data;
-            }
-            return new List<CategoryDto>();
         }
     }
 
