@@ -37,14 +37,19 @@ public class LoginModel : PageModel
         };
         var client = _httpClientFactory.CreateClient();
         var response = await client.PostAsJsonAsync("http://localhost:5041/api/authentication/login", loginData);
+
         if (response.IsSuccessStatusCode)
         {
             var responseContent = await response.Content.ReadAsStringAsync();
             var loginResponse = JsonConvert.DeserializeObject<LoginResponse>(responseContent);
             var token = loginResponse?.Data?.Token;
+            var userName = loginResponse?.Data?.UserName ?? string.Empty;
+
             if (!string.IsNullOrEmpty(token))
             {
-                HttpContext.Session.SetString("Token", token);
+                HttpContext.Session.SetString("Token", token);  
+                HttpContext.Session.SetString("UserName", userName);
+
                 return RedirectToPage("/HomePage");
             }
             else

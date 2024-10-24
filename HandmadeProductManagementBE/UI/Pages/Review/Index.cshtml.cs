@@ -5,6 +5,7 @@ using HandmadeProductManagement.Core.Store;
 using HandmadeProductManagement.ModelViews.ReviewModelViews;
 using HandmadeProductManagement.ModelViews.ShopModelViews;
 using HandmadeProductManagement.ModelViews.UserInfoModelViews;
+using HandmadeProductManagement.ModelViews.UserModelViews;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Linq;
@@ -23,6 +24,8 @@ namespace UI.Pages.Review
         public IList<ReviewModel> Reviews { get; set; } = new List<ReviewModel>();
         public int PageNumber { get; set; } = 1;
         public int TotalPages { get; set; }
+        public IList<UserResponseModel> Users { get; set; } = new List<UserResponseModel>();
+        public IList<ShopResponseModel> Shops { get; set; } = new List<ShopResponseModel>();
 
         public async Task<IActionResult> OnGetAsync(int pageNumber = 1, int pageSize = 10)
         {
@@ -40,22 +43,21 @@ namespace UI.Pages.Review
                 }
             }
 
+            // Fetch all Users
+            var userResponse = await _apiResponseHelper.GetAsync<IList<UserResponseModel>>($"{Constants.ApiBaseUrl}/api/users");
+            if (userResponse.StatusCode == StatusCodeHelper.OK)
+            {
+                Users = userResponse.Data ?? new List<UserResponseModel>(); // Fallback to empty list if null
+            }
+
+            // Fetch all Shops
+            var shopResponse = await _apiResponseHelper.GetAsync<IList<ShopResponseModel>>($"{Constants.ApiBaseUrl}/api/shop/get-all");
+            if (shopResponse.StatusCode == StatusCodeHelper.OK)
+            {
+                Shops = shopResponse.Data ?? new List<ShopResponseModel>();  // Fallback to empty list if null;
+            }
+
             return Page();
         }
-
-        //private async Task<string> GetUserDisplayName(Guid userId)
-        //{
-        //    var response = await _apiResponseHelper.GetAsync<UserInfoDto>($"{Constants.ApiBaseUrl}/api/userinfo/{userId}");
-        //    return response.StatusCode == StatusCodeHelper.OK ? response.Data?.FullName ?? "Unknown User" : "Unknown User";
-        //}
-
-        //private async Task<string> GetShopName(string shopId)
-        //{
-        //    if (string.IsNullOrWhiteSpace(shopId))
-        //        return "Unknown Shop";
-
-        //    var response = await _apiResponseHelper.GetAsync<ShopResponseModel>($"{Constants.ApiBaseUrl}/api/shop/{shopId}");
-        //    return response.StatusCode == StatusCodeHelper.OK ? response.Data?.Name ?? "Unknown Shop" : "Unknown Shop";
-        //}
     }
 }
