@@ -487,7 +487,6 @@ namespace HandmadeProductManagement.Services.Service
 
             return productToReturn;
         }
-
         public async Task<bool> Update(string id, ProductForUpdateDto product, string userId)
         {
             var validationResult = await _updateValidator.ValidateAsync(product);
