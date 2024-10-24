@@ -312,13 +312,13 @@ namespace HandmadeProductManagement.Services.Service
             switch (searchFilter.SortOption)
             {
                 case Constants.SortByPrice:
-                    query = searchFilter.sortDescending
+                    query = searchFilter.SortDescending
                         ? query.OrderByDescending(p => p.ProductItems.Min(pi => pi.Price))
                         : query.OrderBy(p => p.ProductItems.Min(pi => pi.Price));
                     break;
 
                 case Constants.SortByRating:
-                    query = searchFilter.sortDescending
+                    query = searchFilter.SortDescending
                         ? query.OrderByDescending(p => p.Rating)
                         : query.OrderBy(p => p.Rating);
                     break;

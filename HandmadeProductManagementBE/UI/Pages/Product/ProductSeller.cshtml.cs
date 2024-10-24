@@ -13,13 +13,13 @@ using System.Text.Json;
 
 namespace UI.Pages.Product
 {
-    [Authorize] // Ensure the page is accessible only to authenticated users
-    public class ProductSeller : PageModel
+    //[Authorize] // Ensure the page is accessible only to authenticated users
+    public class ProductSellerModel : PageModel
     {
         private readonly ApiResponseHelper _apiResponseHelper;
         private readonly IHttpClientFactory _httpClientFactory;
 
-        public ProductSeller(ApiResponseHelper apiResponseHelper, IHttpClientFactory httpClientFactory)
+        public ProductSellerModel(ApiResponseHelper apiResponseHelper, IHttpClientFactory httpClientFactory)
         {
             _apiResponseHelper = apiResponseHelper ?? throw new ArgumentNullException(nameof(apiResponseHelper));
             _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
@@ -40,28 +40,30 @@ namespace UI.Pages.Product
             await LoadCategoriesAsync();
 
             // Step 1: Extract userId from JWT token
-            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
-            if (userIdClaim == null || string.IsNullOrEmpty(userIdClaim.Value))
-            {
-                ModelState.AddModelError(string.Empty, "User is not authenticated.");
-                return Page();
-            }
 
-            if (!Guid.TryParse(userIdClaim.Value, out Guid userId))
-            {
-                ModelState.AddModelError(string.Empty, "Invalid user identifier.");
-                return Page();
-            }
+            //var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+            //if (userIdClaim == null || string.IsNullOrEmpty(userIdClaim.Value))
+            //{
+            //    ModelState.AddModelError(string.Empty, "User is not authenticated.");
+            //    return Page();
+            //}
+
+            //if (!Guid.TryParse(userIdClaim.Value, out Guid userId))
+            //{
+            //    ModelState.AddModelError(string.Empty, "Invalid user identifier.");
+            //    return Page();
+            //}
 
             // Step 2: Fetch shopId using userId by calling the shop API
-            var shopResponse = await GetShopByUserIdAsync(userId);
-            if (shopResponse == null)
-            {
-                // Error message already added in GetShopByUserIdAsync
-                return Page();
-            }
+            //var shopResponse = await GetShopByUserIdAsync(userId);
+            //if (shopResponse == null)
+            //{
+            //    // Error message already added in GetShopByUserIdAsync
+            //    return Page();
+            //}
 
-            var shopId = shopResponse.Id; // Assuming ShopResponseModel has an Id property
+            //var shopId = shopResponse.Id; 
+            var shopId = "a61db0e7f95245ea86fbcfc7361ffcbc";
 
             // Step 3: Create the product search filter including shopId
             var searchFilter = new ProductSearchFilter
@@ -136,40 +138,25 @@ namespace UI.Pages.Product
 
         private async Task LoadCategoriesAsync()
         {
-            try
+            var client = _httpClientFactory.CreateClient();
+            var response = await client.GetAsync(Constants.ApiBaseUrl + "/api/category");
+
+            if (response.IsSuccessStatusCode)
             {
-                var client = _httpClientFactory.CreateClient();
-                client.DefaultRequestHeaders.Authorization =
-                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer",
-                        await HttpContext.GetTokenAsync("access_token"));
-
-                var response = await client.GetAsync($"{Constants.ApiBaseUrl}/api/category");
-
-                if (response.IsSuccessStatusCode)
+                var content = await response.Content.ReadAsStringAsync();
+                var options = new JsonSerializerOptions
                 {
-                    var content = await response.Content.ReadAsStringAsync();
-                    var options = new JsonSerializerOptions
-                    {
-                        PropertyNameCaseInsensitive = true
-                    };
-                    var baseResponse = JsonSerializer.Deserialize<BaseResponse<IList<CategoryDto>>>(content, options);
-                    if (baseResponse != null && baseResponse.StatusCode == StatusCodeHelper.OK && baseResponse.Data != null)
-                    {
-                        Categories = baseResponse.Data.ToList();
-                    }
-                    else
-                    {
-                        ModelState.AddModelError(string.Empty, baseResponse?.Message ?? "Failed to load categories.");
-                    }
-                }
-                else
+                    PropertyNameCaseInsensitive = true
+                };
+                var baseResponse = JsonSerializer.Deserialize<BaseResponse<IList<CategoryDto>>>(content, options);
+                if (baseResponse != null && baseResponse.StatusCode == StatusCodeHelper.OK && baseResponse.Data != null)
                 {
-                    ModelState.AddModelError(string.Empty, "An error occurred while fetching categories.");
+                    Categories = baseResponse.Data.ToList();
                 }
             }
-            catch (Exception ex)
+            else
             {
-                ModelState.AddModelError(string.Empty, $"An unexpected error occurred: {ex.Message}");
+                ModelState.AddModelError(string.Empty, "An error occurred while fetching categories.");
             }
         }
     }

@@ -22,7 +22,7 @@
                     </button>
 
                     <!-- Dropdown menu -->
-                    <div class="group-hover:block absolute hidden w-40 origin-top-left divide-y divide-gray-100 rounded-md bg-white shadow-lg transition duration-300">
+@*                     <div class="group-hover:block absolute hidden w-40 origin-top-left divide-y divide-gray-100 rounded-md bg-white shadow-lg transition duration-300">
                         <div class="py-1">
                             @if (Model.Categories != null)
                             {
@@ -35,11 +35,12 @@
 
                         </div>
                     </div>
-                </div>
+ *@                </div>
 
                 <button class="rounded-lg bg-cyan-600 px-4 py-2 font-semibold text-white transition duration-300 hover:bg-cyan-700" asp-area="" asp-page="/Login">Login</button>
                 <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Privacy">Privacy</a>
                 <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Product/ProductList">Product</a>
+                <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Product/ProductSeller">ProductSeller</a>
 
             </div>
         </nav>
