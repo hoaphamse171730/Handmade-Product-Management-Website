@@ -4,26 +4,37 @@ using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.Core.Store;
 using HandmadeProductManagement.ModelViews.CategoryModelViews;
 using HandmadeProductManagement.ModelViews.ProductModelViews;
+using HandmadeProductManagement.ModelViews.ShopModelViews;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization; // Added for authorization
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Text.Json;
 
 namespace UI.Pages.Product
 {
-    public class ProductListModel : PageModel
+    //[Authorize] // Ensure the page is accessible only to authenticated users
+    public class ProductSellerModel : PageModel
     {
         private readonly ApiResponseHelper _apiResponseHelper;
         private readonly IHttpClientFactory _httpClientFactory;
 
-        public ProductListModel(ApiResponseHelper apiResponseHelper, IHttpClientFactory httpClientFactory)
+        public ProductSellerModel(ApiResponseHelper apiResponseHelper, IHttpClientFactory httpClientFactory)
         {
             _apiResponseHelper = apiResponseHelper ?? throw new ArgumentNullException(nameof(apiResponseHelper));
             _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
         }
+
         public List<ProductSearchVM>? Products { get; set; }
         public List<CategoryDto>? Categories { get; set; }
 
-        public async Task OnGetAsync([FromQuery] string? Name, [FromQuery] string? CategoryId, [FromQuery] string? Status, [FromQuery] decimal? MinRating, [FromQuery] string SortOption, [FromQuery] bool SortDescending)
+        public async Task<IActionResult> OnGetAsync(
+            [FromQuery] string? Name,
+            [FromQuery] string? CategoryId,
+            [FromQuery] string? Status,
+            [FromQuery] decimal? MinRating,
+            [FromQuery] string SortOption,
+            [FromQuery] bool SortDescending)
         {
             await LoadCategoriesAsync();
 
@@ -37,7 +48,10 @@ namespace UI.Pages.Product
                 SortDescending = SortDescending
             };
 
-            var response = await _apiResponseHelper.GetAsync<List<ProductSearchVM>>((Constants.ApiBaseUrl + "/api/product/search"), searchFilter);
+            // Step 4: Fetch products based on the search filter
+            var response = await _apiResponseHelper.GetAsync<List<ProductSearchVM>>(
+                $"{Constants.ApiBaseUrl}/api/product/search-seller",
+                searchFilter);
 
             if (response.StatusCode == StatusCodeHelper.OK && response.Data != null)
             {
@@ -47,6 +61,8 @@ namespace UI.Pages.Product
             {
                 ModelState.AddModelError(string.Empty, response.Message ?? "An error occurred while fetching products.");
             }
+
+            return Page();
         }
 
         private async Task LoadCategoriesAsync()

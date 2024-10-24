@@ -1,4 +1,5 @@
 ﻿using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
@@ -7,24 +8,43 @@ using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.Core.Exceptions.Handler; // Adjust this based on your actual namespace
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
+using System.Text.Json;
+using System.Net;
 
 namespace HandmadeProductManagement.Core.Store;
 public class ApiResponseHelper
 {
     private readonly HttpClient _httpClient;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public ApiResponseHelper(HttpClient httpClient)
+    public ApiResponseHelper(HttpClient httpClient, IHttpContextAccessor httpContextAccessor)
     {
-        _httpClient = httpClient;
+        var handler = new HttpClientHandler()
+        {
+            AllowAutoRedirect = false // Disable automatic redirects
+        };
+
+        _httpClient = new HttpClient(handler); // Use handler to disable redirect
+        _httpContextAccessor = httpContextAccessor;
     }
 
-    // Generic method to handle GET requests
-    public async Task<BaseResponse<T>> GetAsync<T>(string url)
+    private void AddAuthorizationHeader(HttpRequestMessage request)
     {
-        var response = await _httpClient.GetAsync(url);
-        return await HandleApiResponse<T>(response);
+        var context = _httpContextAccessor.HttpContext;
+        if (context != null)
+        {
+            var token = context.Session.GetString("Token");
+            if (!string.IsNullOrEmpty(token))
+            {
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+                // Optional: Log the Authorization header for debugging
+                // Consider using a logging framework instead of Console.WriteLine
+                Console.WriteLine($"Authorization Header: Bearer {token}");
+            }
+        }
     }
+
 
     public async Task<BaseResponse<T>> GetAsync<T>(string url, object queryParams = null)
     {
@@ -34,9 +54,27 @@ public class ApiResponseHelper
             url = string.IsNullOrEmpty(query) ? url : $"{url}?{query}";
         }
 
-        var response = await _httpClient.GetAsync(url);
+        var request = new HttpRequestMessage(HttpMethod.Get, url);
+        AddAuthorizationHeader(request);
+        Console.WriteLine(request.Headers.ToString());
+
+        var response = await _httpClient.SendAsync(request);
+        // Check if the response status is redirect (307 or 301/302)
+        if (response.StatusCode == HttpStatusCode.RedirectKeepVerb ||
+            response.StatusCode == HttpStatusCode.MovedPermanently ||
+            response.StatusCode == HttpStatusCode.Found)
+        {
+            // Handle redirection manually
+            var newUrl = response.Headers.Location.ToString();
+            request = new HttpRequestMessage(HttpMethod.Get, newUrl);
+            AddAuthorizationHeader(request); // Ensure token is added again
+
+            response = await _httpClient.SendAsync(request);
+        }
+
         return await HandleApiResponse<T>(response);
     }
+
 
 
     // Generic method to handle POST requests
@@ -98,7 +136,7 @@ public class ApiResponseHelper
     {
         try
         {
-            return JsonConvert.DeserializeObject<ProblemDetails>(content);
+            return JsonSerializer.Deserialize<ProblemDetails>(content);
         }
         catch
         {
@@ -110,7 +148,7 @@ public class ApiResponseHelper
     {
         try
         {
-            return JsonConvert.DeserializeObject<BaseResponse<string>>(content);
+            return JsonSerializer.Deserialize<BaseResponse<string>>(content);
         }
         catch
         {
