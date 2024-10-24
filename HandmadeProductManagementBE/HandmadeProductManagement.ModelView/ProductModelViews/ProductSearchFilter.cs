@@ -13,6 +13,6 @@ namespace HandmadeProductManagement.ModelViews.ProductModelViews
 
         // Default sorting by Rating Descending
         public string SortOption { get; set; } = Constants.SortByRating;
-        public bool sortDescending { get; set; } = true;
+        public bool SortDescending { get; set; } = true;
     }
 }

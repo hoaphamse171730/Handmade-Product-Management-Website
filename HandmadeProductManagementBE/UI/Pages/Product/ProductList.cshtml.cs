@@ -34,7 +34,7 @@ namespace UI.Pages.Product
                 Status = Status,
                 MinRating = MinRating,
                 SortOption = SortOption,
-                sortDescending = SortDescending
+                SortDescending = SortDescending
             };
 
             var response = await _apiResponseHelper.GetAsync<List<ProductSearchVM>>((Constants.ApiBaseUrl + "/api/product/search"), searchFilter);
