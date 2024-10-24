@@ -17,6 +17,7 @@
 @section Scripts {
     <!-- Swiper Initialization for Selling Products -->
     <script>
+
         var sellingSwiper = new Swiper('.selling-products-swiper', {
             slidesPerView: 1,
             spaceBetween: 30,
@@ -48,4 +49,28 @@
             },
         });
     </script>
+
+    <script>
+        // Ensure the token is properly encoded to prevent XSS attacks
+        var token = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Token));
+                        console.log("Token:", token); // You can remove this line after verifying
+
+        // Example usage of the token in an API request
+        /*
+        fetch('/api/your-endpoint', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data);
+        })
+        .catch(error => console.error('Error:', error));
+        */
+    </script>
+
+
 }
