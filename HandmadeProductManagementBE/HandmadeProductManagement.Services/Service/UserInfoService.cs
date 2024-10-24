@@ -50,6 +50,8 @@ namespace HandmadeProductManagement.Services.Service
 
             var userInfoDto = _mapper.Map<UserInfoDto>(applicationUser.UserInfo);
 
+            userInfoDto.PhoneNumber = applicationUser.PhoneNumber ?? string.Empty;
+
             return userInfoDto;
         }
 

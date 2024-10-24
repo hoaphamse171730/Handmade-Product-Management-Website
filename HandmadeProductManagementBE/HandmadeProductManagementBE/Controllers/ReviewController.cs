@@ -175,5 +175,19 @@ namespace HandmadeProductManagementAPI.Controllers
             };
             return Ok(response);
         }
+
+        [HttpGet("totalpages")]
+        public async Task<IActionResult> GetTotalPages(int pageSize)
+        {
+            var totalPages = await _reviewService.GetTotalPagesAsync(pageSize);
+            var response = new BaseResponse<int>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Total pages retrieved successfully.",
+                Data = totalPages
+            };
+            return Ok(response);
+        }
     }
 }

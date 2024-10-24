@@ -269,5 +269,20 @@ namespace HandmadeProductManagement.Services.Service
 
             return averageRating;
         }
+
+        public async Task<IList<ShopResponseModel>> GetAllShopsAsync()
+        {
+            var shops = await _unitOfWork.GetRepository<Shop>()
+                .Entities
+                .Where(shop => !shop.DeletedTime.HasValue)
+                .Select(shop => new ShopResponseModel
+                {
+                    Id = shop.Id.ToString(),
+                    Name = shop.Name
+                })
+                .ToListAsync();
+
+            return shops;
+        }
     }
 }

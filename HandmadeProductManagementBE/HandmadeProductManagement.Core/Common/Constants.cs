@@ -4,13 +4,19 @@ public static class Constants
 {
     #region Base
 
-    public const string ApiBaseUrl = "https://localhost:7159";
+    public const string ApiBaseUrl = "http://localhost:5041";
     public const string AvatarBaseUrl = "/images/avatars";
     public const string VNPAY = "VNPAY";
     public const string TimeZoneSEAsiaStandard = "SE Asia Standard Time";
     public const string DateTimeFormat = "dd/MM/yyyy HH:mm";
 
     #endregion
+
+    #region SortOption
+
+    #endregion
+    public const string SortByPrice = "SortByPrice";
+    public const string SortByRating = "SortByRating";
 
     #region User Status
 
@@ -227,5 +233,7 @@ public static class Constants
     public const string ErrorMessageDeletedReplyOfDeletedProduct = "Cannot recover reply for a deleted product";
     public const string ErrorMessageDeletedReplyOfDeletedReview = "Cannot recover reply for a deleted review";
     public const string ErrorMessageReplyIsNotDeletedYet = "Reply is not deleted";
+
+    public const string ErrorMessageFetchingFailed = "An error occurred while fetching data.";
     #endregion
 }

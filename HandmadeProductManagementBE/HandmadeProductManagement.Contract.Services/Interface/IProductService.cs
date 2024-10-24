@@ -8,6 +8,7 @@ namespace HandmadeProductManagement.Contract.Services.Interface
     public interface IProductService
     {
         Task<IEnumerable<ProductSearchVM>> SearchProductsAsync(ProductSearchFilter searchFilter, int pageNumber, int pageSize);
+        Task<IEnumerable<ProductSearchVM>> SearchProductsBySellerAsync(ProductSearchFilter searchFilter,string userId, int pageNumber, int pageSize);
         //Task<IEnumerable<ProductSearchVM>> SortProductsAsync(ProductSortFilter sortFilter);
         Task AddVariationOptionsToProduct(Product product, List<VariationCombinationDto> variationCombinations, string userId);
         Task<ProductDto> GetById(string id);

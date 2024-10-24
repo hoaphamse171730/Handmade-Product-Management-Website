@@ -1,0 +1,14 @@
+﻿@page "{replyId}"
+@model UI.Pages.Reply.SoftDeleteModel
+@{
+    ViewData["Title"] = "Soft Delete Reply";
+}
+
+<h2>Soft Delete Reply</h2>
+
+<p>Are you sure you want to soft delete this reply?</p>
+
+<form method="post">
+    <button type="submit" class="btn btn-danger">Soft Delete</button>
+    <a asp-page="./Index" class="btn btn-secondary">Cancel</a>
+</form>

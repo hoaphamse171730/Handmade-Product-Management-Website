@@ -51,7 +51,7 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<IActionResult> GetShopsByPage([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
@@ -123,6 +123,21 @@ namespace HandmadeProductManagementAPI.Controllers
                 StatusCode = StatusCodeHelper.OK,
                 Message = "Shop average rating calculated successfully.",
                 Data = averageRating
+            };
+            return Ok(response);
+        }
+
+
+        [HttpGet("get-all")]
+        public async Task<IActionResult> GetAllShops()
+        {
+            var shops = await _shopService.GetAllShopsAsync();
+            var response = new BaseResponse<IList<ShopResponseModel>>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "All shops retrieved successfully",
+                Data = shops
             };
             return Ok(response);
         }

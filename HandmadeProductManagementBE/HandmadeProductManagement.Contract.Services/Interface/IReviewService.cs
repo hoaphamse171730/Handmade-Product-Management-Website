@@ -13,5 +13,6 @@ namespace HandmadeProductManagement.Contract.Services.Interface
         Task<bool> SoftDeleteAsync(string reviewId, Guid userId);
         Task<bool> RecoverDeletedReviewAsync(string reviewId, Guid userId);
         Task<IList<DeletedReviewModel>> GetAllDeletedReviewsAsync(Guid userId);
+        Task<int> GetTotalPagesAsync(int pageSize);
     }
 }

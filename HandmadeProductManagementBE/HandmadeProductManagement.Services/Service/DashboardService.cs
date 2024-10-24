@@ -125,11 +125,14 @@ namespace HandmadeProductManagement.Services.Service
                                                       .OrderByDescending(p => p.SoldCount)
                                                       .Take(10)
                                                       .Select(p => new TopSellingProducts
-                                                      { 
+                                                      {
+                                                            Id = p.Id,
                                                             Name = p.Name,
                                                             CategoryName = p.Category != null ? p.Category.Name : "",
                                                             Price = p.ProductItems.FirstOrDefault() != null ? p.ProductItems.FirstOrDefault()!.Price : 0,
-                                                            ImageUrls = p.ProductImages.Select(pi => pi.Url).ToList(),
+                                                            ImageUrl = p.ProductImages.Any()
+                                                            ? p.ProductImages.OrderByDescending(pi => pi.CreatedTime).First().Url
+                                                            : string.Empty,
                                                             SoldCount = p.SoldCount
                                                       })
                                                       .ToListAsync();
@@ -148,10 +151,13 @@ namespace HandmadeProductManagement.Services.Service
                                                .Take(10)
                                                .Select(p => new ProductForDashboard
                                                 {
+                                                    Id = p.Id,
                                                     Name = p.Name,
                                                     CategoryName = p.Category != null ? p.Category.Name : "",
                                                     Price = p.ProductItems.FirstOrDefault() != null ? p.ProductItems.FirstOrDefault()!.Price : 0,
-                                                    ImageUrls = p.ProductImages.Select(pi => pi.Url).ToList()
+                                                    ImageUrl = p.ProductImages.Any()
+                                                    ? p.ProductImages.OrderByDescending(pi => pi.CreatedTime).First().Url
+                                                    : string.Empty,
                                                })
                                               .ToListAsync();
             return topProducts;
