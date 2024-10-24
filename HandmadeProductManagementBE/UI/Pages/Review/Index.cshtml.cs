@@ -3,8 +3,11 @@ using HandmadeProductManagement.Core.Common;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.Core.Store;
 using HandmadeProductManagement.ModelViews.ReviewModelViews;
+using HandmadeProductManagement.ModelViews.ShopModelViews;
+using HandmadeProductManagement.ModelViews.UserInfoModelViews;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using System.Linq;
 
 namespace UI.Pages.Review
 {
@@ -39,5 +42,20 @@ namespace UI.Pages.Review
 
             return Page();
         }
+
+        //private async Task<string> GetUserDisplayName(Guid userId)
+        //{
+        //    var response = await _apiResponseHelper.GetAsync<UserInfoDto>($"{Constants.ApiBaseUrl}/api/userinfo/{userId}");
+        //    return response.StatusCode == StatusCodeHelper.OK ? response.Data?.FullName ?? "Unknown User" : "Unknown User";
+        //}
+
+        //private async Task<string> GetShopName(string shopId)
+        //{
+        //    if (string.IsNullOrWhiteSpace(shopId))
+        //        return "Unknown Shop";
+
+        //    var response = await _apiResponseHelper.GetAsync<ShopResponseModel>($"{Constants.ApiBaseUrl}/api/shop/{shopId}");
+        //    return response.StatusCode == StatusCodeHelper.OK ? response.Data?.Name ?? "Unknown Shop" : "Unknown Shop";
+        //}
     }
 }
