@@ -26,6 +26,19 @@ public class ApiResponseHelper
         return await HandleApiResponse<T>(response);
     }
 
+    public async Task<BaseResponse<T>> GetAsync<T>(string url, object queryParams = null)
+    {
+        if (queryParams != null)
+        {
+            var query = QueryStringHelper.ToQueryString(queryParams);
+            url = string.IsNullOrEmpty(query) ? url : $"{url}?{query}";
+        }
+
+        var response = await _httpClient.GetAsync(url);
+        return await HandleApiResponse<T>(response);
+    }
+
+
     // Generic method to handle POST requests
     public async Task<BaseResponse<T>> PostAsync<T>(string url, object payload)
     {

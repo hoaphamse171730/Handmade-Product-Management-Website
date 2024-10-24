@@ -1,37 +1,51 @@
 ﻿@page
-@model IndexModel
+@model UI.Pages.IndexModel
 @{
     ViewData["Title"] = "Home page";
 }
 
-<div class="text-center">
-    <h1 class="text-blue-700">Welcome to the Handmade Product Management System</h1>
-    <p>Use the navigation to interact with various functionalities.</p>
+<div class="flex px-40">
+    <div class="w-1/2 overflow-hidden">
+        @await Html.PartialAsync("_Top10SellingProducts", Model.Top10SellingProducts)
+    </div>
 
-    @if (Model.products == null || !Model.products.Any())
-    {
-        <p>No WeatherForecasts Found</p>
-    }
-    else
-    {
-        <table>
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Rating</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var product in Model.products)
-                {
-                    <tr>
-                        <td>@product.Name</td>
-                        <td>@product.Rating</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-
-    }
-
+    <div class="w-1/2 overflow-hidden">
+        @await Html.PartialAsync("_Top10NewProducts", Model.Top10NewProducts)
+    </div>
 </div>
+
+@section Scripts {
+    <!-- Swiper Initialization for Selling Products -->
+    <script>
+        var sellingSwiper = new Swiper('.selling-products-swiper', {
+            slidesPerView: 1,
+            spaceBetween: 30,
+            loop: true,
+            pagination: {
+                el: '.selling-products-swiper .swiper-pagination',
+                clickable: true,
+            },
+            navigation: {
+                nextEl: '.selling-products-swiper .swiper-button-next',
+                prevEl: '.selling-products-swiper .swiper-button-prev',
+            },
+        });
+    </script>
+
+    <!-- Swiper Initialization for New Products -->
+    <script>
+        var newProductsSwiper = new Swiper('.new-products-swiper', {
+            slidesPerView: 1,
+            spaceBetween: 30,
+            loop: true,
+            pagination: {
+                el: '.new-products-swiper .swiper-pagination',
+                clickable: true,
+            },
+            navigation: {
+                nextEl: '.new-products-swiper .swiper-button-next',
+                prevEl: '.new-products-swiper .swiper-button-prev',
+            },
+        });
+    </script>
+}

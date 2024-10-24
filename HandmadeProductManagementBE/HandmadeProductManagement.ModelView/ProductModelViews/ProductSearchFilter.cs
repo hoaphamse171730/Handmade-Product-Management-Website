@@ -1,4 +1,7 @@
-﻿namespace HandmadeProductManagement.ModelViews.ProductModelViews
+﻿
+using HandmadeProductManagement.Core.Common;
+
+namespace HandmadeProductManagement.ModelViews.ProductModelViews
 {
     public class ProductSearchFilter
     {
@@ -8,10 +11,8 @@
         public string? Status { get; set; }
         public decimal? MinRating { get; set; }
 
-        public bool SortByPrice { get; set; }
-        public bool SortByRating { get; set; } = true; // Default sorting by Rating
-        public bool SortDescending { get; set; } = true; // Default to descending sort
-
-
+        // Default sorting by Rating Descending
+        public string SortOption { get; set; } = Constants.SortByRating;
+        public bool sortDescending { get; set; } = true;
     }
 }

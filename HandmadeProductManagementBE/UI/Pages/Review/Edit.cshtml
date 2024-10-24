@@ -1,0 +1,103 @@
+﻿@page "{reviewId}"
+@model UI.Pages.Review.EditModel
+@{
+    ViewData["Title"] = "Edit Review";
+}
+<div class="max-w-xl mx-auto p-6">
+    <h1 class="text-4xl font-bold text-center text-blue-600 mb-8">Edit Review</h1>
+    <div class="bg-white rounded-lg shadow-md border border-gray-300 p-6">
+        <form method="post" class="space-y-6">
+            <div class="space-y-2">
+                <label asp-for="Content" class="block text-lg font-semibold text-gray-700">Content</label>
+                <textarea asp-for="Content"
+                          class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-[120px]"
+                          placeholder="Enter your review content"></textarea>
+            </div>
+            <div class="space-y-2">
+                <label asp-for="Rating" class="block text-lg font-semibold text-gray-700">Rating</label>
+                <div class="flex items-center space-x-3"> <!-- Changed to space-x-3 -->
+                    @for (var i = 1; i <= 5; i++)
+                    {
+                        <button type="button"
+                                onclick="setRating(@i)"
+                                class="star-btn text-4xl focus:outline-none transition-colors duration-200 hover:scale-110"
+                                data-rating="@i">
+                            ★
+                        </button>
+                    }
+                </div>
+                <input type="hidden" asp-for="Rating" id="ratingInput" />
+            </div>
+            <div class="flex items-center justify-between pt-4">
+                <a asp-page="Index"
+                   class="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium transition duration-300">
+                    Back to list
+                </a>
+                <button type="submit"
+                        class="px-6 py-2 bg-blue-600 text-white font-bold rounded-md hover:bg-blue-700 transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                    Update Review
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+<style>
+    .star-btn {
+        color: #d1d5db; /* gray-300 */
+        cursor: pointer;
+        padding: 0 2px;
+    }
+    .star-btn.active {
+        color: #fbbf24; /* yellow-400 */
+    }
+    .star-btn:hover {
+        color: #fcd34d; /* yellow-300 */
+    }
+</style>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Set initial rating if it exists
+        const initialRating = @(Model.Rating);
+        if (initialRating > 0) {
+            setRating(initialRating);
+        }
+
+        // Add hover effects
+        const stars = document.querySelectorAll('.star-btn');
+        stars.forEach((star, index) => {
+            star.addEventListener('mouseenter', () => previewRating(index + 1));
+            star.addEventListener('mouseleave', () => resetRating());
+        });
+    });
+
+    function setRating(rating) {
+        const stars = document.querySelectorAll('.star-btn');
+        const ratingInput = document.getElementById('ratingInput');
+        
+        // Update hidden input value
+        ratingInput.value = rating;
+        
+        // Update stars appearance
+        updateStarsDisplay(rating);
+    }
+
+    function previewRating(rating) {
+        updateStarsDisplay(rating);
+    }
+
+    function resetRating() {
+        const ratingInput = document.getElementById('ratingInput');
+        updateStarsDisplay(ratingInput.value);
+    }
+
+    function updateStarsDisplay(rating) {
+        const stars = document.querySelectorAll('.star-btn');
+        stars.forEach((star, index) => {
+            if (index < rating) {
+                star.classList.add('active');
+            } else {
+                star.classList.remove('active');
+            }
+        });
+    }
+</script>

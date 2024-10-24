@@ -481,5 +481,24 @@ namespace HandmadeProductManagement.Services.Service
                                             .ToListAsync();
             return deletedReviews;
         }
+
+        public async Task<int> GetTotalPagesAsync(int pageSize)
+        {
+            // Validate page size
+            if (pageSize <= 0)
+            {
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidPageSize);
+            }
+
+            // Get the total count of reviews
+            var totalReviewsCount = await _unitOfWork.GetRepository<Review>()
+                                                     .Entities
+                                                     .CountAsync();
+
+            // Calculate total pages
+            var totalPages = (int)Math.Ceiling(totalReviewsCount / (double)pageSize);
+
+            return totalPages;
+        }
     }
 }
