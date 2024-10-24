@@ -10,10 +10,12 @@ namespace UI.Pages.Checkout
     public class IndexModel : PageModel
     {
         private readonly ApiResponseHelper _apiResponseHelper;
+        private readonly IHttpClientFactory _httpClientFactory;
 
-        public IndexModel(ApiResponseHelper apiResponseHelper)
+        public IndexModel(ApiResponseHelper apiResponseHelper, IHttpClientFactory httpClientFactory)
         {
             _apiResponseHelper = apiResponseHelper ?? throw new ArgumentNullException(nameof(apiResponseHelper));
+            _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
         }
 
         public List<CartItemGroupDto> CartItems { get; set; } = new List<CartItemGroupDto>();

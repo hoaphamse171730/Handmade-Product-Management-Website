@@ -18,6 +18,7 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         public async Task<IActionResult> GetUserInfoById()
         {
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
@@ -26,7 +27,7 @@ namespace HandmadeProductManagementAPI.Controllers
                 Code = "200",
                 StatusCode = StatusCodeHelper.OK,
                 Message = "Success",
-                Data = await _userInfoService.GetUserInfoByIdAsync("10a831f5-e739-4103-6bce-08dcf23ca862")
+                Data = await _userInfoService.GetUserInfoByIdAsync(userId)
             };
             return Ok(response);
         }
