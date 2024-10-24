@@ -39,9 +39,19 @@ public class LoginModel : PageModel
         var response = await client.PostAsJsonAsync("http://localhost:5041/api/authentication/login", loginData);
         if (response.IsSuccessStatusCode)
         {
-            var token = await response.Content.ReadAsStringAsync();
-            HttpContext.Session.SetString("Token", token);
-            return RedirectToPage("/HomePage");
+            var responseContent = await response.Content.ReadAsStringAsync();
+            var loginResponse = JsonConvert.DeserializeObject<LoginResponse>(responseContent);
+            var token = loginResponse?.Data?.Token;
+            if (!string.IsNullOrEmpty(token))
+            {
+                HttpContext.Session.SetString("Token", token);
+                return RedirectToPage("/HomePage");
+            }
+            else
+            {
+                ErrorMessage = "Login failed. Token not found.";
+                return Page();
+            }
         }
         else
         {
@@ -53,6 +63,22 @@ public class LoginModel : PageModel
     }
 }
 
+public class LoginResponse
+{
+    public LoginData? Data { get; set; }
+    public string? Message { get; set; }
+    public int StatusCode { get; set; }
+    public string? Code { get; set; }
+}
+
+public class LoginData
+{
+    public string? UserName { get; set; }
+    public string? DisplayName { get; set; }
+    public string? FullName { get; set; }
+    public string? Token { get; set; }
+}
+
 public class ErrorResponse
 {
     public string? Title { get; set; }
@@ -61,4 +87,3 @@ public class ErrorResponse
     public string? Instance { get; set; }
     public string? TraceId { get; set; }
 }
-    
