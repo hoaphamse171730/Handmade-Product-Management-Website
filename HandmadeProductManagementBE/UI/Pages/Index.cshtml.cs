@@ -33,7 +33,7 @@ namespace UI.Pages
 
         private List<TopSellingProducts> GetTop10SellingProducts()
         {
-            var response = _apiResponseHelper.GetAsync<List<TopSellingProducts>>(Constants.ApiBaseUrl + "/api/dashboard/top-10-selling-products").Result; // Lấy dữ liệu từ API
+            var response = _apiResponseHelper.GetAsync<List<TopSellingProducts>>(Constants.ApiBaseUrl +"/api/dashboard/top-10-selling-products").Result; // Lấy dữ liệu từ API
             if (response.StatusCode == StatusCodeHelper.OK && response.Data != null)
             {
                 return response.Data;
