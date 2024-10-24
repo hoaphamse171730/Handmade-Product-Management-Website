@@ -59,6 +59,7 @@ public class ApiResponseHelper
         Console.WriteLine(request.Headers.ToString());
 
         var response = await _httpClient.SendAsync(request);
+        
         // Check if the response status is redirect (307 or 301/302)
         if (response.StatusCode == HttpStatusCode.RedirectKeepVerb ||
             response.StatusCode == HttpStatusCode.MovedPermanently ||
@@ -67,7 +68,34 @@ public class ApiResponseHelper
             // Handle redirection manually
             var newUrl = response.Headers.Location.ToString();
             request = new HttpRequestMessage(HttpMethod.Get, newUrl);
-            AddAuthorizationHeader(request); // Ensure token is added again
+            AddAuthorizationHeader(request); // http://localhost:5041 - Header: Authorization Bearer <token> BODY
+
+            response = await _httpClient.SendAsync(request); // https://localhost:7159 - BODY
+        }
+
+        return await HandleApiResponse<T>(response);
+    }
+
+    public async Task<BaseResponse<T>> PostAsync<T>(string url, object payload)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Post, url)
+        {
+            Content = JsonContent.Create(payload)
+        };
+        AddAuthorizationHeader(request);
+
+        var response = await _httpClient.SendAsync(request);
+
+        if (response.StatusCode == HttpStatusCode.RedirectKeepVerb ||
+            response.StatusCode == HttpStatusCode.MovedPermanently ||
+            response.StatusCode == HttpStatusCode.Found)
+        {
+            var newUrl = response.Headers.Location.ToString();
+            request = new HttpRequestMessage(HttpMethod.Post, newUrl)
+            {
+                Content = JsonContent.Create(payload)
+            };
+            AddAuthorizationHeader(request);
 
             response = await _httpClient.SendAsync(request);
         }
@@ -75,26 +103,51 @@ public class ApiResponseHelper
         return await HandleApiResponse<T>(response);
     }
 
-
-
-    // Generic method to handle POST requests
-    public async Task<BaseResponse<T>> PostAsync<T>(string url, object payload)
-    {
-        var response = await _httpClient.PostAsJsonAsync(url, payload);
-        return await HandleApiResponse<T>(response);
-    }
-
-    // Generic method to handle PUT requests
     public async Task<BaseResponse<T>> PutAsync<T>(string url, object payload)
     {
-        var response = await _httpClient.PutAsJsonAsync(url, payload);
+        var request = new HttpRequestMessage(HttpMethod.Put, url)
+        {
+            Content = JsonContent.Create(payload)
+        };
+        AddAuthorizationHeader(request);
+
+        var response = await _httpClient.SendAsync(request);
+
+        if (response.StatusCode == HttpStatusCode.RedirectKeepVerb ||
+            response.StatusCode == HttpStatusCode.MovedPermanently ||
+            response.StatusCode == HttpStatusCode.Found)
+        {
+            var newUrl = response.Headers.Location.ToString();
+            request = new HttpRequestMessage(HttpMethod.Put, newUrl)
+            {
+                Content = JsonContent.Create(payload)
+            };
+            AddAuthorizationHeader(request);
+
+            response = await _httpClient.SendAsync(request);
+        }
+
         return await HandleApiResponse<T>(response);
     }
 
-    // Generic method to handle DELETE requests
     public async Task<BaseResponse<T>> DeleteAsync<T>(string url)
     {
-        var response = await _httpClient.DeleteAsync(url);
+        var request = new HttpRequestMessage(HttpMethod.Delete, url);
+        AddAuthorizationHeader(request);
+
+        var response = await _httpClient.SendAsync(request);
+
+        if (response.StatusCode == HttpStatusCode.RedirectKeepVerb ||
+            response.StatusCode == HttpStatusCode.MovedPermanently ||
+            response.StatusCode == HttpStatusCode.Found)
+        {
+            var newUrl = response.Headers.Location.ToString();
+            request = new HttpRequestMessage(HttpMethod.Delete, newUrl);
+            AddAuthorizationHeader(request);
+
+            response = await _httpClient.SendAsync(request);
+        }
+
         return await HandleApiResponse<T>(response);
     }
 
