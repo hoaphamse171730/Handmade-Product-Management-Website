@@ -17,33 +17,12 @@
             <a class="text-4xl font-bold" asp-area="" asp-page="/Index">Handmade Product</a>
             <div class="space-x-4">
                 <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Index">Home</a>
-                <div class="group relative inline-block text-left">
-                    <button id="menu-button" class="text-gray-700 hover:text-blue-600">
-                        Category
-                        <i class="fa fa-caret-down ml-2"></i>
-                    </button>
-
-                    <!-- Dropdown menu -->
-@*                     <div class="group-hover:block absolute hidden w-40 origin-top-left divide-y divide-gray-100 rounded-md bg-white shadow-lg transition duration-300">
-                        <div class="py-1">
-                            @if (Model.Categories != null)
-                            {
-                                @foreach (var category in Model.Categories)
-                                {
-                                    <a href="/category/@category.Id" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">@category.Name</a>
-                                }
-
-                            }
-
-                        </div>
-                    </div>
- *@                </div>
+                @await Component.InvokeAsync("CategoryMenu")
+                <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Product/ProductList">Product</a>
+                <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Review/Index">Reviews</a>
                 <a asp-page="/Login">
                     <button class="rounded-lg bg-cyan-600 px-4 py-2 font-semibold text-white transition duration-300 hover:bg-cyan-700" asp-area="" asp-page="/Login">Login</button>
                 </a>
-                <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Privacy">Privacy</a>
-                <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Product/ProductList">Product</a>
-                <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Review/Index">Reviews</a>
             </div>
         </nav>
     </header>
