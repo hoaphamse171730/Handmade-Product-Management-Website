@@ -4,7 +4,7 @@ public static class Constants
 {
     #region Base
 
-    public const string ApiBaseUrl = "https://localhost:7159";
+    public const string ApiBaseUrl = "http://localhost:5041";
     public const string AvatarBaseUrl = "/images/avatars";
     public const string VNPAY = "VNPAY";
     public const string TimeZoneSEAsiaStandard = "SE Asia Standard Time";
@@ -232,5 +232,7 @@ public static class Constants
     public const string ErrorMessageDeletedReplyOfDeletedProduct = "Cannot recover reply for a deleted product";
     public const string ErrorMessageDeletedReplyOfDeletedReview = "Cannot recover reply for a deleted review";
     public const string ErrorMessageReplyIsNotDeletedYet = "Reply is not deleted";
+
+    public const string ErrorMessageFetchingFailed = "An error occurred while fetching data.";
     #endregion
 }

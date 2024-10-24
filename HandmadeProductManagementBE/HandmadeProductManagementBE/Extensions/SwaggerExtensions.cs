@@ -8,7 +8,7 @@ public static class SwaggerExtensions
     {
         services.AddSwaggerGen(c =>
         {
-            c.SwaggerDoc("v1", new OpenApiInfo { Title = "Your API", Version = "v1" });
+            c.SwaggerDoc("v1", new OpenApiInfo { Title = "Handmade Product Management System", Version = "v1" });
 
             // Add JWT Authentication support in Swagger
             c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
