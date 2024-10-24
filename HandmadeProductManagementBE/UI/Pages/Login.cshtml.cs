@@ -45,7 +45,7 @@ public class LoginModel : PageModel
             if (!string.IsNullOrEmpty(token))
             {
                 HttpContext.Session.SetString("Token", token);
-                return RedirectToPage("/HomePage");
+                return Redirect("/");
             }
             else
             {

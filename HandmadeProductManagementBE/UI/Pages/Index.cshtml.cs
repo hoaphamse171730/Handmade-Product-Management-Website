@@ -3,6 +3,7 @@ using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.Core.Store;
 using HandmadeProductManagement.ModelViews.CategoryModelViews;
 using HandmadeProductManagement.ModelViews.ProductModelViews;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace UI.Pages
@@ -28,7 +29,18 @@ namespace UI.Pages
             Categories = GetCategories();
 
             Token = HttpContext.Session.GetString("Token");
+            ViewData["Token"] = Token;
+        }
 
+        public IActionResult OnPostLogout()
+        {
+            var token = HttpContext.Session.GetString("Token");
+            if (token != null)
+            {
+                HttpContext.Session.Remove("Token");
+            }
+
+            return Redirect("/");
         }
 
         private List<TopSellingProducts> GetTop10SellingProducts()
