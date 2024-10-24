@@ -50,8 +50,7 @@ public class LoginModel : PageModel
             {
                 HttpContext.Session.SetString("Token", token);  
                 HttpContext.Session.SetString("UserName", userName);
-
-                return RedirectToPage("/HomePage");
+                return Redirect("/");
             }
             else
             {

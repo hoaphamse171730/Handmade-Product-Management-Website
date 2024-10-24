@@ -2,8 +2,9 @@
 {
     public class UserInfoDto
     {
-        public required string Id { get; set; }
+        public string Id { get; set; }
         public string FullName { get; set; } = string.Empty;
+        public string PhoneNumber { get; set; }
         public string? DisplayName { get; set; } = default!;
         public string? Bio { get; set; } = default!;
         public string? BankAccount { get; set; }
