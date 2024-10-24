@@ -25,16 +25,16 @@ namespace UI.Pages
         public async Task OnGetAsync()
         {
 
-            var response = await _apiResponseHelper.GetAsync<List<ProductSearchVM>>((Constants.ApiBaseUrl + "/api/product/search"));
+            //var response = await _apiResponseHelper.GetAsync<List<ProductSearchVM>>((Constants.ApiBaseUrl + "/api/product/search"));
 
-            if (response.StatusCode == StatusCodeHelper.OK && response.Data != null)
-            {
-                products = response.Data;
-            }
-            else
-            {
-                ModelState.AddModelError(string.Empty, response.Message ?? "An error occurred while fetching weather forecasts.");
-            }
+            //if (response.StatusCode == StatusCodeHelper.OK && response.Data != null)
+            //{
+            //    products = response.Data;
+            //}
+            //else
+            //{
+            //    ModelState.AddModelError(string.Empty, response.Message ?? "An error occurred while fetching weather forecasts.");
+            //}
         }
     }
 }
