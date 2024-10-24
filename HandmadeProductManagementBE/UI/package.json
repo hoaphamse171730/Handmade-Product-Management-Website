@@ -4,5 +4,8 @@
   },
   "scripts": {
     "build:css": "npx tailwindcss -i ./wwwroot/css/site.css -o ./wwwroot/css/output.css --minify"
+  },
+  "devDependencies": {
+    "eslint": "^9.13.0"
   }
 }

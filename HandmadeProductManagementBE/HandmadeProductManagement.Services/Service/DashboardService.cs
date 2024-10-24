@@ -125,7 +125,8 @@ namespace HandmadeProductManagement.Services.Service
                                                       .OrderByDescending(p => p.SoldCount)
                                                       .Take(10)
                                                       .Select(p => new TopSellingProducts
-                                                      { 
+                                                      {
+                                                            Id = p.Id,
                                                             Name = p.Name,
                                                             CategoryName = p.Category != null ? p.Category.Name : "",
                                                             Price = p.ProductItems.FirstOrDefault() != null ? p.ProductItems.FirstOrDefault()!.Price : 0,
@@ -148,6 +149,7 @@ namespace HandmadeProductManagement.Services.Service
                                                .Take(10)
                                                .Select(p => new ProductForDashboard
                                                 {
+                                                   Id = p.Id,
                                                     Name = p.Name,
                                                     CategoryName = p.Category != null ? p.Category.Name : "",
                                                     Price = p.ProductItems.FirstOrDefault() != null ? p.ProductItems.FirstOrDefault()!.Price : 0,
