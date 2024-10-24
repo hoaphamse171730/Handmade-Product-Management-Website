@@ -12,7 +12,7 @@
     {
         <div class="border border-gray-300 rounded-lg p-4 bg-white shadow-md">
             <div class="flex flex-col">
-                @* <span class="font-semibold">@review.UserDisplayName</span> *@
+                <span class="font-semibold">@(Model.Users.FirstOrDefault(user => user.Id == review.UserId)?.UserName ?? "Unknown User")</span>
                 <span class="text-gray-500 text-sm">@review.Date?.ToString("g")</span>
                 <div class="flex items-center">
                     @for (int i = 1; i <= 5; i++)
@@ -25,12 +25,9 @@
                 <p class="mt-2">@review.Content</p>
             </div>
 
-            <!-- Review Content -->
-            <p class="text-gray-800 mb-4">@review.Content</p>
-
             <!-- Reply Section with Shop ID -->
             <div class="relative ml-4 bg-gray-50 border border-gray-300 rounded-lg p-2 mt-4">
-                <div class="text-gray-700 font-semibold mb-2">Shop ID: @review.ProductId</div>
+                <div class="text-gray-700 font-semibold mb-2">@(Model.Shops.FirstOrDefault(shop => shop.Id == review.Reply?.ShopId)?.Name ?? "Unknown Shop")</div>
 
                 @if (review.Reply != null)
                 {

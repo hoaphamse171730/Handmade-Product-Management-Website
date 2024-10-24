@@ -44,9 +44,13 @@ public class LoginModel : PageModel
             var responseContent = await response.Content.ReadAsStringAsync();
             var loginResponse = JsonConvert.DeserializeObject<LoginResponse>(responseContent);
             var token = loginResponse?.Data?.Token;
+            var userName = loginResponse?.Data?.UserName ?? string.Empty;
+
             if (!string.IsNullOrEmpty(token))
             {
-                HttpContext.Session.SetString("Token", token);
+                HttpContext.Session.SetString("Token", token);  
+                HttpContext.Session.SetString("UserName", userName);
+
                 return RedirectToPage("/HomePage");
             }
             else
