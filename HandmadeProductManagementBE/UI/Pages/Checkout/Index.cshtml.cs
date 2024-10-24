@@ -10,12 +10,10 @@ namespace UI.Pages.Checkout
     public class IndexModel : PageModel
     {
         private readonly ApiResponseHelper _apiResponseHelper;
-        private readonly IHttpClientFactory _httpClientFactory;
 
-        public IndexModel(ApiResponseHelper apiResponseHelper, IHttpClientFactory httpClientFactory)
+        public IndexModel(ApiResponseHelper apiResponseHelper)
         {
             _apiResponseHelper = apiResponseHelper ?? throw new ArgumentNullException(nameof(apiResponseHelper));
-            _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
         }
 
         public List<CartItemGroupDto> CartItems { get; set; } = new List<CartItemGroupDto>();
@@ -23,10 +21,14 @@ namespace UI.Pages.Checkout
         public decimal Subtotal { get; set; }
         public decimal Total { get; set; }
 
+        public string Token { get; set; }
+
         public async Task OnGetAsync()
         {
             CartItems = await GetCartItemsAsync();
             UserInfo = await GetUserInfoAsync();
+            Token = HttpContext.Session.GetString("Token");
+            ViewData["Token"] = Token;
         }
 
         private async Task<List<CartItemGroupDto>> GetCartItemsAsync()
