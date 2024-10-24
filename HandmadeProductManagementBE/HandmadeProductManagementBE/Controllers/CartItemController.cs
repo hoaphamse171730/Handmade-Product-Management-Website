@@ -19,7 +19,6 @@ namespace HandmadeProductManagement.Controllers
             _cartItemService = cartItemService;
         }
 
-        [Authorize]
         // GET: api/cartitem
         [HttpGet]
         public async Task<IActionResult> GetCartItems()
@@ -30,7 +29,7 @@ namespace HandmadeProductManagement.Controllers
                 Code = "Success",
                 StatusCode = StatusCodeHelper.OK,
                 Message = "Retrieved cart items successfully!",
-                Data = await _cartItemService.GetCartItemsByUserIdAsync(userId)
+                Data = await _cartItemService.GetCartItemsByUserIdAsync("10a831f5-e739-4103-6bce-08dcf23ca862")
             };
             return Ok(response);
         }

@@ -137,6 +137,7 @@ namespace HandmadeProductManagement.Services.Service
                         .ThenInclude(p => p.Category!)
                             .ThenInclude(cat => cat.Promotion)
                 .Include(ci => ci.ProductItem!.Product!.Shop)
+                .Include(ci => ci.ProductItem!.Product!.ProductImages)
                 .Where(ci => ci.UserId == userIdGuid 
                     && ci.DeletedTime == null 
                     && ci.ProductItem != null
@@ -153,6 +154,13 @@ namespace HandmadeProductManagement.Services.Service
                     ShopName = ci.ProductItem.Product.Shop.Name,
                     UnitPrice = ci.ProductItem.Price,
                     DiscountPrice = ci.ProductItem.Price * (1 - (ci.ProductItem.Product!.Category!.Promotion != null && ci.ProductItem.Product.Category.Promotion.Status.Equals("active", StringComparison.OrdinalIgnoreCase) ? ci.ProductItem.Product.Category.Promotion.DiscountRate : 0)),
+                    ProductId = ci.ProductItem.Product.Id,
+                    ProductName = ci.ProductItem.Product.Name,
+                    // Lấy URL của hình ảnh cuối cùng
+                    ImageUrl = ci.ProductItem.Product.ProductImages
+                        .OrderByDescending(pi => pi.CreatedTime)
+                        .Select(pi => pi.Url)
+                        .FirstOrDefault() ?? string.Empty,
                     VariationOptionValues = _unitOfWork.GetRepository<ProductConfiguration>().Entities
                         .Where(pc => pc.ProductItemId == ci.ProductItemId)
                         .Select(pc => pc.VariationOption!.Value)
@@ -171,6 +179,9 @@ namespace HandmadeProductManagement.Services.Service
                     CartItems = group.Select(ci => new CartItemDto
                     {
                         Id = ci.Id,
+                        ProductId= ci.ProductId,
+                        ProductName = ci.ProductName,
+                        ImageUrl = ci.ImageUrl,
                         ProductItemId = ci.ProductItemId,
                         ProductQuantity = ci.ProductQuantity,
                         UnitPrice = ci.UnitPrice,
