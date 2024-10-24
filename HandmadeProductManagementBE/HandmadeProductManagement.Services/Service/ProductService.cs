@@ -309,17 +309,23 @@ namespace HandmadeProductManagement.Services.Service
             }
 
             // Sort Logic
-            if (searchFilter.SortByPrice)
+            switch (searchFilter.SortOption)
             {
-                query = searchFilter.SortDescending
-                    ? query.OrderByDescending(p => p.ProductItems.Min(pi => pi.Price))
-                    : query.OrderBy(p => p.ProductItems.Min(pi => pi.Price));
-            }
-            else
-            {
-                query = searchFilter.SortDescending
-                    ? query.OrderByDescending(p => p.Rating)
-                    : query.OrderBy(p => p.Rating);
+                case Constants.SortByPrice:
+                    query = searchFilter.sortDescending
+                        ? query.OrderByDescending(p => p.ProductItems.Min(pi => pi.Price))
+                        : query.OrderBy(p => p.ProductItems.Min(pi => pi.Price));
+                    break;
+
+                case Constants.SortByRating:
+                    query = searchFilter.sortDescending
+                        ? query.OrderByDescending(p => p.Rating)
+                        : query.OrderBy(p => p.Rating);
+                    break;
+                
+                default:
+                    query = query.OrderByDescending(p => p.Rating);
+                    break;
             }
 
             // Pagination: Apply Skip and Take

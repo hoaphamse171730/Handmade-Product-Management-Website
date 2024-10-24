@@ -1,6 +1,7 @@
 ﻿using HandmadeProductManagement.Core.Common;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.Core.Store;
+using HandmadeProductManagement.ModelViews.CategoryModelViews;
 using HandmadeProductManagement.ModelViews.ProductModelViews;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -17,6 +18,7 @@ namespace UI.Pages
 
         public List<TopSellingProducts> Top10SellingProducts { get; set; }
         public List<ProductForDashboard> Top10NewProducts { get; set; }
+        public List<CategoryDto> Categories { get; set; } = new List<CategoryDto>();
 
         public void OnGet()
         {

@@ -40,12 +40,11 @@ public static class IdentityServiceExtensions
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["TokenKey"] ?? string.Empty)),
                 ValidateIssuer = false,
                 ValidateAudience = false,
-                RoleClaimType = ClaimTypes.Role,  // Ensure this matches your token's role claim
+                RoleClaimType = ClaimTypes.Role, 
                 ValidateLifetime = true,
                 ClockSkew = TimeSpan.Zero
             };
         });
-
         //services.AddAuthorization();
         services.AddAuthorization();
         services.AddScoped<TokenService>();
