@@ -9,7 +9,11 @@
             <div class="swiper-slide">
                 <div class="mb-10 text-center">
                     <a href="/Product/@product.Id" class="block transform transition-transform hover:scale-105">
-                        <img class="mx-auto h-40 w-40" src="@product.ImageUrl" alt="@product.Name" />
+                        <div class="relative inline-block">
+                            <img class="mx-auto h-40 w-40" src="@product.ImageUrl" alt="@product.Name" />
+                            <!-- Sold Count Overlay -->
+                            <div class="h-4 w-full bg-transparent bg-opacity-50"></div>
+                        </div>
                         <h3 class="text-md font-semibold transition-colors duration-300 hover:text-blue-600">@product.Name</h3>
                         <p class="text-sm text-gray-600">₫@product.Price</p>
                     </a>
