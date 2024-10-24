@@ -9,6 +9,7 @@ using HandmadeProductManagement.Core.Exceptions.Handler; // Adjust this based on
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
+using System.Net;
 
 namespace HandmadeProductManagement.Core.Store;
 public class ApiResponseHelper
@@ -18,7 +19,12 @@ public class ApiResponseHelper
 
     public ApiResponseHelper(HttpClient httpClient, IHttpContextAccessor httpContextAccessor)
     {
-        _httpClient = httpClient;
+        var handler = new HttpClientHandler()
+        {
+            AllowAutoRedirect = false // Disable automatic redirects
+        };
+
+        _httpClient = new HttpClient(handler); // Use handler to disable redirect
         _httpContextAccessor = httpContextAccessor;
     }
 
@@ -53,6 +59,19 @@ public class ApiResponseHelper
         Console.WriteLine(request.Headers.ToString());
 
         var response = await _httpClient.SendAsync(request);
+        // Check if the response status is redirect (307 or 301/302)
+        if (response.StatusCode == HttpStatusCode.RedirectKeepVerb ||
+            response.StatusCode == HttpStatusCode.MovedPermanently ||
+            response.StatusCode == HttpStatusCode.Found)
+        {
+            // Handle redirection manually
+            var newUrl = response.Headers.Location.ToString();
+            request = new HttpRequestMessage(HttpMethod.Get, newUrl);
+            AddAuthorizationHeader(request); // Ensure token is added again
+
+            response = await _httpClient.SendAsync(request);
+        }
+
         return await HandleApiResponse<T>(response);
     }
 
