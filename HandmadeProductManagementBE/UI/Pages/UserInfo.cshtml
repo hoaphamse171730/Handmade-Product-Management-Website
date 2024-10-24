@@ -1,0 +1,41 @@
+﻿@page
+@model UI.Pages.UserInfoModel
+@{
+    ViewData["Title"] = "User Info";
+}
+
+<div class="container mx-auto mt-10">
+    <h2 class="text-center text-lg font-bold text-blue-600">User Information</h2>
+
+    <div class="max-w-md mx-auto mt-8">
+        <div class="border p-4 rounded-lg shadow-lg bg-white">
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2">Name:</label>
+                @* <p class="text-gray-600">@Model.UserInfo.Name</p> *@
+            </div>
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2">Email:</label>
+                @* <p class="text-gray-600">@Model.UserInfo.Email</p> *@
+            </div>
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2">Phone Number:</label>
+                @* <p class="text-gray-600">@Model.UserInfo.PhoneNumber</p> *@
+            </div>
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2">Address:</label>
+                @* <p class="text-gray-600">@Model.UserInfo.Address</p> *@
+            </div>
+            <div class="text-center mt-6">
+                <button class="bg-blue-500 hover:bg-blue-700 text-pink font-bold py-2 px-4 rounded">
+                    Edit Profile
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // You can add some JavaScript if needed for this page
+    </script>
+}

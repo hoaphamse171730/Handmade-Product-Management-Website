@@ -26,6 +26,6 @@ app.UseAuthorization();
 
 app.MapRazorPages();
 
-app.MapGet("/", () => Results.Redirect("/HomePage"));
+app.MapGet("/", () => Results.Redirect("/UserInfo"));
 
 app.Run();
