@@ -1,0 +1,67 @@
+﻿@page
+@model UI.Pages.Dashboard.DashboardModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+<div class="dashboard">
+    <h1>Dashboard</h1>
+
+    <div class="dashboard-section">
+        <h2>Total Sale</h2>
+        <p>Total Sales: @Model.TotalSales</p>
+    </div>
+
+    <div class="dashboard-section">
+        <h2>Sales Trend Over Time</h2>
+        <canvas id="salesTrendChart"></canvas>
+    </div>
+
+    <div class="dashboard-section">
+        <h2>Top 10 Most-Sale Shops</h2>
+        <ul>
+            @foreach (var shop in Model.TopShops)
+            {
+                <li>@shop.Name: @shop.TotalSales</li>
+            }
+        </ul>
+    </div>
+
+    <div class="dashboard-section">
+        <h2>Type Distribution</h2>
+        <canvas id="typeDistributionChart"></canvas>
+    </div>
+</div>
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+
+        // Sales Trend Chart
+        var salesTrendCtx = document.getElementById('salesTrendChart').getContext('2d');
+        var salesTrendChart = new Chart(salesTrendCtx, {
+            type: 'line',
+            data: {
+                labels: @Html.Raw(Json.Serialize(Model.SalesTrendDates)),
+                datasets: [{
+                    label: 'Sales',
+                    data: @Html.Raw(Json.Serialize(Model.SalesTrendData)),
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 2,
+                    fill: false
+                }]
+            }
+        });
+
+        // Type Distribution Chart
+        var typeDistributionCtx = document.getElementById('typeDistributionChart').getContext('2d');
+        var typeDistributionChart = new Chart(typeDistributionCtx, {
+            type: 'pie',
+            data: {
+                labels: @Html.Raw(Json.Serialize(Model.TypeDistributionLabels)),
+                datasets: [{
+                    data: @Html.Raw(Json.Serialize(Model.TypeDistributionData)),
+                    backgroundColor: ['#ff6384', '#36a2eb', '#cc65fe', '#ffce56']
+                }]
+            }
+        });
+    </script>
+}
