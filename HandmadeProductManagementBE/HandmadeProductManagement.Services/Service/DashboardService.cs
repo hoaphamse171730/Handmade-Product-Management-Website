@@ -107,6 +107,33 @@ namespace HandmadeProductManagement.Services.Service
 
             return topShops;
         }
+        public async Task<List<TopShopDto>> GetTop10ShopsByTotalSalesAsync()
+        {
+            var shippedOrders = await _unitOfWork.GetRepository<Order>()
+                .Entities
+                .Where(order => order.Status == Constants.OrderStatusShipped)
+                .GroupBy(order => order.OrderDetails
+                    .Select(od => od.ProductItem.Product.ShopId).FirstOrDefault())
+                .Select(group => new
+                {
+                    ShopId = group.Key,
+                    TotalSales = group.Sum(order => order.TotalPrice)
+                })
+                .OrderByDescending(g => g.TotalSales)
+                .Take(10)
+                .ToListAsync();
+
+            var topShops = shippedOrders.Select(s => new TopShopDto
+            {
+                Name = _unitOfWork.GetRepository<Shop>().Entities.FirstOrDefault(shop => shop.Id == s.ShopId)?.Name ?? "Unknown",
+                TotalSales = s.TotalSales
+            }).ToList();
+
+            return topShops;
+        }
+
+
+
 
         public async Task<decimal> GetTotalSaleByShopId(string Id, DashboardDTO dashboardDTO)
         {

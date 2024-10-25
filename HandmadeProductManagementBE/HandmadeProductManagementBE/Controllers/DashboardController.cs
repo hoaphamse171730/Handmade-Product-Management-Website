@@ -64,6 +64,15 @@ using Microsoft.AspNetCore.Mvc;
             return Ok(BaseResponse<List<TopShopDashboardDTO>>.OkResponse(topShops));
         }
 
+        [HttpGet("top-sales-shops")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetTop10SalesShops()
+        {
+            var topShops = await _dashboardService.GetTop10ShopsByTotalSalesAsync();
+            return Ok(BaseResponse<List<TopShopDto>>.OkResponse(topShops));
+        }
+
+
         [HttpPost("TotalSaleByShopId")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> TotalSaleByShopId(string Id, DashboardDTO dashboardDTO)

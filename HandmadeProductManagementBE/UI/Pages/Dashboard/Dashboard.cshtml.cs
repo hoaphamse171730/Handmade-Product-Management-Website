@@ -15,7 +15,7 @@ namespace UI.Pages.Dashboard
         public decimal TotalSales { get; set; }
         public List<string> SalesTrendDates { get; set; }
         public List<decimal> SalesTrendData { get; set; }
-        public List<Shop> TopShops { get; set; }
+        public List<TopShopDto> TopShops { get; set; }
         public List<string> TypeDistributionLabels { get; set; }
         public List<int> TypeDistributionData { get; set; }
         public DashboardModel(ApiResponseHelper apiResponseHelper)
@@ -34,8 +34,8 @@ namespace UI.Pages.Dashboard
             SalesTrendData = salesTrendResponse.Data.Sales;
 
             // Fetch top 10 most-sale shops
-            //var topShopsResponse = await _apiResponseHelper.GetAsync<BaseResponse<List<Shop>>>($"{Constants.ApiBaseUrl}/api/shops/top");
-            //TopShops = topShopsResponse.Data;
+            var topShopsResponse = await _apiResponseHelper.GetAsync<List<TopShopDto>>($"{Constants.ApiBaseUrl}/api/dashboard/top-sales-shops");
+            TopShops = topShopsResponse.Data;
 
             // Fetch type distribution
             //var typeDistributionResponse = await _apiResponseHelper.GetAsync<BaseResponse<TypeDistributionDto>>("api/sales/type-distribution");
