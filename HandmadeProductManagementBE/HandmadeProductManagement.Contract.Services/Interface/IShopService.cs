@@ -5,7 +5,7 @@ namespace HandmadeProductManagement.Contract.Services.Interface
 {
     public interface IShopService
     {
-        Task<PaginatedList<ShopResponseModel>> GetShopsByPageAsync(int pageNumber, int pageSize);
+        Task<ShopResponseModel> GetShopByIdAsync(string shopId);
         Task<ShopResponseModel> GetShopByUserIdAsync(Guid userId);
         Task<bool> CreateShopAsync(string userId, CreateShopDto createShop);
         Task<bool> UpdateShopAsync(string userId, CreateShopDto shop);
