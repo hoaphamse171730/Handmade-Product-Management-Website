@@ -69,7 +69,7 @@ public class RegistrationModel : PageModel
 
         if (response.IsSuccessStatusCode)
         {
-            return RedirectToPage("/Login");
+            return RedirectToPage("/HomePage");
         }
         else
         {
