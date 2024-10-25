@@ -130,6 +130,32 @@ public class ApiResponseHelper
 
         return await HandleApiResponse<T>(response);
     }
+    public async Task<BaseResponse<T>> PatchAsync<T>(string url, object payload)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Patch, url)
+        {
+            Content = JsonContent.Create(payload)
+        };
+        AddAuthorizationHeader(request);
+
+        var response = await _httpClient.SendAsync(request);
+
+        if (response.StatusCode == HttpStatusCode.RedirectKeepVerb ||
+            response.StatusCode == HttpStatusCode.MovedPermanently ||
+            response.StatusCode == HttpStatusCode.Found)
+        {
+            var newUrl = response.Headers.Location.ToString();
+            request = new HttpRequestMessage(HttpMethod.Patch, newUrl)
+            {
+                Content = JsonContent.Create(payload)
+            };
+            AddAuthorizationHeader(request);
+
+            response = await _httpClient.SendAsync(request);
+        }
+
+        return await HandleApiResponse<T>(response);
+    }
 
     public async Task<BaseResponse<T>> DeleteAsync<T>(string url)
     {
