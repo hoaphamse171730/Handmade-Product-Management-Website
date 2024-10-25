@@ -1,6 +1,4 @@
-
 ﻿using HandmadeProductManagement.Core.Common;
-
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.Core.Store;
 using HandmadeProductManagement.ModelViews.CategoryModelViews;
@@ -24,27 +22,14 @@ namespace UI.Pages
         public List<CategoryDto> Categories { get; set; } = [];
         public string Token { get; set; }
 
-
         public void OnGet()
-
         {
-            Top10SellingProducts = GetTop10SellingProducts();
-            Top10NewProducts = GetTop10NewProducts();
-            Categories = GetCategories();
 
             Token = HttpContext.Session.GetString("Token");
             ViewData["Token"] = Token;
-        }
-
-        public IActionResult OnPostLogout()
-        {
-            var token = HttpContext.Session.GetString("Token");
-            if (token != null)
-            {
-                HttpContext.Session.Remove("Token");
-            }
-
-            return Redirect("/");
+            Top10SellingProducts = GetTop10SellingProducts();
+            Top10NewProducts = GetTop10NewProducts();
+            Categories = GetCategories();
         }
 
         private List<TopSellingProducts> GetTop10SellingProducts()
@@ -64,7 +49,6 @@ namespace UI.Pages
             {
                 return response.Data;
             }
-
             return new List<ProductForDashboard>();
         }
 
@@ -76,7 +60,6 @@ namespace UI.Pages
                 return response.Data;
             }
             return new List<CategoryDto>();
-
         }
     }
 

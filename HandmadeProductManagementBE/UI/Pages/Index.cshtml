@@ -7,12 +7,12 @@
 
 <div class="flex px-40">
     <div class="w-1/2 overflow-hidden">
-        @await Html.PartialAsync("_Top10SellingProducts", Model.Top10SellingProducts)
+        @await Html.PartialAsync("HomePage/_Top10SellingProducts", Model.Top10SellingProducts)
     </div>
 
 
     <div class="w-1/2 overflow-hidden">
-        @await Html.PartialAsync("_Top10NewProducts", Model.Top10NewProducts)
+        @await Html.PartialAsync("HomePage/_Top10NewProducts", Model.Top10NewProducts)
     </div>
 </div>
 

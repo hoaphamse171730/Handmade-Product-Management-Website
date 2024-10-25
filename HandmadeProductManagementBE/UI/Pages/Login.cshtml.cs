@@ -24,6 +24,17 @@ public class LoginModel : PageModel
 
     public string? ErrorMessage { get; set; }
 
+    public IActionResult OnPostLogout()
+    {
+        var token = HttpContext.Session.GetString("Token");
+        if (token != null)
+        {
+            HttpContext.Session.Remove("Token");
+        }
+
+        return RedirectToPage("/Login");
+    }
+
     public async Task<IActionResult> OnPostAsync()
     {
         if (!ModelState.IsValid)

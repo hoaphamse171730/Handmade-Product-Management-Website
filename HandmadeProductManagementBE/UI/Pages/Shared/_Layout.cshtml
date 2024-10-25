@@ -17,32 +17,43 @@
             <a class="text-4xl font-bold" asp-area="" asp-page="/Index">Handmade Product</a>
             <div class="space-x-4">
                 <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Index">Home</a>
-
+                <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Privacy">Privacy</a>
                 <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Product/ProductList">Product</a>
                 <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Product/ProductSeller">ProductSeller</a>
+                <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Order/OrderHistory">Order</a>
+                <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Seller/Shop">My Shop</a>
+                <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Dashboard/Dashboard">Dashboard</a>
+                <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Promotion/Index">Promotion</a>
 
                 @await Component.InvokeAsync("CategoryMenu")
+
                 <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Review/Index">Reviews</a>
                 @using Microsoft.AspNetCore.Http
 
                 @{
                     var token = Context.Session.GetString("Token");
                 }
-
-                @if (!string.IsNullOrEmpty(token))
-                {
-                    <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/UserInfo/UserInfo">My Account</a>
-                }
                 @if (Context.Session.GetString("Token") != null)
                 {
-                    <span class="bg-blue-600 text-white font-semibold rounded-lg px-3 py-1 shadow-md">
-                        Welcome, @Context.Session.GetString("UserName")
-                    </span>
-                                        
-                    <form method="post" asp-page-handler="Logout" class="inline-block">
-                        <button type="submit" class="rounded-lg bg-red-600 px-6 py-2 font-semibold text-white transition duration-300 hover:bg-red-700">Logout</button>
-                    </form>
+                    <!-- User Menu Dropdown -->
+                    <div class="group relative inline-block text-left">
+                        <!-- Button to trigger the dropdown -->
+                        <button id="user-menu-button" class="rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white shadow-md transition duration-300 hover:bg-blue-700 focus:outline-none">
+                            Welcome, @Context.Session.GetString("UserName")
+                            <i class="fa fa-caret-down ml-2"></i>
+                        </button>
 
+                        <!-- Dropdown menu -->
+                        <div class="group-hover:block absolute right-0 z-50 hidden w-44 origin-top-right rounded-md bg-white shadow-lg">
+                            <div class="py-1">
+                                <a href="@Url.Page("/UserInfo/UserInfo")" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">My Account</a>
+
+                                <form method="post" asp-page-handler="Logout" asp-page="/Login" class="block">
+                                    <button type="submit" class="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100">Logout</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
                 }
                 else
                 {
@@ -50,7 +61,6 @@
                     <button class="rounded-lg bg-cyan-600 px-4 py-2 font-semibold text-white transition duration-300 hover:bg-cyan-700" asp-area="" asp-page="/Login">Login</button>
                 </a>
                 }
-
             </div>
         </nav>
     </header>
