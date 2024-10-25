@@ -152,8 +152,25 @@ public class ApiResponseHelper
         return await HandleApiResponse<T>(response);
     }
 
-        // Centralized method to handle API response and exceptions
-        private async Task<BaseResponse<T>> HandleApiResponse<T>(HttpResponseMessage response)
+    public async Task<BaseResponse<T>> PostFileAsync<T>(string url, IFormFile file)
+    {
+        var content = new MultipartFormDataContent();
+        var fileStreamContent = new StreamContent(file.OpenReadStream());
+        fileStreamContent.Headers.ContentType = new MediaTypeHeaderValue(file.ContentType);
+        content.Add(fileStreamContent, "file", file.FileName);
+
+        var request = new HttpRequestMessage(HttpMethod.Post, url)
+        {
+            Content = content
+        };
+        AddAuthorizationHeader(request);
+
+        var response = await _httpClient.SendAsync(request);
+        return await HandleApiResponse<T>(response);
+    }
+
+    // Centralized method to handle API response and exceptions
+    private async Task<BaseResponse<T>> HandleApiResponse<T>(HttpResponseMessage response)
         {
             if (response.IsSuccessStatusCode)
             {
