@@ -27,6 +27,10 @@ namespace UI.Pages
 
             Token = HttpContext.Session.GetString("Token");
             ViewData["Token"] = Token;
+            Top10SellingProducts = GetTop10SellingProducts();
+            Top10NewProducts = GetTop10NewProducts();
+            Categories = GetCategories();
+
         }
 
         public IActionResult OnPostLogout()
