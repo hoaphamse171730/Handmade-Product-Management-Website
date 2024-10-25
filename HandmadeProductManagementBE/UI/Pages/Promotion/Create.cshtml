@@ -4,31 +4,38 @@
     ViewData["Title"] = "Create Promotion";
 }
 
-<h1>Create Promotion</h1>
+<h1 class="text-3xl font-bold text-center mb-6">Create Promotion</h1>
 
-<form method="post">
-    <div class="form-group">
-        <label asp-for="Promotion.Name"></label>
-        <input asp-for="Promotion.Name" class="form-control" />
-        <span asp-validation-for="Promotion.Name" class="text-danger"></span>
+<form method="post" class="bg-white shadow-md rounded-lg p-6">
+    <div class="mb-4">
+        <label asp-for="Promotion.Name" class="block text-gray-700 text-sm font-bold mb-2"></label>
+        <input asp-for="Promotion.Name" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
+        <span asp-validation-for="Promotion.Name" class="text-red-500 text-xs italic"></span>
     </div>
-    <div class="form-group">
-        <label asp-for="Promotion.Description"></label>
-        <textarea asp-for="Promotion.Description" class="form-control"></textarea>
-        <span asp-validation-for="Promotion.Description" class="text-danger"></span>
+    <div class="mb-4">
+        <label asp-for="Promotion.Description" class="block text-gray-700 text-sm font-bold mb-2"></label>
+        <textarea asp-for="Promotion.Description" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"></textarea>
+        <span asp-validation-for="Promotion.Description" class="text-red-500 text-xs italic"></span>
     </div>
-    <div class="form-group">
-        <label asp-for="Promotion.StartDate"></label>
-        <input asp-for="Promotion.StartDate" class="form-control" type="date" />
-        <span asp-validation-for="Promotion.StartDate" class="text-danger"></span>
+    <div class="mb-4">
+        <label asp-for="Promotion.DiscountRate" class="block text-gray-700 text-sm font-bold mb-2"></label>
+        <input asp-for="Promotion.DiscountRate" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="number" step="0.01" min="0" max="1" />
+        <span asp-validation-for="Promotion.DiscountRate" class="text-red-500 text-xs italic"></span>
     </div>
-    <div class="form-group">
-        <label asp-for="Promotion.EndDate"></label>
-        <input asp-for="Promotion.EndDate" class="form-control" type="date" />
-        <span asp-validation-for="Promotion.EndDate" class="text-danger"></span>
+    <div class="mb-4">
+        <label asp-for="Promotion.StartDate" class="block text-gray-700 text-sm font-bold mb-2"></label>
+        <input asp-for="Promotion.StartDate" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="date" />
+        <span asp-validation-for="Promotion.StartDate" class="text-red-500 text-xs italic"></span>
     </div>
-    <button type="submit" class="btn btn-primary">Create</button>
-    <a asp-page="Index" class="btn btn-secondary">Cancel</a>
+    <div class="mb-4">
+        <label asp-for="Promotion.EndDate" class="block text-gray-700 text-sm font-bold mb-2"></label>
+        <input asp-for="Promotion.EndDate" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="date" />
+        <span asp-validation-for="Promotion.EndDate" class="text-red-500 text-xs italic"></span>
+    </div>
+    <div class="flex items-center justify-between">
+        <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Create</button>
+        <a asp-page="Index" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded ml-2">Cancel</a>
+    </div>
 </form>
 
 @section Scripts {
