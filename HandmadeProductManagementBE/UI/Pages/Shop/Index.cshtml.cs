@@ -25,6 +25,8 @@ namespace UI.Pages.Shop
         public ShopResponseModel Shop { get; private set; } = new ShopResponseModel();
         public List<ProductSearchVM>? Products { get; private set; }
         public List<CategoryDto>? Categories { get; private set; }
+        public int PageNumber { get; set; } = 1;
+        public int PageSize { get; set; } = 12;
 
         public async Task OnGetAsync(
             string? name,
@@ -33,8 +35,12 @@ namespace UI.Pages.Shop
             decimal? minRating,
             string sortOption = "Name",
             bool sortDescending = false,
-            string? id = null)
+            string? id = null,
+            int pageNumber = 1, int pageSize = 12)
         {
+            PageNumber = pageNumber;
+            PageSize = pageSize;
+
             if (string.IsNullOrEmpty(id))
             {
                 ModelState.AddModelError(string.Empty, "Shop ID is required.");
@@ -75,7 +81,7 @@ namespace UI.Pages.Shop
             };
 
             var response = await _apiResponseHelper.GetAsync<List<ProductSearchVM>>(
-                $"{Constants.ApiBaseUrl}/api/product/shop/{id}", searchFilter);
+                $"{Constants.ApiBaseUrl}/api/product/shop/{id}?pageNumber={PageNumber}&pageSize={PageSize}", searchFilter);
 
             return response.StatusCode == StatusCodeHelper.OK && response.Data != null
                 ? response.Data

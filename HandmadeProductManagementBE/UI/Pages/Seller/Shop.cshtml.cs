@@ -26,14 +26,20 @@ namespace UI.Pages.Seller
         public List<ProductSearchVM>? Products { get; private set; }
         public List<CategoryDto>? Categories { get; private set; }
 
+        public int PageNumber { get; set; } = 1;
+        public int PageSize { get; set; } = 12;
+
         public async Task OnGetAsync(
             string? name,
             string? categoryId,
             string? status,
             decimal? minRating,
             string sortOption = "Name",
-            bool sortDescending = false)
+            bool sortDescending = false,
+            int pageNumber = 1, int pageSize = 12)
         {
+            PageNumber = pageNumber;
+            PageSize = pageSize;
             Shop = await GetCurrentUserShop();
             Products = await GetProducts(name, categoryId, status, minRating, sortOption, sortDescending);
             await LoadCategoriesAsync();
@@ -67,7 +73,7 @@ namespace UI.Pages.Seller
             };
 
             var response = await _apiResponseHelper.GetAsync<List<ProductSearchVM>>(
-                $"{Constants.ApiBaseUrl}/api/product/search-seller", searchFilter);
+                $"{Constants.ApiBaseUrl}/api/product/search-seller?pageNumber={PageNumber}&pageSize={PageSize}", searchFilter);
 
             return response.StatusCode == StatusCodeHelper.OK && response.Data != null
                 ? response.Data
