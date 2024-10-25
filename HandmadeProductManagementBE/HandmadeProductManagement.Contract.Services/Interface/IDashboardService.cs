@@ -20,5 +20,6 @@ namespace HandmadeProductManagement.Contract.Services.Interface
         Task<IList<TopSellingProducts>> GetTopSellingProducts();
 
         Task<IList<ProductForDashboard>> GetTop10NewProducts();
+        Task<SalesTrendDto> GetSalesTrendAsync();
     }
 }

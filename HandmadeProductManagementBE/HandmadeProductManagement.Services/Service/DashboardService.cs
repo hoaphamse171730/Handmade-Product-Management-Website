@@ -18,7 +18,28 @@ namespace HandmadeProductManagement.Services.Service
         {
             _unitOfWork = unitOfWork;
         }
+        public async Task<SalesTrendDto> GetSalesTrendAsync()
+        {
+            var repository = _unitOfWork.GetRepository<Order>();
 
+            var shippedOrders = await repository.Entities
+                .Where(order => order.Status == "Shipped" && !order.DeletedTime.HasValue)
+                .GroupBy(order => order.OrderDate.Date)
+                .Select(group => new
+                {
+                    Date = group.Key,
+                    Sales = group.Sum(order => order.TotalPrice)
+                })
+                .OrderBy(result => result.Date)
+                .ToListAsync();
+
+            return new SalesTrendDto
+            {
+                Dates = shippedOrders.Select(o => o.Date.ToString("yyyy-MM-dd")).ToList(),
+                Sales = shippedOrders.Select(o => o.Sales).ToList()
+            };
+        }
+    
         public async Task<TotalOrdersByStatusDTO> GetTotalOrdersByStatus()
         {
             var orders = await _unitOfWork.GetRepository<Order>().Entities.ToListAsync();

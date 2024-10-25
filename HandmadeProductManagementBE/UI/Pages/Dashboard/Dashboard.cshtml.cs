@@ -1,6 +1,8 @@
 using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.Core.Common;
 using HandmadeProductManagement.Core.Store;
+using HandmadeProductManagement.ModelViews.DashboardModelViews;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -23,16 +25,16 @@ namespace UI.Pages.Dashboard
 
         public async Task OnGetAsync()
         {
-            var totalSalesResponse = await _apiResponseHelper.GetAsync<BaseResponse<decimal>>("api/sales/total");
+            var totalSalesResponse = await _apiResponseHelper.GetAsync<decimal>($"{Constants.ApiBaseUrl}/api/dashboard/total-sales");
             TotalSales = totalSalesResponse.Data;
 
-            // Fetch sales trend data
-            //var salesTrendResponse = await _apiResponseHelper.GetAsync<BaseResponse<SalesTrendDto>>("api/sales/trend");
-            //SalesTrendDates = salesTrendResponse.Data.Dates;
-            //SalesTrendData = salesTrendResponse.Data.Sales;
+            //Fetch sales trend data
+            var salesTrendResponse = await _apiResponseHelper.GetAsync<SalesTrendDto>($"{Constants.ApiBaseUrl}/api/dashboard/sales/trend");
+            SalesTrendDates = salesTrendResponse.Data.Dates;
+            SalesTrendData = salesTrendResponse.Data.Sales;
 
             // Fetch top 10 most-sale shops
-            //var topShopsResponse = await _apiResponseHelper.GetAsync<BaseResponse<List<Shop>>>("api/shops/top");
+            //var topShopsResponse = await _apiResponseHelper.GetAsync<BaseResponse<List<Shop>>>($"{Constants.ApiBaseUrl}/api/shops/top");
             //TopShops = topShopsResponse.Data;
 
             // Fetch type distribution

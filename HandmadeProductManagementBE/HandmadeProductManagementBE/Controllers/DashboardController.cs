@@ -24,6 +24,14 @@ using Microsoft.AspNetCore.Mvc;
                 _dashboardService = dashboardService;
             }
 
+        [HttpGet("sales/trend")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetSalesTrend()
+        {
+            var salesTrendDto = await _dashboardService.GetSalesTrendAsync();
+            return Ok(BaseResponse<SalesTrendDto>.OkResponse(salesTrendDto));
+        }
+
         [HttpGet("total-orders-by-status")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetTotalOrdersByStatus()
