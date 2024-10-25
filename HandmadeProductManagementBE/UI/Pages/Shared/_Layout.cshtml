@@ -18,17 +18,11 @@
             <div class="space-x-4">
                 <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Index">Home</a>
 <<<<<<< HEAD
-<<<<<<< HEAD
                 <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Privacy">Privacy</a>
                 <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/CartPage">CartPage</a>
 =======
-=======
-                <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Privacy">Privacy</a>
->>>>>>> dev
                 <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Product/ProductList">Product</a>
                 <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Product/ProductSeller">ProductSeller</a>
-                <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Order/OrderHistory">Order</a>
-                <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Dashboard/Dashboard">Dashboard</a>
 
                 @await Component.InvokeAsync("CategoryMenu")
                 <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Review/Index">Reviews</a>
@@ -44,7 +38,7 @@
                 }
                 @if (Context.Session.GetString("Token") != null)
                 {
-                    <span class="rounded-lg bg-blue-600 px-3 py-1 font-semibold text-white shadow-md">
+                    <span class="bg-blue-600 text-white font-semibold rounded-lg px-3 py-1 shadow-md">
                         Welcome, @Context.Session.GetString("UserName")
                     </span>
                                         
