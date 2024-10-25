@@ -4,62 +4,12 @@
     ViewData["Title"] = "Home page";
 }
 
-<<<<<<< HEAD
-<div class="text-center">
-    @if (Model.categories == null || !Model.categories.Any())
-    {
-        <p>No Found</p>
-    }
-    else
-    {
-        <h2>Category List</h2>
-            <tbody>
-                <ul>
-                    @foreach (var category in Model.categories)
-                    {
-                        <li>
-                            @category.Name
-                        </li>
-                    }
-                </ul>
 
-            </tbody>
-    }
-
-    <h1 class="text-blue-700">Welcome to the Handmade Product Management System</h1>
-    <p>Use the navigation to interact with various functionalities.</p>
-
-    @if (Model.products == null || !Model.products.Any())
-    {
-        <p>No WeatherForecasts Found</p>
-    }
-    else
-    {
-        <table>
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Rating</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var product in Model.products)
-                {
-                    <tr>
-                        <td>@product.Name</td>
-                        <td>@product.Rating</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-
-    }
-=======
 <div class="flex px-40">
     <div class="w-1/2 overflow-hidden">
         @await Html.PartialAsync("_Top10SellingProducts", Model.Top10SellingProducts)
     </div>
->>>>>>> dev
+
 
     <div class="w-1/2 overflow-hidden">
         @await Html.PartialAsync("_Top10NewProducts", Model.Top10NewProducts)

@@ -1,9 +1,6 @@
-<<<<<<< HEAD
-﻿using HandmadeProductManagement.Contract.Repositories.Entity;
-using HandmadeProductManagement.Core.Common;
-=======
+
 ﻿using HandmadeProductManagement.Core.Common;
->>>>>>> dev
+
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.Core.Store;
 using HandmadeProductManagement.ModelViews.CategoryModelViews;
@@ -27,13 +24,9 @@ namespace UI.Pages
         public List<CategoryDto> Categories { get; set; } = [];
         public string Token { get; set; }
 
-<<<<<<< HEAD
-        public List<CategoryDto>? categories { get; set; }
 
-        public async Task OnGetAsync()
-=======
         public void OnGet()
->>>>>>> dev
+
         {
             Top10SellingProducts = GetTop10SellingProducts();
             Top10NewProducts = GetTop10NewProducts();
@@ -71,23 +64,7 @@ namespace UI.Pages
             {
                 return response.Data;
             }
-<<<<<<< HEAD
 
-            
-        }
-        public async Task OnGetcategoryAsync()
-        {
-            var categoryresponse = await _apiResponseHelper.GetAsync<List<CategoryDto>>((Constants.ApiBaseUrl + "/api/category"));
-
-            if (categoryresponse.StatusCode == StatusCodeHelper.OK && categoryresponse.Data != null)
-            {
-                categories = categoryresponse.Data;
-            }
-            else
-            {
-                ModelState.AddModelError(string.Empty, categoryresponse.Message ?? "An error occurred while fetching weather forecasts.");
-            }
-=======
             return new List<ProductForDashboard>();
         }
 
@@ -99,7 +76,7 @@ namespace UI.Pages
                 return response.Data;
             }
             return new List<CategoryDto>();
->>>>>>> dev
+
         }
     }
 
