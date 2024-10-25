@@ -1,5 +1,5 @@
 ﻿@page
-@model UI.Pages.Order.StatusTrackingModel
+@model UI.Pages.Seller.StatusTrackingModel
 @{
     ViewData["Title"] = "Status Tracking";
 
@@ -39,7 +39,7 @@
 <div class="flex items-center justify-between py-4">
     <a href="javascript:history.back()" class="text-lg font-semibold text-black hover:underline">← Return</a>
     <div class="text-lg font-semibold">
-        Order Code: @Model.OrderId
+        Mã Đơn Hàng: @Model.OrderId
     </div>
     @if (GetOrderStatusMessage() != "Order has been cancelled")
     {
@@ -62,11 +62,6 @@
             <ol class="relative ms-3 border-s border-gray-200 dark:border-gray-700">
                 @foreach (var status in statusMapping.Reverse())
                 {
-                    if (status.Key == "Canceled" && !IsStatusReached("Canceled"))
-                    {
-                        continue;
-                    }
-
                     bool isReached = IsStatusReached(status.Key);
                     var statusDate = GetStatusDate(status.Key);
                     <li class="mb-10 ms-6 @(isReached ? "text-blue-600" : "text-black")">

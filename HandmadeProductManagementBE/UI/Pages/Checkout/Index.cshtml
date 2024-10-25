@@ -50,7 +50,7 @@
                     @foreach (var group in Model.CartItems)
                     {
                         <div class="mb-4 rounded-lg bg-white p-6 shadow-md">
-                            <a href="/Shop/@group.ShopId" class="text-lg font-semibold">@group.ShopName</a>
+                            <a href="/Shop/Index?id=@group.ShopId" class="text-lg font-semibold">@group.ShopName</a>
                             <table class="w-full">
                                 <thead>
                                     <tr>
@@ -69,7 +69,7 @@
                                                 <div class="flex items-center justify-start">
                                                     <!-- Căn lề trái -->
                                                     <img class="h-20 w-20" src="@item.ImageUrl" alt="@item.ProductName" />
-                                                    <a href="/Product/@item.ProductId" class="ml-4 block font-semibold transition-transform">@item.ProductName</a>
+                                                    <a href="/ProductDetail/ProductDetail?id=@item.ProductId" class="ml-4 block font-semibold transition-transform">@item.ProductName</a>
                                                 </div>
                                             </td>
                                             <td>
@@ -94,15 +94,15 @@
                                 <h2 class="mb-4 text-lg font-semibold">Choose Payment Method</h2>
                                 <div>
                                     <div class="mb-4 flex items-center">
-                                        <input id="paypal" type="radio" name="paymentMethod" value="paypal" class="mr-2" required>
-                                        <label for="paypal" class="flex items-center text-sm">
-                                            <img src="https://firebasestorage.googleapis.com/v0/b/handmade-product-bde7a.appspot.com/o/product-Image%2Fcod.png?alt=media&token=c9fd3bc6-dd64-481e-a5ef-b4dfb3d0733a" alt="PayPal" class="mr-2 h-10 w-10" /> PayPal
+                                        <input id="vnpay" type="radio" name="paymentMethod" value="vnpay" class="mr-2" required>
+                                        <label for="vnpay" class="flex items-center text-sm">
+                                            <img src="https://firebasestorage.googleapis.com/v0/b/handmade-product-bde7a.appspot.com/o/product-Image%2Fvnpay.jpg?alt=media&token=11fd665e-2078-416d-ba6e-619a50680fc2" alt="PayPal" class="mr-2 h-10 w-10" /> VNPAY
                                         </label>
                                     </div>
                                     <div class="flex items-center">
                                         <input id="cod" type="radio" name="paymentMethod" value="cod" class="mr-2">
                                         <label for="cod" class="flex items-center text-sm">
-                                            <img src="https://firebasestorage.googleapis.com/v0/b/handmade-product-bde7a.appspot.com/o/product-Image%2Fvnpay.jpg?alt=media&token=11fd665e-2078-416d-ba6e-619a50680fc2" alt="Cash on Delivery" class="mr-2 h-10 w-10" /> Cash on Delivery (COD)
+                                            <img src="https://firebasestorage.googleapis.com/v0/b/handmade-product-bde7a.appspot.com/o/product-Image%2Fcod.png?alt=media&token=c9fd3bc6-dd64-481e-a5ef-b4dfb3d0733a" alt="Cash on Delivery" class="mr-2 h-10 w-10" /> Cash on Delivery (COD)
                                         </label>
                                     </div>
                                 </div>

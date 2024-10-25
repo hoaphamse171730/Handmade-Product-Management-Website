@@ -21,18 +21,21 @@ namespace HandmadeProductManagement.Services.Service
         private readonly IOrderDetailService _orderDetailService;
         private readonly ICartItemService _cartItemService;
         private readonly IProductService _productService;
+        private readonly IProductImageService _productImageService;
 
         public OrderService(IUnitOfWork unitOfWork,
             IStatusChangeService statusChangeService,
             IOrderDetailService orderDetailService,
             ICartItemService cartItemService,
-            IProductService productService)
+            IProductService productService,
+            IProductImageService productImageService)
         {
             _unitOfWork = unitOfWork;
             _statusChangeService = statusChangeService;
             _orderDetailService = orderDetailService;
             _cartItemService = cartItemService;
             _productService = productService;
+            _productImageService = productImageService;
         }
 
         public async Task<bool> CreateOrderAsync(string userId, CreateOrderDto createOrder)
@@ -224,8 +227,6 @@ namespace HandmadeProductManagement.Services.Service
                 .FirstOrDefaultAsync(o => o.Id == orderId && !o.DeletedTime.HasValue)
                 ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageOrderNotFound);
 
-            
-
             // If user is not an admin, apply buyer/seller checks
             if (role != Constants.RoleAdmin)
             {
@@ -245,25 +246,33 @@ namespace HandmadeProductManagement.Services.Service
 
             // Retrieve order details with product config and variation option value
             var orderDetails = await _unitOfWork.GetRepository<OrderDetail>().Entities
-                    .Where(od => od.OrderId == orderId && !od.DeletedTime.HasValue)
-                    .Select(od => new OrderInDetailDto
-                    {
-                        ProductId = od.ProductItem != null && od.ProductItem.Product != null? od.ProductItem.Product.Id :  Guid.Empty.ToString(),
-                        ProductName = od.ProductItem != null && od.ProductItem.Product != null ? od.ProductItem.Product.Name : "",
-                        ProductQuantity = od.ProductQuantity,
-                        DiscountPrice = od.DiscountPrice,
-
-                        // Truy vấn ProductConfiguration để lấy các tùy chọn variation của sản phẩm
-                        VariationOptionValues = _unitOfWork.GetRepository<ProductConfiguration>().Entities
-                            .Where(pc => pc.ProductItemId == od.ProductItemId && pc.VariationOption != null)
-                            .Select(pc => pc.VariationOption!.Value)
-                            .ToList()
-                    })
-                    .ToListAsync();
+                .Where(od => od.OrderId == orderId && !od.DeletedTime.HasValue)
+                .Select(od => new OrderInDetailDto
+                {
+                    ProductItemId = od.ProductItem != null && od.ProductItem.Product != null ? od.ProductItem.Product.Id : Guid.Empty.ToString(),
+                    ProductName = od.ProductItem != null && od.ProductItem.Product != null ? od.ProductItem.Product.Name : "",
+                    ProductQuantity = od.ProductQuantity,
+                    DiscountPrice = od.DiscountPrice,
+                    VariationOptionValues = _unitOfWork.GetRepository<ProductConfiguration>().Entities
+                        .Where(pc => pc.ProductItemId == od.ProductItemId && pc.VariationOption != null)
+                        .Select(pc => pc.VariationOption!.Value)
+                        .ToList()
+                })
+                .ToListAsync();
 
             if (!orderDetails.Any())
             {
                 throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "No order details found for this order.");
+            }
+
+            // Fetch product images and set the first image URL
+            foreach (var orderDetail in orderDetails)
+            {
+                var images = await _productImageService.GetProductImageById(orderDetail.ProductItemId);
+                if (images != null && images.Count > 0)
+                {
+                    orderDetail.ProductImage = images.First().Url;
+                }
             }
 
             return new OrderWithDetailDto

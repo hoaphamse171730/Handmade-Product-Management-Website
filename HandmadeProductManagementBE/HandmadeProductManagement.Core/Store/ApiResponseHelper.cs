@@ -51,7 +51,7 @@ public class ApiResponseHelper
         if (queryParams != null)
         {
             var query = QueryStringHelper.ToQueryString(queryParams);
-            url = string.IsNullOrEmpty(query) ? url : $"{url}?{query}";
+            url = string.IsNullOrEmpty(query) ? url : $"{url}&{query}";
         }
 
         var request = new HttpRequestMessage(HttpMethod.Get, url);
@@ -120,6 +120,32 @@ public class ApiResponseHelper
         {
             var newUrl = response.Headers.Location.ToString();
             request = new HttpRequestMessage(HttpMethod.Put, newUrl)
+            {
+                Content = JsonContent.Create(payload)
+            };
+            AddAuthorizationHeader(request);
+
+            response = await _httpClient.SendAsync(request);
+        }
+
+        return await HandleApiResponse<T>(response);
+    }
+    public async Task<BaseResponse<T>> PatchAsync<T>(string url, object payload)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Patch, url)
+        {
+            Content = JsonContent.Create(payload)
+        };
+        AddAuthorizationHeader(request);
+
+        var response = await _httpClient.SendAsync(request);
+
+        if (response.StatusCode == HttpStatusCode.RedirectKeepVerb ||
+            response.StatusCode == HttpStatusCode.MovedPermanently ||
+            response.StatusCode == HttpStatusCode.Found)
+        {
+            var newUrl = response.Headers.Location.ToString();
+            request = new HttpRequestMessage(HttpMethod.Patch, newUrl)
             {
                 Content = JsonContent.Create(payload)
             };
