@@ -27,6 +27,8 @@ namespace UI.Pages.Product
 
         public List<ProductSearchVM>? Products { get; set; }
         public List<CategoryDto>? Categories { get; set; }
+        public int PageNumber { get; set; } = 1;
+        public int PageSize { get; set; } = 12;
 
         public async Task<IActionResult> OnGetAsync(
             [FromQuery] string? Name,
@@ -34,9 +36,13 @@ namespace UI.Pages.Product
             [FromQuery] string? Status,
             [FromQuery] decimal? MinRating,
             [FromQuery] string SortOption,
-            [FromQuery] bool SortDescending)
+            [FromQuery] bool SortDescending,
+            int pageNumber = 1, 
+            int pageSize = 12)
         {
             await LoadCategoriesAsync();
+            PageNumber = pageNumber;
+            PageSize = pageSize;
 
             var searchFilter = new ProductSearchFilter
             {
@@ -50,7 +56,7 @@ namespace UI.Pages.Product
 
             // Step 4: Fetch products based on the search filter
             var response = await _apiResponseHelper.GetAsync<List<ProductSearchVM>>(
-                $"{Constants.ApiBaseUrl}/api/product/search-seller",
+                $"{Constants.ApiBaseUrl}/api/product/search-seller?pageNumber={PageNumber}&pageSize={PageSize}",
                 searchFilter);
 
             if (response.StatusCode == StatusCodeHelper.OK && response.Data != null)
