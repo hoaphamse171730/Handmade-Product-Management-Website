@@ -37,10 +37,10 @@ namespace UI.Pages.Dashboard
             var topShopsResponse = await _apiResponseHelper.GetAsync<List<TopShopDto>>($"{Constants.ApiBaseUrl}/api/dashboard/top-sales-shops");
             TopShops = topShopsResponse.Data;
 
-            // Fetch type distribution
-            //var typeDistributionResponse = await _apiResponseHelper.GetAsync<BaseResponse<TypeDistributionDto>>("api/sales/type-distribution");
-            //TypeDistributionLabels = typeDistributionResponse.Data.Labels;
-            //TypeDistributionData = typeDistributionResponse.Data.Distribution;
+            //Fetch type distribution
+           var typeDistributionResponse = await _apiResponseHelper.GetAsync<List<CategoryStockDistributionDTO>>($"{Constants.ApiBaseUrl}/api/dashboard/type-distribution");
+            TypeDistributionLabels = typeDistributionResponse.Data.Select(x => x.CategoryName).ToList();
+            TypeDistributionData = typeDistributionResponse.Data.Select(x => x.ProductCount).ToList();
         }
     }
 }

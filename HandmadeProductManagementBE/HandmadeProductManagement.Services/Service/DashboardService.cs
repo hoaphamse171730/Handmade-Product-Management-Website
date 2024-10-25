@@ -113,7 +113,7 @@ namespace HandmadeProductManagement.Services.Service
                 .Entities
                 .Where(order => order.Status == Constants.OrderStatusShipped)
                 .GroupBy(order => order.OrderDetails
-                    .Select(od => od.ProductItem.Product.ShopId).FirstOrDefault())
+                    .Select(od => od!.ProductItem!.Product!.ShopId).FirstOrDefault())
                 .Select(group => new
                 {
                     ShopId = group.Key,
