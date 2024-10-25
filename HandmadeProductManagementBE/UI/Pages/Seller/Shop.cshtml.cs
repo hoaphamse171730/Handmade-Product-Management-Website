@@ -47,7 +47,7 @@ namespace UI.Pages.Seller
                 ? response.Data
                 : new ShopResponseModel();
         }
-
+        //
         private async Task<List<ProductSearchVM>> GetProducts(
             string? name,
             string? categoryId,
