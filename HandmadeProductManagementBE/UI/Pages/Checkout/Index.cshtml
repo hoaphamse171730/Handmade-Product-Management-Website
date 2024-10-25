@@ -50,7 +50,7 @@
                     @foreach (var group in Model.CartItems)
                     {
                         <div class="mb-4 rounded-lg bg-white p-6 shadow-md">
-                            <a href="/Shop/@group.ShopId" class="text-lg font-semibold">@group.ShopName</a>
+                            <a href="/Shop/Index?id=@group.ShopId" class="text-lg font-semibold">@group.ShopName</a>
                             <table class="w-full">
                                 <thead>
                                     <tr>
@@ -69,7 +69,7 @@
                                                 <div class="flex items-center justify-start">
                                                     <!-- Căn lề trái -->
                                                     <img class="h-20 w-20" src="@item.ImageUrl" alt="@item.ProductName" />
-                                                    <a href="/Product/@item.ProductId" class="ml-4 block font-semibold transition-transform">@item.ProductName</a>
+                                                    <a href="/ProductDetail/ProductDetail?id=@item.ProductId" class="ml-4 block font-semibold transition-transform">@item.ProductName</a>
                                                 </div>
                                             </td>
                                             <td>

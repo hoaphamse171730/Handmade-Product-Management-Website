@@ -803,6 +803,10 @@ video {
   width: 10rem;
 }
 
+.w-44 {
+  width: 11rem;
+}
+
 .w-5 {
   width: 1.25rem;
 }
@@ -821,14 +825,6 @@ video {
 
 .w-full {
   width: 100%;
-}
-
-.w-52 {
-  width: 13rem;
-}
-
-.w-44 {
-  width: 11rem;
 }
 
 .min-w-\[100px\] {
@@ -861,6 +857,11 @@ video {
 
 .max-w-xl {
   max-width: 36rem;
+}
+
+.max-w-min {
+  max-width: -moz-min-content;
+  max-width: min-content;
 }
 
 .grow {
@@ -1183,8 +1184,17 @@ video {
   padding-bottom: 1.5rem;
 }
 
+.px-8 {
+  padding-left: 2rem;
+  padding-right: 2rem;
+}
+
 .pb-4 {
   padding-bottom: 1rem;
+}
+
+.pl-6 {
+  padding-left: 1.5rem;
 }
 
 .pt-4 {
