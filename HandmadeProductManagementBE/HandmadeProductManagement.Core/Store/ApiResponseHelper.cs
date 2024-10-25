@@ -50,7 +50,8 @@ public class ApiResponseHelper
     {
         if (queryParams != null)
         {
-            _httpClient = httpClient;
+            var query = QueryStringHelper.ToQueryString(queryParams);
+            url = string.IsNullOrEmpty(query) ? url : $"{url}?{query}";
         }
 
         var request = new HttpRequestMessage(HttpMethod.Get, url);
@@ -58,7 +59,7 @@ public class ApiResponseHelper
         Console.WriteLine(request.Headers.ToString());
 
         var response = await _httpClient.SendAsync(request);
-        
+
         // Check if the response status is redirect (307 or 301/302)
         if (response.StatusCode == HttpStatusCode.RedirectKeepVerb ||
             response.StatusCode == HttpStatusCode.MovedPermanently ||
@@ -74,6 +75,7 @@ public class ApiResponseHelper
 
         return await HandleApiResponse<T>(response);
     }
+
 
     public async Task<BaseResponse<T>> PostAsync<T>(string url, object payload)
     {
@@ -150,49 +152,6 @@ public class ApiResponseHelper
         return await HandleApiResponse<T>(response);
     }
 
-    // Centralized method to handle API response and exceptions
-    private async Task<BaseResponse<T>> HandleApiResponse<T>(HttpResponseMessage response)
-    {
-        if (response.IsSuccessStatusCode)
-        {
-            var response = await _httpClient.GetAsync(url);
-            return await HandleApiResponse<T>(response);
-        }
-
-        public async Task<BaseResponse<T>> GetAsync<T>(string url, object queryParams = null)
-        {
-            if (queryParams != null)
-            {
-                var query = QueryStringHelper.ToQueryString(queryParams);
-                url = string.IsNullOrEmpty(query) ? url : $"{url}?{query}";
-            }
-
-            var response = await _httpClient.GetAsync(url);
-            return await HandleApiResponse<T>(response);
-        }
-
-
-        // Generic method to handle POST requests
-        public async Task<BaseResponse<T>> PostAsync<T>(string url, object payload)
-        {
-            var response = await _httpClient.PostAsJsonAsync(url, payload);
-            return await HandleApiResponse<T>(response);
-        }
-
-        // Generic method to handle PUT requests
-        public async Task<BaseResponse<T>> PutAsync<T>(string url, object payload)
-        {
-            var response = await _httpClient.PutAsJsonAsync(url, payload);
-            return await HandleApiResponse<T>(response);
-        }
-
-        // Generic method to handle DELETE requests
-        public async Task<BaseResponse<T>> DeleteAsync<T>(string url)
-        {
-            var response = await _httpClient.DeleteAsync(url);
-            return await HandleApiResponse<T>(response);
-        }
-
         // Centralized method to handle API response and exceptions
         private async Task<BaseResponse<T>> HandleApiResponse<T>(HttpResponseMessage response)
         {
@@ -227,74 +186,7 @@ public class ApiResponseHelper
             }
         }
 
-        private ProblemDetails? TryDeserializeProblemDetails(string content)
-        {
-            try
-            {
-                return JsonConvert.DeserializeObject<ProblemDetails>(content);
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
-        private BaseResponse<string>? TryDeserializeBaseResponse(string content)
-        {
-            try
-            {
-                return JsonConvert.DeserializeObject<BaseResponse<string>>(content);
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
-        private void HandleProblemDetailsExceptions(ProblemDetails problemDetails)
-        {
-            // Map ProblemDetails to specific exceptions
-            switch (problemDetails.Status)
-            {
-                case StatusCodes.Status400BadRequest:
-                    throw new BaseException.BadRequestException("bad_request", problemDetails.Detail ?? "Bad Request");
-
-                case StatusCodes.Status401Unauthorized:
-                    throw new BaseException.UnauthorizedException("unauthorized", problemDetails.Detail ?? "Unauthorized");
-
-                case StatusCodes.Status403Forbidden:
-                    throw new BaseException.ForbiddenException("forbidden", problemDetails.Detail ?? "Forbidden");
-
-                case StatusCodes.Status404NotFound:
-                    throw new BaseException.NotFoundException("not_found", problemDetails.Detail ?? "Not Found");
-
-                default:
-                    throw new BaseException.CoreException("error", problemDetails.Detail ?? "Internal Server Error", problemDetails.Status ?? 500);
-            }
-        }
-
-        private Exception MapToCustomException(BaseResponse<string> baseResponse)
-        {
-            switch (baseResponse.StatusCode)
-            {
-                case StatusCodeHelper.BadRequest:
-                    return new BaseException.BadRequestException(baseResponse.Code ?? "bad_request", baseResponse.Message ?? "Bad Request");
-
-                case StatusCodeHelper.NotFound:
-                    return new BaseException.NotFoundException(baseResponse.Code ?? "not_found", baseResponse.Message ?? "Not Found");
-
-                case StatusCodeHelper.Unauthorized:
-                    return new BaseException.UnauthorizedException(baseResponse.Code ?? "unauthorized", baseResponse.Message ?? "Unauthorized");
-
-                case StatusCodeHelper.Forbidden:
-                    return new BaseException.ForbiddenException(baseResponse.Code ?? "forbidden", baseResponse.Message ?? "Forbidden");
-
-                default:
-                    return new BaseException.CoreException(baseResponse.Code ?? "error", baseResponse.Message ?? "Internal Server Error", (int)baseResponse.StatusCode);
-            }
-        }
-    }
-
+  
     private ProblemDetails? TryDeserializeProblemDetails(string content)
     {
         try

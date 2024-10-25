@@ -1,9 +1,10 @@
+using System.ComponentModel.DataAnnotations;
 using HandmadeProductManagement.Core.Common;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Newtonsoft.Json;
-using System.ComponentModel.DataAnnotations;
-using System.Reflection.Metadata;
+
+namespace UI.Pages;
 
 public class LoginModel : PageModel
 {
@@ -50,8 +51,7 @@ public class LoginModel : PageModel
             {
                 HttpContext.Session.SetString("Token", token);  
                 HttpContext.Session.SetString("UserName", userName);
-
-                return RedirectToPage("/HomePage");
+                return Redirect("/");
             }
             else
             {

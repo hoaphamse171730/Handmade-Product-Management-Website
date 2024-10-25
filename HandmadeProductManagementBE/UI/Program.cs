@@ -1,4 +1,4 @@
-using HandmadeProductManagement.Core.Store;
+﻿using HandmadeProductManagement.Core.Store;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddScoped<ApiResponseHelper>();
@@ -34,7 +34,5 @@ app.UseRouting();
 app.UseAuthorization();
 
 app.MapRazorPages();
-
-app.MapGet("/", () => Results.Redirect("/HomePage"));
 
 app.Run();
