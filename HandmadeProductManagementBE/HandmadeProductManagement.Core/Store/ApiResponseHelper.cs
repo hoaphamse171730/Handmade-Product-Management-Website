@@ -51,7 +51,7 @@ public class ApiResponseHelper
         if (queryParams != null)
         {
             var query = QueryStringHelper.ToQueryString(queryParams);
-            url = string.IsNullOrEmpty(query) ? url : $"{url}?{query}";
+            url = string.IsNullOrEmpty(query) ? url : $"{url}&{query}";
         }
 
         var request = new HttpRequestMessage(HttpMethod.Get, url);

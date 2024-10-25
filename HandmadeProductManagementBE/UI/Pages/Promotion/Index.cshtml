@@ -1,0 +1,46 @@
+﻿@page
+@model UI.Pages.Promotion.PromotionModel
+@{
+    ViewData["Title"] = "Promotions";
+}
+
+<h1>Promotions</h1>
+
+<a asp-page="Create" class="btn btn-primary mb-3">Create New Promotion</a>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var promotion in Model.Promotions)
+        {
+            <tr>
+                <td>@promotion.Name</td>
+                <td>@promotion.Description</td>
+                <td>@promotion.StartDate.ToShortDateString()</td>
+                <td>@promotion.EndDate.ToShortDateString()</td>
+                <td>
+                    <a asp-page="Edit" asp-route-id="@promotion.Id" class="btn btn-sm btn-warning">Edit</a>
+                    <a asp-page="Delete" asp-route-id="@promotion.Id" class="btn btn-sm btn-danger">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@{
+    var paginationModel = new UI.Pages.Shared.PaginationModel
+            {
+                PageNumber = Model.PageNumber,
+                PageSize = Model.PageSize
+            };
+}
+
+<partial name="~/Pages/Shared/_Pagination.cshtml" model="paginationModel" />
