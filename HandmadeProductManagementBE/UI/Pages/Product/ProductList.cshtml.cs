@@ -23,11 +23,14 @@ namespace UI.Pages.Product
         }
         public List<ProductSearchVM>? Products { get; set; }
         public List<CategoryDto>? Categories { get; set; }
+        public int PageNumber { get; set; } = 1;
+        public int PageSize { get; set; } = 12;
 
-        public async Task OnGetAsync([FromQuery] string? Name, [FromQuery] string? CategoryId, [FromQuery] string? Status, [FromQuery] decimal? MinRating, [FromQuery] string SortOption, [FromQuery] bool SortDescending)
+        public async Task OnGetAsync([FromQuery] string? Name, [FromQuery] string? CategoryId, [FromQuery] string? Status, [FromQuery] decimal? MinRating, [FromQuery] string SortOption, [FromQuery] bool SortDescending, int pageNumber = 1, int pageSize = 12)
         {
             await LoadCategoriesAsync();
-
+            PageNumber = pageNumber;
+            PageSize = pageSize;
             var searchFilter = new ProductSearchFilter
             {
                 Name = Name,
@@ -38,7 +41,7 @@ namespace UI.Pages.Product
                 SortDescending = SortDescending
             };
 
-            var response = await _apiResponseHelper.GetAsync<List<ProductSearchVM>>((Constants.ApiBaseUrl + "/api/product/search"), searchFilter);
+            var response = await _apiResponseHelper.GetAsync<List<ProductSearchVM>>($"{Constants.ApiBaseUrl}/api/product/search?pageNumber={PageNumber}&pageSize={PageSize}", searchFilter);
 
             if (response.StatusCode == StatusCodeHelper.OK && response.Data != null)
             {
