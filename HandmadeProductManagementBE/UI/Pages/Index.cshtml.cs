@@ -24,10 +24,12 @@ namespace UI.Pages
 
         public void OnGet()
         {
+
+            Token = HttpContext.Session.GetString("Token");
+            ViewData["Token"] = Token;
             Top10SellingProducts = GetTop10SellingProducts();
             Top10NewProducts = GetTop10NewProducts();
             Categories = GetCategories();
-            Token = HttpContext.Session.GetString("Token");
         }
 
         public IActionResult OnPostLogout()

@@ -6,7 +6,8 @@ using HandmadeProductManagement.ModelViews.CategoryModelViews;
 using HandmadeProductManagement.ModelViews.ProductModelViews;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using System.Text.Json;
+using System.Text.Json; // Chay okay hon 
+
 
 namespace UI.Pages.Product
 {
