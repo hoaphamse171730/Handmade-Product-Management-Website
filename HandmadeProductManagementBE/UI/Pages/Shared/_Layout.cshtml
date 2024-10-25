@@ -17,12 +17,39 @@
             <a class="text-4xl font-bold" asp-area="" asp-page="/Index">Handmade Product</a>
             <div class="space-x-4">
                 <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Index">Home</a>
-                @await Component.InvokeAsync("CategoryMenu")
+                <div class="group relative inline-block text-left">
+                    <button id="menu-button" class="text-gray-700 hover:text-blue-600">
+                        Category
+                        <i class="fa fa-caret-down ml-2"></i>
+                    </button>
+                <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Privacy">Privacy</a>
                 <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Product/ProductList">Product</a>
+                <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Product/ProductSeller">ProductSeller</a>
+
+                @await Component.InvokeAsync("CategoryMenu")
                 <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Review/Index">Reviews</a>
+                @using Microsoft.AspNetCore.Http
+
+                @{
+                    var token = Context.Session.GetString("Token");
+                }
+
+                @if (!string.IsNullOrEmpty(token))
+                {
+                    <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/UserInfo/UserInfo">My Account</a>
+                }
+                @if (Context.Session.GetString("Token") != null)
+                {
+                    <span class="bg-blue-600 text-white font-semibold rounded-lg px-3 py-1 shadow-md">
+                        Welcome, @Context.Session.GetString("UserName")
+                    </span>
+                }
+                else
+                {
                 <a asp-page="/Login">
                     <button class="rounded-lg bg-cyan-600 px-4 py-2 font-semibold text-white transition duration-300 hover:bg-cyan-700" asp-area="" asp-page="/Login">Login</button>
                 </a>
+                }
             </div>
         </nav>
     </header>

@@ -145,9 +145,8 @@ namespace HandmadeProductManagement.Services.Service
 
             if (isNameDuplicated)
                 throw new ValidationException(
-            [
-                new(nameof(promotion.Name), Constants.ErrorMessageNameInUse)
-            ]);
+                 Constants.ErrorMessageNameInUse
+            );
 
             // Update fields only if they are not null or provided
             if (!string.IsNullOrEmpty(promotion.Name))

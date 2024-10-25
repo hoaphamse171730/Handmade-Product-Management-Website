@@ -1,7 +1,7 @@
-﻿@page "ProductList"
-@model UI.Pages.Product.ProductListModel
+﻿@page
+@model UI.Pages.Product.ProductSellerModel
 @{
-    ViewData["Title"] = "Product List";
+    ViewData["Title"] = "Product Seller List";
 }
 
 
@@ -125,16 +125,3 @@ else
     <p>No products found matching your criteria.</p>
 }
 
-<script>
-    document.getElementById('sortByPrice').addEventListener('change', function () {
-        if (this.checked) {
-            document.getElementById('sortByRating').checked = false;
-        }
-    });
-
-    document.getElementById('sortByRating').addEventListener('change', function () {
-        if (this.checked) {
-            document.getElementById('sortByPrice').checked = false;
-        }
-    });
-</script>

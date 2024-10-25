@@ -21,7 +21,7 @@ namespace HandmadeProductManagementAPI.Controllers
 
         // GET: api/Users
         [HttpGet]
-        [Authorize(Roles ="Admin")]
+        //[Authorize(Roles ="Admin")]
         public async Task<IActionResult> GetApplicationUsers()
         {
 
@@ -38,7 +38,6 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [HttpGet("{id}")]
-        [Authorize(Roles = "Admin")]
 
         public async Task<IActionResult> GetApplicationUsersById(String id)
         {
@@ -55,7 +54,6 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [HttpPut("{id}")]
-        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateUser(string id, UpdateUserDTO updateUserDTO)
         {
             var updateResult = await _userService.UpdateUser(id, updateUserDTO);

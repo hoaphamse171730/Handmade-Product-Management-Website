@@ -1,0 +1,16 @@
+﻿@page
+@model UI.Pages.Reply.CreateModel
+@{
+    ViewData["Title"] = "Create Reply";
+}
+
+<h2 class="text-2xl font-bold mb-4">Create Reply</h2>
+
+<form method="post" class="space-y-4">
+    <div>
+        <label for="Content" class="block font-semibold mb-2">Content</label>
+        <textarea id="Content" name="Content" class="border border-gray-300 rounded-lg p-2 w-full" placeholder="Enter your reply here..." required></textarea>
+    </div>
+    <input type="hidden" id="ReviewId" name="ReviewId" value="@Model.Reply.ReviewId" />
+    <button type="submit" class="bg-blue-500 text-white rounded-lg px-4 py-2">Create</button>
+</form>

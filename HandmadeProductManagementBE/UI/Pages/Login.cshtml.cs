@@ -1,7 +1,9 @@
+using HandmadeProductManagement.Core.Common;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Newtonsoft.Json;
 using System.ComponentModel.DataAnnotations;
+using System.Reflection.Metadata;
 
 public class LoginModel : PageModel
 {
@@ -36,15 +38,19 @@ public class LoginModel : PageModel
             Password = this.Password
         };
         var client = _httpClientFactory.CreateClient();
-        var response = await client.PostAsJsonAsync("http://localhost:5041/api/authentication/login", loginData);
+        var response = await client.PostAsJsonAsync($"{Constants.ApiBaseUrl}/api/authentication/login", loginData);
         if (response.IsSuccessStatusCode)
         {
             var responseContent = await response.Content.ReadAsStringAsync();
             var loginResponse = JsonConvert.DeserializeObject<LoginResponse>(responseContent);
             var token = loginResponse?.Data?.Token;
+            var userName = loginResponse?.Data?.UserName ?? string.Empty;
+
             if (!string.IsNullOrEmpty(token))
             {
-                HttpContext.Session.SetString("Token", token);
+                HttpContext.Session.SetString("Token", token);  
+                HttpContext.Session.SetString("UserName", userName);
+
                 return RedirectToPage("/HomePage");
             }
             else

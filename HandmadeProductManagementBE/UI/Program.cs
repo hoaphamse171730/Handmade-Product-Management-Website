@@ -6,6 +6,8 @@ builder.Services.AddScoped<ApiResponseHelper>();
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddHttpClient();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddHttpClient<ApiResponseHelper>();
 
 builder.Services.AddSession(options =>
 {
@@ -32,5 +34,7 @@ app.UseRouting();
 app.UseAuthorization();
 
 app.MapRazorPages();
+
+app.MapGet("/", () => Results.Redirect("/HomePage"));
 
 app.Run();

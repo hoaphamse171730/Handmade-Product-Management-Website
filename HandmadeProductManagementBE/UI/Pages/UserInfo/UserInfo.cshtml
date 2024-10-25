@@ -1,0 +1,45 @@
+﻿@page
+@model UserInfoModel
+@{
+    ViewData["Title"] = "User Info";
+}
+
+<div class="container mx-auto mt-10">
+    <h2 class="text-center text-lg font-bold text-blue-600">User Information</h2>
+
+    <div class="max-w-md mx-auto mt-8">
+        <div class="border p-4 rounded-lg shadow-lg bg-white">
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2">Name:</label>
+                <p class="text-gray-600">@Model.userInfo.UserName</p>
+            </div>
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2">Email:</label>
+                <p class="text-gray-600">@Model.userInfo.Email</p>
+            </div>
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2">Phone Number:</label>
+                <p class="text-gray-600">@Model.userInfo.PhoneNumber</p>
+            </div>
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2">Two factor enabled:</label>
+                <p class="text-gray-600">@Model.userInfo.TwoFactorEnabled</p>
+            </div>
+            
+            <div class="text-center mt-6">
+                
+                <form method="get" asp-page="/UserInfo/EditUser">
+                    <button type="submit" class="rounded-lg bg-cyan-600 px-4 py-2 font-semibold text-white transition duration-300 hover:bg-cyan-700">
+                        Edit Profile
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // You can add some JavaScript if needed for this page
+    </script>
+}
