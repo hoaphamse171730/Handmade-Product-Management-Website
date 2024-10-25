@@ -20,9 +20,9 @@ namespace UI.Pages.ProductDetail
 
         public async Task OnGet(string id)
         {
-            id = "09463F02-7883-4C68-946A-71AA09217326";
+            string productId = id;
             // Gọi API để lấy chi tiết sản phẩm theo id
-            var response = await _apiResponseHelper.GetAsync<ProductDetailResponseModel>($"{Constants.ApiBaseUrl}/api/product/detail/{id}");
+            var response = await _apiResponseHelper.GetAsync<ProductDetailResponseModel>($"{Constants.ApiBaseUrl}/api/product/detail/{productId}");
 
             // Gán thông tin sản phẩm cho thuộc tính productDetail
             productDetail = response.Data;

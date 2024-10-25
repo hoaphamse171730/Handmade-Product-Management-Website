@@ -8,180 +8,196 @@
 
 <style>
     .card {
-        display: flex;
-        background-color: #fff;
-        border-radius: 10px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        overflow: hidden;
-        max-width: 800px;
-        margin: 20px auto;
-    }
+    display: flex;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    max-width: 800px;
+    margin: 20px auto;
+}
 
-    .left {
-        position: relative;
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: 20px;
-    }
+.left {
+    position: relative;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
 
-        .left img {
-            max-width: 100%;
-            border-radius: 10px;
-        }
+.left img {
+    max-width: 100%;
+    border-radius: 10px;
+}
 
-        .left .fa {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 24px;
-            color: #333;
-            cursor: pointer;
-        }
+.left .fa {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 24px;
+    color: #333;
+    cursor: pointer;
+}
 
-        .left .fa-long-arrow-left {
-            left: 10px;
-        }
+.left .fa-long-arrow-left {
+    left: 10px;
+}
 
-        .left .fa-long-arrow-right {
-            right: 10px;
-        }
+.left .fa-long-arrow-right {
+    right: 10px;
+}
 
-    .right {
-        flex: 1.5;
-        padding: 20px;
-    }
+.right {
+    flex: 1.5;
+    padding: 20px;
+}
 
-    .product-info {
-        margin-top: 10px;
-    }
+.product-info {
+    margin-top: 10px;
+}
 
-    .product-name {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
+.product-name {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
 
-        .product-name h1 {
-            font-size: 24px;
-            margin: 0;
-        }
+.product-name h1 {
+    font-size: 24px;
+    margin: 0;
+}
 
-        .product-name .fa {
-            font-size: 20px;
-            color: #333;
-            margin-left: 10px;
-            cursor: pointer;
-        }
+.product-name .fa {
+    font-size: 20px;
+    color: #333;
+    margin-left: 10px;
+    cursor: pointer;
+}
 
-    .details {
-        margin: 15px 0;
-    }
+.details {
+    margin: 15px 0;
+}
 
-        .details h3 {
-            font-size: 18px;
-            margin: 5px 0;
-            color: #666;
-        }
+.details h3 {
+    font-size: 18px;
+    margin: 5px 0;
+    color: #666;
+}
 
-        .details h2 {
-            font-size: 22px;
-            margin: 5px 0;
-            color: #333;
-        }
+.details h2 {
+    font-size: 22px;
+    margin: 5px 0;
+    color: #333;
+}
 
-        .details h4 {
-            font-size: 20px;
-            margin: 5px 0;
-        }
+.details h4 {
+    font-size: 20px;
+    margin: 5px 0;
+}
 
-        .details .dis {
-            text-decoration: line-through;
-            color: #999;
-        }
+.details .dis {
+    text-decoration: line-through;
+    color: #999;
+}
 
-    ul {
-        list-style-type: none;
-        padding: 0;
-        margin: 10px 0;
-    }
+ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 10px 0;
+}
 
-        ul li {
-            margin: 5px 0;
-            font-weight: bold;
-        }
+ul li {
+    margin: 5px 0;
+    font-weight: bold;
+}
 
-    .bg {
-        display: inline-block;
-        width: 30px;
-        height: 30px;
-        margin-right: 5px;
-        border-radius: 50%;
-        background-color: #ccc;
-    }
+.bg {
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    margin-right: 5px;
+    border-radius: 50%;
+    background-color: #ccc;
+}
 
-    .yellow {
-        background-color: yellow;
-    }
+.yellow {
+    background-color: yellow;
+}
 
-    .black {
-        background-color: black;
-    }
+.black {
+    background-color: black;
+}
 
-    .blue {
-        background-color: blue;
-    }
+.blue {
+    background-color: blue;
+}
 
-    .foot {
-        display: inline-block;
-        background-color: #007bff;
-        color: white;
-        padding: 10px 20px;
-        border-radius: 5px;
-        cursor: pointer;
-        margin-right: 10px;
-        transition: background-color 0.3s;
-    }
+.foot {
+    display: inline-block;
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-right: 10px;
+    transition: background-color 0.3s;
+}
 
-        .foot:hover {
-            background-color: #0056b3;
-        }
+.foot:hover {
+    background-color: #0056b3;
+}
 
-    .quantity {
-        display: flex;
-        align-items: center;
-        margin: 10px 0;
-    }
+.quantity {
+    display: flex;
+    align-items: center;
+    margin: 10px 0;
+}
 
-    .quantity-button {
-        background-color: #007bff;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        padding: 5px 10px;
-        cursor: pointer;
-        font-size: 18px;
-        margin: 0 10px;
-        transition: background-color 0.3s;
-    }
+.quantity-button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-size: 18px;
+    margin: 0 10px;
+    transition: background-color 0.3s;
+}
 
-        .quantity-button:hover {
-            background-color: #0056b3;
-        }
+.quantity-button:hover {
+    background-color: #0056b3;
+}
 
-    .quantity-value {
-        font-size: 18px;
-        min-width: 30px;
-        text-align: center;
-    }
+.quantity-value {
+    font-size: 18px;
+    min-width: 30px;
+    text-align: center;
+}
+
+/* CSS cho rating ngôi sao */
+.rating-stars {
+    display: flex;
+    align-items: center;
+}
+
+.rating-stars .fa-star {
+    font-size: 20px; /* Kích thước ngôi sao */
+    margin-right: 2px; /* Khoảng cách giữa các ngôi sao */
+    color: gold; /* Màu vàng cho ngôi sao được đánh giá */
+}
+
+.rating-stars .fa-star.gray {
+    color: lightgray; /* Màu xám cho ngôi sao chưa được đánh giá */
+}
+
 
 </style>
-
 <div class="card">
     <div class="left">
-        <img src="https://www.dropbox.com/s/e928cht0h5crcn4/shoe.png?raw=1" alt="shoe">
+        <img src="@Model.productDetail?.ProductImageUrls" alt="shoe">
         <i class="fa fa-long-arrow-left"></i>
         <i class="fa fa-long-arrow-right"></i>
     </div>
@@ -189,12 +205,33 @@
         <div class="product-info">
             <div class="product-name">
                 <h1>@Model.productDetail?.Name</h1>
-                <span>Rating: @Model.productDetail?.Rating</span>
+                <div>
+                    <span>Rating: @Model.productDetail?.Rating</span>
+                    <div class="rating-stars">
+                        @for (int i = 1; i <= 5; i++)
+                        {
+                            if (i <= Model.productDetail?.Rating)
+                            {
+                                <i class="fa fa-star" style="color: gold;">*</i> <!-- Ngôi sao màu vàng -->
+                            }
+                            else
+                            {
+                                <i class="fa fa-star" style="color: gray;">*</i> <!-- Ngôi sao màu xám -->
+                            }
+                        }
+                    </div>
+                </div>
             </div>
             <div class="details">
                 <h3>@Model.productDetail?.Description</h3>
-                <h4><span class="fa fa-dollar"></span>@Model.productDetail?.ProductItems?.FirstOrDefault()?.DiscountedPrice</h4>
-                <h4 class="dis"><span class="fa fa-dollar"></span>@Model.productDetail?.ProductItems?.FirstOrDefault()?.Price</h4>
+                <h4>
+                    <span class="fa fa-dollar"></span>
+                    @Model.productDetail?.ProductItems?.FirstOrDefault()?.DiscountedPrice
+                </h4>
+                <h4 class="dis">
+                    <span class="fa fa-dollar"></span>
+                    @Model.productDetail?.ProductItems?.FirstOrDefault()?.Price
+                </h4>
             </div>
             <!-- Quantity Controls -->
             <div class="quantity">
@@ -202,11 +239,13 @@
                 <span class="quantity-value">1</span>
                 <button class="quantity-button" onclick="changeQuantity(1)">+</button>
             </div>
-            <span class="foot"><i class="fa fa-shopping-bag"></i>Buy Now</span>
-            <span class="foot"><i class="fa fa-shopping-cart"></i>Add TO Cart</span>
+            <span class="foot"><i class="fa fa-shopping-bag"></i> Buy Now</span>
+            <span class="foot"><i class="fa fa-shopping-cart"></i> Add To Cart</span>
         </div>
     </div>
+
 </div>
+
 <script>
     function changeQuantity(delta) {
         const quantityElement = document.querySelector('.quantity-value');
