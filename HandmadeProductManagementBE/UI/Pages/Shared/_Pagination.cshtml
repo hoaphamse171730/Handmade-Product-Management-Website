@@ -1,14 +1,39 @@
 ﻿@model UI.Pages.Shared.PaginationModel
-<nav aria-label="Page navigation">
-    <ul class="pagination">
-        <li class="page-item @(Model.PageNumber == 1 ? "disabled" : "")">
-            <a class="page-link" asp-route-pageNumber="@(Model.PageNumber - 1)" asp-route-pageSize="@Model.PageSize">Previous</a>
-        </li>
+
+<nav aria-label="Page navigation" class="flex justify-center my-4">
+    <ul class="flex space-x-2">
+        <!-- Previous Button -->
         <li class="page-item">
-            <span class="page-link">Page @Model.PageNumber</span>
+            @if (Model.PageNumber > 1)
+            {
+                <a class="page-link px-3 py-1 border border-gray-300 rounded hover:bg-gray-200"
+                   asp-route-pageNumber="@(Model.PageNumber - 1)"
+                   asp-route-pageSize="@Model.PageSize">
+                    Previous
+                </a>
+            }
+            else
+            {
+                <span class="page-link px-3 py-1 border border-gray-300 rounded opacity-50 cursor-not-allowed">
+                    Previous
+                </span>
+            }
         </li>
+
+        <!-- Current Page Display -->
         <li class="page-item">
-            <a class="page-link" asp-route-pageNumber="@(Model.PageNumber + 1)" asp-route-pageSize="@Model.PageSize">Next</a>
+            <span class="px-3 py-1 border border-gray-300 rounded bg-gray-100">
+                Page @Model.PageNumber
+            </span>
+        </li>
+
+        <!-- Next Button -->
+        <li class="page-item">
+            <a class="page-link px-3 py-1 border border-gray-300 rounded hover:bg-gray-200"
+               asp-route-pageNumber="@(Model.PageNumber + 1)"
+               asp-route-pageSize="@Model.PageSize">
+                Next
+            </a>
         </li>
     </ul>
 </nav>

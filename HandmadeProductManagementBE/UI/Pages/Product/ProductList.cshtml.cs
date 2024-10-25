@@ -9,6 +9,8 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Text.Json; // Chay okay hon 
 
 
+// Continue with setting pagination
+
 namespace UI.Pages.Product
 {
     public class ProductListModel : PageModel
@@ -23,14 +25,22 @@ namespace UI.Pages.Product
         }
         public List<ProductSearchVM>? Products { get; set; }
         public List<CategoryDto>? Categories { get; set; }
+        
+        
+        //Step 2: Define PageNumber & PageSize like this
         public int PageNumber { get; set; } = 1;
         public int PageSize { get; set; } = 12;
 
+        //Step 3: Remember to add pageNumber & pageSize into parameter of OnGetAsync like below
+        //Note: in page, the p is not the P
         public async Task OnGetAsync([FromQuery] string? Name, [FromQuery] string? CategoryId, [FromQuery] string? Status, [FromQuery] decimal? MinRating, [FromQuery] string SortOption, [FromQuery] bool SortDescending, int pageNumber = 1, int pageSize = 12)
         {
             await LoadCategoriesAsync();
+
+            //Step 4: PageNumber = pageNumber & PageSize = pageSize
             PageNumber = pageNumber;
             PageSize = pageSize;
+
             var searchFilter = new ProductSearchFilter
             {
                 Name = Name,
@@ -41,6 +51,7 @@ namespace UI.Pages.Product
                 SortDescending = SortDescending
             };
 
+            //Final Step: add Page Number and Page Size into url like this: url/api/....?pageNumber={PageNumber}&pageSize={PageSize}
             var response = await _apiResponseHelper.GetAsync<List<ProductSearchVM>>($"{Constants.ApiBaseUrl}/api/product/search?pageNumber={PageNumber}&pageSize={PageSize}", searchFilter);
 
             if (response.StatusCode == StatusCodeHelper.OK && response.Data != null)
