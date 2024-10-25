@@ -32,17 +32,6 @@ namespace UI.Pages
             Categories = GetCategories();
         }
 
-        public IActionResult OnPostLogout()
-        {
-            var token = HttpContext.Session.GetString("Token");
-            if (token != null)
-            {
-                HttpContext.Session.Remove("Token");
-            }
-
-            return Redirect("/");
-        }
-
         private List<TopSellingProducts> GetTop10SellingProducts()
         {
             var response = _apiResponseHelper.GetAsync<List<TopSellingProducts>>(Constants.ApiBaseUrl +"/api/dashboard/top-10-selling-products").Result; // Lấy dữ liệu từ API
