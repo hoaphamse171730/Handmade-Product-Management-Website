@@ -24,23 +24,12 @@ namespace UI.Pages
 
         public void OnGet()
         {
-            Top10SellingProducts = GetTop10SellingProducts();
-            Top10NewProducts = GetTop10NewProducts();
-            Categories = GetCategories();
 
             Token = HttpContext.Session.GetString("Token");
             ViewData["Token"] = Token;
-        }
-
-        public IActionResult OnPostLogout()
-        {
-            var token = HttpContext.Session.GetString("Token");
-            if (token != null)
-            {
-                HttpContext.Session.Remove("Token");
-            }
-
-            return Redirect("/");
+            Top10SellingProducts = GetTop10SellingProducts();
+            Top10NewProducts = GetTop10NewProducts();
+            Categories = GetCategories();
         }
 
         private List<TopSellingProducts> GetTop10SellingProducts()

@@ -101,36 +101,36 @@ namespace HandmadeProductManagement.Services.Service
             return true;
         }
 
-        public async Task<PaginatedList<ShopResponseModel>> GetShopsByPageAsync(int pageNumber, int pageSize)
+        public async Task<ShopResponseModel> GetShopByIdAsync(string shopId)
         {
-            if (pageNumber <= 0)
+            if (string.IsNullOrEmpty(shopId))
             {
-                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidPageNumber);
-            }
-
-            if (pageSize <= 0)
-            {
-                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidPageSize);
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat);
             }
 
             var repository = _unitOfWork.GetRepository<Shop>();
-            var query = repository.Entities.Where(shop => !shop.DeletedTime.HasValue);
+            var productRepository = _unitOfWork.GetRepository<Product>();
 
-            var totalItems = await query.CountAsync();
-            var shops = await query
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
+            var shop = await repository.Entities
+                .Where(s => s.Id.ToString() == shopId && !s.DeletedTime.HasValue)
                 .Select(shop => new ShopResponseModel
                 {
                     Id = shop.Id.ToString(),
                     Name = shop.Name,
                     Description = shop.Description,
                     Rating = shop.Rating,
-                    UserId = shop.UserId
+                    CreatedTime = shop.CreatedTime,
+                    UserId = shop.UserId,
+                    ProductCount = productRepository.Entities.Count(p => p.ShopId == shop.Id && (!p.DeletedTime.HasValue || p.DeletedBy == null))
                 })
-                .ToListAsync();
+                .FirstOrDefaultAsync();
 
-            return new PaginatedList<ShopResponseModel>(shops, totalItems, pageNumber, pageSize);
+            if (shop == null)
+            {
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageShopNotFound);
+            }
+
+            return shop;
         }
 
         public async Task<ShopResponseModel> GetShopByUserIdAsync(Guid userId)
@@ -143,9 +143,13 @@ namespace HandmadeProductManagement.Services.Service
             }
 
             var repository = _unitOfWork.GetRepository<Shop>();
+            var productRepository = _unitOfWork.GetRepository<Product>();
+
             var shop = await repository.Entities
                 .FirstOrDefaultAsync(s => s.UserId == userId && !s.DeletedTime.HasValue)
                 ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageShopNotFoundForUser);
+
+            var productCount = await productRepository.Entities.CountAsync(p => p.ShopId == shop.Id && (!p.DeletedTime.HasValue || p.DeletedBy == null));
 
             return new ShopResponseModel
             {
@@ -153,7 +157,9 @@ namespace HandmadeProductManagement.Services.Service
                 Name = shop.Name,
                 Description = shop.Description,
                 Rating = shop.Rating,
-                UserId = shop.UserId
+                CreatedTime = shop.CreatedTime,
+                UserId = shop.UserId,
+                ProductCount = productCount
             };
         }
 

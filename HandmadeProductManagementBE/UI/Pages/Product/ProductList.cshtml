@@ -104,7 +104,7 @@
                             <img class="object-cover w-full h-full" src="@product.ProductImageUrl" alt="@product.Name" />
                             <div class="absolute inset-0 bg-black opacity-40"></div>
                             <div class="absolute inset-0 flex items-center justify-center">
-                                <button class="bg-white text-gray-900 py-2 px-6 rounded-full font-bold hover:bg-gray-300">View Product</button>
+                                <button class="bg-white text-gray-900 py-2 px-6 rounded-full font-bold hover:bg-gray-300" onclick="viewProduct('@product.Id')">View Product</button>
                             </div>
                         </div>
                         <h3 class="text-xl font-bold text-gray-900 mt-4">@product.Name</h3>
@@ -138,3 +138,17 @@ else
         }
     });
 </script>
+<script>
+    function viewProduct(productId) {
+        window.location.href = `/ProductDetail/ProductDetail?id=${productId}`;
+    }
+</script>
+@{
+    var paginationModel = new UI.Pages.Shared.PaginationModel
+            {
+                PageNumber = Model.PageNumber,
+                PageSize = Model.PageSize
+            };
+}
+
+<partial name="~/Pages/Shared/_Pagination.cshtml" model="paginationModel" />
