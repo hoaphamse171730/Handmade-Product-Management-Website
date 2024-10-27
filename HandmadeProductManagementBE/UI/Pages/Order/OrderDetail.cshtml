@@ -1,0 +1,48 @@
+﻿@page
+@model UI.Pages.Order.OrderDetailModel
+@{
+    ViewData["Title"] = "Order Detail";
+}
+
+<div class="flex items-center justify-between py-4">
+    <a href="javascript:history.back()" class="text-lg font-semibold text-black hover:underline">← Return</a>
+    <div class="text-lg font-semibold">
+        Order Code: @Model.Order?.Id
+    </div>
+    <div class="text-lg font-semibold text-black">
+        Total Price: @Model.Order?.TotalPrice.ToString("C")
+    </div>
+</div>
+
+<div class="order-details">
+    @if (Model.Order?.OrderDetails != null && Model.Order.OrderDetails.Any())
+    {
+        foreach (var orderDetail in Model.Order.OrderDetails)
+        {
+            decimal totalPrice = orderDetail.DiscountPrice * orderDetail.ProductQuantity;
+
+            <div class="order-detail my-2 flex h-24 items-center justify-between rounded border border-gray-300 p-2">
+                <div class="flex items-center">
+                    <img src="@orderDetail.ProductImage" alt="@orderDetail.ProductName" class="h-20 w-20" />
+                </div>
+                <div class="flex-1 mx-2">
+                    <h2 class="text-lg font-bold">@orderDetail.ProductName</h2>
+                    <p class="text-sm text-gray-600">
+                        @string.Join(", ", orderDetail.VariationOptionValues)
+                    </p>
+                    <p class="text-sm">Quantity: x @orderDetail.ProductQuantity</p>
+                </div>
+                <div class="ml-4 flex flex-col items-end">
+                    <p class="text-lg font-semibold">@totalPrice.ToString("C")</p> 
+                </div>
+            </div>
+            <div class="flex justify-end">
+                <button class="mt-1 rounded bg-blue-500 px-4 py-2 text-white">Review</button>
+            </div>
+        }
+    }
+    else
+    {
+        <p class="text-gray-600">No order details available.</p>
+    }
+</div>

@@ -249,6 +249,15 @@ namespace HandmadeProductManagement.Services.Service
 
             return result.Select(c => c.ToList());
         }
+        public async Task<IEnumerable<ProductSearchVM>> GetProductByShopId(ProductSearchFilter searchFilter, string shopId, int pageNumber, int pageSize)
+        {
+            var shop = await _shopService.GetShopByIdAsync(shopId);
+
+            searchFilter.ShopId = shop.Id;
+
+            return await SearchProductsAsync( searchFilter, pageNumber, pageSize);
+        }
+
         public async Task<IEnumerable<ProductSearchVM>> SearchProductsBySellerAsync(ProductSearchFilter searchFilter, string userId, int pageNumber, int pageSize)
         {
             var stringUserId = Guid.Parse(userId);
@@ -256,7 +265,7 @@ namespace HandmadeProductManagement.Services.Service
 
             searchFilter.ShopId = shop.Id;
 
-            return await SearchProductsAsync( searchFilter, pageNumber, pageSize);
+            return await SearchProductsAsync(searchFilter, pageNumber, pageSize);
         }
 
 

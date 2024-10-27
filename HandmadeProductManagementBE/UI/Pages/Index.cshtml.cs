@@ -30,18 +30,6 @@ namespace UI.Pages
             Top10SellingProducts = GetTop10SellingProducts();
             Top10NewProducts = GetTop10NewProducts();
             Categories = GetCategories();
-
-        }
-
-        public IActionResult OnPostLogout()
-        {
-            var token = HttpContext.Session.GetString("Token");
-            if (token != null)
-            {
-                HttpContext.Session.Remove("Token");
-            }
-
-            return Redirect("/");
         }
 
         private List<TopSellingProducts> GetTop10SellingProducts()

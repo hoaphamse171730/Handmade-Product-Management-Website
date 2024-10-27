@@ -28,7 +28,6 @@ namespace UI.Pages.Checkout
             CartItems = await GetCartItemsAsync();
             UserInfo = await GetUserInfoAsync();
             Token = HttpContext.Session.GetString("Token");
-            ViewData["Token"] = Token;
         }
 
         private async Task<List<CartItemGroupDto>> GetCartItemsAsync()
