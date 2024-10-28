@@ -15,6 +15,7 @@ using System.Linq;
 using HandmadeProductManagement.ModelViews.VariationModelViews;
 using HandmadeProductManagement.ModelViews.VariationOptionModelViews;
 using System.Net.Http.Headers;
+using Microsoft.IdentityModel.Tokens;
 
 namespace UI.Pages.Product
 {
@@ -34,24 +35,8 @@ namespace UI.Pages.Product
 
         public List<ProductSearchVM>? Products { get; set; }
         public List<CategoryDto>? Categories { get; set; }
-        public List<VariationDto>? Variations { get; set; }
         public int PageNumber { get; set; } = 1;
         public int PageSize { get; set; } = 12;
-
-        [BindProperty]
-        public ProductForCreationDto NewProduct { get; set; } = new();
-
-        [BindProperty]
-        public List<IFormFile> ProductImages { get; set; } = new();
-
-        [BindProperty]
-        public VariationForCreationDto NewVariation { get; set; } = new VariationForCreationDto
-        {
-            Name = string.Empty,      // Initialize with empty string
-            CategoryId = string.Empty // Initialize with empty string
-        };
-        [BindProperty]
-        public Dictionary<string, List<VariationOptionDto>> VariationOptions { get; set; } = new();
 
         public async Task<IActionResult> OnGetAsync(
             [FromQuery] string? Name,
@@ -118,7 +103,13 @@ namespace UI.Pages.Product
             }
         }
 
-        public async Task<IActionResult> OnPostCreateProductAsync([FromBody] ProductForCreationDto NewProduct)
+        public List<VariationDto>? Variations { get; set; }
+        [BindProperty]
+        public List<IFormFile> ProductImages { get; set; } = new();
+        [BindProperty]
+        public Dictionary<string, List<VariationOptionDto>> VariationOptions { get; set; } = new();
+
+        public async Task<IActionResult> OnPostCreateProductAsync([FromBody] ProductRequestModel productRequest)
         {
             try
             {
@@ -126,61 +117,48 @@ namespace UI.Pages.Product
 
                 if (!ModelState.IsValid)
                 {
-                    return new JsonResult(ModelState.ToDictionary(
-                        kvp => kvp.Key,
-                        kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray()
-                    ))
-                    { StatusCode = 400 };
+                    return new JsonResult(new { error = "Invalid model state" }) { StatusCode = 400 };
                 }
 
-                // First create the product
-                var createProductResponse = await _apiResponseHelper.PostAsync<string>(
+                // Create the product
+                var createProductRequest = new
+                {
+                    name = productRequest.Name,
+                    categoryId = productRequest.CategoryId,
+                    description = productRequest.Description,
+                    variations = productRequest.Variations?.Select(v => new
+                    {
+                        id = v.Id,
+                        variationOptionIds = v.VariationOptionIds
+                    }),
+                    variationCombinations = productRequest.VariationCombinations?.Select(c => new
+                    {
+                        variationOptionIds = c.VariationOptionIds,
+                        price = c.Price,
+                        quantityInStock = c.QuantityInStock
+                    })
+                };
+
+                var createProductResponse = await _apiResponseHelper.PostAsync<bool>(
                     $"{Constants.ApiBaseUrl}/api/product",
-                    NewProduct);
+                    createProductRequest);
 
                 if (createProductResponse.StatusCode != StatusCodeHelper.OK)
                 {
-                    _logger.LogError("Failed to create product. API Response: {Message}",
-                        createProductResponse.Message);
-                    return new JsonResult(new { error = createProductResponse.Message })
-                    { StatusCode = 400 };
+                    _logger.LogError("Failed to create product. API Response: {Message}", createProductResponse.Message);
+                    return new JsonResult(new { error = createProductResponse.Message }) { StatusCode = 400 };
                 }
 
-                string productId = createProductResponse.Data ?? string.Empty;
+                // Get the productId from the response
+                string productId = createProductResponse.Data.ToString();
 
-                // Handle image uploads if product creation was successful
-                if (ProductImages != null && ProductImages.Any())
+                await OnPostUploadImagesAsync(productId);
+
+                return new JsonResult(new
                 {
-                    foreach (var image in ProductImages)
-                    {
-                        try
-                        {
-                            var formData = new MultipartFormDataContent();
-                            var fileContent = new StreamContent(image.OpenReadStream());
-                            fileContent.Headers.ContentType =
-                                MediaTypeHeaderValue.Parse(image.ContentType);
-                            formData.Add(fileContent, "file", image.FileName);
-
-                            var uploadResponse = await _apiResponseHelper.PostMultipartAsync<bool>(
-                                $"{Constants.ApiBaseUrl}/api/productimage/upload?productId={productId}",
-                                formData);
-
-                            if (uploadResponse.StatusCode != StatusCodeHelper.OK)
-                            {
-                                _logger.LogError("Failed to upload image {FileName}. Response: {Message}",
-                                    image.FileName, uploadResponse.Message);
-                            }
-                        }
-                        catch (Exception imageEx)
-                        {
-                            _logger.LogError(imageEx, "Error uploading image {FileName}",
-                                image.FileName);
-                        }
-                    }
-                }
-
-                _logger.LogInformation("Product creation completed successfully");
-                return new JsonResult(new { success = true, productId });
+                    success = true,
+                    productId = productId
+                });
             }
             catch (Exception ex)
             {
@@ -190,6 +168,60 @@ namespace UI.Pages.Product
                     error = "An unexpected error occurred while creating the product.",
                     details = ex.Message
                 })
+                { StatusCode = 500 };
+            }
+        }
+
+        public async Task<IActionResult> OnPostUploadImagesAsync(string productId)
+        {
+            try
+            {
+                // Validate product ID
+                if (string.IsNullOrEmpty(productId))
+                {
+                    return new JsonResult(new { error = "Product ID is required" }) { StatusCode = 400 };
+                }
+
+                // Check if images are provided
+                if (ProductImages == null || !ProductImages.Any())
+                {
+                    return new JsonResult(new { error = "No images provided" }) { StatusCode = 400 };
+                }
+
+                // List to store uploaded images for the response
+                var uploadedImages = new List<ProductImage>();
+
+                foreach (var image in ProductImages)
+                {
+                    // Use PostFileAsync for each image upload
+                    var uploadResponse = await _apiResponseHelper.PostFileAsync<BaseResponse<string>>(
+                        $"{Constants.ApiBaseUrl}/api/productimage/upload?productId={productId}", image);
+
+                    // Check if upload was successful
+                    if (uploadResponse.StatusCode == StatusCodeHelper.OK && !string.IsNullOrEmpty(uploadResponse.Data.Data))
+                    {
+                        var productImage = new ProductImage
+                        {
+                            Url = uploadResponse.Data.Data,  // URL from response
+                            ProductId = productId       // Associate with product ID
+                        };
+
+                        uploadedImages.Add(productImage); // Add to list for response
+                    }
+                    else
+                    {
+                        // Log any upload errors
+                        _logger.LogError("Failed to upload image {FileName}. API Response: {Message}", image.FileName, uploadResponse.Message);
+                    }
+                }
+
+                // Return successful result with list of uploaded images
+                return new JsonResult(new { success = true, images = uploadedImages });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unhandled error during image upload");
+                return new JsonResult(new { error = "An unexpected error occurred while uploading images.", details = ex.Message })
                 { StatusCode = 500 };
             }
         }
@@ -236,6 +268,50 @@ namespace UI.Pages.Product
             }
         }
 
+        public async Task<IActionResult> OnDeleteProductAsync(string productId)
+        {
+            try
+            {
+                var deleteResponse = await _apiResponseHelper.DeleteAsync<bool>($"{Constants.ApiBaseUrl}/api/product/soft-delete/{productId}");
+
+                if (deleteResponse.StatusCode != StatusCodeHelper.OK)
+                {
+                    _logger.LogError("Failed to delete product. API Response: {Message}", deleteResponse.Message);
+                    return new JsonResult(new { error = deleteResponse.Message }) { StatusCode = 400 };
+                }
+
+                return new JsonResult(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unhandled error in product deletion");
+                return new JsonResult(new { error = "An unexpected error occurred while deleting the product.", details = ex.Message }) { StatusCode = 500 };
+            }
+        }
+
+        public async Task<IActionResult> OnPatchEditProductAsync(string productId, [FromBody] ProductEditRequestModel productEdit)
+        {
+            try
+            {
+                var editPayload = new { name = productEdit.Name, description = productEdit.Description };
+
+                var editResponse = await _apiResponseHelper.PatchAsync<bool>($"{Constants.ApiBaseUrl}/api/product/{productId}", editPayload);
+
+                if (editResponse.StatusCode != StatusCodeHelper.OK)
+                {
+                    _logger.LogError("Failed to edit product. API Response: {Message}", editResponse.Message);
+                    return new JsonResult(new { error = editResponse.Message }) { StatusCode = 400 };
+                }
+
+                return new JsonResult(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unhandled error in product editing");
+                return new JsonResult(new { error = "An unexpected error occurred while editing the product.", details = ex.Message }) { StatusCode = 500 };
+            }
+        }
+
         private async Task<List<VariationDto>> LoadVariationsAsync(string categoryId)
         {
             var response = await _apiResponseHelper.GetAsync<List<VariationDto>>(
@@ -263,5 +339,33 @@ namespace UI.Pages.Product
 
             return new List<VariationDto>();
         }
+    }
+
+    public class ProductRequestModel
+    {
+        public string Name { get; set; }
+        public string CategoryId { get; set; }
+        public string Description { get; set; }
+        public List<VariationModel> Variations { get; set; }
+        public List<VariationCombinationModel> VariationCombinations { get; set; }
+    }
+
+    public class VariationModel
+    {
+        public string Id { get; set; }
+        public List<string> VariationOptionIds { get; set; }
+    }
+
+    public class VariationCombinationModel
+    {
+        public List<string> VariationOptionIds { get; set; }
+        public decimal Price { get; set; }
+        public int QuantityInStock { get; set; }
+    }
+
+    public class ProductEditRequestModel
+    {
+        public string Name { get; set; }
+        public string Description { get; set; }
     }
 }
