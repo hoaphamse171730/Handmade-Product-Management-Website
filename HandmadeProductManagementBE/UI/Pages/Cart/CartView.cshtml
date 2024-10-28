@@ -1,0 +1,155 @@
+﻿@page
+@model UI.Pages.Cart.CartViewModel
+@{
+    ViewData["Title"] = "Cart";
+}
+
+<div class="mb-20 h-screen bg-gray-100">
+    <div class="container mx-auto px-4">
+        <h1 class="mb-4 text-4xl font-semibold">Your Cart</h1>
+
+        @if (Model.CartItems != null && Model.CartItems.Any())
+        {
+            <div class="flex flex-col gap-4 md:flex-row">
+                <div class="md:w-3/4">
+                    @foreach (var group in Model.CartItems)
+                    {
+                        <div class="mb-4 rounded-lg bg-white p-6 shadow-md">
+                            <a href="/Shop/Index?id=@group.ShopId" class="text-lg font-semibold">@group.ShopName</a>
+                            <table class="w-full" data-shop-id="@group.ShopId">
+                                <thead>
+                                    <tr>
+                                        <th class="text-left font-normal">Product</th>
+                                        <th class="text-left font-normal">Price</th>
+                                        <th class="text-left font-normal">Quantity</th>
+                                        <th class="text-left font-normal">Total</th>
+                                        <th class="text-left font-normal">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in group.CartItems)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <div class="flex items-center">
+                                                    <img class="h-20 w-20" src="@item.ImageUrl" alt="@item.ProductName" />
+                                                    <a href="/ProductDetail/ProductDetail?id=@item.ProductId" class="ml-4 block font-semibold">@item.ProductName</a>
+                                                </div>
+                                            </td>
+                                            <td>₫@item.DiscountPrice</td>
+                                            <td>
+                                                <input type="number" id="quantity-@item.Id" value="@item.ProductQuantity" class="w-16 text-center" onchange="updateTotal('@item.Id', @item.DiscountPrice, '@group.ShopId')" />
+                                            </td>
+                                            <td id="total-@item.Id">₫@((item.DiscountPrice * item.ProductQuantity))</td>
+                                            <td>
+                                                <button class="btn btn-primary" type="button" onclick="editItem('@item.Id')">Edit</button>
+                                                <button class="btn btn-danger" type="button" onclick="deleteItem('@item.Id')">Delete</button>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="3" style="text-align: right;"><strong>Subtotal</strong></td>
+                                        <td id="subtotal-@group.ShopId">₫@((group.CartItems.Sum(item => item.DiscountPrice * item.ProductQuantity)))</td>
+                                        <td></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    }
+                    <div class="rounded-lg bg-white p-6 shadow-md">
+                        <h2 class="text-lg font-semibold">Total</h2>
+                        <p class="text-lg" id="totalAmount">₫@Model.Total</p>
+                        <button class="mt-4 w-full rounded-lg bg-blue-500 px-4 py-2 text-white" type="button" onclick="checkout()">Checkout</button>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <p>Your cart is empty.</p>
+        }
+
+        @* Thông báo lỗi *@
+        @if (!Model.ModelState.IsValid)
+        {
+            <div class="alert alert-danger">
+                @foreach (var error in Model.ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    <p>@error.ErrorMessage</p>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+    async function editItem(itemId) {
+        window.location.href = '/Cart/Edit/' + itemId;
+    }
+
+    async function deleteItem(itemId) {
+        if (confirm("Are you sure you want to remove this item?")) {
+            window.location.href = '/Cart/Delete/' + itemId;
+        }
+    }
+
+    async function checkout() {
+        // Lấy tất cả số lượng sản phẩm trong giỏ hàng
+        const quantities = {};
+        document.querySelectorAll('input[type="number"]').forEach(input => {
+            const itemId = input.id.split('-')[1]; // Lấy ID sản phẩm từ id của input
+            quantities[itemId] = parseInt(input.value) || 0; // Gán giá trị số lượng cho itemId
+        });
+
+        // Chuyển hướng đến trang checkout với thông tin số lượng
+        const queryString = new URLSearchParams(quantities).toString();
+        window.location.href = '/Checkout?' + queryString;
+    }
+
+    function updateTotal(itemId, price, shopId) {
+        var quantity = parseInt(document.getElementById('quantity-' + itemId).value) || 0;
+        var totalPrice = price * quantity;
+
+        document.getElementById('total-' + itemId).innerText = '₫' + totalPrice;
+
+        // Cập nhật subtotal cho shop
+        updateSubtotal(shopId);
+        // Cập nhật tổng tiền cho giỏ hàng
+        updateCartTotal();
+    }
+
+    function updateSubtotal(shopId) {
+        let subtotal = 0;
+
+        // Lấy tất cả các hàng trong bảng của shop
+        const rows = document.querySelector(`table[data-shop-id="${shopId}"]`).querySelectorAll('tbody tr');
+
+        rows.forEach(row => {
+            const totalCell = row.querySelector('td[id^="total-"]');
+            if (totalCell) {
+                subtotal += parseFloat(totalCell.innerText.replace('₫', '').replace(',', '')) || 0;
+            }
+        });
+
+        // Cập nhật subtotal cho shop
+        const subtotalCell = document.getElementById('subtotal-' + shopId);
+        if (subtotalCell) {
+            subtotalCell.innerText = '₫' + subtotal; // Cập nhật subtotal
+        }
+    }
+
+    function updateCartTotal() {
+        let totalAmount = 0;
+
+        document.querySelectorAll('tr').forEach(row => {
+            const totalCell = row.querySelector('td[id^="total-"]');
+            if (totalCell) {
+                totalAmount += parseFloat(totalCell.innerText.replace('₫', '').replace(',', '')) || 0;
+            }
+        });
+
+        document.getElementById('totalAmount').innerText = '₫' + totalAmount; // Cập nhật tổng tiền cho giỏ hàng
+    }
+</script>
