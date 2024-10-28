@@ -1,9 +1,10 @@
+using System.ComponentModel.DataAnnotations;
 using HandmadeProductManagement.Core.Common;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Newtonsoft.Json;
-using System.ComponentModel.DataAnnotations;
-using System.Reflection.Metadata;
+
+namespace UI.Pages;
 
 public class LoginModel : PageModel
 {
