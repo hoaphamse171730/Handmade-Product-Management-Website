@@ -45,8 +45,9 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
                 }
             }
 
-            public async Task<IActionResult> OnPostAsync()
+            public async Task<IActionResult> OnPostAsync(string id)
             {
+            Id = id;
                 if (string.IsNullOrEmpty(Id))
                 {
                     return NotFound();
@@ -54,6 +55,11 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
                 if (!ModelState.IsValid)
                 {
+                // Log model state errors for debugging
+                    foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+                    {
+                        Console.WriteLine(error.ErrorMessage);
+                    }
                     return Page();
                 }
 
@@ -66,7 +72,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
                     Promotion.EndDate
                 };
 
-                var response = await _apiHelper.PutAsync<bool>($"{Constants.ApiBaseUrl}/api/promotions/{Id}", updatePayload);
+                var response = await _apiHelper.PatchAsync<bool>($"{Constants.ApiBaseUrl}/api/promotions/{Id}", updatePayload);
                 if (response != null && response.Data)
                 {
                     TempData["SuccessMessage"] = "Promotion updated successfully.";
