@@ -141,7 +141,8 @@ namespace HandmadeProductManagement.Services.Service
                 ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(),
                     Constants.ErrorMessagePromotionNotFound);
 
-            var isNameDuplicated = promotionEntity.Name == promotion.Name;
+            var isNameDuplicated = await _unitOfWork.GetRepository<Promotion>().Entities
+                .AnyAsync(p => p.Name == promotion.Name && p.Id != id && p.DeletedTime == null);
 
             if (isNameDuplicated)
                 throw new ValidationException(

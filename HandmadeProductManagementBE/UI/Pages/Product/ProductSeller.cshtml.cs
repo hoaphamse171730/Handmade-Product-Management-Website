@@ -68,7 +68,7 @@ namespace UI.Pages.Product
         private async Task LoadCategoriesAsync()
         {
             var client = _httpClientFactory.CreateClient();
-            var response = await client.GetAsync(Constants.ApiBaseUrl + "/api/category");
+            var response = await client.GetAsync($"{Constants.ApiBaseUrl}/api/category");
 
             if (response.IsSuccessStatusCode)
             {

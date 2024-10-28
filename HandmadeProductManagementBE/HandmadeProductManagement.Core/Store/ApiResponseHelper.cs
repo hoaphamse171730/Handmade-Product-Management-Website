@@ -40,7 +40,7 @@ public class ApiResponseHelper
 
                 // Optional: Log the Authorization header for debugging
                 // Consider using a logging framework instead of Console.WriteLine
-                Console.WriteLine($"Authorization Header: Bearer {token}");
+                //Console.WriteLine($"Authorization Header: Bearer {token}");
             }
         }
     }
@@ -104,9 +104,40 @@ public class ApiResponseHelper
         return await HandleApiResponse<T>(response);
     }
 
-    public async Task<BaseResponse<T>> PutAsync<T>(string url, object payload)
+public async Task<BaseResponse<T>> PutAsync<T>(string url, object payload = null)
+{
+    var request = new HttpRequestMessage(HttpMethod.Put, url);
+
+    if (payload != null)
     {
-        var request = new HttpRequestMessage(HttpMethod.Put, url)
+        request.Content = JsonContent.Create(payload);
+    }
+    AddAuthorizationHeader(request);
+
+    var response = await _httpClient.SendAsync(request);
+
+    if (response.StatusCode == HttpStatusCode.RedirectKeepVerb ||
+        response.StatusCode == HttpStatusCode.MovedPermanently ||
+        response.StatusCode == HttpStatusCode.Found)
+    {
+        var newUrl = response.Headers.Location.ToString();
+        request = new HttpRequestMessage(HttpMethod.Put, newUrl);
+
+        if (payload != null)
+        {
+            request.Content = JsonContent.Create(payload);
+        }
+        AddAuthorizationHeader(request);
+
+        response = await _httpClient.SendAsync(request);
+    }
+
+    return await HandleApiResponse<T>(response);
+}
+
+    public async Task<BaseResponse<T>> PatchAsync<T>(string url, object payload)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Patch, url)
         {
             Content = JsonContent.Create(payload)
         };
@@ -119,7 +150,7 @@ public class ApiResponseHelper
             response.StatusCode == HttpStatusCode.Found)
         {
             var newUrl = response.Headers.Location.ToString();
-            request = new HttpRequestMessage(HttpMethod.Put, newUrl)
+            request = new HttpRequestMessage(HttpMethod.Patch, newUrl)
             {
                 Content = JsonContent.Create(payload)
             };
@@ -155,10 +186,16 @@ public class ApiResponseHelper
         // Centralized method to handle API response and exceptions
         private async Task<BaseResponse<T>> HandleApiResponse<T>(HttpResponseMessage response)
         {
+            var responseBody = await response.Content.ReadAsStringAsync();
+            Console.WriteLine(responseBody);
             if (response.IsSuccessStatusCode)
             {
-                // Deserialize the successful response into the BaseResponse<T>
-                var baseResponse = await response.Content.ReadFromJsonAsync<BaseResponse<T>>();
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true,
+                    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+                };
+                var baseResponse = await response.Content.ReadFromJsonAsync<BaseResponse<T>>(options);
                 return baseResponse ?? new BaseResponse<T>();
             }
             else
