@@ -1,4 +1,4 @@
-using HandmadeProductManagement.Core.Base;
+ using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Common;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.Core.Store;

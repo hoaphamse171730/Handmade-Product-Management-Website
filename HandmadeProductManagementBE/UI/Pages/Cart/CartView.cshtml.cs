@@ -1,7 +1,7 @@
-﻿using HandmadeProductManagement.Core.Common;
+﻿using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.Core.Common;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.Core.Store;
-
 using HandmadeProductManagement.ModelViews.CartItemModelViews;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -58,5 +58,20 @@ namespace UI.Pages.Cart
                 return new List<CartItemGroupDto>();
             }
         }
+        public async Task<IActionResult> OnPostDeleteItemAsync(string cartItemId)
+        {
+            var response = await _apiResponseHelper.DeleteAsync<bool>($"{Constants.ApiBaseUrl}/api/cartitem/{cartItemId}");
+
+            if (response.StatusCode == StatusCodeHelper.OK)
+            {
+                // Cập nhật lại giỏ hàng sau khi xóa
+                CartItems = await GetCartItemsAsync();
+                return RedirectToPage();
+            }
+
+            ModelState.AddModelError(string.Empty, response.Message ?? "Đã xảy ra lỗi khi xóa sản phẩm.");
+            return Page();
+        }
+
     }
 }
