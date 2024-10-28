@@ -21,6 +21,7 @@
                                     <tr>
                                         <th class="text-left font-normal">Product</th>
                                         <th class="text-left font-normal">Price</th>
+                                        <th class="text-left font-normal">DiscountPrice</th>
                                         <th class="text-left font-normal">Quantity</th>
                                         <th class="text-left font-normal">Total</th>
                                         <th class="text-left font-normal">Actions</th>
@@ -36,13 +37,13 @@
                                                     <a href="/ProductDetail/ProductDetail?id=@item.ProductId" class="ml-4 block font-semibold">@item.ProductName</a>
                                                 </div>
                                             </td>
+                                            <td>₫@item.UnitPrice</td>
                                             <td>₫@item.DiscountPrice</td>
                                             <td>
                                                 <input type="number" id="quantity-@item.Id" value="@item.ProductQuantity" class="w-16 text-center" onchange="updateTotal('@item.Id', @item.DiscountPrice, '@group.ShopId')" />
                                             </td>
                                             <td id="total-@item.Id">₫@((item.DiscountPrice * item.ProductQuantity))</td>
                                             <td>
-                                                <button class="btn btn-primary" type="button" onclick="editItem('@item.Id')">Edit</button>
                                                 <button class="btn btn-danger" type="button" onclick="deleteItem('@item.Id')">Delete</button>
                                             </td>
                                         </tr>
@@ -85,9 +86,6 @@
 </div>
 
 <script>
-    async function editItem(itemId) {
-        window.location.href = '/Cart/Edit/' + itemId;
-    }
 
     async function deleteItem(itemId) {
         if (confirm("Are you sure you want to remove this item?")) {
