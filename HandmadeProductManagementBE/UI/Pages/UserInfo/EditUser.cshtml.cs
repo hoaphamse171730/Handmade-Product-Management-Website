@@ -6,6 +6,7 @@ using HandmadeProductManagement.ModelViews.UserModelViews;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.IdentityModel.Tokens.Jwt;
+using System.Text.Json;
 
 namespace UI.Pages.UserInfo
 {
@@ -64,17 +65,30 @@ namespace UI.Pages.UserInfo
             string token = HttpContext.Session.GetString("Token");
             string userId = GetUserIdFromToken(token);
 
-            var response = await _apiResponseHelper.PutAsync<BaseResponse<bool>>(
-                $"{Constants.ApiBaseUrl}/api/users/{userId}",
-                updateUser
-            );
+            var client = _httpClientFactory.CreateClient();
+            var response = await client.PutAsJsonAsync($"{Constants.ApiBaseUrl}/api/users/{userId}", updateUser);
 
-            if (response.StatusCode == StatusCodeHelper.OK )
+            if (response.IsSuccessStatusCode)
             {
-                return RedirectToPage("/HomePage");
+                var content = await response.Content.ReadAsStringAsync();
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                };
+                var baseResponse = JsonSerializer.Deserialize<BaseResponse<bool>>(content, options);
+
+                if (baseResponse != null && baseResponse.StatusCode == StatusCodeHelper.OK)
+                {
+                    return RedirectToPage("/UserInfo/UserInfo");
+                }
+
+                ModelState.AddModelError(string.Empty, baseResponse?.Message ?? "Error updating user information.");
+            }
+            else
+            {
+                ModelState.AddModelError(string.Empty, "An error occurred while updating user information.");
             }
 
-            ModelState.AddModelError(string.Empty, response.Message ?? "Error updating user information.");
             return Page();
         }
     }
