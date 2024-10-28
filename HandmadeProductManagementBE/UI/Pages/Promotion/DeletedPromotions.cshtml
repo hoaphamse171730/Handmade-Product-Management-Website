@@ -1,13 +1,12 @@
 ﻿@page
-@model UI.Pages.Promotion.PromotionModel
+@model UI.Pages.Promotion.DeletedPromotionModel
 @{
-    ViewData["Title"] = "Promotions";
+    ViewData["Title"] = "Deleted Promotions";
 }
 
-<h1 class="text-3xl font-bold text-center mb-6">Promotions</h1>
+<h1 class="text-3xl font-bold text-center mb-6">Deleted Promotions</h1>
 
-<a asp-page="Create" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-6 inline-block">Create New Promotion</a>
-<a asp-page="DeletedPromotions" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mb-6 inline-block">View Deleted Promotions</a>
+<a asp-page="/Promotion/Index" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-6 inline-block">Back to Promotions</a>
 
 <div class="overflow-x-auto">
     <table class="min-w-full bg-white shadow-md rounded-lg">
@@ -22,7 +21,7 @@
             </tr>
         </thead>
         <tbody class="text-gray-600 text-sm font-light">
-            @foreach (var promotion in Model.Promotions)
+            @foreach (var promotion in Model.DeletedPromotions)
             {
                 <tr class="border-b border-gray-200 hover:bg-gray-100">
                     <td class="py-3 px-6 text-left whitespace-nowrap">@promotion.Name</td>
@@ -31,8 +30,10 @@
                     <td class="py-3 px-6 text-left">@promotion.StartDate.ToShortDateString()</td>
                     <td class="py-3 px-6 text-left">@promotion.EndDate.ToShortDateString()</td>
                     <td class="py-3 px-6 text-left">
-                        <a asp-page="Edit" asp-route-id="@promotion.Id" class="bg-blue-500 hover:bg-blue-800 text-white font-bold py-1 px-3 rounded text-xs">Edit</a>
-                        <a asp-page="Delete" asp-route-id="@promotion.Id" class="bg-red-500 hover:bg-red-800 text-white font-bold py-1 px-3 rounded text-xs ml-2">Delete</a>
+                        <form method="post" asp-page-handler="Recover">
+                            <input type="hidden" asp-for="promotionIdToRecover" value="@promotion.Id" />
+                            <button type="submit" class="bg-green-500 hover:bg-green-800 text-white font-bold py-1 px-3 rounded text-xs">Activate</button>
+                        </form>
                     </td>
                 </tr>
             }
