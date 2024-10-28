@@ -12,33 +12,36 @@
         <div class="mb-8 rounded-lg bg-white p-6 shadow-md">
             <h2 class="mb-4 text-lg font-semibold">Thông tin giao hàng</h2>
             <form>
-                <!-- Họ và tên, Số điện thoại cùng hàng -->
+                <!-- Full Name and Phone Number in the same row -->
                 <div class="-mx-2 mb-4 flex flex-wrap">
-                    <!-- Họ và tên -->
+                    <!-- Full Name -->
                     <div class="mb-4 w-full px-2 md:w-1/2 md:mb-0">
-                        <label for="fullName" class="mb-2 block text-sm font-medium">Họ và tên:</label>
+                        <label for="fullName" class="mb-2 block text-sm font-medium">Full Name:</label>
                         <input type="text" id="fullName" name="fullName"
                                class="w-full rounded-lg border px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                               placeholder="Nhập họ và tên"
-                               value="@Model.UserInfo.FullName" required>
+                               placeholder="Enter your full name"
+                               value="@Model.UserInfo.FullName" required
+                               pattern="^[\p{L}\sĐđ]+$" title="Please enter a valid full name (letters and spaces only).">
                     </div>
-                    <!-- Số điện thoại -->
+                    <!-- Phone Number -->
                     <div class="w-full px-2 md:w-1/2">
-                        <label for="phoneNumber" class="mb-2 block text-sm font-medium">Số điện thoại:</label>
+                        <label for="phoneNumber" class="mb-2 block text-sm font-medium">Phone Number:</label>
                         <input type="tel" id="phoneNumber" name="phoneNumber"
                                class="w-full rounded-lg border px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                               placeholder="Nhập số điện thoại"
-                               value="@Model.UserInfo.PhoneNumber" required>
+                               placeholder="Enter your phone number"
+                               value="@Model.UserInfo.PhoneNumber" required
+                               pattern="^0\d{9,10}$" title="Please enter a valid phone number (starting with 0 and containing 10-11 digits).">
                     </div>
                 </div>
 
-                <!-- Địa chỉ -->
+                <!-- Address -->
                 <div class="mb-4">
-                    <label for="address" class="mb-2 block text-sm font-medium">Địa chỉ:</label>
+                    <label for="address" class="mb-2 block text-sm font-medium">Address:</label>
                     <input type="text" id="address" name="address"
                            class="w-full rounded-lg border px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                           placeholder="Nhập địa chỉ giao hàng"
-                           value="@Model.UserInfo.Address" required>
+                           placeholder="Enter delivery address"
+                           value="@Model.UserInfo.Address" required
+                           pattern="^[\p{L}\p{N}\s,\.Đđ]+$" title="Please enter a valid address (can include letters, numbers, spaces, commas, and periods).">
                 </div>
             </form>
         </div>
@@ -141,3 +144,48 @@
         }
     </div>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const fullNameInput = document.getElementById("fullName");
+        const phoneInput = document.getElementById("phoneNumber");
+        const addressInput = document.getElementById("address");
+        const form = document.querySelector("form");
+
+        // Function to validate input and set custom validity message
+        function validateInput(input) {
+            // Check the input validity
+            if (input.validity.valid) {
+                input.setCustomValidity(""); // Clear custom error message
+            } else {
+                input.setCustomValidity(input.title); // Set custom error message
+            }
+            input.reportValidity(); // Show validation message
+        }
+
+        // Add input event listeners for instant validation
+        fullNameInput.addEventListener("input", () => validateInput(fullNameInput));
+        phoneInput.addEventListener("input", () => validateInput(phoneInput));
+        addressInput.addEventListener("input", () => validateInput(addressInput));
+
+        // Validate on form submit
+        form.addEventListener("submit", function (event) {
+            let isValid = true;
+
+            // Validate each input one more time before submission
+            [fullNameInput, phoneInput, addressInput].forEach(input => {
+                validateInput(input);
+                if (!input.validity.valid) {
+                    isValid = false; // If any input is invalid, mark the form as invalid
+                }
+            });
+
+            // If the form is invalid, prevent submission
+            if (!isValid) {
+                event.preventDefault(); // Prevent form submission
+            }
+        });
+    });
+</script>
+
+

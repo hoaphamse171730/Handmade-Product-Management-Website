@@ -39,6 +39,7 @@ namespace UI.Pages.Seller
             { Constants.OrderStatusRefunded, new List<string> { Constants.OrderStatusClosed } },
             { Constants.OrderStatusCanceled, new List<string> { Constants.OrderStatusClosed } },
             { Constants.OrderStatusDeliveringRetry, new List<string> { Constants.OrderStatusDelivering } },
+            { Constants.OrderStatusShipped, new List<string> { Constants.OrderStatusClosed } },
         };
 
         public async Task OnGetAsync()

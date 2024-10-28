@@ -48,28 +48,30 @@
                                 <td class="border-b border-slate-200 p-6 text-lg">@order.Status</td>
                                 <td class="border-b border-slate-200 p-6 text-lg">@order.Note</td>
                                 <td class="border-b border-slate-200 p-6 text-lg">
-                                    <form method="post" asp-page-handler="UpdateStatus" class="flex items-center justify-between space-x-2">
-                                        <input type="hidden" name="orderId" value="@order.Id" />
-                                        <select name="newStatus" class="rounded border p-1" onchange="toggleCancelReason(this)">
-                                            @{
-                                                var validStatuses = Model.GetValidStatusTransitions(order.Status);
-                                            }
-                                            @foreach (var status in validStatuses)
-                                            {
-                                                <option value="@status" selected="@(status == order.Status ? "selected" : null)">@status</option>
-                                            }
-                                        </select>
-                                        <select name="cancelReasonId" class="hidden rounded border p-1" id="cancelReasonDropdown-@order.Id">
-                                            @* Populate this dropdown with the list of cancel reasons *@
-                                            @foreach (var reason in Model.CancelReasons)
-                                            {
-                                                <option value="@reason.Id">@reason.Description</option>
-                                            }
-                                        </select>
-                                        <button type="submit" class="rounded bg-blue-500 px-4 py-1 text-white hover:bg-blue-600">
-                                            Update
-                                        </button>
-                                    </form>
+                                    @if (order.Status != "Closed")
+                                    {
+                                        <form method="post" asp-page-handler="UpdateStatus" class="flex items-center justify-between space-x-2">
+                                            <input type="hidden" name="orderId" value="@order.Id" />
+                                            <select name="newStatus" class="rounded border p-1" onchange="toggleCancelReason(this)">
+                                                @{
+                                                    var validStatuses = Model.GetValidStatusTransitions(order.Status);
+                                                }
+                                                @foreach (var status in validStatuses)
+                                                {
+                                                    <option value="@status" selected="@(status == order.Status ? "selected" : null)">@status</option>
+                                                }
+                                            </select>
+                                            <select name="cancelReasonId" class="hidden rounded border p-1" id="cancelReasonDropdown-@order.Id">
+                                                @foreach (var reason in Model.CancelReasons)
+                                                {
+                                                    <option value="@reason.Id">@reason.Description</option>
+                                                }
+                                            </select>
+                                            <button type="submit" class="rounded bg-blue-500 px-4 py-1 text-white hover:bg-blue-600">
+                                                Update
+                                            </button>
+                                        </form>
+                                    }
                                 </td>
                             </tr>
                             index++;

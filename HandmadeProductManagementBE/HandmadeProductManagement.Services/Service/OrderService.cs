@@ -1,4 +1,4 @@
-using HandmadeProductManagement.Contract.Repositories.Entity;
+﻿using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
@@ -600,7 +600,8 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidAddress);
             }
 
-            if (Regex.IsMatch(order.Address, @"[^a-zA-Z0-9\s,\.]"))
+            // Allow characters commonly found in Vietnamese addresses (including spaces, commas, periods, and diacritics)
+            if (Regex.IsMatch(order.Address, @"[^\p{L}\p{N}\s,\.Đđ]"))
             {
                 throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidAddressFormat);
             }
@@ -610,7 +611,8 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidCustomerName);
             }
 
-            if (Regex.IsMatch(order.CustomerName, @"[^a-zA-Z\s]"))
+            // Allow characters commonly found in Vietnamese names (including spaces and diacritics)
+            if (Regex.IsMatch(order.CustomerName, @"[^\p{L}\sĐđ]"))
             {
                 throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidCustomerNameFormat);
             }
@@ -620,10 +622,12 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidPhone);
             }
 
+            // Vietnamese phone number format: starts with 0 followed by 9 to 10 digits
             if (!Regex.IsMatch(order.Phone, @"^0\d{9,10}$"))
             {
                 throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidPhoneFormat);
             }
         }
+
     }
 }
