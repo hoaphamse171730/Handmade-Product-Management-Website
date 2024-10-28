@@ -40,7 +40,7 @@ public class ApiResponseHelper
 
                 // Optional: Log the Authorization header for debugging
                 // Consider using a logging framework instead of Console.WriteLine
-                Console.WriteLine($"Authorization Header: Bearer {token}");
+                //Console.WriteLine($"Authorization Header: Bearer {token}");
             }
         }
     }
