@@ -36,11 +36,12 @@ namespace UI.Pages
             //    ModelState.AddModelError(string.Empty, response.Message ?? "An error occurred while fetching weather forecasts.");
             //}
 
-            //Top10SellingProducts = GetTop10SellingProducts();
-            //Top10NewProducts = GetTop10NewProducts();
-            //Categories = GetCategories();
+            Top10SellingProducts = GetTop10SellingProducts();
+            Top10NewProducts = GetTop10NewProducts();
+            Categories = GetCategories();
 
-            //Token = HttpContext.Session.GetString("Token");
+            Token = HttpContext.Session.GetString("Token");
+
 
         }
 
