@@ -227,6 +227,39 @@ public async Task<BaseResponse<T>> PutAsync<T>(string url, object payload = null
         return await HandleApiResponse<T>(response);
     }
 
+    public async Task<BaseResponse<bool>> PutProductStatusUpdateAsync(string url, bool isAvailable)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Put, url)
+        {
+            Content = JsonContent.Create(new { IsAvailable = isAvailable })
+        };
+        AddAuthorizationHeader(request);
+
+        var response = await _httpClient.SendAsync(request);
+        return await HandleProductStatusResponse(response);
+    }
+
+    private async Task<BaseResponse<bool>> HandleProductStatusResponse(HttpResponseMessage response)
+    {
+        var responseBody = await response.Content.ReadAsStringAsync();
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            return JsonSerializer.Deserialize<BaseResponse<bool>>(responseBody, options) ?? new BaseResponse<bool>();
+        }
+        else
+        {
+            // Handle non-success status codes with an error message
+            return new BaseResponse<bool>
+            {
+                StatusCode = StatusCodeHelper.ServerError,
+                Code = ((int)response.StatusCode).ToString(),
+                Message = $"Failed to update product status. Status code: {response.StatusCode}"
+            };
+        }
+    }
+
+
     // Centralized method to handle API response and exceptions
     private async Task<BaseResponse<T>> HandleApiResponse<T>(HttpResponseMessage response)
         {
@@ -265,7 +298,7 @@ public async Task<BaseResponse<T>> PutAsync<T>(string url, object payload = null
                 // If nothing matches, throw a generic exception
                 throw new HttpRequestException($"Request failed with status code {response.StatusCode} and content: {content}");
             }
-        }
+    }
 
   
     private ProblemDetails? TryDeserializeProblemDetails(string content)

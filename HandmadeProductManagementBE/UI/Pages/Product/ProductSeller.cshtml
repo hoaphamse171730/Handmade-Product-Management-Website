@@ -3,7 +3,7 @@
 @{
     ViewData["Title"] = "Product Seller List";
 }
-
+@Html.AntiForgeryToken()
 
 <h1 class="text-3xl font-bold mb-4">Product List</h1>
 
@@ -121,10 +121,14 @@
             *@
                 </div>
                 <div class="mt-3 flex justify-between items-center">
-                    <span class="px-2 py-1 rounded-full text-sm @(product.Status == "Available" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800")">
-                        @product.Status
-                    </span>
+                    <div class="text-sm text-gray-500 mt-2">
+                        <span id="status-label-@product.Id" class="px-2 py-1 rounded-full text-sm @(product.Status == "Available" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800")">@product.Status</span>
+                    </div>
                     <div class="flex space-x-2">
+                        <button onclick="toggleProductStatus('@product.Id', '@product.Status', this)"
+                                class="@(product.Status == "Available" ? "bg-yellow-500 hover:bg-yellow-600 text-white py-1 px-3 rounded-md" : "bg-green-500 hover:bg-green-600 text-white py-1 px-3 rounded-md")">
+                            @(product.Status == "Available" ? "Deactivate" : "Activate")
+                        </button>
                         <button onclick="editProduct('@product.Id')"
                                 class="bg-blue-500 text-white py-1 px-3 rounded-md hover:bg-blue-600">
                             Edit
@@ -231,18 +235,81 @@
     </div>
 </div>
 
-<div id="editProductModal" class="modal" style="display:none;">
-    <div class="modal-content">
-        <h2>Edit Product</h2>
-        <input type="hidden" id="editProductId">
-        <label for="editProductName">Name</label>
-        <input type="text" id="editProductName" required>
-        
-        <label for="editProductDescription">Description</label>
-        <textarea id="editProductDescription" required></textarea>
-        
-        <button onclick="saveProductChanges()">Save Changes</button>
-        <button onclick="document.getElementById('editProductModal').style.display='none'">Cancel</button>
+<!-- Edit Product Modal -->
+<div id="editProductModal" class="modal hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
+    <div class="modal-content relative top-20 mx-auto p-5 border w-3/4 shadow-lg rounded-md bg-white">
+        <div class="mt-3">
+            <h3 class="text-lg font-medium leading-6 text-gray-900 text-center">Edit Product</h3>
+            <form id="editProductForm" class="mt-4">
+                @Html.AntiForgeryToken()
+                <input type="hidden" id="editProductId" />
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Product Name</label>
+                        <input type="text" id="editProductName" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" />
+                        <div class="text-red-500" id="editNameError"></div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Category</label>
+                        <select id="editCategoryId"
+                                onchange="loadVariations(this.value)"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                            <option value="">Select Category</option>
+                            @foreach (var category in Model.Categories)
+                            {
+                                <option value="@category.Id">@category.Name</option>
+                            }
+                        </select>
+                        <div class="text-red-500" id="editCategoryError"></div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Description</label>
+                        <textarea id="editProductDescription"
+                                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                                  rows="3"></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Product Images</label>
+                        <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+                            <div class="space-y-1 text-center">
+                                <input type="file" multiple accept="image/*"
+                                       id="editProductImages" class="hidden" />
+                                <label for="editProductImages"
+                                       class="cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500">
+                                    Upload Images
+                                </label>
+                            </div>
+                        </div>
+                        <div id="editImagePreviewContainer" class="grid grid-cols-4 gap-4 mt-4"></div>
+                    </div>
+                </div>
+
+                <div id="editVariationsContainer" class="mt-4">
+                    <h4 class="text-lg font-medium mb-2">Variations</h4>
+                    <div id="editExistingVariations"></div>
+                </div>
+
+                <div id="editVariationCombinationsContainer" class="mt-4">
+                    <h4 class="text-lg font-medium mb-2">Variation Combinations</h4>
+                    <div id="editCombinationsList"></div>
+                </div>
+
+                <div class="mt-4 flex justify-between">
+                    <div>
+                        <button type="submit" class="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600">
+                            Save Changes
+                        </button>
+                        <button type="button" onclick="document.getElementById('editProductModal').classList.add('hidden')"
+                                class="ml-2 bg-gray-500 text-white py-2 px-4 rounded-md hover:bg-gray-600">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
@@ -543,10 +610,11 @@
                     throw new Error(result.error || 'Failed to create product');
                 }
 
-                // Upload images if product creation was successful
+                // Get product ID from the response
                 const productId = result.productId;
-                const imageInput = document.getElementById('productImages');
 
+                // Upload images if there are any
+                const imageInput = document.getElementById('productImages');
                 if (imageInput?.files?.length > 0) {
                     const formData = new FormData();
                     Array.from(imageInput.files).forEach(file => {
@@ -630,47 +698,353 @@
             return combinations;
         }
 
-        async function deleteProduct(productId) {
-            if (confirm("Are you sure you want to delete this product?")) {
-                const response = await fetch(`/Product/ProductSeller?handler=DeleteProduct&productId=${productId}`, {
-                    method: 'DELETE'
+        // Edit Product Functions
+        async function editProduct(productId) {
+            const modal = document.getElementById('editProductModal');
+            modal.classList.remove('hidden');
+            document.getElementById('editProductId').value = productId;
+
+            try {
+                // Fetch product details
+                const response = await fetch(`?handler=ProductDetails&id=${productId}`, {
+                    headers: {
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    }
                 });
-                const result = await response.json();
-                if (result.success) {
-                    alert("Product deleted successfully.");
-                    location.reload(); // Reload to reflect changes
-                } else {
-                    alert("Error deleting product: " + result.error);
+
+                const product = await response.json();
+
+                // Populate basic form fields
+                document.getElementById('editProductName').value = product.name;
+                document.getElementById('editProductDescription').value = product.description;
+                document.getElementById('editCategoryId').value = product.categoryId;
+
+                // Load variations for the category and then set selected options
+                await loadVariationsForEdit(product.categoryId, product.variations);
+
+                // Display existing images
+                const imageContainer = document.getElementById('editImagePreviewContainer');
+                imageContainer.innerHTML = '';
+                if (product.productImages && product.productImages.length > 0) {
+                    product.productImages.forEach(image => {
+                        const div = document.createElement('div');
+                        div.className = 'relative';
+                        div.innerHTML = `
+                            <img src="${image.url}" class="w-full h-24 object-cover rounded-md" />
+                            <button type="button" onclick="deleteProductImage('${image.id}')"
+                                    class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center">
+                                ×
+                            </button>
+                        `;
+                        imageContainer.appendChild(div);
+                    });
+                }
+
+                // Update combinations if they exist
+                if (product.variationCombinations && product.variationCombinations.length > 0) {
+                    displayExistingCombinations(product.variationCombinations);
+                }
+            } catch (error) {
+                console.error('Error loading product details:', error);
+                alert('Failed to load product details');
+            }
+        }
+
+        async function loadVariationsForEdit(categoryId, existingVariations) {
+            if (!categoryId) return;
+
+            try {
+                const response = await fetch(`?handler=VariationsByCategory&categoryId=${categoryId}`, {
+                    headers: {
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    }
+                });
+
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+                const variations = await response.json();
+                const variationsContainer = document.getElementById('editExistingVariations');
+
+                if (!variationsContainer) return;
+
+                if (!variations || variations.length === 0) {
+                    variationsContainer.innerHTML = '<p class="text-gray-500">No variations available for this category.</p>';
+                    return;
+                }
+
+                // Render variations with existing selections
+                const variationsHtml = variations.map(variation => `
+                    <div class="mb-4 p-3 border rounded" data-variation-id="${variation.id}">
+                        <strong>${variation.name || 'Unnamed Variation'}</strong>
+                        <div class="mt-2">
+                            ${variation.variationOptions && variation.variationOptions.length > 0 ?
+                        variation.variationOptions.map(option => {
+                            const isSelected = existingVariations?.some(v =>
+                                v.variationId === variation.id &&
+                                v.variationOptionId === option.id
+                            );
+                            return `
+                                    <div class="form-check">
+                                        <input type="checkbox"
+                                               class="form-check-input variation-option"
+                                               id="edit_option_${option.id}"
+                                               value="${option.id}"
+                                               data-variation-id="${variation.id}"
+                                               data-option-value="${option.value}"
+                                               ${isSelected ? 'checked' : ''}>
+                                        <label class="form-check-label" for="edit_option_${option.id}">
+                                            ${option.value}
+                                        </label>
+                                    </div>
+                                `;
+                        }).join('')
+                        : '<p class="text-gray-500">No options available</p>'}
+                        </div>
+                    </div>
+                `).join('');
+
+                variationsContainer.innerHTML = variationsHtml;
+
+                // Add event listeners to checkboxes
+                document.querySelectorAll('#editExistingVariations .variation-option').forEach(checkbox => {
+                    checkbox.addEventListener('change', updateEditVariationCombinations);
+                });
+
+                // Initialize combinations container
+                updateEditVariationCombinations();
+
+            } catch (error) {
+                console.error('Error loading variations:', error);
+                const variationsContainer = document.getElementById('editExistingVariations');
+                if (variationsContainer) {
+                    variationsContainer.innerHTML = '<p class="text-red-500">Error loading variations. Please try again.</p>';
                 }
             }
         }
 
-        function editProduct(productId) {
-            // Assuming you have a modal popup for editing with ID "editProductModal"
-            document.getElementById("editProductModal").style.display = "block";
-            // Fetch product data and fill in the fields (Implement fetching product details if needed)
-            // Populate form with existing product data for editing
+        async function saveProductChanges() {
+            const productId = document.getElementById('editProductId').value;
+            const formData = new FormData();
+
+            // Add basic product info
+            formData.append('Name', document.getElementById('editProductName').value);
+            formData.append('Description', document.getElementById('editProductDescription').value);
+            formData.append('CategoryId', document.getElementById('editCategoryId').value);
+
+            // Add variation combinations
+            const combinations = getVariationCombinations();
+            formData.append('VariationCombinations', JSON.stringify(combinations));
+
+            // Add new images
+            const imageInput = document.getElementById('editProductImages');
+            if (imageInput.files.length > 0) {
+                Array.from(imageInput.files).forEach(file => {
+                    formData.append('ProductImages', file);
+                });
+            }
+
+            try {
+                const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+                const response = await fetch(`?handler=UpdateProduct&id=${productId}`, {
+                    method: 'POST',
+                    headers: {
+                        'RequestVerificationToken': token
+                    },
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to update product');
+                }
+
+                alert('Product updated successfully!');
+                window.location.reload();
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while updating the product');
+            }
         }
 
-        async function saveProductChanges() {
-            const productId = document.getElementById("editProductId").value;
-            const name = document.getElementById("editProductName").value;
-            const description = document.getElementById("editProductDescription").value;
+        function updateEditVariationCombinations() {
+            const selectedOptions = {};
+            const optionLabels = {};
 
-            const payload = { name, description };
-
-            const response = await fetch(`/Product/ProductSeller?handler=EditProduct&productId=${productId}`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
+            document.querySelectorAll('#editExistingVariations .variation-option:checked').forEach(checkbox => {
+                const variationId = checkbox.getAttribute('data-variation-id');
+                if (!selectedOptions[variationId]) {
+                    selectedOptions[variationId] = [];
+                }
+                selectedOptions[variationId].push(checkbox.value);
+                optionLabels[checkbox.value] = checkbox.getAttribute('data-option-value');
             });
 
-            const result = await response.json();
-            if (result.success) {
-                alert("Product updated successfully.");
-                location.reload(); // Reload to reflect changes
-            } else {
-                alert("Error updating product: " + result.error);
+            const combinations = generateCombinations(selectedOptions);
+            const combinationsContainer = document.getElementById('editCombinationsList');
+
+            if (!combinationsContainer) return;
+
+            if (combinations.length === 0) {
+                combinationsContainer.innerHTML = '<p class="text-gray-500">Select variation options to create combinations</p>';
+                return;
+            }
+
+            const combinationsHtml = combinations.map((combination, index) => `
+                <div class="mb-4 p-3 border rounded">
+                    <div class="flex items-center justify-between">
+                        <div class="flex-grow">
+                            <p class="font-medium">Combination ${index + 1}:</p>
+                            <p class="text-sm text-gray-600">
+                                ${combination.map(optionId => optionLabels[optionId]).join(' / ')}
+                            </p>
+                        </div>
+                        <div class="flex gap-2">
+                            <input type="number"
+                                   class="w-32 rounded-md border-gray-300 shadow-sm"
+                                   placeholder="Price"
+                                   min="0"
+                                   step="0.01">
+                            <input type="number"
+                                   class="w-32 rounded-md border-gray-300 shadow-sm"
+                                   placeholder="Stock"
+                                   min="0">
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            combinationsContainer.innerHTML = combinationsHtml;
+        }
+
+        // Function to display existing combinations with their values
+        function displayExistingCombinations(combinations) {
+            const container = document.getElementById('editCombinationsList');
+            if (!container) return;
+
+            const combinationsHtml = combinations.map((combo, index) => `
+                <div class="mb-4 p-3 border rounded">
+                    <div class="flex items-center justify-between">
+                        <div class="flex-grow">
+                            <p class="font-medium">Combination ${index + 1}:</p>
+                            <p class="text-sm text-gray-600">
+                                ${combo.optionNames.join(' / ')}
+                            </p>
+                        </div>
+                        <div class="flex gap-2">
+                            <input type="number"
+                                   class="w-32 rounded-md border-gray-300 shadow-sm"
+                                   placeholder="Price"
+                                   min="0"
+                                   step="0.01"
+                                   value="${combo.price}">
+                            <input type="number"
+                                   class="w-32 rounded-md border-gray-300 shadow-sm"
+                                   placeholder="Stock"
+                                   min="0"
+                                   value="${combo.stock}">
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            container.innerHTML = combinationsHtml;
+        }
+
+        async function toggleProductStatus(productId, currentStatus, button) {
+            try {
+                const isAvailable = currentStatus === "Available" ? false : true;
+                const response = await fetch(`?handler=ToggleProductStatus&productId=${productId}&isAvailable=${isAvailable}`, {
+                    method: 'POST',
+                    headers: {
+                        '__RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    }
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    // Update the product status label and button text immediately
+                    const statusLabel = document.getElementById(`status-label-${productId}`);
+                    const newStatus = isAvailable ? "Available" : "Unavailable";
+                    statusLabel.textContent = newStatus;
+
+                    // Update the status label class for color change
+                    if (isAvailable) {
+                        statusLabel.classList.remove("bg-red-100", "text-red-800");
+                        statusLabel.classList.add("bg-green-100", "text-green-800");
+                    } else {
+                        statusLabel.classList.remove("bg-green-100", "text-green-800");
+                        statusLabel.classList.add("bg-red-100", "text-red-800");
+                    }
+
+                    // Update the button text and style
+                    button.textContent = isAvailable ? "Deactivate" : "Activate";
+                    button.className = isAvailable ? "bg-yellow-500 hover:bg-yellow-600 text-white py-1 px-3 rounded-md"
+                        : "bg-green-500 hover:bg-green-600 text-white py-1 px-3 rounded-md";
+
+                    // Update the button's currentStatus value for next toggle
+                    button.setAttribute("onclick", `toggleProductStatus('${productId}', '${newStatus}', this)`);
+                } else {
+                    alert(data.error || 'Failed to update product status');
+                }
+            } catch (error) {
+                console.error('Error details:', error);
+                alert('An unexpected error occurred while updating the product status.');
+            }
+        }
+
+        // Delete Product Function
+        async function deleteProduct(productId) {
+            if (!confirm('Are you sure you want to delete this product?')) {
+                return;
+            }
+
+            try {
+                const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+                const response = await fetch(`?handler=DeleteProduct&id=${productId}`, {
+                    method: 'POST',
+                    headers: {
+                        'RequestVerificationToken': token
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to delete product');
+                }
+
+                alert('Product deleted successfully!');
+                window.location.reload();
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while deleting the product');
+            }
+        }
+
+        // Delete Product Image Function
+        async function deleteProductImage(imageId) {
+            if (!confirm('Are you sure you want to delete this image?')) {
+                return;
+            }
+
+            try {
+                const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+                const response = await fetch(`?handler=DeleteProductImage&imageId=${imageId}`, {
+                    method: 'POST',
+                    headers: {
+                        'RequestVerificationToken': token
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to delete image');
+                }
+
+                // Remove image from UI
+                const imageElement = document.querySelector(`[data-image-id="${imageId}"]`);
+                if (imageElement) {
+                    imageElement.remove();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while deleting the image');
             }
         }
 

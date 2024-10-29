@@ -16,6 +16,9 @@ using HandmadeProductManagement.ModelViews.VariationModelViews;
 using HandmadeProductManagement.ModelViews.VariationOptionModelViews;
 using System.Net.Http.Headers;
 using Microsoft.IdentityModel.Tokens;
+using System.ComponentModel.DataAnnotations;
+using HandmadeProductManagement.ModelViews.VariationCombinationModelViews;
+using System.Security.Claims;
 
 namespace UI.Pages.Product
 {
@@ -126,17 +129,17 @@ namespace UI.Pages.Product
                     name = productRequest.Name,
                     categoryId = productRequest.CategoryId,
                     description = productRequest.Description,
-                    variations = productRequest.Variations?.Select(v => new
+                    Variations = productRequest.Variations?.Select(v => new VariationDto
                     {
-                        id = v.Id,
-                        variationOptionIds = v.VariationOptionIds
-                    }),
-                    variationCombinations = productRequest.VariationCombinations?.Select(c => new
+                        Id = v.Id,
+                        CategoryId = productRequest.CategoryId
+                    }).ToList(),
+                    VariationCombinations = productRequest.VariationCombinations?.Select(c => new VariationCombinationDto
                     {
-                        variationOptionIds = c.VariationOptionIds,
-                        price = c.Price,
-                        quantityInStock = c.QuantityInStock
-                    })
+                        VariationOptionIds = c.VariationOptionIds,
+                        Price = c.Price,
+                        QuantityInStock = c.QuantityInStock
+                    }).ToList()
                 };
 
                 var createProductResponse = await _apiResponseHelper.PostAsync<bool>(
@@ -149,15 +152,41 @@ namespace UI.Pages.Product
                     return new JsonResult(new { error = createProductResponse.Message }) { StatusCode = 400 };
                 }
 
-                // Get the productId from the response
+                if (!createProductResponse.Data)
+                {
+                    _logger.LogError("Failed to create product");
+                    return new JsonResult(new { error = "Failed to create product" }) { StatusCode = 400 };
+                }
+
+                // Retrieve the productId from the response
                 string productId = createProductResponse.Data.ToString();
 
-                await OnPostUploadImagesAsync(productId);
+                if (string.IsNullOrEmpty(productId))
+                {
+                    _logger.LogError("Product ID not received after creation");
+                    return new JsonResult(new { error = "Failed to retrieve product ID" }) { StatusCode = 500 };
+                }
+
+                // Upload images for the created product
+                if (ProductImages != null && ProductImages.Any())
+                {
+                    foreach (var image in ProductImages)
+                    {
+                        var uploadResponse = await _apiResponseHelper.PostFileAsync<bool>(
+                            $"{Constants.ApiBaseUrl}/api/productimage/upload?productId={productId}",
+                            image);
+
+                        if (!uploadResponse.Data)
+                        {
+                            _logger.LogWarning("Failed to upload image {FileName}", image.FileName);
+                        }
+                    }
+                }
 
                 return new JsonResult(new
                 {
                     success = true,
-                    productId = productId
+                    productId
                 });
             }
             catch (Exception ex)
@@ -172,51 +201,57 @@ namespace UI.Pages.Product
             }
         }
 
+
         public async Task<IActionResult> OnPostUploadImagesAsync(string productId)
         {
             try
             {
-                // Validate product ID
                 if (string.IsNullOrEmpty(productId))
                 {
                     return new JsonResult(new { error = "Product ID is required" }) { StatusCode = 400 };
                 }
 
-                // Check if images are provided
                 if (ProductImages == null || !ProductImages.Any())
                 {
+                    _logger.LogWarning("No images provided for product ID {ProductId}", productId);
                     return new JsonResult(new { error = "No images provided" }) { StatusCode = 400 };
                 }
 
-                // List to store uploaded images for the response
                 var uploadedImages = new List<ProductImage>();
-
                 foreach (var image in ProductImages)
                 {
-                    // Use PostFileAsync for each image upload
+                    _logger.LogInformation("Uploading image {FileName} for product ID {ProductId}", image.FileName, productId);
+
                     var uploadResponse = await _apiResponseHelper.PostFileAsync<BaseResponse<string>>(
                         $"{Constants.ApiBaseUrl}/api/productimage/upload?productId={productId}", image);
 
-                    // Check if upload was successful
                     if (uploadResponse.StatusCode == StatusCodeHelper.OK && !string.IsNullOrEmpty(uploadResponse.Data.Data))
                     {
                         var productImage = new ProductImage
                         {
-                            Url = uploadResponse.Data.Data,  // URL from response
-                            ProductId = productId       // Associate with product ID
+                            Url = uploadResponse.Data.Data,
+                            ProductId = productId
                         };
 
-                        uploadedImages.Add(productImage); // Add to list for response
+                        uploadedImages.Add(productImage);
+                        _logger.LogInformation("Successfully uploaded image {FileName} with URL {ImageUrl}", image.FileName, productImage.Url);
                     }
                     else
                     {
-                        // Log any upload errors
                         _logger.LogError("Failed to upload image {FileName}. API Response: {Message}", image.FileName, uploadResponse.Message);
                     }
                 }
 
-                // Return successful result with list of uploaded images
-                return new JsonResult(new { success = true, images = uploadedImages });
+                if (uploadedImages.Any())
+                {
+                    // Log the success response with all uploaded image URLs
+                    _logger.LogInformation("Images successfully uploaded for product ID {ProductId}", productId);
+                    return new JsonResult(new { success = true, images = uploadedImages });
+                }
+                else
+                {
+                    return new JsonResult(new { error = "Image upload failed." }) { StatusCode = 500 };
+                }
             }
             catch (Exception ex)
             {
@@ -268,50 +303,6 @@ namespace UI.Pages.Product
             }
         }
 
-        public async Task<IActionResult> OnDeleteProductAsync(string productId)
-        {
-            try
-            {
-                var deleteResponse = await _apiResponseHelper.DeleteAsync<bool>($"{Constants.ApiBaseUrl}/api/product/soft-delete/{productId}");
-
-                if (deleteResponse.StatusCode != StatusCodeHelper.OK)
-                {
-                    _logger.LogError("Failed to delete product. API Response: {Message}", deleteResponse.Message);
-                    return new JsonResult(new { error = deleteResponse.Message }) { StatusCode = 400 };
-                }
-
-                return new JsonResult(new { success = true });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Unhandled error in product deletion");
-                return new JsonResult(new { error = "An unexpected error occurred while deleting the product.", details = ex.Message }) { StatusCode = 500 };
-            }
-        }
-
-        public async Task<IActionResult> OnPatchEditProductAsync(string productId, [FromBody] ProductEditRequestModel productEdit)
-        {
-            try
-            {
-                var editPayload = new { name = productEdit.Name, description = productEdit.Description };
-
-                var editResponse = await _apiResponseHelper.PatchAsync<bool>($"{Constants.ApiBaseUrl}/api/product/{productId}", editPayload);
-
-                if (editResponse.StatusCode != StatusCodeHelper.OK)
-                {
-                    _logger.LogError("Failed to edit product. API Response: {Message}", editResponse.Message);
-                    return new JsonResult(new { error = editResponse.Message }) { StatusCode = 400 };
-                }
-
-                return new JsonResult(new { success = true });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Unhandled error in product editing");
-                return new JsonResult(new { error = "An unexpected error occurred while editing the product.", details = ex.Message }) { StatusCode = 500 };
-            }
-        }
-
         private async Task<List<VariationDto>> LoadVariationsAsync(string categoryId)
         {
             var response = await _apiResponseHelper.GetAsync<List<VariationDto>>(
@@ -339,6 +330,141 @@ namespace UI.Pages.Product
 
             return new List<VariationDto>();
         }
+
+        public async Task<IActionResult> OnGetProductDetailsAsync(string id)
+        {
+            var response = await _apiResponseHelper.GetAsync<ProductSearchVM>(
+                $"{Constants.ApiBaseUrl}/api/product/{id}");
+
+            if (response.StatusCode == StatusCodeHelper.OK && response.Data != null)
+            {
+                return new JsonResult(response.Data);
+            }
+
+            return new JsonResult(new { error = "Product not found" }) { StatusCode = 404 };
+        }
+
+        public async Task<IActionResult> OnPostUpdateProductAsync(string id)
+        {
+            try
+            {
+                // Read the form data
+                var formData = await Request.ReadFormAsync();
+                var productRequest = new ProductRequestModel
+                {
+                    Name = formData["Name"],
+                    CategoryId = formData["CategoryId"],
+                    Description = formData["Description"],
+                    VariationCombinations = JsonSerializer.Deserialize<List<VariationCombinationModel>>(
+                        formData["VariationCombinations"])
+                };
+
+                // Update product via API
+                var updateResponse = await _apiResponseHelper.PatchAsync<bool>(
+                    $"{Constants.ApiBaseUrl}/api/product/{id}",
+                    productRequest);
+
+                if (updateResponse.StatusCode != StatusCodeHelper.OK)
+                {
+                    return new JsonResult(new { error = updateResponse.Message }) { StatusCode = 400 };
+                }
+
+                // Handle image uploads if any
+                if (Request.Form.Files.Count > 0)
+                {
+                    foreach (var file in Request.Form.Files)
+                    {
+                        var uploadResponse = await _apiResponseHelper.PostFileAsync<BaseResponse<string>>(
+                            $"{Constants.ApiBaseUrl}/api/productimage/upload?productId={id}",
+                            file);
+
+                        if (uploadResponse.StatusCode != StatusCodeHelper.OK)
+                        {
+                            _logger.LogError("Failed to upload image {FileName}", file.FileName);
+                        }
+                    }
+                }
+
+                return new JsonResult(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating product {ProductId}", id);
+                return new JsonResult(new { error = "An error occurred while updating the product" })
+                { StatusCode = 500 };
+            }
+        }
+
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> OnPostToggleProductStatusAsync(string productId, bool isAvailable)
+        {
+            try
+            {
+                _logger.LogInformation($"Attempting to toggle product status. ProductId: {productId}, IsAvailable: {isAvailable}");
+
+                var apiUrl = $"{Constants.ApiBaseUrl}/api/product/update-status/{productId}?isAvailable={isAvailable}";
+                var response = await _apiResponseHelper.PutProductStatusUpdateAsync(apiUrl, isAvailable);
+
+                if (response != null && response.Data)
+                {
+                    return new JsonResult(new { success = true });
+                }
+                else
+                {
+                    return new JsonResult(new { success = false, error = response?.Message ?? "Failed to update product status" });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error toggling product status for ProductId: {productId}");
+                return new JsonResult(new { success = false, error = "An error occurred while processing your request" });
+            }
+        }
+
+        public async Task<IActionResult> OnPostDeleteProductAsync(string id)
+        {
+            try
+            {
+                var response = await _apiResponseHelper.DeleteAsync<bool>(
+                    $"{Constants.ApiBaseUrl}/api/product/soft-delete/{id}");
+
+                if (response.StatusCode == StatusCodeHelper.OK)
+                {
+                    return new JsonResult(new { success = true });
+                }
+
+                return new JsonResult(new { error = response.Message }) { StatusCode = 400 };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting product {ProductId}", id);
+                return new JsonResult(new { error = "An error occurred while deleting the product" })
+                { StatusCode = 500 };
+            }
+        }
+
+        public async Task<IActionResult> OnPostDeleteProductImageAsync(string imageId)
+        {
+            try
+            {
+                var response = await _apiResponseHelper.DeleteAsync<bool>(
+                    $"{Constants.ApiBaseUrl}/api/productimage/{imageId}");
+
+                if (response.StatusCode == StatusCodeHelper.OK)
+                {
+                    return new JsonResult(new { success = true });
+                }
+
+                return new JsonResult(new { error = response.Message }) { StatusCode = 400 };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting product image {ImageId}", imageId);
+                return new JsonResult(new { error = "An error occurred while deleting the image" })
+                { StatusCode = 500 };
+            }
+        }
+
     }
 
     public class ProductRequestModel
@@ -359,13 +485,16 @@ namespace UI.Pages.Product
     public class VariationCombinationModel
     {
         public List<string> VariationOptionIds { get; set; }
-        public decimal Price { get; set; }
+        public int Price { get; set; }
         public int QuantityInStock { get; set; }
     }
 
-    public class ProductEditRequestModel
+    public class UpdateProductStatusRequest
     {
-        public string Name { get; set; }
-        public string Description { get; set; }
+        [Required]
+        public string ProductId { get; set; }
+
+        [Required]
+        public bool IsAvailable { get; set; }
     }
 }
