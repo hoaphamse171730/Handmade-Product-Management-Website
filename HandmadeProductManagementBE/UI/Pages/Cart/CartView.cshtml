@@ -38,8 +38,8 @@
                                                     <a href="/ProductDetail/ProductDetail?id=@item.ProductId" class="ml-4 block font-semibold">@item.ProductName</a>
                                                 </div>
                                             </td>
-                                            <td>₫@item.UnitPrice</td>
-                                            <td>₫@Math.Round(item.DiscountPrice, 0, MidpointRounding.AwayFromZero)</td>
+                                            <td>₫<s>@item.UnitPrice</s></td>
+                                            <td class="text-red-500 line-through">₫@Math.Round(item.DiscountPrice, 0, MidpointRounding.AwayFromZero)</td>
                                             <td>
                                                 @if (item.VariationOptionValues != null && item.VariationOptionValues.Any())
                                                 {
