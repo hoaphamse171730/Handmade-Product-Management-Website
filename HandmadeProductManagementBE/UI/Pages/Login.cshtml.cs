@@ -1,9 +1,10 @@
+using System.ComponentModel.DataAnnotations;
 using HandmadeProductManagement.Core.Common;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Newtonsoft.Json;
-using System.ComponentModel.DataAnnotations;
-using System.Reflection.Metadata;
+
+namespace UI.Pages;
 
 public class LoginModel : PageModel
 {
@@ -23,6 +24,17 @@ public class LoginModel : PageModel
     }
 
     public string? ErrorMessage { get; set; }
+
+    public IActionResult OnPostLogout()
+    {
+        var token = HttpContext.Session.GetString("Token");
+        if (token != null)
+        {
+            HttpContext.Session.Remove("Token");
+        }
+
+        return RedirectToPage("/Login");
+    }
 
     public async Task<IActionResult> OnPostAsync()
     {

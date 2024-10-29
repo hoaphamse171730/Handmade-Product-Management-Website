@@ -1,0 +1,63 @@
+﻿@page
+@model RegistrationModel
+<form method="post">
+    <div class="font-[sans-serif] flex flex-col justify-center p-4 sm:h-screen">
+        <div class="mx-auto w-full max-w-md rounded-2xl border border-gray-300 p-8">
+            <div class="mb-12 text-center">
+                <a href="javascript:void(0)">
+                    <img src="https://readymadeui.com/readymadeui.svg" alt="logo" class='inline-block w-40' />
+                </a>
+            </div>
+            <div class="space-y-6">
+                <div>
+                    <label class="mb-2 block text-sm text-gray-800">User Name</label>
+                    <input asp-for="UserName" type="text" class="w-full rounded-md border border-gray-300 bg-white px-4 py-3 text-sm text-gray-800 outline-blue-500" placeholder="Enter user name" />
+                    <span asp-validation-for="UserName" class="text-red-500"></span>
+                </div>
+
+                <div>
+                    <label class="mb-2 block text-sm text-gray-800">Full Name</label>
+                    <input asp-for="FullName" type="text" class="w-full rounded-md border border-gray-300 bg-white px-4 py-3 text-sm text-gray-800 outline-blue-500" placeholder="Enter full name" />
+                    <span asp-validation-for="FullName" class="text-red-500"></span>
+                </div>
+
+                <div>
+                    <label class="mb-2 block text-sm text-gray-800">Phone Number</label>
+                    <input asp-for="PhoneNumber" type="text" class="w-full rounded-md border border-gray-300 bg-white px-4 py-3 text-sm text-gray-800 outline-blue-500" placeholder="Enter phone number" />
+                    <span asp-validation-for="PhoneNumber" class="text-red-500"></span>
+                </div>
+
+                <div>
+                    <label class="mb-2 block text-sm text-gray-800">Email</label>
+                    <input asp-for="Email" type="text" class="w-full rounded-md border border-gray-300 bg-white px-4 py-3 text-sm text-gray-800 outline-blue-500" placeholder="Enter email" />
+                    <span asp-validation-for="Email" class="text-red-500"></span>
+                </div>
+
+                <div>
+                    <label class="mb-2 block text-sm text-gray-800">Password</label>
+                    <input asp-for="Password" type="password" class="w-full rounded-md border border-gray-300 bg-white px-4 py-3 text-sm text-gray-800 outline-blue-500" placeholder="Enter password" />
+                    <span asp-validation-for="Password" class="text-red-500"></span>
+                </div>
+                <div>
+                    <label class="mb-2 block text-sm text-gray-800">Confirm Password</label>
+                    <input asp-for="ConfirmPassword" type="password" class="w-full rounded-md border border-gray-300 bg-white px-4 py-3 text-sm text-gray-800 outline-blue-500" placeholder="Enter confirm password" />
+                    <span asp-validation-for="ConfirmPassword" class="text-red-500"></span>
+                </div>
+
+                <div class="flex items-center">
+                    <input id="remember-me" name="remember-me" type="checkbox" class="shrink-0 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                    <label for="remember-me" class="ml-3 block text-sm text-gray-800">
+                        I accept the <a href="javascript:void(0);" class="ml-1 font-semibold text-blue-600 hover:underline">Terms and Conditions</a>
+                    </label>
+                </div>
+            </div>
+
+            <div class="!mt-12">
+                <button type="submit" class="w-full rounded-md bg-blue-600 px-4 py-3 text-sm font-semibold tracking-wider text-white hover:bg-blue-700 focus:outline-none">
+                    Create an account
+                </button>
+            </div>
+            <p class="mt-6 text-center text-sm text-gray-800">Already have an account? <a href="/Login" class="ml-1 font-semibold text-blue-600 hover:underline">Login here</a></p>
+        </div>
+    </div>
+</form>

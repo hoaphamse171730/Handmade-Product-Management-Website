@@ -249,7 +249,7 @@ namespace HandmadeProductManagement.Services.Service
                 .Where(od => od.OrderId == orderId && !od.DeletedTime.HasValue)
                 .Select(od => new OrderInDetailDto
                 {
-                    ProductItemId = od.ProductItem != null && od.ProductItem.Product != null ? od.ProductItem.Product.Id : Guid.Empty.ToString(),
+                    ProductId = od.ProductItem != null && od.ProductItem.Product != null ? od.ProductItem.Product.Id : Guid.Empty.ToString(),
                     ProductName = od.ProductItem != null && od.ProductItem.Product != null ? od.ProductItem.Product.Name : "",
                     ProductQuantity = od.ProductQuantity,
                     DiscountPrice = od.DiscountPrice,
@@ -268,7 +268,7 @@ namespace HandmadeProductManagement.Services.Service
             // Fetch product images and set the first image URL
             foreach (var orderDetail in orderDetails)
             {
-                var images = await _productImageService.GetProductImageById(orderDetail.ProductItemId);
+                var images = await _productImageService.GetProductImageById(orderDetail.ProductId);
                 if (images != null && images.Count > 0)
                 {
                     orderDetail.ProductImage = images.First().Url;
@@ -451,22 +451,22 @@ namespace HandmadeProductManagement.Services.Service
 
                 // Validate Status Flow
                 var validStatusTransitions = new Dictionary<string, List<string>>
-            {
-                { Constants.OrderStatusPending, new List<string> { Constants.OrderStatusCanceled, Constants.OrderStatusAwaitingPayment } },
-                { Constants.OrderStatusAwaitingPayment, new List<string> { Constants.OrderStatusCanceled, Constants.OrderStatusProcessing } },
-                { Constants.OrderStatusProcessing, new List<string> { Constants.OrderStatusDelivering } },
-                { Constants.OrderStatusDelivering, new List<string> { Constants.OrderStatusShipped, Constants.OrderStatusDeliveryFailed } },
-                { Constants.OrderStatusDeliveryFailed, new List<string> { Constants.OrderStatusOnHold } },
-                { Constants.OrderStatusOnHold, new List<string> { Constants.OrderStatusDeliveringRetry, Constants.OrderStatusRefundRequested, Constants.OrderStatusReturning } },
-                { Constants.OrderStatusRefundRequested, new List<string> { Constants.OrderStatusRefundDenied, Constants.OrderStatusRefundApprove } },
-                { Constants.OrderStatusRefundApprove, new List<string> { Constants.OrderStatusReturning } },
-                { Constants.OrderStatusReturning, new List<string> { Constants.OrderStatusReturnFailed, Constants.OrderStatusReturned } },
-                { Constants.OrderStatusReturnFailed, new List<string> { Constants.OrderStatusOnHold } },
-                { Constants.OrderStatusReturned, new List<string> { Constants.OrderStatusRefunded } },
-                { Constants.OrderStatusRefunded, new List<string> { Constants.OrderStatusClosed } },
-                { Constants.OrderStatusCanceled, new List<string> { Constants.OrderStatusClosed } },
-                { Constants.OrderStatusDeliveringRetry, new List<string> { Constants.OrderStatusDelivering } }
-            };
+                {
+                    { Constants.OrderStatusPending, new List<string> { Constants.OrderStatusCanceled, Constants.OrderStatusAwaitingPayment } },
+                    { Constants.OrderStatusAwaitingPayment, new List<string> { Constants.OrderStatusCanceled, Constants.OrderStatusProcessing } },
+                    { Constants.OrderStatusProcessing, new List<string> { Constants.OrderStatusDelivering } },
+                    { Constants.OrderStatusDelivering, new List<string> { Constants.OrderStatusShipped, Constants.OrderStatusDeliveryFailed } },
+                    { Constants.OrderStatusDeliveryFailed, new List<string> { Constants.OrderStatusOnHold } },
+                    { Constants.OrderStatusOnHold, new List<string> { Constants.OrderStatusDeliveringRetry, Constants.OrderStatusRefundRequested, Constants.OrderStatusReturning } },
+                    { Constants.OrderStatusRefundRequested, new List<string> { Constants.OrderStatusRefundDenied, Constants.OrderStatusRefundApprove } },
+                    { Constants.OrderStatusRefundApprove, new List<string> { Constants.OrderStatusReturning } },
+                    { Constants.OrderStatusReturning, new List<string> { Constants.OrderStatusReturnFailed, Constants.OrderStatusReturned } },
+                    { Constants.OrderStatusReturnFailed, new List<string> { Constants.OrderStatusOnHold } },
+                    { Constants.OrderStatusReturned, new List<string> { Constants.OrderStatusRefunded } },
+                    { Constants.OrderStatusRefunded, new List<string> { Constants.OrderStatusClosed } },
+                    { Constants.OrderStatusCanceled, new List<string> { Constants.OrderStatusClosed } },
+                    { Constants.OrderStatusDeliveringRetry, new List<string> { Constants.OrderStatusDelivering } }
+                };
 
             var allValidStatuses = validStatusTransitions.Keys
                 .Concat(validStatusTransitions.Values.SelectMany(v => v))
