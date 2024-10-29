@@ -1,14 +1,8 @@
-﻿using HandmadeProductManagement.Core.Base;
-using HandmadeProductManagement.Core.Common;
+﻿using HandmadeProductManagement.Core.Common;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.Core.Store;
 using HandmadeProductManagement.ModelViews.OrderModelViews;
-using HandmadeProductManagement.ModelViews.ProductModelViews;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using System.Net.Http;
-using System.Net.Http.Json;
-using System.Threading.Tasks;
 
 namespace UI.Pages.Order
 {
@@ -22,14 +16,31 @@ namespace UI.Pages.Order
         }
 
         public List<OrderByUserDto>? Orders { get; set; }
+        public string CurrentFilter { get; set; } = "All";
 
-        public async Task OnGetAsync()
+        public async Task OnGetAsync(string? filter)
         {
+            // Set default filter to "All" if none is provided
+            CurrentFilter = filter ?? "All";
+
             var response = await _apiResponseHelper.GetAsync<List<OrderByUserDto>>(Constants.ApiBaseUrl + "/api/order/user");
 
             if (response?.StatusCode == StatusCodeHelper.OK && response.Data != null)
             {
-                Orders = response.Data.OrderByDescending(o => o.OrderDate).ToList();
+                var orders = response.Data.OrderByDescending(o => o.OrderDate).ToList();
+
+                // Filter orders based on selected filter
+                Orders = CurrentFilter switch
+                {
+                    "Pending" => orders.Where(o => o.Status == "Pending").ToList(),
+                    "AwaitingPayment" => orders.Where(o => o.Status == "Awaiting Payment").ToList(),
+                    "Processing" => orders.Where(o => o.Status == "Processing").ToList(),
+                    "Delivering" => orders.Where(o => new[] { "Delivery Failed", "Delivering", "On Hold", "Delivering Retry" }.Contains(o.Status)).ToList(),
+                    "Shipped" => orders.Where(o => o.Status == "Shipped").ToList(),
+                    "Canceled" => orders.Where(o => o.Status == "Canceled").ToList(),
+                    "Refunded" => orders.Where(o => new[] { "Refund Requested", "Refund Denied", "Refund Approve", "Refunded" }.Contains(o.Status)).ToList(),
+                    _ => orders // Default to show all orders
+                };
             }
             else
             {
