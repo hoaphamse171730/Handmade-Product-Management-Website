@@ -1,0 +1,44 @@
+﻿@page
+@model UI.Pages.User.EditModel
+@{
+    ViewData["Title"] = "Edit User Info";
+}
+
+<div class="container mx-auto mt-10">
+    <h2 class="text-center text-lg font-bold text-blue-600">Edit User Information</h2>
+
+    <div class="max-w-md mx-auto mt-8">
+        <form method="post">
+            <div class="border p-4 rounded-lg shadow-lg bg-white">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="UserName">Name:</label>
+                    <input type="text" id="UserName" name="UserName" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" value="@Model.userInfo.UserName" />
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="Email">Email:</label>
+                    <input type="email" id="Email" name="Email" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" value="@Model.userInfo.Email" />
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="PhoneNumber">Phone Number:</label>
+                    <input type="tel" id="PhoneNumber" name="PhoneNumber" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" value="@Model.userInfo.PhoneNumber" />
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Two factor enabled:</label>
+                    <p class="text-gray-600">@Model.userInfo.TwoFactorEnabled</p>
+
+                </div>
+                <div class="text-center mt-6">
+                    <button type="submit" class="rounded-lg bg-cyan-600 px-4 py-2 font-semibold text-white transition duration-300 hover:bg-cyan-700">
+                        Save Changes
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Add any custom JavaScript logic for form validation if needed
+    </script>
+}

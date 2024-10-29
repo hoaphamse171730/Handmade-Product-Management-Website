@@ -27,12 +27,11 @@
                 </span>
             </div>
             
-            <!-- Action Links -->
             <div class="flex justify-end mt-4 space-x-2">
                 <a class="text-blue-600 hover:text-blue-800" asp-page="Details" asp-route-userId="@user.Id">Details</a> |
                 <a class="text-blue-600 hover:text-blue-800" asp-page="Edit" asp-route-userId="@user.Id">Edit</a> |
                 <a class="text-red-600 hover:text-red-800 cursor-pointer" onclick="deleteUser('@user.Id')">Delete</a> |
-                <a class="text-blue-600 hover:text-blue-800" asp-page="Restore" asp-route-userId="@user.Id">Restore</a>
+                <a class="text-blue-600 hover:text-blue-800 cursor-pointer" onclick="restoreUser('@user.Id')">Restore</a>
             </div>
         </div>
     }
@@ -69,6 +68,23 @@
                         location.reload();
                     } else {
                         alert('Error deleting user.');
+                    }
+                }
+            }
+
+            async function restoreUser(userId) {
+                console.log("Restoring user with ID:", userId);
+
+                const confirmed = confirm("Are you sure you want to restore this user?");
+                if (confirmed) {
+                    const response = await fetch(`${apiBaseUrl}/api/users/${userId}/restore`, {
+                        method: 'POST'
+                    });
+
+                    if (response.ok) {
+                        location.reload();
+                    } else {
+                        alert('Error restoring user.');
                     }
                 }
             }
