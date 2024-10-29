@@ -4,18 +4,26 @@
     ViewData["Title"] = "Status Tracking";
 
     var statusList = Model.StatusChanges;
-    var statusMapping = new Dictionary<string, string>
+    var statusMapping = new List<KeyValuePair<string, string>>
     {
-        { "Pending", "Order Placed" },
-        { "Awaiting Payment", "Order is awaiting payment" },
-        { "Processing", "Order is being prepared" },
-        { "Delivering", "Order is being shipped" },
-        { "Shipped", "Order was delivered successfully" },
-        { "Canceled", "Order has been cancelled" } 
+        new("Pending", "Order Placed"),
+        new("Awaiting Payment", "Order is awaiting payment"),
+        new("Processing", "Order is being prepared"),
+        new("Delivering", "Order is being shipped"),
+        new("Delivery Failed", "Delivery Failed"),
+        new("On Hold", "Order is on hold"),
+        new("Delivering Retry", "Retrying Delivery"),
+        new("Refund Requested", "Refund has been requested"),
+        new("Refund Denied", "Refund request was denied"),
+        new("Refund Approve", "Refund request was approved"),
+        new("Refunded", "Order was refunded successfully"),
+        new("Shipped", "Order was delivered successfully"),
+        new("Canceled", "Order has been cancelled")
     };
 
-    string GetStatusDate(string status) =>
-        statusList?.FirstOrDefault(s => s.Status == status)?.ChangeTime.ToString("dd MMM yyyy, HH:mm") ?? "";
+    // Helper methods to get status information
+    string GetStatusDate(DateTime changeTime) =>
+        changeTime.ToString("dd MMM yyyy, HH:mm");
 
     bool IsStatusReached(string status) =>
         statusList.Any(s => s.Status == status);
@@ -23,29 +31,107 @@
     string GetOrderStatusMessage()
     {
         var lastStatus = statusList?.OrderByDescending(s => s.ChangeTime).FirstOrDefault()?.Status;
-
         return lastStatus switch
         {
             "Pending" => "Order Placed",
             "Awaiting Payment" => "Order is awaiting payment",
             "Processing" => "Order is being prepared",
             "Delivering" => "Order is being shipped",
+            "Delivery Failed" => "Delivery Failed",
+            "On Hold" => "Order is on hold",
+            "Delivering Retry" => "Retrying Delivery",
+            "Refund Requested" => "Refund has been requested",
+            "Refund Denied" => "Refund request was denied",
+            "Refund Approve" => "Refund request was approved",
+            "Refunded" => "Order was refunded successfully",
             "Shipped" => "Order was delivered successfully",
-            "Canceled" => "Order has been cancelled", 
+            "Canceled" => "Order has been cancelled",
             _ => "Unknown Order Status"
         };
     }
+
+    // Final list of statuses to display
+    var finalStatuses = new List<KeyValuePair<string, Tuple<string, DateTime?>>>();
+
+    if (!finalStatuses.Any(kv => kv.Key == "Pending"))
+        finalStatuses.Add(new KeyValuePair<string, Tuple<string, DateTime?>>("Pending", new Tuple<string, DateTime?>("Order Placed", null)));
+
+    if (!finalStatuses.Any(kv => kv.Key == "Awaiting Payment"))
+        finalStatuses.Add(new KeyValuePair<string, Tuple<string, DateTime?>>("Awaiting Payment", new Tuple<string, DateTime?>("Order is awaiting payment", null)));
+
+    if (!finalStatuses.Any(kv => kv.Key == "Processing"))
+        finalStatuses.Add(new KeyValuePair<string, Tuple<string, DateTime?>>("Processing", new Tuple<string, DateTime?>("Order is being prepared", null)));
+
+    if (!finalStatuses.Any(kv => kv.Key == "Delivering"))
+        finalStatuses.Add(new KeyValuePair<string, Tuple<string, DateTime?>>("Delivering", new Tuple<string, DateTime?>("Order is being shipped", null)));
+    
+
+    bool isDeliveringAdded = true;
+
+    foreach (var status in statusList)
+    {
+        if (status.Status == "Pending" || status.Status == "Awaiting Payment" || status.Status == "Processing")
+        {
+            var existingStatus = finalStatuses.FirstOrDefault(kv => kv.Key == status.Status);
+            if (existingStatus.Key != null)
+            {
+                finalStatuses[finalStatuses.IndexOf(existingStatus)] =
+                    new KeyValuePair<string, Tuple<string, DateTime?>>(
+                        existingStatus.Key,
+                        new Tuple<string, DateTime?>(existingStatus.Value.Item1, status.ChangeTime));
+            }
+        }
+
+        if (status.Status == "Delivering" && isDeliveringAdded)
+        {
+            var existingStatus = finalStatuses.FirstOrDefault(kv => kv.Key == status.Status);
+            if (existingStatus.Key != null)
+            {
+                finalStatuses[finalStatuses.IndexOf(existingStatus)] =
+                    new KeyValuePair<string, Tuple<string, DateTime?>>(
+                        existingStatus.Key,
+                        new Tuple<string, DateTime?>(existingStatus.Value.Item1, status.ChangeTime));
+            }
+        }
+
+        if (status.Status == "Delivering" && !isDeliveringAdded)
+        {
+            finalStatuses.Add(new KeyValuePair<string, Tuple<string, DateTime?>>("Delivering", new Tuple<string, DateTime?>("Order is being shipped", status.ChangeTime)));
+        }
+        else if (status.Status != "Pending" && status.Status != "Awaiting Payment" && status.Status != "Processing" && status.Status != "Delivering")
+        {
+            var matchingStatus = statusMapping.FirstOrDefault(kv => kv.Key == status.Status);
+            if (matchingStatus.Key != null)
+            {
+                finalStatuses.Add(new KeyValuePair<string, Tuple<string, DateTime?>>(matchingStatus.Key, new Tuple<string, DateTime?>(matchingStatus.Value, status.ChangeTime)));
+            }
+            isDeliveringAdded = false;
+        }
+
+        if (status.Status == "Shipped" && !finalStatuses.Any(kv => kv.Key == "Shipped"))
+            finalStatuses.Add(new KeyValuePair<string, Tuple<string, DateTime?>>("Shipped", new Tuple<string, DateTime?>("Order was delivered successfully", status.ChangeTime)));
+        
+    }
+
+    if (!IsStatusReached("Shipped"))
+    {
+        finalStatuses.Add(new KeyValuePair<string, Tuple<string, DateTime?>>("Shipped", new Tuple<string, DateTime?>("Order was delivered successfully", null)));
+    }
+
+
+    if (IsStatusReached("Refund Requested"))
+    {
+        finalStatuses.RemoveAll(kv => kv.Key == "Shipped");
+    }
+    
 }
+
 <div class="flex items-center justify-between py-4">
     <a href="javascript:history.back()" class="text-lg font-semibold text-black hover:underline">← Return</a>
-    <div class="text-lg font-semibold">
-        Order Code: @Model.OrderId
-    </div>
+    <div class="text-lg font-semibold">Order Code: @Model.OrderId</div>
     @if (GetOrderStatusMessage() != "Order has been cancelled")
     {
-        <div class="text-lg font-semibold text-green-700">
-            @GetOrderStatusMessage()
-        </div>
+        <div class="text-lg font-semibold text-green-700">@GetOrderStatusMessage()</div>
     }
 </div>
 
@@ -53,26 +139,21 @@
     <div class="space-y-6 rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-black dark:bg-gray-200">
         <h3 class="text-xl font-semibold text-black">Order Status</h3>
 
-        @if (IsStatusReached("Canceled")) 
+        @if (finalStatuses.Any(kv => kv.Key == "Canceled"))
         {
             <p class="text-lg text-red-600">Order has been cancelled</p>
         }
         else
         {
             <ol class="relative ms-3 border-s border-gray-200 dark:border-gray-700">
-                @foreach (var status in statusMapping.Reverse())
+                @foreach (var status in finalStatuses.AsEnumerable().Reverse())
                 {
-                    if (status.Key == "Canceled" && !IsStatusReached("Canceled"))
-                    {
-                        continue;
-                    }
+                    var statusDate = status.Value.Item2.HasValue ? GetStatusDate(status.Value.Item2.Value) : null;
 
-                    bool isReached = IsStatusReached(status.Key);
-                    var statusDate = GetStatusDate(status.Key);
-                    <li class="mb-10 ms-6 @(isReached ? "text-blue-600" : "text-black")">
-                        <span class="absolute -start-3 flex h-6 w-6 items-center justify-center rounded-full @(isReached ? "bg-blue-200" : "bg-gray-100")">
+                    <li class="mb-10 ms-6 @(IsStatusReached(status.Key) ? "text-blue-600" : "text-black")">
+                        <span class="absolute -start-3 flex h-6 w-6 items-center justify-center rounded-full @(IsStatusReached(status.Key) ? "bg-blue-200" : "bg-gray-100")">
                             <svg class="h-4 w-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                @if (isReached)
+                                @if (IsStatusReached(status.Key))
                                 {
                                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 11.917 9.724 16.5 19 7.5" />
                                 }
@@ -82,8 +163,13 @@
                                 }
                             </svg>
                         </span>
-                        <h4 class="mb-0.5 text-base font-semibold @(isReached ? "text-blue-600" : "text-black")">@status.Value</h4>
-                        <p class="text-sm">@statusDate</p>
+                        <h4 class="mb-0.5 text-base font-semibold @(IsStatusReached(status.Key) ? "text-blue-600" : "text-black")">
+                            @status.Value.Item1
+                        </h4>
+                        @if (statusDate != null)
+                        {
+                            <p class="text-sm">@statusDate</p>
+                        }
                     </li>
                 }
             </ol>

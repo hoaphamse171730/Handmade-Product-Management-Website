@@ -22,7 +22,7 @@ namespace HandmadeProductManagementAPI.Controllers
         // GET: api/Users
         [HttpGet]
         //[Authorize(Roles ="Admin")]
-        public async Task<IActionResult> GetApplicationUsers()
+        public async Task<IActionResult> GetApplicationUsers(int PageNumber, int PageSize,[FromQuery] string? userName, [FromQuery] string? phoneNumber)
         {
 
             var response = new BaseResponse<IList<UserResponseModel>>
@@ -30,7 +30,7 @@ namespace HandmadeProductManagementAPI.Controllers
                 Code = "200",
                 StatusCode = StatusCodeHelper.OK,
                 Message = "Success",
-                Data = await _userService.GetAll()
+                Data = await _userService.GetAll(PageNumber,PageSize, userName, phoneNumber)
             };
             return Ok(response);
 
@@ -70,7 +70,7 @@ namespace HandmadeProductManagementAPI.Controllers
 
 
         [HttpDelete("{id}")]
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
 
         public async Task<IActionResult> DeleteUser(string id)
         {
