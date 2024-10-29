@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Constants;
-using HandmadeProductManagement.Core.Exceptions.Handler; // Adjust this based on your actual namespace
+using HandmadeProductManagement.Core.Exceptions.Handler; // Adjust based on your namespace
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
@@ -244,18 +244,16 @@ public async Task<BaseResponse<T>> PutAsync<T>(string url, object payload = null
             }
             else
             {
-                // Read the error content
-                var content = await response.Content.ReadAsStringAsync();
 
-                // Attempt to deserialize the response as ProblemDetails (middleware-thrown exceptions)
-                var problemDetails = TryDeserializeProblemDetails(content);
+            // Attempt to deserialize the response as ProblemDetails (middleware-thrown exceptions)
+                var problemDetails = TryDeserializeProblemDetails(responseBody);
                 if (problemDetails != null)
                 {
                     HandleProblemDetailsExceptions(problemDetails);
                 }
 
-                // Attempt to deserialize the response as BaseResponse<string>
-                var baseResponse = TryDeserializeBaseResponse(content);
+            // Attempt to deserialize the response as BaseResponse<string>
+                var baseResponse = TryDeserializeBaseResponse(responseBody);
                 if (baseResponse != null)
                 {
                     // Handle based on StatusCodeHelper
@@ -263,16 +261,19 @@ public async Task<BaseResponse<T>> PutAsync<T>(string url, object payload = null
                 }
 
                 // If nothing matches, throw a generic exception
-                throw new HttpRequestException($"Request failed with status code {response.StatusCode} and content: {content}");
-            }
+                throw new HttpRequestException($"Request failed with status code {response.StatusCode} and content: {responseBody}");
         }
+    }
 
   
     private ProblemDetails? TryDeserializeProblemDetails(string content)
     {
         try
         {
-            return JsonSerializer.Deserialize<ProblemDetails>(content);
+            return JsonSerializer.Deserialize<ProblemDetails>(content, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
         }
         catch
         {
@@ -284,7 +285,10 @@ public async Task<BaseResponse<T>> PutAsync<T>(string url, object payload = null
     {
         try
         {
-            return JsonSerializer.Deserialize<BaseResponse<string>>(content);
+            return JsonSerializer.Deserialize<BaseResponse<string>>(content, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
         }
         catch
         {
