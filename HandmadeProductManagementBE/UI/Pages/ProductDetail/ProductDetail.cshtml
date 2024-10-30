@@ -8,6 +8,20 @@
     var productItems = Model.productDetail.ProductItems;
 }
 
+<style>
+    /* Ẩn nút tăng giảm trên Chrome, Safari và Edge */
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    /* Ẩn nút tăng giảm trên Firefox */
+    input[type=number] {
+        -moz-appearance: textfield;
+    }
+</style>
+
 <div class="flex flex-wrap p-6">
     <!-- Left side: Product Images -->
     <div class="w-full md:w-1/2 p-4">
@@ -28,10 +42,13 @@
 
     <!-- Right side: Product Details -->
     <div class="w-full md:w-1/2 p-4 space-y-6">
+        <a href="javascript:void(0);" onclick="viewProductList()"
+           class="flex items-center px-4 py-2 text-gray-600 bg-gray-200 rounded-lg hover:text-gray-800 font-medium transition duration-300">
+            <i class="fa fa-arrow-left mr-2"></i> Back to Products
+        </a>
         <!-- Product Name -->
         <h1 class="text-3xl font-bold text-gray-800">@Model.productDetail?.Name</h1>
         <h2 class="text-3xl font-bold text-gray-800">@Model.productDetail?.Description</h2>
-        <!-- Product Rating -->
         <!-- Product Rating -->
         <div class="rating-stars flex items-center space-x-1">
             @for (int i = 1; i <= 5; i++)
@@ -113,12 +130,12 @@
                 <h2 class="text-lg font-semibold text-gray-800">Quantity</h2>
                 <div class="flex items-center border border-gray-300 rounded-lg">
                     <button onclick="decreaseQuantity()" class="px-4 py-2 text-gray-700 hover:bg-gray-200 rounded-l-lg focus:outline-none">-</button>
-                    <span id="quantity" class="px-4 py-2 text-gray-800">1</span>
+                     <input id="quantity" type="number" value="1" min="1" max="50" class="w-16 px-4 py-2 text-center text-gray-800 focus:outline-none" oninput="handleInputChange()" />
+ 
                     <button onclick="increaseQuantity()" class="px-4 py-2 text-gray-700 hover:bg-gray-200 rounded-r-lg focus:outline-none">+</button>
                 </div>
             </div>
         </div>
-
         <!-- Buttons -->
         <div class="flex space-x-4">
             <button class="flex-1 px-4 py-3 text-white bg-blue-500 rounded-lg hover:bg-blue-600">
@@ -136,9 +153,8 @@
 
     function updateQuantityDisplay() {
         // Cập nhật hiển thị số lượng
-        document.getElementById('quantity').textContent = quantity;
+        document.getElementById('quantity').value = quantity;
     }
-
     function decreaseQuantity() {
         if (quantity > 1) { // Đảm bảo số lượng không âm
             quantity--; // Giảm số lượng
@@ -154,6 +170,22 @@
             // Thông báo cho người dùng khi vượt quá số lượng
             alert(`You cannot increase the quantity beyond ${maxQuantity}.`);
         }
+    }
+    function handleInputChange() {
+        const input = document.getElementById('quantity');
+        let value = parseInt(input.value, 10);
+
+        // Kiểm tra nếu giá trị nhập vào không hợp lệ hoặc nhỏ hơn 1
+        if (isNaN(value) || value < 1) {
+            quantity = 1; // Đặt giá trị về 1 nếu không hợp lệ
+        } else if (value > maxQuantity) {
+            quantity = maxQuantity; // Giới hạn ở số lượng tối đa
+            alert(`You cannot increase the quantity beyond ${maxQuantity}.`);
+        } else {
+            quantity = value; // Cập nhật số lượng
+        }
+
+        updateQuantityDisplay();
     }
     // Định dạng giá theo kiểu Việt Nam
     const formatCurrency = (amount) => {
@@ -205,8 +237,6 @@
                 discountedPriceElement.textContent = ""; // Ẩn giá giảm
             }
 
-
-
             maxQuantity = matchingProduct.quantityInStock;
             quantity = Math.min(quantity, maxQuantity); // Đảm bảo số lượng không vượt quá số lượng tối đa
             updateQuantityDisplay(); // Cập nhật hiển thị số lượng
@@ -215,6 +245,9 @@
             remainingQuantityElement.textContent = "";
             discountedPriceElement.textContent = "";
         }
+    }
+    function viewProductList() {
+        window.location.href = `/Product/ProductList/ProductList`;
     }
 
 </script>
