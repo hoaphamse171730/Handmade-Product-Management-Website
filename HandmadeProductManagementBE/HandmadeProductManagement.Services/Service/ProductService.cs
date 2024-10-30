@@ -23,9 +23,10 @@ namespace HandmadeProductManagement.Services.Service
         private readonly IValidator<ProductForUpdateDto> _updateValidator;
         private readonly IValidator<VariationCombinationDto> _variationCombinationValidator;
         private readonly IPromotionService _promotionService;
+        private readonly IShopService _shopService;
 
         public ProductService(IUnitOfWork unitOfWork, IMapper mapper,
-            IValidator<ProductForCreationDto> creationValidator, IValidator<ProductForUpdateDto> updateValidator, IValidator<VariationCombinationDto> variationCombinationValidator, IPromotionService promotionService)
+            IValidator<ProductForCreationDto> creationValidator, IValidator<ProductForUpdateDto> updateValidator, IValidator<VariationCombinationDto> variationCombinationValidator, IPromotionService promotionService, IShopService shopService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
@@ -33,6 +34,7 @@ namespace HandmadeProductManagement.Services.Service
             _updateValidator = updateValidator;
             _variationCombinationValidator = variationCombinationValidator;
             _promotionService = promotionService;
+            _shopService = shopService;
         }
 
         public async Task<bool> Create(ProductForCreationDto productDto, string userId)
@@ -247,6 +249,25 @@ namespace HandmadeProductManagement.Services.Service
 
             return result.Select(c => c.ToList());
         }
+        public async Task<IEnumerable<ProductSearchVM>> GetProductByShopId(ProductSearchFilter searchFilter, string shopId, int pageNumber, int pageSize)
+        {
+            var shop = await _shopService.GetShopByIdAsync(shopId);
+
+            searchFilter.ShopId = shop.Id;
+
+            return await SearchProductsAsync( searchFilter, pageNumber, pageSize);
+        }
+
+        public async Task<IEnumerable<ProductSearchVM>> SearchProductsBySellerAsync(ProductSearchFilter searchFilter, string userId, int pageNumber, int pageSize)
+        {
+            var stringUserId = Guid.Parse(userId);
+            var shop = await _shopService.GetShopByUserIdAsync(stringUserId);
+
+            searchFilter.ShopId = shop.Id;
+
+            return await SearchProductsAsync(searchFilter, pageNumber, pageSize);
+        }
+
 
         public async Task<IEnumerable<ProductSearchVM>> SearchProductsAsync(ProductSearchFilter searchFilter, int pageNumber, int pageSize)
         {
@@ -312,13 +333,13 @@ namespace HandmadeProductManagement.Services.Service
             switch (searchFilter.SortOption)
             {
                 case Constants.SortByPrice:
-                    query = searchFilter.sortDescending
+                    query = searchFilter.SortDescending
                         ? query.OrderByDescending(p => p.ProductItems.Min(pi => pi.Price))
                         : query.OrderBy(p => p.ProductItems.Min(pi => pi.Price));
                     break;
 
                 case Constants.SortByRating:
-                    query = searchFilter.sortDescending
+                    query = searchFilter.SortDescending
                         ? query.OrderByDescending(p => p.Rating)
                         : query.OrderBy(p => p.Rating);
                     break;
@@ -487,7 +508,6 @@ namespace HandmadeProductManagement.Services.Service
 
             return productToReturn;
         }
-
         public async Task<bool> Update(string id, ProductForUpdateDto product, string userId)
         {
             var validationResult = await _updateValidator.ValidateAsync(product);

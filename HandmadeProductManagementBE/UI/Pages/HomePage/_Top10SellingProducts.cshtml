@@ -8,9 +8,9 @@
         {
             <div class="swiper-slide">
                 <div class="mb-10 text-center">
-                    <a href="/Product/Details/@product.Id" class="block transform transition-transform hover:scale-105">
+                    <a href="/ProductDetail/ProductDetail?id=@product.Id" class="block transform transition-transform hover:scale-105">
                         <div class="relative inline-block">
-                            <img class="mx-auto h-40 w-40" src="@product.ImageUrls.LastOrDefault()" alt="@product.Name" />
+                            <img class="mx-auto h-40 w-40" src="@product.ImageUrl" alt="@product.Name" />
                             <!-- Sold Count Overlay -->
                             <div class="bg-opacity-50text-center bg-gray-700 text-sm text-white">
                                 Sold: @product.SoldCount

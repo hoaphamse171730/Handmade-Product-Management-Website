@@ -66,6 +66,35 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
+        [HttpGet("search-seller")]
+        [Authorize]
+        public async Task<IActionResult> SearchProductsBySeller([FromQuery] ProductSearchFilter searchFilter, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
+
+            var response = new BaseResponse<IEnumerable<ProductSearchVM>>
+            {
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Search Product Successfully",
+                Data = await _productService.SearchProductsBySellerAsync(searchFilter, userId, pageNumber, pageSize)
+            };
+            return Ok(response);
+        }
+
+        [HttpGet("shop/{shopId}")]
+        public async Task<IActionResult> GetProductById(string shopId, [FromQuery] ProductSearchFilter searchFilter, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            var response = new BaseResponse<IEnumerable<ProductSearchVM>>
+            {
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Search Product Successfully",
+                Data = await _productService.GetProductByShopId(searchFilter, shopId, pageNumber, pageSize)
+            };
+            return Ok(response);
+        }
+
         //[HttpGet("sort")]
         //[Authorize]
         //public async Task<IActionResult> SortProducts([FromQuery] ProductSortFilter sortModel)

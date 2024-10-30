@@ -19,7 +19,7 @@ namespace HandmadeProductManagement.Validation.UserInfo
 
             RuleFor(x => x.FullName)
                 .MaximumLength(255).WithMessage("Full name cannot be longer than 255 characters.")
-                .Matches(@"^[a-zA-Z\s]+$").WithMessage("Full name can only contain letters and spaces.")
+                .Matches(@"^[\p{L}\s]+$").WithMessage("Full name can only contain letters (including accents) and spaces.")
                 .When(x => !string.IsNullOrWhiteSpace(x.FullName));
             RuleFor(x => x.DisplayName)
                 .MaximumLength(100).WithMessage("Display name cannot be longer than 100 characters.")

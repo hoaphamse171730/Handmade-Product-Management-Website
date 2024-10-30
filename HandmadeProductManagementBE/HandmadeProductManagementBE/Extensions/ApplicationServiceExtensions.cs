@@ -62,15 +62,15 @@ public static class ApplicationServiceExtensions
         {
             opt.AddPolicy("CorsPolicy", policy =>
             {
-                policy
-                    .AllowAnyHeader()
-                    .AllowAnyMethod()
-                    .AllowCredentials();
+                policy.AllowAnyOrigin()
+                      .AllowAnyHeader()
+                      .AllowAnyMethod();
             });
         });
-        services.AddScoped<ApiResponseHelper>();
 
-        services.AddHttpClient<ApiResponseHelper>();
+        services.AddHttpClient(); 
+        services.AddHttpContextAccessor();
+        services.AddScoped<ApiResponseHelper>();
 
         services.AddExceptionHandler<CustomExceptionHandler>();
 

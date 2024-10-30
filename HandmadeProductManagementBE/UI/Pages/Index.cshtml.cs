@@ -3,6 +3,7 @@ using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.Core.Store;
 using HandmadeProductManagement.ModelViews.CategoryModelViews;
 using HandmadeProductManagement.ModelViews.ProductModelViews;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace UI.Pages
@@ -24,30 +25,16 @@ namespace UI.Pages
         public void OnGet()
         {
 
-
-            //var response = await _apiResponseHelper.GetAsync<List<ProductSearchVM>>((Constants.ApiBaseUrl + "/api/product/search"));
-
-            //if (response.StatusCode == StatusCodeHelper.OK && response.Data != null)
-            //{
-            //    products = response.Data;
-            //}
-            //else
-            //{
-            //    ModelState.AddModelError(string.Empty, response.Message ?? "An error occurred while fetching weather forecasts.");
-            //}
-
+            Token = HttpContext.Session.GetString("Token");
+            ViewData["Token"] = Token;
             Top10SellingProducts = GetTop10SellingProducts();
             Top10NewProducts = GetTop10NewProducts();
             Categories = GetCategories();
-
-            Token = HttpContext.Session.GetString("Token");
-
-
         }
 
         private List<TopSellingProducts> GetTop10SellingProducts()
         {
-            var response = _apiResponseHelper.GetAsync<List<TopSellingProducts>>(Constants.ApiBaseUrl + "/api/dashboard/top-10-selling-products").Result; // Lấy dữ liệu từ API
+            var response = _apiResponseHelper.GetAsync<List<TopSellingProducts>>(Constants.ApiBaseUrl +"/api/dashboard/top-10-selling-products").Result; // Lấy dữ liệu từ API
             if (response.StatusCode == StatusCodeHelper.OK && response.Data != null)
             {
                 return response.Data;

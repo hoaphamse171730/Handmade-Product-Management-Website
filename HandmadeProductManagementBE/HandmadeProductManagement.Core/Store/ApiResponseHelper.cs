@@ -1,4 +1,5 @@
 ﻿using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
@@ -7,98 +8,271 @@ using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.Core.Exceptions.Handler; // Adjust this based on your actual namespace
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
+using System.Text.Json;
+using System.Net;
 
 namespace HandmadeProductManagement.Core.Store;
 public class ApiResponseHelper
 {
     private readonly HttpClient _httpClient;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public ApiResponseHelper(HttpClient httpClient)
+    public ApiResponseHelper(HttpClient httpClient, IHttpContextAccessor httpContextAccessor)
     {
-        _httpClient = httpClient;
+        var handler = new HttpClientHandler()
+        {
+            AllowAutoRedirect = false // Disable automatic redirects
+        };
+
+        _httpClient = new HttpClient(handler); // Use handler to disable redirect
+        _httpContextAccessor = httpContextAccessor;
     }
 
-    // Generic method to handle GET requests
-    public async Task<BaseResponse<T>> GetAsync<T>(string url)
+    private void AddAuthorizationHeader(HttpRequestMessage request)
     {
-        var response = await _httpClient.GetAsync(url);
-        return await HandleApiResponse<T>(response);
+        var context = _httpContextAccessor.HttpContext;
+        if (context != null)
+        {
+            var token = context.Session.GetString("Token");
+            if (!string.IsNullOrEmpty(token))
+            {
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+                // Optional: Log the Authorization header for debugging
+                // Consider using a logging framework instead of Console.WriteLine
+                //Console.WriteLine($"Authorization Header: Bearer {token}");
+            }
+        }
     }
+
 
     public async Task<BaseResponse<T>> GetAsync<T>(string url, object queryParams = null)
     {
         if (queryParams != null)
         {
             var query = QueryStringHelper.ToQueryString(queryParams);
-            url = string.IsNullOrEmpty(query) ? url : $"{url}?{query}";
+            url = string.IsNullOrEmpty(query) ? url : $"{url}&{query}";
         }
 
-        var response = await _httpClient.GetAsync(url);
+        var request = new HttpRequestMessage(HttpMethod.Get, url);
+        AddAuthorizationHeader(request);
+        Console.WriteLine(request.Headers.ToString());
+
+        var response = await _httpClient.SendAsync(request);
+
+        // Check if the response status is redirect (307 or 301/302)
+        if (response.StatusCode == HttpStatusCode.RedirectKeepVerb ||
+            response.StatusCode == HttpStatusCode.MovedPermanently ||
+            response.StatusCode == HttpStatusCode.Found)
+        {
+            // Handle redirection manually
+            var newUrl = response.Headers.Location.ToString();
+            request = new HttpRequestMessage(HttpMethod.Get, newUrl);
+            AddAuthorizationHeader(request); // http://localhost:5041 - Header: Authorization Bearer <token> BODY
+
+            response = await _httpClient.SendAsync(request); // https://localhost:7159 - BODY
+        }
+
         return await HandleApiResponse<T>(response);
     }
 
 
-    // Generic method to handle POST requests
     public async Task<BaseResponse<T>> PostAsync<T>(string url, object payload)
     {
-        var response = await _httpClient.PostAsJsonAsync(url, payload);
+        var request = new HttpRequestMessage(HttpMethod.Post, url)
+        {
+            Content = JsonContent.Create(payload)
+        };
+        AddAuthorizationHeader(request);
+
+        var response = await _httpClient.SendAsync(request);
+
+        if (response.StatusCode == HttpStatusCode.RedirectKeepVerb ||
+            response.StatusCode == HttpStatusCode.MovedPermanently ||
+            response.StatusCode == HttpStatusCode.Found)
+        {
+            var newUrl = response.Headers.Location.ToString();
+            request = new HttpRequestMessage(HttpMethod.Post, newUrl)
+            {
+                Content = JsonContent.Create(payload)
+            };
+            AddAuthorizationHeader(request);
+
+            response = await _httpClient.SendAsync(request);
+        }
+
         return await HandleApiResponse<T>(response);
     }
 
-    // Generic method to handle PUT requests
-    public async Task<BaseResponse<T>> PutAsync<T>(string url, object payload)
+public async Task<BaseResponse<T>> PutAsync<T>(string url, object payload = null)
+{
+    var request = new HttpRequestMessage(HttpMethod.Put, url);
+
+    if (payload != null)
     {
-        var response = await _httpClient.PutAsJsonAsync(url, payload);
+        request.Content = JsonContent.Create(payload);
+    }
+    AddAuthorizationHeader(request);
+
+    var response = await _httpClient.SendAsync(request);
+
+    if (response.StatusCode == HttpStatusCode.RedirectKeepVerb ||
+        response.StatusCode == HttpStatusCode.MovedPermanently ||
+        response.StatusCode == HttpStatusCode.Found)
+    {
+        var newUrl = response.Headers.Location.ToString();
+        request = new HttpRequestMessage(HttpMethod.Put, newUrl);
+
+        if (payload != null)
+        {
+            request.Content = JsonContent.Create(payload);
+        }
+        AddAuthorizationHeader(request);
+
+        response = await _httpClient.SendAsync(request);
+    }
+
+    return await HandleApiResponse<T>(response);
+}
+
+    public async Task<BaseResponse<T>> PatchAsync<T>(string url, object payload)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Patch, url)
+        {
+            Content = JsonContent.Create(payload)
+        };
+        AddAuthorizationHeader(request);
+
+        var response = await _httpClient.SendAsync(request);
+
+        if (response.StatusCode == HttpStatusCode.RedirectKeepVerb ||
+            response.StatusCode == HttpStatusCode.MovedPermanently ||
+            response.StatusCode == HttpStatusCode.Found)
+        {
+            var newUrl = response.Headers.Location.ToString();
+            request = new HttpRequestMessage(HttpMethod.Patch, newUrl)
+            {
+                Content = JsonContent.Create(payload)
+            };
+            AddAuthorizationHeader(request);
+
+            response = await _httpClient.SendAsync(request);
+        }
+
         return await HandleApiResponse<T>(response);
     }
 
-    // Generic method to handle DELETE requests
     public async Task<BaseResponse<T>> DeleteAsync<T>(string url)
     {
-        var response = await _httpClient.DeleteAsync(url);
+        var request = new HttpRequestMessage(HttpMethod.Delete, url);
+        AddAuthorizationHeader(request);
+
+        var response = await _httpClient.SendAsync(request);
+
+        if (response.StatusCode == HttpStatusCode.RedirectKeepVerb ||
+            response.StatusCode == HttpStatusCode.MovedPermanently ||
+            response.StatusCode == HttpStatusCode.Found)
+        {
+            var newUrl = response.Headers.Location.ToString();
+            request = new HttpRequestMessage(HttpMethod.Delete, newUrl);
+            AddAuthorizationHeader(request);
+
+            response = await _httpClient.SendAsync(request);
+        }
+
+        return await HandleApiResponse<T>(response);
+    }
+
+    public async Task<BaseResponse<T>> PostFileAsync<T>(string url, IFormFile file)
+    {
+        var content = new MultipartFormDataContent();
+        var fileStreamContent = new StreamContent(file.OpenReadStream());
+        fileStreamContent.Headers.ContentType = new MediaTypeHeaderValue(file.ContentType);
+        content.Add(fileStreamContent, "file", file.FileName);
+
+        var request = new HttpRequestMessage(HttpMethod.Post, url)
+        {
+            Content = content
+        };
+        AddAuthorizationHeader(request);
+
+        var response = await _httpClient.SendAsync(request);
+        return await HandleApiResponse<T>(response);
+    }
+
+    public async Task<BaseResponse<T>> PostMultipartAsync<T>(string url, MultipartFormDataContent content)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Post, url)
+        {
+            Content = content
+        };
+        AddAuthorizationHeader(request);
+
+        var response = await _httpClient.SendAsync(request);
+
+        if (response.StatusCode == HttpStatusCode.RedirectKeepVerb ||
+            response.StatusCode == HttpStatusCode.MovedPermanently ||
+            response.StatusCode == HttpStatusCode.Found)
+        {
+            var newUrl = response.Headers.Location.ToString();
+            request = new HttpRequestMessage(HttpMethod.Post, newUrl)
+            {
+                Content = content
+            };
+            AddAuthorizationHeader(request);
+
+            response = await _httpClient.SendAsync(request);
+        }
+
         return await HandleApiResponse<T>(response);
     }
 
     // Centralized method to handle API response and exceptions
     private async Task<BaseResponse<T>> HandleApiResponse<T>(HttpResponseMessage response)
-    {
-        if (response.IsSuccessStatusCode)
         {
-            // Deserialize the successful response into the BaseResponse<T>
-            var baseResponse = await response.Content.ReadFromJsonAsync<BaseResponse<T>>();
-            return baseResponse ?? new BaseResponse<T>();
-        }
-        else
-        {
-            // Read the error content
-            var content = await response.Content.ReadAsStringAsync();
-
-            // Attempt to deserialize the response as ProblemDetails (middleware-thrown exceptions)
-            var problemDetails = TryDeserializeProblemDetails(content);
-            if (problemDetails != null)
+            var responseBody = await response.Content.ReadAsStringAsync();
+            Console.WriteLine(responseBody);
+            if (response.IsSuccessStatusCode)
             {
-                HandleProblemDetailsExceptions(problemDetails);
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true,
+                    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+                };
+                var baseResponse = await response.Content.ReadFromJsonAsync<BaseResponse<T>>(options);
+                return baseResponse ?? new BaseResponse<T>();
             }
-
-            // Attempt to deserialize the response as BaseResponse<string>
-            var baseResponse = TryDeserializeBaseResponse(content);
-            if (baseResponse != null)
+            else
             {
-                // Handle based on StatusCodeHelper
-                throw MapToCustomException(baseResponse);
+                // Read the error content
+                var content = await response.Content.ReadAsStringAsync();
+
+                // Attempt to deserialize the response as ProblemDetails (middleware-thrown exceptions)
+                var problemDetails = TryDeserializeProblemDetails(content);
+                if (problemDetails != null)
+                {
+                    HandleProblemDetailsExceptions(problemDetails);
+                }
+
+                // Attempt to deserialize the response as BaseResponse<string>
+                var baseResponse = TryDeserializeBaseResponse(content);
+                if (baseResponse != null)
+                {
+                    // Handle based on StatusCodeHelper
+                    throw MapToCustomException(baseResponse);
+                }
+
+                // If nothing matches, throw a generic exception
+                throw new HttpRequestException($"Request failed with status code {response.StatusCode} and content: {content}");
             }
-
-            // If nothing matches, throw a generic exception
-            throw new HttpRequestException($"Request failed with status code {response.StatusCode} and content: {content}");
         }
-    }
 
+  
     private ProblemDetails? TryDeserializeProblemDetails(string content)
     {
         try
         {
-            return JsonConvert.DeserializeObject<ProblemDetails>(content);
+            return JsonSerializer.Deserialize<ProblemDetails>(content);
         }
         catch
         {
@@ -110,7 +284,7 @@ public class ApiResponseHelper
     {
         try
         {
-            return JsonConvert.DeserializeObject<BaseResponse<string>>(content);
+            return JsonSerializer.Deserialize<BaseResponse<string>>(content);
         }
         catch
         {

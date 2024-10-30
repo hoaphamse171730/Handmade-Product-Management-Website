@@ -38,7 +38,6 @@ builder.Services.AddHttpClient<ApiResponseHelper>();
 
 builder.Services.ConfigureSwaggerServices();
 
-
 var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
@@ -54,6 +53,7 @@ app.UseSwaggerUI(c =>
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "API V1");
 });
 
+app.UseCors("CorsPolicy");
 
 app.UseHttpsRedirection();
 

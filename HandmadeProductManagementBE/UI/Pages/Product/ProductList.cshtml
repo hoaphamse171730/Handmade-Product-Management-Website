@@ -81,7 +81,7 @@
         <label class="flex items-center">
             <span class="mr-2">Sort Descending:</span>
             <input type="checkbox" name="sortDescending" value="true" 
-                   @(Request.Query["sortDescending"] == "true" ? "checked" : "") onchange="this.form.submit();" />
+                   @(Request.Query["SortDescending"] == "true" ? "checked" : "") onchange="this.form.submit();" />
         </label>
 
         <button type="submit" class="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600">Search</button>
@@ -143,3 +143,12 @@ else
         window.location.href = `/ProductDetail/ProductDetail?id=${productId}`;
     }
 </script>
+@{
+    var paginationModel = new UI.Pages.Shared.PaginationModel
+            {
+                PageNumber = Model.PageNumber,
+                PageSize = Model.PageSize
+            };
+}
+
+<partial name="~/Pages/Shared/_Pagination.cshtml" model="paginationModel" />

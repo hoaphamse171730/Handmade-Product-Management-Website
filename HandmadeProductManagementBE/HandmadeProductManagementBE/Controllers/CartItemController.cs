@@ -19,9 +19,9 @@ namespace HandmadeProductManagement.Controllers
             _cartItemService = cartItemService;
         }
 
-        [Authorize]
         // GET: api/cartitem
         [HttpGet]
+        [Authorize]
         public async Task<IActionResult> GetCartItems()
         {
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;

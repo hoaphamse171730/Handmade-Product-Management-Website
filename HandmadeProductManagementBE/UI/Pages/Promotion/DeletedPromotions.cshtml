@@ -1,0 +1,52 @@
+﻿@page
+@model UI.Pages.Promotion.DeletedPromotionModel
+@{
+    ViewData["Title"] = "Deleted Promotions";
+}
+
+<h1 class="text-3xl font-bold text-center mb-6">Deleted Promotions</h1>
+
+<a asp-page="/Promotion/Index" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-6 inline-block">Back to Promotions</a>
+
+<div class="overflow-x-auto">
+    <table class="min-w-full bg-white shadow-md rounded-lg">
+        <thead>
+            <tr class="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
+                <th class="py-3 px-6 text-left">Name</th>
+                <th class="py-3 px-6 text-left">Description</th>
+                <th class="py-3 px-6 text-left">Discount Rate</th>
+                <th class="py-3 px-6 text-left">Start Date</th>
+                <th class="py-3 px-6 text-left">End Date</th>
+                <th class="py-3 px-6 text-left">Actions</th>
+            </tr>
+        </thead>
+        <tbody class="text-gray-600 text-sm font-light">
+            @foreach (var promotion in Model.DeletedPromotions)
+            {
+                <tr class="border-b border-gray-200 hover:bg-gray-100">
+                    <td class="py-3 px-6 text-left whitespace-nowrap">@promotion.Name</td>
+                    <td class="py-3 px-6 text-left">@promotion.Description</td>
+                    <td class="py-3 px-6 text-left">@promotion.DiscountRate</td>
+                    <td class="py-3 px-6 text-left">@promotion.StartDate.ToShortDateString()</td>
+                    <td class="py-3 px-6 text-left">@promotion.EndDate.ToShortDateString()</td>
+                    <td class="py-3 px-6 text-left">
+                        <form method="post" asp-page-handler="Recover">
+                            <input type="hidden" asp-for="promotionIdToRecover" value="@promotion.Id" />
+                            <button type="submit" class="bg-green-500 hover:bg-green-800 text-white font-bold py-1 px-3 rounded text-xs">Activate</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@{
+    var paginationModel = new UI.Pages.Shared.PaginationModel
+            {
+                PageNumber = Model.PageNumber,
+                PageSize = Model.PageSize
+            };
+}
+
+<partial name="~/Pages/Shared/_Pagination.cshtml" model="paginationModel" />

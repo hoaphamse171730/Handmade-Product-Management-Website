@@ -8,7 +8,7 @@ namespace HandmadeProductManagement.Contract.Services.Interface
 {
     public interface IUserService
     {
-        Task<IList<UserResponseModel>> GetAll();
+        Task<IList<UserResponseModel>> GetAll(int PageNumber, int PageSize, string? userName, string? phoneNumber);
 
         Task<UserResponseByIdModel> GetById(string Id);
 
