@@ -10,14 +10,16 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 using System.Net;
+using Microsoft.Extensions.Logging;
 
 namespace HandmadeProductManagement.Core.Store;
 public class ApiResponseHelper
 {
     private readonly HttpClient _httpClient;
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly ILogger<ApiResponseHelper> _logger;
 
-    public ApiResponseHelper(HttpClient httpClient, IHttpContextAccessor httpContextAccessor)
+    public ApiResponseHelper(HttpClient httpClient, IHttpContextAccessor httpContextAccessor, ILogger<ApiResponseHelper> logger)
     {
         var handler = new HttpClientHandler()
         {
@@ -26,6 +28,7 @@ public class ApiResponseHelper
 
         _httpClient = new HttpClient(handler); // Use handler to disable redirect
         _httpContextAccessor = httpContextAccessor;
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     private void AddAuthorizationHeader(HttpRequestMessage request)
@@ -200,7 +203,7 @@ public async Task<BaseResponse<T>> PutAsync<T>(string url, object payload = null
         return await HandleApiResponse<T>(response);
     }
 
-    public async Task<BaseResponse<T>> PostMultipartAsync<T>(string url, MultipartFormDataContent content)
+    public async Task<BaseResponse<T>> PostMultipartAsync<T>(string url, MultipartFormDataContent content, string fileName, string productId)
     {
         var request = new HttpRequestMessage(HttpMethod.Post, url)
         {
@@ -208,20 +211,39 @@ public async Task<BaseResponse<T>> PutAsync<T>(string url, object payload = null
         };
         AddAuthorizationHeader(request);
 
-        var response = await _httpClient.SendAsync(request);
+        HttpResponseMessage response;
+        try
+        {
+            response = await _httpClient.SendAsync(request);
+            _logger.LogInformation("API response received. StatusCode: {StatusCode}", response.StatusCode);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("Exception during API request: {Message}", ex.Message);
+            throw;
+        }
 
         if (response.StatusCode == HttpStatusCode.RedirectKeepVerb ||
             response.StatusCode == HttpStatusCode.MovedPermanently ||
             response.StatusCode == HttpStatusCode.Found)
         {
+            // Follow the redirect by creating a new FormData
             var newUrl = response.Headers.Location.ToString();
-            request = new HttpRequestMessage(HttpMethod.Post, newUrl)
-            {
-                Content = content
-            };
-            AddAuthorizationHeader(request);
+            _logger.LogInformation("Redirecting to URL: {Url}", newUrl);
 
-            response = await _httpClient.SendAsync(request);
+            var redirectFormData = new MultipartFormDataContent();
+            // Use the passed fileName and productId
+            redirectFormData.Add(new StreamContent(content.ReadAsStreamAsync().Result), "file", fileName);
+            redirectFormData.Add(new StringContent(productId), "productId");
+
+            var redirectRequest = new HttpRequestMessage(HttpMethod.Post, newUrl)
+            {
+                Content = redirectFormData
+            };
+
+            AddAuthorizationHeader(redirectRequest);
+            response = await _httpClient.SendAsync(redirectRequest);
+            _logger.LogInformation("Redirected response received. StatusCode: {StatusCode}", response.StatusCode);
         }
 
         return await HandleApiResponse<T>(response);

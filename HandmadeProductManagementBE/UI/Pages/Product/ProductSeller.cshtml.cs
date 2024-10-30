@@ -107,12 +107,56 @@ namespace UI.Pages.Product
         }
 
         public List<VariationDto>? Variations { get; set; }
+
         [BindProperty]
-        public List<IFormFile> ProductImages { get; set; } = new();
+        public IList<IFormFile> ProductImages { get; set; } = new List<IFormFile>();
+
         [BindProperty]
         public Dictionary<string, List<VariationOptionDto>> VariationOptions { get; set; } = new();
 
-        public async Task<IActionResult> OnPostCreateProductAsync([FromBody] ProductRequestModel productRequest)
+        public async Task<IActionResult> OnPostUploadImagesAsync(IFormFile file, string productId)
+        {
+            try
+            {
+                if (file == null || string.IsNullOrEmpty(productId))
+                {
+                    _logger.LogError("File or Product ID is missing.");
+                    return new JsonResult(new { error = "File or Product ID is missing" }) { StatusCode = 400 };
+                }
+
+                _logger.LogInformation("Starting image upload for Product ID: {ProductId} with File: {FileName}", productId, file.FileName);
+
+                var formData = new MultipartFormDataContent();
+                var fileContent = new StreamContent(file.OpenReadStream());
+                fileContent.Headers.ContentType = new MediaTypeHeaderValue(file.ContentType);
+                formData.Add(fileContent, "file", file.FileName);
+                formData.Add(new StringContent(productId.ToString()), "productId");
+
+                var response = await _apiResponseHelper.PostMultipartAsync<bool>(
+                    $"{Constants.ApiBaseUrl}/api/ProductImage/Upload",
+                    formData,
+                    file.FileName,    // Pass the file name here
+                    productId.ToString()         // Pass the product ID here
+                );
+
+                if (response.StatusCode == StatusCodeHelper.OK && response.Data)
+                {
+                    _logger.LogInformation("Image uploaded successfully for Product ID: {ProductId}", productId);
+                    return new JsonResult(new { success = true });
+                }
+
+                _logger.LogError("Failed to upload image for Product ID: {ProductId}. API Response: {Message}", productId, response.Message);
+                return new JsonResult(new { error = response.Message }) { StatusCode = 500 };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unhandled error in OnPostUploadImagesAsync for Product ID: {ProductId}", productId);
+                return new JsonResult(new { error = "An unexpected error occurred while uploading the image.", details = ex.Message })
+                { StatusCode = 500 };
+            }
+        }
+
+        public async Task<IActionResult> OnPostCreateProductAsync([FromBody] ProductRequestModel productRequest, IList<IFormFile> productImages)
         {
             try
             {
@@ -129,16 +173,17 @@ namespace UI.Pages.Product
                     name = productRequest.Name,
                     categoryId = productRequest.CategoryId,
                     description = productRequest.Description,
-                    Variations = productRequest.Variations?.Select(v => new VariationDto
+                    variations = productRequest.Variations?.Select(v => new 
                     {
-                        Id = v.Id,
-                        CategoryId = productRequest.CategoryId
+                        id = v.Id,
+                        categoryId = productRequest.CategoryId,
+                        variationOptionIds = v.VariationOptionIds
                     }).ToList(),
-                    VariationCombinations = productRequest.VariationCombinations?.Select(c => new VariationCombinationDto
+                    variationCombinations = productRequest.VariationCombinations?.Select(c => new
                     {
-                        VariationOptionIds = c.VariationOptionIds,
-                        Price = c.Price,
-                        QuantityInStock = c.QuantityInStock
+                        variationOptionIds = c.VariationOptionIds,
+                        price = c.Price,
+                        quantityInStock = c.QuantityInStock
                     }).ToList()
                 };
 
@@ -146,47 +191,38 @@ namespace UI.Pages.Product
                     $"{Constants.ApiBaseUrl}/api/product",
                     createProductRequest);
 
-                if (createProductResponse.StatusCode != StatusCodeHelper.OK)
+                if (createProductResponse.StatusCode != StatusCodeHelper.OK || !createProductResponse.Data)
                 {
                     _logger.LogError("Failed to create product. API Response: {Message}", createProductResponse.Message);
                     return new JsonResult(new { error = createProductResponse.Message }) { StatusCode = 400 };
                 }
 
-                if (!createProductResponse.Data)
-                {
-                    _logger.LogError("Failed to create product");
-                    return new JsonResult(new { error = "Failed to create product" }) { StatusCode = 400 };
-                }
+                // Get the latest product ID
+                var userProductsResponse = await _apiResponseHelper.GetAsync<List<ProductOverviewDto>>(
+                    $"{Constants.ApiBaseUrl}/api/product/user?pageNumber=1&pageSize=1");
 
-                // Retrieve the productId from the response
-                string productId = createProductResponse.Data.ToString();
-
-                if (string.IsNullOrEmpty(productId))
+                if (userProductsResponse.StatusCode != StatusCodeHelper.OK ||
+                    userProductsResponse.Data == null ||
+                    !userProductsResponse.Data.Any())
                 {
-                    _logger.LogError("Product ID not received after creation");
                     return new JsonResult(new { error = "Failed to retrieve product ID" }) { StatusCode = 500 };
                 }
 
-                // Upload images for the created product
-                if (ProductImages != null && ProductImages.Any())
-                {
-                    foreach (var image in ProductImages)
-                    {
-                        var uploadResponse = await _apiResponseHelper.PostFileAsync<bool>(
-                            $"{Constants.ApiBaseUrl}/api/productimage/upload?productId={productId}",
-                            image);
+                var newProductId = userProductsResponse.Data.First().Id;
 
-                        if (!uploadResponse.Data)
-                        {
-                            _logger.LogWarning("Failed to upload image {FileName}", image.FileName);
-                        }
+                // Upload images
+                if (productImages != null && productImages.Count > 0)
+                {
+                    foreach (var image in productImages)
+                    {
+                        var uploadResponse = await OnPostUploadImagesAsync(image, newProductId);
                     }
                 }
 
                 return new JsonResult(new
                 {
                     success = true,
-                    productId
+                    productId = newProductId
                 });
             }
             catch (Exception ex)
@@ -197,66 +233,6 @@ namespace UI.Pages.Product
                     error = "An unexpected error occurred while creating the product.",
                     details = ex.Message
                 })
-                { StatusCode = 500 };
-            }
-        }
-
-
-        public async Task<IActionResult> OnPostUploadImagesAsync(string productId)
-        {
-            try
-            {
-                if (string.IsNullOrEmpty(productId))
-                {
-                    return new JsonResult(new { error = "Product ID is required" }) { StatusCode = 400 };
-                }
-
-                if (ProductImages == null || !ProductImages.Any())
-                {
-                    _logger.LogWarning("No images provided for product ID {ProductId}", productId);
-                    return new JsonResult(new { error = "No images provided" }) { StatusCode = 400 };
-                }
-
-                var uploadedImages = new List<ProductImage>();
-                foreach (var image in ProductImages)
-                {
-                    _logger.LogInformation("Uploading image {FileName} for product ID {ProductId}", image.FileName, productId);
-
-                    var uploadResponse = await _apiResponseHelper.PostFileAsync<BaseResponse<string>>(
-                        $"{Constants.ApiBaseUrl}/api/productimage/upload?productId={productId}", image);
-
-                    if (uploadResponse.StatusCode == StatusCodeHelper.OK && !string.IsNullOrEmpty(uploadResponse.Data.Data))
-                    {
-                        var productImage = new ProductImage
-                        {
-                            Url = uploadResponse.Data.Data,
-                            ProductId = productId
-                        };
-
-                        uploadedImages.Add(productImage);
-                        _logger.LogInformation("Successfully uploaded image {FileName} with URL {ImageUrl}", image.FileName, productImage.Url);
-                    }
-                    else
-                    {
-                        _logger.LogError("Failed to upload image {FileName}. API Response: {Message}", image.FileName, uploadResponse.Message);
-                    }
-                }
-
-                if (uploadedImages.Any())
-                {
-                    // Log the success response with all uploaded image URLs
-                    _logger.LogInformation("Images successfully uploaded for product ID {ProductId}", productId);
-                    return new JsonResult(new { success = true, images = uploadedImages });
-                }
-                else
-                {
-                    return new JsonResult(new { error = "Image upload failed." }) { StatusCode = 500 };
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Unhandled error during image upload");
-                return new JsonResult(new { error = "An unexpected error occurred while uploading images.", details = ex.Message })
                 { StatusCode = 500 };
             }
         }

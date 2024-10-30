@@ -498,6 +498,22 @@
             updateHiddenCombinationsField(combinations);
         }
 
+        function updateHiddenCombinationsField(combinations) {
+            // Create hidden input if it doesn't exist
+            let hiddenField = document.getElementById('combinationsJson');
+            if (!hiddenField) {
+                hiddenField = document.createElement('input');
+                hiddenField.type = 'hidden';
+                hiddenField.id = 'combinationsJson';
+                document.getElementById('addProductForm').appendChild(hiddenField);
+            }
+            hiddenField.value = JSON.stringify(combinations.map(combo => ({
+                variationOptionIds: combo,
+                price: 0,
+                quantityInStock: 0
+            })));
+        }
+
         function generateCombinations(selectedOptions) {
             const variations = Object.values(selectedOptions);
             if (variations.length === 0) return [];
@@ -537,32 +553,67 @@
             container.innerHTML = combinationsHtml;
         }
 
+        // Function to handle variation combinations
         function updateCombinationData(index, field, value) {
-            const combinationsField = document.getElementById('combinationsJson');
-            let combinations;
-
-            try {
-                combinations = JSON.parse(combinationsField.value || '[]');
-            } catch {
-                combinations = [];
-            }
+            const combinations = JSON.parse(document.getElementById('combinationsJson').value || '[]');
 
             // Ensure the combination exists
             if (!combinations[index]) {
-                combinations[index] = {};
+                combinations[index] = {
+                    variationOptionIds: [],
+                    price: 0,
+                    quantityInStock: 0
+                };
             }
 
             // Update the field
-            combinations[index][field] = value;
-
-            // Validate numeric values
             if (field === 'price') {
-                combinations[index][field] = parseFloat(value) || 0;
+                combinations[index].price = parseInt(value) || 0;
             } else if (field === 'stock') {
-                combinations[index][field] = parseInt(value) || 0;
+                combinations[index].quantityInStock = parseInt(value) || 0;
             }
 
-            combinationsField.value = JSON.stringify(combinations);
+            document.getElementById('combinationsJson').value = JSON.stringify(combinations);
+        }
+
+        async function uploadImagesSequentially(productId, files) {
+            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+            const results = [];
+
+            // Use a single FormData instance for all images
+            const formData = new FormData();
+            files.forEach(file => {
+                formData.append('productImages', file); // Append all images to a single FormData
+            });
+
+            try {
+                const response = await fetch(`?handler=UploadImages&productId=${productId}`, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'RequestVerificationToken': token
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+                results.push(result);
+                console.log(`Successfully uploaded ${files.length} images.`);
+            } catch (error) {
+                console.error(`Error uploading images:`, error);
+                results.push({ error: error.message });
+            }
+
+            return {
+                success: results.some(r => !r.error),
+                totalAttempted: files.length,
+                successfulUploads: results.filter(r => !r.error).length,
+                failedUploads: results.filter(r => r.error).length,
+                details: results
+            };
         }
 
         async function handleFormSubmission(e) {
@@ -613,28 +664,26 @@
                 // Get product ID from the response
                 const productId = result.productId;
 
-                // Upload images if there are any
+                // Handle image uploads if there are any
                 const imageInput = document.getElementById('productImages');
                 if (imageInput?.files?.length > 0) {
-                    const formData = new FormData();
-                    Array.from(imageInput.files).forEach(file => {
-                        formData.append('ProductImages', file);
-                    });
+                    const uploadResult = await uploadImagesSequentially(productId, Array.from(imageInput.files));
 
-                    const uploadResponse = await fetch(`?handler=UploadImages&productId=${productId}`, {
-                        method: 'POST',
-                        body: formData,
-                        headers: {
-                            'RequestVerificationToken': token
+                    if (uploadResult.successfulUploads > 0) {
+                        const message = `Product created successfully!\n` +
+                            `${uploadResult.successfulUploads} out of ${uploadResult.totalAttempted} images uploaded.`;
+                        if (uploadResult.failedUploads > 0) {
+                            message += `\n${uploadResult.failedUploads} images failed to upload.`;
                         }
-                    });
-
-                    if (!uploadResponse.ok) {
-                        console.error('Error uploading images:', await uploadResponse.json());
+                        alert(message);
+                    } else {
+                        alert('Product created but image uploads failed. Please try uploading images again.');
                     }
+                } else {
+                    alert('Product created successfully!');
                 }
 
-                alert('Product created successfully!');
+                // Reload page after completion
                 window.location.reload();
             } catch (error) {
                 console.error('Error:', error);
@@ -643,25 +692,46 @@
         }
 
         function handleImageUpload(event) {
+            const files = event.target.files;
+            if (!files || files.length === 0) return;
+
             const container = document.getElementById('imagePreviewContainer');
             container.innerHTML = '';
 
-            Array.from(event.target.files).forEach(file => {
+            Array.from(files).forEach(file => {
+                // Validate file type
+                if (!file.type.startsWith('image/')) {
+                    console.error(`Invalid file type: ${file.type}`);
+                    return;
+                }
+
                 const reader = new FileReader();
                 reader.onload = function (e) {
                     const div = document.createElement('div');
                     div.className = 'relative';
                     div.innerHTML = `
-                                                <img src="${e.target.result}" class="w-full h-24 object-cover rounded-md" />
-                                                <button type="button" onclick="this.parentElement.remove()"
-                                                        class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center">
-                                                    ×
-                                                </button>
-                                            `;
+                        <img src="${e.target.result}"
+                             class="w-full h-24 object-cover rounded-md"
+                             alt="${file.name}"
+                             title="${file.name}"/>
+                        <button type="button"
+                                onclick="removeImagePreview(this)"
+                                class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center">
+                            ×
+                        </button>
+                    `;
                     container.appendChild(div);
                 };
                 reader.readAsDataURL(file);
             });
+        }
+
+        function removeImagePreview(button) {
+            const imageContainer = button.parentElement;
+            imageContainer.remove();
+
+            // Note: Since we can't directly modify FileList,
+            // we'll need to handle the actual file removal during form submission
         }
 
         function getSelectedVariations() {
@@ -1058,27 +1128,7 @@
             // Image preview handler
             const imageInput = document.getElementById('productImages');
             if (imageInput) {
-                imageInput.addEventListener('change', function (event) {
-                    const container = document.getElementById('imagePreviewContainer');
-                    container.innerHTML = '';
-
-                    Array.from(event.target.files).forEach(file => {
-                        const reader = new FileReader();
-                        reader.onload = function (e) {
-                            const div = document.createElement('div');
-                            div.className = 'relative';
-                            div.innerHTML = `
-                                        <img src="${e.target.result}" class="w-full h-24 object-cover rounded-md" />
-                                        <button type="button" onclick="this.parentElement.remove()"
-                                            class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center">
-                                            ×
-                                        </button>
-                                    `;
-                            container.appendChild(div);
-                        };
-                        reader.readAsDataURL(file);
-                    });
-                });
+                imageInput.addEventListener('change', handleImageUpload);
             }
         });
     </script>

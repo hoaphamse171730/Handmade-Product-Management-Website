@@ -28,7 +28,6 @@ namespace HandmadeProductManagementAPI.Controllers
                 Data = await _productImageService.UploadProductImage(file, productId)
             };
             return Ok(response);
-
         }
 
         [HttpDelete("Delete")]
