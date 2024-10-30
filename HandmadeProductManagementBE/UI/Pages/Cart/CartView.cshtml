@@ -52,11 +52,16 @@
                                                 }
                                             </td>
                                             <td>
-                                                <input type="number" id="quantity-@item.Id" min="1" value="@item.ProductQuantity" class="w-16 text-center" onchange="updateTotal('@item.Id', @item.DiscountPrice, '@group.ShopId')" />
+                                                <form method="post" asp-page-handler="UpdateQuantity" asp-route-itemId="@item.Id">
+                                                    <input type="number" name="newQuantity" min="1" value="@item.ProductQuantity" class="w-16 text-center" />
+                                                    <button type="submit" class="ml-2 text-blue-500">Update</button>
+                                                </form>
                                             </td>
-                                            <td id="total-@item.Id">₫@Math.Round(item.DiscountPrice * item.ProductQuantity, 0, MidpointRounding.AwayFromZero)</td>
+                                            <td>₫@Math.Round(item.DiscountPrice * item.ProductQuantity, 0, MidpointRounding.AwayFromZero)</td>
                                             <td>
-                                                <button class="text-white font-bold py-2 px-4 rounded" style="background-color: red" type="button" onclick="deleteItem('@item.Id')">Delete</button>
+                                                <form method="post" asp-page-handler="RemoveCartItem" asp-route-cartItemId="@item.Id">
+                                                    <button class="text-white font-bold py-2 px-4 rounded" style="background-color: red" type="submit">Delete</button>
+                                                </form>
                                             </td>
                                         </tr>
                                     }
@@ -64,7 +69,7 @@
                                 <tfoot>
                                     <tr>
                                         <td colspan="4" style="text-align: right;"><strong>Subtotal</strong></td>
-                                        <td id="subtotal-@group.ShopId">₫@Math.Round(group.CartItems.Sum(item => item.DiscountPrice * item.ProductQuantity), 0, MidpointRounding.AwayFromZero)</td>
+                                        <td>₫@Math.Round(group.CartItems.Sum(item => item.DiscountPrice * item.ProductQuantity), 0, MidpointRounding.AwayFromZero)</td>
                                         <td></td>
                                     </tr>
                                 </tfoot>
@@ -73,8 +78,10 @@
                     }
                     <div class="rounded-lg bg-white p-6 shadow-md">
                         <h2 class="text-lg font-semibold">Total</h2>
-                        <p class="text-lg" id="totalAmount">₫@Math.Round(Model.Total, 0, MidpointRounding.AwayFromZero)</p>
-                        <button class="mt-4 w-full rounded-lg bg-blue-500 px-4 py-2 text-white" type="button" onclick="checkout()">Checkout</button>
+                        <p class="text-lg">₫@Math.Round(Model.Total, 0, MidpointRounding.AwayFromZero)</p>
+                        <form method="post" asp-page-handler="Checkout">
+                            <button class="mt-4 w-full rounded-lg bg-blue-500 px-4 py-2 text-white" type="submit">Checkout</button>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -84,7 +91,6 @@
             <p>Your cart is empty.</p>
         }
 
-        @* Thông báo lỗi *@
         @if (!Model.ModelState.IsValid)
         {
             <div class="alert alert-danger">
@@ -96,81 +102,3 @@
         }
     </div>
 </div>
-
-<script>
-    async function deleteItem(cartItemId) {
-        if (confirm("Are you sure you want to remove this item?")) {
-            try {
-                const response = await fetch(`/api/cartitem/${cartItemId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                const result = await response.json();
-
-                if (response.ok && result.Code === "Success") {
-                    document.querySelector(`#quantity-${cartItemId}`).closest('tr').remove();
-                    updateCartTotal();
-                    alert(result.Message);
-                } else {
-                    alert("Failed to delete item: " + result.Message);
-                }
-            } catch (error) {
-                console.error("Error deleting item:", error);
-                alert("An error occurred while deleting the item.");
-            }
-        }
-    }
-
-    async function checkout() {
-        const quantities = {};
-        document.querySelectorAll('input[type="number"]').forEach(input => {
-            const itemId = input.id.split('-')[1];
-            quantities[itemId] = parseInt(input.value) || 0;
-        });
-
-        const queryString = new URLSearchParams(quantities).toString();
-        window.location.href = '/Checkout?' + queryString;
-    }
-
-    function updateTotal(itemId, price, shopId) {
-        var quantity = parseInt(document.getElementById('quantity-' + itemId).value) || 0;
-        var totalPrice = Math.round(price * quantity);
-
-        document.getElementById('total-' + itemId).innerText = '₫' + totalPrice;
-        updateSubtotal(shopId);
-        updateCartTotal();
-    }
-
-    function updateSubtotal(shopId) {
-        let subtotal = 0;
-
-        const rows = document.querySelector(`table[data-shop-id="${shopId}"]`).querySelectorAll('tbody tr');
-        rows.forEach(row => {
-            const totalCell = row.querySelector('td[id^="total-"]');
-            if (totalCell) {
-                subtotal += Math.round(parseFloat(totalCell.innerText.replace('₫', '').replace(',', ''))) || 0;
-            }
-        });
-
-        const subtotalCell = document.getElementById('subtotal-' + shopId);
-        if (subtotalCell) {
-            subtotalCell.innerText = '₫' + subtotal;
-        }
-    }
-
-    function updateCartTotal() {
-        let totalAmount = 0;
-
-        document.querySelectorAll('tr').forEach(row => {
-            const totalCell = row.querySelector('td[id^="total-"]');
-            if (totalCell) {
-                totalAmount += Math.round(parseFloat(totalCell.innerText.replace('₫', '').replace(',', ''))) || 0;
-            }
-        });
-
-        document.getElementById('totalAmount').innerText = '₫' + totalAmount;
-    }
-</script>

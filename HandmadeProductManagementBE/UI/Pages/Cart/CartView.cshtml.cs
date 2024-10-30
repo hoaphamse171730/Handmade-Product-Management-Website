@@ -58,20 +58,42 @@ namespace UI.Pages.Cart
                 return new List<CartItemGroupDto>();
             }
         }
+
         public async Task<IActionResult> OnPostDeleteItemAsync(string cartItemId)
         {
             var response = await _apiResponseHelper.DeleteAsync<bool>($"{Constants.ApiBaseUrl}/api/cartitem/{cartItemId}");
 
-            if (response.StatusCode == StatusCodeHelper.OK)
+            if (response?.StatusCode == StatusCodeHelper.OK)
             {
                 // Cập nhật lại giỏ hàng sau khi xóa
                 CartItems = await GetCartItemsAsync();
                 return RedirectToPage();
             }
 
-            ModelState.AddModelError(string.Empty, response.Message ?? "Đã xảy ra lỗi khi xóa sản phẩm.");
+            ModelState.AddModelError(string.Empty, response?.Message ?? "Đã xảy ra lỗi khi xóa sản phẩm.");
             return Page();
         }
 
+        public async Task<IActionResult> OnPostUpdateQuantityAsync(string cartItemId, int newQuantity)
+        {
+            if (newQuantity < 1)
+            {
+                ModelState.AddModelError(string.Empty, "Số lượng sản phẩm phải lớn hơn 0.");
+                return Page();
+            }
+
+            var updateData = new { ProductQuantity = newQuantity };
+            var response = await _apiResponseHelper.PutAsync<bool>($"{Constants.ApiBaseUrl}/api/cartitem/{cartItemId}", updateData);
+
+            if (response?.StatusCode == StatusCodeHelper.OK)
+            {
+                // Cập nhật lại giỏ hàng sau khi thay đổi số lượng
+                CartItems = await GetCartItemsAsync();
+                return RedirectToPage();
+            }
+
+            ModelState.AddModelError(string.Empty, response?.Message ?? "Đã xảy ra lỗi khi cập nhật số lượng sản phẩm.");
+            return Page();
+        }
     }
 }
