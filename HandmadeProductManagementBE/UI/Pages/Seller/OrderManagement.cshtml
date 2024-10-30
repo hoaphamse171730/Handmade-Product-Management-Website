@@ -5,7 +5,50 @@
 }
 <div class="mx-auto max-w-full">
     <div class="mb-6 text-center">
-        <h1 class="ml-4 text-left text-2xl font-bold text-black">Order Management</h1>
+        <h1 class="ml-4 text-left text-2xl font-bold text-black">Order History</h1>
+    </div>
+
+    <div class="mb-4 flex w-full flex-wrap justify-center gap-2">
+        <a href="?filter=All"
+           class="flex-grow rounded-lg border border-blue-500 p-2 text-center text-lg font-bold
+@(Model.CurrentFilter == "All" ? "bg-blue-500 text-white" : "bg-white text-black hover:bg-blue-100")">
+            All Orders
+        </a>
+        <a href="?filter=Pending"
+           class="flex-grow rounded-lg border border-blue-500 p-2 text-center text-lg font-bold
+@(Model.CurrentFilter == "Pending" ? "bg-blue-500 text-white" : "bg-white text-black hover:bg-blue-100")">
+            Pending
+        </a>
+        <a href="?filter=AwaitingPayment"
+           class="flex-grow rounded-lg border border-blue-500 p-2 text-center text-lg font-bold
+@(Model.CurrentFilter == "AwaitingPayment" ? "bg-blue-500 text-white" : "bg-white text-black hover:bg-blue-100")">
+            Awaiting Payment
+        </a>
+        <a href="?filter=Processing"
+           class="flex-grow rounded-lg border border-blue-500 p-2 text-center text-lg font-bold
+@(Model.CurrentFilter == "Processing" ? "bg-blue-500 text-white" : "bg-white text-black hover:bg-blue-100")">
+            Processing
+        </a>
+        <a href="?filter=Delivering"
+           class="flex-grow rounded-lg border border-blue-500 p-2 text-center text-lg font-bold
+@(Model.CurrentFilter == "Delivering" ? "bg-blue-500 text-white" : "bg-white text-black hover:bg-blue-100")">
+            Delivering
+        </a>
+        <a href="?filter=Shipped"
+           class="flex-grow rounded-lg border border-blue-500 p-2 text-center text-lg font-bold
+@(Model.CurrentFilter == "Shipped" ? "bg-blue-500 text-white" : "bg-white text-black hover:bg-blue-100")">
+            Shipped
+        </a>
+        <a href="?filter=Canceled"
+           class="flex-grow rounded-lg border border-blue-500 p-2 text-center text-lg font-bold
+@(Model.CurrentFilter == "Canceled" ? "bg-blue-500 text-white" : "bg-white text-black hover:bg-blue-100")">
+            Canceled
+        </a>
+        <a href="?filter=Refunded"
+           class="flex-grow rounded-lg border border-blue-500 p-2 text-center text-lg font-bold
+@(Model.CurrentFilter == "Refunded" ? "bg-blue-500 text-white" : "bg-white text-black hover:bg-blue-100")">
+            Refunded
+        </a>
     </div>
 
     @if (Model.Orders == null || !Model.Orders.Any())

@@ -10,8 +10,12 @@
 
         <form method="post" action="/Checkout/ProcessPayment">
             <!-- Section Thông tin giao hàng -->
+            <div class="w-full rounded-t-lg bg-blue-700 px-4 py-2">
+                <h2 class="text-lg font-semibold text-white">Shipping Info</h2>
+            </div>
+
             <div class="mb-8 rounded-lg bg-white p-6 shadow-md">
-                <h2 class="mb-4 text-lg font-semibold">Thông tin giao hàng</h2>
+                
                 <!-- Full Name and Phone Number in the same row -->
                 <div class="-mx-2 mb-4 flex flex-wrap">
                     <!-- Full Name -->
@@ -51,8 +55,10 @@
                     <div class="md:w-3/4">
                         @foreach (var group in Model.CartItems)
                         {
+                            <div class="w-full rounded-t-lg bg-blue-700 px-4 py-2">
+                                <a href="/Shop/Index?id=@group.ShopId" class="text-lg font-semibold text-white">@group.ShopName</a>
+                            </div>
                             <div class="mb-4 rounded-lg bg-white p-6 shadow-md">
-                                <a href="/Shop/Index?id=@group.ShopId" class="text-lg font-semibold">@group.ShopName</a>
                                 <table class="w-full">
                                     <thead>
                                         <tr>
@@ -88,8 +94,10 @@
                     </div>
                     <div class="flex flex-col md:w-1/4">
                         <div class="mb-4">
+                            <div class="w-full rounded-t-lg bg-blue-700 px-4 py-2">
+                                <h2 class="text-lg font-semibold text-white">Choose Payment Method</h2>
+                            </div>
                             <div class="rounded-lg bg-white p-6 shadow-md">
-                                <h2 class="mb-4 text-lg font-semibold">Choose Payment Method</h2>
                                 <div>
                                     <div class="mb-4 flex items-center">
                                         <input id="vnpay" type="radio" name="paymentMethod" value="vnpay" class="mr-2" required>
@@ -108,8 +116,10 @@
                         </div>
 
                         <div class="mb-4">
+                            <div class="w-full rounded-t-lg bg-blue-700 px-4 py-2">
+                                <h2 class="text-lg font-semibold text-white">Summary</h2>
+                            </div>
                             <div class="rounded-lg bg-white p-6 shadow-md">
-                                <h2 class="mb-4 text-lg font-semibold">Summary</h2>
                                 <div class="mb-2 flex justify-between">
                                     <span>Subtotal</span>
                                     <span>₫@Model.Subtotal.ToString("N0").Replace(",", ".")</span>
