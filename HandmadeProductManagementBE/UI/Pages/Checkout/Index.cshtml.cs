@@ -3,7 +3,9 @@ using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.Core.Store;
 using HandmadeProductManagement.ModelViews.CartItemModelViews;
 using HandmadeProductManagement.ModelViews.UserInfoModelViews;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using System.Text.RegularExpressions;
 
 namespace UI.Pages.Checkout
 {
@@ -28,6 +30,48 @@ namespace UI.Pages.Checkout
             CartItems = await GetCartItemsAsync();
             UserInfo = await GetUserInfoAsync();
             Token = HttpContext.Session.GetString("Token");
+        }
+
+        public async Task<IActionResult> OnPostAsync()
+        {
+            // Perform validation
+            if (string.IsNullOrWhiteSpace(UserInfo.FullName))
+            {
+                ModelState.AddModelError(nameof(UserInfo.FullName), "Full Name is required.");
+            }
+            else if (!Regex.IsMatch(UserInfo.FullName, @"^[\p{L}\sĐđ]+$"))
+            {
+                ModelState.AddModelError(nameof(UserInfo.FullName), "Please enter a valid full name (letters and spaces only).");
+            }
+
+            if (string.IsNullOrWhiteSpace(UserInfo.PhoneNumber))
+            {
+                ModelState.AddModelError(nameof(UserInfo.PhoneNumber), "Phone Number is required.");
+            }
+            else if (!Regex.IsMatch(UserInfo.PhoneNumber, @"^0\d{9,10}$"))
+            {
+                ModelState.AddModelError(nameof(UserInfo.PhoneNumber), "Please enter a valid phone number (starting with 0 and containing 10-11 digits).");
+            }
+
+            if (string.IsNullOrWhiteSpace(UserInfo.Address))
+            {
+                ModelState.AddModelError(nameof(UserInfo.Address), "Address is required.");
+            }
+            else if (!Regex.IsMatch(UserInfo.Address, @"^[\p{L}\p{N}\s,\.Đđ]+$"))
+            {
+                ModelState.AddModelError(nameof(UserInfo.Address), "Please enter a valid address (can include letters, numbers, spaces, commas, and periods).");
+            }
+
+            // Check if ModelState is valid
+            if (!ModelState.IsValid)
+            {
+                // If validation fails, return to the page with the validation messages
+                CartItems = await GetCartItemsAsync();
+                Token = HttpContext.Session.GetString("Token");
+                return Page();
+            }
+
+            return RedirectToPage("/ProcessPayment");
         }
 
         private async Task<List<CartItemGroupDto>> GetCartItemsAsync()
