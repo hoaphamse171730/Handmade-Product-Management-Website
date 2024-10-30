@@ -15,6 +15,7 @@ using System.Linq;
 using HandmadeProductManagement.ModelViews.VariationModelViews;
 using HandmadeProductManagement.ModelViews.VariationOptionModelViews;
 using System.Net.Http.Headers;
+using Azure;
 
 namespace UI.Pages.Product
 {
@@ -31,7 +32,8 @@ namespace UI.Pages.Product
             _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
-
+        public string? ErrorMessage { get; set; }
+        public string? ErrorDetail { get; set; }
         public List<ProductSearchVM>? Products { get; set; }
         public List<CategoryDto>? Categories { get; set; }
         public List<VariationDto>? Variations { get; set; }
@@ -63,33 +65,48 @@ namespace UI.Pages.Product
             int pageNumber = 1,
             int pageSize = 12)
         {
-            await LoadCategoriesAsync();
-            PageNumber = pageNumber;
-            PageSize = pageSize;
-
-            var searchFilter = new ProductSearchFilter
+            try
             {
-                Name = Name,
-                CategoryId = CategoryId,
-                Status = Status,
-                MinRating = MinRating,
-                SortOption = SortOption,
-                SortDescending = SortDescending
-            };
 
-            // Step 4: Fetch products based on the search filter
-            var response = await _apiResponseHelper.GetAsync<List<ProductSearchVM>>(
-                $"{Constants.ApiBaseUrl}/api/product/search-seller?pageNumber={PageNumber}&pageSize={PageSize}",
-                searchFilter);
+                await LoadCategoriesAsync();
+                PageNumber = pageNumber;
+                PageSize = pageSize;
 
-            if (response.StatusCode == StatusCodeHelper.OK && response.Data != null)
+                var searchFilter = new ProductSearchFilter
+                {
+                    Name = Name,
+                    CategoryId = CategoryId,
+                    Status = Status,
+                    MinRating = MinRating,
+                    SortOption = SortOption,
+                    SortDescending = SortDescending
+                };
+
+                // Step 4: Fetch products based on the search filter
+                var response = await _apiResponseHelper.GetAsync<List<ProductSearchVM>>(
+                    $"{Constants.ApiBaseUrl}/api/product/search-seller?pageNumber={PageNumber}&pageSize={PageSize}",
+                    searchFilter);
+
+                if (response.StatusCode == StatusCodeHelper.OK && response.Data != null)
+                {
+                    Products = response.Data;
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, response.Message ?? "An error occurred while fetching products.");
+                }
+            } catch (BaseException.BadRequestException ex)
             {
-                Products = response.Data;
+                ErrorMessage = ex.Message;
             }
-            else
-            {
-                ModelState.AddModelError(string.Empty, response.Message ?? "An error occurred while fetching products.");
-            }
+            catch (BaseException.UnauthorizedException ex)
+                {
+                    ErrorMessage = ex.Message;
+                }
+            catch (Exception ex)
+                {
+                    ErrorMessage = "An unexpected error occurred.";
+                }
 
             return Page();
         }
