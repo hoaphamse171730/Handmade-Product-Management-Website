@@ -95,14 +95,11 @@ namespace UI.Pages.Product
                 {
                     ModelState.AddModelError(string.Empty, response.Message ?? "An error occurred while fetching products.");
                 }
-            } catch (BaseException.BadRequestException ex)
+            } catch (BaseException.ErrorException ex)
             {
-                ErrorMessage = ex.Message;
+                ErrorMessage = ex.ErrorDetail.ErrorCode;
+                ErrorDetail = ex.ErrorDetail.ErrorMessage?.ToString();
             }
-            catch (BaseException.UnauthorizedException ex)
-                {
-                    ErrorMessage = ex.Message;
-                }
             catch (Exception ex)
                 {
                     ErrorMessage = "An unexpected error occurred.";

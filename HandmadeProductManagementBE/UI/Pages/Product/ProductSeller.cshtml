@@ -1,4 +1,5 @@
 ﻿@page
+@using UI.Pages.Shared
 @model UI.Pages.Product.ProductSellerModel
 @{
     ViewData["Title"] = "Product Seller List";
@@ -6,17 +7,16 @@
 
 
 <h1 class="text-3xl font-bold mb-4">Product List</h1>
-@if (Model.ErrorMessage != null)
+@{
+    var errorModel = new ErrorMessageModel
+            {
+                ErrorMessage = Model.ErrorMessage,
+                ErrorDetail = Model.ErrorDetail
+            };
+}
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
 {
-    <div class="alert alert-danger">
-        @Model.ErrorMessage
-        
-    @if (!string.IsNullOrEmpty(Model.ErrorDetail))
-    {
-    <p>@Model.ErrorDetail</p>
-    }
-   
-    </div>
+    <partial name="_ErrorMessage" model="errorModel" />
 }
 
 
