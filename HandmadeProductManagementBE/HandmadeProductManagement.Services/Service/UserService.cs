@@ -23,28 +23,44 @@ namespace HandmadeProductManagement.Services.Service
             _updateValidator = updateValidator;
         }
 
-        public async Task<IList<UserResponseModel>> GetAll()
+        public async Task<IList<UserResponseModel>> GetAll(int PageNumber, int PageSize, string? userName = null, string? phoneNumber = null)
         {
 
-            var users = await _unitOfWork.GetRepository<ApplicationUser>()
+            var query =  _unitOfWork.GetRepository<ApplicationUser>()
                 .Entities
-                .Select(user => new UserResponseModel
-                {
-                    Id = user.Id,
-                    UserName = user.UserName,
-                    Email = user.Email,
-                    PhoneNumber = user.PhoneNumber,
-                    CreatedBy = user.CreatedBy,
-                    LastUpdatedBy = user.LastUpdatedBy,
-                    DeletedBy = user.DeletedBy,
-                    CreatedTime = user.CreatedTime,
-                    LastUpdatedTime = user.LastUpdatedTime,
-                    DeletedTime = user.DeletedTime,
-                    Status = user.Status,
-                })
-                .ToListAsync();
+                .AsQueryable();
 
-            return users;
+            if(!string.IsNullOrEmpty(userName) )
+            {
+                query = query.Where(x => x.UserName.Contains(userName));
+            }
+
+            if (!string.IsNullOrEmpty(phoneNumber))
+            {
+                query = query.Where(x => x.PhoneNumber.Contains(phoneNumber));
+            }
+
+
+            var users = await query
+           .Select(user => new UserResponseModel
+           {
+               Id = user.Id,
+               UserName = user.UserName,
+               Email = user.Email,
+               PhoneNumber = user.PhoneNumber,
+               CreatedBy = user.CreatedBy,
+               LastUpdatedBy = user.LastUpdatedBy,
+               DeletedBy = user.DeletedBy,
+               CreatedTime = user.CreatedTime,
+               LastUpdatedTime = user.LastUpdatedTime,
+               DeletedTime = user.DeletedTime,
+               Status = user.Status,
+           })
+           .Skip((PageNumber - 1) * PageSize)
+           .Take(PageSize)
+           .ToListAsync();
+
+            return users; ;
 
         }
 

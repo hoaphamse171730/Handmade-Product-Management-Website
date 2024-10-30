@@ -26,7 +26,7 @@ namespace UI.Pages.Order
 
         private async Task FetchStatusChangesAsync(string orderId)
         {
-            var response = await _apiResponseHelper.GetAsync<List<StatusChangeDto>>(Constants.ApiBaseUrl + $"/api/StatusChange/Order/{orderId}");
+            var response = await _apiResponseHelper.GetAsync<List<StatusChangeDto>>($"{Constants.ApiBaseUrl}/api/StatusChange/Order/{orderId}?sortAsc=true");
 
             if (response?.StatusCode == StatusCodeHelper.OK && response.Data != null)
             {

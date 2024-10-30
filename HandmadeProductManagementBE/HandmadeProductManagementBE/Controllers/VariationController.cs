@@ -33,7 +33,7 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin, Seller")]
         // POST: api/variation
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] VariationForCreationDto variation)
