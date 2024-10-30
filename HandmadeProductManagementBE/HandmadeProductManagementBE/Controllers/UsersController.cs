@@ -100,7 +100,7 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [HttpPost("{id}/restore")]
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
 
         public async Task<IActionResult> ReverseDeleteUser(string id)
         {
