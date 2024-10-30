@@ -845,10 +845,6 @@ video {
   height: 1.5rem;
 }
 
-.h-64 {
-  height: 16rem;
-}
-
 .h-\[550px\] {
   height: 550px;
 }
@@ -891,6 +887,10 @@ video {
 
 .w-10 {
   width: 2.5rem;
+}
+
+.w-16 {
+  width: 4rem;
 }
 
 .w-20 {
@@ -1027,10 +1027,6 @@ video {
 
 .cursor-pointer {
   cursor: pointer;
-}
-
-.list-disc {
-  list-style-type: disc;
 }
 
 .appearance-none {
