@@ -8,90 +8,96 @@
     <div class="container mx-auto px-4">
         <h1 class="mb-4 text-4xl font-semibold">Checkout</h1>
 
-        <!-- Section Thông tin giao hàng -->
-        <div class="mb-8 rounded-lg bg-white p-6 shadow-md">
-            <h2 class="mb-4 text-lg font-semibold">Thông tin giao hàng</h2>
-            <form>
-                <!-- Họ và tên, Số điện thoại cùng hàng -->
+        <form method="post" action="/Checkout/ProcessPayment">
+            <!-- Section Thông tin giao hàng -->
+            <div class="w-full rounded-t-lg bg-blue-700 px-4 py-2">
+                <h2 class="text-lg font-semibold text-white">Shipping Info</h2>
+            </div>
+
+            <div class="mb-8 rounded-lg bg-white p-6 shadow-md">
+                
+                <!-- Full Name and Phone Number in the same row -->
                 <div class="-mx-2 mb-4 flex flex-wrap">
-                    <!-- Họ và tên -->
+                    <!-- Full Name -->
                     <div class="mb-4 w-full px-2 md:w-1/2 md:mb-0">
-                        <label for="fullName" class="mb-2 block text-sm font-medium">Họ và tên:</label>
+                        <label for="fullName" class="mb-2 block text-sm font-medium">Full Name:</label>
                         <input type="text" id="fullName" name="fullName"
                                class="w-full rounded-lg border px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                               placeholder="Nhập họ và tên"
-                               value="@Model.UserInfo.FullName" required>
+                               placeholder="Enter your full name"
+                               value="@Model.UserInfo.FullName" required
+                               pattern="^[\p{L}\sĐđ]+$" title="Please enter a valid full name (letters and spaces only).">
                     </div>
-                    <!-- Số điện thoại -->
+                    <!-- Phone Number -->
                     <div class="w-full px-2 md:w-1/2">
-                        <label for="phoneNumber" class="mb-2 block text-sm font-medium">Số điện thoại:</label>
+                        <label for="phoneNumber" class="mb-2 block text-sm font-medium">Phone Number:</label>
                         <input type="tel" id="phoneNumber" name="phoneNumber"
                                class="w-full rounded-lg border px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                               placeholder="Nhập số điện thoại"
-                               value="@Model.UserInfo.PhoneNumber" required>
+                               placeholder="Enter your phone number"
+                               value="@Model.UserInfo.PhoneNumber" required
+                               pattern="^0\d{9,10}$" title="Please enter a valid phone number (starting with 0 and containing 10-11 digits).">
                     </div>
                 </div>
 
-                <!-- Địa chỉ -->
+                <!-- Address -->
                 <div class="mb-4">
-                    <label for="address" class="mb-2 block text-sm font-medium">Địa chỉ:</label>
+                    <label for="address" class="mb-2 block text-sm font-medium">Address:</label>
                     <input type="text" id="address" name="address"
                            class="w-full rounded-lg border px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                           placeholder="Nhập địa chỉ giao hàng"
-                           value="@Model.UserInfo.Address" required>
+                           placeholder="Enter delivery address"
+                           value="@Model.UserInfo.Address" required
+                           pattern="^[\p{L}\p{N}\s,\.Đđ]+$" title="Please enter a valid address (can include letters, numbers, spaces, commas, and periods).">
                 </div>
-            </form>
-        </div>
+            </div>
 
-        @if (Model.CartItems != null && Model.CartItems.Any())
-        {
-            <div class="flex flex-col gap-4 md:flex-row">
-                <div class="md:w-3/4">
-                    @foreach (var group in Model.CartItems)
-                    {
-                        <div class="mb-4 rounded-lg bg-white p-6 shadow-md">
-                            <a href="/Shop/Index?id=@group.ShopId" class="text-lg font-semibold">@group.ShopName</a>
-                            <table class="w-full">
-                                <thead>
-                                    <tr>
-                                        <th class="text-left font-normal">Product</th>
-                                        <th class="text-left font-normal"></th>
-                                        <th class="text-left font-normal">Price</th>
-                                        <th class="text-left font-normal">Quantity</th>
-                                        <th class="text-left font-normal">Total</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var item in group.CartItems)
-                                    {
+            @if (Model.CartItems != null && Model.CartItems.Any())
+            {
+                <div class="flex flex-col gap-4 md:flex-row">
+                    <div class="md:w-3/4">
+                        @foreach (var group in Model.CartItems)
+                        {
+                            <div class="w-full rounded-t-lg bg-blue-700 px-4 py-2">
+                                <a href="/Shop/Index?id=@group.ShopId" class="text-lg font-semibold text-white">@group.ShopName</a>
+                            </div>
+                            <div class="mb-4 rounded-lg bg-white p-6 shadow-md">
+                                <table class="w-full">
+                                    <thead>
                                         <tr>
-                                            <td class="py-4">
-                                                <div class="flex items-center justify-start">
-                                                    <!-- Căn lề trái -->
-                                                    <img class="h-20 w-20" src="@item.ImageUrl" alt="@item.ProductName" />
-                                                    <a href="/ProductDetail/ProductDetail?id=@item.ProductId" class="ml-4 block font-semibold transition-transform">@item.ProductName</a>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <span class="float-left text-left text-sm text-gray-500">Variation: @string.Join(", ", item.VariationOptionValues)</span>
-                                            </td>
-                                            <td class="py-4">₫@item.DiscountPrice.ToString("N0").Replace(",", ".")</td>
-                                            <td class="py-4">@item.ProductQuantity</td>
-                                            <td class="py-4">₫@item.TotalPriceEachProduct.ToString("N0").Replace(",", ".")</td>
+                                            <th class="text-left font-normal">Product</th>
+                                            <th class="text-left font-normal"></th>
+                                            <th class="text-left font-normal">Price</th>
+                                            <th class="text-left font-normal">Quantity</th>
+                                            <th class="text-left font-normal">Total</th>
                                         </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                    }
-                </div>
-                <div class="flex flex-col md:w-1/4">
-                    <!-- Form chọn phương thức thanh toán và hiển thị tổng hợp đơn hàng -->
-                    <form method="post" action="/Checkout/ProcessPayment">
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in group.CartItems)
+                                        {
+                                            <tr>
+                                                <td class="py-4">
+                                                    <div class="flex items-center justify-start">
+                                                        <img class="h-20 w-20" src="@item.ImageUrl" alt="@item.ProductName" />
+                                                        <a href="/ProductDetail/ProductDetail?id=@item.ProductId" class="ml-4 block font-semibold transition-transform">@item.ProductName</a>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span class="float-left text-left text-sm text-gray-500">Variation: @string.Join(", ", item.VariationOptionValues)</span>
+                                                </td>
+                                                <td class="py-4">₫@item.DiscountPrice.ToString("N0").Replace(",", ".")</td>
+                                                <td class="py-4">@item.ProductQuantity</td>
+                                                <td class="py-4">₫@item.TotalPriceEachProduct.ToString("N0").Replace(",", ".")</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                    </div>
+                    <div class="flex flex-col md:w-1/4">
                         <div class="mb-4">
-                            <!-- Chọn phương thức thanh toán -->
+                            <div class="w-full rounded-t-lg bg-blue-700 px-4 py-2">
+                                <h2 class="text-lg font-semibold text-white">Choose Payment Method</h2>
+                            </div>
                             <div class="rounded-lg bg-white p-6 shadow-md">
-                                <h2 class="mb-4 text-lg font-semibold">Choose Payment Method</h2>
                                 <div>
                                     <div class="mb-4 flex items-center">
                                         <input id="vnpay" type="radio" name="paymentMethod" value="vnpay" class="mr-2" required>
@@ -110,9 +116,10 @@
                         </div>
 
                         <div class="mb-4">
-                            <!-- Tóm tắt đơn hàng -->
+                            <div class="w-full rounded-t-lg bg-blue-700 px-4 py-2">
+                                <h2 class="text-lg font-semibold text-white">Summary</h2>
+                            </div>
                             <div class="rounded-lg bg-white p-6 shadow-md">
-                                <h2 class="mb-4 text-lg font-semibold">Summary</h2>
                                 <div class="mb-2 flex justify-between">
                                     <span>Subtotal</span>
                                     <span>₫@Model.Subtotal.ToString("N0").Replace(",", ".")</span>
@@ -131,13 +138,13 @@
 
                         <!-- Nút Checkout -->
                         <button type="submit" class="mt-4 w-full rounded-lg bg-blue-500 px-4 py-2 text-white">Checkout</button>
-                    </form>
+                    </div>
                 </div>
-            </div>
-        }
-        else
-        {
-            <p>Your cart is empty.</p>
-        }
+            }
+            else
+            {
+                <p>Your cart is empty.</p>
+            }
+        </form>
     </div>
 </div>
