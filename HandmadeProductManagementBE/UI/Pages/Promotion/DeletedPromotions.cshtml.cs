@@ -19,6 +19,8 @@ namespace UI.Pages.Promotion
         }
 
         public List<PromotionDto> DeletedPromotions { get; set; }
+        public string? ErrorMessage { get; set; }
+        public string? ErrorDetail { get; set; }
 
         public int PageNumber { get; set; } = 1;
         public int PageSize { get; set; } = 10;
@@ -26,18 +28,31 @@ namespace UI.Pages.Promotion
 
         public async Task OnGetAsync(int pageNumber = 1, int pageSize = 10)
         {
-            PageNumber = pageNumber;
-            PageSize = pageSize;
+            try { 
 
-            var response = await _apiHelper.GetAsync<List<PromotionDto>>($"{Constants.ApiBaseUrl}/api/promotions/GetDeletedPromotions?pageNumber={PageNumber}&pageSize={PageSize}");
-            if (response != null && response.Data != null)
-            {
-                DeletedPromotions = response.Data;
+                PageNumber = pageNumber;
+                PageSize = pageSize;
+
+                var response = await _apiHelper.GetAsync<List<PromotionDto>>($"{Constants.ApiBaseUrl}/api/promotions/GetDeletedPromotions?pageNumber={PageNumber}&pageSize={PageSize}");
+                if (response != null && response.Data != null)
+                {
+                    DeletedPromotions = response.Data;
+                }
+                else
+                {
+                    DeletedPromotions = new List<PromotionDto>();
+                }
             }
-            else
+            catch (BaseException.ErrorException ex)
             {
-                DeletedPromotions = new List<PromotionDto>();
+                ErrorMessage = ex.ErrorDetail.ErrorCode;
+                ErrorDetail = ex.ErrorDetail.ErrorMessage?.ToString();
             }
+            catch (Exception ex)
+            {
+                ErrorMessage = "An unexpected error occurred.";
+            }
+
         }
 
         [BindProperty]
@@ -45,15 +60,30 @@ namespace UI.Pages.Promotion
 
         public async Task<IActionResult> OnPostRecoverAsync()
         {
-            var url = $"{Constants.ApiBaseUrl}/api/promotions/{promotionIdToRecover}/recover";
-            var response = await _apiHelper.PutAsync<bool>(url);
-
-            if (response == null || response.StatusCode != StatusCodeHelper.OK)
+            try
             {
-                ModelState.AddModelError(string.Empty, "Unable to activate the promotion. Please try again.");
+                var url = $"{Constants.ApiBaseUrl}/api/promotions/{promotionIdToRecover}/recover";
+                var response = await _apiHelper.PutAsync<bool>(url);
+
+                if (response == null || response.StatusCode != StatusCodeHelper.OK)
+                {
+                    ModelState.AddModelError(string.Empty, "Unable to activate the promotion. Please try again.");
+                }
+
+                return RedirectToPage("/Promotion/DeletedPromotions");
+            }
+            catch (BaseException.ErrorException ex)
+            {
+                ErrorMessage = ex.ErrorDetail.ErrorCode;
+                ErrorDetail = ex.ErrorDetail.ErrorMessage?.ToString();
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = "An unexpected error occurred.";
             }
 
-            return RedirectToPage("/Promotion/DeletedPromotions");
+            return Page();
+
         }
     }
 }
