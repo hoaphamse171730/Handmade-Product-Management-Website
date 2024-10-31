@@ -26,6 +26,8 @@ namespace UI.Pages.Seller
         public List<CancelReason> CancelReasons { get; set; } = new List<CancelReason>();
 
         public string CurrentFilter { get; set; } = "All";
+        public int PageNumber { get; set; } = 1;
+        public int PageSize { get; set; } = 2;
 
         // Define valid status transitions
         private readonly Dictionary<string, List<string>> validStatusTransitions = new Dictionary<string, List<string>>
@@ -47,15 +49,17 @@ namespace UI.Pages.Seller
             { Constants.OrderStatusShipped, new List<string> { Constants.OrderStatusClosed } },
         };
 
-        public async Task OnGetAsync(string? filter)
+        public async Task OnGetAsync(string? filter, int pageNumber = 1, int pageSize = 2)
         {
             try
             {
+                PageNumber = pageNumber;
+                PageSize = pageSize;
 
                 // Set default filter to "All" if none is provided
                 CurrentFilter = filter ?? "All";
 
-            var response = await _apiResponseHelper.GetAsync<List<OrderByUserDto>>(Constants.ApiBaseUrl + "/api/order/seller");
+                var response = await _apiResponseHelper.GetAsync<List<OrderByUserDto>>($"{Constants.ApiBaseUrl}/api/order/seller?pageNumber={PageNumber}&pageSize={PageSize}");
 
             if (response?.StatusCode == StatusCodeHelper.OK && response.Data != null)
             {

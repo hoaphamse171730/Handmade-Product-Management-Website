@@ -560,22 +560,37 @@ namespace HandmadeProductManagement.Services.Service
             }
         }
 
-        public async Task<IList<OrderResponseModel>> GetOrdersBySellerUserIdAsync(Guid userId)
+        public async Task<IList<OrderResponseModel>> GetOrdersBySellerUserIdAsync(Guid userId, int pageNumber, int pageSize)
         {
+            if (pageNumber <= 0)
+            {
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidPageNumber);
+            }
+            if (pageSize <= 0)
+            {
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidPageSize);
+            }
+
             // Validate if the shop exists for the given seller user ID
             var shop = await _unitOfWork.GetRepository<Shop>().Entities
                 .FirstOrDefaultAsync(s => s.UserId == userId)
                 ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageShopNotFound);
 
             var orderRepository = _unitOfWork.GetRepository<Order>();
-            var orders = await orderRepository.Entities
+            var ordersQuery = orderRepository.Entities
                 .Where(o => o.OrderDetails.Any(od =>
-                                        od.ProductItem != null 
-                                        && od.ProductItem.Product != null 
-                                        && od.ProductItem.Product.Shop != null 
-                                        && od.ProductItem.Product.Shop.UserId == userId 
-                                        && !od.ProductItem.Product.Shop.DeletedTime.HasValue))
+                                            od.ProductItem != null
+                                            && od.ProductItem.Product != null
+                                            && od.ProductItem.Product.Shop != null
+                                            && od.ProductItem.Product.Shop.UserId == userId
+                                            && !od.ProductItem.Product.Shop.DeletedTime.HasValue))
                 .OrderByDescending(o => o.CreatedTime) // Sort by CreatedTime in descending order
+                .AsQueryable();
+
+            var totalItems = await ordersQuery.CountAsync();
+            var orders = await ordersQuery
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
                 .Select(order => new OrderResponseModel
                 {
                     Id = order.Id,
