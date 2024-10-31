@@ -25,75 +25,26 @@ namespace UI.Pages.Cart
         public decimal Subtotal { get; set; }
         public decimal Total { get; set; }
 
-        public async Task OnGetAsync()
-        {
-            CartItems = await GetCartItemsAsync();
-        }
+        public async Task OnGetAsync(string id)
+        {         
 
-        private async Task<List<CartItemGroupDto>> GetCartItemsAsync()
-        {
-            try
+            var response = await _apiResponseHelper.GetAsync<List<CartItemGroupDto>>($"{Constants.ApiBaseUrl}/api/cartitem");
+
+            if (response?.StatusCode == StatusCodeHelper.OK && response.Data != null)
             {
-                var response = await _apiResponseHelper.GetAsync<List<CartItemGroupDto>>($"{Constants.ApiBaseUrl}/api/cartitem");
+                var cartItems = response.Data;
 
-                if (response?.StatusCode == StatusCodeHelper.OK && response.Data != null)
-                {
-                    var cartItems = response.Data;
+                // Tính toán subtotal cho từng nhóm và tổng
+                Subtotal = cartItems.Sum(group => group.CartItems.Sum(item => item.DiscountPrice * item.ProductQuantity));
+                Total = Subtotal; // Cần thêm logic tính toán nếu có phí vận chuyển hoặc giảm giá
 
-                    // Tính toán subtotal cho từng nhóm và tổng
-                    Subtotal = cartItems.Sum(group => group.CartItems.Sum(item => item.DiscountPrice * item.ProductQuantity));
-                    Total = Subtotal; // Cần thêm logic tính toán nếu có phí vận chuyển hoặc giảm giá
-
-                    return cartItems;
-                }
-                else
-                {
-                    ModelState.AddModelError(string.Empty, response?.Message ?? "Đã xảy ra lỗi khi lấy dữ liệu giỏ hàng.");
-                    return new List<CartItemGroupDto>();
-                }
+                CartItems = cartItems;
             }
-            catch (Exception ex)
+            else
             {
-                ModelState.AddModelError(string.Empty, $"Lỗi: {ex.Message}");
-                return new List<CartItemGroupDto>();
+                ModelState.AddModelError(string.Empty, response?.Message ?? "Đã xảy ra lỗi khi lấy dữ liệu giỏ hàng.");
+                CartItems = new List<CartItemGroupDto>();
             }
-        }
-
-        public async Task<IActionResult> OnPostDeleteItemAsync(string cartItemId)
-        {
-            var response = await _apiResponseHelper.DeleteAsync<bool>($"{Constants.ApiBaseUrl}/api/cartitem/{cartItemId}");
-
-            if (response?.StatusCode == StatusCodeHelper.OK)
-            {
-                // Cập nhật lại giỏ hàng sau khi xóa
-                CartItems = await GetCartItemsAsync();
-                return RedirectToPage();
-            }
-
-            ModelState.AddModelError(string.Empty, response?.Message ?? "Đã xảy ra lỗi khi xóa sản phẩm.");
-            return Page();
-        }
-
-        public async Task<IActionResult> OnPostUpdateQuantityAsync(string cartItemId, int newQuantity)
-        {
-            if (newQuantity < 1)
-            {
-                ModelState.AddModelError(string.Empty, "Số lượng sản phẩm phải lớn hơn 0.");
-                return Page();
-            }
-
-            var updateData = new { ProductQuantity = newQuantity };
-            var response = await _apiResponseHelper.PutAsync<bool>($"{Constants.ApiBaseUrl}/api/cartitem/{cartItemId}", updateData);
-
-            if (response?.StatusCode == StatusCodeHelper.OK)
-            {
-                // Cập nhật lại giỏ hàng sau khi thay đổi số lượng
-                CartItems = await GetCartItemsAsync();
-                return RedirectToPage();
-            }
-
-            ModelState.AddModelError(string.Empty, response?.Message ?? "Đã xảy ra lỗi khi cập nhật số lượng sản phẩm.");
-            return Page();
         }
     }
 }

@@ -39,7 +39,7 @@
                                                 </div>
                                             </td>
                                             <td>₫<s>@item.UnitPrice</s></td>
-                                            <td class="text-red-500 line-through">₫@Math.Round(item.DiscountPrice, 0, MidpointRounding.AwayFromZero)</td>
+                                            <td class="text-red-500">₫@Math.Round(item.DiscountPrice, 0, MidpointRounding.AwayFromZero)</td>
                                             <td>
                                                 @if (item.VariationOptionValues != null && item.VariationOptionValues.Any())
                                                 {
@@ -52,16 +52,11 @@
                                                 }
                                             </td>
                                             <td>
-                                                <form method="post" asp-page-handler="UpdateQuantity" asp-route-itemId="@item.Id">
-                                                    <input type="number" name="newQuantity" min="1" value="@item.ProductQuantity" class="w-16 text-center" />
-                                                    <button type="submit" class="ml-2 text-blue-500">Update</button>
-                                                </form>
+                                                <input type="number" id="quantity-@item.Id" min="1" value="@item.ProductQuantity" class="w-16 text-center" />
                                             </td>
                                             <td>₫@Math.Round(item.DiscountPrice * item.ProductQuantity, 0, MidpointRounding.AwayFromZero)</td>
                                             <td>
-                                                <form method="post" asp-page-handler="RemoveCartItem" asp-route-cartItemId="@item.Id">
-                                                    <button class="text-white font-bold py-2 px-4 rounded" style="background-color: red" type="submit">Delete</button>
-                                                </form>
+                                                <button class="text-white font-bold py-2 px-4 rounded" style="background-color: red" onclick="removeCartItem('@item.Id')">Delete</button>
                                             </td>
                                         </tr>
                                     }
@@ -79,9 +74,7 @@
                     <div class="rounded-lg bg-white p-6 shadow-md">
                         <h2 class="text-lg font-semibold">Total</h2>
                         <p class="text-lg">₫@Math.Round(Model.Total, 0, MidpointRounding.AwayFromZero)</p>
-                        <form method="post" asp-page-handler="Checkout">
-                            <button class="mt-4 w-full rounded-lg bg-blue-500 px-4 py-2 text-white" type="submit">Checkout</button>
-                        </form>
+                        <button class="mt-4 w-full rounded-lg bg-blue-500 px-4 py-2 text-white" onclick="checkout()">Checkout</button>
                     </div>
                 </div>
             </div>
@@ -102,3 +95,5 @@
         }
     </div>
 </div>
+
+
