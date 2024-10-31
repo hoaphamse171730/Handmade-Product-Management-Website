@@ -1,4 +1,5 @@
-﻿using HandmadeProductManagement.Core.Common;
+﻿using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.Core.Common;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.Core.Store;
 using HandmadeProductManagement.ModelViews.CartItemModelViews;
@@ -17,6 +18,8 @@ namespace UI.Pages.Checkout
         {
             _apiResponseHelper = apiResponseHelper ?? throw new ArgumentNullException(nameof(apiResponseHelper));
         }
+        public string? ErrorMessage { get; set; }
+        public string? ErrorDetail { get; set; }
 
         public List<CartItemGroupDto> CartItems { get; set; } = new List<CartItemGroupDto>();
         public UserInfoDto UserInfo { get; set; } = new UserInfoDto();
@@ -27,15 +30,32 @@ namespace UI.Pages.Checkout
 
         public async Task OnGetAsync()
         {
-            CartItems = await GetCartItemsAsync();
-            UserInfo = await GetUserInfoAsync();
-            Token = HttpContext.Session.GetString("Token");
+            try
+            {
+
+                CartItems = await GetCartItemsAsync();
+                UserInfo = await GetUserInfoAsync();
+                Token = HttpContext.Session.GetString("Token");
+            }
+            catch (BaseException.ErrorException ex)
+            {
+                ErrorMessage = ex.ErrorDetail.ErrorCode;
+                ErrorDetail = ex.ErrorDetail.ErrorMessage?.ToString();
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = "An unexpected error occurred.";
+            }
+
         }
 
         public async Task<IActionResult> OnPostAsync()
         {
-            // Perform validation
-            if (string.IsNullOrWhiteSpace(UserInfo.FullName))
+            try
+            {
+
+                // Perform validation
+                if (string.IsNullOrWhiteSpace(UserInfo.FullName))
             {
                 ModelState.AddModelError(nameof(UserInfo.FullName), "Full Name is required.");
             }
@@ -72,6 +92,19 @@ namespace UI.Pages.Checkout
             }
 
             return RedirectToPage("/ProcessPayment");
+            }
+            catch (BaseException.ErrorException ex)
+            {
+                ErrorMessage = ex.ErrorDetail.ErrorCode;
+                ErrorDetail = ex.ErrorDetail.ErrorMessage?.ToString();
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = "An unexpected error occurred.";
+            }
+
+            return Page();
+
         }
 
         private async Task<List<CartItemGroupDto>> GetCartItemsAsync()

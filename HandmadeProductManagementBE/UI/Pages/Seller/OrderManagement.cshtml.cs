@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using HandmadeProductManagement.Core.Common;
 using HandmadeProductManagement.Contract.Repositories.Entity;
 using System.Net.Http;
+using HandmadeProductManagement.Core.Base;
 
 namespace UI.Pages.Seller
 {
@@ -17,6 +18,8 @@ namespace UI.Pages.Seller
         {
             _apiResponseHelper = apiResponseHelper ?? throw new ArgumentNullException(nameof(apiResponseHelper));
         }
+        public string? ErrorMessage { get; set; }
+        public string? ErrorDetail { get; set; }
 
         public List<OrderByUserDto>? Orders { get; set; }
 
@@ -46,8 +49,11 @@ namespace UI.Pages.Seller
 
         public async Task OnGetAsync(string? filter)
         {
-            // Set default filter to "All" if none is provided
-            CurrentFilter = filter ?? "All";
+            try
+            {
+
+                // Set default filter to "All" if none is provided
+                CurrentFilter = filter ?? "All";
 
             var response = await _apiResponseHelper.GetAsync<List<OrderByUserDto>>(Constants.ApiBaseUrl + "/api/order/seller");
 
@@ -74,11 +80,24 @@ namespace UI.Pages.Seller
             }
 
             await LoadCancelReasonsAsync();
+            }
+            catch (BaseException.ErrorException ex)
+            {
+                ErrorMessage = ex.ErrorDetail.ErrorCode;
+                ErrorDetail = ex.ErrorDetail.ErrorMessage?.ToString();
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = "An unexpected error occurred.";
+            }
+
         }
 
         // Method to update the order status
         public async Task<IActionResult> OnPostUpdateStatusAsync(string orderId, string newStatus, string? cancelReasonId)
         {
+            try {
+
             // Refresh orders to ensure we're working with the latest data
             await OnGetAsync(CurrentFilter);
 
@@ -115,6 +134,19 @@ namespace UI.Pages.Seller
             }
 
             return Page();
+            }
+            catch (BaseException.ErrorException ex)
+            {
+                ErrorMessage = ex.ErrorDetail.ErrorCode;
+                ErrorDetail = ex.ErrorDetail.ErrorMessage?.ToString();
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = "An unexpected error occurred.";
+            }
+            return Page();
+
+
         }
 
         public List<string> GetValidStatusTransitions(string currentStatus)
