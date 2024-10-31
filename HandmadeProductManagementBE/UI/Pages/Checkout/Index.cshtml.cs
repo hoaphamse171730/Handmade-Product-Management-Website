@@ -1,6 +1,3 @@
-﻿using Firebase.Auth;
-using GraphQLParser;
-using HandmadeProductManagement.Core.Base;
 ﻿using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Common;
 using HandmadeProductManagement.Core.Constants;
@@ -76,11 +73,8 @@ namespace UI.Pages.Checkout
 
         public async Task<IActionResult> OnPostAsync(string paymentMethod)
         {
-            try
-            {
-
-                // Perform validation
-                if (string.IsNullOrWhiteSpace(UserInfo.FullName))
+            // Perform validation
+            if (string.IsNullOrWhiteSpace(UserInfo.FullName))
             {
                 ModelState.AddModelError(nameof(UserInfo.FullName), "Full Name is required.");
             }
@@ -113,7 +107,7 @@ namespace UI.Pages.Checkout
                 // If validation fails, return to the page with the validation messages
                 CartItems = await GetCartItemsAsync();
                 Token = HttpContext.Session.GetString("Token");
-                
+
                 // Handle order creation for COD payment method
                 if (paymentMethod == "cod")
                 {
@@ -149,7 +143,7 @@ namespace UI.Pages.Checkout
                     {
                         ModelState.AddModelError(string.Empty, "An error occurred while updating user information.");
                     }
-                } 
+                }
                 else if (paymentMethod == "vnpay")
                 {
                     return RedirectToPage("/ProcessPayment");
@@ -164,52 +158,51 @@ namespace UI.Pages.Checkout
         }
 
         private async Task<List<CartItemGroupDto>> GetCartItemsAsync()
-        {
-            var response = await _apiResponseHelper.GetAsync<List<CartItemGroupDto>>(Constants.ApiBaseUrl + "/api/cartitem");
-
-            if (response.StatusCode == StatusCodeHelper.OK && response.Data != null)
             {
-                var cartItems = response.Data;
+                var response = await _apiResponseHelper.GetAsync<List<CartItemGroupDto>>(Constants.ApiBaseUrl + "/api/cartitem");
 
-                Subtotal = cartItems.Sum(group => group.CartItems.Sum(item => item.TotalPriceEachProduct));
-                Total = Subtotal;
+                if (response.StatusCode == StatusCodeHelper.OK && response.Data != null)
+                {
+                    var cartItems = response.Data;
 
-                return cartItems;
-            }
-            return new List<CartItemGroupDto>();
-        }
+                    Subtotal = cartItems.Sum(group => group.CartItems.Sum(item => item.TotalPriceEachProduct));
+                    Total = Subtotal;
 
-        private async Task<UserInfoDto> GetUserInfoAsync()
-        {
-            var response = await _apiResponseHelper.GetAsync<UserInfoDto>(Constants.ApiBaseUrl + "/api/userinfo");
-
-            if (response.StatusCode == StatusCodeHelper.OK && response.Data != null)
-            {
-                return response.Data;
-            }
-            return new UserInfoDto();
-        }
-
-        private async Task<bool> CreateOrderAsync()
-        {
-            var orderData = new CreateOrderDto
-            {
-                Address = UserInfo.Address ?? string.Empty,
-                CustomerName = UserInfo.FullName ?? string.Empty,
-                Phone = UserInfo.PhoneNumber ?? string.Empty,
-                Note = Note ?? string.Empty,
-            };
-
-            var response = await _apiResponseHelper.PostAsync<BaseResponse<bool>>(Constants.ApiBaseUrl + "/api/order", orderData);
-
-            if (response != null && response.StatusCode == StatusCodeHelper.OK)
-            {
-                return response.Data.Data;
+                    return cartItems;
+                }
+                return new List<CartItemGroupDto>();
             }
 
-            return false;
-        }
+            private async Task<UserInfoDto> GetUserInfoAsync()
+            {
+                var response = await _apiResponseHelper.GetAsync<UserInfoDto>(Constants.ApiBaseUrl + "/api/userinfo");
 
+                if (response.StatusCode == StatusCodeHelper.OK && response.Data != null)
+                {
+                    return response.Data;
+                }
+                return new UserInfoDto();
+            }
+
+            private async Task<bool> CreateOrderAsync()
+            {
+                var orderData = new CreateOrderDto
+                {
+                    Address = UserInfo.Address ?? string.Empty,
+                    CustomerName = UserInfo.FullName ?? string.Empty,
+                    Phone = UserInfo.PhoneNumber ?? string.Empty,
+                    Note = Note ?? string.Empty,
+                };
+
+                var response = await _apiResponseHelper.PostAsync<BaseResponse<bool>>(Constants.ApiBaseUrl + "/api/order", orderData);
+
+                if (response != null && response.StatusCode == StatusCodeHelper.OK)
+                {
+                    return response.Data.Data;
+                }
+
+                return false;
+            }
+
+        }
     }
-
-}
