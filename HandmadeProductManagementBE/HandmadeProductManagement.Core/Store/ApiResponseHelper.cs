@@ -230,19 +230,34 @@ public async Task<BaseResponse<T>> PutAsync<T>(string url, object payload = null
     // Centralized method to handle API response and exceptions
     private async Task<BaseResponse<T>> HandleApiResponse<T>(HttpResponseMessage response)
         {
-            var responseBody = await response.Content.ReadAsStringAsync();
-            Console.WriteLine(responseBody);
-            if (response.IsSuccessStatusCode)
+        var responseBody = await response.Content.ReadAsStringAsync();
+        Console.WriteLine($"Response body: {responseBody}");
+
+        if (response.IsSuccessStatusCode)
+        {
+            Console.WriteLine("Request was successful.");
+
+            var options = new JsonSerializerOptions
             {
-                var options = new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true,
-                    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-                };
+                PropertyNameCaseInsensitive = true,
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            };
+
+            // Attempt to deserialize the response
+            try
+            {
                 var baseResponse = await response.Content.ReadFromJsonAsync<BaseResponse<T>>(options);
-                return baseResponse ?? new BaseResponse<T>();
+                Console.WriteLine("Successfully deserialized BaseResponse.");
+                return baseResponse;
             }
-            else
+            catch (JsonException ex)
+            {
+                Console.WriteLine($"Deserialization failed: {ex.Message}");
+                Console.WriteLine($"Response content: {responseBody}");
+                throw;
+            }
+        }
+        else
             {
                 // Read the error content
                 var content = await response.Content.ReadAsStringAsync();

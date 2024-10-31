@@ -23,11 +23,10 @@ namespace UI.Pages
 
         public List<TopSellingProducts> Top10SellingProducts { get; set; }
         public List<ProductForDashboard> Top10NewProducts { get; set; }
-        public List<CategoryDto> Categories { get; set; } = [];
+        public List<CategoryDto> Categories { get; set; } = new List<CategoryDto>();
         public string Token { get; set; }
         public List<ProductSearchVM>? Products { get; set; }
 
-        //Step 2: Define PageNumber & PageSize like this
         public int PageNumber { get; set; } = 1;
         public int PageSize { get; set; } = 12;
 
@@ -35,13 +34,10 @@ namespace UI.Pages
         {
             Token = HttpContext.Session.GetString("Token");
             ViewData["Token"] = Token;
-            Top10SellingProducts = GetTop10SellingProducts();
-            Top10NewProducts = GetTop10NewProducts();
-            Categories = GetCategories();
-
+            Top10SellingProducts = await LoadProductsAsync<TopSellingProducts>("/api/dashboard/top-10-selling-products");
+            Top10NewProducts = await LoadProductsAsync<ProductForDashboard>("/api/dashboard/top-10-new-products");
             await LoadCategoriesAsync();
 
-            //Step 4: PageNumber = pageNumber & PageSize = pageSize
             PageNumber = pageNumber;
             PageSize = pageSize;
 
@@ -55,7 +51,6 @@ namespace UI.Pages
                 SortDescending = SortDescending
             };
 
-            //Final Step: add Page Number and Page Size into url like this: url/api/....?pageNumber={PageNumber}&pageSize={PageSize}
             var response = await _apiResponseHelper.GetAsync<List<ProductSearchVM>>($"{Constants.ApiBaseUrl}/api/product/search?pageNumber={PageNumber}&pageSize={PageSize}", searchFilter);
 
             if (response.StatusCode == StatusCodeHelper.OK && response.Data != null)
@@ -68,34 +63,10 @@ namespace UI.Pages
             }
         }
 
-        private List<TopSellingProducts> GetTop10SellingProducts()
+        private async Task<List<T>> LoadProductsAsync<T>(string endpoint)
         {
-            var response = _apiResponseHelper.GetAsync<List<TopSellingProducts>>(Constants.ApiBaseUrl +"/api/dashboard/top-10-selling-products").Result; // Lấy dữ liệu từ API
-            if (response.StatusCode == StatusCodeHelper.OK && response.Data != null)
-            {
-                return response.Data;
-            }
-            return new List<TopSellingProducts>();
-        }
-
-        private List<ProductForDashboard> GetTop10NewProducts()
-        {
-            var response = _apiResponseHelper.GetAsync<List<ProductForDashboard>>(Constants.ApiBaseUrl + "/api/dashboard/top-10-new-products").Result; // Lấy dữ liệu từ API
-            if (response.StatusCode == StatusCodeHelper.OK && response.Data != null)
-            {
-                return response.Data;
-            }
-            return new List<ProductForDashboard>();
-        }
-
-        private List<CategoryDto> GetCategories()
-        {
-            var response = _apiResponseHelper.GetAsync<List<CategoryDto>>(Constants.ApiBaseUrl + "/api/category").Result;
-            if (response.StatusCode == StatusCodeHelper.OK && response.Data != null)
-            {
-                return response.Data;
-            }
-            return new List<CategoryDto>();
+            var response = await _apiResponseHelper.GetAsync<List<T>>(Constants.ApiBaseUrl + endpoint);
+            return response.StatusCode == StatusCodeHelper.OK && response.Data != null ? response.Data : new List<T>();
         }
 
         private async Task LoadCategoriesAsync()
@@ -106,10 +77,7 @@ namespace UI.Pages
             if (response.IsSuccessStatusCode)
             {
                 var content = await response.Content.ReadAsStringAsync();
-                var options = new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                };
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
                 var baseResponse = JsonSerializer.Deserialize<BaseResponse<IList<CategoryDto>>>(content, options);
                 if (baseResponse != null && baseResponse.StatusCode == StatusCodeHelper.OK && baseResponse.Data != null)
                 {
@@ -122,5 +90,4 @@ namespace UI.Pages
             }
         }
     }
-
 }
