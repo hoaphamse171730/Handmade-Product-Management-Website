@@ -28,6 +28,7 @@ namespace UI.Pages.Seller
         public string CurrentFilter { get; set; } = "All";
         public int PageNumber { get; set; } = 1;
         public int PageSize { get; set; } = 2;
+        public bool HasNextPage { get; set; } = true;
 
         // Define valid status transitions
         private readonly Dictionary<string, List<string>> validStatusTransitions = new Dictionary<string, List<string>>
@@ -64,6 +65,7 @@ namespace UI.Pages.Seller
                 if (response?.StatusCode == StatusCodeHelper.OK && response.Data != null)
                 {
                     Orders = response.Data.OrderByDescending(o => o.OrderDate).ToList();
+                    HasNextPage = Orders.Count == PageSize;
                 }
                 else
                 {
