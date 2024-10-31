@@ -24,12 +24,12 @@
     </div>
     <div class="mb-4">
         <label asp-for="Promotion.StartDate" class="block text-gray-700 text-sm font-bold mb-2"></label>
-        <input asp-for="Promotion.StartDate" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="date" />
+        <input asp-for="Promotion.StartDate" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="date" min="1990-01-01" />
         <span asp-validation-for="Promotion.StartDate" class="text-red-500 text-xs italic"></span>
     </div>
     <div class="mb-4">
         <label asp-for="Promotion.EndDate" class="block text-gray-700 text-sm font-bold mb-2"></label>
-        <input asp-for="Promotion.EndDate" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="date" />
+        <input asp-for="Promotion.EndDate" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="date" min="1990-01-01" />
         <span asp-validation-for="Promotion.EndDate" class="text-red-500 text-xs italic"></span>
     </div>
     <div class="flex items-center justify-between">
