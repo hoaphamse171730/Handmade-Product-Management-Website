@@ -4,7 +4,7 @@ public static class Constants
 {
     #region Base
 
-    public const string ApiBaseUrl = "http://localhost:5041";
+    public const string ApiBaseUrl = "http://localhost:44328";
     public const string AvatarBaseUrl = "/images/avatars";
     public const string VNPAY = "VNPAY";
     public const string TimeZoneSEAsiaStandard = "SE Asia Standard Time";
