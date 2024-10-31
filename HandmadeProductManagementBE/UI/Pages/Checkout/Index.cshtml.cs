@@ -1,6 +1,7 @@
 ﻿using Firebase.Auth;
 using GraphQLParser;
 using HandmadeProductManagement.Core.Base;
+﻿using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Common;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.Core.Store;
@@ -26,6 +27,8 @@ namespace UI.Pages.Checkout
             _apiResponseHelper = apiResponseHelper ?? throw new ArgumentNullException(nameof(apiResponseHelper));
             _httpClientFactory = httpClientFactory;
         }
+        public string? ErrorMessage { get; set; }
+        public string? ErrorDetail { get; set; }
 
 
         public List<CartItemGroupDto> CartItems { get; set; } = new List<CartItemGroupDto>();
@@ -52,12 +55,32 @@ namespace UI.Pages.Checkout
             //}
             UserInfo = await GetUserInfoAsync();
             Token = HttpContext.Session.GetString("Token");
+            try
+            {
+
+                CartItems = await GetCartItemsAsync();
+                UserInfo = await GetUserInfoAsync();
+                Token = HttpContext.Session.GetString("Token");
+            }
+            catch (BaseException.ErrorException ex)
+            {
+                ErrorMessage = ex.ErrorDetail.ErrorCode;
+                ErrorDetail = ex.ErrorDetail.ErrorMessage?.ToString();
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = "An unexpected error occurred.";
+            }
+
         }
 
         public async Task<IActionResult> OnPostAsync(string paymentMethod)
         {
-            // Perform validation
-            if (string.IsNullOrWhiteSpace(UserInfo.FullName))
+            try
+            {
+
+                // Perform validation
+                if (string.IsNullOrWhiteSpace(UserInfo.FullName))
             {
                 ModelState.AddModelError(nameof(UserInfo.FullName), "Full Name is required.");
             }

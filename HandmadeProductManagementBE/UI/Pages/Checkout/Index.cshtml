@@ -1,4 +1,5 @@
 ﻿@page
+@using UI.Pages.Shared
 @model UI.Pages.Checkout.IndexModel
 @{
     ViewData["Title"] = "Checkout Page";
@@ -7,6 +8,18 @@
 <div class="mb-20 h-screen bg-gray-100">
     <div class="container mx-auto px-4">
         <h1 class="mb-4 text-4xl font-semibold">Checkout</h1>
+        
+@{
+    var errorModel = new ErrorMessageModel
+            {
+                ErrorMessage = Model.ErrorMessage,
+                ErrorDetail = Model.ErrorDetail
+            };
+}
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <partial name="_ErrorMessage" model="errorModel" />
+}
 
         <form method="post">
             <!-- Section: Shipping Info -->

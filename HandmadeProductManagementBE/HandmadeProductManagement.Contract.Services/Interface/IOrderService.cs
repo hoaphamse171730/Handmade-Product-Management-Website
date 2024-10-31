@@ -12,6 +12,6 @@ namespace HandmadeProductManagement.Contract.Services.Interface
         Task<IList<OrderByUserDto>> GetOrderByUserIdAsync(Guid userId);
         Task<IList<OrderResponseModel>> GetOrderByUserIdForAdminAsync(Guid userId);
         Task<PaginatedList<OrderResponseModel>> GetOrdersByPageAsync(int pageNumber, int pageSize);
-        Task<IList<OrderResponseModel>> GetOrdersBySellerUserIdAsync(Guid userId);
+        Task<IList<OrderResponseModel>> GetOrdersBySellerUserIdAsync(Guid userId,string filter, int pageNumber, int pageSize);
     }
 }

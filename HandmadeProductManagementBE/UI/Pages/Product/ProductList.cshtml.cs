@@ -25,43 +25,83 @@ namespace UI.Pages.Product
         }
         public List<ProductSearchVM>? Products { get; set; }
         public List<CategoryDto>? Categories { get; set; }
-        
-        
+
+        public string? ErrorMessage { get; set; }
+
         //Step 2: Define PageNumber & PageSize like this
         public int PageNumber { get; set; } = 1;
-        public int PageSize { get; set; } = 12;
+        public int PageSize { get; set; } = 2;
+        public bool HasNextPage { get; set; } = true;
+        public string CurrentFilters { get; set; } = string.Empty;
 
         //Step 3: Remember to add pageNumber & pageSize into parameter of OnGetAsync like below
         //Note: in page, the p is not the P
-        public async Task OnGetAsync([FromQuery] string? Name, [FromQuery] string? CategoryId, [FromQuery] string? Status, [FromQuery] decimal? MinRating, [FromQuery] string SortOption, [FromQuery] bool SortDescending, int pageNumber = 1, int pageSize = 12)
+        public async Task OnGetAsync([FromQuery] string? Name, [FromQuery] string? CategoryId, [FromQuery] string? Status, [FromQuery] decimal? MinRating, [FromQuery] string SortOption, [FromQuery] bool SortDescending, int pageNumber = 1, int pageSize = 2)
         {
-            await LoadCategoriesAsync();
-
-            //Step 4: PageNumber = pageNumber & PageSize = pageSize
-            PageNumber = pageNumber;
-            PageSize = pageSize;
-
-            var searchFilter = new ProductSearchFilter
+            try
             {
-                Name = Name,
-                CategoryId = CategoryId,
-                Status = Status,
-                MinRating = MinRating,
-                SortOption = SortOption,
-                SortDescending = SortDescending
-            };
 
-            //Final Step: add Page Number and Page Size into url like this: url/api/....?pageNumber={PageNumber}&pageSize={PageSize}
-            var response = await _apiResponseHelper.GetAsync<List<ProductSearchVM>>($"{Constants.ApiBaseUrl}/api/product/search?pageNumber={PageNumber}&pageSize={PageSize}", searchFilter);
+                await LoadCategoriesAsync();
 
-            if (response.StatusCode == StatusCodeHelper.OK && response.Data != null)
-            {
-                Products = response.Data;
+                //Step 4: PageNumber = pageNumber & PageSize = pageSize
+                PageNumber = pageNumber;
+                PageSize = pageSize;
+
+                var searchFilter = new ProductSearchFilter
+                {
+                    Name = Name,
+                    CategoryId = CategoryId,
+                    Status = Status,
+                    MinRating = MinRating,
+                    SortOption = SortOption,
+                    SortDescending = SortDescending
+                };
+
+                // Serialize current filters into a query string format
+                var queryParameters = new Dictionary<string, string?>
+                {
+                    { "Name", Name },
+                    { "CategoryId", CategoryId },
+                    { "Status", Status },
+                    { "MinRating", MinRating?.ToString() },
+                    { "SortOption", SortOption },
+                    { "SortDescending", SortDescending.ToString() }
+                };
+
+                // Remove null or empty parameters
+                var filteredParams = queryParameters
+                .Where(kvp => !string.IsNullOrEmpty(kvp.Value))
+                .Select(kvp => $"{kvp.Key}={Uri.EscapeDataString(kvp.Value!)}");
+                
+                CurrentFilters = string.Join("&", filteredParams);
+
+                //Final Step: add Page Number and Page Size into url like this: url/api/....?pageNumber={PageNumber}&pageSize={PageSize}
+                var response = await _apiResponseHelper.GetAsync<List<ProductSearchVM>>($"{Constants.ApiBaseUrl}/api/product/search?pageNumber={PageNumber}&pageSize={PageSize}", searchFilter);
+
+                if (response.StatusCode == StatusCodeHelper.OK && response.Data != null)
+                {
+                    Products = response.Data;
+                    HasNextPage = Products.Count == PageSize;
+
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, response.Message ?? "An error occurred while fetching products.");
+                }
             }
-            else
+            catch (BaseException.BadRequestException ex)
             {
-                ModelState.AddModelError(string.Empty, response.Message ?? "An error occurred while fetching products.");
+                ErrorMessage = ex.Message;
             }
+            catch (BaseException.UnauthorizedException ex)
+            {
+                ErrorMessage = ex.Message;
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = "An unexpected error occurred.";
+            }
+
         }
 
         private async Task LoadCategoriesAsync()

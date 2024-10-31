@@ -1,3 +1,4 @@
+using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Common;
 using HandmadeProductManagement.Core.Store;
 using HandmadeProductManagement.ModelViews.PromotionModelViews;
@@ -14,6 +15,8 @@ namespace UI.Pages.Promotion
         {
             _apiHelper = apiHelper;
         }
+        public string? ErrorMessage { get; set; }
+        public string? ErrorDetail { get; set; }
 
         [BindProperty]
         public PromotionForCreationDto Promotion { get; set; }
@@ -25,22 +28,36 @@ namespace UI.Pages.Promotion
 
         public async Task<IActionResult> OnPostAsync()
         {
-            if (!ModelState.IsValid)
+            try
             {
-                return Page();
+                if (!ModelState.IsValid)
+                {
+                    return Page();
+                }
+
+                var response = await _apiHelper.PostAsync<bool>($"{Constants.ApiBaseUrl}/api/promotions", Promotion);
+                if (response != null && response.Data)
+                {
+                    TempData["SuccessMessage"] = "Promotion created successfully.";
+                    return RedirectToPage("Index");
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, response?.Message ?? "An error occurred while creating the promotion.");
+                    return Page();
+                }
+            }
+            catch (BaseException.ErrorException ex)
+            {
+                ErrorMessage = ex.ErrorDetail.ErrorCode;
+                ErrorDetail = ex.ErrorDetail.ErrorMessage?.ToString();
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = "An unexpected error occurred.";
             }
 
-            var response = await _apiHelper.PostAsync<bool>($"{Constants.ApiBaseUrl}/api/promotions", Promotion);
-            if (response != null && response.Data)
-            {
-                TempData["SuccessMessage"] = "Promotion created successfully.";
-                return RedirectToPage("Index");
-            }
-            else
-            {
-                ModelState.AddModelError(string.Empty, response?.Message ?? "An error occurred while creating the promotion.");
-                return Page();
-            }
+            return Page();
         }
     }
 }

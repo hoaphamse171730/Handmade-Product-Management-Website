@@ -6,6 +6,12 @@
 
 
 <h1 class="text-3xl font-bold mb-4">Product List</h1>
+@if (Model.ErrorMessage != null)
+{
+    <div class="alert alert-danger">
+        @Model.ErrorMessage
+    </div>
+}
 
 <div class="search-filter">
     <form method="get" class="flex space-x-4 items-center">
@@ -144,10 +150,14 @@ else
     }
 </script>
 @{
+    // Create the pagination model with CurrentFilters
     var paginationModel = new UI.Pages.Shared.PaginationModel
             {
                 PageNumber = Model.PageNumber,
-                PageSize = Model.PageSize
+                PageSize = Model.PageSize,
+                // Pass the serialized CurrentFilters
+                CurrentFilter = Model.CurrentFilters,
+                HasNextPage = Model.HasNextPage
             };
 }
 
