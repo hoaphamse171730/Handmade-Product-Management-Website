@@ -91,7 +91,7 @@
                                 <td class="border-b border-slate-200 p-6 text-lg">@order.Status</td>
                                 <td class="border-b border-slate-200 p-6 text-lg">@order.Note</td>
                                 <td class="border-b border-slate-200 p-6 text-lg">
-                                    @if (order.Status != "Closed")
+                                    @if (order.Status != "Closed" && order.Status != "Shipped")
                                     {
                                         <form method="post" asp-page-handler="UpdateStatus" class="flex items-center justify-between space-x-2">
                                             <input type="hidden" name="orderId" value="@order.Id" />
