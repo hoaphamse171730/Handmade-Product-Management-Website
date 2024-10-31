@@ -31,6 +31,7 @@ namespace UI.Pages.Product
         //Step 2: Define PageNumber & PageSize like this
         public int PageNumber { get; set; } = 1;
         public int PageSize { get; set; } = 2;
+        public bool HasNextPage { get; set; } = true;
         public string CurrentFilters { get; set; } = string.Empty;
 
         //Step 3: Remember to add pageNumber & pageSize into parameter of OnGetAsync like below
@@ -80,6 +81,8 @@ namespace UI.Pages.Product
                 if (response.StatusCode == StatusCodeHelper.OK && response.Data != null)
                 {
                     Products = response.Data;
+                    HasNextPage = Products.Count == PageSize;
+
                 }
                 else
                 {

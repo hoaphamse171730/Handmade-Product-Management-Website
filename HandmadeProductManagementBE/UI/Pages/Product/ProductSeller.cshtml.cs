@@ -39,6 +39,7 @@ namespace UI.Pages.Product
         public List<VariationDto>? Variations { get; set; }
         public int PageNumber { get; set; } = 1;
         public int PageSize { get; set; } = 2;
+        public bool HasNextPage { get; set; } = true;
         public string CurrentFilters { get; set; } = string.Empty;
 
         [BindProperty]
@@ -108,6 +109,8 @@ namespace UI.Pages.Product
                 if (response.StatusCode == StatusCodeHelper.OK && response.Data != null)
                 {
                     Products = response.Data;
+                    HasNextPage = Products.Count == PageSize;
+
                 }
                 else
                 {
