@@ -10,6 +10,6 @@ namespace UI.Pages.Shared
         public int TotalItems { get; set; } 
         public int TotalPages => (int)Math.Ceiling((double)TotalItems / PageSize);
 
-        public string CurrentFilter { get; set; }
+        public string CurrentFilter { get; set; } = string.Empty;
     }
 }
