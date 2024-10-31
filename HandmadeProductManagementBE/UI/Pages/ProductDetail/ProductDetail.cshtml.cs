@@ -87,7 +87,7 @@ namespace UI.Pages.ProductDetail
 
             PageNumber = pageNumber;
 
-            var reviewResponse = await _apiResponseHelper.GetAsync<IList<ReviewModel>>($"{Constants.ApiBaseUrl}/api/review?pageNumber={pageNumber}&pageSize={pageSize}");
+            var reviewResponse = await _apiResponseHelper.GetAsync<IList<ReviewModel>>($"{Constants.ApiBaseUrl}/api/review/product/{productId}?pageNumber={pageNumber}&pageSize={pageSize}");
 
             if (response.StatusCode == StatusCodeHelper.OK && response.Data != null)
             {
