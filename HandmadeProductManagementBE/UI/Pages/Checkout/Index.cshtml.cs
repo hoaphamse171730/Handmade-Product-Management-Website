@@ -117,7 +117,7 @@ namespace UI.Pages.Checkout
 
                         if (baseResponse != null && baseResponse.StatusCode == StatusCodeHelper.OK)
                         {
-                            return RedirectToPage("/OrderSucess");
+                            return RedirectToPage("/Checkout/OrderSucess");
                         }
 
                         ModelState.AddModelError(string.Empty, baseResponse?.Message ?? "Error updating user information.");
