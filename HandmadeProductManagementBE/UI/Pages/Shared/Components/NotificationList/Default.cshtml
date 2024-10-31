@@ -1,0 +1,36 @@
+﻿
+@model List<HandmadeProductManagement.ModelViews.NotificationModelViews.NotificationModel>
+
+<button id="notification-button" class="rounded-full p-2 text-gray-600 hover:text-blue-600 focus:outline-none transition duration-300">
+    <i class="fa fa-bell text-xl"></i>
+    <span class="absolute top-0 right-0 -mt-1 -mr-1 inline-flex items-center justify-center w-4 h-4 text-xs font-bold text-white bg-red-500 rounded-full">
+        @ViewData["NotificationCount"] 
+    </span>
+</button>
+
+<div id="notificationDropdown" class="hidden absolute right-0 mt-2 custom-dropdown-width origin-top-right rounded-md bg-white shadow-lg z-50">
+    <div class="p-4">
+        <h3 class="font-semibold text-gray-700 mb-2">Notifications</h3>
+        <div class="notification-container">
+            <ul id="notificationList" class="space-y-2">
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var notification in Model)
+                    {
+                        <li class="notification-item">
+                            <a href="@notification.URL" class="block text-gray-700 hover:bg-gray-100 px-3 py-2">
+                                @notification.Message
+                            </a>
+                        </li>
+                    }
+                }
+                else
+                {
+                    <li class="notification-item">
+                        <span class="block text-gray-700 px-3 py-2">Không có thông báo nào.</span>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+</div>
