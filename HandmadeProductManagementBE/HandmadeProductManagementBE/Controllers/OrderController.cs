@@ -69,10 +69,10 @@ namespace HandmadeProductManagementAPI.Controllers
 
         [Authorize(Roles = "Seller")]
         [HttpGet("seller")]
-        public async Task<IActionResult> GetOrderForSeller([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetOrderForSeller([FromQuery] string? filter, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
-            var orders = await _orderService.GetOrdersBySellerUserIdAsync(Guid.Parse(userId), pageNumber, pageSize);
+            var orders = await _orderService.GetOrdersBySellerUserIdAsync(Guid.Parse(userId), filter, pageNumber, pageSize);
             var response = new BaseResponse<IList<OrderResponseModel>>
             {
                 Code = "Success",

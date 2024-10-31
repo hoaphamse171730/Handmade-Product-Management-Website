@@ -6,9 +6,8 @@
         <li class="page-item">
             @if (Model.PageNumber > 1)
             {
-                <a class="page-link px-3 py-1 border border-gray-300 rounded hover:bg-gray-200"
-                   asp-route-pageNumber="@(Model.PageNumber - 1)"
-                   asp-route-pageSize="@Model.PageSize">
+                <a href="?filter=@Model.CurrentFilter&pageNumber=@(Model.PageNumber - 1)&pageSize=@Model.PageSize"
+                    class="page-link px-3 py-1 border border-gray-300 rounded hover:bg-gray-200">
                     Previous
                 </a>
             }
@@ -29,9 +28,8 @@
 
         <!-- Next Button -->
         <li class="page-item">
-            <a class="page-link px-3 py-1 border border-gray-300 rounded hover:bg-gray-200"
-               asp-route-pageNumber="@(Model.PageNumber + 1)"
-               asp-route-pageSize="@Model.PageSize">
+            <a href="?filter=@Model.CurrentFilter&pageNumber=@(Model.PageNumber + 1)&pageSize=@Model.PageSize"
+               class="page-link px-3 py-1 border border-gray-300 rounded hover:bg-gray-200">
                 Next
             </a>
         </li>

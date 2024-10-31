@@ -21,42 +21,42 @@
     }
 
     <div class="mb-4 flex w-full flex-wrap justify-center gap-2">
-        <a href="?filter=All"
+        <a href="?filter=All&pageNumber=1"
            class="flex-grow rounded-lg border border-blue-500 p-2 text-center text-lg font-bold
 @(Model.CurrentFilter == "All" ? "bg-blue-500 text-white" : "bg-white text-black hover:bg-blue-100")">
             All Orders
         </a>
-        <a href="?filter=Pending"
+        <a href="?filter=Pending&pageNumber=1"
            class="flex-grow rounded-lg border border-blue-500 p-2 text-center text-lg font-bold
 @(Model.CurrentFilter == "Pending" ? "bg-blue-500 text-white" : "bg-white text-black hover:bg-blue-100")">
             Pending
         </a>
-        <a href="?filter=AwaitingPayment"
+        <a href="?filter=Awaiting%20Payment&pageNumber=1"
            class="flex-grow rounded-lg border border-blue-500 p-2 text-center text-lg font-bold
-@(Model.CurrentFilter == "AwaitingPayment" ? "bg-blue-500 text-white" : "bg-white text-black hover:bg-blue-100")">
+@(Model.CurrentFilter == "Awaiting Payment" ? "bg-blue-500 text-white" : "bg-white text-black hover:bg-blue-100")">
             Awaiting Payment
         </a>
-        <a href="?filter=Processing"
+        <a href="?filter=Processing&pageNumber=1"
            class="flex-grow rounded-lg border border-blue-500 p-2 text-center text-lg font-bold
 @(Model.CurrentFilter == "Processing" ? "bg-blue-500 text-white" : "bg-white text-black hover:bg-blue-100")">
             Processing
         </a>
-        <a href="?filter=Delivering"
+        <a href="?filter=Delivering&pageNumber=1"
            class="flex-grow rounded-lg border border-blue-500 p-2 text-center text-lg font-bold
 @(Model.CurrentFilter == "Delivering" ? "bg-blue-500 text-white" : "bg-white text-black hover:bg-blue-100")">
             Delivering
         </a>
-        <a href="?filter=Shipped"
+        <a href="?filter=Shipped&pageNumber=1"
            class="flex-grow rounded-lg border border-blue-500 p-2 text-center text-lg font-bold
 @(Model.CurrentFilter == "Shipped" ? "bg-blue-500 text-white" : "bg-white text-black hover:bg-blue-100")">
             Shipped
         </a>
-        <a href="?filter=Canceled"
+        <a href="?filter=Canceled&pageNumber=1"
            class="flex-grow rounded-lg border border-blue-500 p-2 text-center text-lg font-bold
 @(Model.CurrentFilter == "Canceled" ? "bg-blue-500 text-white" : "bg-white text-black hover:bg-blue-100")">
             Canceled
         </a>
-        <a href="?filter=Refunded"
+        <a href="?filter=Refunded&pageNumber=1"
            class="flex-grow rounded-lg border border-blue-500 p-2 text-center text-lg font-bold
 @(Model.CurrentFilter == "Refunded" ? "bg-blue-500 text-white" : "bg-white text-black hover:bg-blue-100")">
             Refunded
@@ -86,9 +86,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @{
-                            var index = 1;
-                        }
+                        @{var index = 1 + (Model.PageNumber - 1) * Model.PageSize;}
                         @foreach (var order in Model.Orders)
                         {
                             <tr class="cursor-pointer hover:bg-slate-50">
@@ -134,6 +132,7 @@
                     </tbody>
                 </table>
             </div>
+
         </div>
     }
 
@@ -165,7 +164,9 @@
     var paginationModel = new UI.Pages.Shared.PaginationModel
             {
                 PageNumber = Model.PageNumber,
-                PageSize = Model.PageSize
+                PageSize = Model.PageSize,
+                CurrentFilter = Model.CurrentFilter // Pass the current filter
+
             };
 }
 <partial name="~/Pages/Shared/_Pagination.cshtml" model="paginationModel" />

@@ -59,31 +59,18 @@ namespace UI.Pages.Seller
                 // Set default filter to "All" if none is provided
                 CurrentFilter = filter ?? "All";
 
-                var response = await _apiResponseHelper.GetAsync<List<OrderByUserDto>>($"{Constants.ApiBaseUrl}/api/order/seller?pageNumber={PageNumber}&pageSize={PageSize}");
+                var response = await _apiResponseHelper.GetAsync<List<OrderByUserDto>>($"{Constants.ApiBaseUrl}/api/order/seller?filter={CurrentFilter}&pageNumber={PageNumber}&pageSize={PageSize}");
 
-            if (response?.StatusCode == StatusCodeHelper.OK && response.Data != null)
-            {
-                var orders = response.Data.OrderByDescending(o => o.OrderDate).ToList();
-
-                // Filter orders based on selected filter
-                Orders = CurrentFilter switch
+                if (response?.StatusCode == StatusCodeHelper.OK && response.Data != null)
                 {
-                    "Pending" => orders.Where(o => o.Status == Constants.OrderStatusPending).ToList(),
-                    "AwaitingPayment" => orders.Where(o => o.Status == Constants.OrderStatusAwaitingPayment).ToList(),
-                    "Processing" => orders.Where(o => o.Status == Constants.OrderStatusProcessing).ToList(),
-                    "Delivering" => orders.Where(o => new[] { Constants.OrderStatusDeliveryFailed, Constants.OrderStatusDelivering, Constants.OrderStatusOnHold, Constants.OrderStatusDeliveringRetry }.Contains(o.Status)).ToList(),
-                    "Shipped" => orders.Where(o => o.Status == Constants.OrderStatusShipped).ToList(),
-                    "Canceled" => orders.Where(o => o.Status == Constants.OrderStatusCanceled).ToList(),
-                    "Refunded" => orders.Where(o => new[] { Constants.OrderStatusRefundRequested, Constants.OrderStatusRefundDenied, Constants.OrderStatusRefundApprove, Constants.OrderStatusRefunded }.Contains(o.Status)).ToList(),
-                    _ => orders // Default to show all orders
-                };
-            }
-            else
-            {
-                ModelState.AddModelError(string.Empty, response?.Message ?? "An error occurred while fetching orders.");
-            }
+                    Orders = response.Data.OrderByDescending(o => o.OrderDate).ToList();
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, response?.Message ?? "An error occurred while fetching orders.");
+                }
 
-            await LoadCancelReasonsAsync();
+                await LoadCancelReasonsAsync();
             }
             catch (BaseException.ErrorException ex)
             {

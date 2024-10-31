@@ -560,7 +560,7 @@ namespace HandmadeProductManagement.Services.Service
             }
         }
 
-        public async Task<IList<OrderResponseModel>> GetOrdersBySellerUserIdAsync(Guid userId, int pageNumber, int pageSize)
+        public async Task<IList<OrderResponseModel>> GetOrdersBySellerUserIdAsync(Guid userId, string? filter, int pageNumber, int pageSize)
         {
             if (pageNumber <= 0)
             {
@@ -578,14 +578,46 @@ namespace HandmadeProductManagement.Services.Service
 
             var orderRepository = _unitOfWork.GetRepository<Order>();
             var ordersQuery = orderRepository.Entities
-                .Where(o => o.OrderDetails.Any(od =>
-                                            od.ProductItem != null
-                                            && od.ProductItem.Product != null
-                                            && od.ProductItem.Product.Shop != null
-                                            && od.ProductItem.Product.Shop.UserId == userId
-                                            && !od.ProductItem.Product.Shop.DeletedTime.HasValue))
-                .OrderByDescending(o => o.CreatedTime) // Sort by CreatedTime in descending order
-                .AsQueryable();
+            .Where(o => o.OrderDetails.Any(od =>
+                                        od.ProductItem != null
+                                        && od.ProductItem.Product != null
+                                        && od.ProductItem.Product.Shop != null
+                                        && od.ProductItem.Product.Shop.UserId == userId
+                                        && !od.ProductItem.Product.Shop.DeletedTime.HasValue))
+            .AsQueryable();
+
+            // Apply filtering based on the filter parameter
+            if (!string.IsNullOrEmpty(filter) && filter != "All")
+            {
+                switch (filter)
+                {
+                    case Constants.OrderStatusPending:
+                        ordersQuery = ordersQuery.Where(o => o.Status == Constants.OrderStatusPending);
+                        break;
+                    case Constants.OrderStatusAwaitingPayment:
+                        ordersQuery = ordersQuery.Where(o => o.Status == Constants.OrderStatusAwaitingPayment);
+                        break;
+                    case Constants.OrderStatusProcessing:
+                        ordersQuery = ordersQuery.Where(o => o.Status == Constants.OrderStatusProcessing);
+                        break;
+                    case Constants.OrderStatusDelivering:
+                        ordersQuery = ordersQuery.Where(o => new[] { Constants.OrderStatusDeliveryFailed, Constants.OrderStatusDelivering, Constants.OrderStatusOnHold, Constants.OrderStatusDeliveringRetry }.Contains(o.Status));
+                        break;
+                    case Constants.OrderStatusShipped:
+                        ordersQuery = ordersQuery.Where(o => o.Status == Constants.OrderStatusShipped);
+                        break;
+                    case Constants.OrderStatusCanceled:
+                        ordersQuery = ordersQuery.Where(o => o.Status == Constants.OrderStatusCanceled);
+                        break;
+                    case Constants.OrderStatusRefunded:
+                        ordersQuery = ordersQuery.Where(o => new[] { Constants.OrderStatusRefundRequested, Constants.OrderStatusRefundDenied, Constants.OrderStatusRefundApprove, Constants.OrderStatusRefunded }.Contains(o.Status));
+                        break;
+                    default:
+                        break;
+                }
+            }
+            ordersQuery = ordersQuery.OrderByDescending(o => o.CreatedTime);
+
 
             var totalItems = await ordersQuery.CountAsync();
             var orders = await ordersQuery
