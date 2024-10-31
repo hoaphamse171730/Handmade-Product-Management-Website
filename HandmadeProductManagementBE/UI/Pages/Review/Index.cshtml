@@ -5,15 +5,15 @@
 	ViewData["Title"] = "Reviews";
 }
 
-<h1 class="text-4xl font-bold mb-4 text-center text-red-600">Reviews</h1>
+<h1 class="mb-4 text-center text-4xl font-bold text-red-600">Reviews</h1>
 
 <div class="space-y-4">
     @foreach (var review in Model.Reviews)
     {
-        <div class="border border-gray-300 rounded-lg p-4 bg-white shadow-md">
+        <div class="rounded-lg border border-gray-300 bg-white p-4 shadow-md">
             <div class="flex flex-col">
                 <span class="font-semibold">@(Model.Users.FirstOrDefault(user => user.Id == review.UserId)?.UserName ?? "Unknown User")</span>
-                <span class="text-gray-500 text-sm">@review.Date?.ToString("g")</span>
+                <span class="text-sm text-gray-500">@review.Date?.ToString("g")</span>
                 <div class="flex items-center">
                     @for (int i = 1; i <= 5; i++)
                     {
@@ -26,8 +26,8 @@
             </div>
 
             <!-- Reply Section with Shop ID -->
-            <div class="relative ml-4 bg-gray-50 border border-gray-300 rounded-lg p-2 mt-4">
-                <div class="text-gray-700 font-semibold mb-2">@(Model.Shops.FirstOrDefault(shop => shop.Id == review.Reply?.ShopId)?.Name ?? "Unknown Shop")</div>
+            <div class="relative ml-4 mt-4 rounded-lg border border-gray-300 bg-gray-50 p-2">
+                <div class="mb-2 font-semibold text-gray-700">@(Model.Shops.FirstOrDefault(shop => shop.Id == review.Reply?.ShopId)?.Name ?? "Unknown Shop")</div>
 
                 @if (review.Reply != null)
                 {
@@ -36,14 +36,14 @@
                 else
                 {
                     <form method="post" asp-page="CreateReply" asp-route-reviewId="@review.Id" class="mt-2">
-                        <textarea name="content" required class="border border-gray-300 rounded-lg p-2 w-full mb-2" placeholder="Write your reply here..."></textarea>
-                        <button type="submit" class="bg-blue-500 text-white rounded-lg px-4 py-2">Reply</button>
+                        <textarea name="content" required class="mb-2 w-full rounded-lg border border-gray-300 p-2" placeholder="Write your reply here..."></textarea>
+                        <button type="submit" class="rounded-lg bg-blue-500 px-4 py-2 text-white">Reply</button>
                     </form>
                 }
             </div>
 
             <!-- Action Links -->
-            <div class="flex justify-end mt-4">
+            <div class="mt-4 flex justify-end">
                 <a class="text-blue-600 hover:text-blue-800" asp-page="Details" asp-route-reviewId="@review.Id">Details</a> |
                 <a class="text-blue-600 hover:text-blue-800" asp-page="Edit" asp-route-reviewId="@review.Id">Edit</a> |
                 <a class="text-red-600 hover:text-red-800" asp-page="SoftDelete" asp-route-reviewId="@review.Id">Soft Delete</a>
@@ -59,7 +59,7 @@
             @for (int i = 1; i <= Model.TotalPages; i++)
             {
                 <li class="page-item @(Model.PageNumber == i ? "active" : "")">
-                    <a class="px-4 py-2 border border-gray-300 rounded-md" class="page-link" asp-page="Index" asp-route-pageNumber="@i">@i</a>
+                    <a class="rounded-md border border-gray-300 px-4 py-2" class="page-link" asp-page="Index" asp-route-pageNumber="@i">@i</a>
                 </li>
             }
         </ul>

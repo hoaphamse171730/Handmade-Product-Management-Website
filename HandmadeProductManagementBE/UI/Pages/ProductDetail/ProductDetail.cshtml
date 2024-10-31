@@ -10,10 +10,10 @@
 
 <div class="flex flex-wrap p-6">
     <!-- Left side: Product Images -->
-    <div class="w-full md:w-1/2 p-4">
+    <div class="w-full p-4 md:w-1/2">
         <div class="mb-4">
             <!-- Large Image -->
-            <img src="@Model.productDetail?.ProductImageUrls.FirstOrDefault()" alt="Product Image" class="w-[600px] h-[550px] object-cover rounded-lg shadow-md mx-auto">
+            <img src="@Model.productDetail?.ProductImageUrls.FirstOrDefault()" alt="Product Image" class="mx-auto h-[550px] w-[600px] rounded-lg object-cover shadow-md">
         </div>
         <div class="flex space-x-2">
             <!-- Small Images -->
@@ -21,28 +21,29 @@
             {
             <img src="@Model.productDetail.ProductImageUrls[i]"
                  alt="Product Thumbnail"
-                 class="w-1/5 h-20 object-cover rounded-lg shadow-md cursor-pointer">
+                 class="h-20 w-1/5 cursor-pointer rounded-lg object-cover shadow-md">
             }
         </div>
     </div>
 
     <!-- Right side: Product Details -->
-    <div class="w-full md:w-1/2 p-4 space-y-6">
+    <div class="w-full space-y-6 p-4 md:w-1/2">
         <!-- Product Name -->
         <h1 class="text-3xl font-bold text-gray-800">@Model.productDetail?.Name</h1>
         <h2 class="text-3xl font-bold text-gray-800">@Model.productDetail?.Description</h2>
         <!-- Product Rating -->
         <!-- Product Rating -->
         <div class="rating-stars flex items-center space-x-1">
+            <span class="text-lg text-gray-700">@Model.productDetail?.Rating.ToString("0.0")/5</span> <!-- Display rating in "4.6/5" format -->
             @for (int i = 1; i <= 5; i++)
             {
                 if (i <= (Model.productDetail?.Rating ?? 0))
                 {
-                    <i class="fa fa-star" style="color: gold;"></i> <!-- Ngôi sao màu vàng -->
+                    <i class="fa fa-star" style="color: gold;"></i> <!-- Yellow star -->
                 }
                 else
                 {
-                    <i class="fa fa-star" style="color: gray;"></i> <!-- Ngôi sao màu xám -->
+                    <i class="fa fa-star" style="color: gray;"></i> <!-- Gray star -->
                 }
             }
         </div>
@@ -53,16 +54,16 @@
             @if (Model.productDetail?.ProductItems?.FirstOrDefault()?.DiscountedPrice != null && Model.productDetail?.ProductItems?.FirstOrDefault()?.DiscountedPrice < Model.productDetail?.ProductItems?.FirstOrDefault()?.Price)
             {
                 <span class="text-2xl font-semibold text-red-500">
-                    @Model.productDetail?.ProductItems?.FirstOrDefault()?.DiscountedPrice <!-- Hiển thị giá giảm -->
+                    ₫@Model.productDetail?.ProductItems?.FirstOrDefault()?.DiscountedPrice?.ToString("N0")
                 </span>
                 <span class="text-lg text-gray-400 line-through">
-                    @Model.productDetail?.ProductItems?.FirstOrDefault()?.Price <!-- Hiển thị giá gốc, gạch ngang -->
+                    ₫@Model.productDetail?.ProductItems?.FirstOrDefault()?.Price.ToString("N0")
                 </span>
             }
             else
             {
                 <span class="text-2xl font-semibold text-red-500">
-                    @Model.productDetail?.ProductItems?.FirstOrDefault()?.Price <!-- Hiển thị giá gốc nếu không có giá giảm -->
+                    ₫@Model.productDetail?.ProductItems?.FirstOrDefault()?.Price.ToString("N0")
                 </span>
             }
         </div>
@@ -70,11 +71,11 @@
 
         <!-- Product Materials -->
         <div>
-            <div class="flex space-x-2 mt-2">
+            <div class="mt-2 flex space-x-2">
                 @foreach (var variation in Model.VariationOptions)
                 {
                     <div>
-                        <span class="px-3 py-1 text-sm bg-gray-200 rounded-full">@variation.Name</span>
+                        <span class="rounded-full bg-gray-200 px-3 py-1 text-sm">@variation.Name</span>
                         <div class="mt-1">
                             @if (variation.Options != null && variation.Options.Any())
                             {
@@ -101,30 +102,75 @@
         </div>
         <div class="price-container">
             <span id="price" class="text-lg font-bold text-gray-800"></span>
-            <span id="discountedPrice" class="text-lg font-bold text-red-600 ml-2 hidden"></span> <!-- Định nghĩa giá giảm -->
+            <span id="discountedPrice" class="ml-2 hidden text-lg font-bold text-red-600"></span> <!-- Định nghĩa giá giảm -->
         </div>
         <span id="remainingQuantity" class="text-sm text-gray-600"></span>
-        <div id="message" class="text-red-500 mt-2"></div>
+        <div id="message" class="mt-2 text-red-500"></div>
 
         <div class="container mx-auto p-4">
             <div class="flex items-center space-x-4">
                 <h2 class="text-lg font-semibold text-gray-800">Quantity</h2>
-                <div class="flex items-center border border-gray-300 rounded-lg">
-                    <button onclick="decreaseQuantity()" class="px-4 py-2 text-gray-700 hover:bg-gray-200 rounded-l-lg focus:outline-none">-</button>
+                <div class="flex items-center rounded-lg border border-gray-300">
+                    <button onclick="decreaseQuantity()" class="rounded-l-lg px-4 py-2 text-gray-700 hover:bg-gray-200 focus:outline-none">-</button>
                     <span id="quantity" class="px-4 py-2 text-gray-800">1</span>
-                    <button onclick="increaseQuantity()" class="px-4 py-2 text-gray-700 hover:bg-gray-200 rounded-r-lg focus:outline-none">+</button>
+                    <button onclick="increaseQuantity()" class="rounded-r-lg px-4 py-2 text-gray-700 hover:bg-gray-200 focus:outline-none">+</button>
                 </div>
             </div>
         </div>
 
         <!-- Buttons -->
         <div class="flex space-x-4">
-            <button class="flex-1 px-4 py-3 text-white bg-blue-500 rounded-lg hover:bg-blue-600">
+            <button class="flex-1 rounded-lg bg-blue-500 px-4 py-3 text-white hover:bg-blue-600">
                 <i class="fa fa-shopping-cart mr-2"></i> Add to Cart
             </button>
         </div>
     </div>
 </div>
+
+<h1 class="mb-4 text-center text-4xl font-bold text-red-600">Product Ratings</h1>
+
+<div class="space-y-4">
+    @foreach (var review in Model.Reviews)
+    {
+        <div class="rounded-lg border border-gray-300 bg-white p-4 shadow-md">
+            <div class="flex flex-col">
+                <span class="font-semibold">@(Model.Users.FirstOrDefault(user => user.Id == review.UserId)?.UserName ?? "Unknown User")</span>
+                <span class="text-sm text-gray-500">@review.Date?.ToString("g")</span>
+                <div class="flex items-center">
+                    @for (int i = 1; i <= 5; i++)
+                    {
+                        <svg class="h-5 w-5 @(i <= review.Rating ? "text-yellow-500" : "text-gray-300")" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 .587l3.668 7.568 8.235 1.199-5.964 5.222L19.339 24 12 20.812 4.661 24l1.331-9.424-5.964-5.222 8.235-1.199L12 .587z" />
+                        </svg>
+                    }
+                </div>
+                <p class="mt-2">@review.Content</p>
+            </div>
+
+            <!-- Reply Section with Shop ID -->
+            @if (review.Reply != null){
+            <div class="relative ml-4 mt-4 rounded-lg border border-gray-300 bg-gray-50 p-2">
+                <div class="mb-2 font-semibold text-gray-700">@(Model.Shops.FirstOrDefault(shop => shop.Id == review.Reply?.ShopId)?.Name ?? "Unknown Shop")</div>
+                    <p>@review.Reply.Content</p>
+            </div>
+            }
+        </div>
+    }
+</div>
+
+@if (Model.TotalPages > 1)
+{
+    <nav class="mt-4">
+        <ul class="flex justify-center space-x-2">
+            @for (int i = 1; i <= Model.TotalPages; i++)
+            {
+                <li class="page-item @(Model.PageNumber == i ? "active" : "")">
+                    <a class="rounded-md border border-gray-300 px-4 py-2" class="page-link" asp-page="Index" asp-route-pageNumber="@i">@i</a>
+                </li>
+            }
+        </ul>
+    </nav>
+}
 
 <!-- Include Font Awesome for Icons -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
