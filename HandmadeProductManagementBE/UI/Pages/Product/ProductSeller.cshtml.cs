@@ -38,7 +38,8 @@ namespace UI.Pages.Product
         public List<CategoryDto>? Categories { get; set; }
         public List<VariationDto>? Variations { get; set; }
         public int PageNumber { get; set; } = 1;
-        public int PageSize { get; set; } = 12;
+        public int PageSize { get; set; } = 2;
+        public string CurrentFilters { get; set; } = string.Empty;
 
         [BindProperty]
         public ProductForCreationDto NewProduct { get; set; } = new();
@@ -63,7 +64,7 @@ namespace UI.Pages.Product
             [FromQuery] string SortOption,
             [FromQuery] bool SortDescending,
             int pageNumber = 1,
-            int pageSize = 12)
+            int pageSize = 2)
         {
             try
             {
@@ -81,6 +82,23 @@ namespace UI.Pages.Product
                     SortOption = SortOption,
                     SortDescending = SortDescending
                 };
+                // Serialize current filters into a query string format
+                var queryParameters = new Dictionary<string, string?>
+                {
+                    { "Name", Name },
+                    { "CategoryId", CategoryId },
+                    { "Status", Status },
+                    { "MinRating", MinRating?.ToString() },
+                    { "SortOption", SortOption },
+                    { "SortDescending", SortDescending.ToString() }
+                };
+
+                // Remove null or empty parameters
+                var filteredParams = queryParameters
+                .Where(kvp => !string.IsNullOrEmpty(kvp.Value))
+                .Select(kvp => $"{kvp.Key}={Uri.EscapeDataString(kvp.Value!)}");
+
+                CurrentFilters = string.Join("&", filteredParams);
 
                 // Step 4: Fetch products based on the search filter
                 var response = await _apiResponseHelper.GetAsync<List<ProductSearchVM>>(
