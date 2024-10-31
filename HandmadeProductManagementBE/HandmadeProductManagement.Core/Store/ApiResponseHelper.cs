@@ -1,11 +1,8 @@
-﻿using System.Net.Http;
-using System.Net.Http.Headers;
+﻿using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Constants;
-using HandmadeProductManagement.Core.Exceptions.Handler; // Adjust this based on your actual namespace
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
@@ -16,12 +13,18 @@ public class ApiResponseHelper
 {
     private readonly HttpClient _httpClient;
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly JsonSerializerOptions _jsonOptions;
 
     public ApiResponseHelper(HttpClient httpClient, IHttpContextAccessor httpContextAccessor)
     {
         var handler = new HttpClientHandler()
         {
             AllowAutoRedirect = false // Disable automatic redirects
+        };
+        _jsonOptions = new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
         };
 
         _httpClient = new HttpClient(handler); // Use handler to disable redirect
@@ -37,10 +40,6 @@ public class ApiResponseHelper
             if (!string.IsNullOrEmpty(token))
             {
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
-
-                // Optional: Log the Authorization header for debugging
-                // Consider using a logging framework instead of Console.WriteLine
-                //Console.WriteLine($"Authorization Header: Bearer {token}");
             }
         }
     }
@@ -229,106 +228,125 @@ public async Task<BaseResponse<T>> PutAsync<T>(string url, object payload = null
 
     // Centralized method to handle API response and exceptions
     private async Task<BaseResponse<T>> HandleApiResponse<T>(HttpResponseMessage response)
-        {
-        var responseBody = await response.Content.ReadAsStringAsync();
-        Console.WriteLine($"Response body: {responseBody}");
+    {
+        Console.WriteLine(response);
+        string responseContent = await response.Content.ReadAsStringAsync();
 
         if (response.IsSuccessStatusCode)
         {
-            Console.WriteLine("Request was successful.");
-
-            var options = new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true,
-                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-            };
-
-            // Attempt to deserialize the response
+            // Attempt to deserialize the successful response
             try
             {
-                var baseResponse = await response.Content.ReadFromJsonAsync<BaseResponse<T>>(options);
-                Console.WriteLine("Successfully deserialized BaseResponse.");
-                return baseResponse;
+                var successResponse = JsonSerializer.Deserialize<BaseResponse<T>>(responseContent, _jsonOptions);
+                return successResponse ?? new BaseResponse<T>();
             }
             catch (JsonException ex)
             {
-                Console.WriteLine($"Deserialization failed: {ex.Message}");
-                Console.WriteLine($"Response content: {responseBody}");
-                throw;
+                // Log or handle deserialization errors as needed
+                throw new HttpRequestException("Failed to deserialize the successful response.", ex);
             }
         }
         else
+        {
+            if (string.IsNullOrWhiteSpace(responseContent))
             {
-                // Read the error content
-                var content = await response.Content.ReadAsStringAsync();
-
-                // Attempt to deserialize the response as ProblemDetails (middleware-thrown exceptions)
-                var problemDetails = TryDeserializeProblemDetails(content);
-                if (problemDetails != null)
-                {
-                    HandleProblemDetailsExceptions(problemDetails);
-                }
-
-                // Attempt to deserialize the response as BaseResponse<string>
-                var baseResponse = TryDeserializeBaseResponse(content);
-                if (baseResponse != null)
-                {
-                    // Handle based on StatusCodeHelper
-                    throw MapToCustomException(baseResponse);
-                }
-
-                // If nothing matches, throw a generic exception
-                throw new HttpRequestException($"Request failed with status code {response.StatusCode} and content: {content}");
+                HandleEmptyErrorResponse(response.StatusCode);
             }
-        }
 
-  
-    private ProblemDetails? TryDeserializeProblemDetails(string content)
+            // Attempt to deserialize the response as ProblemDetails
+            var problemDetails = DeserializeProblemDetails(responseContent);
+            if (problemDetails != null)
+            {
+                HandleProblemDetailsExceptions(problemDetails);
+                // The above method will throw an exception, so the following code won't execute
+            }
+
+            // Attempt to deserialize the response as BaseResponse<string>
+            var baseResponse = DeserializeBaseResponse<string>(responseContent);
+            if (baseResponse != null)
+            {
+                // Map to a custom exception based on the BaseResponse
+                throw MapToCustomException(baseResponse);
+            }
+
+            // If deserialization did not match any known formats, throw a generic exception
+            throw new HttpRequestException($"Request failed with status code {response.StatusCode} and content: {responseContent}");
+        }
+    }
+    private void HandleEmptyErrorResponse(HttpStatusCode statusCode)
+    {
+        switch (statusCode)
+        {
+            case HttpStatusCode.BadRequest:
+                throw new BaseException.BadRequestException("bad_request", "Bad Request");
+
+            case HttpStatusCode.Unauthorized:
+                throw new BaseException.UnauthorizedException("unauthorized", "Unauthorized");
+
+            case HttpStatusCode.Forbidden:
+                throw new BaseException.ForbiddenException("forbidden", "Forbidden");
+
+            case HttpStatusCode.NotFound:
+                throw new BaseException.NotFoundException("not_found", "Not Found");
+
+            default:
+                throw new BaseException.CoreException("error", $"Error: response status is {(int)statusCode}", (int)statusCode);
+        }
+    }
+
+
+    private ProblemDetails? DeserializeProblemDetails(string content)
     {
         try
         {
-            return JsonSerializer.Deserialize<ProblemDetails>(content);
+            return JsonSerializer.Deserialize<ProblemDetails>(content, _jsonOptions);
         }
-        catch
+        catch (JsonException)
         {
+            // Log the exception if necessary
             return null;
         }
     }
 
-    private BaseResponse<string>? TryDeserializeBaseResponse(string content)
+
+    private BaseResponse<T>? DeserializeBaseResponse<T>(string content)
     {
         try
         {
-            return JsonSerializer.Deserialize<BaseResponse<string>>(content);
+            return JsonSerializer.Deserialize<BaseResponse<T>>(content, _jsonOptions);
         }
-        catch
+        catch (JsonException)
         {
+            // Log the exception if necessary
             return null;
         }
     }
+
 
     private void HandleProblemDetailsExceptions(ProblemDetails problemDetails)
     {
-        // Map ProblemDetails to specific exceptions
-        switch (problemDetails.Status)
+        // Ensure that the Status property is set; default to 500 if not
+        int status = problemDetails.Status ?? (int)HttpStatusCode.InternalServerError;
+        string detail = problemDetails.Detail ?? "An error occurred.";
+
+        switch (status)
         {
             case StatusCodes.Status400BadRequest:
-                throw new BaseException.BadRequestException("bad_request", problemDetails.Detail ?? "Bad Request");
+                throw new BaseException.BadRequestException(problemDetails.Title ?? "bad_request", detail);
 
             case StatusCodes.Status401Unauthorized:
-                throw new BaseException.UnauthorizedException("unauthorized", problemDetails.Detail ?? "Unauthorized");
+                throw new BaseException.UnauthorizedException(problemDetails.Title ?? "unauthorized", detail);
 
             case StatusCodes.Status403Forbidden:
-                throw new BaseException.ForbiddenException("forbidden", problemDetails.Detail ?? "Forbidden");
+                throw new BaseException.ForbiddenException(problemDetails.Title ?? "forbidden", detail);
 
             case StatusCodes.Status404NotFound:
-                throw new BaseException.NotFoundException("not_found", problemDetails.Detail ?? "Not Found");
+                throw new BaseException.NotFoundException(problemDetails.Title ?? "not_found", detail);
 
             default:
-                throw new BaseException.CoreException("error", problemDetails.Detail ?? "Internal Server Error", problemDetails.Status ?? 500);
+                throw new BaseException.CoreException(problemDetails.Title ?? "error", detail, status);
         }
     }
-
     private Exception MapToCustomException(BaseResponse<string> baseResponse)
     {
         switch (baseResponse.StatusCode)

@@ -15,6 +15,7 @@ using System.Linq;
 using HandmadeProductManagement.ModelViews.VariationModelViews;
 using HandmadeProductManagement.ModelViews.VariationOptionModelViews;
 using System.Net.Http.Headers;
+using Azure;
 
 namespace UI.Pages.Product
 {
@@ -31,12 +32,15 @@ namespace UI.Pages.Product
             _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
-
+        public string? ErrorMessage { get; set; }
+        public string? ErrorDetail { get; set; }
         public List<ProductSearchVM>? Products { get; set; }
         public List<CategoryDto>? Categories { get; set; }
         public List<VariationDto>? Variations { get; set; }
         public int PageNumber { get; set; } = 1;
-        public int PageSize { get; set; } = 12;
+        public int PageSize { get; set; } = 2;
+        public bool HasNextPage { get; set; } = true;
+        public string CurrentFilters { get; set; } = string.Empty;
 
         [BindProperty]
         public ProductForCreationDto NewProduct { get; set; } = new();
@@ -61,35 +65,66 @@ namespace UI.Pages.Product
             [FromQuery] string SortOption,
             [FromQuery] bool SortDescending,
             int pageNumber = 1,
-            int pageSize = 12)
+            int pageSize = 2)
         {
-            await LoadCategoriesAsync();
-            PageNumber = pageNumber;
-            PageSize = pageSize;
-
-            var searchFilter = new ProductSearchFilter
+            try
             {
-                Name = Name,
-                CategoryId = CategoryId,
-                Status = Status,
-                MinRating = MinRating,
-                SortOption = SortOption,
-                SortDescending = SortDescending
-            };
 
-            // Step 4: Fetch products based on the search filter
-            var response = await _apiResponseHelper.GetAsync<List<ProductSearchVM>>(
-                $"{Constants.ApiBaseUrl}/api/product/search-seller?pageNumber={PageNumber}&pageSize={PageSize}",
-                searchFilter);
+                await LoadCategoriesAsync();
+                PageNumber = pageNumber;
+                PageSize = pageSize;
 
-            if (response.StatusCode == StatusCodeHelper.OK && response.Data != null)
+                var searchFilter = new ProductSearchFilter
+                {
+                    Name = Name,
+                    CategoryId = CategoryId,
+                    Status = Status,
+                    MinRating = MinRating,
+                    SortOption = SortOption,
+                    SortDescending = SortDescending
+                };
+                // Serialize current filters into a query string format
+                var queryParameters = new Dictionary<string, string?>
+                {
+                    { "Name", Name },
+                    { "CategoryId", CategoryId },
+                    { "Status", Status },
+                    { "MinRating", MinRating?.ToString() },
+                    { "SortOption", SortOption },
+                    { "SortDescending", SortDescending.ToString() }
+                };
+
+                // Remove null or empty parameters
+                var filteredParams = queryParameters
+                .Where(kvp => !string.IsNullOrEmpty(kvp.Value))
+                .Select(kvp => $"{kvp.Key}={Uri.EscapeDataString(kvp.Value!)}");
+
+                CurrentFilters = string.Join("&", filteredParams);
+
+                // Step 4: Fetch products based on the search filter
+                var response = await _apiResponseHelper.GetAsync<List<ProductSearchVM>>(
+                    $"{Constants.ApiBaseUrl}/api/product/search-seller?pageNumber={PageNumber}&pageSize={PageSize}",
+                    searchFilter);
+
+                if (response.StatusCode == StatusCodeHelper.OK && response.Data != null)
+                {
+                    Products = response.Data;
+                    HasNextPage = Products.Count == PageSize;
+
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, response.Message ?? "An error occurred while fetching products.");
+                }
+            } catch (BaseException.ErrorException ex)
             {
-                Products = response.Data;
+                ErrorMessage = ex.ErrorDetail.ErrorCode;
+                ErrorDetail = ex.ErrorDetail.ErrorMessage?.ToString();
             }
-            else
-            {
-                ModelState.AddModelError(string.Empty, response.Message ?? "An error occurred while fetching products.");
-            }
+            catch (Exception ex)
+                {
+                    ErrorMessage = "An unexpected error occurred.";
+                }
 
             return Page();
         }

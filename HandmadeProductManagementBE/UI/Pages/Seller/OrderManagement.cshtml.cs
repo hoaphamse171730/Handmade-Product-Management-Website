@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using HandmadeProductManagement.Core.Common;
 using HandmadeProductManagement.Contract.Repositories.Entity;
 using System.Net.Http;
+using HandmadeProductManagement.Core.Base;
 
 namespace UI.Pages.Seller
 {
@@ -17,12 +18,17 @@ namespace UI.Pages.Seller
         {
             _apiResponseHelper = apiResponseHelper ?? throw new ArgumentNullException(nameof(apiResponseHelper));
         }
+        public string? ErrorMessage { get; set; }
+        public string? ErrorDetail { get; set; }
 
         public List<OrderByUserDto>? Orders { get; set; }
 
         public List<CancelReason> CancelReasons { get; set; } = new List<CancelReason>();
 
         public string CurrentFilter { get; set; } = "All";
+        public int PageNumber { get; set; } = 1;
+        public int PageSize { get; set; } = 2;
+        public bool HasNextPage { get; set; } = true;
 
         // Define valid status transitions
         private readonly Dictionary<string, List<string>> validStatusTransitions = new Dictionary<string, List<string>>
@@ -43,41 +49,47 @@ namespace UI.Pages.Seller
             { Constants.OrderStatusDeliveringRetry, new List<string> { Constants.OrderStatusDelivering } },
         };
 
-        public async Task OnGetAsync(string? filter)
+        public async Task OnGetAsync(string? filter, int pageNumber = 1, int pageSize = 2)
         {
-            // Set default filter to "All" if none is provided
-            CurrentFilter = filter ?? "All";
-
-            var response = await _apiResponseHelper.GetAsync<List<OrderByUserDto>>(Constants.ApiBaseUrl + "/api/order/seller");
-
-            if (response?.StatusCode == StatusCodeHelper.OK && response.Data != null)
+            try
             {
-                var orders = response.Data.OrderByDescending(o => o.OrderDate).ToList();
+                PageNumber = pageNumber;
+                PageSize = pageSize;
 
-                // Filter orders based on selected filter
-                Orders = CurrentFilter switch
+                // Set default filter to "All" if none is provided
+                CurrentFilter = filter ?? "All";
+
+                var response = await _apiResponseHelper.GetAsync<List<OrderByUserDto>>($"{Constants.ApiBaseUrl}/api/order/seller?filter={CurrentFilter}&pageNumber={PageNumber}&pageSize={PageSize}");
+
+                if (response?.StatusCode == StatusCodeHelper.OK && response.Data != null)
                 {
-                    "Pending" => orders.Where(o => o.Status == Constants.OrderStatusPending).ToList(),
-                    "AwaitingPayment" => orders.Where(o => o.Status == Constants.OrderStatusAwaitingPayment).ToList(),
-                    "Processing" => orders.Where(o => o.Status == Constants.OrderStatusProcessing).ToList(),
-                    "Delivering" => orders.Where(o => new[] { Constants.OrderStatusDeliveryFailed, Constants.OrderStatusDelivering, Constants.OrderStatusOnHold, Constants.OrderStatusDeliveringRetry }.Contains(o.Status)).ToList(),
-                    "Shipped" => orders.Where(o => o.Status == Constants.OrderStatusShipped).ToList(),
-                    "Canceled" => orders.Where(o => o.Status == Constants.OrderStatusCanceled).ToList(),
-                    "Refunded" => orders.Where(o => new[] { Constants.OrderStatusRefundRequested, Constants.OrderStatusRefundDenied, Constants.OrderStatusRefundApprove, Constants.OrderStatusRefunded }.Contains(o.Status)).ToList(),
-                    _ => orders // Default to show all orders
-                };
+                    Orders = response.Data.OrderByDescending(o => o.OrderDate).ToList();
+                    HasNextPage = Orders.Count == PageSize;
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, response?.Message ?? "An error occurred while fetching orders.");
+                }
+
+                await LoadCancelReasonsAsync();
             }
-            else
+            catch (BaseException.ErrorException ex)
             {
-                ModelState.AddModelError(string.Empty, response?.Message ?? "An error occurred while fetching orders.");
+                ErrorMessage = ex.ErrorDetail.ErrorCode;
+                ErrorDetail = ex.ErrorDetail.ErrorMessage?.ToString();
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = "An unexpected error occurred.";
             }
 
-            await LoadCancelReasonsAsync();
         }
 
         // Method to update the order status
         public async Task<IActionResult> OnPostUpdateStatusAsync(string orderId, string newStatus, string? cancelReasonId)
         {
+            try {
+
             // Refresh orders to ensure we're working with the latest data
             await OnGetAsync(CurrentFilter);
 
@@ -114,6 +126,19 @@ namespace UI.Pages.Seller
             }
 
             return Page();
+            }
+            catch (BaseException.ErrorException ex)
+            {
+                ErrorMessage = ex.ErrorDetail.ErrorCode;
+                ErrorDetail = ex.ErrorDetail.ErrorMessage?.ToString();
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = "An unexpected error occurred.";
+            }
+            return Page();
+
+
         }
 
         public List<string> GetValidStatusTransitions(string currentStatus)

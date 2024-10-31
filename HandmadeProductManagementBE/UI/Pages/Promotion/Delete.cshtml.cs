@@ -1,3 +1,4 @@
+using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Common;
 using HandmadeProductManagement.Core.Store;
 using HandmadeProductManagement.ModelViews.PromotionModelViews;
@@ -14,46 +15,72 @@ namespace UI.Pages.Promotion
         {
             _apiHelper = apiHelper;
         }
+        public string? ErrorMessage { get; set; }
+        public string? ErrorDetail { get; set; }
 
         [BindProperty]
         public PromotionDto Promotion { get; set; }
         public async Task<IActionResult> OnGetAsync(string id)
         {
-            if (string.IsNullOrEmpty(id))
-            {
-                return NotFound();
-            }
+            try { 
 
-            var response = await _apiHelper.GetAsync<PromotionDto>($"{Constants.ApiBaseUrl}/api/promotions/{id}");
-            if (response != null && response.Data != null)
-            {
-                Promotion = response.Data;
+                if (string.IsNullOrEmpty(id))
+                {
+                    return NotFound();
+                }
+
+                var response = await _apiHelper.GetAsync<PromotionDto>($"{Constants.ApiBaseUrl}/api/promotions/{id}");
+                if (response != null && response.Data != null)
+                {
+                    Promotion = response.Data;
+                    return Page();
+                }
+                else
+                {
+                    return NotFound();
+                }
+                } catch (BaseException.ErrorException ex)
+                    {
+                        ErrorMessage = ex.ErrorDetail.ErrorCode;
+                        ErrorDetail = ex.ErrorDetail.ErrorMessage?.ToString();
+                } catch (Exception ex)
+                {
+                    ErrorMessage = "An unexpected error occurred.";
+                }
                 return Page();
-            }
-            else
-            {
-                return NotFound();
-            }
         }
 
         public async Task<IActionResult> OnPostAsync(string id)
         {
-            if (string.IsNullOrEmpty(id))
+            try
             {
-                return NotFound();
-            }
+                if (string.IsNullOrEmpty(id))
+                {
+                    return NotFound();
+                }
 
-            var response = await _apiHelper.DeleteAsync<bool>($"{Constants.ApiBaseUrl}/api/promotions/{id}");
-            if (response != null && response.Data)
-            {
-                TempData["SuccessMessage"] = "Promotion deleted successfully.";
-                return RedirectToPage("Index");
+                var response = await _apiHelper.DeleteAsync<bool>($"{Constants.ApiBaseUrl}/api/promotions/{id}");
+                if (response != null && response.Data)
+                {
+                    TempData["SuccessMessage"] = "Promotion deleted successfully.";
+                    return RedirectToPage("Index");
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, response?.Message ?? "An error occurred while deleting the promotion.");
+                    return Page();
+                }
             }
-            else
+            catch (BaseException.ErrorException ex)
             {
-                ModelState.AddModelError(string.Empty, response?.Message ?? "An error occurred while deleting the promotion.");
-                return Page();
+                ErrorMessage = ex.ErrorDetail.ErrorCode;
+                ErrorDetail = ex.ErrorDetail.ErrorMessage?.ToString();
             }
+            catch (Exception ex)
+            {
+                ErrorMessage = "An unexpected error occurred.";
+            }
+            return Page();
         }
     }
 }
