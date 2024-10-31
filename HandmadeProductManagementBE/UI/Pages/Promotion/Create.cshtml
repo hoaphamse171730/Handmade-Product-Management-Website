@@ -1,10 +1,23 @@
 ﻿@page
+@using UI.Pages.Shared
 @model UI.Pages.Promotion.CreateModel
 @{
     ViewData["Title"] = "Create Promotion";
 }
 
 <h1 class="text-3xl font-bold text-center mb-6">Create Promotion</h1>
+
+@{
+    var errorModel = new ErrorMessageModel
+            {
+                ErrorMessage = Model.ErrorMessage,
+                ErrorDetail = Model.ErrorDetail
+            };
+}
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <partial name="_ErrorMessage" model="errorModel" />
+}
 
 <form method="post" class="bg-white shadow-md rounded-lg p-6">
     <div class="mb-4">
@@ -24,12 +37,12 @@
     </div>
     <div class="mb-4">
         <label asp-for="Promotion.StartDate" class="block text-gray-700 text-sm font-bold mb-2"></label>
-        <input asp-for="Promotion.StartDate" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="date" />
+        <input asp-for="Promotion.StartDate" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="date" min="1990-01-01" value="@DateTime.Today.ToString("yyyy-MM-dd")" />
         <span asp-validation-for="Promotion.StartDate" class="text-red-500 text-xs italic"></span>
     </div>
     <div class="mb-4">
         <label asp-for="Promotion.EndDate" class="block text-gray-700 text-sm font-bold mb-2"></label>
-        <input asp-for="Promotion.EndDate" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="date" />
+        <input asp-for="Promotion.EndDate" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="date" min="1990-01-01" value="@DateTime.Today.ToString("yyyy-MM-dd")" />
         <span asp-validation-for="Promotion.EndDate" class="text-red-500 text-xs italic"></span>
     </div>
     <div class="flex items-center justify-between">

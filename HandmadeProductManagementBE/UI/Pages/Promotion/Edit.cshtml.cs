@@ -1,3 +1,4 @@
+using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Common;
 using HandmadeProductManagement.Core.Store;
 using HandmadeProductManagement.ModelViews.PromotionModelViews;
@@ -14,6 +15,8 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
             {
                 _apiHelper = apiHelper;
             }
+            public string? ErrorMessage { get; set; }
+            public string? ErrorDetail { get; set; }
 
             [BindProperty]
             public PromotionForUpdateDto Promotion { get; set; }
@@ -21,33 +24,53 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
             public async Task<IActionResult> OnGetAsync(string id)
             {
+            try
+            {
                 if (string.IsNullOrEmpty(id))
-                {
-                    return NotFound();
-                }
-                Id = id;
-                var response = await _apiHelper.GetAsync<PromotionDto>($"{Constants.ApiBaseUrl}/api/promotions/{id}");
-                if (response != null && response.Data != null)
-                {
-                    Promotion = new PromotionForUpdateDto
                     {
-                        Name = response.Data.Name,
-                        Description = response.Data.Description,
-                        DiscountRate = response.Data.DiscountRate,
-                        StartDate = response.Data.StartDate,
-                        EndDate = response.Data.EndDate
-                    };
-                    return Page();
+                        return NotFound();
+                    }
+                    Id = id;
+                    var response = await _apiHelper.GetAsync<PromotionDto>($"{Constants.ApiBaseUrl}/api/promotions/{id}");
+                    if (response != null && response.Data != null)
+                    {
+                        Promotion = new PromotionForUpdateDto
+                        {
+                            Name = response.Data.Name,
+                            Description = response.Data.Description,
+                            DiscountRate = response.Data.DiscountRate,
+                            StartDate = response.Data.StartDate,
+                            EndDate = response.Data.EndDate
+                        };
+                        return Page();
+                    }
+                    else
+                    {
+                        return NotFound();
+                    }
+
+
                 }
-                else
+                catch (BaseException.ErrorException ex)
                 {
-                    return NotFound();
+                    ErrorMessage = ex.ErrorDetail.ErrorCode;
+                    ErrorDetail = ex.ErrorDetail.ErrorMessage?.ToString();
                 }
+                catch (Exception ex)
+                {
+                    ErrorMessage = "An unexpected error occurred.";
+                }
+                return Page();
+
             }
 
             public async Task<IActionResult> OnPostAsync(string id)
             {
             Id = id;
+            try
+            {
+
+
                 if (string.IsNullOrEmpty(Id))
                 {
                     return NotFound();
@@ -55,7 +78,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
                 if (!ModelState.IsValid)
                 {
-                // Log model state errors for debugging
+                    // Log model state errors for debugging
                     foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
                     {
                         Console.WriteLine(error.ErrorMessage);
@@ -83,6 +106,18 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
                     ModelState.AddModelError(string.Empty, response?.Message ?? "An error occurred while updating the promotion.");
                     return Page();
                 }
+            }
+            catch (BaseException.ErrorException ex)
+            {
+                ErrorMessage = ex.ErrorDetail.ErrorCode;
+                ErrorDetail = ex.ErrorDetail.ErrorMessage?.ToString();
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = "An unexpected error occurred.";
+            }
+
+            return Page();
             }
         }
     }
