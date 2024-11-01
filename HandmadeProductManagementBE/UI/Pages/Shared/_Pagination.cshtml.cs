@@ -7,5 +7,7 @@ namespace UI.Pages.Shared
     {
         public int PageNumber { get; set; }
         public int PageSize { get; set; }
+        public bool HasNextPage { get; set; } = true;
+        public string CurrentFilter { get; set; } = string.Empty;
     }
 }

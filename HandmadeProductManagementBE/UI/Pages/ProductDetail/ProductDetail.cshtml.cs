@@ -1,9 +1,13 @@
 ﻿using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Core.Common;
+using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.Core.Store;
 using HandmadeProductManagement.ModelViews.OrderDetailModelViews;
 using HandmadeProductManagement.ModelViews.ProductDetailModelViews;
 using HandmadeProductManagement.ModelViews.ProductModelViews;
+using HandmadeProductManagement.ModelViews.ReviewModelViews;
+using HandmadeProductManagement.ModelViews.ShopModelViews;
+using HandmadeProductManagement.ModelViews.UserModelViews;
 using HandmadeProductManagement.ModelViews.VariationModelViews;
 using HandmadeProductManagement.ModelViews.VariationOptionModelViews;
 using Microsoft.AspNetCore.Mvc;
@@ -24,7 +28,12 @@ namespace UI.Pages.ProductDetail
         public ProductDetailResponseModel? productDetail { get; set; }
         public IList<VariationDto> Variations { get; set; } = new List<VariationDto>();
         public IList<VariationWithOptionsDto> VariationOptions { get; set; } = new List<VariationWithOptionsDto>();
-        public async Task OnGet(string id)
+        public IList<ReviewModel> Reviews { get; set; } = new List<ReviewModel>();
+        public int PageNumber { get; set; } = 1;
+        public int TotalPages { get; set; }
+        public IList<UserResponseModel> Users { get; set; } = new List<UserResponseModel>();
+        public IList<ShopResponseModel> Shops { get; set; } = new List<ShopResponseModel>();
+        public async Task<PageResult> OnGet(string id, int pageNumber = 1, int pageSize = 10)
         {
             string productId = id;
 
@@ -75,6 +84,36 @@ namespace UI.Pages.ProductDetail
             {
                 ModelState.AddModelError(string.Empty, "Không thể lấy thông tin chi tiết sản phẩm hoặc categoryID.");
             }
+
+            PageNumber = pageNumber;
+
+            var reviewResponse = await _apiResponseHelper.GetAsync<IList<ReviewModel>>($"{Constants.ApiBaseUrl}/api/review/product/{productId}?pageNumber={pageNumber}&pageSize={pageSize}");
+
+            if (response.StatusCode == StatusCodeHelper.OK && response.Data != null)
+            {
+                Reviews = reviewResponse.Data;
+                var totalPagesResponse = await _apiResponseHelper.GetAsync<int>($"{Constants.ApiBaseUrl}/api/review/totalpages?pageSize={pageSize}");
+                if (totalPagesResponse.StatusCode == StatusCodeHelper.OK)
+                {
+                    TotalPages = totalPagesResponse.Data;
+                }
+            }
+
+            // Fetch all Users
+            var userResponse = await _apiResponseHelper.GetAsync<IList<UserResponseModel>>($"{Constants.ApiBaseUrl}/api/users");
+            if (userResponse.StatusCode == StatusCodeHelper.OK)
+            {
+                Users = userResponse.Data ?? new List<UserResponseModel>(); // Fallback to empty list if null
+            }
+
+            // Fetch all Shops
+            var shopResponse = await _apiResponseHelper.GetAsync<IList<ShopResponseModel>>($"{Constants.ApiBaseUrl}/api/shop/get-all");
+            if (shopResponse.StatusCode == StatusCodeHelper.OK)
+            {
+                Shops = shopResponse.Data ?? new List<ShopResponseModel>();  // Fallback to empty list if null;
+            }
+
+            return Page();
         }
 
     }

@@ -73,18 +73,6 @@ namespace HandmadeProductManagement.Services.Service
                 );
             }
 
-            // Check if the variation name already exists for the given category
-            var variationNameExists = await _unitOfWork.GetRepository<Variation>()
-                .Entities.AnyAsync(v => v.Name == variationForCreation.Name && v.CategoryId == variationForCreation.CategoryId);
-
-            if (variationNameExists)
-            {
-                throw new BaseException.BadRequestException(
-                    StatusCodeHelper.BadRequest.ToString(),
-                    Constants.ErrorMessageDuplicateVariationName
-                );
-            }
-
             var variationEntity = _mapper.Map<Variation>(variationForCreation);
 
             variationEntity.CreatedBy = userId;

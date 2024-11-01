@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿@using HandmadeProductManagement.ModelViews.NotificationModelViews
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -8,9 +9,35 @@
     <link rel="stylesheet" href="~/css/output.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper/swiper-bundle.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/swiper/swiper-bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        .custom-dropdown-width {
+            min-width: 400px !important; /* Đặt chiều rộng tối thiểu là 400px */
+            max-width: 600px !important; /* Đặt chiều rộng tối đa là 600px */
+        }
+    </style>
+
 </head>
 <body class="bg-gray-100">
+    @using Microsoft.AspNetCore.Http
+    @using System.IdentityModel.Tokens.Jwt
 
+    @{
+        string getRole(string token)
+        {
+            var handler = new JwtSecurityTokenHandler();
+            var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
+            var role = jsonToken?.Claims.FirstOrDefault(c => c.Type == "role")?.Value;
+
+            if (role == "Admin") return "Admin";
+            if (role == "Seller") return "Seller";
+            if (role == "Customer") return "Customer";
+            return null;
+        }
+
+        var token = Context.Session.GetString("Token");
+        var userRole = token != null ? getRole(token) : null;
+    }
     <!-- Header -->
     <header class="bg-white shadow">
         <nav class="container mx-auto flex items-center justify-between py-4">
@@ -19,23 +46,37 @@
                 <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Index">Home</a>
                 <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Privacy">Privacy</a>
                 <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Product/ProductList">Product</a>
-                <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Product/ProductSeller">ProductSeller</a>
-                <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Order/OrderHistory">Order</a>
-                <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Seller/Shop">My Shop</a>
-                <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Dashboard/Dashboard">Dashboard</a>
-                <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Promotion/Index">Promotion</a>
-                <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Seller/OrderManagement">OrderManagement</a>
-                <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Checkout/Index">Checkout</a>
 
-                <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/User/User">ManageUser</a>
-                @await Component.InvokeAsync("CategoryMenu")
-
-                <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Review/Index">Reviews</a>
-                @using Microsoft.AspNetCore.Http
-
-                @{
-                    var token = Context.Session.GetString("Token");
+                <!-- Admin-Only Links -->
+                @if (userRole == "Admin")
+                {
+                    <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Dashboard/Dashboard">Dashboard</a>
+                    <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/User/User">Manage Users</a>
+                    <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Promotion/Index">Promotion</a>
                 }
+
+                <!-- Seller-Only Links -->
+                @if (userRole == "Seller")
+                {
+                    <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Product/ProductSeller">Product Seller</a>
+                    <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Seller/Shop">My Shop</a>
+                    <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Seller/OrderManagement">Order Management</a>
+                    <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Review/Index">Reviews</a>
+                    <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Order/OrderHistory">Order History</a>
+                    <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Checkout/Index">Checkout</a>
+                }
+
+                <!-- Customer Links -->
+                @if (userRole == "Customer")
+                {
+                    <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Order/OrderHistory">Order History</a>
+                    <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Checkout/Index">Checkout</a>
+                }
+
+                @using Microsoft.AspNetCore.Http
+                @using System.IdentityModel.Tokens.Jwt
+                
+ 
                 @if (Context.Session.GetString("Token") != null)
                 {
                     <!-- User Menu Dropdown -->
@@ -45,7 +86,6 @@
                             Welcome, @Context.Session.GetString("UserName")
                             <i class="fa fa-caret-down ml-2"></i>
                         </button>
-
                         <!-- Dropdown menu -->
                         <div class="group-hover:block absolute right-0 z-50 hidden w-44 origin-top-right rounded-md bg-white shadow-lg">
                             <div class="py-1">
@@ -56,6 +96,13 @@
                                 </form>
                             </div>
                         </div>
+                    </div>
+                    <!-- Notification Bell Icon and Dropdown (separate from User Menu) -->
+                    <div class="relative inline-block ml-4">
+                        <!-- Notification Button -->
+                        
+
+                        @await Component.InvokeAsync("NotificationList")
                     </div>
                 }
                 else
@@ -85,6 +132,31 @@
     <!-- Scripts -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <script>
+
+        // Toggle dropdown visibility
+        document.getElementById("notification-button").addEventListener("click", function (event) {
+            event.stopPropagation();
+            const dropdown = document.getElementById("notificationDropdown");
+            dropdown.classList.toggle("hidden");
+
+            // Fetch notifications only if dropdown is opened
+            if (!dropdown.classList.contains("hidden")) {
+                fetchNotifications();
+            }
+        });
+        // Close dropdown when clicking outside
+        window.addEventListener("click", function () {
+            const dropdown = document.getElementById("notificationDropdown");
+            if (!dropdown.classList.contains("hidden")) {
+                dropdown.classList.add("hidden");
+            }
+        });
+
+    </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
+
+

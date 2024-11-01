@@ -14,6 +14,97 @@
     </div>
 </div>
 
+<div class="search-filter">
+    <form method="get" class="flex items-center space-x-4">
+        <input class="rounded-md border border-gray-300 p-2" type="text" name="Name" placeholder="Search by name" value="@Request.Query["Name"]" onchange="this.form.submit();" />
+        <select name="CategoryId" class="rounded-md border border-gray-300 p-2">
+            <option value="">Select Category</option>
+            @if (Model.Categories != null && Model.Categories.Any())
+            {
+                foreach (var category in Model.Categories)
+                {
+                    var isSelected = Request.Query["CategoryId"] == category.Id.ToString();
+                    if (isSelected)
+                    {
+                        <option value="@category.Id" selected>@category.Name</option>
+                    }
+                    else
+                    {
+                        <option value="@category.Id">@category.Name</option>
+                    }
+                }
+            }
+        </select>
+        @{
+            var selectedStatus = Request.Query["Status"].ToString();
+        }
+
+        <select name="Status" class="rounded-md border border-gray-300 p-2">
+            @if (string.IsNullOrEmpty(selectedStatus))
+            {
+                <option value="" selected>Select Status</option>
+            }
+            else
+            {
+                <option value="">Select Status</option>
+            }
+
+            @if (selectedStatus == "Available")
+            {
+                <option value="Available" selected>Available</option>
+            }
+            else
+            {
+                <option value="Available">Available</option>
+            }
+
+            @if (selectedStatus == "OutOfStock")
+            {
+                <option value="OutOfStock" selected>Out Of Stock</option>
+            }
+            else
+            {
+                <option value="OutOfStock">Out Of Stock</option>
+            }
+        </select>
+        <input class="rounded-md border border-gray-300 p-2" type="number" name="MinRating" placeholder="Min Rating" min="0" max="5" value="@Request.Query["MinRating"]" />
+
+        <div class="flex items-center space-x-4">
+            <label class="flex items-center">
+                <input type="radio" id="sortByPrice" name="SortOption" value="SortByPrice"
+                @(Request.Query["SortOption"] == "SortByPrice" ? "checked" : "") onchange="this.form.submit();" />
+                <span class="ml-2">Sort by Price</span>
+            </label>
+
+            <label class="flex items-center">
+                <input type="radio" id="sortByRating" name="SortOption" value="SortByRating"
+                @(Request.Query["SortOption"] == "SortByRating" ? "checked" : "") onchange="this.form.submit();" />
+                <span class="ml-2">Sort by Rating</span>
+            </label>
+        </div>
+
+
+
+        <label class="flex items-center">
+            <span class="mr-2">Sort Descending:</span>
+            <input type="checkbox" name="sortDescending" value="true"
+            @(Request.Query["SortDescending"] == "true" ? "checked" : "") onchange="this.form.submit();" />
+        </label>
+
+        <button type="submit" class="rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600">Search</button>
+    </form>
+</div>
+
+<!-- Product List -->
+@if (Model.Products != null && Model.Products.Any())
+{
+    @await Html.PartialAsync("Shared/_ProductList", Model.Products)
+}
+else
+{
+    <p>No products found matching your criteria.</p>
+}
+
 @section Scripts {
     <!-- Swiper Initialization for Selling Products -->
     <script>
@@ -51,26 +142,31 @@
     </script>
 
     <script>
-        // Ensure the token is properly encoded to prevent XSS attacks
-        var token = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Token));
-                        console.log("Token:", token); // You can remove this line after verifying
-
-        // Example usage of the token in an API request
-        /*
-        fetch('/api/your-endpoint', {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
+        document.getElementById('sortByPrice').addEventListener('change', function () {
+            if (this.checked) {
+                document.getElementById('sortByRating').checked = false;
             }
-        })
-        .then(response => response.json())
-        .then(data => {
-            console.log(data);
-        })
-        .catch(error => console.error('Error:', error));
-        */
+        });
+
+        document.getElementById('sortByRating').addEventListener('change', function () {
+            if (this.checked) {
+                document.getElementById('sortByPrice').checked = false;
+            }
+        });
     </script>
-
-
+    <script>
+        function viewProduct(productId) {
+            window.location.href = `/ProductDetail/ProductDetail?id=${productId}`;
+        }
+    </script>
 }
+
+@{
+    var paginationModel = new UI.Pages.Shared.PaginationModel
+            {
+                PageNumber = Model.PageNumber,
+                PageSize = Model.PageSize
+            };
+}
+
+<partial name="~/Pages/Shared/_Pagination.cshtml" model="paginationModel" />
