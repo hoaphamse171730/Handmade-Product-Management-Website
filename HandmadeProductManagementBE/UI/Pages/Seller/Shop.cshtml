@@ -125,58 +125,14 @@
 </div>
 
 <!-- Product List -->
-<div class="grid-cols-1 mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-    @if (Model.Products != null && Model.Products.Any())
-    {
-        foreach (var product in Model.Products)
-        {
-            <div class="rounded-lg border p-4 shadow-md">
-                <div class="aspect-w-1 aspect-h-1 mb-4">
-                    @if (!string.IsNullOrEmpty(product.ProductImageUrl))
-                    {
-                        <img src="@product.ProductImageUrl" alt="@product.Name" class="h-48 w-full rounded-md object-cover" />
-                    }
-                    else
-                    {
-                        <div class="flex h-48 w-full items-center justify-center rounded-md bg-gray-200">
-                            <span class="text-gray-500">No image</span>
-                        </div>
-                    }
-                </div>
-                <h3 class="text-lg font-semibold">@product.Name</h3>
-                @*                 <p class="mb-2 text-sm text-gray-600">@product.Category?.Name</p>
-        *@                <p class="font-medium text-gray-800">$@product.LowestPrice.ToString("F2")</p>
-                <div class="mt-2 flex items-center">
-                    <span class="text-yellow-400">★</span>
-                    <span class="ml-1">@product.Rating.ToString("F1")</span>
-                    @*                     <span class="ml-2 text-gray-500">(@product.ReviewCount reviews)</span>
-            *@
-                </div>
-                <div class="mt-3 flex items-center justify-between">
-                    <span class="rounded-full px-2 py-1 text-sm @(product.Status == "Available" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800")">
-                        @product.Status
-                    </span>
-                    <div class="flex space-x-2">
-                        <button onclick="editProduct('@product.Id')"
-                                class="rounded-md bg-blue-500 px-3 py-1 text-white hover:bg-blue-600">
-                            Edit
-                        </button>
-                        <button onclick="deleteProduct('@product.Id')"
-                                class="rounded-md bg-red-500 px-3 py-1 text-white hover:bg-red-600">
-                            Delete
-                        </button>
-                    </div>
-                </div>
-            </div>
-        }
-    }
-    else
-    {
-        <div class="col-span-full py-8 text-center">
-            <p class="text-gray-500">No products found.</p>
-        </div>
-    }
-</div>
+@if (Model.Products != null && Model.Products.Any())
+{
+    @await Html.PartialAsync("Shared/_ProductList", Model.Products)
+}
+else
+{
+    <p>No products found matching your criteria.</p>
+}
 
 @{
     var paginationModel = new UI.Pages.Shared.PaginationModel
@@ -308,6 +264,24 @@
 </div>
 
 @section Scripts {
+    <script>
+        document.getElementById('sortByPrice').addEventListener('change', function () {
+            if (this.checked) {
+                document.getElementById('sortByRating').checked = false;
+            }
+        });
+
+        document.getElementById('sortByRating').addEventListener('change', function () {
+            if (this.checked) {
+                document.getElementById('sortByPrice').checked = false;
+            }
+        });
+    </script>
+    <script>
+        function viewProduct(productId) {
+            window.location.href = `/ProductDetail/ProductDetail?id=${productId}`;
+        }
+    </script>
     <script>
         const antiForgeryToken = document.querySelector('input[name="__RequestVerificationToken"]').value;
 
