@@ -1,3 +1,4 @@
+using GraphQLParser;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Common;
 using HandmadeProductManagement.Core.Constants;
@@ -37,12 +38,18 @@ namespace UI.Pages.Seller
         public List<CategoryDto>? Categories { get; private set; }
         public int PageNumber { get; set; } = 1;
         public int PageSize { get; set; } = 12;
+        [BindProperty]
+        public string ShopName { get; set; } = string.Empty;
+
+        [BindProperty]
+        public string ShopDescription { get; set; } = string.Empty;
         public List<VariationDto>? Variations { get; set; }
         [BindProperty]
         public ProductForCreationDto NewProduct { get; set; } = new();
 
         [BindProperty]
         public List<IFormFile> ProductImages { get; set; } = new();
+        public string Token { get; set; }
 
         [BindProperty]
         public VariationForCreationDto NewVariation { get; set; } = new VariationForCreationDto
@@ -87,6 +94,114 @@ namespace UI.Pages.Seller
 
 
         }
+
+        public async Task<IActionResult> OnPostCreateShopAsync()
+        {
+            try
+            {
+                var shopCreationDto = new CreateShopDto
+                {
+                    Name = ShopName,
+                    Description = ShopDescription
+                };
+
+                Token = HttpContext.Session.GetString("Token");
+                var client = _httpClientFactory.CreateClient();
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Token);
+
+                var response = await client.PostAsJsonAsync($"{Constants.ApiBaseUrl}/api/shop", shopCreationDto);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var content = await response.Content.ReadAsStringAsync();
+                    var options = new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
+                    };
+                    var baseResponse = JsonSerializer.Deserialize<BaseResponse<bool>>(content, options);
+
+                    if (baseResponse != null && baseResponse.StatusCode == StatusCodeHelper.OK)
+                    {
+                        return RedirectToPage("/Seller/Shop");
+                    }
+
+                    ErrorMessage = "Failed to create shop.";
+                    ErrorDetail = baseResponse?.Message;
+                    ModelState.AddModelError(string.Empty, baseResponse?.Message ?? "Error updating user information.");
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, "An error occurred while updating user information.");
+                }
+            }
+            catch (BaseException.ErrorException ex)
+            {
+                ErrorMessage = ex.ErrorDetail.ErrorCode;
+                ErrorDetail = ex.ErrorDetail.ErrorMessage?.ToString();
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = "An unexpected error occurred.";
+                _logger.LogError(ex, "Shop creation failed.");
+            }
+
+            return Page();
+        }
+
+        public async Task<IActionResult> OnPostUpdateShopAsync()
+        {
+            try
+            {
+                var shopUpdateDto = new CreateShopDto
+                {
+                    Name = ShopName,
+                    Description = ShopDescription
+                };
+
+                Token = HttpContext.Session.GetString("Token");
+                var client = _httpClientFactory.CreateClient();
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Token);
+
+                // Make the PUT request to the API to update the shop
+                var response = await client.PutAsJsonAsync($"{Constants.ApiBaseUrl}/api/shop/update", shopUpdateDto);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var content = await response.Content.ReadAsStringAsync();
+                    var options = new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
+                    };
+                    var baseResponse = JsonSerializer.Deserialize<BaseResponse<bool>>(content, options);
+
+                    if (baseResponse != null && baseResponse.StatusCode == StatusCodeHelper.OK)
+                    {
+                        return RedirectToPage("/Seller/Shop");
+                    }
+
+                    ErrorMessage = "Failed to update shop.";
+                    ErrorDetail = baseResponse?.Message;
+                    ModelState.AddModelError(string.Empty, baseResponse?.Message ?? "Error updating shop information.");
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, "An error occurred while updating shop information.");
+                }
+            }
+            catch (BaseException.ErrorException ex)
+            {
+                ErrorMessage = ex.ErrorDetail.ErrorCode;
+                ErrorDetail = ex.ErrorDetail.ErrorMessage?.ToString();
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = "An unexpected error occurred.";
+                _logger.LogError(ex, "Shop update failed.");
+            }
+
+            return Page();
+        }
+
 
         private async Task<ShopResponseModel> GetCurrentUserShop()
         {

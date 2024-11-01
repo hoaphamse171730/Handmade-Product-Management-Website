@@ -5,8 +5,6 @@
     ViewData["Title"] = "My Shop";
 }
 
-<h1 class="text-3xl font-bold mb-4">Product List</h1>
-
 @{
     var errorModel = new ErrorMessageModel
             {
@@ -19,7 +17,57 @@
     <partial name="_ErrorMessage" model="errorModel" />
 }
 
-<div class="w-full bg-white px-8 py-6">
+@if (Model.ErrorMessage == "NotFoundException")
+{
+    <div class="flex h-screen flex-col items-center justify-center text-center">
+        <h2 class="mb-4 text-6xl font-semibold">Open Your Own Shop Today!</h2>
+        <button onclick="openShopModal()" class="rounded-lg bg-blue-500 px-6 py-3 font-bold text-white hover:bg-blue-600">
+            Open Your Shop
+        </button>
+    </div>
+
+    <!-- Shop creation modal -->
+    <div id="shopModal" class="fixed inset-0 flex hidden items-center justify-center bg-gray-900 bg-opacity-50">
+        <div class="w-full max-w-md rounded-lg bg-white p-8">
+            <h3 class="mb-4 text-xl font-semibold">Create Your Shop</h3>
+            <form method="post" id="shopForm" asp-page-handler="CreateShop">
+                <div class="mb-4">
+                    <label class="mb-2 block font-bold text-gray-700" for="shopName">Shop Name</label>
+                    <input type="text" id="shopName" name="ShopName" class="w-full rounded-md border border-gray-300 p-2" required />
+                </div>
+                <div class="mb-4">
+                    <label class="mb-2 block font-bold text-gray-700" for="shopDescription">Description</label>
+                    <textarea id="shopDescription" name="ShopDescription" class="w-full rounded-md border border-gray-300 p-2" required></textarea>
+                </div>
+                <div class="flex justify-end space-x-4">
+                    <button type="button" onclick="closeShopModal()" class="rounded-md bg-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-400">
+                        Cancel
+                    </button>
+                    <button type="submit" class="rounded-md bg-green-500 px-4 py-2 text-white hover:bg-green-600">
+                        Create Shop
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openShopModal() {
+            document.getElementById("shopModal").classList.remove("hidden");
+        }
+        function closeShopModal() {
+            document.getElementById("shopModal").classList.add("hidden");
+        }
+    </script>
+}
+else
+{
+    <div class="relative w-full bg-white px-8 py-6">
+    <!-- Update Button -->
+    <button onclick="openUpdateModal()" class="absolute right-4 top-4 rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600">
+        Update Shop Info
+    </button>
+
     <div class="flex">
         <!-- Left half for Shop Name -->
         <div class="flex w-1/2 items-center justify-center">
@@ -50,114 +98,145 @@
         <h2 class="text-xl font-semibold">Description</h2>
         <span class="text-gray-600">@Model.Shop.Description</span>
     </div>
-</div>
+    </div>
 
-<h1 class="mb-4 mt-4 text-3xl font-bold">Product List</h1>
+   <!-- Update Shop Modal -->
+    <div id="updateShopModal" class="fixed inset-0 z-50 flex hidden items-center justify-center bg-gray-900 bg-opacity-50">
+        <div class="w-full max-w-md rounded-lg bg-white p-8">
+            <h3 class="mb-4 text-xl font-semibold">Update Shop Info</h3>
+            <form method="post" id="updateShopForm" asp-page-handler="UpdateShop">
+                <div class="mb-4">
+                    <label class="mb-2 block font-bold text-gray-700" for="updateShopName">Shop Name</label>
+                    <input type="text" id="updateShopName" name="ShopName" class="w-full rounded-md border border-gray-300 p-2" value="@Model.Shop.Name" required />
+                </div>
+                <div class="mb-4">
+                    <label class="mb-2 block font-bold text-gray-700" for="updateShopDescription">Description</label>
+                    <textarea id="updateShopDescription" name="ShopDescription" class="w-full rounded-md border border-gray-300 p-2" required>@Model.Shop.Description</textarea>
+                </div>
+                <div class="flex justify-end space-x-4">
+                    <button type="button" onclick="closeUpdateModal()" class="rounded-md bg-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-400">
+                        Cancel
+                    </button>
+                    <button type="submit" class="rounded-md bg-green-500 px-4 py-2 text-white hover:bg-green-600">
+                        Update Shop
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-<div class="search-filter">
-    <form method="get" class="flex items-center space-x-4">
-        <input class="rounded-md border border-gray-300 p-2" type="text" name="Name" placeholder="Search by name" value="@Request.Query["Name"]" onchange="this.form.submit();" />
-        <select name="CategoryId" class="rounded-md border border-gray-300 p-2">
-            <option value="">Select Category</option>
-            @if (Model.Categories != null && Model.Categories.Any())
-            {
-                foreach (var category in Model.Categories)
-                {
-                    var isSelected = Request.Query["CategoryId"] == category.Id.ToString();
-                    if (isSelected)
-                    {
-                        <option value="@category.Id" selected>@category.Name</option>
-                    }
-                    else
-                    {
-                        <option value="@category.Id">@category.Name</option>
-                    }
-                }
-            }
-        </select>
-        @{
-            var selectedStatus = Request.Query["Status"].ToString();
+    <script>
+        function openUpdateModal() {
+            document.getElementById("updateShopModal").classList.remove("hidden");
         }
 
-        <select name="Status" class="rounded-md border border-gray-300 p-2">
-            @if (string.IsNullOrEmpty(selectedStatus))
-            {
-                <option value="" selected>Select Status</option>
-            }
-            else
-            {
-                <option value="">Select Status</option>
+        function closeUpdateModal() {
+            document.getElementById("updateShopModal").classList.add("hidden");
+        }
+    </script>
+
+    <h1 class="mb-4 mt-4 text-3xl font-bold">Product List</h1>
+
+    <div class="search-filter">
+        <form method="get" class="flex items-center space-x-4">
+            <input class="rounded-md border border-gray-300 p-2" type="text" name="Name" placeholder="Search by name" value="@Request.Query["Name"]" onchange="this.form.submit();" />
+            <select name="CategoryId" class="rounded-md border border-gray-300 p-2">
+                <option value="">Select Category</option>
+                @if (Model.Categories != null && Model.Categories.Any())
+                {
+                    foreach (var category in Model.Categories)
+                    {
+                        var isSelected = Request.Query["CategoryId"] == category.Id.ToString();
+                        if (isSelected)
+                        {
+                            <option value="@category.Id" selected>@category.Name</option>
+                        }
+                        else
+                        {
+                            <option value="@category.Id">@category.Name</option>
+                        }
+                    }
+                }
+            </select>
+            @{
+                var selectedStatus = Request.Query["Status"].ToString();
             }
 
-            @if (selectedStatus == "Available")
-            {
-                <option value="Available" selected>Available</option>
-            }
-            else
-            {
-                <option value="Available">Available</option>
-            }
+            <select name="Status" class="rounded-md border border-gray-300 p-2">
+                @if (string.IsNullOrEmpty(selectedStatus))
+                {
+                    <option value="" selected>Select Status</option>
+                }
+                else
+                {
+                    <option value="">Select Status</option>
+                }
 
-            @if (selectedStatus == "OutOfStock")
-            {
-                <option value="OutOfStock" selected>Out Of Stock</option>
-            }
-            else
-            {
-                <option value="OutOfStock">Out Of Stock</option>
-            }
-        </select>
-        <input class="rounded-md border border-gray-300 p-2" type="number" name="MinRating" placeholder="Min Rating" min="0" max="5" value="@Request.Query["MinRating"]" />
+                @if (selectedStatus == "Available")
+                {
+                    <option value="Available" selected>Available</option>
+                }
+                else
+                {
+                    <option value="Available">Available</option>
+                }
 
-        <div class="flex items-center space-x-4">
+                @if (selectedStatus == "OutOfStock")
+                {
+                    <option value="OutOfStock" selected>Out Of Stock</option>
+                }
+                else
+                {
+                    <option value="OutOfStock">Out Of Stock</option>
+                }
+            </select>
+            <input class="rounded-md border border-gray-300 p-2" type="number" name="MinRating" placeholder="Min Rating" min="0" max="5" value="@Request.Query["MinRating"]" />
+
+            <div class="flex items-center space-x-4">
+                <label class="flex items-center">
+                    <input type="radio" id="sortByPrice" name="SortOption" value="SortByPrice"
+                    @(Request.Query["SortOption"] == "SortByPrice" ? "checked" : "") onchange="this.form.submit();" />
+                    <span class="ml-2">Sort by Price</span>
+                </label>
+
+                <label class="flex items-center">
+                    <input type="radio" id="sortByRating" name="SortOption" value="SortByRating"
+                    @(Request.Query["SortOption"] == "SortByRating" ? "checked" : "") onchange="this.form.submit();" />
+                    <span class="ml-2">Sort by Rating</span>
+                </label>
+            </div>
+
+
+
             <label class="flex items-center">
-                <input type="radio" id="sortByPrice" name="SortOption" value="SortByPrice"
-                @(Request.Query["SortOption"] == "SortByPrice" ? "checked" : "") onchange="this.form.submit();" />
-                <span class="ml-2">Sort by Price</span>
+                <span class="mr-2">Sort Descending:</span>
+                <input type="checkbox" name="sortDescending" value="true"
+                @(Request.Query["SortDescending"] == "true" ? "checked" : "") onchange="this.form.submit();" />
             </label>
 
-            <label class="flex items-center">
-                <input type="radio" id="sortByRating" name="SortOption" value="SortByRating"
-                @(Request.Query["SortOption"] == "SortByRating" ? "checked" : "") onchange="this.form.submit();" />
-                <span class="ml-2">Sort by Rating</span>
-            </label>
-        </div>
+            <button type="submit" class="rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600">Search</button>
+            <button type="button" onclick="openAddProductModal()"
+                    class="rounded-md bg-green-500 px-4 py-2 text-white hover:bg-green-600">
+                Add Product
+            </button>
+        </form>
+    </div>
 
+    @if (Model.Products != null && Model.Products.Any())
+    {
+        @await Html.PartialAsync("Shared/_ProductList", Model.Products)
+    }
+    else
+    {
+        <p>No products found matching your criteria.</p>
+    }
 
-
-        <label class="flex items-center">
-            <span class="mr-2">Sort Descending:</span>
-            <input type="checkbox" name="sortDescending" value="true"
-            @(Request.Query["SortDescending"] == "true" ? "checked" : "") onchange="this.form.submit();" />
-        </label>
-
-        <button type="submit" class="rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600">Search</button>
-        <button type="button" onclick="openAddProductModal()"
-                class="rounded-md bg-green-500 px-4 py-2 text-white hover:bg-green-600">
-            Add Product
-        </button>
-    </form>
-</div>
-
-<!-- Product List -->
-@if (Model.Products != null && Model.Products.Any())
-{
-    @await Html.PartialAsync("Shared/_ProductList", Model.Products)
+    <partial name="~/Pages/Shared/_Pagination.cshtml" model="new UI.Pages.Shared.PaginationModel
+    {
+        PageNumber = Model.PageNumber,
+        PageSize = Model.PageSize
+    }" />
 }
-else
-{
-    <p>No products found matching your criteria.</p>
-}
-
-@{
-    var paginationModel = new UI.Pages.Shared.PaginationModel
-            {
-                PageNumber = Model.PageNumber,
-                PageSize = Model.PageSize
-            };
-}
-
-<partial name="~/Pages/Shared/_Pagination.cshtml" model="paginationModel" />
 
 <!-- Add Product Modal -->
 <div id="addProductModal" class="modal fixed inset-0 hidden h-full w-full overflow-y-auto bg-gray-600 bg-opacity-50">
