@@ -247,18 +247,22 @@ namespace HandmadeProductManagement.Services.Service
             // Retrieve order details with product config and variation option value
             var orderDetails = await _unitOfWork.GetRepository<OrderDetail>().Entities
                 .Where(od => od.OrderId == orderId && !od.DeletedTime.HasValue)
-                .Select(od => new OrderInDetailDto
-                {
-                    ProductId = od.ProductItem != null && od.ProductItem.Product != null ? od.ProductItem.Product.Id : Guid.Empty.ToString(),
-                    ProductName = od.ProductItem != null && od.ProductItem.Product != null ? od.ProductItem.Product.Name : "",
-                    ProductQuantity = od.ProductQuantity,
-                    DiscountPrice = od.DiscountPrice,
-                    VariationOptionValues = _unitOfWork.GetRepository<ProductConfiguration>().Entities
-                        .Where(pc => pc.ProductItemId == od.ProductItemId && pc.VariationOption != null)
-                        .Select(pc => pc.VariationOption!.Value)
-                        .ToList()
-                })
+                .Include(od => od.ProductItem!)
+                .ThenInclude(pi => pi.Product!) 
+                .ThenInclude(p => p.Shop)
                 .ToListAsync();
+
+            var orderInDetailDtos = orderDetails.Select(od => new OrderInDetailDto
+            {
+                ProductId = od.ProductItem != null && od.ProductItem.Product != null ? od.ProductItem.Product.Id : Guid.Empty.ToString(),
+                ProductName = od.ProductItem != null && od.ProductItem.Product != null ? od.ProductItem.Product.Name : "",
+                ProductQuantity = od.ProductQuantity,
+                DiscountPrice = od.DiscountPrice,
+                VariationOptionValues = _unitOfWork.GetRepository<ProductConfiguration>().Entities
+                    .Where(pc => pc.ProductItemId == od.ProductItemId && pc.VariationOption != null)
+                    .Select(pc => pc.VariationOption!.Value)
+                    .ToList(),
+            }).ToList();
 
             if (!orderDetails.Any())
             {
@@ -266,7 +270,7 @@ namespace HandmadeProductManagement.Services.Service
             }
 
             // Fetch product images and set the first image URL
-            foreach (var orderDetail in orderDetails)
+            foreach (var orderDetail in orderInDetailDtos)
             {
                 var images = await _productImageService.GetProductImageById(orderDetail.ProductId);
                 if (images != null && images.Count > 0)
@@ -274,6 +278,8 @@ namespace HandmadeProductManagement.Services.Service
                     orderDetail.ProductImage = images.First().Url;
                 }
             }
+            
+            var shopName = orderDetails.FirstOrDefault()?.ProductItem?.Product?.Shop?.Name;
 
             return new OrderWithDetailDto
             {
@@ -285,9 +291,10 @@ namespace HandmadeProductManagement.Services.Service
                 Address = order.Address,
                 CustomerName = order.CustomerName,
                 Phone = order.Phone,
+                ShopName = shopName,
                 Note = order.Note,
                 CancelReasonId = order.CancelReasonId,
-                OrderDetails = orderDetails
+                OrderDetails = orderInDetailDtos
             };
         }
 
