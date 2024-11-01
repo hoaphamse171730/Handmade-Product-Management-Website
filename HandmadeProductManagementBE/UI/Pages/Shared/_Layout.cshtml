@@ -19,7 +19,25 @@
 
 </head>
 <body class="bg-gray-100">
+    @using Microsoft.AspNetCore.Http
+    @using System.IdentityModel.Tokens.Jwt
 
+    @{
+        string getRole(string token)
+        {
+            var handler = new JwtSecurityTokenHandler();
+            var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
+            var role = jsonToken?.Claims.FirstOrDefault(c => c.Type == "role")?.Value;
+
+            if (role == "Admin") return "Admin";
+            if (role == "Seller") return "Seller";
+            if (role == "Customer") return "Customer";
+            return null;
+        }
+
+        var token = Context.Session.GetString("Token");
+        var userRole = token != null ? getRole(token) : null;
+    }
     <!-- Header -->
     <header class="bg-white shadow">
         <nav class="container mx-auto flex items-center justify-between py-4">
@@ -28,24 +46,37 @@
                 <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Index">Home</a>
                 <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Privacy">Privacy</a>
                 <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Product/ProductList">Product</a>
-                <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Product/ProductSeller">ProductSeller</a>
-                <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Order/OrderHistory">Order</a>
-                <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Seller/Shop">My Shop</a>
-                <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Dashboard/Dashboard">Dashboard</a>
-                <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Promotion/Index">Promotion</a>
-                <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Seller/OrderManagement">OrderManagement</a>
-                <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Checkout/Index">Checkout</a>
 
-                <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/User/User">ManageUser</a>
-               
-                @await Component.InvokeAsync("CategoryMenu")
-
-                <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Review/Index">Reviews</a>
-                @using Microsoft.AspNetCore.Http
-
-                @{
-                    var token = Context.Session.GetString("Token");
+                <!-- Admin-Only Links -->
+                @if (userRole == "Admin")
+                {
+                    <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Dashboard/Dashboard">Dashboard</a>
+                    <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/User/User">Manage Users</a>
+                    <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Promotion/Index">Promotion</a>
                 }
+
+                <!-- Seller-Only Links -->
+                @if (userRole == "Seller")
+                {
+                    <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Product/ProductSeller">Product Seller</a>
+                    <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Seller/Shop">My Shop</a>
+                    <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Seller/OrderManagement">Order Management</a>
+                    <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Review/Index">Reviews</a>
+                    <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Order/OrderHistory">Order History</a>
+                    <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Checkout/Index">Checkout</a>
+                }
+
+                <!-- Customer Links -->
+                @if (userRole == "Customer")
+                {
+                    <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Order/OrderHistory">Order History</a>
+                    <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Checkout/Index">Checkout</a>
+                }
+
+                @using Microsoft.AspNetCore.Http
+                @using System.IdentityModel.Tokens.Jwt
+                
+ 
                 @if (Context.Session.GetString("Token") != null)
                 {
                     <!-- User Menu Dropdown -->
@@ -127,3 +158,5 @@
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
+
+
