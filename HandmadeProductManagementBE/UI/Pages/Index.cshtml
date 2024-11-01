@@ -14,8 +14,6 @@
     </div>
 </div>
 
-<h1 class="mb-4 mt-4 text-center text-5xl font-bold">Product List</h1>
-
 <div class="search-filter">
     <form method="get" class="flex items-center space-x-4">
         <input class="rounded-md border border-gray-300 p-2" type="text" name="Name" placeholder="Search by name" value="@Request.Query["Name"]" onchange="this.form.submit();" />
@@ -97,37 +95,10 @@
     </form>
 </div>
 
-<!-- Product Grid -->
+<!-- Product List -->
 @if (Model.Products != null && Model.Products.Any())
 {
-    <div class="py-16">
-        <div class="container mx-auto px-4">
-            <h2 class="mb-8 text-3xl font-bold">Introducing Our Latest Products</h2>
-
-            <!-- Responsive Grid Layout: 1 column on mobile, 2 columns on small screens, 4 columns on larger screens -->
-            <div class="grid-cols-1 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-                @foreach (var product in Model.Products)
-                {
-                    <div class="rounded-lg bg-white p-6 shadow-lg">
-                        <div class="relative h-48 overflow-hidden">
-                            <img class="h-full w-full object-cover" src="@product.ProductImageUrl" alt="@product.Name" />
-                            <div class="opacity-40 absolute inset-0 bg-black"></div>
-                            <div class="absolute inset-0 flex items-center justify-center">
-                                <button class="rounded-full bg-white px-6 py-2 font-bold text-gray-900 hover:bg-gray-300" onclick="viewProduct('@product.Id')">View Product</button>
-                            </div>
-                        </div>
-                        <h3 class="mt-4 text-xl font-bold text-gray-900">@product.Name</h3>
-                        <p class="mt-2 text-sm text-gray-500">@product.Description</p>
-                        <div class="mt-4 flex items-center justify-between">
-                            <span class="text-lg font-bold text-gray-900">₫@product.LowestPrice.ToString("N0")</span>
-                            <button class="rounded-full bg-gray-900 px-4 py-2 font-bold text-white hover:bg-gray-800">Add to Cart</button>
-                        </div>
-                        <div class="mt-2 text-sm text-gray-500">Rating: @product.Rating | Status: @product.Status</div>
-                    </div>
-                }
-            </div>
-        </div>
-    </div>
+    @await Html.PartialAsync("HomePage/_ProductList", Model.Products)
 }
 else
 {
@@ -168,28 +139,6 @@ else
                 prevEl: '.new-products-swiper .swiper-button-prev',
             },
         });
-    </script>
-
-    <script>
-        // Ensure the token is properly encoded to prevent XSS attacks
-        var token = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Token));
-                        console.log("Token:", token); // You can remove this line after verifying
-
-        // Example usage of the token in an API request
-        /*
-        fetch('/api/your-endpoint', {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            console.log(data);
-        })
-        .catch(error => console.error('Error:', error));
-        */
     </script>
 
     <script>
