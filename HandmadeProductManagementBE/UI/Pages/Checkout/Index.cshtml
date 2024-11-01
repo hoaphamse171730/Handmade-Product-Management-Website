@@ -1,4 +1,5 @@
 ﻿@page
+@using UI.Pages.Shared
 @model UI.Pages.Checkout.IndexModel
 @{
     ViewData["Title"] = "Checkout Page";
@@ -7,48 +8,57 @@
 <div class="mb-20 h-screen bg-gray-100">
     <div class="container mx-auto px-4">
         <h1 class="mb-4 text-4xl font-semibold">Checkout</h1>
+        
+@{
+    var errorModel = new ErrorMessageModel
+            {
+                ErrorMessage = Model.ErrorMessage,
+                ErrorDetail = Model.ErrorDetail
+            };
+}
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <partial name="_ErrorMessage" model="errorModel" />
+}
 
-        <form method="post" action="/Checkout/ProcessPayment">
-            <!-- Section Thông tin giao hàng -->
+        <form method="post">
+            <!-- Section: Shipping Info -->
             <div class="w-full rounded-t-lg bg-blue-700 px-4 py-2">
                 <h2 class="text-lg font-semibold text-white">Shipping Info</h2>
             </div>
-
             <div class="mb-8 rounded-lg bg-white p-6 shadow-md">
-                
-                <!-- Full Name and Phone Number in the same row -->
                 <div class="-mx-2 mb-4 flex flex-wrap">
                     <!-- Full Name -->
-                    <div class="mb-4 w-full px-2 md:w-1/2 md:mb-0">
+                    <div class="mb-4 w-full px-2 md:w-1/2">
                         <label for="fullName" class="mb-2 block text-sm font-medium">Full Name:</label>
-                        <input type="text" id="fullName" name="fullName"
-                               class="w-full rounded-lg border px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                               placeholder="Enter your full name"
-                               value="@Model.UserInfo.FullName" required
+                        <input type="text" id="fullName" name="fullName" class="w-full rounded-lg border px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                               placeholder="Enter your full name" value="@Model.UserInfo.FullName" required
                                pattern="^[\p{L}\sĐđ]+$" title="Please enter a valid full name (letters and spaces only).">
                     </div>
                     <!-- Phone Number -->
                     <div class="w-full px-2 md:w-1/2">
                         <label for="phoneNumber" class="mb-2 block text-sm font-medium">Phone Number:</label>
-                        <input type="tel" id="phoneNumber" name="phoneNumber"
-                               class="w-full rounded-lg border px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                               placeholder="Enter your phone number"
-                               value="@Model.UserInfo.PhoneNumber" required
+                        <input type="tel" id="phoneNumber" name="phoneNumber" class="w-full rounded-lg border px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                               placeholder="Enter your phone number" value="@Model.UserInfo.PhoneNumber" required
                                pattern="^0\d{9,10}$" title="Please enter a valid phone number (starting with 0 and containing 10-11 digits).">
                     </div>
                 </div>
-
                 <!-- Address -->
                 <div class="mb-4">
                     <label for="address" class="mb-2 block text-sm font-medium">Address:</label>
-                    <input type="text" id="address" name="address"
-                           class="w-full rounded-lg border px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                           placeholder="Enter delivery address"
-                           value="@Model.UserInfo.Address" required
-                           pattern="^[\p{L}\p{N}\s,\.Đđ]+$" title="Please enter a valid address (can include letters, numbers, spaces, commas, and periods).">
+                    <input type="text" id="address" name="address" class="w-full rounded-lg border px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                           placeholder="Enter delivery address" value="@Model.UserInfo.Address" required
+                           pattern="^[\p{L}\p{N}\s,\.Đđ]+$" title="Please enter a valid address (letters, numbers, spaces, commas, and periods allowed).">
+                </div>
+                <!-- Note -->
+                <div class="mb-4">
+                    <label for="note" class="mb-2 block text-sm font-medium">Note:</label>
+                    <input type="text" id="note" name="note" class="w-full rounded-lg border px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                           placeholder="Enter your note">
                 </div>
             </div>
 
+            <!-- Section: Cart Items -->
             @if (Model.CartItems != null && Model.CartItems.Any())
             {
                 <div class="flex flex-col gap-4 md:flex-row">
@@ -92,29 +102,30 @@
                             </div>
                         }
                     </div>
+
+                    <!-- Section: Payment Method and Summary -->
                     <div class="flex flex-col md:w-1/4">
                         <div class="mb-4">
                             <div class="w-full rounded-t-lg bg-blue-700 px-4 py-2">
                                 <h2 class="text-lg font-semibold text-white">Choose Payment Method</h2>
                             </div>
                             <div class="rounded-lg bg-white p-6 shadow-md">
-                                <div>
-                                    <div class="mb-4 flex items-center">
-                                        <input id="vnpay" type="radio" name="paymentMethod" value="vnpay" class="mr-2" required>
-                                        <label for="vnpay" class="flex items-center text-sm">
-                                            <img src="https://firebasestorage.googleapis.com/v0/b/handmade-product-bde7a.appspot.com/o/product-Image%2Fvnpay.jpg?alt=media&token=11fd665e-2078-416d-ba6e-619a50680fc2" alt="PayPal" class="mr-2 h-10 w-10" /> VNPAY
-                                        </label>
-                                    </div>
-                                    <div class="flex items-center">
-                                        <input id="cod" type="radio" name="paymentMethod" value="cod" class="mr-2">
-                                        <label for="cod" class="flex items-center text-sm">
-                                            <img src="https://firebasestorage.googleapis.com/v0/b/handmade-product-bde7a.appspot.com/o/product-Image%2Fcod.png?alt=media&token=c9fd3bc6-dd64-481e-a5ef-b4dfb3d0733a" alt="Cash on Delivery" class="mr-2 h-10 w-10" /> Cash on Delivery (COD)
-                                        </label>
-                                    </div>
+                                <div class="mb-4 flex items-center">
+                                    <input id="vnpay" type="radio" name="paymentMethod" value="vnpay" class="mr-2" required>
+                                    <label for="vnpay" class="flex items-center text-sm">
+                                        <img src="https://firebasestorage.googleapis.com/v0/b/handmade-product-bde7a.appspot.com/o/product-Image%2Fvnpay.jpg?alt=media&token=11fd665e-2078-416d-ba6e-619a50680fc2" alt="VNPAY" class="mr-2 h-10 w-10" /> VNPAY
+                                    </label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input id="cod" type="radio" name="paymentMethod" value="cod" class="mr-2">
+                                    <label for="cod" class="flex items-center text-sm">
+                                        <img src="https://firebasestorage.googleapis.com/v0/b/handmade-product-bde7a.appspot.com/o/product-Image%2Fcod.png?alt=media&token=c9fd3bc6-dd64-481e-a5ef-b4dfb3d0733a" alt="Cash on Delivery" class="mr-2 h-10 w-10" /> Cash on Delivery (COD)
+                                    </label>
                                 </div>
                             </div>
                         </div>
 
+                        <!-- Summary Section -->
                         <div class="mb-4">
                             <div class="w-full rounded-t-lg bg-blue-700 px-4 py-2">
                                 <h2 class="text-lg font-semibold text-white">Summary</h2>
@@ -136,7 +147,7 @@
                             </div>
                         </div>
 
-                        <!-- Nút Checkout -->
+                        <!-- Checkout Button -->
                         <button type="submit" class="mt-4 w-full rounded-lg bg-blue-500 px-4 py-2 text-white">Checkout</button>
                     </div>
                 </div>

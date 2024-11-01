@@ -1,20 +1,27 @@
 using System.ComponentModel.DataAnnotations;
+using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.Core.Common;
+using HandmadeProductManagement.Core.Store;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+
 
 namespace UI.Pages;
 
 public class RegistrationModel : PageModel
 {
     private readonly IHttpClientFactory _httpClientFactory;
+    private readonly ApiResponseHelper _apiResponseHelper;
 
-    public RegistrationModel(IHttpClientFactory httpClientFactory)
+    public RegistrationModel(IHttpClientFactory httpClientFactory, ApiResponseHelper apiResponseHelper)
     {
         _httpClientFactory = httpClientFactory;
+        _apiResponseHelper = apiResponseHelper;
     }
 
     [BindProperty]
     [Required(ErrorMessage = "User Name is required.")]
+    [RegularExpression(@"^[a-zA-Z0-9]*$", ErrorMessage = "User Name cannot contain spaces or special characters.")]
     public string UserName { get; set; }
 
     [BindProperty]
@@ -41,9 +48,6 @@ public class RegistrationModel : PageModel
     [Compare(nameof(Password), ErrorMessage = "The password and confirmation password do not match.")]
     public string ConfirmPassword { get; set; }
 
-    [BindProperty]
-    public string? ClientUri { get; set; }
-
     public string? ErrorMessage { get; set; }
 
     public async Task<IActionResult> OnPostAsync()
@@ -53,7 +57,6 @@ public class RegistrationModel : PageModel
             ErrorMessage = "Please correct the errors in the form.";
             return Page();
         }
-
         var registrationData = new
         {
             UserName = this.UserName,
@@ -61,20 +64,31 @@ public class RegistrationModel : PageModel
             Email = this.Email,
             PhoneNumber = this.PhoneNumber,
             Password = this.Password,
-            ClientUri = this.ClientUri
         };
-
         var client = _httpClientFactory.CreateClient();
-        var response = await client.PostAsJsonAsync("http://localhost:5041/api/registration", registrationData);
-
+        var response = await client.PostAsJsonAsync("http://localhost:5041/api/authentication/register", registrationData);
+        var errorContent = await response.Content.ReadAsStringAsync();
+        Console.WriteLine("Error Details: " + errorContent);
         if (response.IsSuccessStatusCode)
         {
             return RedirectToPage("/Index");
         }
         else
         {
-            var errorContent = await response.Content.ReadAsStringAsync();
-            ErrorMessage = $"Registration failed: {errorContent}";
+          
+            if (errorContent.Contains("Email already in use"))
+            {
+                ModelState.AddModelError("Email", "Email is already in use.");
+            }
+            if (errorContent.Contains("Phone number already in use"))
+            {
+                ModelState.AddModelError("PhoneNumber", "Phone number is already in use.");
+            }
+            if (errorContent.Contains("This username is already taken"))
+            {
+                ModelState.AddModelError("UserName", "This username is already taken.");
+            }
+            ErrorMessage = "Registration failed. Please correct the errors and try again.";
             return Page();
         }
     }

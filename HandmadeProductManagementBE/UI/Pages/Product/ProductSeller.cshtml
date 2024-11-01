@@ -163,7 +163,11 @@
     var paginationModel = new UI.Pages.Shared.PaginationModel
             {
                 PageNumber = Model.PageNumber,
-                PageSize = Model.PageSize
+                PageSize = Model.PageSize,
+
+                CurrentFilter = Model.CurrentFilters,
+                HasNextPage = Model.HasNextPage
+
             };
 }
 

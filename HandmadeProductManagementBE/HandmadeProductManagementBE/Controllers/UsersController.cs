@@ -21,7 +21,7 @@ namespace HandmadeProductManagementAPI.Controllers
 
         // GET: api/Users
         [HttpGet]
-        //[Authorize(Roles ="Admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetApplicationUsers(int PageNumber, int PageSize,[FromQuery] string? userName, [FromQuery] string? phoneNumber)
         {
 
@@ -38,7 +38,7 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [HttpGet("{id}")]
-
+        [Authorize]
         public async Task<IActionResult> GetApplicationUsersById(String id)
         {
             var response = new BaseResponse<UserResponseByIdModel>
@@ -70,8 +70,6 @@ namespace HandmadeProductManagementAPI.Controllers
 
 
         [HttpDelete("{id}")]
-        //[Authorize(Roles = "Admin")]
-
         public async Task<IActionResult> DeleteUser(string id)
         {
 
@@ -100,8 +98,6 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [HttpPost("{id}/restore")]
-        //[Authorize(Roles = "Admin")]
-
         public async Task<IActionResult> ReverseDeleteUser(string id)
         {
 

@@ -51,6 +51,7 @@ public class LoginModel : PageModel
         };
         var client = _httpClientFactory.CreateClient();
         var response = await client.PostAsJsonAsync($"{Constants.ApiBaseUrl}/api/authentication/login", loginData);
+
         if (response.IsSuccessStatusCode)
         {
             var responseContent = await response.Content.ReadAsStringAsync();
@@ -60,7 +61,7 @@ public class LoginModel : PageModel
 
             if (!string.IsNullOrEmpty(token))
             {
-                HttpContext.Session.SetString("Token", token);  
+                HttpContext.Session.SetString("Token", token);
                 HttpContext.Session.SetString("UserName", userName);
                 return Redirect("/");
             }
@@ -73,8 +74,15 @@ public class LoginModel : PageModel
         else
         {
             var errorContent = await response.Content.ReadAsStringAsync();
-            var errorResponse = JsonConvert.DeserializeObject<ErrorResponse>(errorContent);
-            ErrorMessage = errorResponse?.Detail ?? "Login failed. Please try again.";
+            if (errorContent.Contains("The password you entered is incorrect"))
+            {
+                ModelState.AddModelError("Password", "The password you entered is incorrect.");
+            }
+            else
+            {
+                var errorResponse = JsonConvert.DeserializeObject<ErrorResponse>(errorContent);
+                ErrorMessage = errorResponse?.Detail ?? "Login failed. Please try again.";
+            }
             return Page();
         }
     }
@@ -92,7 +100,7 @@ public class LoginData
 {
     public string? UserName { get; set; }
     public string? DisplayName { get; set; }
-    public string? FullName { get; set; }
+    public string? FullName { get; set; } 
     public string? Token { get; set; }
 }
 
