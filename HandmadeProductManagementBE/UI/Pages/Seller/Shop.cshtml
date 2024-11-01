@@ -127,7 +127,7 @@
 <!-- Product List -->
 @if (Model.Products != null && Model.Products.Any())
 {
-    @await Html.PartialAsync("Seller/_ProductList", Model.Products)
+    @await Html.PartialAsync("Shared/_ProductList", Model.Products)
 }
 else
 {
@@ -264,6 +264,24 @@ else
 </div>
 
 @section Scripts {
+    <script>
+        document.getElementById('sortByPrice').addEventListener('change', function () {
+            if (this.checked) {
+                document.getElementById('sortByRating').checked = false;
+            }
+        });
+
+        document.getElementById('sortByRating').addEventListener('change', function () {
+            if (this.checked) {
+                document.getElementById('sortByPrice').checked = false;
+            }
+        });
+    </script>
+    <script>
+        function viewProduct(productId) {
+            window.location.href = `/ProductDetail/ProductDetail?id=${productId}`;
+        }
+    </script>
     <script>
         const antiForgeryToken = document.querySelector('input[name="__RequestVerificationToken"]').value;
 

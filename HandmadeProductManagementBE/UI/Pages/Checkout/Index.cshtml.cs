@@ -117,6 +117,7 @@ namespace UI.Pages.Checkout
                         CustomerName = UserInfo.FullName ?? string.Empty,
                         Phone = UserInfo.PhoneNumber ?? string.Empty,
                         Note = Note ?? string.Empty,
+                        PaymentMethod = "COD",
                     };
 
                     var client = _httpClientFactory.CreateClient();

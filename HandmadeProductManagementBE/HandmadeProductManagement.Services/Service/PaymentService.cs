@@ -108,11 +108,6 @@ namespace HandmadeProductManagement.Services.Service
                 .FirstOrDefaultAsync(o => o.Id == orderId && !o.DeletedTime.HasValue)
                 ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageOrderNotFound);
 
-            if (order.Status != Constants.OrderStatusAwaitingPayment)
-            {
-                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidOrderStatus);
-            }
-
             if (order.UserId.ToString() != userId)
             {
                 throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageUserNotOwner);
@@ -144,11 +139,6 @@ namespace HandmadeProductManagement.Services.Service
             payment.CreatedBy = userId;
             payment.LastUpdatedBy = userId;
 
-            await OrderService.UpdateOrderStatusAsync(userId, new UpdateStatusOrderDto
-            {
-                OrderId = orderId,
-                Status = "Processing"
-            });
             await paymentRepository.InsertAsync(payment);
             await _unitOfWork.SaveAsync();
 

@@ -98,7 +98,7 @@
 <!-- Product List -->
 @if (Model.Products != null && Model.Products.Any())
 {
-    @await Html.PartialAsync("HomePage/_ProductList", Model.Products)
+    @await Html.PartialAsync("Shared/_ProductList", Model.Products)
 }
 else
 {
