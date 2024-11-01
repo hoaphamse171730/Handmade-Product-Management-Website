@@ -157,7 +157,7 @@ namespace HandmadeProductManagement.Services.Service
             // Validate Status Flow
             var validStatusTransitions = new Dictionary<string, List<string>>
             {
-                { Constants.PaymentStatusPending, new List<string> { Constants.PaymentStatusCompleted, Constants.PaymentStatusExpired } },
+                { Constants.PaymentStatusPending, new List<string> { Constants.PaymentStatusCompleted, Constants.PaymentStatusExpired, Constants.PaymentStatusFailed } },
                 { Constants.PaymentStatusCompleted, new List<string> { Constants.PaymentStatusRefunded } }
             };
 
@@ -248,11 +248,24 @@ namespace HandmadeProductManagement.Services.Service
             {
                 throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageOrderNotFound);
             }
+
+            // Check if the user is the buyer
             if (order.UserId.ToString() != userId)
             {
-                throw new BaseException.ForbiddenException(StatusCodeHelper.Forbidden.ToString(), Constants.ErrorMessageForbidden);
-            }
+                // If not the buyer, check if the user is the seller associated with any item in the order
+                var orderDetailRepository = _unitOfWork.GetRepository<OrderDetail>();
 
+                // Filter for order details with a valid ProductItem and check for a match on CreatedBy
+                var isSeller = await orderDetailRepository.Entities
+                    .Where(od => od.OrderId == orderId && !od.DeletedTime.HasValue && od.ProductItem != null)
+                    .Select(od => od.ProductItem!.CreatedBy)
+                    .AnyAsync(createdBy => createdBy.ToString() == userId);
+
+                if (!isSeller)
+                {
+                    throw new BaseException.ForbiddenException(StatusCodeHelper.Forbidden.ToString(), Constants.ErrorMessageForbidden);
+                }
+            }
 
             var paymentRepository = _unitOfWork.GetRepository<Payment>();
             var payment = await paymentRepository.Entities

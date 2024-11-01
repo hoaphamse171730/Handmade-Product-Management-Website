@@ -64,12 +64,13 @@ public static class Constants
     #region Payment
 
     public const string PaymentStatusPending = "Pending";
-    public const string PaymentStatusPaid = "Paid";
+    public const string PaymentDetailStatusPaid = "Paid";
     public const string PaymentStatusCompleted = "Completed";
     public const string PaymentStatusExpired = "Expired";
-    public const string PaymentStatusRefunded = "Refunded";
-    public const string PaymentStatusSuccess = "Success";
     public const string PaymentStatusFailed = "Failed";
+    public const string PaymentStatusRefunded = "Refunded";
+    public const string PaymentDetailStatusSuccess = "Success";
+    public const string PaymentDetailStatusFailed = "Failed";
     public const string PaymentMethodOnline = "Online";
     public const string PaymentMethodOffline = "Offline";
     public const string PaymentDescriptionFailed = "Failed";

@@ -59,7 +59,7 @@ namespace HandmadeProductManagement.Services.Service
             await paymentDetailRepository.InsertAsync(paymentDetail);
             await _unitOfWork.SaveAsync();
 
-            if (createPaymentDetailDto.Status == Constants.PaymentStatusSuccess)
+            if (createPaymentDetailDto.Status == Constants.PaymentDetailStatusSuccess)
             {
                 await _paymentService.UpdatePaymentStatusAsync(createPaymentDetailDto.PaymentId, Constants.PaymentStatusCompleted, userId);
             }
@@ -84,7 +84,7 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessagePleaseInputStatus);
             }
 
-            if (createPaymentDetailDto.Status != Constants.PaymentStatusSuccess && createPaymentDetailDto.Status != Constants.PaymentStatusFailed)
+            if (createPaymentDetailDto.Status != Constants.PaymentDetailStatusSuccess && createPaymentDetailDto.Status != Constants.PaymentDetailStatusFailed)
             {
                 throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidStatusFormat);
             }

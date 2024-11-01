@@ -274,7 +274,7 @@ namespace HandmadeProductManagement.Services.Service
                     PaymentDetail paymentDetail = new()
                     {
                         PaymentId = payment.Id,
-                        Status = Constants.PaymentStatusSuccess,
+                        Status = Constants.PaymentDetailStatusSuccess,
                         Method = Constants.PaymentMethodTransfer,
                         ExternalTransaction = Constants.VNPAY,
                         CreatedTime = DateTime.Now,
