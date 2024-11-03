@@ -117,6 +117,7 @@ namespace UI.Pages.Checkout
                         CustomerName = UserInfo.FullName ?? string.Empty,
                         Phone = UserInfo.PhoneNumber ?? string.Empty,
                         Note = Note ?? string.Empty,
+                        PaymentMethod = "COD",
                     };
 
                     var client = _httpClientFactory.CreateClient();
@@ -134,7 +135,7 @@ namespace UI.Pages.Checkout
 
                         if (baseResponse != null && baseResponse.StatusCode == StatusCodeHelper.OK)
                         {
-                            return RedirectToPage("/OrderSucess");
+                            return RedirectToPage("/Checkout/OrderSucess");
                         }
 
                         ModelState.AddModelError(string.Empty, baseResponse?.Message ?? "Error updating user information.");

@@ -120,39 +120,41 @@
     </form>
 </div>
 
-<!-- Product Grid -->
+<!-- Product List -->
 @if (Model.Products != null && Model.Products.Any())
 {
-    <div class="py-16">
-        <div class="container mx-auto px-4">
-            <h2 class="mb-8 text-3xl font-bold">Introducing Our Latest Products</h2>
-
-            <!-- Responsive Grid Layout: 1 column on mobile, 2 columns on small screens, 4 columns on larger screens -->
-            <div class="grid-cols-1 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-                @foreach (var product in Model.Products)
-                {
-                    <div class="rounded-lg bg-white p-6 shadow-lg">
-                        <div class="relative h-48 overflow-hidden">
-                            <img class="h-full w-full object-cover" src="@product.ProductImageUrl" alt="@product.Name" />
-                            <div class="opacity-40 absolute inset-0 bg-black"></div>
-                            <div class="absolute inset-0 flex items-center justify-center">
-                                <button class="rounded-full bg-white px-6 py-2 font-bold text-gray-900 hover:bg-gray-300">View Product</button>
-                            </div>
-                        </div>
-                        <h3 class="mt-4 text-xl font-bold text-gray-900">@product.Name</h3>
-                        <p class="mt-2 text-sm text-gray-500">@product.Description</p>
-                        <div class="mt-4 flex items-center justify-between">
-                            <span class="text-lg font-bold text-gray-900">$@product.LowestPrice</span>
-                            <button class="rounded-full bg-gray-900 px-4 py-2 font-bold text-white hover:bg-gray-800">Add to Cart</button>
-                        </div>
-                        <div class="mt-2 text-sm text-gray-500">Rating: @product.Rating | Status: @product.Status</div>
-                    </div>
-                }
-            </div>
-        </div>
-    </div>
+    @await Html.PartialAsync("Shared/_ProductList", Model.Products)
 }
 else
 {
     <p>No products found matching your criteria.</p>
 }
+
+@{
+    var paginationModel = new UI.Pages.Shared.PaginationModel
+            {
+                PageNumber = Model.PageNumber,
+                PageSize = Model.PageSize
+            };
+}
+
+<partial name="~/Pages/Shared/_Pagination.cshtml" model="paginationModel" />
+
+<script>
+    document.getElementById('sortByPrice').addEventListener('change', function () {
+        if (this.checked) {
+            document.getElementById('sortByRating').checked = false;
+        }
+    });
+
+    document.getElementById('sortByRating').addEventListener('change', function () {
+        if (this.checked) {
+            document.getElementById('sortByPrice').checked = false;
+        }
+    });
+</script>
+<script>
+    function viewProduct(productId) {
+        window.location.href = `/ProductDetail/ProductDetail?id=${productId}`;
+    }
+</script>

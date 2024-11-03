@@ -4,7 +4,7 @@ public static class Constants
 {
     #region Base
 
-    public const string ApiBaseUrl = "http://localhost:5041";
+    public const string ApiBaseUrl = "https://localhost:7159";
     public const string AvatarBaseUrl = "/images/avatars";
     public const string VNPAY = "VNPAY";
     public const string TimeZoneSEAsiaStandard = "SE Asia Standard Time";
@@ -13,10 +13,9 @@ public static class Constants
     #endregion
 
     #region SortOption
-
-    #endregion
     public const string SortByPrice = "SortByPrice";
     public const string SortByRating = "SortByRating";
+    #endregion
 
     #region User Status
 
@@ -78,6 +77,8 @@ public static class Constants
     public const string PaymentApproveFailed = "Payment approve failed";
     public const string VNPayBanking = "VNPay_banking";
     public const int PaymentExpirationDays = 15;
+    public const string VNPAYMethod = "VNPAY";
+    public const string CODMethod = "COD";
 
     #endregion
 

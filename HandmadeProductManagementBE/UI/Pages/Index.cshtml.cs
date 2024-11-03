@@ -1,4 +1,5 @@
-﻿using HandmadeProductManagement.Core.Base;
+﻿using HandmadeProductManagement.Contract.Repositories.Entity;
+using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Common;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.Core.Store;
@@ -26,6 +27,17 @@ namespace UI.Pages
         public List<CategoryDto> Categories { get; set; } = new List<CategoryDto>();
         public string Token { get; set; }
         public List<ProductSearchVM>? Products { get; set; }
+
+        public class FilterModel
+        {
+            public string Name { get; set; }
+            public int? CategoryId { get; set; }
+            public string Status { get; set; }
+            public decimal? MinRating { get; set; }
+            public List<Category> Categories { get; set; } // Ensure this is defined
+            public string SortOption { get; set; }
+            public bool SortDescending { get; set; }
+        }
 
         public int PageNumber { get; set; } = 1;
         public int PageSize { get; set; } = 12;
