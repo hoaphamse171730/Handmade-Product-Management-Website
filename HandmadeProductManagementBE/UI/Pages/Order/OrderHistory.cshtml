@@ -51,7 +51,6 @@
                         {
                             <tr class="hover:bg-gray-50"
                                 onclick="location.href='@Url.Page("/Order/OrderDetail", new { orderId = order.Id })'">
-                                >
                                 <td class="border-b border-gray-200 p-6 text-lg">@index</td>
                                 <td class="border-b border-gray-200 p-6 text-lg">@order.CustomerName</td>
                                 <td class="border-b border-gray-200 p-6 text-lg">@order.Phone</td>
@@ -65,20 +64,21 @@
                                         @if (order.Status == "Pending")
                                         {
                                             <button class="rounded bg-green-500 px-4 py-2 text-white hover:bg-green-600"
-                                                    onclick="openUpdateModal('@order.Id', '@order.CustomerName', '@order.Phone', '@order.Address', '@order.Note')">
+                                                    onclick="event.stopPropagation(); openUpdateModal('@order.Id', '@order.CustomerName', '@order.Phone', '@order.Address', '@order.Note')">
                                                 Update
                                             </button>
                                         }
                                         @if (order.Status == "Pending" || order.Status == "Processing")
                                         {
                                             <button class="rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600"
-                                                    onclick="openConfirmModal('@order.Id')">
+                                                    onclick="event.stopPropagation(); openConfirmModal('@order.Id')">
                                                 Cancel
                                             </button>
                                         }
                                     </div>
                                 </td>
                             </tr>
+
                             index++;
                         }
                     </tbody>
