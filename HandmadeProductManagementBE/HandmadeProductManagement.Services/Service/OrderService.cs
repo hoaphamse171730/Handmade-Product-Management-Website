@@ -326,7 +326,7 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.ForbiddenException(StatusCodeHelper.Forbidden.ToString(), Constants.ErrorMessageForbidden);
             }
 
-            if (existingOrder.Status != Constants.OrderStatusPending && existingOrder.Status != Constants.OrderStatusAwaitingPayment)
+            if (existingOrder.Status != Constants.OrderStatusPending)
             {
                 throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidOrderStatus);
             }
@@ -337,7 +337,7 @@ namespace HandmadeProductManagement.Services.Service
                 {
                     throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidAddressFormat);
                 }
-                existingOrder.Address = order.Address;
+                existingOrder.Address = order.Address.Trim();
             }
 
             if (!string.IsNullOrWhiteSpace(order.CustomerName))
@@ -346,7 +346,7 @@ namespace HandmadeProductManagement.Services.Service
                 {
                     throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidCustomerNameFormat);
                 }
-                existingOrder.CustomerName = order.CustomerName;
+                existingOrder.CustomerName = order.CustomerName.Trim();
             }
 
             if (!string.IsNullOrWhiteSpace(order.Phone))
@@ -355,12 +355,12 @@ namespace HandmadeProductManagement.Services.Service
                 {
                     throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidPhoneFormat);
                 }
-                existingOrder.Phone = order.Phone;
+                existingOrder.Phone = order.Phone.Trim();
             }
 
-            if (!string.IsNullOrWhiteSpace(order.Note))
+            if (order.Note != null)
             {
-                existingOrder.Note = order.Note;
+                existingOrder.Note = order.Note.Trim();
             }
 
             existingOrder.LastUpdatedBy = userId;

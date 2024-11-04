@@ -65,7 +65,7 @@ namespace UI.Pages.Order
             var updateStatusDto = new UpdateStatusOrderDto
             {
                 OrderId = orderId,
-                Status = "Canceled",
+                Status = Constants.OrderStatusCanceled,
                 CancelReasonId = cancelReasonResponse.Data.Id
             };
 
@@ -80,6 +80,23 @@ namespace UI.Pages.Order
             else
             {
                 return new JsonResult(new { success = false, message = response?.Message ?? "An error occurred while canceling the order." });
+            }
+        }
+
+        public async Task<IActionResult> OnPutUpdateOrderAsync(string orderId,[FromBody] UpdateOrderDto updateOrderDto)
+        {
+            // Make the PUT request to update the order
+            var response = await _apiResponseHelper.PutAsync<bool>(Constants.ApiBaseUrl + $"/api/order/{orderId}", updateOrderDto);
+
+            if (response?.StatusCode == StatusCodeHelper.OK && response.Data)
+            {
+                // Refresh the orders list after successful update
+                await OnGetAsync(CurrentFilter);
+                return new JsonResult(new { success = true });
+            }
+            else
+            {
+                return new JsonResult(new { success = false, message = response?.Message ?? "An error occurred while updating the order." });
             }
         }
 
