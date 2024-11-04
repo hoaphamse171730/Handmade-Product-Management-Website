@@ -266,20 +266,20 @@ namespace UI.Pages.Seller
 
                 try
                 {
-                    _logger.LogInformation("Starting product creation process");
+                    //_logger.LogInformation("Starting product creation process");
 
-                    if (!ModelState.IsValid)
-                    {
-                        return new JsonResult(ModelState.ToDictionary(
-                            kvp => kvp.Key,
-                            kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray()
-                        ))
-                        { StatusCode = 400 };
-                    }
+                    //if (!ModelState.IsValid)
+                    //{
+                    //    return new JsonResult(ModelState.ToDictionary(
+                    //        kvp => kvp.Key,
+                    //        kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray()
+                    //    ))
+                    //    { StatusCode = 400 };
+                    //}
 
                     // First create the product
                     var createProductResponse = await _apiResponseHelper.PostAsync<string>(
-                        $"{Constants.ApiBaseUrl}/api/product",
+                        $"{Constants.ApiBaseUrl}/api/product?",
                         NewProduct);
 
                     if (createProductResponse.StatusCode != StatusCodeHelper.OK)
