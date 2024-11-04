@@ -238,4 +238,8 @@ public static class Constants
 
     public const string ErrorMessageFetchingFailed = "An error occurred while fetching data.";
     #endregion
+
+    #region CancelReason
+    public const string CustomerCancelReason = "Customer changed mind";
+    #endregion
 }

@@ -112,7 +112,7 @@
         if (orderIdToCancel) {
             try {
                 console.log(`Sending PATCH request to cancel order: ${orderIdToCancel}`);
-                const response = await fetch(`/Order/OrderHistory?handler=PatchCancelOrder&orderId=${orderIdToCancel}`, {
+                const response = await fetch(`/Order/OrderHistory?handler=CancelOrder&orderId=${orderIdToCancel}`, {
                     method: 'PATCH',
                     headers: {
                         'Content-Type': 'application/json'

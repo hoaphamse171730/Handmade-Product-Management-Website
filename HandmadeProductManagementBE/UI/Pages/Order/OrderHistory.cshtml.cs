@@ -8,6 +8,7 @@ using HandmadeProductManagement.ModelViews.OrderModelViews;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
+using HandmadeProductManagement.ModelViews.CancelReasonModelViews;
 
 namespace UI.Pages.Order
 {
@@ -53,11 +54,19 @@ namespace UI.Pages.Order
 
         public async Task<IActionResult> OnPatchCancelOrderAsync(string orderId)
         {
-            _logger.LogInformation("OnPatchCancelOrderAsync called with orderId: {OrderId}", orderId);
+            // Call GetByDescription to get the CancelReasonId
+            var cancelReasonResponse = await _apiResponseHelper.GetAsync<CancelReasonDto>(Constants.ApiBaseUrl + $"/api/cancelreason/description/{Constants.CustomerCancelReason}");
+
+            if (cancelReasonResponse?.StatusCode != StatusCodeHelper.OK || cancelReasonResponse.Data == null)
+            {
+                return new JsonResult(new { success = false, message = cancelReasonResponse?.Message ?? "An error occurred while fetching the cancel reason." });
+            }
+
             var updateStatusDto = new UpdateStatusOrderDto
             {
                 OrderId = orderId,
-                Status = "Processing"
+                Status = "Canceled",
+                CancelReasonId = cancelReasonResponse.Data.Id
             };
 
             var response = await _apiResponseHelper.PatchAsync<bool>(Constants.ApiBaseUrl + "/api/order/status", updateStatusDto);
