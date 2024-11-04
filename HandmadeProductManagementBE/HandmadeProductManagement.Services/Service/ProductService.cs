@@ -24,9 +24,10 @@ namespace HandmadeProductManagement.Services.Service
         private readonly IValidator<VariationCombinationDto> _variationCombinationValidator;
         private readonly IPromotionService _promotionService;
         private readonly IShopService _shopService;
+        private readonly IProductImageService _productImageService;
 
         public ProductService(IUnitOfWork unitOfWork, IMapper mapper,
-            IValidator<ProductForCreationDto> creationValidator, IValidator<ProductForUpdateDto> updateValidator, IValidator<VariationCombinationDto> variationCombinationValidator, IPromotionService promotionService, IShopService shopService)
+            IValidator<ProductForCreationDto> creationValidator, IValidator<ProductForUpdateDto> updateValidator, IValidator<VariationCombinationDto> variationCombinationValidator, IPromotionService promotionService, IShopService shopService, IProductImageService productImageService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
@@ -35,6 +36,7 @@ namespace HandmadeProductManagement.Services.Service
             _variationCombinationValidator = variationCombinationValidator;
             _promotionService = promotionService;
             _shopService = shopService;
+            _productImageService = productImageService;
         }
 
         public async Task<bool> Create(ProductForCreationDto productDto, string userId)
@@ -87,6 +89,14 @@ namespace HandmadeProductManagement.Services.Service
                 // Step 6: Insert the product into the repository
                 await _unitOfWork.GetRepository<Product>().InsertAsync(productEntity);
                 await _unitOfWork.SaveAsync();
+
+                if (productDto.ProductImages != null && productDto.ProductImages.Count > 0)
+                {
+                    foreach (var image in productDto.ProductImages)
+                    {
+                        await _productImageService.UploadProductImage(image, productEntity.Id);
+                    }
+                }
 
                 // Step 7: Validate if each Variation exists and if its ID is a valid GUID
                 foreach (var variation in productDto.Variations)
