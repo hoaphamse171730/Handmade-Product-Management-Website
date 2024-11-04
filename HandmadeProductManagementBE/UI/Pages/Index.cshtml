@@ -14,10 +14,20 @@
     </div>
 </div>
 
+
+<h1 class="mb-4 mt-4 text-center text-5xl font-bold">Product List</h1>
+@if (Model.ErrorMessage != null)
+{
+    <div class="alert alert-danger">
+        @Model.ErrorMessage
+    </div>
+}
+
+
 <div class="search-filter">
-    <form method="get" class="flex items-center space-x-4">
-        <input class="rounded-md border border-gray-300 p-2" type="text" name="Name" placeholder="Search by name" value="@Request.Query["Name"]" onchange="this.form.submit();" />
-        <select name="CategoryId" class="rounded-md border border-gray-300 p-2">
+    <form method="get" class="flex space-x-4 items-center">
+        <input class="border border-gray-300 rounded-md p-2" type="text" name="Name" placeholder="Search by name" value="@Request.Query["Name"]" onchange="this.form.submit();" />
+        <select name="CategoryId" class="border border-gray-300 rounded-md p-2">
             <option value="">Select Category</option>
             @if (Model.Categories != null && Model.Categories.Any())
             {
@@ -39,7 +49,7 @@
             var selectedStatus = Request.Query["Status"].ToString();
         }
 
-        <select name="Status" class="rounded-md border border-gray-300 p-2">
+        <select name="Status" class="border border-gray-300 rounded-md p-2">
             @if (string.IsNullOrEmpty(selectedStatus))
             {
                 <option value="" selected>Select Status</option>
@@ -67,7 +77,7 @@
                 <option value="OutOfStock">Out Of Stock</option>
             }
         </select>
-        <input class="rounded-md border border-gray-300 p-2" type="number" name="MinRating" placeholder="Min Rating" min="0" max="5" value="@Request.Query["MinRating"]" />
+        <input class="border border-gray-300 rounded-md p-2" type="number" name="MinRating" placeholder="Min Rating" min="0" max="5" value="@Request.Query["MinRating"]" />
 
         <div class="flex items-center space-x-4">
             <label class="flex items-center">
@@ -91,81 +101,72 @@
             @(Request.Query["SortDescending"] == "true" ? "checked" : "") onchange="this.form.submit();" />
         </label>
 
-        <button type="submit" class="rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600">Search</button>
+        <button type="submit" class="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600">Search</button>
     </form>
 </div>
 
 <!-- Product List -->
 @if (Model.Products != null && Model.Products.Any())
 {
-    @await Html.PartialAsync("Shared/_ProductList", Model.Products)
+    <div class="py-16">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold mb-8">Introducing Our Latest Products</h2>
+
+            <!-- Responsive Grid Layout: 1 column on mobile, 2 columns on small screens, 4 columns on larger screens -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                @foreach (var product in Model.Products)
+                {
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <div class="relative overflow-hidden h-48">
+                            <img class="object-cover w-full h-full" src="@product.ProductImageUrl" alt="@product.Name" />
+                            <div class="absolute inset-0 bg-black opacity-40"></div>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <button class="bg-white text-gray-900 py-2 px-6 rounded-full font-bold hover:bg-gray-300" onclick="viewProduct('@product.Id')">View Product</button>
+                            </div>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mt-4">@product.Name</h3>
+                        <p class="text-gray-500 text-sm mt-2">@product.Description</p>
+                        <div class="flex items-center justify-between mt-4">
+                            <span class="text-gray-900 font-bold text-lg">$@product.LowestPrice</span>
+                            <button class="bg-gray-900 text-white py-2 px-4 rounded-full font-bold hover:bg-gray-800">Add to Cart</button>
+                        </div>
+                        <div class="text-sm text-gray-500 mt-2">Rating: @product.Rating | Status: @product.Status</div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
 }
 else
 {
     <p>No products found matching your criteria.</p>
 }
 
-@section Scripts {
-    <!-- Swiper Initialization for Selling Products -->
-    <script>
-
-        var sellingSwiper = new Swiper('.selling-products-swiper', {
-            slidesPerView: 1,
-            spaceBetween: 30,
-            loop: true,
-            pagination: {
-                el: '.selling-products-swiper .swiper-pagination',
-                clickable: true,
-            },
-            navigation: {
-                nextEl: '.selling-products-swiper .swiper-button-next',
-                prevEl: '.selling-products-swiper .swiper-button-prev',
-            },
-        });
-    </script>
-
-    <!-- Swiper Initialization for New Products -->
-    <script>
-        var newProductsSwiper = new Swiper('.new-products-swiper', {
-            slidesPerView: 1,
-            spaceBetween: 30,
-            loop: true,
-            pagination: {
-                el: '.new-products-swiper .swiper-pagination',
-                clickable: true,
-            },
-            navigation: {
-                nextEl: '.new-products-swiper .swiper-button-next',
-                prevEl: '.new-products-swiper .swiper-button-prev',
-            },
-        });
-    </script>
-
-    <script>
-        document.getElementById('sortByPrice').addEventListener('change', function () {
-            if (this.checked) {
-                document.getElementById('sortByRating').checked = false;
-            }
-        });
-
-        document.getElementById('sortByRating').addEventListener('change', function () {
-            if (this.checked) {
-                document.getElementById('sortByPrice').checked = false;
-            }
-        });
-    </script>
-    <script>
-        function viewProduct(productId) {
-            window.location.href = `/ProductDetail/ProductDetail?id=${productId}`;
+<script>
+    document.getElementById('sortByPrice').addEventListener('change', function () {
+        if (this.checked) {
+            document.getElementById('sortByRating').checked = false;
         }
-    </script>
-}
+    });
 
+    document.getElementById('sortByRating').addEventListener('change', function () {
+        if (this.checked) {
+            document.getElementById('sortByPrice').checked = false;
+        }
+    });
+</script>
+<script>
+    function viewProduct(productId) {
+        window.location.href = `/ProductDetail/ProductDetail?id=${productId}`;
+    }
+</script>
 @{
     var paginationModel = new UI.Pages.Shared.PaginationModel
             {
                 PageNumber = Model.PageNumber,
-                PageSize = Model.PageSize
+                PageSize = Model.PageSize,
+                CurrentFilter = Model.CurrentFilters,
+                HasNextPage = Model.HasNextPage
             };
 }
 
