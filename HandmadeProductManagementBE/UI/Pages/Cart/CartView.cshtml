@@ -52,7 +52,8 @@
                                                 }
                                             </td>
                                             <td>
-                                                <input type="number" id="quantity-@item.Id" min="1" value="@item.ProductQuantity" class="w-16 text-center" />
+                                                <input type="number" id="quantity-@item.Id" min="1" value="@item.ProductQuantity"
+                                                       class="w-16 text-center" onchange="updateQuantity('@item.Id', this.value)" />
                                             </td>
                                             <td>₫@Math.Round(item.DiscountPrice * item.ProductQuantity, 0, MidpointRounding.AwayFromZero)</td>
                                             <td>
@@ -96,4 +97,53 @@
     </div>
 </div>
 
+<script>
+    async function updateQuantity(cartItemId, newQuantity) {
+        if (newQuantity < 1) {
+            alert("Quantity must be at least 1.");
+            return;
+        }
 
+        const response = await fetch(`?handler=UpdateQuantity&cartItemId=${cartItemId}&newQuantity=${newQuantity}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "RequestVerificationToken": document.querySelector('input[name="__RequestVerificationToken"]').value
+            },
+            body: JSON.stringify({ productQuantity: newQuantity })
+        });
+
+        if (response.ok) {
+            location.reload(); // Tải lại trang để cập nhật danh sách giỏ hàng
+        } else {
+            alert("An error occurred while updating the quantity.");
+        }
+    }
+
+    async function removeCartItem(cartItemId) {
+        if (!confirm("Are you sure you want to delete this item?")) return;
+
+        const response = await fetch(`?handler=Delete&cartItemId=${cartItemId}`, {
+            method: "POST",
+            headers: {
+                "RequestVerificationToken": document.querySelector('input[name="__RequestVerificationToken"]').value
+            }
+        });
+
+        if (response.ok) {
+            location.reload();
+        } else {
+            alert("An error occurred while trying to delete the item.");
+        }
+    }
+
+    async function checkout() {
+        const cartItems = @Html.Raw(Json.Serialize(Model.CartItems)); // Chuyển đổi CartItems thành JSON
+
+        // Lưu trữ thông tin vào localStorage
+        localStorage.setItem('cartItems', JSON.stringify(cartItems));
+
+        // Chuyển hướng đến trang checkout
+        window.location.href = '/Checkout'; // Đảm bảo đường dẫn đúng với trang checkout của bạn
+    }
+</script>
