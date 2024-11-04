@@ -7,6 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Pages\Promotion\Promotion\**" />
+    <Content Remove="Pages\Promotion\Promotion\**" />
+    <EmbeddedResource Remove="Pages\Promotion\Promotion\**" />
+    <None Remove="Pages\Promotion\Promotion\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\HandmadeProductManagement.Core\HandmadeProductManagement.Core.csproj" />
     <ProjectReference Include="..\HandmadeProductManagementBE\HandmadeProductManagementAPI.csproj" />
   </ItemGroup>

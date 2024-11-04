@@ -1,0 +1,176 @@
+﻿@page
+@model UI.Pages.Cart.CartViewModel
+@{
+    ViewData["Title"] = "Cart";
+}
+
+<div class="mb-20 h-screen bg-gray-100">
+    <div class="container mx-auto px-4">
+        <h1 class="mb-4 text-4xl font-semibold">Your Cart</h1>
+
+        @if (Model.CartItems != null && Model.CartItems.Any())
+        {
+            <div class="flex flex-col gap-4 md:flex-row">
+                <div class="md:w-3/4">
+                    @foreach (var group in Model.CartItems)
+                    {
+                        <div class="mb-4 rounded-lg bg-white p-6 shadow-md">
+                            <a href="/Shop/Index?id=@group.ShopId" class="text-lg font-semibold">@group.ShopName</a>
+                            <table class="w-full" data-shop-id="@group.ShopId">
+                                <thead>
+                                    <tr>
+                                        <th class="text-left font-normal">Product</th>
+                                        <th class="text-left font-normal">Price</th>
+                                        <th class="text-left font-normal">Discount Price</th>
+                                        <th class="text-left font-normal">Variation Options</th>
+                                        <th class="text-left font-normal">Quantity</th>
+                                        <th class="text-left font-normal">Total</th>
+                                        <th class="text-left font-normal">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in group.CartItems)
+                                    {
+                                        <tr id="cart-item-@item.Id" data-shop-id="@group.ShopId" data-price="@item.UnitPrice" data-discount-price="@item.DiscountPrice">
+                                            <td>
+                                                <div class="flex items-center">
+                                                    <img class="h-20 w-20" src="@item.ImageUrl" alt="@item.ProductName" />
+                                                    <a href="/ProductDetail/ProductDetail?id=@item.ProductId" class="ml-4 block font-semibold">@item.ProductName</a>
+                                                </div>
+                                            </td>
+                                            <td>₫<s>@item.UnitPrice</s></td>
+                                            <td class="text-red-500">₫@Math.Round(item.DiscountPrice, 0, MidpointRounding.AwayFromZero)</td>
+                                            <td>
+                                                @if (item.VariationOptionValues != null && item.VariationOptionValues.Any())
+                                                {
+                                                    <ul>
+                                                        @foreach (var option in item.VariationOptionValues)
+                                                        {
+                                                            <li>@option</li>
+                                                        }
+                                                    </ul>
+                                                }
+                                            </td>
+                                            <td>
+                                                <input type="number" id="quantity-@item.Id" min="1" value="@item.ProductQuantity"
+                                                       class="w-16 text-center" onchange="updateQuantity('@item.Id', this.value)" />
+                                            </td>
+                                            <td class="total-price" id="total-price-@item.Id">
+                                                ₫@Math.Round(item.DiscountPrice * item.ProductQuantity, 0, MidpointRounding.AwayFromZero)
+                                            </td>
+                                            <td>
+                                                <button class="text-white font-bold py-2 px-4 rounded" style="background-color: red" onclick="removeCartItem('@item.Id')">Delete</button>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="4" style="text-align: right;"><strong>Subtotal</strong></td>
+                                        <td colspan="2" id="subtotal-@group.ShopId">
+                                            ₫@Math.Round(group.CartItems.Sum(item => item.DiscountPrice * item.ProductQuantity), 0, MidpointRounding.AwayFromZero)
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    }
+                    <div class="rounded-lg bg-white p-6 shadow-md">
+                        <h2 class="text-lg font-semibold">Total</h2>
+                        <p class="text-lg" id="total-amount">₫@Math.Round(Model.Total, 0, MidpointRounding.AwayFromZero)</p>
+                        <button class="mt-4 w-full rounded-lg bg-blue-500 px-4 py-2 text-white" onclick="checkout()">Checkout</button>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <p>Your cart is empty.</p>
+        }
+
+        @if (!Model.ModelState.IsValid)
+        {
+            <div class="alert alert-danger">
+                @foreach (var error in Model.ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    <p>@error.ErrorMessage</p>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+    async function updateQuantity(cartItemId, newQuantity) {
+        const cartItem = document.querySelector(`#cart-item-${cartItemId}`);
+        const currentQuantity = parseInt(cartItem.querySelector(`#quantity-${cartItemId}`).value); // Lưu giá trị hiện tại
+        if (newQuantity < 1) {
+            alert("Quantity must be at least 1.");
+            return;
+        }
+
+        const response = await fetch(`?handler=UpdateQuantity&cartItemId=${cartItemId}&newQuantity=${newQuantity}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "RequestVerificationToken": document.querySelector('input[name="__RequestVerificationToken"]').value
+            },
+            body: JSON.stringify({ productQuantity: newQuantity })
+        });
+
+        if (response.ok) {
+            // Cập nhật tổng giá cho sản phẩm
+            const price = parseFloat(cartItem.dataset.price);
+            const discountPrice = parseFloat(cartItem.dataset.discountPrice) || 0;
+            const totalPriceElement = cartItem.querySelector('.total-price');
+            const total = discountPrice * newQuantity;
+            totalPriceElement.innerText = `₫${total.toFixed(0)}`;
+
+            // Cập nhật subtotal
+            const shopId = cartItem.dataset.shopId;
+            const subtotalElement = document.querySelector(`#subtotal-${shopId}`);
+            const groupSubtotal = Array.from(document.querySelectorAll(`table[data-shop-id="${shopId}"] .total-price`))
+                .reduce((sum, el) => sum + parseFloat(el.innerText.replace('₫', '').replace(/,/g, '')), 0);
+            subtotalElement.innerText = `₫${groupSubtotal.toFixed(0)}`;
+
+            // Cập nhật tổng giỏ hàng
+            const totalAmountElement = document.querySelector("#total-amount");
+            const overallTotal = Array.from(document.querySelectorAll(`.total-price`))
+                .reduce((sum, el) => sum + parseFloat(el.innerText.replace('₫', '').replace(/,/g, '')), 0);
+            totalAmountElement.innerText = `₫${overallTotal.toFixed(0)}`;
+        } else {
+            // Khôi phục lại số lượng nếu có lỗi
+            cartItem.querySelector(`#quantity-${cartItemId}`).value = currentQuantity; // Khôi phục giá trị trước đó
+            alert("An error occurred while updating the quantity.");
+            location.reload(); // Tải lại trang
+        }
+    }
+
+
+    async function removeCartItem(cartItemId) {
+        if (!confirm("Are you sure you want to delete this item?")) return;
+
+        const response = await fetch(`?handler=Delete&cartItemId=${cartItemId}`, {
+            method: "POST",
+            headers: {
+                "RequestVerificationToken": document.querySelector('input[name="__RequestVerificationToken"]').value
+            }
+        });
+
+        if (response.ok) {
+            location.reload();
+        } else {
+            alert("An error occurred while trying to delete the item.");
+        }
+    }
+
+    async function checkout() {
+        const cartItems = @Html.Raw(Json.Serialize(Model.CartItems)); // Chuyển đổi CartItems thành JSON
+
+        // Lưu trữ thông tin vào localStorage
+        localStorage.setItem('cartItems', JSON.stringify(cartItems));
+
+        // Chuyển hướng đến trang checkout
+        window.location.href = '/Checkout'; // Đảm bảo đường dẫn đúng với trang checkout của bạn
+    }
+</script>

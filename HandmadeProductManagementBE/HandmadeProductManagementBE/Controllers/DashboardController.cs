@@ -24,14 +24,6 @@ using Microsoft.AspNetCore.Mvc;
                 _dashboardService = dashboardService;
             }
 
-        [HttpGet("sales/trend")]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> GetSalesTrend()
-        {
-            var salesTrendDto = await _dashboardService.GetSalesTrendAsync();
-            return Ok(BaseResponse<SalesTrendDto>.OkResponse(salesTrendDto));
-        }
-
         [HttpGet("total-orders-by-status")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetTotalOrdersByStatus()
@@ -63,15 +55,6 @@ using Microsoft.AspNetCore.Mvc;
             var topShops = await _dashboardService.GetTop10Shops();
             return Ok(BaseResponse<List<TopShopDashboardDTO>>.OkResponse(topShops));
         }
-
-        [HttpGet("top-sales-shops")]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> GetTop10SalesShops()
-        {
-            var topShops = await _dashboardService.GetTop10ShopsByTotalSalesAsync();
-            return Ok(BaseResponse<List<TopShopDto>>.OkResponse(topShops));
-        }
-
 
         [HttpPost("TotalSaleByShopId")]
         [Authorize(Roles = "Admin")]
