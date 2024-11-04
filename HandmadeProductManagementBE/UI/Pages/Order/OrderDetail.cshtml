@@ -7,7 +7,6 @@
     var statusMapping = new List<KeyValuePair<string, string>>
     {
         new("Pending", "Order Placed"),
-        new("Awaiting Payment", "Order is awaiting payment"),
         new("Processing", "Order is being prepared"),
         new("Delivering", "Order is being shipped"),
         new("Delivery Failed", "Delivery Failed"),
@@ -34,7 +33,6 @@
         return lastStatus switch
         {
             "Pending" => "Order Placed",
-            "Awaiting Payment" => "Order is awaiting payment",
             "Processing" => "Order is being prepared",
             "Delivering" => "Order is being shipped",
             "Delivery Failed" => "Delivery Failed",
@@ -56,9 +54,6 @@
     if (!finalStatuses.Any(kv => kv.Key == "Pending"))
         finalStatuses.Add(new KeyValuePair<string, Tuple<string, DateTime?>>("Pending", new Tuple<string, DateTime?>("Order Placed", null)));
 
-    if (!finalStatuses.Any(kv => kv.Key == "Awaiting Payment"))
-        finalStatuses.Add(new KeyValuePair<string, Tuple<string, DateTime?>>("Awaiting Payment", new Tuple<string, DateTime?>("Order is awaiting payment", null)));
-
     if (!finalStatuses.Any(kv => kv.Key == "Processing"))
         finalStatuses.Add(new KeyValuePair<string, Tuple<string, DateTime?>>("Processing", new Tuple<string, DateTime?>("Order is being prepared", null)));
 
@@ -70,7 +65,7 @@
 
     foreach (var status in statusList)
     {
-        if (status.Status == "Pending" || status.Status == "Awaiting Payment" || status.Status == "Processing")
+        if (status.Status == "Pending" || status.Status == "Processing")
         {
             var existingStatus = finalStatuses.FirstOrDefault(kv => kv.Key == status.Status);
             if (existingStatus.Key != null)
@@ -98,7 +93,7 @@
         {
             finalStatuses.Add(new KeyValuePair<string, Tuple<string, DateTime?>>("Delivering", new Tuple<string, DateTime?>("Order is being shipped", status.ChangeTime)));
         }
-        else if (status.Status != "Pending" && status.Status != "Awaiting Payment" && status.Status != "Processing" && status.Status != "Delivering")
+        else if (status.Status != "Pending" && status.Status != "Processing" && status.Status != "Delivering")
         {
             var matchingStatus = statusMapping.FirstOrDefault(kv => kv.Key == status.Status);
             if (matchingStatus.Key != null)
