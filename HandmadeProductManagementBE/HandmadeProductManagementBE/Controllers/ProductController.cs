@@ -125,7 +125,7 @@ namespace HandmadeProductManagementAPI.Controllers
 
         [HttpPost]
         [Authorize(Roles = "Seller")]
-        public async Task<IActionResult> CreateProduct(ProductForCreationDto productForCreation)
+        public async Task<IActionResult> CreateProduct([FromBody] ProductForCreationDto productForCreation)
         {
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
 
