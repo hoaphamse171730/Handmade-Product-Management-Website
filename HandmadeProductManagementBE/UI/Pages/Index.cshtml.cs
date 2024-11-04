@@ -26,6 +26,8 @@ namespace UI.Pages
         public List<CategoryDto> Categories { get; set; } = new List<CategoryDto>();
         public string Token { get; set; }
         public List<ProductSearchVM>? Products { get; set; }
+        public string? ErrorMessage { get; set; }
+        public string? ErrorDetail { get; set; }
 
         public int PageNumber { get; set; } = 1;
         public int PageSize { get; set; } = 12;
@@ -34,49 +36,61 @@ namespace UI.Pages
 
         public async Task OnGetAsync([FromQuery] string? Name, [FromQuery] string? CategoryId, [FromQuery] string? Status, [FromQuery] decimal? MinRating, [FromQuery] string SortOption, [FromQuery] bool SortDescending, int pageNumber = 1, int pageSize = 12)
         {
-            Token = HttpContext.Session.GetString("Token");
-            ViewData["Token"] = Token;
-            Top10SellingProducts = await LoadProductsAsync<TopSellingProducts>("/api/dashboard/top-10-selling-products");
-            Top10NewProducts = await LoadProductsAsync<ProductForDashboard>("/api/dashboard/top-10-new-products");
-            await LoadCategoriesAsync();
-
-            PageNumber = pageNumber;
-            PageSize = pageSize;
-
-            var searchFilter = new ProductSearchFilter
+            try
             {
-                Name = Name,
-                CategoryId = CategoryId,
-                Status = Status,
-                MinRating = MinRating,
-                SortOption = SortOption,
-                SortDescending = SortDescending
-            };
-            var queryParameters = new Dictionary<string, string?>
+                Token = HttpContext.Session.GetString("Token");
+                ViewData["Token"] = Token;
+                Top10SellingProducts = await LoadProductsAsync<TopSellingProducts>("/api/dashboard/top-10-selling-products");
+                Top10NewProducts = await LoadProductsAsync<ProductForDashboard>("/api/dashboard/top-10-new-products");
+                await LoadCategoriesAsync();
+
+                PageNumber = pageNumber;
+                PageSize = pageSize;
+
+                var searchFilter = new ProductSearchFilter
+                {
+                    Name = Name,
+                    CategoryId = CategoryId,
+                    Status = Status,
+                    MinRating = MinRating,
+                    SortOption = SortOption,
+                    SortDescending = SortDescending
+                };
+                var queryParameters = new Dictionary<string, string?>
+                {
+                    { "Name", Name },
+                    { "CategoryId", CategoryId },
+                    { "Status", Status },
+                    { "MinRating", MinRating?.ToString() },
+                    { "SortOption", SortOption },
+                    { "SortDescending", SortDescending.ToString() }
+                };
+                var filteredParams = queryParameters
+        .Where(kvp => !string.IsNullOrEmpty(kvp.Value))
+        .Select(kvp => $"{kvp.Key}={Uri.EscapeDataString(kvp.Value!)}");
+
+                CurrentFilters = string.Join("&", filteredParams);
+
+                var response = await _apiResponseHelper.GetAsync<List<ProductSearchVM>>($"{Constants.ApiBaseUrl}/api/product/search?pageNumber={PageNumber}&pageSize={PageSize}", searchFilter);
+
+                if (response.StatusCode == StatusCodeHelper.OK && response.Data != null)
+                {
+                    Products = response.Data;
+                    HasNextPage = Products.Count == PageSize;
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, response.Message ?? "An error occurred while fetching products.");
+                }
+            
+            } catch (BaseException.ErrorException ex)
             {
-                { "Name", Name },
-                { "CategoryId", CategoryId },
-                { "Status", Status },
-                { "MinRating", MinRating?.ToString() },
-                { "SortOption", SortOption },
-                { "SortDescending", SortDescending.ToString() }
-            };
-            var filteredParams = queryParameters
-    .Where(kvp => !string.IsNullOrEmpty(kvp.Value))
-    .Select(kvp => $"{kvp.Key}={Uri.EscapeDataString(kvp.Value!)}");
-
-            CurrentFilters = string.Join("&", filteredParams);
-
-            var response = await _apiResponseHelper.GetAsync<List<ProductSearchVM>>($"{Constants.ApiBaseUrl}/api/product/search?pageNumber={PageNumber}&pageSize={PageSize}", searchFilter);
-
-            if (response.StatusCode == StatusCodeHelper.OK && response.Data != null)
-            {
-                Products = response.Data;
-                HasNextPage = Products.Count == PageSize;
+                ErrorMessage = ex.ErrorDetail.ErrorCode;
+                ErrorDetail = ex.ErrorDetail.ErrorMessage?.ToString();
             }
-            else
+            catch (Exception ex)
             {
-                ModelState.AddModelError(string.Empty, response.Message ?? "An error occurred while fetching products.");
+                ErrorMessage = "An unexpected error occurred.";
             }
         }
 
