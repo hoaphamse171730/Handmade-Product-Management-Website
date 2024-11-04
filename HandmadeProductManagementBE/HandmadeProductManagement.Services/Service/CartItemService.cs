@@ -153,12 +153,7 @@ namespace HandmadeProductManagement.Services.Service
                     ShopId = ci.ProductItem!.Product!.Shop!.Id,
                     ShopName = ci.ProductItem.Product.Shop.Name,
                     UnitPrice = ci.ProductItem.Price,
-                    DiscountPrice = ci.ProductItem.Price * (1 - ((ci.ProductItem.Product!.Category!.Promotion != null
-                           && ci.ProductItem.Product.Category.Promotion.Status.Equals("active", StringComparison.OrdinalIgnoreCase)
-                           && DateTime.Now >= ci.ProductItem.Product.Category.Promotion.StartDate
-                           && DateTime.Now <= ci.ProductItem.Product.Category.Promotion.EndDate)
-                           ? ci.ProductItem.Product.Category.Promotion.DiscountRate
-                           : 0)),
+                    DiscountPrice = ci.ProductItem.Price * (1 - (ci.ProductItem.Product!.Category!.Promotion != null && ci.ProductItem.Product.Category.Promotion.Status.Equals("active", StringComparison.OrdinalIgnoreCase) ? ci.ProductItem.Product.Category.Promotion.DiscountRate : 0)),
                     ProductId = ci.ProductItem.Product.Id,
                     ProductName = ci.ProductItem.Product.Name,
                     // Lấy URL của hình ảnh cuối cùng
