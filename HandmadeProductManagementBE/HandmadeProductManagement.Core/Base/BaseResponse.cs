@@ -10,6 +10,10 @@ namespace HandmadeProductManagement.Core.Base
         public StatusCodeHelper StatusCode { get; set; }
         public string? Code { get; set; }
 
+        public BaseResponse()
+        {
+            
+        }
         public BaseResponse(StatusCodeHelper statusCode, string code, T? data, string? message)
         {
             Data = data;
@@ -30,10 +34,6 @@ namespace HandmadeProductManagement.Core.Base
             Message = message;
             StatusCode = statusCode;
             Code = code;
-        }
-
-        public BaseResponse()
-        {
         }
 
         public static BaseResponse<T> OkResponse(T? data)
