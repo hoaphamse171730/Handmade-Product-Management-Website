@@ -266,65 +266,39 @@ namespace UI.Pages.Seller
 
                 try
                 {
-                    //_logger.LogInformation("Starting product creation process");
-
-                    //if (!ModelState.IsValid)
-                    //{
-                    //    return new JsonResult(ModelState.ToDictionary(
-                    //        kvp => kvp.Key,
-                    //        kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray()
-                    //    ))
-                    //    { StatusCode = 400 };
-                    //}
-
-                    // First create the product
-                    var createProductResponse = await _apiResponseHelper.PostAsync<string>(
-                        $"{Constants.ApiBaseUrl}/api/product?",
-                        NewProduct);
-
-                    if (createProductResponse.StatusCode != StatusCodeHelper.OK)
+                    _logger.LogInformation("Starting product creation process");
+                    ModelState.Clear();
+                    TryValidateModel(NewProduct);
+                    if (!ModelState.IsValid)
                     {
-                        _logger.LogError("Failed to create product. API Response: {Message}",
-                            createProductResponse.Message);
-                        return new JsonResult(new { error = createProductResponse.Message })
+                        return new JsonResult(ModelState.ToDictionary(
+                            kvp => kvp.Key,
+                            kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray()
+                        ))
                         { StatusCode = 400 };
                     }
+                    // Goi API POST ko bi loi
+                    Token = HttpContext.Session.GetString("Token");
+                    var client = _httpClientFactory.CreateClient();
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Token);
+                    var response = await client.PostAsJsonAsync($"{Constants.ApiBaseUrl}/api/product", NewProduct);
 
-                    string productId = createProductResponse.Data ?? string.Empty;
-
-                    // Handle image uploads if product creation was successful
-                    if (ProductImages != null && ProductImages.Any())
+                    if (response.IsSuccessStatusCode)
                     {
-                        foreach (var image in ProductImages)
+                        var content = await response.Content.ReadAsStringAsync();
+                        var options = new JsonSerializerOptions
                         {
-                            try
-                            {
-                                var formData = new MultipartFormDataContent();
-                                var fileContent = new StreamContent(image.OpenReadStream());
-                                fileContent.Headers.ContentType =
-                                    MediaTypeHeaderValue.Parse(image.ContentType);
-                                formData.Add(fileContent, "file", image.FileName);
+                            PropertyNameCaseInsensitive = true
+                        };
+                        var baseResponse = JsonSerializer.Deserialize<BaseResponse<bool>>(content, options);
 
-                                var uploadResponse = await _apiResponseHelper.PostMultipartAsync<bool>(
-                                    $"{Constants.ApiBaseUrl}/api/productimage/upload?productId={productId}",
-                                    formData);
-
-                                if (uploadResponse.StatusCode != StatusCodeHelper.OK)
-                                {
-                                    _logger.LogError("Failed to upload image {FileName}. Response: {Message}",
-                                        image.FileName, uploadResponse.Message);
-                                }
-                            }
-                            catch (Exception imageEx)
-                            {
-                                _logger.LogError(imageEx, "Error uploading image {FileName}",
-                                    image.FileName);
-                            }
+                        if (baseResponse != null && baseResponse.StatusCode == StatusCodeHelper.OK)
+                        {
+                            return Page();
                         }
-                    }
 
-                    _logger.LogInformation("Product creation completed successfully");
-                    return new JsonResult(new { success = true, productId });
+                        ModelState.AddModelError(string.Empty, baseResponse?.Message ?? "Error updating user information.");
+                    }
                 }
                 catch (Exception ex)
                 {
