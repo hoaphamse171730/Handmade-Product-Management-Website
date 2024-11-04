@@ -110,7 +110,7 @@ namespace UI.Pages.Seller
             };
 
             var response = await _apiResponseHelper.PatchAsync<object>(
-                $"{Constants.ApiBaseUrl}/api/order/status/offline?",
+                $"{Constants.ApiBaseUrl}/api/order/status?",
                 requestBody
             );
 

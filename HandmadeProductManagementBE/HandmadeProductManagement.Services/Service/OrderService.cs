@@ -1,4 +1,5 @@
-﻿using HandmadeProductManagement.Contract.Repositories.Entity;
+﻿using Google.Apis.Storage.v1.Data;
+using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
@@ -7,6 +8,7 @@ using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.Core.Utils;
 using HandmadeProductManagement.ModelViews.OrderDetailModelViews;
 using HandmadeProductManagement.ModelViews.OrderModelViews;
+using HandmadeProductManagement.ModelViews.PaymentDetailModelViews;
 using HandmadeProductManagement.ModelViews.StatusChangeModelViews;
 using HandmadeProductManagement.Repositories.Entity;
 using Microsoft.EntityFrameworkCore;
@@ -470,7 +472,7 @@ namespace HandmadeProductManagement.Services.Service
                 var validStatusTransitions = new Dictionary<string, List<string>>
                 {
                     { Constants.OrderStatusPending, new List<string> { Constants.OrderStatusCanceled, Constants.OrderStatusProcessing } },
-                    { Constants.OrderStatusProcessing, new List<string> { Constants.OrderStatusDelivering } },
+                    { Constants.OrderStatusProcessing, new List<string> { Constants.OrderStatusCanceled, Constants.OrderStatusDelivering } },
                     { Constants.OrderStatusDelivering, new List<string> { Constants.OrderStatusShipped, Constants.OrderStatusDeliveryFailed } },
                     { Constants.OrderStatusDeliveryFailed, new List<string> { Constants.OrderStatusOnHold } },
                     { Constants.OrderStatusOnHold, new List<string> { Constants.OrderStatusDeliveringRetry, Constants.OrderStatusRefundRequested, Constants.OrderStatusReturning } },
@@ -540,6 +542,21 @@ namespace HandmadeProductManagement.Services.Service
                         productItem.QuantityInStock += detail.ProductQuantity;
 
                         productItemRepository.Update(productItem);
+                    }
+
+                    var payment = await _paymentService.GetPaymentByOrderIdAsync(existingOrder.Id, userId);
+                    if(payment != null && payment.Method == Constants.PaymentMethodOffline)
+                    {
+                        await _paymentService.UpdatePaymentStatusAsync(payment.Id, Constants.PaymentStatusFailed, userId);
+                    }
+                }
+
+                if(updateStatusOrderDto.Status == Constants.OrderStatusShipped)
+                {
+                    var payment = await _paymentService.GetPaymentByOrderIdAsync(existingOrder.Id, userId);
+                    if(payment != null && payment.Method == Constants.PaymentMethodOffline)
+                    {
+                        await _paymentService.UpdatePaymentStatusAsync(payment.Id, Constants.PaymentStatusCompleted, userId);
                     }
                 }
 

@@ -27,6 +27,7 @@ namespace UI.Pages.Product
         public List<CategoryDto>? Categories { get; set; }
 
         public string? ErrorMessage { get; set; }
+        public string? ErrorDetail { get; set; }
 
         //Step 2: Define PageNumber & PageSize like this
         public int PageNumber { get; set; } = 1;
@@ -89,18 +90,16 @@ namespace UI.Pages.Product
                     ModelState.AddModelError(string.Empty, response.Message ?? "An error occurred while fetching products.");
                 }
             }
-            catch (BaseException.BadRequestException ex)
+            catch (BaseException.ErrorException ex)
             {
-                ErrorMessage = ex.Message;
-            }
-            catch (BaseException.UnauthorizedException ex)
-            {
-                ErrorMessage = ex.Message;
+                ErrorMessage = ex.ErrorDetail.ErrorCode;
+                ErrorDetail = ex.ErrorDetail.ErrorMessage?.ToString();
             }
             catch (Exception ex)
             {
                 ErrorMessage = "An unexpected error occurred.";
             }
+
 
         }
 
