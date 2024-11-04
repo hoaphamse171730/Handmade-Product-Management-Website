@@ -1,4 +1,5 @@
 ﻿@page
+@using UI.Pages.Shared
 @model UI.Pages.ProductDetail.ProductDetailModel
 
 @{
@@ -21,7 +22,17 @@
         -moz-appearance: textfield;
     }
 </style>
-
+@{
+    var errorModel = new ErrorMessageModel
+            {
+                ErrorMessage = Model.ErrorMessage,
+                ErrorDetail = Model.ErrorDetail
+            };
+}
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <partial name="_ErrorMessage" model="errorModel" />
+}
 <div class="flex flex-wrap p-6">
     <!-- Left side: Product Images -->
     <div class="z-10 fixed right-0 rounded-full bottom-0 mr-5 mb-5 sm:mr-6 sm:mb-6 shadow-2xl">
