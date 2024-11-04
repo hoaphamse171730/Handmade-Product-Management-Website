@@ -19,6 +19,12 @@ using Microsoft.IdentityModel.Tokens;
 using System.ComponentModel.DataAnnotations;
 using HandmadeProductManagement.ModelViews.VariationCombinationModelViews;
 using System.Security.Claims;
+using System.Collections.Generic;
+using Microsoft.Extensions.Primitives;
+using static HandmadeProductManagement.Core.Base.BaseException;
+using HandmadeProductManagement.ModelViews.ProductDetailModelViews;
+using HandmadeProductManagement.ModelViews.ProductItemModelViews;
+using HandmadeProductManagement.ModelViews.ProductImageModelViews;
 
 namespace UI.Pages.Product
 {
@@ -28,12 +34,14 @@ namespace UI.Pages.Product
         private readonly ApiResponseHelper _apiResponseHelper;
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly ILogger<ProductSellerModel> _logger;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public ProductSellerModel(ApiResponseHelper apiResponseHelper, IHttpClientFactory httpClientFactory, ILogger<ProductSellerModel> logger)
+        public ProductSellerModel(ApiResponseHelper apiResponseHelper, IHttpClientFactory httpClientFactory, ILogger<ProductSellerModel> logger, IHttpContextAccessor httpContextAccessor)
         {
             _apiResponseHelper = apiResponseHelper ?? throw new ArgumentNullException(nameof(apiResponseHelper));
             _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
         }
 
         public List<ProductSearchVM>? Products { get; set; }
@@ -52,6 +60,7 @@ namespace UI.Pages.Product
             int pageSize = 12)
         {
             await LoadCategoriesAsync();
+
             PageNumber = pageNumber;
             PageSize = pageSize;
 
@@ -106,272 +115,6 @@ namespace UI.Pages.Product
             }
         }
 
-        public List<VariationDto>? Variations { get; set; }
-
-        [BindProperty]
-        public IList<IFormFile> ProductImages { get; set; } = new List<IFormFile>();
-
-        [BindProperty]
-        public Dictionary<string, List<VariationOptionDto>> VariationOptions { get; set; } = new();
-
-        public async Task<IActionResult> OnPostUploadImagesAsync(IFormFile file, string productId)
-        {
-            try
-            {
-                if (file == null || string.IsNullOrEmpty(productId))
-                {
-                    _logger.LogError("File or Product ID is missing.");
-                    return new JsonResult(new { error = "File or Product ID is missing" }) { StatusCode = 400 };
-                }
-
-                _logger.LogInformation("Starting image upload for Product ID: {ProductId} with File: {FileName}", productId, file.FileName);
-
-                var formData = new MultipartFormDataContent();
-                var fileContent = new StreamContent(file.OpenReadStream());
-                fileContent.Headers.ContentType = new MediaTypeHeaderValue(file.ContentType);
-                formData.Add(fileContent, "file", file.FileName);
-                formData.Add(new StringContent(productId.ToString()), "productId");
-
-                var response = await _apiResponseHelper.PostMultipartAsync<bool>(
-                    $"{Constants.ApiBaseUrl}/api/ProductImage/Upload",
-                    formData,
-                    file.FileName,    // Pass the file name here
-                    productId.ToString()         // Pass the product ID here
-                );
-
-                if (response.StatusCode == StatusCodeHelper.OK && response.Data)
-                {
-                    _logger.LogInformation("Image uploaded successfully for Product ID: {ProductId}", productId);
-                    return new JsonResult(new { success = true });
-                }
-
-                _logger.LogError("Failed to upload image for Product ID: {ProductId}. API Response: {Message}", productId, response.Message);
-                return new JsonResult(new { error = response.Message }) { StatusCode = 500 };
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Unhandled error in OnPostUploadImagesAsync for Product ID: {ProductId}", productId);
-                return new JsonResult(new { error = "An unexpected error occurred while uploading the image.", details = ex.Message })
-                { StatusCode = 500 };
-            }
-        }
-
-        public async Task<IActionResult> OnPostCreateProductAsync([FromBody] ProductRequestModel productRequest, IList<IFormFile> productImages)
-        {
-            try
-            {
-                _logger.LogInformation("Starting product creation process");
-
-                if (!ModelState.IsValid)
-                {
-                    return new JsonResult(new { error = "Invalid model state" }) { StatusCode = 400 };
-                }
-
-                // Create the product
-                var createProductRequest = new
-                {
-                    name = productRequest.Name,
-                    categoryId = productRequest.CategoryId,
-                    description = productRequest.Description,
-                    variations = productRequest.Variations?.Select(v => new 
-                    {
-                        id = v.Id,
-                        categoryId = productRequest.CategoryId,
-                        variationOptionIds = v.VariationOptionIds
-                    }).ToList(),
-                    variationCombinations = productRequest.VariationCombinations?.Select(c => new
-                    {
-                        variationOptionIds = c.VariationOptionIds,
-                        price = c.Price,
-                        quantityInStock = c.QuantityInStock
-                    }).ToList()
-                };
-
-                var createProductResponse = await _apiResponseHelper.PostAsync<bool>(
-                    $"{Constants.ApiBaseUrl}/api/product",
-                    createProductRequest);
-
-                if (createProductResponse.StatusCode != StatusCodeHelper.OK || !createProductResponse.Data)
-                {
-                    _logger.LogError("Failed to create product. API Response: {Message}", createProductResponse.Message);
-                    return new JsonResult(new { error = createProductResponse.Message }) { StatusCode = 400 };
-                }
-
-                // Get the latest product ID
-                var userProductsResponse = await _apiResponseHelper.GetAsync<List<ProductOverviewDto>>(
-                    $"{Constants.ApiBaseUrl}/api/product/user?pageNumber=1&pageSize=1");
-
-                if (userProductsResponse.StatusCode != StatusCodeHelper.OK ||
-                    userProductsResponse.Data == null ||
-                    !userProductsResponse.Data.Any())
-                {
-                    return new JsonResult(new { error = "Failed to retrieve product ID" }) { StatusCode = 500 };
-                }
-
-                var newProductId = userProductsResponse.Data.First().Id;
-
-                // Upload images
-                if (productImages != null && productImages.Count > 0)
-                {
-                    foreach (var image in productImages)
-                    {
-                        var uploadResponse = await OnPostUploadImagesAsync(image, newProductId);
-                    }
-                }
-
-                return new JsonResult(new
-                {
-                    success = true,
-                    productId = newProductId
-                });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Unhandled error in product creation");
-                return new JsonResult(new
-                {
-                    error = "An unexpected error occurred while creating the product.",
-                    details = ex.Message
-                })
-                { StatusCode = 500 };
-            }
-        }
-
-        public async Task<IActionResult> OnGetVariationsByCategoryAsync(string categoryId)
-        {
-            try
-            {
-                var response = await _apiResponseHelper.GetAsync<List<VariationDto>>(
-                    $"{Constants.ApiBaseUrl}/api/variation/category/{categoryId}");
-
-                if (response.StatusCode == StatusCodeHelper.OK && response.Data != null)
-                {
-                    var variationsWithOptions = new List<object>();
-
-                    // Load variation options for each variation
-                    foreach (var variation in response.Data)
-                    {
-                        var optionsResponse = await _apiResponseHelper.GetAsync<List<VariationOptionDto>>(
-                            $"{Constants.ApiBaseUrl}/api/variationoption/variation/{variation.Id}");
-
-                        if (optionsResponse.StatusCode == StatusCodeHelper.OK)
-                        {
-                            // Create an anonymous object combining variation and its options
-                            variationsWithOptions.Add(new
-                            {
-                                id = variation.Id,
-                                name = variation.Name,
-                                categoryId = variation.CategoryId,
-                                variationOptions = optionsResponse.Data
-                            });
-                        }
-                    }
-
-                    return new JsonResult(variationsWithOptions);
-                }
-
-                return new JsonResult(new List<object>());
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error loading variations for category {CategoryId}", categoryId);
-                return new JsonResult(new List<object>());
-            }
-        }
-
-        private async Task<List<VariationDto>> LoadVariationsAsync(string categoryId)
-        {
-            var response = await _apiResponseHelper.GetAsync<List<VariationDto>>(
-                $"{Constants.ApiBaseUrl}/api/variation/category/{categoryId}");
-
-            if (response.StatusCode == StatusCodeHelper.OK && response.Data != null)
-            {
-                // Store variations
-                Variations = response.Data;
-
-                // Load and store options for each variation
-                foreach (var variation in response.Data)
-                {
-                    var optionsResponse = await _apiResponseHelper.GetAsync<List<VariationOptionDto>>(
-                        $"{Constants.ApiBaseUrl}/api/variationoption/variation/{variation.Id}");
-
-                    if (optionsResponse.StatusCode == StatusCodeHelper.OK && optionsResponse.Data != null)
-                    {
-                        VariationOptions[variation.Id] = optionsResponse.Data;
-                    }
-                }
-
-                return response.Data;
-            }
-
-            return new List<VariationDto>();
-        }
-
-        public async Task<IActionResult> OnGetProductDetailsAsync(string id)
-        {
-            var response = await _apiResponseHelper.GetAsync<ProductSearchVM>(
-                $"{Constants.ApiBaseUrl}/api/product/{id}");
-
-            if (response.StatusCode == StatusCodeHelper.OK && response.Data != null)
-            {
-                return new JsonResult(response.Data);
-            }
-
-            return new JsonResult(new { error = "Product not found" }) { StatusCode = 404 };
-        }
-
-        public async Task<IActionResult> OnPostUpdateProductAsync(string id)
-        {
-            try
-            {
-                // Read the form data
-                var formData = await Request.ReadFormAsync();
-                var productRequest = new ProductRequestModel
-                {
-                    Name = formData["Name"],
-                    CategoryId = formData["CategoryId"],
-                    Description = formData["Description"],
-                    VariationCombinations = JsonSerializer.Deserialize<List<VariationCombinationModel>>(
-                        formData["VariationCombinations"])
-                };
-
-                // Update product via API
-                var updateResponse = await _apiResponseHelper.PatchAsync<bool>(
-                    $"{Constants.ApiBaseUrl}/api/product/{id}",
-                    productRequest);
-
-                if (updateResponse.StatusCode != StatusCodeHelper.OK)
-                {
-                    return new JsonResult(new { error = updateResponse.Message }) { StatusCode = 400 };
-                }
-
-                // Handle image uploads if any
-                if (Request.Form.Files.Count > 0)
-                {
-                    foreach (var file in Request.Form.Files)
-                    {
-                        var uploadResponse = await _apiResponseHelper.PostFileAsync<BaseResponse<string>>(
-                            $"{Constants.ApiBaseUrl}/api/productimage/upload?productId={id}",
-                            file);
-
-                        if (uploadResponse.StatusCode != StatusCodeHelper.OK)
-                        {
-                            _logger.LogError("Failed to upload image {FileName}", file.FileName);
-                        }
-                    }
-                }
-
-                return new JsonResult(new { success = true });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error updating product {ProductId}", id);
-                return new JsonResult(new { error = "An error occurred while updating the product" })
-                { StatusCode = 500 };
-            }
-        }
-
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> OnPostToggleProductStatusAsync(string productId, bool isAvailable)
         {
             try
@@ -419,58 +162,741 @@ namespace UI.Pages.Product
             }
         }
 
-        public async Task<IActionResult> OnPostDeleteProductImageAsync(string imageId)
+        //public async Task<IActionResult> OnPostDeleteProductImageAsync(string imageId)
+        //{
+        //    try
+        //    {
+        //        var response = await _apiResponseHelper.DeleteAsync<bool>(
+        //            $"{Constants.ApiBaseUrl}/api/productimage/{imageId}");
+
+        //        if (response.StatusCode == StatusCodeHelper.OK)
+        //        {
+        //            return new JsonResult(new { success = true });
+        //        }
+
+        //        return new JsonResult(new { error = response.Message }) { StatusCode = 400 };
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, "Error deleting product image {ImageId}", imageId);
+        //        return new JsonResult(new { error = "An error occurred while deleting the image" })
+        //        { StatusCode = 500 };
+        //    }
+        //}
+
+        [BindProperty]
+        public ProductForCreationDto ProductCreation { get; set; } = new ProductForCreationDto();
+
+        [BindProperty]
+        public List<IFormFile> ProductImages { get; set; } = new List<IFormFile>();
+
+        [BindProperty]
+        public List<NewVariationDto> NewVariations { get; set; } = new List<NewVariationDto>();
+        public List<VariationDto>? CategoryVariations { get; set; }
+        public List<VariationOptionDto>? VariationOptions { get; set; }
+        public class NewVariationDto
+        {
+            public string Name { get; set; } = string.Empty;
+            public List<string> Options { get; set; } = new List<string>();
+        }
+
+        public async Task<IActionResult> OnPostCreateProductAsync()
+        {
+            try
+            {
+                if (!ModelState.IsValid ||
+                    string.IsNullOrEmpty(ProductCreation.Name) ||
+                    string.IsNullOrEmpty(ProductCreation.Description) ||
+                    string.IsNullOrEmpty(ProductCreation.CategoryId))
+                {
+                    return new JsonResult(new { success = false, message = "Invalid product data" });
+                }
+
+                var shopResponse = await _apiResponseHelper.GetAsync<ShopResponseModel>($"{Constants.ApiBaseUrl}/api/shop/user");
+                if (shopResponse.StatusCode != StatusCodeHelper.OK || shopResponse.Data == null)
+                {
+                    return new JsonResult(new { success = false, message = "Could not retrieve shop information" });
+                }
+
+                ProductCreation.ShopId = shopResponse.Data.Id;
+
+                var variations = new List<VariationForProductCreationDto>();
+                var existingVariationInputs = Request.Form.Keys
+                    .Where(k => k.StartsWith("variation_"))
+                    .Select(k => new
+                    {
+                        VariationId = k.Replace("variation_", ""),
+                        OptionId = Request.Form[k].ToString()
+                    })
+                    .Where(v => !string.IsNullOrEmpty(v.OptionId))
+                    .Select(v => new VariationForProductCreationDto
+                    {
+                        Id = v.VariationId,
+                        VariationOptionIds = new List<string> { v.OptionId }
+                    })
+                    .ToList();
+
+                variations.AddRange(existingVariationInputs);
+
+                if (!variations.Any())
+                {
+                    return new JsonResult(new { success = false, message = "At least one variation is required" });
+                }
+
+                var variationCombinations = ParseVariationCombinations();
+                if (!variationCombinations.Any())
+                {
+                    return new JsonResult(new { success = false, message = "At least one variation combination is required" });
+                }
+
+                var productCreation = new
+                {
+                    name = ProductCreation.Name,
+                    description = ProductCreation.Description,
+                    categoryId = ProductCreation.CategoryId,
+                    shopId = shopResponse.Data.Id,
+                    variations = variations,
+                    variationCombinations = variationCombinations
+                };
+
+                var createProductResponse = await _apiResponseHelper.PostAsync<bool>(
+                    $"{Constants.ApiBaseUrl}/api/product",
+                    productCreation);
+
+                if (createProductResponse.StatusCode != StatusCodeHelper.OK || !createProductResponse.Data)
+                {
+                    return new JsonResult(new { success = false, message = "Failed to create product" });
+                }
+
+                if (ProductImages?.Any() == true)
+                {
+                    await HandleImageUploads();
+                }
+
+                return RedirectToPage("/Product/ProductSeller");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating product");
+                return new JsonResult(new { success = false, message = $"Error creating product: {ex.Message}" });
+            }
+        }
+
+        private List<VariationCombinationDto> ParseVariationCombinations()
+        {
+            var combinations = new List<VariationCombinationDto>();
+            var combinationCount = Request.Form
+                .Where(x => x.Key.StartsWith("VariationCombinations[") && x.Key.EndsWith("].Price"))
+                .Count();
+
+            for (int i = 0; i < combinationCount; i++)
+            {
+                if (int.TryParse(Request.Form[$"VariationCombinations[{i}].Price"], out int price) &&
+                    int.TryParse(Request.Form[$"VariationCombinations[{i}].Stock"], out int stock))
+                {
+                    var optionIds = Request.Form[$"VariationCombinations[{i}].OptionIds"]
+                        .ToString()
+                        .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                        .ToList();
+
+                    combinations.Add(new VariationCombinationDto
+                    {
+                        VariationOptionIds = optionIds,
+                        Price = price,
+                        QuantityInStock = stock
+                    });
+                }
+            }
+
+            return combinations;
+        }
+
+        private async Task HandleImageUploads()
+        {
+            var latestProductsResponse = await _apiResponseHelper.GetAsync<List<ProductOverviewDto>>(
+                $"{Constants.ApiBaseUrl}/api/product/user?pageNumber=1&pageSize=1");
+
+            if (latestProductsResponse.StatusCode == StatusCodeHelper.OK &&
+                latestProductsResponse.Data?.Any() == true)
+            {
+                var latestProductId = latestProductsResponse.Data.First().Id;
+
+                foreach (var image in ProductImages)
+                {
+                    if (image != null && image.Length > 0)
+                    {
+                        var uploadResponse = await _apiResponseHelper.UploadImageAsync(
+                            $"{Constants.ApiBaseUrl}/api/productimage/Upload",
+                            image,
+                            latestProductId);
+
+                        if (uploadResponse.StatusCode != StatusCodeHelper.OK || !uploadResponse.Data)
+                        {
+                            _logger.LogError($"Failed to upload image for product {latestProductId}");
+                        }
+                    }
+                }
+            }
+        }
+
+        public async Task<IActionResult> OnPostCreateVariationAsync([FromBody] CreateVariationRequest request)
+        {
+            try
+            {
+                // Create variation
+                var variationCreationDto = new
+                {
+                    name = request.Name,
+                    categoryId = request.CategoryId
+                };
+
+                var createVariationResponse = await _apiResponseHelper.PostAsync<bool>(
+                    $"{Constants.ApiBaseUrl}/api/variation",
+                    variationCreationDto);
+
+                if (createVariationResponse.StatusCode != StatusCodeHelper.OK || !createVariationResponse.Data)
+                {
+                    return new JsonResult(new { success = false, message = "Failed to create variation" });
+                }
+
+                // Get latest variation ID
+                var latestVariationResponse = await _apiResponseHelper.GetAsync<LatestVariationId>(
+                    $"{Constants.ApiBaseUrl}/api/variation/latest?categoryId={request.CategoryId}");
+
+                if (latestVariationResponse.StatusCode != StatusCodeHelper.OK ||
+                    string.IsNullOrEmpty(latestVariationResponse.Data?.Id))
+                {
+                    return new JsonResult(new { success = false, message = "Failed to retrieve variation ID" });
+                }
+
+                var variationId = latestVariationResponse.Data.Id;
+                var optionIds = new List<string>();
+
+                // Create options
+                foreach (var optionValue in request.Options)
+                {
+                    var optionDto = new
+                    {
+                        value = optionValue,
+                        variationId = variationId
+                    };
+
+                    var createOptionResponse = await _apiResponseHelper.PostAsync<bool>(
+                        $"{Constants.ApiBaseUrl}/api/variationoption",
+                        optionDto);
+
+                    if (createOptionResponse.StatusCode != StatusCodeHelper.OK || !createOptionResponse.Data)
+                    {
+                        return new JsonResult(new { success = false, message = $"Failed to create option: {optionValue}" });
+                    }
+
+                    var latestOptionResponse = await _apiResponseHelper.GetAsync<LatestVariationOptionId>(
+                        $"{Constants.ApiBaseUrl}/api/variationoption/latest?variationId={variationId}");
+
+                    if (latestOptionResponse.StatusCode != StatusCodeHelper.OK ||
+                        string.IsNullOrEmpty(latestOptionResponse.Data?.Id))
+                    {
+                        return new JsonResult(new { success = false, message = "Failed to retrieve option ID" });
+                    }
+
+                    optionIds.Add(latestOptionResponse.Data.Id);
+                }
+
+                return new JsonResult(new
+                {
+                    success = true,
+                    variationId = variationId,
+                    optionIds = optionIds
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating variation");
+                return new JsonResult(new { success = false, message = ex.Message });
+            }
+        }
+
+        public async Task<IActionResult> OnPostCreateVariationOptionAsync([FromBody] CreateVariationOptionRequest request)
+        {
+            try
+            {
+                var optionDto = new
+                {
+                    value = request.Value,
+                    variationId = request.VariationId
+                };
+
+                var createOptionResponse = await _apiResponseHelper.PostAsync<bool>(
+                    $"{Constants.ApiBaseUrl}/api/variationoption",
+                    optionDto);
+
+                if (createOptionResponse.StatusCode != StatusCodeHelper.OK || !createOptionResponse.Data)
+                {
+                    return new JsonResult(new { success = false, message = "Failed to create option" });
+                }
+
+                var latestOptionResponse = await _apiResponseHelper.GetAsync<LatestVariationOptionId>(
+                    $"{Constants.ApiBaseUrl}/api/variationoption/latest?variationId={request.VariationId}");
+
+                if (latestOptionResponse.StatusCode != StatusCodeHelper.OK ||
+                    string.IsNullOrEmpty(latestOptionResponse.Data?.Id))
+                {
+                    return new JsonResult(new { success = false, message = "Failed to retrieve option ID" });
+                }
+
+                return new JsonResult(new
+                {
+                    success = true,
+                    optionId = latestOptionResponse.Data.Id
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating variation option");
+                return new JsonResult(new { success = false, message = ex.Message });
+            }
+        }
+
+        public class CreateVariationRequest
+        {
+            public string Name { get; set; }
+            public string CategoryId { get; set; }
+            public List<string> Options { get; set; }
+        }
+
+        public class CreateVariationOptionRequest
+        {
+            public string Value { get; set; }
+            public string VariationId { get; set; }
+        }
+
+        //public async Task<IActionResult> OnPostCreateVariationAsync([FromBody] dynamic data)
+        //{
+        //    try
+        //    {
+        //        var name = (string)data.name;
+        //        var categoryId = (string)data.categoryId;
+
+        //        var variationCreationDto = new { name, categoryId };
+        //        var createVariationResponse = await _apiResponseHelper.PostAsync<bool>($"{Constants.ApiBaseUrl}/api/variation", variationCreationDto);
+
+        //        if (createVariationResponse.StatusCode != StatusCodeHelper.OK || !createVariationResponse.Data)
+        //        {
+        //            return new JsonResult(new { success = false, message = $"Failed to create variation: {name}" });
+        //        }
+
+        //        var latestVariationResponse = await _apiResponseHelper.GetAsync<LatestVariationId>($"{Constants.ApiBaseUrl}/api/variation/latest?categoryId={categoryId}");
+        //        if (latestVariationResponse.StatusCode != StatusCodeHelper.OK || string.IsNullOrEmpty(latestVariationResponse.Data?.Id))
+        //        {
+        //            return new JsonResult(new { success = false, message = "Failed to retrieve variation ID" });
+        //        }
+
+        //        return new JsonResult(new { success = true, variationId = latestVariationResponse.Data.Id });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, "Error creating variation");
+        //        return new JsonResult(new { success = false, message = "An unexpected error occurred" });
+        //    }
+        //}
+
+        //public async Task<IActionResult> OnPostCreateVariationOptionAsync([FromBody] dynamic data)
+        //{
+        //    try
+        //    {
+        //        var value = (string)data.value;
+        //        var variationId = (string)data.variationId;
+
+        //        var optionDto = new { value, variationId };
+        //        var createOptionResponse = await _apiResponseHelper.PostAsync<bool>($"{Constants.ApiBaseUrl}/api/variationoption", optionDto);
+
+        //        if (createOptionResponse.StatusCode != StatusCodeHelper.OK || !createOptionResponse.Data)
+        //        {
+        //            return new JsonResult(new { success = false, message = $"Failed to create option: {value}" });
+        //        }
+
+        //        var latestOptionResponse = await _apiResponseHelper.GetAsync<LatestVariationOptionId>($"{Constants.ApiBaseUrl}/api/variationoption/latest?variationId={variationId}");
+        //        if (latestOptionResponse.StatusCode != StatusCodeHelper.OK || string.IsNullOrEmpty(latestOptionResponse.Data?.Id))
+        //        {
+        //            return new JsonResult(new { success = false, message = "Failed to retrieve option ID" });
+        //        }
+
+        //        return new JsonResult(new { success = true, optionId = latestOptionResponse.Data.Id });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, "Error creating variation option");
+        //        return new JsonResult(new { success = false, message = "An unexpected error occurred" });
+        //    }
+        //}
+
+        //private async Task<string> GetVariationIdByName(string variationName, string categoryId)
+        //{
+        //    var variationsResponse = await _apiResponseHelper.GetAsync<List<VariationDto>>(
+        //        $"{Constants.ApiBaseUrl}/api/variation/category/{categoryId}");
+
+        //    if (variationsResponse.StatusCode == StatusCodeHelper.OK && variationsResponse.Data != null)
+        //    {
+        //        var variation = variationsResponse.Data.FirstOrDefault(v => v.Name.Equals(variationName, StringComparison.OrdinalIgnoreCase));
+        //        return variation?.Id ?? string.Empty;
+        //    }
+
+        //    return string.Empty;
+        //}
+
+        //public async Task<IActionResult> OnGetLatestVariationIdAsync(string categoryId)
+        //{
+        //    // Call the API to get the latest variation ID for the specified category
+        //    var latestVariationIdResponse = await _apiResponseHelper.GetAsync<LatestVariationId>(
+        //        $"{Constants.ApiBaseUrl}/api/variation/latest?categoryId={categoryId}");
+
+        //    // Check if the response was successful
+        //    if (latestVariationIdResponse.StatusCode == StatusCodeHelper.OK && !string.IsNullOrEmpty(latestVariationIdResponse.Data!.Id))
+        //    {
+        //        // Return the latest variation ID as a JSON result
+        //        return new JsonResult(new { LatestVariationId = latestVariationIdResponse.Data });
+        //    }
+
+        //    // Return a JSON result with a null or empty string if no latest variation ID is found
+        //    return new JsonResult(new { LatestVariationId = string.Empty });
+        //}
+
+        //public async Task<IActionResult> OnGetLatestVariationOptionIdAsync(string variationId)
+        //{
+        //    // Call the API to get the latest variation option ID for the specified variation
+        //    var latestOptionIdResponse = await _apiResponseHelper.GetAsync<LatestVariationOptionId>(
+        //        $"{Constants.ApiBaseUrl}/api/variationoption/latest?variationId={variationId}");
+
+        //    // Check if the response was successful
+        //    if (latestOptionIdResponse.StatusCode == StatusCodeHelper.OK && !string.IsNullOrEmpty(latestOptionIdResponse.Data!.Id))
+        //    {
+        //        // Return the latest variation option ID as a JSON result
+        //        return new JsonResult(new { LatestVariationOptionId = latestOptionIdResponse.Data });
+        //    }
+
+        //    // Return a JSON result with a null or empty string if no latest variation option ID is found
+        //    return new JsonResult(new { LatestVariationOptionId = string.Empty });
+        //}
+
+        //public async Task<IActionResult> OnGetLatestVariationIdByCategoryAsync(string categoryId)
+        //{
+        //    // Call the API endpoint to get the latest variation ID for the specified category
+        //    var latestVariationIdResponse = await _apiResponseHelper.GetAsync<string>(
+        //        $"{Constants.ApiBaseUrl}/api/variation/latest?categoryId={categoryId}");
+
+        //    // Check if the response is successful and return the result
+        //    if (latestVariationIdResponse.StatusCode == StatusCodeHelper.OK)
+        //    {
+        //        var latestVariationId = latestVariationIdResponse.Data;
+        //        return new JsonResult(latestVariationId);
+        //    }
+
+        //    // If the call fails, return an empty string or null
+        //    return new JsonResult(string.Empty);
+        //}
+
+        public async Task<IActionResult> OnGetCategoryVariationsAsync(string categoryId)
+        {
+            var variationsResponse = await _apiResponseHelper.GetAsync<List<VariationDto>>(
+                $"{Constants.ApiBaseUrl}/api/variation/category/{categoryId}");
+
+            if (variationsResponse.StatusCode == StatusCodeHelper.OK)
+            {
+                CategoryVariations = variationsResponse.Data;
+                return new JsonResult(CategoryVariations);
+            }
+
+            return new JsonResult(new List<VariationDto>());
+        }
+
+        public async Task<IActionResult> OnGetVariationOptionsAsync(string variationId)
+        {
+            try
+            {
+                // Validate input
+                if (string.IsNullOrWhiteSpace(variationId))
+                {
+                    return new JsonResult(new List<VariationOptionDto>());
+                }
+
+                var optionsResponse = await _apiResponseHelper.GetAsync<List<VariationOptionDto>>(
+                    $"{Constants.ApiBaseUrl}/api/variationoption/variation/{variationId}");
+
+                if (optionsResponse.StatusCode == StatusCodeHelper.OK && optionsResponse.Data != null)
+                {
+                    // Log the options for debugging
+                    _logger.LogInformation($"Loaded {optionsResponse.Data.Count} variation options for variation {variationId}");
+
+                    return new JsonResult(optionsResponse.Data);
+                }
+                else
+                {
+                    // Log the error
+                    _logger.LogWarning($"Failed to load variation options. Status: {optionsResponse.StatusCode}, Message: {optionsResponse.Message}");
+
+                    return new JsonResult(new List<VariationOptionDto>());
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                _logger.LogError(ex, $"Exception occurred while fetching variation options for variation {variationId}");
+
+                return new JsonResult(new List<VariationOptionDto>());
+            }
+        }
+
+        //public async Task<IActionResult> OnPostRemoveVariationAsync(string variationId)
+        //{
+        //    if (string.IsNullOrEmpty(variationId))
+        //        return new JsonResult(new { success = false, message = "Invalid variation ID" });
+
+        //    var response = await _apiResponseHelper.DeleteAsync<bool>($"{Constants.ApiBaseUrl}/api/variation/{variationId}");
+        //    return new JsonResult(new
+        //    {
+        //        success = response.StatusCode == StatusCodeHelper.OK,
+        //        message = response.StatusCode == StatusCodeHelper.OK ? "Variation removed successfully" : "Failed to remove variation"
+        //    });
+        //}
+
+
+        //Edit Product
+        // DTO Models
+        public class ProductImageByIdResponse
+        {
+            public string ImageUrl { get; set; }
+            public string ProductId { get; set; }
+        }
+
+        public class CategoryVariationResponse
+        {
+            public string Id { get; set; }
+            public string Name { get; set; }
+            public List<VariationOptionResponse> Options { get; set; } = new();
+        }
+
+        public class VariationOptionResponse
+        {
+            public string Id { get; set; }
+            public string Value { get; set; }
+        }
+
+        public class ProductItemForUpdateDto
+        {
+            public int QuantityInStock { get; set; }
+            public int Price { get; set; }
+        }
+
+        public class CategoryVariationApiResponse
+        {
+            public string Id { get; set; }
+            public string Name { get; set; }
+            public string CategoryId { get; set; }
+        }
+
+        [BindProperty]
+        public ProductDetailResponseModel ProductUpdate { get; set; } = new();
+
+        [BindProperty]
+        public List<IFormFile> NewProductImages { get; set; } = new();
+
+        [BindProperty]
+        public Dictionary<string, ProductItemForUpdateDto> ProductItemUpdates { get; set; } = new();
+
+        [BindProperty]
+        public Dictionary<string, string> VariationUpdates { get; set; } = new();
+
+        [BindProperty]
+        public Dictionary<string, string> VariationOptionUpdates { get; set; } = new();
+
+        public async Task<IActionResult> OnGetProductDetailsAsync(string productId)
+        {
+            try
+            {
+                // Get product details
+                var response = await _apiResponseHelper.GetAsync<ProductDetailResponseModel>(
+                    $"{Constants.ApiBaseUrl}/api/product/detail/{productId}");
+
+                if (response.StatusCode != StatusCodeHelper.OK)
+                {
+                    return new JsonResult(new { success = false, message = "Failed to load product details" });
+                }
+
+                // Get product images
+                var imageResponse = await _apiResponseHelper.GetAsync<IList<ProductImageByIdResponse>>(
+                    $"{Constants.ApiBaseUrl}/api/productimage/GetImage?productId={productId}");
+
+                // Get category variations
+                var variationsResponse = await _apiResponseHelper.GetAsync<List<CategoryVariationResponse>>(
+                    $"{Constants.ApiBaseUrl}/api/variation/category/{response.Data!.CategoryId}");
+
+                var result = new
+                {
+                    success = true,
+                    product = response.Data,
+                    images = imageResponse.Data,
+                    variations = variationsResponse.Data
+                };
+
+                return new JsonResult(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading product details");
+                return new JsonResult(new { success = false, message = "An error occurred while loading product details" });
+            }
+        }
+
+        public async Task<IActionResult> OnPostUpdateProductAsync(string productId)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return new JsonResult(new { success = false, message = "Invalid form data" });
+                }
+
+                // Update basic product information
+                var productUpdateResponse = await _apiResponseHelper.PatchAsync<bool>(
+                    $"{Constants.ApiBaseUrl}/api/product/{productId}",
+                    ProductUpdate);
+
+                if (productUpdateResponse.StatusCode != StatusCodeHelper.OK)
+                {
+                    return new JsonResult(new { success = false, message = "Failed to update product information" });
+                }
+
+                // Update product items
+                foreach (var (itemId, itemUpdate) in ProductItemUpdates)
+                {
+                    var itemUpdateResponse = await _apiResponseHelper.PatchAsync<bool>(
+                        $"{Constants.ApiBaseUrl}/api/productitem/{itemId}",
+                        itemUpdate);
+
+                    if (itemUpdateResponse.StatusCode != StatusCodeHelper.OK)
+                    {
+                        _logger.LogWarning($"Failed to update product item {itemId}");
+                    }
+                }
+
+                // Update variations
+                foreach (var (variationId, newName) in VariationUpdates)
+                {
+                    var variationUpdateDto = new VariationForUpdateDto { Name = newName };
+                    var variationUpdateResponse = await _apiResponseHelper.PatchAsync<bool>(
+                        $"{Constants.ApiBaseUrl}/api/variation/{variationId}",
+                        variationUpdateDto);
+
+                    if (variationUpdateResponse.StatusCode != StatusCodeHelper.OK)
+                    {
+                        _logger.LogWarning($"Failed to update variation {variationId}");
+                    }
+                }
+
+                // Update variation options
+                foreach (var (optionId, newValue) in VariationOptionUpdates)
+                {
+                    var optionUpdateDto = new VariationOptionForUpdateDto { Value = newValue };
+                    var optionUpdateResponse = await _apiResponseHelper.PatchAsync<bool>(
+                        $"{Constants.ApiBaseUrl}/api/variationoption/{optionId}",
+                        optionUpdateDto);
+
+                    if (optionUpdateResponse.StatusCode != StatusCodeHelper.OK)
+                    {
+                        _logger.LogWarning($"Failed to update variation option {optionId}");
+                    }
+                }
+
+                // Handle new images
+                if (NewProductImages != null && NewProductImages.Any())
+                {
+                    foreach (var image in NewProductImages)
+                    {
+                        if (image.Length > 0)
+                        {
+                            var uploadResponse = await _apiResponseHelper.UploadImageAsync(
+                                $"{Constants.ApiBaseUrl}/api/productimage/Upload",
+                                image,
+                                productId);
+
+                            if (uploadResponse.StatusCode != StatusCodeHelper.OK)
+                            {
+                                _logger.LogError($"Failed to upload image for product {productId}");
+                            }
+                        }
+                    }
+                }
+
+                return new JsonResult(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating product");
+                return new JsonResult(new { success = false, message = "An error occurred while updating the product" });
+            }
+        }
+
+        public async Task<IActionResult> OnPostDeleteImageAsync(string imageId)
         {
             try
             {
                 var response = await _apiResponseHelper.DeleteAsync<bool>(
-                    $"{Constants.ApiBaseUrl}/api/productimage/{imageId}");
+                    $"{Constants.ApiBaseUrl}/api/productimage/Delete?imageId={imageId}");
 
-                if (response.StatusCode == StatusCodeHelper.OK)
-                {
-                    return new JsonResult(new { success = true });
-                }
-
-                return new JsonResult(new { error = response.Message }) { StatusCode = 400 };
+                return new JsonResult(new { success = response.StatusCode == StatusCodeHelper.OK });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error deleting product image {ImageId}", imageId);
-                return new JsonResult(new { error = "An error occurred while deleting the image" })
-                { StatusCode = 500 };
+                _logger.LogError(ex, "Error deleting product image");
+                return new JsonResult(new { success = false });
             }
         }
 
-    }
+        public async Task<IActionResult> OnPostDeleteVariationAsync(string variationId)
+        {
+            try
+            {
+                var response = await _apiResponseHelper.DeleteAsync<bool>(
+                    $"{Constants.ApiBaseUrl}/api/variation/{variationId}");
 
-    public class ProductRequestModel
-    {
-        public string Name { get; set; }
-        public string CategoryId { get; set; }
-        public string Description { get; set; }
-        public List<VariationModel> Variations { get; set; }
-        public List<VariationCombinationModel> VariationCombinations { get; set; }
-    }
+                return new JsonResult(new { success = response.StatusCode == StatusCodeHelper.OK });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting variation");
+                return new JsonResult(new { success = false });
+            }
+        }
 
-    public class VariationModel
-    {
-        public string Id { get; set; }
-        public List<string> VariationOptionIds { get; set; }
-    }
+        public async Task<IActionResult> OnGetProductImagesAsync(string productId)
+        {
+            try
+            {
+                // Validate input
+                if (string.IsNullOrWhiteSpace(productId))
+                {
+                    return new JsonResult(new List<ProductImageByIdResponse>());
+                }
 
-    public class VariationCombinationModel
-    {
-        public List<string> VariationOptionIds { get; set; }
-        public int Price { get; set; }
-        public int QuantityInStock { get; set; }
-    }
+                var imagesResponse = await _apiResponseHelper.GetAsync<IList<ProductImageByIdResponse>>(
+                    $"{Constants.ApiBaseUrl}/api/productimage/GetImage?productId={productId}");
 
-    public class UpdateProductStatusRequest
-    {
-        [Required]
-        public string ProductId { get; set; }
-
-        [Required]
-        public bool IsAvailable { get; set; }
+                if (imagesResponse.StatusCode == StatusCodeHelper.OK && imagesResponse.Data != null)
+                {
+                    _logger.LogInformation($"Loaded {imagesResponse.Data.Count} images for product {productId}");
+                    return new JsonResult(imagesResponse.Data);
+                }
+                else
+                {
+                    _logger.LogWarning($"Failed to load product images. Status: {imagesResponse.StatusCode}, Message: {imagesResponse.Message}");
+                    return new JsonResult(new List<ProductImageByIdResponse>());
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Exception occurred while fetching images for product {productId}");
+                return new JsonResult(new List<ProductImageByIdResponse>());
+            }
+        }
     }
 }

@@ -692,7 +692,7 @@ namespace HandmadeProductManagement.Services.Service
                         OptionName = pc.VariationOption?.Value??""
                     }).ToList()
                 }).ToList(),
-                Promotion = promotion == null ? new PromotionDetailModel() : new PromotionDetailModel
+                Promotion = promotion == null ? null : new PromotionDetailModel
                     {
                         Id = promotion.Id,
                         Name = promotion.Name,

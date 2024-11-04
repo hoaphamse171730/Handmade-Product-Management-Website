@@ -27,7 +27,7 @@ public class ApiResponseHelper
         };
 
         _httpClient = new HttpClient(handler); // Use handler to disable redirect
-        _httpContextAccessor = httpContextAccessor;
+        _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -47,7 +47,34 @@ public class ApiResponseHelper
             }
         }
     }
+    public async Task<BaseResponse<bool>> UploadImageAsync(string url, IFormFile file, string productId)
+    {
+        try
+        {
+            using var client = new HttpClient();
+            using var formData = new MultipartFormDataContent();
+            using var streamContent = new StreamContent(file.OpenReadStream());
 
+            formData.Add(streamContent, "file", file.FileName);
+            var response = await client.PostAsync($"{url}?productId={productId}", formData);
+            var responseContent = await response.Content.ReadAsStringAsync();
+
+            return JsonSerializer.Deserialize<BaseResponse<bool>>(responseContent, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+        }
+        catch (Exception ex)
+        {
+            return new BaseResponse<bool>
+            {
+                Code = StatusCodeHelper.ServerError.ToString(),
+                StatusCode = StatusCodeHelper.ServerError,
+                Message = ex.Message,
+                Data = false
+            };
+        }
+    }
 
     public async Task<BaseResponse<T>> GetAsync<T>(string url, object queryParams = null)
     {
@@ -186,13 +213,8 @@ public async Task<BaseResponse<T>> PutAsync<T>(string url, object payload = null
         return await HandleApiResponse<T>(response);
     }
 
-    public async Task<BaseResponse<T>> PostFileAsync<T>(string url, IFormFile file)
+    public async Task<BaseResponse<T>> PostMultipartAsync<T>(string url, MultipartFormDataContent content)
     {
-        var content = new MultipartFormDataContent();
-        var fileStreamContent = new StreamContent(file.OpenReadStream());
-        fileStreamContent.Headers.ContentType = new MediaTypeHeaderValue(file.ContentType);
-        content.Add(fileStreamContent, "file", file.FileName);
-
         var request = new HttpRequestMessage(HttpMethod.Post, url)
         {
             Content = content
@@ -200,52 +222,6 @@ public async Task<BaseResponse<T>> PutAsync<T>(string url, object payload = null
         AddAuthorizationHeader(request);
 
         var response = await _httpClient.SendAsync(request);
-        return await HandleApiResponse<T>(response);
-    }
-
-    public async Task<BaseResponse<T>> PostMultipartAsync<T>(string url, MultipartFormDataContent content, string fileName, string productId)
-    {
-        var request = new HttpRequestMessage(HttpMethod.Post, url)
-        {
-            Content = content
-        };
-        AddAuthorizationHeader(request);
-
-        HttpResponseMessage response;
-        try
-        {
-            response = await _httpClient.SendAsync(request);
-            _logger.LogInformation("API response received. StatusCode: {StatusCode}", response.StatusCode);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError("Exception during API request: {Message}", ex.Message);
-            throw;
-        }
-
-        if (response.StatusCode == HttpStatusCode.RedirectKeepVerb ||
-            response.StatusCode == HttpStatusCode.MovedPermanently ||
-            response.StatusCode == HttpStatusCode.Found)
-        {
-            // Follow the redirect by creating a new FormData
-            var newUrl = response.Headers.Location.ToString();
-            _logger.LogInformation("Redirecting to URL: {Url}", newUrl);
-
-            var redirectFormData = new MultipartFormDataContent();
-            // Use the passed fileName and productId
-            redirectFormData.Add(new StreamContent(content.ReadAsStreamAsync().Result), "file", fileName);
-            redirectFormData.Add(new StringContent(productId), "productId");
-
-            var redirectRequest = new HttpRequestMessage(HttpMethod.Post, newUrl)
-            {
-                Content = redirectFormData
-            };
-
-            AddAuthorizationHeader(redirectRequest);
-            response = await _httpClient.SendAsync(redirectRequest);
-            _logger.LogInformation("Redirected response received. StatusCode: {StatusCode}", response.StatusCode);
-        }
-
         return await HandleApiResponse<T>(response);
     }
 
