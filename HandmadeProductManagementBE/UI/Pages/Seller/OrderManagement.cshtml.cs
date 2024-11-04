@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using HandmadeProductManagement.Core.Common;
 using HandmadeProductManagement.Contract.Repositories.Entity;
 using System.Net.Http;
+using HandmadeProductManagement.Core.Base;
 
 namespace UI.Pages.Seller
 {
@@ -17,16 +18,22 @@ namespace UI.Pages.Seller
         {
             _apiResponseHelper = apiResponseHelper ?? throw new ArgumentNullException(nameof(apiResponseHelper));
         }
+        public string? ErrorMessage { get; set; }
+        public string? ErrorDetail { get; set; }
 
         public List<OrderByUserDto>? Orders { get; set; }
 
         public List<CancelReason> CancelReasons { get; set; } = new List<CancelReason>();
 
+        public string CurrentFilter { get; set; } = "All";
+        public int PageNumber { get; set; } = 1;
+        public int PageSize { get; set; } = 2;
+        public bool HasNextPage { get; set; } = true;
+
         // Define valid status transitions
         private readonly Dictionary<string, List<string>> validStatusTransitions = new Dictionary<string, List<string>>
         {
-            { Constants.OrderStatusPending, new List<string> { Constants.OrderStatusCanceled, Constants.OrderStatusAwaitingPayment } },
-            { Constants.OrderStatusAwaitingPayment, new List<string> { Constants.OrderStatusCanceled, Constants.OrderStatusProcessing } },
+            { Constants.OrderStatusPending, new List<string> { Constants.OrderStatusCanceled, Constants.OrderStatusProcessing } },
             { Constants.OrderStatusProcessing, new List<string> { Constants.OrderStatusDelivering } },
             { Constants.OrderStatusDelivering, new List<string> { Constants.OrderStatusShipped, Constants.OrderStatusDeliveryFailed } },
             { Constants.OrderStatusDeliveryFailed, new List<string> { Constants.OrderStatusOnHold } },
@@ -41,29 +48,49 @@ namespace UI.Pages.Seller
             { Constants.OrderStatusDeliveringRetry, new List<string> { Constants.OrderStatusDelivering } },
         };
 
-        public async Task OnGetAsync()
+        public async Task OnGetAsync(string? filter, int pageNumber = 1, int pageSize = 2)
         {
-            var response = await _apiResponseHelper.GetAsync<List<OrderByUserDto>>(Constants.ApiBaseUrl + "/api/order/seller");
-
-            await LoadCancelReasonsAsync();
-
-            if (response?.StatusCode == StatusCodeHelper.OK && response.Data != null)
+            try
             {
-                Orders = response.Data.OrderByDescending(o => o.OrderDate).ToList();
+                PageNumber = pageNumber;
+                PageSize = pageSize;
+
+                // Set default filter to "All" if none is provided
+                CurrentFilter = filter ?? "All";
+
+                var response = await _apiResponseHelper.GetAsync<List<OrderByUserDto>>($"{Constants.ApiBaseUrl}/api/order/seller?filter={CurrentFilter}&pageNumber={PageNumber}&pageSize={PageSize}");
+
+                if (response?.StatusCode == StatusCodeHelper.OK && response.Data != null)
+                {
+                    Orders = response.Data.OrderByDescending(o => o.OrderDate).ToList();
+                    HasNextPage = Orders.Count == PageSize;
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, response?.Message ?? "An error occurred while fetching orders.");
+                }
+
+                await LoadCancelReasonsAsync();
             }
-            else
+            catch (BaseException.ErrorException ex)
             {
-                ModelState.AddModelError(string.Empty, response?.Message ?? "An error occurred while fetching orders.");
+                ErrorMessage = ex.ErrorDetail.ErrorCode;
+                ErrorDetail = ex.ErrorDetail.ErrorMessage?.ToString();
             }
+            catch (Exception ex)
+            {
+                ErrorMessage = "An unexpected error occurred.";
+            }
+
         }
 
         // Method to update the order status
         public async Task<IActionResult> OnPostUpdateStatusAsync(string orderId, string newStatus, string? cancelReasonId)
         {
-            Console.WriteLine($"Updating order: {orderId} to status: {newStatus}");
+            try {
 
             // Refresh orders to ensure we're working with the latest data
-            await OnGetAsync();
+            await OnGetAsync(CurrentFilter);
 
             var order = Orders?.FirstOrDefault(o => o.Id == orderId);
             if (order == null ||
@@ -89,7 +116,7 @@ namespace UI.Pages.Seller
 
             if (response?.StatusCode == StatusCodeHelper.OK)
             {
-                await OnGetAsync();  // Refresh orders to show updated status
+                await OnGetAsync(CurrentFilter);  // Refresh orders to show updated status with filter applied
                 return Page();
             }
             else
@@ -98,6 +125,19 @@ namespace UI.Pages.Seller
             }
 
             return Page();
+            }
+            catch (BaseException.ErrorException ex)
+            {
+                ErrorMessage = ex.ErrorDetail.ErrorCode;
+                ErrorDetail = ex.ErrorDetail.ErrorMessage?.ToString();
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = "An unexpected error occurred.";
+            }
+            return Page();
+
+
         }
 
         public List<string> GetValidStatusTransitions(string currentStatus)

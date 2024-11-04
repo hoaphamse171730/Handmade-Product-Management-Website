@@ -24,10 +24,25 @@
 
 <div class="flex flex-wrap p-6">
     <!-- Left side: Product Images -->
+    <div class="z-10 fixed right-0 rounded-full bottom-0 mr-5 mb-5 sm:mr-6 sm:mb-6 shadow-2xl">
+        <div class="flex items-center justify-center bg-teal-500 rounded-full opacity-75 p-3 sm:p-4">
+            <svg class="fill-current text-gray-200 h-6 w-6 sm:h-10 sm:w-10" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M2 5a2 2 0 012-2h7a2 2 0 012 2v4a2 2 0 01-2 2H9l-3 3v-3H4a2 2 0 01-2-2V5z" />
+                <path d="M15 7v2a4 4 0 01-4 4H9.828l-1.766 1.767c.28.149.599.233.938.233h2l3 3v-3h2a2 2 0 002-2V9a2 2 0 00-2-2h-1z" />
+            </svg>
+        </div>
+        <div class="absolute left-0 top-0 ml-3 mt-3 sm:ml-4 sm:mt-4">
+            <div class="flex h-3 w-3">
+                <span class="animate-ping absolute inline-flex h-2 w-2 sm:h-full sm:w-full rounded-full bg-pink-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 sm:h-3 sm:w-3 bg-pink-500"></span>
+            </div>
+        </div>
+    </div>
+
     <div class="w-full md:w-1/2 p-4">
         <div class="mb-4">
             <!-- Large Image -->
-            <img src="@Model.productDetail?.ProductImageUrls.FirstOrDefault()" alt="Product Image" class="w-[600px] h-[550px] object-cover rounded-lg shadow-md mx-auto">
+            <img src="@Model.productDetail?.ProductImageUrls.FirstOrDefault()" alt="Product Image" class="mx-auto h-[550px] w-[600px] rounded-lg object-cover shadow-md">
         </div>
         <div class="flex space-x-2">
             <!-- Small Images -->
@@ -35,7 +50,7 @@
             {
             <img src="@Model.productDetail.ProductImageUrls[i]"
                  alt="Product Thumbnail"
-                 class="w-1/5 h-20 object-cover rounded-lg shadow-md cursor-pointer">
+                 class="h-20 w-1/5 cursor-pointer rounded-lg object-cover shadow-md">
             }
         </div>
     </div>
@@ -51,15 +66,16 @@
         <h2 class="text-3xl font-bold text-gray-800">@Model.productDetail?.Description</h2>
         <!-- Product Rating -->
         <div class="rating-stars flex items-center space-x-1">
+            <span class="text-lg text-gray-700">@Model.productDetail?.Rating.ToString("0.0")/5</span> <!-- Display rating in "4.6/5" format -->
             @for (int i = 1; i <= 5; i++)
             {
                 if (i <= (Model.productDetail?.Rating ?? 0))
                 {
-                    <i class="fa fa-star" style="color: gold;"></i> <!-- Ngôi sao màu vàng -->
+                    <i class="fa fa-star" style="color: gold;"></i> <!-- Yellow star -->
                 }
                 else
                 {
-                    <i class="fa fa-star" style="color: gray;"></i> <!-- Ngôi sao màu xám -->
+                    <i class="fa fa-star" style="color: gray;"></i> <!-- Gray star -->
                 }
             }
         </div>
@@ -71,17 +87,17 @@
             && Model.productDetail?.ProductItems?.FirstOrDefault()?.DiscountedPrice
             < Model.productDetail?.ProductItems?.FirstOrDefault()?.Price)
             {
-                <span id="discountedPrice" class="text-2xl font-semibold text-red-500">
-                    @Model.productDetail?.ProductItems?.FirstOrDefault()?.DiscountedPrice <!-- Hiển thị giá giảm -->
+                <span class="text-2xl font-semibold text-red-500">
+                    ₫@Model.productDetail?.ProductItems?.FirstOrDefault()?.DiscountedPrice?.ToString("N0")
                 </span>
-                <span id="price" class="text-lg text-gray-400 line-through">
-                    @Model.productDetail?.ProductItems?.FirstOrDefault()?.Price <!-- Hiển thị giá gốc, gạch ngang -->
+                <span class="text-lg text-gray-400 line-through">
+                    ₫@Model.productDetail?.ProductItems?.FirstOrDefault()?.Price.ToString("N0")
                 </span>
             }
             else
             {
-                <span id="price" class="text-2xl font-semibold text-red-500">
-                    @Model.productDetail?.ProductItems?.FirstOrDefault()?.Price <!-- Hiển thị giá gốc nếu không có giá giảm -->
+                <span class="text-2xl font-semibold text-red-500">
+                    ₫@Model.productDetail?.ProductItems?.FirstOrDefault()?.Price.ToString("N0")
                 </span>
             }
         </div>
@@ -90,11 +106,11 @@
 
         <!-- Product Materials -->
         <div>
-            <div class="flex space-x-2 mt-2">
+            <div class="mt-2 flex space-x-2">
                 @foreach (var variation in Model.VariationOptions)
                 {
                     <div>
-                        <span class="px-3 py-1 text-sm bg-gray-200 rounded-full">@variation.Name</span>
+                        <span class="rounded-full bg-gray-200 px-3 py-1 text-sm">@variation.Name</span>
                         <div class="mt-1">
                             @if (variation.Options != null && variation.Options.Any())
                             {
@@ -121,7 +137,7 @@
         </div>
         <div class="price-container">
             <span id="price" class="text-lg font-bold text-gray-800"></span>
-            <span id="discountedPrice" class="text-lg font-bold text-red-600 ml-2 hidden"></span> <!-- Định nghĩa giá giảm -->
+            <span id="discountedPrice" class="ml-2 hidden text-lg font-bold text-red-600"></span> <!-- Định nghĩa giá giảm -->
         </div>
         <span id="remainingQuantity" class="text-sm text-gray-600"></span>
         
@@ -139,12 +155,57 @@
         </div>
         <!-- Buttons -->
         <div class="flex space-x-4">
-            <button class="flex-1 px-4 py-3 text-white bg-blue-500 rounded-lg hover:bg-blue-600">
+            <button class="flex-1 rounded-lg bg-blue-500 px-4 py-3 text-white hover:bg-blue-600">
                 <i class="fa fa-shopping-cart mr-2"></i> Add to Cart
             </button>
         </div>
     </div>
 </div>
+
+<h1 class="mb-4 text-center text-4xl font-bold text-red-600">Product Ratings</h1>
+
+<div class="space-y-4">
+    @foreach (var review in Model.Reviews)
+    {
+        <div class="rounded-lg border border-gray-300 bg-white p-4 shadow-md">
+            <div class="flex flex-col">
+                <span class="font-semibold">@(Model.Users.FirstOrDefault(user => user.Id == review.UserId)?.UserName ?? "Unknown User")</span>
+                <span class="text-sm text-gray-500">@review.Date?.ToString("g")</span>
+                <div class="flex items-center">
+                    @for (int i = 1; i <= 5; i++)
+                    {
+                        <svg class="h-5 w-5 @(i <= review.Rating ? "text-yellow-500" : "text-gray-300")" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 .587l3.668 7.568 8.235 1.199-5.964 5.222L19.339 24 12 20.812 4.661 24l1.331-9.424-5.964-5.222 8.235-1.199L12 .587z" />
+                        </svg>
+                    }
+                </div>
+                <p class="mt-2">@review.Content</p>
+            </div>
+
+            <!-- Reply Section with Shop ID -->
+            @if (review.Reply != null){
+            <div class="relative ml-4 mt-4 rounded-lg border border-gray-300 bg-gray-50 p-2">
+                <div class="mb-2 font-semibold text-gray-700">@(Model.Shops.FirstOrDefault(shop => shop.Id == review.Reply?.ShopId)?.Name ?? "Unknown Shop")</div>
+                    <p>@review.Reply.Content</p>
+            </div>
+            }
+        </div>
+    }
+</div>
+
+@if (Model.TotalPages > 1)
+{
+    <nav class="mt-4">
+        <ul class="flex justify-center space-x-2">
+            @for (int i = 1; i <= Model.TotalPages; i++)
+            {
+                <li class="page-item @(Model.PageNumber == i ? "active" : "")">
+                    <a class="rounded-md border border-gray-300 px-4 py-2" class="page-link" asp-page="Index" asp-route-pageNumber="@i">@i</a>
+                </li>
+            }
+        </ul>
+    </nav>
+}
 
 <!-- Include Font Awesome for Icons -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
