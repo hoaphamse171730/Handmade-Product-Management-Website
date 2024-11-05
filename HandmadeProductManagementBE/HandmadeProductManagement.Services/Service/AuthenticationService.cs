@@ -1,4 +1,4 @@
-using System.IdentityModel.Tokens.Jwt;
+﻿using System.IdentityModel.Tokens.Jwt;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Common;
@@ -239,11 +239,19 @@ public class AuthenticationService : IAuthenticationService
 
     public async Task<BaseResponse<string>> ResetPasswordAsync(ResetPasswordModelView resetPasswordModelView)
     {
+        // Find the user by email
         var user = await _userManager.FindByEmailAsync(resetPasswordModelView.Email)
-                    ?? throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidEmail);
+                    ?? throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidEmailFormat);
 
-        var decodedToken = HttpUtility.UrlDecode(resetPasswordModelView.Token);
-        var result = await _userManager.ResetPasswordAsync(user, decodedToken, resetPasswordModelView.NewPassword);
+        // Verify the reset token
+        var isValidToken = await _userManager.VerifyUserTokenAsync(user, "Default", "ResetPassword", resetPasswordModelView.Token);
+        if (!isValidToken)
+        {
+            throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidToken);
+        }
+
+        // Reset the password
+        var result = await _userManager.ResetPasswordAsync(user, resetPasswordModelView.Token, resetPasswordModelView.NewPassword);
 
         if (result.Succeeded)
         {

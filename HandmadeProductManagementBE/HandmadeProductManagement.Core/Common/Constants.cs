@@ -5,6 +5,7 @@ public static class Constants
     #region Base
 
     public const string ApiBaseUrl = "https://localhost:7159";
+    public const string FrontUrl = "https://localhost:7072";
     public const string AvatarBaseUrl = "/images/avatars";
     public const string VNPAY = "VNPAY";
     public const string TimeZoneSEAsiaStandard = "SE Asia Standard Time";
@@ -111,6 +112,8 @@ public static class Constants
 
     #region Error Messages
 
+    public const string ErrorMessageInvalidCurrentPassword = "The current password is incorrect.";
+    public const string ErrorMessagePasswordMismatch = "The new password and confirm password do not match.";
     public const string ErrorMessageForbidden = "You do not have permission to access this resource.";
     public const string OrderNotFoundMessage = "The order you're looking for could not be found.";
     public const string ErrorMessageEmptyId = "The ID field cannot be empty.";

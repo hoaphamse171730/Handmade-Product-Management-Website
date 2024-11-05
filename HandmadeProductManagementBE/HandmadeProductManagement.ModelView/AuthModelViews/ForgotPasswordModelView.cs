@@ -1,7 +1,11 @@
+using HandmadeProductManagement.Core.Common;
+using System.Text.Json.Serialization;
+
 namespace HandmadeProductManagement.ModelViews.AuthModelViews;
 
 public class ForgotPasswordModelView
 {
-    public string ClientUri { get; set; } = "https://localhost:7159/api/reset-password/";
+    [JsonIgnore]
+    public string ClientUri { get; set; } = $"{Constants.FrontUrl}/ResetPassword/";
     public required string Email { get; set; }
 }
