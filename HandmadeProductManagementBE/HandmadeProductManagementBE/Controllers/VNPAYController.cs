@@ -22,7 +22,7 @@ namespace HandmadeProductManagementAPI.Controllers
         }
         //dùng để test
         [HttpGet("get-transaction-status-vnpay")]
-        [Authorize] //determine actor ???
+       // [Authorize] //determine actor ???
         public async Task<IActionResult> GetTransactionStatusVNPay(string orderId, Guid userId, String urlReturn)
         {
             var response = new BaseResponse<string>
@@ -32,6 +32,7 @@ namespace HandmadeProductManagementAPI.Controllers
                 Message = "Transaction created successfully.",
                 Data = await _VNPAYService.GetTransactionStatusVNPay(orderId, userId, urlReturn)
             };
+            
             return Ok(response);
         }
         // Tự lấy param từ url và token, có thể dùng sau khi deploy
@@ -86,10 +87,10 @@ namespace HandmadeProductManagementAPI.Controllers
 
             var paymentStatus = await _VNPAYService.VNPAYPayment(request);
             //redirect về webpage của project, sau khi deploy set lại returnUrl trong service có thể mở ra
-            /*if (paymentStatus.IsSucceed && paymentStatus.Text != null)
+            if (paymentStatus.IsSucceed && paymentStatus.Text != null)
             {
                 return Redirect(paymentStatus.Text);
-            }*/
+            }
 
             return Ok(paymentStatus);
         }

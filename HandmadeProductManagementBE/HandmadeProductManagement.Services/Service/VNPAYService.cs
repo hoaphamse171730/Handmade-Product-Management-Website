@@ -244,9 +244,9 @@ namespace HandmadeProductManagement.Services.Service
 
             var amount = double.Parse(totalPrice) / 100;
             //var returnUrl = $"(url trang web sau khi deploy/{orderInfo}";
-            var returnUrl = vnp_ReturnUrl;//dung de test
+            var returnUrl = "https://localhost:7072/Checkout/OrderSucess";
 
-          
+
 
 
             fields.Add("vnp_Amount", totalPrice ?? string.Empty);
