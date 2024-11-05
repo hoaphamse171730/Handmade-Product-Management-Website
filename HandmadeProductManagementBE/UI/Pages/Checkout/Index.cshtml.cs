@@ -7,6 +7,7 @@ using HandmadeProductManagement.ModelViews.OrderModelViews;
 using HandmadeProductManagement.ModelViews.UserInfoModelViews;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -147,7 +148,48 @@ namespace UI.Pages.Checkout
                 }
                 else if (paymentMethod == "vnpay")
                 {
-                    return RedirectToPage("/ProcessPayment");
+                    var orderData = new CreateOrderDto
+                    {
+                        Address = UserInfo.Address ?? string.Empty,
+                        CustomerName = UserInfo.FullName ?? string.Empty,
+                        Phone = UserInfo.PhoneNumber ?? string.Empty,
+                        Note = Note ?? string.Empty,
+                        PaymentMethod = "VNPAY",
+                    };
+
+                    var client = _httpClientFactory.CreateClient();
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Token);
+                    var response = await client.PostAsJsonAsync($"{Constants.ApiBaseUrl}/api/order/returnorder", orderData);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var content = await response.Content.ReadAsStringAsync();
+                        var options = new JsonSerializerOptions
+                        {
+                            PropertyNameCaseInsensitive = true
+                        };
+                        var baseResponse = JsonSerializer.Deserialize<BaseResponse<OrderResponseModel>>(content, options);
+
+                        if (baseResponse != null && baseResponse.StatusCode == StatusCodeHelper.OK && baseResponse.Data != null)
+                        {
+                            string orderId = baseResponse.Data.Id;
+                            string userId = baseResponse.Data.UserId.ToString();
+                            string encodedUri = Uri.EscapeDataString(Constants.ApiBaseUrl);
+
+                         var VNPayResponse = await _apiResponseHelper.GetAsync<string>(Constants.ApiBaseUrl + $"/api/vnpay/get-transaction-status-vnpay?orderId={orderId}&userId={userId}&urlReturn={encodedUri}");
+
+                            if (VNPayResponse != null && VNPayResponse.StatusCode == StatusCodeHelper.OK && VNPayResponse.Data != null)
+                            {
+                                return Redirect(VNPayResponse.Data.ToString());
+                            }
+                        }
+
+                        ModelState.AddModelError(string.Empty, baseResponse?.Message ?? "Error updating user information.");
+                    }
+                    else
+                    {
+                        ModelState.AddModelError(string.Empty, "An error occurred while updating user information.");
+                    }
                 }
             }
             else
@@ -205,5 +247,7 @@ namespace UI.Pages.Checkout
                 return false;
             }
 
-        }
+     
+
+    }
     }

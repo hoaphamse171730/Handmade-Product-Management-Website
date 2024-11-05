@@ -1,4 +1,5 @@
-﻿using HandmadeProductManagement.Contract.Services.Interface;
+﻿using HandmadeProductManagement.Contract.Repositories.Entity;
+using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.Core.Utils;
@@ -121,6 +122,21 @@ namespace HandmadeProductManagementAPI.Controllers
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
             var order = await _orderService.CreateOrderAsync(userId, createOrder);
             var response = new BaseResponse<bool>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Order created successfully",
+                Data = order
+            };
+            return Ok(response);
+        }
+
+        [HttpPost("returnOrder")]
+        public async Task<IActionResult> CreateOrderReturnOrder([FromBody] CreateOrderDto createOrder)
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
+            var order = await _orderService.CreateOrderAsyncReturnOrder(userId, createOrder);
+            var response = new BaseResponse<OrderResponseModel>
             {
                 Code = "Success",
                 StatusCode = StatusCodeHelper.OK,
