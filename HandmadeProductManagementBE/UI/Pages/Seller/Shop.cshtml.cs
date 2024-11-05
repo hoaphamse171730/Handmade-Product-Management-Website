@@ -10,11 +10,9 @@ using HandmadeProductManagement.ModelViews.VariationModelViews;
 using HandmadeProductManagement.ModelViews.VariationOptionModelViews;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using System.Linq.Expressions;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using UI.Pages.Product;
-using static HandmadeProductManagement.Core.Base.BaseException;
 
 namespace UI.Pages.Seller
 {
@@ -125,13 +123,20 @@ namespace UI.Pages.Seller
                         return RedirectToPage("/Seller/Shop");
                     }
 
+                    // Fallback for when the base response does not indicate success
                     ErrorMessage = "Failed to create shop.";
                     ErrorDetail = baseResponse?.Message;
                     ModelState.AddModelError(string.Empty, baseResponse?.Message ?? "Error updating user information.");
                 }
                 else
                 {
-                    ModelState.AddModelError(string.Empty, "An error occurred while updating user information.");
+                    // Handle error response and extract detail
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    var errorResponse = JsonSerializer.Deserialize<ErrorResponse>(errorContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                    // Set the error message to the detail from the error response
+                    ErrorMessage = errorResponse?.Detail ?? "An error occurred while creating the shop.";
+                    ModelState.AddModelError(string.Empty, ErrorMessage);
                 }
             }
             catch (BaseException.ErrorException ex)
@@ -185,7 +190,11 @@ namespace UI.Pages.Seller
                 }
                 else
                 {
-                    ModelState.AddModelError(string.Empty, "An error occurred while updating shop information.");
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    var errorResponse = JsonSerializer.Deserialize<ErrorResponse>(errorContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                    ErrorMessage = errorResponse?.Detail ?? "An error occurred while updating shop information.";
+                    ModelState.AddModelError(string.Empty, ErrorMessage);
                 }
             }
             catch (BaseException.ErrorException ex)
@@ -199,9 +208,9 @@ namespace UI.Pages.Seller
                 _logger.LogError(ex, "Shop update failed.");
             }
 
+            // Return the same page to display validation errors
             return Page();
         }
-
 
         private async Task<ShopResponseModel> GetCurrentUserShop()
         {
@@ -267,7 +276,8 @@ namespace UI.Pages.Seller
                 try
                 {
                     _logger.LogInformation("Starting product creation process");
-
+                    ModelState.Clear();
+                    TryValidateModel(NewProduct);
                     if (!ModelState.IsValid)
                     {
                         return new JsonResult(ModelState.ToDictionary(
@@ -276,55 +286,28 @@ namespace UI.Pages.Seller
                         ))
                         { StatusCode = 400 };
                     }
+                    // Goi API POST ko bi loi
+                    Token = HttpContext.Session.GetString("Token");
+                    var client = _httpClientFactory.CreateClient();
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Token);
+                    var response = await client.PostAsJsonAsync($"{Constants.ApiBaseUrl}/api/product", NewProduct);
 
-                    // First create the product
-                    var createProductResponse = await _apiResponseHelper.PostAsync<string>(
-                        $"{Constants.ApiBaseUrl}/api/product",
-                        NewProduct);
-
-                    if (createProductResponse.StatusCode != StatusCodeHelper.OK)
+                    if (response.IsSuccessStatusCode)
                     {
-                        _logger.LogError("Failed to create product. API Response: {Message}",
-                            createProductResponse.Message);
-                        return new JsonResult(new { error = createProductResponse.Message })
-                        { StatusCode = 400 };
-                    }
-
-                    string productId = createProductResponse.Data ?? string.Empty;
-
-                    // Handle image uploads if product creation was successful
-                    if (ProductImages != null && ProductImages.Any())
-                    {
-                        foreach (var image in ProductImages)
+                        var content = await response.Content.ReadAsStringAsync();
+                        var options = new JsonSerializerOptions
                         {
-                            try
-                            {
-                                var formData = new MultipartFormDataContent();
-                                var fileContent = new StreamContent(image.OpenReadStream());
-                                fileContent.Headers.ContentType =
-                                    MediaTypeHeaderValue.Parse(image.ContentType);
-                                formData.Add(fileContent, "file", image.FileName);
+                            PropertyNameCaseInsensitive = true
+                        };
+                        var baseResponse = JsonSerializer.Deserialize<BaseResponse<bool>>(content, options);
 
-                                var uploadResponse = await _apiResponseHelper.PostMultipartAsync<bool>(
-                                    $"{Constants.ApiBaseUrl}/api/productimage/upload?productId={productId}",
-                                    formData);
-
-                                if (uploadResponse.StatusCode != StatusCodeHelper.OK)
-                                {
-                                    _logger.LogError("Failed to upload image {FileName}. Response: {Message}",
-                                        image.FileName, uploadResponse.Message);
-                                }
-                            }
-                            catch (Exception imageEx)
-                            {
-                                _logger.LogError(imageEx, "Error uploading image {FileName}",
-                                    image.FileName);
-                            }
+                        if (baseResponse != null && baseResponse.StatusCode == StatusCodeHelper.OK)
+                        {
+                            return Page();
                         }
-                    }
 
-                    _logger.LogInformation("Product creation completed successfully");
-                    return new JsonResult(new { success = true, productId });
+                        ModelState.AddModelError(string.Empty, baseResponse?.Message ?? "Error updating user information.");
+                    }
                 }
                 catch (Exception ex)
                 {

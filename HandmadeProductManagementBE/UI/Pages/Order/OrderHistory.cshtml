@@ -8,52 +8,22 @@
         <h1 class="ml-4 text-left text-2xl font-bold text-black">Order History</h1>
     </div>
 
+    <!-- Filter Buttons -->
     <div class="mb-4 flex w-full flex-wrap justify-center gap-2">
-        <a href="?filter=All"
-           class="flex-grow rounded-lg border border-blue-500 p-2 text-center text-lg font-bold
-@(Model.CurrentFilter == "All" ? "bg-blue-500 text-white" : "bg-white text-black hover:bg-blue-100")">
-            All Orders
-        </a>
-        <a href="?filter=Pending"
-           class="flex-grow rounded-lg border border-blue-500 p-2 text-center text-lg font-bold
-@(Model.CurrentFilter == "Pending" ? "bg-blue-500 text-white" : "bg-white text-black hover:bg-blue-100")">
-            Pending
-        </a>
-        <a href="?filter=AwaitingPayment"
-           class="flex-grow rounded-lg border border-blue-500 p-2 text-center text-lg font-bold
-@(Model.CurrentFilter == "AwaitingPayment" ? "bg-blue-500 text-white" : "bg-white text-black hover:bg-blue-100")">
-            Awaiting Payment
-        </a>
-        <a href="?filter=Processing"
-           class="flex-grow rounded-lg border border-blue-500 p-2 text-center text-lg font-bold
-@(Model.CurrentFilter == "Processing" ? "bg-blue-500 text-white" : "bg-white text-black hover:bg-blue-100")">
-            Processing
-        </a>
-        <a href="?filter=Delivering"
-           class="flex-grow rounded-lg border border-blue-500 p-2 text-center text-lg font-bold
-@(Model.CurrentFilter == "Delivering" ? "bg-blue-500 text-white" : "bg-white text-black hover:bg-blue-100")">
-            Delivering
-        </a>
-        <a href="?filter=Shipped"
-           class="flex-grow rounded-lg border border-blue-500 p-2 text-center text-lg font-bold
-@(Model.CurrentFilter == "Shipped" ? "bg-blue-500 text-white" : "bg-white text-black hover:bg-blue-100")">
-            Shipped
-        </a>
-        <a href="?filter=Canceled"
-           class="flex-grow rounded-lg border border-blue-500 p-2 text-center text-lg font-bold
-@(Model.CurrentFilter == "Canceled" ? "bg-blue-500 text-white" : "bg-white text-black hover:bg-blue-100")">
-            Canceled
-        </a>
-        <a href="?filter=Refunded"
-           class="flex-grow rounded-lg border border-blue-500 p-2 text-center text-lg font-bold
-@(Model.CurrentFilter == "Refunded" ? "bg-blue-500 text-white" : "bg-white text-black hover:bg-blue-100")">
-            Refunded
-        </a>
+        @foreach (var filter in new[] { "All", "Pending", "Processing", "Delivering", "Shipped", "Canceled", "Refunded" })
+        {
+            <a href="?filter=@filter"
+               class="flex-grow rounded-lg border border-blue-500 p-2 text-center text-lg font-bold
+@(Model.CurrentFilter == filter ? "bg-blue-500 text-white" : "bg-white text-black hover:bg-blue-100")">
+                @filter Orders
+            </a>
+        }
     </div>
 
+    <!-- Orders Table -->
     @if (Model.Orders == null || !Model.Orders.Any())
     {
-        <p class="text-black">You don't have any orders yet</p>
+        <p class="text-center text-gray-600">You don't have any orders yet</p>
     }
     else
     {
@@ -61,16 +31,16 @@
             <div class="overflow-x-auto">
                 <table class="w-full table-auto text-left">
                     <thead>
-                        <tr class="border-b border-slate-300 bg-slate-50">
-                            <th class="w-1/12 whitespace-nowrap p-6 text-lg font-bold leading-none text-black">No</th>
-                            <th class="w-1/5 whitespace-nowrap p-6 text-lg font-bold leading-none text-black">Name</th>
-                            <th class="w-[11ch] max-w-[11ch] whitespace-nowrap p-6 text-lg font-bold leading-none text-black">Phone</th>
-                            <th class="w-[11ch] max-w-[11ch] whitespace-nowrap p-6 text-lg font-bold leading-none text-black">Order Date</th>
-                            <th class="whitespace-nowrap p-6 text-lg font-bold leading-none text-black">Total Price</th>
-                            <th class="w-1/6 whitespace-nowrap p-6 text-lg font-bold leading-none text-black">Status</th>
-                            <th class="w-1/6 whitespace-nowrap p-6 text-lg font-bold leading-none text-black">Address</th>
-                            <th class="w-1/5 whitespace-nowrap p-6 text-lg font-bold leading-none text-black">Note</th>
-                            <th class="w-[8ch] max-w-[8ch] whitespace-nowrap p-6 text-lg font-bold leading-none text-black"></th>
+                        <tr class="border-b border-gray-300 bg-gray-50">
+                            <th class="w-1/12 p-6 text-lg font-bold text-black">No</th>
+                            <th class="w-1/5 p-6 text-lg font-bold text-black">Name</th>
+                            <th class="w-[11ch] p-6 text-lg font-bold text-black">Phone</th>
+                            <th class="w-[11ch] p-6 text-lg font-bold text-black">Order Date</th>
+                            <th class="p-6 text-lg font-bold text-black">Total Price</th>
+                            <th class="w-1/6 p-6 text-lg font-bold text-black">Status</th>
+                            <th class="w-1/6 p-6 text-lg font-bold text-black">Address</th>
+                            <th class="w-1/5 p-6 text-lg font-bold text-black">Note</th>
+                            <th class="w-1/6 p-6 text-lg font-bold text-black">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -79,22 +49,36 @@
                         }
                         @foreach (var order in Model.Orders)
                         {
-                            <tr class="cursor-pointer hover:bg-slate-50"
-                                onclick="location.href='@Url.Page("/Order/StatusTracking", new { orderId = order.Id })'">
-                                <td class="border-b border-slate-200 p-6 text-lg">@index</td>
-                                <td class="border-b border-slate-200 p-6 text-lg">@order.CustomerName</td>
-                                <td class="border-b border-slate-200 p-6 text-lg">@order.Phone</td>
-                                <td class="border-b border-slate-200 p-6 text-lg">@order.OrderDate.ToString("dd/MM/yyyy")</td>
-                                <td class="border-b border-slate-200 p-6 text-lg">@order.TotalPrice.ToString("C")</td>
-                                <td class="border-b border-slate-200 p-6 text-lg">@order.Status</td>
-                                <td class="border-b border-slate-200 p-6 text-lg">@order.Address</td>
-                                <td class="border-b border-slate-200 p-6 text-lg">@order.Note</td>
-                                <td class="border-b border-slate-200 p-6 text-lg">
-                                    <a href='@Url.Page("/Order/OrderDetail", new { orderId = order.Id })'
-                                       class="text-blue-600 hover:underline"
-                                       onclick="(e) => e.stopPropagation()">View Detail</a>
+                            <tr class="hover:bg-gray-50"
+                                onclick="location.href='@Url.Page("/Order/OrderDetail", new { orderId = order.Id })'">
+                                <td class="border-b border-gray-200 p-6 text-lg">@index</td>
+                                <td class="border-b border-gray-200 p-6 text-lg">@order.CustomerName</td>
+                                <td class="border-b border-gray-200 p-6 text-lg">@order.Phone</td>
+                                <td class="border-b border-gray-200 p-6 text-lg">@order.OrderDate.ToString("dd/MM/yyyy")</td>
+                                <td class="border-b border-gray-200 p-6 text-lg">@order.TotalPrice.ToString("C")</td>
+                                <td class="border-b border-gray-200 p-6 text-lg">@order.Status</td>
+                                <td class="border-b border-gray-200 p-6 text-lg">@order.Address</td>
+                                <td class="border-b border-gray-200 p-6 text-lg">@order.Note</td>
+                                <td class="border-b border-gray-200 p-6 text-lg">
+                                    <div class="flex space-x-2">
+                                        @if (order.Status == "Pending")
+                                        {
+                                            <button class="rounded bg-green-500 px-4 py-2 text-white hover:bg-green-600"
+                                                    onclick="event.stopPropagation(); openUpdateModal('@order.Id', '@order.CustomerName', '@order.Phone', '@order.Address', '@order.Note')">
+                                                Update
+                                            </button>
+                                        }
+                                        @if (order.Status == "Pending" || order.Status == "Processing")
+                                        {
+                                            <button class="rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600"
+                                                    onclick="event.stopPropagation(); openConfirmModal('@order.Id')">
+                                                Cancel
+                                            </button>
+                                        }
+                                    </div>
                                 </td>
                             </tr>
+
                             index++;
                         }
                     </tbody>
@@ -103,3 +87,177 @@
         </div>
     }
 </div>
+
+<!-- Confirmation Modal -->
+<div id="confirmModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" style="display: none;">
+    <div class="w-1/3 rounded-lg bg-white p-6 shadow-lg">
+        <h2 class="mb-4 text-xl font-bold">Cancel Order!</h2>
+        <p class="mb-6">Are you sure you want to cancel this order?</p>
+        <div class="flex justify-end space-x-4">
+            <button id="confirmCancelBtn" class="rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600">Yes</button>
+            <button onclick="closeConfirmModal()" class="rounded bg-gray-300 px-4 py-2 hover:bg-gray-400">No</button>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    let orderIdToCancel = null;
+
+    function openConfirmModal(orderId) {
+        orderIdToCancel = orderId;
+        document.getElementById('confirmModal').style.display = 'flex';
+    }
+
+    function closeConfirmModal() {
+        document.getElementById('confirmModal').style.display = 'none';
+    }
+
+    document.getElementById('confirmCancelBtn').addEventListener('click', async function () {
+        if (orderIdToCancel) {
+            try {
+                console.log(`Sending PATCH request to cancel order: ${orderIdToCancel}`);
+                const response = await fetch(`/Order/OrderHistory?handler=CancelOrder&orderId=${orderIdToCancel}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                const result = await response.json();
+                if (result.success) {
+                    console.log(`Order ${orderIdToCancel} canceled successfully.`);
+                    location.reload(); // Reload the page to reflect changes
+                } else {
+                    console.error(`Failed to cancel order ${orderIdToCancel}. Message: ${result.message}`);
+                    alert(result.message || 'Failed to cancel the order.');
+                }
+            } catch (error) {
+                console.error('There was a problem with the fetch operation:', error);
+                alert('An error occurred while canceling the order.');
+            } finally {
+                closeConfirmModal();
+            }
+        }
+    });
+</script>
+
+<!-- Update Order Modal -->
+<div id="updateModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" style="display: none;">
+    <div class="w-1/3 rounded-lg bg-white p-6 shadow-lg">
+        <h2 class="mb-4 text-xl font-bold">Update Order</h2>
+        <form id="updateOrderForm" onsubmit="event.preventDefault(); saveOrderUpdate();">
+            <input type="hidden" id="updateOrderId" />
+
+            <!-- Name Field -->
+            <label class="mb-2 block">Name:</label>
+            <input type="text" id="updateName" class="mb-2 w-full rounded border p-2" />
+            <p id="nameError" class="text-red-500 text-sm"></p> <!-- Error message for Name -->
+            <!-- Phone Field -->
+            <label class="mb-2 block">Phone:</label>
+            <input type="text" id="updatePhone" class="mb-2 w-full rounded border p-2" />
+            <p id="phoneError" class="text-red-500 text-sm"></p> <!-- Error message for Phone -->
+            <!-- Address Field -->
+            <label class="mb-2 block">Address:</label>
+            <input type="text" id="updateAddress" class="mb-2 w-full rounded border p-2" />
+            <p id="addressError" class="text-red-500 text-sm"></p> <!-- Error message for Address -->
+            <!-- Note Field -->
+            <label class="mb-2 block">Note:</label>
+            <textarea id="updateNote" class="mb-4 w-full rounded border p-2"></textarea>
+
+            <div class="flex justify-end space-x-4">
+                <button type="button" class="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600" onclick="saveOrderUpdate()">
+                    Save
+                </button>
+                <button type="button" onclick="closeUpdateModal()" class="rounded bg-gray-300 px-4 py-2 hover:bg-gray-400">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openUpdateModal(orderId, name, phone, address, note) {
+        document.getElementById('updateOrderId').value = orderId;
+        document.getElementById('updateName').value = name;
+        document.getElementById('updatePhone').value = phone;
+        document.getElementById('updateAddress').value = address;
+        document.getElementById('updateNote').value = note;
+        document.getElementById('updateModal').style.display = 'flex';
+    }
+
+    function closeUpdateModal() {
+        document.getElementById('updateModal').style.display = 'none';
+    }
+
+    function validateInput() {
+        let isValid = true;
+
+        // Clear previous error messages
+        document.getElementById('nameError').innerText = '';
+        document.getElementById('phoneError').innerText = '';
+        document.getElementById('addressError').innerText = '';
+
+        // Name validation
+        const name = document.getElementById('updateName').value.trim();
+        if (name && /[^a-zA-Z\s]/.test(name)) {
+            document.getElementById('nameError').innerText = 'Name should only contain letters and spaces.';
+            isValid = false;
+        }
+
+        // Phone validation
+        const phone = document.getElementById('updatePhone').value.trim();
+        if (phone && !/^0\d{9,10}$/.test(phone)) {
+            document.getElementById('phoneError').innerText = 'Phone should start with 0 and have 10-11 digits.';
+            isValid = false;
+        }
+
+        // Address validation
+        const address = document.getElementById('updateAddress').value.trim();
+        if (address && /[^a-zA-Z0-9\s,\.]/.test(address)) {
+            document.getElementById('addressError').innerText = 'Address contains invalid characters.';
+            isValid = false;
+        }
+
+        return isValid;
+    }
+
+    async function saveOrderUpdate() {
+        if (!validateInput()) {
+            return;
+        }
+
+        const orderId = document.getElementById('updateOrderId').value;
+        const updateOrderDto = {
+            CustomerName: document.getElementById('updateName').value.trim(),
+            Phone: document.getElementById('updatePhone').value.trim(),
+            Address: document.getElementById('updateAddress').value.trim(),
+            Note: document.getElementById('updateNote').value.trim()
+        };
+
+        try {
+            const response = await fetch(`/Order/OrderHistory?handler=UpdateOrder&orderId=${orderId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(updateOrderDto)
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                location.reload(); // Refresh the page on success
+            } else {
+                alert(result.message || 'An error occurred while updating the order.');
+            }
+        } catch (error) {
+            console.error('There was a problem with the update operation:', error);
+            alert('An error occurred while updating the order.');
+        } finally {
+            closeUpdateModal();
+        }
+    }
+</script>

@@ -1,4 +1,5 @@
 ﻿@page
+@using UI.Pages.Shared
 @model UI.Pages.ProductDetail.ProductDetailModel
 
 @{
@@ -21,7 +22,17 @@
         -moz-appearance: textfield;
     }
 </style>
-
+@{
+    var errorModel = new ErrorMessageModel
+            {
+                ErrorMessage = Model.ErrorMessage,
+                ErrorDetail = Model.ErrorDetail
+            };
+}
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <partial name="_ErrorMessage" model="errorModel" />
+}
 <div class="flex flex-wrap p-6">
     <!-- Left side: Product Images -->
     <div class="z-10 fixed right-0 rounded-full bottom-0 mr-5 mb-5 sm:mr-6 sm:mb-6 shadow-2xl">
@@ -81,7 +92,6 @@
         </div>
 
         <!-- Product Price -->
-        <!-- Product Price -->
         <div class="flex items-center space-x-4">
             @if (Model.productDetail?.ProductItems?.FirstOrDefault()?.DiscountedPrice != null
             && Model.productDetail?.ProductItems?.FirstOrDefault()?.DiscountedPrice
@@ -109,7 +119,7 @@
             <div class="mt-2 flex space-x-2">
                 @foreach (var variation in Model.VariationOptions)
                 {
-                    <div>
+                    <div class="variation-options">
                         <span class="rounded-full bg-gray-200 px-3 py-1 text-sm">@variation.Name</span>
                         <div class="mt-1">
                             @if (variation.Options != null && variation.Options.Any())
@@ -121,8 +131,9 @@
                                            name="@variation.Name"
                                            value="@option.Name"
                                            class="mr-2"
+                                           onclick="handleRadioClick(this)"
                                            onchange="updateProductInfo()"
-                                           />
+                                           data-variation-name="@variation.Name" />
                                     <label for="@option.Id" class="text-sm">@option.Name</label>
                                 }
                             }
@@ -140,6 +151,7 @@
             <span id="discountedPrice" class="ml-2 hidden text-lg font-bold text-red-600"></span> <!-- Định nghĩa giá giảm -->
         </div>
         <span id="remainingQuantity" class="text-sm text-gray-600"></span>
+        <span id="message"class="text-sm text-gray-600"></span>
         
         <div class="container mx-auto p-4">
             <div class="flex items-center space-x-4">
@@ -207,6 +219,8 @@
     </nav>
 }
 
+
+
 <!-- Include Font Awesome for Icons -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 <script>
@@ -257,7 +271,26 @@
         }).format(amount);
     };
 
+    let lastChecked = null;
+
+    function handleRadioClick(radio) {
+        // Nếu radio đã được chọn và là tùy chọn đã chọn trước đó, bỏ chọn nó
+        if (lastChecked === radio) {
+            radio.checked = false; // Bỏ chọn radio
+            lastChecked = null; // Đặt lại biến theo dõi
+        } else {
+            // Cập nhật biến theo dõi
+            lastChecked = radio; // Lưu tùy chọn đã chọn
+        }
+
+        // Gọi hàm cập nhật thông tin sản phẩm
+        updateProductInfo();
+    }
+
     const productItems = @Html.Raw(Json.Serialize(productItems));
+
+
+
     // Hàm cập nhật giá dựa trên lựa chọn của người dùng
     function updateProductInfo() {
         // Tạo một đối tượng lưu trữ các lựa chọn hiện tại của người dùng
@@ -275,16 +308,13 @@
             )
         );
         
-
         // Cập nhật giá hiển thị
         const priceElement = document.getElementById("price");
         const discountedPriceElement = document.getElementById("discountedPrice");
         const remainingQuantityElement = document.getElementById("remainingQuantity");
-        const messageElement = document.getElementById("message"); // Thêm phần tử để hiển thị thông báo
 
-
-        if (matchingProduct) {
-            
+        if (matchingProduct)
+        {
             remainingQuantityElement.textContent = `Remaining Quantity: ${matchingProduct.quantityInStock}`;
             // Cập nhật số lượng tối đa
 
@@ -298,16 +328,59 @@
                 priceElement.textContent = `${formatCurrency(matchingProduct.price)}`;
                 discountedPriceElement.textContent = ""; // Ẩn giá giảm
             }
-
             maxQuantity = matchingProduct.quantityInStock;
             quantity = Math.min(quantity, maxQuantity); // Đảm bảo số lượng không vượt quá số lượng tối đa
             updateQuantityDisplay(); // Cập nhật hiển thị số lượng
-        } else {
-            priceElement.textContent = "";
-            remainingQuantityElement.textContent = "";
-            discountedPriceElement.textContent = "";
         }
+            
+        updateVariationOptions(selectedOptions); // Gọi hàm cập nhật các tùy chọn
     }
+
+    function updateVariationOptions(selectedOptions) {
+        // Duyệt qua tất cả các biến thể
+        document.querySelectorAll('.variation-options').forEach(variationContainer => {
+            const variationName = variationContainer.querySelector('span').textContent.trim();
+            const availableOptions = new Set();
+
+            // Kiểm tra các sản phẩm có các tùy chọn phù hợp
+            productItems.forEach(product => {
+                const configurations = product.configurations;
+
+                // Kiểm tra xem sản phẩm có khớp với các tùy chọn đã chọn hay không
+                const matches = Object.keys(selectedOptions).every(selectedName => {
+                    return selectedOptions[selectedName] === configurations.find(config => config.variationName === selectedName)?.optionName;
+                });
+
+                if (matches) {
+                    configurations.forEach(config => {
+                        if (config.variationName === variationName) {
+                            availableOptions.add(config.optionName);
+                        }
+                    });
+                }
+            });
+
+            // Cập nhật hiển thị các radio button
+            variationContainer.querySelectorAll('input[type="radio"]').forEach(input => {
+                const label = document.querySelector(`label[for="${input.id}"]`); // Tìm label dựa trên id của input
+
+                // Đặt lại hiển thị cho tất cả radio
+                //label.style.display = 'none'; // Ẩn label
+                input.disabled = true; // Tắt khả năng chọn
+
+                // Nếu biến thể đã chọn là một trong các lựa chọn hiện tại, luôn hiển thị
+                if (selectedOptions[variationName] === input.value) {
+                    input.disabled = false; // Cho phép chọn
+                } else if (availableOptions.has(input.value)) {
+                    input.disabled = false; // Cho phép chọn
+                }
+            });
+        });
+    }
+
+
+
+
     function viewProductList() {
         window.location.href = `/Product/ProductList/ProductList`;
     }

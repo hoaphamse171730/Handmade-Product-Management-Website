@@ -3,11 +3,9 @@
 @{
     ViewData["Title"] = "Cart";
 }
-
 <div class="mb-20 h-screen bg-gray-100">
     <div class="container mx-auto px-4">
         <h1 class="mb-4 text-4xl font-semibold">Your Cart</h1>
-
         @if (Model.CartItems != null && Model.CartItems.Any())
         {
             <div class="flex flex-col gap-4 md:flex-row">
@@ -87,7 +85,6 @@
         {
             <p>Your cart is empty.</p>
         }
-
         @if (!Model.ModelState.IsValid)
         {
             <div class="alert alert-danger">
@@ -99,7 +96,6 @@
         }
     </div>
 </div>
-
 <script>
     async function updateQuantity(cartItemId, newQuantity) {
         const cartItem = document.querySelector(`#cart-item-${cartItemId}`);
@@ -108,7 +104,6 @@
             alert("Quantity must be at least 1.");
             return;
         }
-
         const response = await fetch(`?handler=UpdateQuantity&cartItemId=${cartItemId}&newQuantity=${newQuantity}`, {
             method: "POST",
             headers: {
@@ -117,7 +112,6 @@
             },
             body: JSON.stringify({ productQuantity: newQuantity })
         });
-
         if (response.ok) {
             // Cập nhật tổng giá cho sản phẩm
             const price = parseFloat(cartItem.dataset.price);
@@ -125,14 +119,12 @@
             const totalPriceElement = cartItem.querySelector('.total-price');
             const total = discountPrice * newQuantity;
             totalPriceElement.innerText = `₫${total.toFixed(0)}`;
-
             // Cập nhật subtotal
             const shopId = cartItem.dataset.shopId;
             const subtotalElement = document.querySelector(`#subtotal-${shopId}`);
             const groupSubtotal = Array.from(document.querySelectorAll(`table[data-shop-id="${shopId}"] .total-price`))
                 .reduce((sum, el) => sum + parseFloat(el.innerText.replace('₫', '').replace(/,/g, '')), 0);
             subtotalElement.innerText = `₫${groupSubtotal.toFixed(0)}`;
-
             // Cập nhật tổng giỏ hàng
             const totalAmountElement = document.querySelector("#total-amount");
             const overallTotal = Array.from(document.querySelectorAll(`.total-price`))
@@ -145,31 +137,24 @@
             location.reload(); // Tải lại trang
         }
     }
-
-
     async function removeCartItem(cartItemId) {
         if (!confirm("Are you sure you want to delete this item?")) return;
-
         const response = await fetch(`?handler=Delete&cartItemId=${cartItemId}`, {
             method: "POST",
             headers: {
                 "RequestVerificationToken": document.querySelector('input[name="__RequestVerificationToken"]').value
             }
         });
-
         if (response.ok) {
             location.reload();
         } else {
             alert("An error occurred while trying to delete the item.");
         }
     }
-
     async function checkout() {
         const cartItems = @Html.Raw(Json.Serialize(Model.CartItems)); // Chuyển đổi CartItems thành JSON
-
         // Lưu trữ thông tin vào localStorage
         localStorage.setItem('cartItems', JSON.stringify(cartItems));
-
         // Chuyển hướng đến trang checkout
         window.location.href = '/Checkout'; // Đảm bảo đường dẫn đúng với trang checkout của bạn
     }

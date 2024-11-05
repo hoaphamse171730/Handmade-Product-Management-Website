@@ -65,6 +65,15 @@ public class AuthenticationController(
         return result.StatusCode == StatusCodeHelper.BadRequest ? BadRequest(result) : Ok(result);
     }
 
+    [Authorize]
+    [HttpPost("change-password")]
+    public async Task<IActionResult> ChangePassword(ChangePasswordModelView changePasswordModelView)
+    {
+        var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
+        var result = await authenticationService.ChangePasswordAsync(changePasswordModelView, userId);
+        return result.StatusCode == StatusCodeHelper.BadRequest ? BadRequest(result) : Ok(result);
+    }
+
     [AllowAnonymous]
     [HttpPost("confirm-email")]
     public async Task<IActionResult> ConfirmEmail(ConfirmEmailModelView confirmEmailModelView)

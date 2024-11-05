@@ -191,6 +191,168 @@ namespace HandmadeProductManagement.Services.Service
             }
         }
 
+        public async Task<OrderResponseModel> CreateOrderAsyncReturnOrder(string userId, CreateOrderDto createOrder)
+        {
+            ValidateOrder(createOrder);
+
+            var orderRepository = _unitOfWork.GetRepository<Order>();
+            var cartItemRepository = _unitOfWork.GetRepository<CartItem>();
+            var productItemRepository = _unitOfWork.GetRepository<ProductItem>();
+            var productRepository = _unitOfWork.GetRepository<Product>();
+
+            // Get cart items
+            var cartItems = await _cartItemService.GetCartItemsByUserIdForOrderCreation(userId);
+            if (cartItems.Count == 0)
+            {
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageEmptyCart);
+            }
+
+            var promotionRepository = _unitOfWork.GetRepository<Promotion>();
+            var categoryRepository = _unitOfWork.GetRepository<Category>();
+
+            // Get promotions
+            var activePromotions = await promotionRepository.Entities
+                .Where(p => (p.Status == Constants.PromotionStatusActive) && DateTime.UtcNow >= p.StartDate && DateTime.UtcNow <= p.EndDate)
+                .ToListAsync();
+
+            var groupedOrderDetails = new List<GroupedOrderDetail>();
+
+            foreach (var cartItem in cartItems)
+            {
+                var productItem = await productItemRepository.Entities
+                    .FirstOrDefaultAsync(p => p.Id.ToString() == cartItem.ProductItemId && (!p.DeletedTime.HasValue || p.DeletedBy == null))
+                    ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageProductItemNotFound);
+
+                var product = await productRepository.Entities
+                    .FirstOrDefaultAsync(p => p.Id == productItem.ProductId && (!p.DeletedTime.HasValue || p.DeletedBy == null))
+                    ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageProductNotFound);
+
+                var category = await categoryRepository.Entities
+                    .FirstOrDefaultAsync(c => c.Id == product.CategoryId && (!c.DeletedTime.HasValue || c.DeletedBy == null))
+                    ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageCategoryNotFound);
+
+                decimal finalPrice = productItem.Price;
+                if (category != null && !string.IsNullOrWhiteSpace(category.PromotionId))
+                {
+                    // Check promotion
+                    var applicablePromotion = activePromotions
+                        .FirstOrDefault(p => p.Id == category.PromotionId);
+
+                    if (applicablePromotion != null)
+                    {
+                        finalPrice = productItem.Price - (productItem.Price * applicablePromotion.DiscountRate);
+                    }
+                }
+
+                groupedOrderDetails.Add(new GroupedOrderDetail
+                {
+                    ShopId = product.ShopId,
+                    CartItem = cartItem,
+                    ProductItem = productItem,
+                    DiscountPrice = finalPrice,
+                });
+            }
+
+            // Group order by shop Id
+            var groupedByShop = groupedOrderDetails.GroupBy(x => x.ShopId).ToList();
+
+            _unitOfWork.BeginTransaction();
+
+            OrderResponseModel lastCreatedOrder = new OrderResponseModel();
+
+            try
+            {
+                foreach (var shopGroup in groupedByShop)
+                {
+                    var totalPrice = shopGroup.Sum(x => x.DiscountPrice * x.CartItem.ProductQuantity);
+                    var order = new Order
+                    {
+                        TotalPrice = (decimal)totalPrice,
+                        OrderDate = DateTime.UtcNow,
+                        Status = Constants.OrderStatusPending,
+                        UserId = Guid.Parse(userId),
+                        Address = createOrder.Address,
+                        CustomerName = createOrder.CustomerName,
+                        Phone = createOrder.Phone,
+                        Note = createOrder.Note,
+                        CreatedBy = userId,
+                        LastUpdatedBy = userId,
+                    };
+
+                    await orderRepository.InsertAsync(order);
+                    await _unitOfWork.SaveAsync();
+
+                    lastCreatedOrder.Id = order.Id;
+                    lastCreatedOrder.TotalPrice = order.TotalPrice;
+                    lastCreatedOrder.Address = order.Address;
+                    lastCreatedOrder.OrderDate = order.OrderDate;
+                    lastCreatedOrder.Status = order.Status;
+                    lastCreatedOrder.UserId = order.UserId;
+                    lastCreatedOrder.Address = order.Address;
+                    lastCreatedOrder.CustomerName = order.CustomerName;
+                    lastCreatedOrder.Phone = order.Phone;
+                    lastCreatedOrder.Note = order.Note;
+                    
+
+
+                    foreach (var groupedDetail in shopGroup)
+                    {
+                        var cartItem = groupedDetail.CartItem;
+                        var productItem = groupedDetail.ProductItem;
+
+                        if (productItem.QuantityInStock - cartItem.ProductQuantity < 0)
+                        {
+                            throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInsufficientStock);
+                        }
+
+                        // Update quantity in stock
+                        productItem.QuantityInStock -= cartItem.ProductQuantity;
+                        productItemRepository.Update(productItem);
+
+                        var orderDetail = new OrderDetailForCreationDto
+                        {
+                            OrderId = order.Id,
+                            ProductItemId = productItem.Id,
+                            ProductQuantity = cartItem.ProductQuantity,
+                            DiscountPrice = groupedDetail.DiscountPrice,
+                        };
+
+                        // Create order detail
+                        await _orderDetailService.Create(orderDetail, userId);
+
+                        // Clear cart
+                        await _cartItemService.DeleteCartItemByIdAsync(cartItem.Id, userId);
+                    }
+
+                    await _unitOfWork.SaveAsync();
+
+                    // Create status change
+                    var statusChangeDto = new StatusChangeForCreationDto
+                    {
+                        OrderId = order.Id.ToString(),
+                        Status = order.Status
+                    };
+
+                    // Call the offline payment creation method
+                    if (createOrder.PaymentMethod == Constants.CODMethod)
+                    {
+                        await UpdateOrderStatusToProcessingAsync(order.Id, userId);
+                    }
+
+                    await _statusChangeService.Create(statusChangeDto, userId);
+                    await _unitOfWork.SaveAsync();
+                }
+
+                _unitOfWork.CommitTransaction();
+                return lastCreatedOrder; // Return the last created order
+            }
+            catch (Exception ex)
+            {
+                _unitOfWork.RollBack();
+                throw new BaseException.CoreException(StatusCodeHelper.ServerError.ToString(), ex.Message);
+            }
+        }
+
         public async Task<PaginatedList<OrderResponseModel>> GetOrdersByPageAsync(int pageNumber, int pageSize)
         {
             var repository = _unitOfWork.GetRepository<Order>();
@@ -259,18 +421,22 @@ namespace HandmadeProductManagement.Services.Service
             // Retrieve order details with product config and variation option value
             var orderDetails = await _unitOfWork.GetRepository<OrderDetail>().Entities
                 .Where(od => od.OrderId == orderId && !od.DeletedTime.HasValue)
-                .Select(od => new OrderInDetailDto
-                {
-                    ProductId = od.ProductItem != null && od.ProductItem.Product != null ? od.ProductItem.Product.Id : Guid.Empty.ToString(),
-                    ProductName = od.ProductItem != null && od.ProductItem.Product != null ? od.ProductItem.Product.Name : "",
-                    ProductQuantity = od.ProductQuantity,
-                    DiscountPrice = od.DiscountPrice,
-                    VariationOptionValues = _unitOfWork.GetRepository<ProductConfiguration>().Entities
-                        .Where(pc => pc.ProductItemId == od.ProductItemId && pc.VariationOption != null)
-                        .Select(pc => pc.VariationOption!.Value)
-                        .ToList()
-                })
+                .Include(od => od.ProductItem!)
+                .ThenInclude(pi => pi.Product!) 
+                .ThenInclude(p => p.Shop)
                 .ToListAsync();
+
+            var orderInDetailDtos = orderDetails.Select(od => new OrderInDetailDto
+            {
+                ProductId = od.ProductItem != null && od.ProductItem.Product != null ? od.ProductItem.Product.Id : Guid.Empty.ToString(),
+                ProductName = od.ProductItem != null && od.ProductItem.Product != null ? od.ProductItem.Product.Name : "",
+                ProductQuantity = od.ProductQuantity,
+                DiscountPrice = od.DiscountPrice,
+                VariationOptionValues = _unitOfWork.GetRepository<ProductConfiguration>().Entities
+                    .Where(pc => pc.ProductItemId == od.ProductItemId && pc.VariationOption != null)
+                    .Select(pc => pc.VariationOption!.Value)
+                    .ToList(),
+            }).ToList();
 
             if (!orderDetails.Any())
             {
@@ -278,7 +444,7 @@ namespace HandmadeProductManagement.Services.Service
             }
 
             // Fetch product images and set the first image URL
-            foreach (var orderDetail in orderDetails)
+            foreach (var orderDetail in orderInDetailDtos)
             {
                 var images = await _productImageService.GetProductImageById(orderDetail.ProductId);
                 if (images != null && images.Count > 0)
@@ -286,6 +452,8 @@ namespace HandmadeProductManagement.Services.Service
                     orderDetail.ProductImage = images.First().Url;
                 }
             }
+            
+            var shopName = orderDetails.FirstOrDefault()?.ProductItem?.Product?.Shop?.Name;
 
             return new OrderWithDetailDto
             {
@@ -297,9 +465,10 @@ namespace HandmadeProductManagement.Services.Service
                 Address = order.Address,
                 CustomerName = order.CustomerName,
                 Phone = order.Phone,
+                ShopName = shopName,
                 Note = order.Note,
                 CancelReasonId = order.CancelReasonId,
-                OrderDetails = orderDetails
+                OrderDetails = orderInDetailDtos
             };
         }
 
@@ -319,7 +488,7 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.ForbiddenException(StatusCodeHelper.Forbidden.ToString(), Constants.ErrorMessageForbidden);
             }
 
-            if (existingOrder.Status != Constants.OrderStatusPending && existingOrder.Status != Constants.OrderStatusAwaitingPayment)
+            if (existingOrder.Status != Constants.OrderStatusPending)
             {
                 throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidOrderStatus);
             }
@@ -330,7 +499,7 @@ namespace HandmadeProductManagement.Services.Service
                 {
                     throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidAddressFormat);
                 }
-                existingOrder.Address = order.Address;
+                existingOrder.Address = order.Address.Trim();
             }
 
             if (!string.IsNullOrWhiteSpace(order.CustomerName))
@@ -339,7 +508,7 @@ namespace HandmadeProductManagement.Services.Service
                 {
                     throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidCustomerNameFormat);
                 }
-                existingOrder.CustomerName = order.CustomerName;
+                existingOrder.CustomerName = order.CustomerName.Trim();
             }
 
             if (!string.IsNullOrWhiteSpace(order.Phone))
@@ -348,12 +517,12 @@ namespace HandmadeProductManagement.Services.Service
                 {
                     throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidPhoneFormat);
                 }
-                existingOrder.Phone = order.Phone;
+                existingOrder.Phone = order.Phone.Trim();
             }
 
-            if (!string.IsNullOrWhiteSpace(order.Note))
+            if (order.Note != null)
             {
-                existingOrder.Note = order.Note;
+                existingOrder.Note = order.Note.Trim();
             }
 
             existingOrder.LastUpdatedBy = userId;

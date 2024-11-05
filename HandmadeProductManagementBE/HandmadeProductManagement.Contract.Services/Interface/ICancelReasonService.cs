@@ -11,5 +11,6 @@ namespace HandmadeProductManagement.Contract.Services.Interface
         Task<bool> Delete(string id, string userId);
         Task<IList<CancelReason>> GetDeletedCancelReasons();
         Task<bool> PatchReverseDelete(string id, string userId);
+        Task<CancelReasonDto> GetByDescription(string description);
     }
 }
