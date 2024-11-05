@@ -695,7 +695,7 @@ namespace UI.Pages.Product
         }
 
         [BindProperty]
-        public ProductDetailResponseModel ProductUpdate { get; set; } = new();
+        public ProductForUpdateDto ProductUpdate { get; set; } = new();
 
         [BindProperty]
         public List<IFormFile> NewProductImages { get; set; } = new();
