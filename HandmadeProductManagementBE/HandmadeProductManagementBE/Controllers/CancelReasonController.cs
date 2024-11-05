@@ -118,5 +118,20 @@ namespace HandmadeProductManagementAPI.Controllers
             };
             return Ok(response);
         }
+
+        [Authorize]
+        [HttpGet("description/{description}")]
+        public async Task<IActionResult> GetByDescription(string description)
+        {
+            var cancelReason = await _cancelReasonService.GetByDescription(description);
+            var response = new BaseResponse<CancelReasonDto>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Get Cancel Reason by description successfully!",
+                Data = cancelReason
+            };
+            return Ok(response);
+        }
     }
 }
