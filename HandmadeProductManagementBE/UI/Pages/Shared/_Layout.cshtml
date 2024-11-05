@@ -1,4 +1,10 @@
 ﻿@using HandmadeProductManagement.ModelViews.NotificationModelViews
+@using HandmadeProductManagement.ModelViews.ShopModelViews
+@using Microsoft.AspNetCore.Http
+@using System.IdentityModel.Tokens.Jwt
+@using System.Linq
+@using System; 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,16 +18,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         .custom-dropdown-width {
-            min-width: 400px !important; /* Đặt chiều rộng tối thiểu là 400px */
-            max-width: 600px !important; /* Đặt chiều rộng tối đa là 600px */
+            min-width: 400px !important;
+            max-width: 600px !important;
         }
     </style>
-
 </head>
 <body class="bg-gray-100">
-    @using Microsoft.AspNetCore.Http
-    @using System.IdentityModel.Tokens.Jwt
-
     @{
         string getRole(string token)
         {
@@ -37,7 +39,24 @@
 
         var token = Context.Session.GetString("Token");
         var userRole = token != null ? getRole(token) : null;
+
+        var userIdString = Context.Session.GetString("UserId"); // Lấy UserId từ session
+        Guid userId;
+        bool isValidUserId = Guid.TryParse(userIdString, out userId); // Chuyển đổi sang Guid nếu có thể
+
+        bool isShopOwner = false;
+
+        var shops = new List<ShopResponseModel>(); // Giả sử bạn đã có phương thức lấy dữ liệu từ cơ sở dữ liệu
+
+        // Ví dụ: shops = await _shopService.GetShopsByUserId(userIdString); // Gọi dịch vụ lấy shop theo UserId
+
+        // Kiểm tra xem UserId hiện tại có nằm trong danh sách shop không
+        if (isValidUserId)
+        {
+            isShopOwner = shops.Any(shop => shop.UserId == userId);
+        }
     }
+
     <!-- Header -->
     <header class="bg-white shadow">
         <nav class="container mx-auto flex items-center justify-between py-4">
@@ -56,60 +75,63 @@
                 }
 
                 <!-- Seller-Only Links -->
-                @if (userRole == "Seller")
+                @if (userRole == "Seller" && isShopOwner)
                 {
                     <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Product/ProductSeller">Product Seller</a>
                     <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Seller/Shop">My Shop</a>
                     <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Seller/OrderManagement">Order Management</a>
                     <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Review/Index">Reviews</a>
+                    <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Cart/CartView">Cart</a>
                     <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Order/OrderHistory">Order History</a>
                     <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Checkout/Index">Checkout</a>
                 }
+
+                @if (userRole == "Seller")
+                {
+                    <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Seller/OrderManagement">Order Management</a>
+                    <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Review/Index">Reviews</a>
+                    <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Cart/CartView">Cart</a>
+                    <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Order/OrderHistory">Order History</a>
+                    <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Checkout/Index">Checkout</a>
+                }
+
 
                 <!-- Customer Links -->
                 @if (userRole == "Customer")
                 {
+                    <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Cart/CartView">Cart</a>
                     <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Order/OrderHistory">Order History</a>
                     <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Checkout/Index">Checkout</a>
                 }
 
-                @using Microsoft.AspNetCore.Http
-                @using System.IdentityModel.Tokens.Jwt
-                
- 
                 @if (Context.Session.GetString("Token") != null)
                 {
                     <!-- User Menu Dropdown -->
                     <div class="group relative inline-block text-left">
-                        <!-- Button to trigger the dropdown -->
                         <button id="user-menu-button" class="rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white shadow-md transition duration-300 hover:bg-blue-700 focus:outline-none">
                             Welcome, @Context.Session.GetString("UserName")
                             <i class="fa fa-caret-down ml-2"></i>
                         </button>
-                        <!-- Dropdown menu -->
                         <div class="group-hover:block absolute right-0 z-50 hidden w-44 origin-top-right rounded-md bg-white shadow-lg">
                             <div class="py-1">
                                 <a href="@Url.Page("/UserInfo/UserInfo")" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">My Account</a>
-
                                 <form method="post" asp-page-handler="Logout" asp-page="/Login" class="block">
                                     <button type="submit" class="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100">Logout</button>
                                 </form>
                             </div>
                         </div>
                     </div>
-                    <!-- Notification Bell Icon and Dropdown (separate from User Menu) -->
-                    <div class="relative inline-block ml-4">
-                        <!-- Notification Button -->
-                        
 
+                    <!-- Notification Bell Icon and Dropdown -->
+                    <div class="relative inline-block ml-4">
                         @await Component.InvokeAsync("NotificationList")
                     </div>
                 }
                 else
                 {
-                <a asp-page="/Login">
-                    <button class="rounded-lg bg-cyan-600 px-4 py-2 font-semibold text-white transition duration-300 hover:bg-cyan-700" asp-area="" asp-page="/Login">Login</button>
-                </a>
+                    <a asp-page="/Login">
+                        <button class="rounded-lg bg-cyan-600 px-4 py-2 font-semibold text-white transition duration-300 hover:bg-cyan-700" asp-area="" asp-page="/Login">Login</button>
+                    </a>
                 }
             </div>
         </nav>
@@ -134,7 +156,6 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
 
     <script>
-
         // Toggle dropdown visibility
         document.getElementById("notification-button").addEventListener("click", function (event) {
             event.stopPropagation();
@@ -146,6 +167,7 @@
                 fetchNotifications();
             }
         });
+
         // Close dropdown when clicking outside
         window.addEventListener("click", function () {
             const dropdown = document.getElementById("notificationDropdown");
@@ -153,10 +175,7 @@
                 dropdown.classList.add("hidden");
             }
         });
-
     </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
-
-
