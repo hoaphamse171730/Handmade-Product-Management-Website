@@ -681,12 +681,6 @@ namespace UI.Pages.Product
             public string Value { get; set; }
         }
 
-        public class ProductItemForUpdateDto
-        {
-            public int QuantityInStock { get; set; }
-            public int Price { get; set; }
-        }
-
         public class CategoryVariationApiResponse
         {
             public string Id { get; set; }
@@ -694,26 +688,24 @@ namespace UI.Pages.Product
             public string CategoryId { get; set; }
         }
 
-        [BindProperty]
-        public ProductForUpdateDto ProductUpdate { get; set; } = new();
+
 
         [BindProperty]
         public List<IFormFile> NewProductImages { get; set; } = new();
-
-        [BindProperty]
-        public Dictionary<string, ProductItemForUpdateDto> ProductItemUpdates { get; set; } = new();
-
         [BindProperty]
         public Dictionary<string, string> VariationUpdates { get; set; } = new();
 
         [BindProperty]
         public Dictionary<string, string> VariationOptionUpdates { get; set; } = new();
+        [BindProperty]
+        public ProductForUpdateDto ProductUpdate { get; set; } = new();
 
+        [BindProperty]
+        public Dictionary<string, ProductItemForUpdateDto> ProductItemUpdates { get; set; }
         public async Task<IActionResult> OnGetProductDetailsAsync(string productId)
         {
             try
             {
-                // Get product details
                 var response = await _apiResponseHelper.GetAsync<ProductDetailResponseModel>(
                     $"{Constants.ApiBaseUrl}/api/product/detail/{productId}");
 
@@ -722,20 +714,10 @@ namespace UI.Pages.Product
                     return new JsonResult(new { success = false, message = "Failed to load product details" });
                 }
 
-                // Get product images
-                var imageResponse = await _apiResponseHelper.GetAsync<IList<ProductImageByIdResponse>>(
-                    $"{Constants.ApiBaseUrl}/api/productimage/GetImage?productId={productId}");
-
-                // Get category variations
-                var variationsResponse = await _apiResponseHelper.GetAsync<List<CategoryVariationResponse>>(
-                    $"{Constants.ApiBaseUrl}/api/variation/category/{response.Data!.CategoryId}");
-
                 var result = new
                 {
                     success = true,
-                    product = response.Data,
-                    images = imageResponse.Data,
-                    variations = variationsResponse.Data
+                    product = response.Data
                 };
 
                 return new JsonResult(result);
@@ -743,20 +725,31 @@ namespace UI.Pages.Product
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error loading product details");
-                return new JsonResult(new { success = false, message = "An error occurred while loading product details" });
+                return new JsonResult(new
+                {
+                    success = false,
+                    message = "An error occurred while loading product details"
+                });
             }
         }
 
-        public async Task<IActionResult> OnPostUpdateProductAsync(string productId)
+        public async Task<IActionResult> OnPostUpdateBasicInfoAsync(string productId)
         {
             try
             {
-                if (!ModelState.IsValid)
+                if (string.IsNullOrEmpty(ProductUpdate.Name))
                 {
-                    return new JsonResult(new { success = false, message = "Invalid form data" });
+                    ModelState.AddModelError("ProductUpdate.Name", "Product name is required");
                 }
 
-                // Update basic product information
+                if (!ModelState.IsValid)
+                {
+                    await LoadCategoriesAsync();
+                    var errors = ModelState.Values.SelectMany(v => v.Errors.Select(e => e.ErrorMessage));
+                    _logger.LogWarning("Validation errors: {Errors}", string.Join("; ", errors));
+                    return new JsonResult(new { success = false, message = "Invalid data", errors });
+                }
+
                 var productUpdateResponse = await _apiResponseHelper.PatchAsync<bool>(
                     $"{Constants.ApiBaseUrl}/api/product/{productId}",
                     ProductUpdate);
@@ -766,73 +759,53 @@ namespace UI.Pages.Product
                     return new JsonResult(new { success = false, message = "Failed to update product information" });
                 }
 
-                // Update product items
-                foreach (var (itemId, itemUpdate) in ProductItemUpdates)
-                {
-                    var itemUpdateResponse = await _apiResponseHelper.PatchAsync<bool>(
-                        $"{Constants.ApiBaseUrl}/api/productitem/{itemId}",
-                        itemUpdate);
-
-                    if (itemUpdateResponse.StatusCode != StatusCodeHelper.OK)
-                    {
-                        _logger.LogWarning($"Failed to update product item {itemId}");
-                    }
-                }
-
-                // Update variations
-                foreach (var (variationId, newName) in VariationUpdates)
-                {
-                    var variationUpdateDto = new VariationForUpdateDto { Name = newName };
-                    var variationUpdateResponse = await _apiResponseHelper.PatchAsync<bool>(
-                        $"{Constants.ApiBaseUrl}/api/variation/{variationId}",
-                        variationUpdateDto);
-
-                    if (variationUpdateResponse.StatusCode != StatusCodeHelper.OK)
-                    {
-                        _logger.LogWarning($"Failed to update variation {variationId}");
-                    }
-                }
-
-                // Update variation options
-                foreach (var (optionId, newValue) in VariationOptionUpdates)
-                {
-                    var optionUpdateDto = new VariationOptionForUpdateDto { Value = newValue };
-                    var optionUpdateResponse = await _apiResponseHelper.PatchAsync<bool>(
-                        $"{Constants.ApiBaseUrl}/api/variationoption/{optionId}",
-                        optionUpdateDto);
-
-                    if (optionUpdateResponse.StatusCode != StatusCodeHelper.OK)
-                    {
-                        _logger.LogWarning($"Failed to update variation option {optionId}");
-                    }
-                }
-
-                // Handle new images
-                if (NewProductImages != null && NewProductImages.Any())
-                {
-                    foreach (var image in NewProductImages)
-                    {
-                        if (image.Length > 0)
-                        {
-                            var uploadResponse = await _apiResponseHelper.UploadImageAsync(
-                                $"{Constants.ApiBaseUrl}/api/productimage/Upload",
-                                image,
-                                productId);
-
-                            if (uploadResponse.StatusCode != StatusCodeHelper.OK)
-                            {
-                                _logger.LogError($"Failed to upload image for product {productId}");
-                            }
-                        }
-                    }
-                }
-
-                return new JsonResult(new { success = true });
+                return new JsonResult(new { success = true, message = "Product updated successfully" });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating product");
-                return new JsonResult(new { success = false, message = "An error occurred while updating the product" });
+                _logger.LogError(ex, "Error updating product basic information");
+                return new JsonResult(new { success = false, message = "An error occurred while updating the product information" });
+            }
+        }
+
+        public async Task<IActionResult> OnPostUpdateProductItemsAsync(string productId)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return new JsonResult(new { success = false, message = "Invalid data" });
+                }
+
+                var hasErrors = false;
+                foreach (var itemUpdate in ProductItemUpdates)
+                {
+                    var itemUpdateResponse = await _apiResponseHelper.PatchAsync<bool>(
+                        $"{Constants.ApiBaseUrl}/api/productitem/{itemUpdate.Key}",
+                        new
+                        {
+                            QuantityInStock = itemUpdate.Value.QuantityInStock,
+                            Price = itemUpdate.Value.Price
+                        });
+
+                    if (itemUpdateResponse.StatusCode != StatusCodeHelper.OK)
+                    {
+                        _logger.LogWarning($"Failed to update product item {itemUpdate.Key}");
+                        hasErrors = true;
+                    }
+                }
+
+                if (hasErrors)
+                {
+                    return new JsonResult(new { success = false, message = "Some product items failed to update" });
+                }
+
+                return new JsonResult(new { success = true, message = "Product items updated successfully" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating product items");
+                return new JsonResult(new { success = false, message = "An error occurred while updating the product items" });
             }
         }
 

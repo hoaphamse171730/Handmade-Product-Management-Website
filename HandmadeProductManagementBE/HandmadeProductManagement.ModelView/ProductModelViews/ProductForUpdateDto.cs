@@ -1,6 +1,6 @@
 ﻿namespace HandmadeProductManagement.ModelViews.ProductModelViews
 {
-    public record ProductForUpdateDto : ProductForManipulationDto
-    {
-    }
+        public record ProductForUpdateDto : ProductForManipulationDto
+        {
+        }
 }
