@@ -181,7 +181,7 @@ namespace HandmadeProductManagement.Services.Service
                     throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidShopName);
                 }
 
-                if (Regex.IsMatch(shop.Name, @"[^a-zA-Z\s]"))
+                if (Regex.IsMatch(shop.Name, @"[^a-zA-Z0-9\s]"))
                 {
                     throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidShopNameFormat);
                 }
@@ -220,7 +220,7 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidShopName);
             }
 
-            if (Regex.IsMatch(shop.Name, @"[^a-zA-Z\s]"))
+            if (Regex.IsMatch(shop.Name, @"[^a-zA-Z0-9\s]"))
             {
                 throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidShopNameFormat);
             }

@@ -112,6 +112,7 @@ public static class Constants
 
     #region Error Messages
 
+    public const string ErrorMessageCurrentAndNewPasswordSame = "The new password cannot be the same as the current password.";
     public const string ErrorMessageInvalidCurrentPassword = "The current password is incorrect.";
     public const string ErrorMessagePasswordMismatch = "The new password and confirm password do not match.";
     public const string ErrorMessageForbidden = "You do not have permission to access this resource.";
