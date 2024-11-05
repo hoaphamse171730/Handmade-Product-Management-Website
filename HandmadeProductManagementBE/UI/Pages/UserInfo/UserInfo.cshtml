@@ -7,39 +7,35 @@
 <div class="container mx-auto mt-10">
     <h2 class="text-center text-lg font-bold text-blue-600">User Information</h2>
 
-    <div class="max-w-md mx-auto mt-8">
-        <div class="border p-4 rounded-lg shadow-lg bg-white">
+    <div class="mx-auto mt-8 max-w-md">
+        <div class="rounded-lg border bg-white p-4 shadow-lg">
             <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-2">Name:</label>
+                <label class="mb-2 block text-sm font-bold text-gray-700">Name:</label>
                 <p class="text-gray-600">@Model.userInfo.UserName</p>
             </div>
             <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-2">Email:</label>
+                <label class="mb-2 block text-sm font-bold text-gray-700">Email:</label>
                 <p class="text-gray-600">@Model.userInfo.Email</p>
             </div>
             <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-2">Phone Number:</label>
+                <label class="mb-2 block text-sm font-bold text-gray-700">Phone Number:</label>
                 <p class="text-gray-600">@Model.userInfo.PhoneNumber</p>
             </div>
             <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-2">Two factor enabled:</label>
+                <label class="mb-2 block text-sm font-bold text-gray-700">Two factor enabled:</label>
                 <p class="text-gray-600">@Model.userInfo.TwoFactorEnabled</p>
             </div>
-            
-            <div class="text-center mt-6">
-                
+
+            <div class="mt-6 text-center">
                 <form method="get" asp-page="/UserInfo/EditUser">
                     <button type="submit" class="rounded-lg bg-cyan-600 px-4 py-2 font-semibold text-white transition duration-300 hover:bg-cyan-700">
                         Edit Profile
                     </button>
                 </form>
+                <a href="/ChangePassword" class="mt-4 inline-block rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white transition duration-300 hover:bg-blue-700">
+                    Change Password
+                </a>
             </div>
         </div>
     </div>
 </div>
-
-@section Scripts {
-    <script>
-        // You can add some JavaScript if needed for this page
-    </script>
-}
