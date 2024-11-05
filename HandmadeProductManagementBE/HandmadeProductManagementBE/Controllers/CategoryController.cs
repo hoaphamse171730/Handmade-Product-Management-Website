@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using HandmadeProductManagement.Core.Constants;
+using HandmadeProductManagement.Core.Utils;
 
 namespace HandmadeProductManagementAPI.Controllers
 {
@@ -27,6 +28,21 @@ namespace HandmadeProductManagementAPI.Controllers
                 Code = "200",
                 StatusCode = StatusCodeHelper.OK,
                 Message = "Categories retrieved successfully",
+                Data = categories
+            };
+            return Ok(response);
+        }
+
+        [Authorize]
+        [HttpGet("pagedetail")]
+        public async Task<IActionResult> GetCategoriesWithDetailByPage([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            var categories = await _categoryService.GetAllWithDetailByPageAsync(pageNumber, pageSize);
+            var response = new BaseResponse<PaginatedList<CategoryDtoWithDetail>>
+            {
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Categories with details retrieved successfully",
                 Data = categories
             };
             return Ok(response);

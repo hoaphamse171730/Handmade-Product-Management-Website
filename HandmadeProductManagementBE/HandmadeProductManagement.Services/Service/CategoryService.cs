@@ -6,7 +6,9 @@ using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Common;
 using HandmadeProductManagement.Core.Constants;
+using HandmadeProductManagement.Core.Utils;
 using HandmadeProductManagement.ModelViews.CategoryModelViews;
+using HandmadeProductManagement.ModelViews.PromotionModelViews;
 using Microsoft.EntityFrameworkCore;
 
 namespace HandmadeProductManagement.Services.Service
@@ -38,6 +40,27 @@ namespace HandmadeProductManagement.Services.Service
                 .Where(c => c.DeletedTime == null)
                 .ToListAsync();
             return _mapper.Map<IList<CategoryDto>>(categories);
+        }
+
+        public async Task<PaginatedList<CategoryDtoWithDetail>> GetAllWithDetailByPageAsync(int pageNumber, int pageSize)
+        {
+            var categories = await _unitOfWork.GetRepository<Category>().Entities
+                .Include(c => c.Promotion)
+                .Where(c => c.DeletedTime == null)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            var totalCount = await _unitOfWork.GetRepository<Category>().Entities.CountAsync();
+
+            var paginatedList = new PaginatedList<CategoryDtoWithDetail>(
+                categories.Select(c => _mapper.Map<CategoryDtoWithDetail>(c)).ToList(),
+                totalCount,
+                pageNumber,
+                pageSize
+            );
+
+            return paginatedList;
         }
 
         public async Task<CategoryDto> GetById(string id)

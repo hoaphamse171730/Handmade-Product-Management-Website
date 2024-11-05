@@ -1,11 +1,13 @@
 ﻿using HandmadeProductManagement.ModelViews.PromotionModelViews;
 using HandmadeProductManagement.ModelViews.CategoryModelViews;
+using HandmadeProductManagement.Core.Utils;
 
 namespace HandmadeProductManagement.Contract.Services.Interface
 {
     public interface ICategoryService
     {
         Task<IList<CategoryDto>> GetAll();
+        Task<PaginatedList<CategoryDtoWithDetail>> GetAllWithDetailByPageAsync(int pageNumber, int pageSize);
         Task<CategoryDto> GetById(string id);
         Task<IList<CategoryDto>> GetAllDeleted();
         Task<bool> Create(CategoryForCreationDto category);
