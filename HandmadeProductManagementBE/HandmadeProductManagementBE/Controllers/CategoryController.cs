@@ -38,7 +38,7 @@ namespace HandmadeProductManagementAPI.Controllers
         public async Task<IActionResult> GetCategoriesWithDetailByPage([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             var categories = await _categoryService.GetAllWithDetailByPageAsync(pageNumber, pageSize);
-            var response = new BaseResponse<PaginatedList<CategoryDtoWithDetail>>
+            var response = new BaseResponse<IList<CategoryDtoWithDetail>>
             {
                 Code = "200",
                 StatusCode = StatusCodeHelper.OK,

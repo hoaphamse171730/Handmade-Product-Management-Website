@@ -42,8 +42,14 @@ namespace HandmadeProductManagement.Services.Service
             return _mapper.Map<IList<CategoryDto>>(categories);
         }
 
-        public async Task<PaginatedList<CategoryDtoWithDetail>> GetAllWithDetailByPageAsync(int pageNumber, int pageSize)
+        public async Task<IList<CategoryDtoWithDetail>> GetAllWithDetailByPageAsync(int pageNumber, int pageSize)
         {
+            if (pageNumber <= 0)
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidPageNumber);
+
+            if (pageSize <= 0)
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidPageSize);
+
             var categories = await _unitOfWork.GetRepository<Category>().Entities
                 .Include(c => c.Promotion)
                 .Where(c => c.DeletedTime == null)
@@ -51,16 +57,7 @@ namespace HandmadeProductManagement.Services.Service
                 .Take(pageSize)
                 .ToListAsync();
 
-            var totalCount = await _unitOfWork.GetRepository<Category>().Entities.CountAsync();
-
-            var paginatedList = new PaginatedList<CategoryDtoWithDetail>(
-                categories.Select(c => _mapper.Map<CategoryDtoWithDetail>(c)).ToList(),
-                totalCount,
-                pageNumber,
-                pageSize
-            );
-
-            return paginatedList;
+            return _mapper.Map<IList<CategoryDtoWithDetail>>(categories);
         }
 
         public async Task<CategoryDto> GetById(string id)
@@ -113,13 +110,13 @@ namespace HandmadeProductManagement.Services.Service
             {
                 var existedCategory = await _unitOfWork.GetRepository<Category>().Entities
                     .FirstOrDefaultAsync(c => c.Name == category.Name && c.DeletedTime == null);
-                if (existedCategory is not null)
+                if (existedCategory?.Id != id)
                     throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageCategoryNameExists);
 
                 categoryEntity.Name = category.Name;
             }
 
-            if (!string.IsNullOrEmpty(category.Description))
+            if (category.Description != null)
             {
                 categoryEntity.Description = category.Description;
             }
