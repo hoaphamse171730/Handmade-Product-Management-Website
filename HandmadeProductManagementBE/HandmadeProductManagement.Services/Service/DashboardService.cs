@@ -171,6 +171,7 @@ namespace HandmadeProductManagement.Services.Service
                                                       .Include(p => p.Category)
                                                       .Include(p => p.ProductItems)
                                                       .OrderByDescending(p => p.SoldCount)
+                                                      .Where(p => p.DeletedTime == null)
                                                       .Take(10)
                                                       .Select(p => new TopSellingProducts
                                                       {
@@ -196,6 +197,7 @@ namespace HandmadeProductManagement.Services.Service
                                                .Include(p => p.ProductItems)
                                                .OrderByDescending(p =>  p.CreatedTime)
                                                .ThenByDescending(p => p.LastUpdatedTime)
+                                               .Where(p => p.DeletedTime == null)
                                                .Take(10)
                                                .Select(p => new ProductForDashboard
                                                 {

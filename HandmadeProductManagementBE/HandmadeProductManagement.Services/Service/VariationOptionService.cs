@@ -8,6 +8,7 @@ using HandmadeProductManagement.Core.Common;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.VariationOptionModelViews;
 using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace HandmadeProductManagement.Services.Service
 {
@@ -28,6 +29,28 @@ namespace HandmadeProductManagement.Services.Service
             _mapper = mapper;
             _creationValidator = creationValidator;
             _updateValidator = updateValidator;
+        }
+
+        public async Task<LatestVariationOptionId> GetLatestVariationOptionId(string variationId, string userId)
+        {
+            // Validate variationId format
+            if (!Guid.TryParse(variationId, out var guid))
+            {
+                throw new BaseException.BadRequestException(
+                    StatusCodeHelper.BadRequest.ToString(),
+                    Constants.ErrorMessageInvalidGuidFormat
+                );
+            }
+
+            // Retrieve the latest variation option for the specified variation and user
+            var latestOption = await _unitOfWork.GetRepository<VariationOption>().Entities
+                .Where(vo => vo.VariationId == variationId &&
+                             vo.CreatedBy == userId &&
+                             (!vo.DeletedTime.HasValue || vo.DeletedBy == null))
+                .OrderByDescending(vo => vo.CreatedTime)
+                .FirstOrDefaultAsync();
+
+            return _mapper.Map<LatestVariationOptionId>(latestOption);
         }
 
         public async Task<IList<VariationOptionDto>> GetByVariationId(string variationId)

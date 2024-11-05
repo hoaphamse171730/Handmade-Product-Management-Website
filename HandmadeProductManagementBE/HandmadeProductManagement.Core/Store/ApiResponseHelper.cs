@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 using System.Net;
+using Microsoft.Extensions.Logging;
 
 namespace HandmadeProductManagement.Core.Store;
 public class ApiResponseHelper
@@ -14,8 +15,9 @@ public class ApiResponseHelper
     private readonly HttpClient _httpClient;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly JsonSerializerOptions _jsonOptions;
+    private readonly ILogger<ApiResponseHelper> _logger;
 
-    public ApiResponseHelper(HttpClient httpClient, IHttpContextAccessor httpContextAccessor)
+    public ApiResponseHelper(HttpClient httpClient, IHttpContextAccessor httpContextAccessor, ILogger<ApiResponseHelper> logger)
     {
         var handler = new HttpClientHandler()
         {
@@ -28,7 +30,8 @@ public class ApiResponseHelper
         };
 
         _httpClient = new HttpClient(handler); // Use handler to disable redirect
-        _httpContextAccessor = httpContextAccessor;
+        _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     private void AddAuthorizationHeader(HttpRequestMessage request)
@@ -43,7 +46,34 @@ public class ApiResponseHelper
             }
         }
     }
+    public async Task<BaseResponse<bool>> UploadImageAsync(string url, IFormFile file, string productId)
+    {
+        try
+        {
+            using var client = new HttpClient();
+            using var formData = new MultipartFormDataContent();
+            using var streamContent = new StreamContent(file.OpenReadStream());
 
+            formData.Add(streamContent, "file", file.FileName);
+            var response = await client.PostAsync($"{url}?productId={productId}", formData);
+            var responseContent = await response.Content.ReadAsStringAsync();
+
+            return JsonSerializer.Deserialize<BaseResponse<bool>>(responseContent, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+        }
+        catch (Exception ex)
+        {
+            return new BaseResponse<bool>
+            {
+                Code = StatusCodeHelper.ServerError.ToString(),
+                StatusCode = StatusCodeHelper.ServerError,
+                Message = ex.Message,
+                Data = false
+            };
+        }
+    }
 
     public async Task<BaseResponse<T>> GetAsync<T>(string url, object queryParams = null)
     {
@@ -182,23 +212,6 @@ public async Task<BaseResponse<T>> PutAsync<T>(string url, object payload = null
         return await HandleApiResponse<T>(response);
     }
 
-    public async Task<BaseResponse<T>> PostFileAsync<T>(string url, IFormFile file)
-    {
-        var content = new MultipartFormDataContent();
-        var fileStreamContent = new StreamContent(file.OpenReadStream());
-        fileStreamContent.Headers.ContentType = new MediaTypeHeaderValue(file.ContentType);
-        content.Add(fileStreamContent, "file", file.FileName);
-
-        var request = new HttpRequestMessage(HttpMethod.Post, url)
-        {
-            Content = content
-        };
-        AddAuthorizationHeader(request);
-
-        var response = await _httpClient.SendAsync(request);
-        return await HandleApiResponse<T>(response);
-    }
-
     public async Task<BaseResponse<T>> PostMultipartAsync<T>(string url, MultipartFormDataContent content)
     {
         var request = new HttpRequestMessage(HttpMethod.Post, url)
@@ -208,23 +221,41 @@ public async Task<BaseResponse<T>> PutAsync<T>(string url, object payload = null
         AddAuthorizationHeader(request);
 
         var response = await _httpClient.SendAsync(request);
-
-        if (response.StatusCode == HttpStatusCode.RedirectKeepVerb ||
-            response.StatusCode == HttpStatusCode.MovedPermanently ||
-            response.StatusCode == HttpStatusCode.Found)
-        {
-            var newUrl = response.Headers.Location.ToString();
-            request = new HttpRequestMessage(HttpMethod.Post, newUrl)
-            {
-                Content = content
-            };
-            AddAuthorizationHeader(request);
-
-            response = await _httpClient.SendAsync(request);
-        }
-
         return await HandleApiResponse<T>(response);
     }
+
+    public async Task<BaseResponse<bool>> PutProductStatusUpdateAsync(string url, bool isAvailable)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Put, url)
+        {
+            Content = JsonContent.Create(new { IsAvailable = isAvailable })
+        };
+        AddAuthorizationHeader(request);
+
+        var response = await _httpClient.SendAsync(request);
+        return await HandleProductStatusResponse(response);
+    }
+
+    private async Task<BaseResponse<bool>> HandleProductStatusResponse(HttpResponseMessage response)
+    {
+        var responseBody = await response.Content.ReadAsStringAsync();
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            return JsonSerializer.Deserialize<BaseResponse<bool>>(responseBody, options) ?? new BaseResponse<bool>();
+        }
+        else
+        {
+            // Handle non-success status codes with an error message
+            return new BaseResponse<bool>
+            {
+                StatusCode = StatusCodeHelper.ServerError,
+                Code = ((int)response.StatusCode).ToString(),
+                Message = $"Failed to update product status. Status code: {response.StatusCode}"
+            };
+        }
+    }
+
 
     // Centralized method to handle API response and exceptions
     private async Task<BaseResponse<T>> HandleApiResponse<T>(HttpResponseMessage response)
