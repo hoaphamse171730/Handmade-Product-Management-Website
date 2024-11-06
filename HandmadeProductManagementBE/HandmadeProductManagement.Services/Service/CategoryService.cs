@@ -6,7 +6,9 @@ using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Common;
 using HandmadeProductManagement.Core.Constants;
+using HandmadeProductManagement.Core.Utils;
 using HandmadeProductManagement.ModelViews.CategoryModelViews;
+using HandmadeProductManagement.ModelViews.PromotionModelViews;
 using Microsoft.EntityFrameworkCore;
 
 namespace HandmadeProductManagement.Services.Service
@@ -38,6 +40,24 @@ namespace HandmadeProductManagement.Services.Service
                 .Where(c => c.DeletedTime == null)
                 .ToListAsync();
             return _mapper.Map<IList<CategoryDto>>(categories);
+        }
+
+        public async Task<IList<CategoryDtoWithDetail>> GetAllWithDetailByPageAsync(int pageNumber, int pageSize)
+        {
+            if (pageNumber <= 0)
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidPageNumber);
+
+            if (pageSize <= 0)
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidPageSize);
+
+            var categories = await _unitOfWork.GetRepository<Category>().Entities
+                .Include(c => c.Promotion)
+                .Where(c => c.DeletedTime == null)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return _mapper.Map<IList<CategoryDtoWithDetail>>(categories);
         }
 
         public async Task<CategoryDto> GetById(string id)
@@ -90,13 +110,13 @@ namespace HandmadeProductManagement.Services.Service
             {
                 var existedCategory = await _unitOfWork.GetRepository<Category>().Entities
                     .FirstOrDefaultAsync(c => c.Name == category.Name && c.DeletedTime == null);
-                if (existedCategory is not null)
+                if (existedCategory?.Id != id)
                     throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageCategoryNameExists);
 
                 categoryEntity.Name = category.Name;
             }
 
-            if (!string.IsNullOrEmpty(category.Description))
+            if (category.Description != null)
             {
                 categoryEntity.Description = category.Description;
             }
@@ -111,7 +131,7 @@ namespace HandmadeProductManagement.Services.Service
         }
 
 
-        public async Task<CategoryDto> UpdatePromotion(string id, CategoryForUpdatePromotion category)
+        public async Task<bool> UpdatePromotion(string id, CategoryForUpdatePromotion category)
         {
             if (!Guid.TryParse(id, out _))
             {
@@ -145,7 +165,7 @@ namespace HandmadeProductManagement.Services.Service
 
             await _unitOfWork.GetRepository<Category>().UpdateAsync(categoryRepo);
             await _unitOfWork.SaveAsync();
-            return _mapper.Map<CategoryDto>(categoryRepo);
+            return true;
         }
 
         public async Task<bool> SoftDelete(string id)
@@ -181,12 +201,21 @@ namespace HandmadeProductManagement.Services.Service
             return true;
         }
 
-        public async Task<IList<CategoryDto>> GetAllDeleted()
+        public async Task<IList<CategoryDto>> GetAllDeleted(int pageNumber, int pageSize)
         {
+            if (pageNumber <= 0)
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidPageNumber);
+
+            if (pageSize <= 0)
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidPageSize);
+
             var deletedCategories = await _unitOfWork.GetRepository<Category>().Entities
                 .Include(c => c.Promotion)
                 .Where(c => c.DeletedTime != null)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
+
             return _mapper.Map<IList<CategoryDto>>(deletedCategories);
         }
 
