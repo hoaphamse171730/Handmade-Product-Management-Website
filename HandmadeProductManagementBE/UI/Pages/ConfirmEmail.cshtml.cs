@@ -63,6 +63,6 @@ namespace UI.Pages
                 ErrorMessage = "Failed to confirm email. Please try again later.";
                 return RedirectToPage("/error");
             }
-        }
+            }
     }
 }

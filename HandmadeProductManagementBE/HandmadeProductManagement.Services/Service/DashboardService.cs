@@ -125,6 +125,7 @@ namespace HandmadeProductManagement.Services.Service
 
             var topShops = shippedOrders.Select(s => new TopShopDto
             {
+                Id = _unitOfWork.GetRepository<Shop>().Entities.FirstOrDefault(shop => shop.Id == s.ShopId)?.Id!,
                 Name = _unitOfWork.GetRepository<Shop>().Entities.FirstOrDefault(shop => shop.Id == s.ShopId)?.Name ?? "Unknown",
                 TotalSales = s.TotalSales
             }).ToList();

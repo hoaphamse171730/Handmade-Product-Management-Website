@@ -9,6 +9,7 @@ namespace HandmadeProductManagement.ModelViews.DashboardModelViews
 
     public class TopShopDto
     {
+        public string Id { get; set; }
         public string Name { get; set; }
         public decimal TotalSales { get; set; }
     }
