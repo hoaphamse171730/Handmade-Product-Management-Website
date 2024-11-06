@@ -37,7 +37,7 @@ namespace UI.Pages.Product
 
         //Step 3: Remember to add pageNumber & pageSize into parameter of OnGetAsync like below
         //Note: in page, the p is not the P
-        public async Task OnGetAsync([FromQuery] string? Name, [FromQuery] string? CategoryId, [FromQuery] string? Status, [FromQuery] decimal? MinRating, [FromQuery] string SortOption, [FromQuery] bool SortDescending, int pageNumber = 1, int pageSize = 2)
+        public async Task OnGetAsync([FromQuery] string? Name, [FromQuery] string? CategoryId, [FromQuery] string? Status, [FromQuery] decimal? MinRating, [FromQuery] string SortOption, [FromQuery] bool SortDescending, int pageNumber = 1, int pageSize = 12)
         {
             try
             {
