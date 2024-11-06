@@ -97,20 +97,21 @@ namespace HandmadeProductManagement.Services.Service
 
 
         public async Task<CategoryDto> Update(string id, CategoryForUpdateDto category)
-
         {
             var validationResult = await _updateValidator.ValidateAsync(category);
             if (!validationResult.IsValid)
                 throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), validationResult.Errors.First().ErrorMessage);
 
             var categoryEntity = await _unitOfWork.GetRepository<Category>().Entities
-                .FirstOrDefaultAsync(c => c.Id == id && c.DeletedTime == null) ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageCategoryNotFound);
-            
+                .FirstOrDefaultAsync(c => c.Id == id && c.DeletedTime == null)
+                ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageCategoryNotFound);
+
             if (!string.IsNullOrEmpty(category.Name))
             {
                 var existedCategory = await _unitOfWork.GetRepository<Category>().Entities
                     .FirstOrDefaultAsync(c => c.Name == category.Name && c.DeletedTime == null);
-                if (existedCategory?.Id != id)
+
+                if (existedCategory != null && existedCategory.Id != id)
                     throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageCategoryNameExists);
 
                 categoryEntity.Name = category.Name;
@@ -120,16 +121,14 @@ namespace HandmadeProductManagement.Services.Service
             {
                 categoryEntity.Description = category.Description;
             }
+
             categoryEntity.LastUpdatedTime = DateTime.UtcNow;
 
             await _unitOfWork.GetRepository<Category>().UpdateAsync(categoryEntity);
             await _unitOfWork.SaveAsync();
 
-
             return _mapper.Map<CategoryDto>(categoryEntity);
-
         }
-
 
         public async Task<bool> UpdatePromotion(string id, CategoryForUpdatePromotion category)
         {
