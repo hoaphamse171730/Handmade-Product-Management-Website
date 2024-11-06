@@ -11,5 +11,6 @@ namespace HandmadeProductManagement.Contract.Services.Interface
         Task<bool> Delete(string id, string userId);
         Task<IList<Variation>> GetDeleted();
         Task<bool> Recover(string id, string userId);
+        Task<LatestVariationId> GetLatestVariationId(string categoryId, string userId);
     }
 }

@@ -13,6 +13,7 @@ using HandmadeProductManagement.ModelViews.StatusChangeModelViews;
 using HandmadeProductManagement.Repositories.Entity;
 using Microsoft.EntityFrameworkCore;
 using System.Text.RegularExpressions;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace HandmadeProductManagement.Services.Service
 {
@@ -191,35 +192,201 @@ namespace HandmadeProductManagement.Services.Service
             }
         }
 
-        public async Task<PaginatedList<OrderResponseModel>> GetOrdersByPageAsync(int pageNumber, int pageSize)
+        public async Task<OrderResponseModel> CreateOrderAsyncReturnOrder(string userId, CreateOrderDto createOrder)
         {
-            var repository = _unitOfWork.GetRepository<Order>();
-            var orderDetailRepository = _unitOfWork.GetRepository<OrderDetail>();
+            ValidateOrder(createOrder);
 
-            var query = repository.Entities.Where(order => !order.DeletedTime.HasValue);
+            var orderRepository = _unitOfWork.GetRepository<Order>();
+            var cartItemRepository = _unitOfWork.GetRepository<CartItem>();
+            var productItemRepository = _unitOfWork.GetRepository<ProductItem>();
+            var productRepository = _unitOfWork.GetRepository<Product>();
 
-            var totalItems = await query.CountAsync();
+            // Get cart items
+            var cartItems = await _cartItemService.GetCartItemsByUserIdForOrderCreation(userId);
+            if (cartItems.Count == 0)
+            {
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageEmptyCart);
+            }
 
-            var orders = await query
-                .OrderByDescending(order => order.CreatedTime) // Sort by the most recent orders
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
-                .Select(order => new OrderResponseModel
-                {
-                    Id = order.Id,
-                    TotalPrice = order.TotalPrice,
-                    OrderDate = order.OrderDate,
-                    Status = order.Status,
-                    UserId = order.UserId,
-                    Address = order.Address,
-                    CustomerName = order.CustomerName,
-                    Phone = order.Phone,
-                    Note = order.Note,
-                    CancelReasonId = order.CancelReasonId
-                })
+            var promotionRepository = _unitOfWork.GetRepository<Promotion>();
+            var categoryRepository = _unitOfWork.GetRepository<Category>();
+
+            // Get promotions
+            var activePromotions = await promotionRepository.Entities
+                .Where(p => (p.Status == Constants.PromotionStatusActive) && DateTime.UtcNow >= p.StartDate && DateTime.UtcNow <= p.EndDate)
                 .ToListAsync();
 
-            return new PaginatedList<OrderResponseModel>(orders, totalItems, pageNumber, pageSize);
+            var groupedOrderDetails = new List<GroupedOrderDetail>();
+
+            foreach (var cartItem in cartItems)
+            {
+                var productItem = await productItemRepository.Entities
+                    .FirstOrDefaultAsync(p => p.Id.ToString() == cartItem.ProductItemId && (!p.DeletedTime.HasValue || p.DeletedBy == null))
+                    ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageProductItemNotFound);
+
+                var product = await productRepository.Entities
+                    .FirstOrDefaultAsync(p => p.Id == productItem.ProductId && (!p.DeletedTime.HasValue || p.DeletedBy == null))
+                    ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageProductNotFound);
+
+                var category = await categoryRepository.Entities
+                    .FirstOrDefaultAsync(c => c.Id == product.CategoryId && (!c.DeletedTime.HasValue || c.DeletedBy == null))
+                    ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageCategoryNotFound);
+
+                decimal finalPrice = productItem.Price;
+                if (category != null && !string.IsNullOrWhiteSpace(category.PromotionId))
+                {
+                    // Check promotion
+                    var applicablePromotion = activePromotions
+                        .FirstOrDefault(p => p.Id == category.PromotionId);
+
+                    if (applicablePromotion != null)
+                    {
+                        finalPrice = productItem.Price - (productItem.Price * applicablePromotion.DiscountRate);
+                    }
+                }
+
+                groupedOrderDetails.Add(new GroupedOrderDetail
+                {
+                    ShopId = product.ShopId,
+                    CartItem = cartItem,
+                    ProductItem = productItem,
+                    DiscountPrice = finalPrice,
+                });
+            }
+
+            // Group order by shop Id
+            var groupedByShop = groupedOrderDetails.GroupBy(x => x.ShopId).ToList();
+
+            _unitOfWork.BeginTransaction();
+
+            OrderResponseModel lastCreatedOrder = new OrderResponseModel();
+
+            try
+            {
+                foreach (var shopGroup in groupedByShop)
+                {
+                    var totalPrice = shopGroup.Sum(x => x.DiscountPrice * x.CartItem.ProductQuantity);
+                    var order = new Order
+                    {
+                        TotalPrice = (decimal)totalPrice,
+                        OrderDate = DateTime.UtcNow,
+                        Status = Constants.OrderStatusPending,
+                        UserId = Guid.Parse(userId),
+                        Address = createOrder.Address,
+                        CustomerName = createOrder.CustomerName,
+                        Phone = createOrder.Phone,
+                        Note = createOrder.Note,
+                        CreatedBy = userId,
+                        LastUpdatedBy = userId,
+                    };
+
+                    await orderRepository.InsertAsync(order);
+                    await _unitOfWork.SaveAsync();
+
+                    lastCreatedOrder.Id = order.Id;
+                    lastCreatedOrder.TotalPrice = order.TotalPrice;
+                    lastCreatedOrder.Address = order.Address;
+                    lastCreatedOrder.OrderDate = order.OrderDate;
+                    lastCreatedOrder.Status = order.Status;
+                    lastCreatedOrder.UserId = order.UserId;
+                    lastCreatedOrder.Address = order.Address;
+                    lastCreatedOrder.CustomerName = order.CustomerName;
+                    lastCreatedOrder.Phone = order.Phone;
+                    lastCreatedOrder.Note = order.Note;
+                    
+
+
+                    foreach (var groupedDetail in shopGroup)
+                    {
+                        var cartItem = groupedDetail.CartItem;
+                        var productItem = groupedDetail.ProductItem;
+
+                        if (productItem.QuantityInStock - cartItem.ProductQuantity < 0)
+                        {
+                            throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInsufficientStock);
+                        }
+
+                        // Update quantity in stock
+                        productItem.QuantityInStock -= cartItem.ProductQuantity;
+                        productItemRepository.Update(productItem);
+
+                        var orderDetail = new OrderDetailForCreationDto
+                        {
+                            OrderId = order.Id,
+                            ProductItemId = productItem.Id,
+                            ProductQuantity = cartItem.ProductQuantity,
+                            DiscountPrice = groupedDetail.DiscountPrice,
+                        };
+
+                        // Create order detail
+                        await _orderDetailService.Create(orderDetail, userId);
+
+                        // Clear cart
+                        await _cartItemService.DeleteCartItemByIdAsync(cartItem.Id, userId);
+                    }
+
+                    await _unitOfWork.SaveAsync();
+
+                    // Create status change
+                    var statusChangeDto = new StatusChangeForCreationDto
+                    {
+                        OrderId = order.Id.ToString(),
+                        Status = order.Status
+                    };
+
+                    // Call the offline payment creation method
+                    if (createOrder.PaymentMethod == Constants.CODMethod)
+                    {
+                        await UpdateOrderStatusToProcessingAsync(order.Id, userId);
+                    }
+
+                    await _statusChangeService.Create(statusChangeDto, userId);
+                    await _unitOfWork.SaveAsync();
+                }
+
+                _unitOfWork.CommitTransaction();
+                return lastCreatedOrder; // Return the last created order
+            }
+            catch (Exception ex)
+            {
+                _unitOfWork.RollBack();
+                throw new BaseException.CoreException(StatusCodeHelper.ServerError.ToString(), ex.Message);
+            }
+        }
+
+        public async Task<IList<OrderResponseModel>> GetOrdersByPageAsync(int pageNumber, int pageSize)
+        {
+            var repository = _unitOfWork.GetRepository<Order>();
+            var orderDetailRepository = _unitOfWork.GetRepository<Order>();
+            var userRepository = _unitOfWork.GetRepository<ApplicationUser>();
+
+            // Query to get non-deleted orders
+            var query = from order in repository.Entities
+                        join user in userRepository.Entities on order.UserId equals user.Id
+                        where !order.DeletedTime.HasValue
+                        orderby order.CreatedTime descending
+                        select new OrderResponseModel
+                        {
+                            Id = order.Id,
+                            TotalPrice = order.TotalPrice,
+                            OrderDate = order.OrderDate,
+                            Status = order.Status,
+                            UserId = order.UserId,
+                            Username = user.UserName!,
+                            Address = order.Address,
+                            CustomerName = order.CustomerName,
+                            Phone = order.Phone,
+                            Note = order.Note,
+                            CancelReasonId = order.CancelReasonId
+                        };
+
+            // Apply pagination
+            var orders = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return orders;
         }
 
         public async Task<OrderWithDetailDto> GetOrderByIdAsync(string orderId, string userId, string role)
@@ -304,6 +471,7 @@ namespace HandmadeProductManagement.Services.Service
                 CustomerName = order.CustomerName,
                 Phone = order.Phone,
                 ShopName = shopName,
+                CustomerId = order.UserId.ToString(),
                 Note = order.Note,
                 CancelReasonId = order.CancelReasonId,
                 OrderDetails = orderInDetailDtos
@@ -372,7 +540,7 @@ namespace HandmadeProductManagement.Services.Service
             return true;
         }
 
-        public async Task<IList<OrderByUserDto>> GetOrderByUserIdAsync(Guid userId)
+        public async Task<IList<OrderByUserDto>> GetOrderByUserIdAsync(Guid userId, int pageNumber, int pageSize)
         {
             var userRepository = _unitOfWork.GetRepository<ApplicationUser>();
             var userExists = await userRepository.Entities
@@ -384,9 +552,13 @@ namespace HandmadeProductManagement.Services.Service
             }
 
             var repository = _unitOfWork.GetRepository<Order>();
-            var orders = await repository.Entities
+
+            // Query to get orders by userId with pagination applied
+            var query = repository.Entities
                 .Where(o => o.UserId == userId && !o.DeletedTime.HasValue)
                 .OrderByDescending(o => o.CreatedTime) // Sort orders by CreatedTime in descending order
+                .Skip((pageNumber - 1) * pageSize) // Apply pagination: Skip the previous pages
+                .Take(pageSize) // Take only the items for the current page
                 .Select(order => new OrderByUserDto
                 {
                     Id = order.Id,
@@ -398,7 +570,9 @@ namespace HandmadeProductManagement.Services.Service
                     Phone = order.Phone,
                     Note = order.Note,
                     CancelReasonId = order.CancelReasonId
-                }).ToListAsync();
+                });
+
+            var orders = await query.ToListAsync();
 
             return orders;
         }

@@ -125,6 +125,7 @@ namespace HandmadeProductManagement.Services.Service
 
             var topShops = shippedOrders.Select(s => new TopShopDto
             {
+                Id = _unitOfWork.GetRepository<Shop>().Entities.FirstOrDefault(shop => shop.Id == s.ShopId)?.Id!,
                 Name = _unitOfWork.GetRepository<Shop>().Entities.FirstOrDefault(shop => shop.Id == s.ShopId)?.Name ?? "Unknown",
                 TotalSales = s.TotalSales
             }).ToList();
@@ -171,6 +172,7 @@ namespace HandmadeProductManagement.Services.Service
                                                       .Include(p => p.Category)
                                                       .Include(p => p.ProductItems)
                                                       .OrderByDescending(p => p.SoldCount)
+                                                      .Where(p => p.DeletedTime == null)
                                                       .Take(10)
                                                       .Select(p => new TopSellingProducts
                                                       {
@@ -196,6 +198,7 @@ namespace HandmadeProductManagement.Services.Service
                                                .Include(p => p.ProductItems)
                                                .OrderByDescending(p =>  p.CreatedTime)
                                                .ThenByDescending(p => p.LastUpdatedTime)
+                                               .Where(p => p.DeletedTime == null)
                                                .Take(10)
                                                .Select(p => new ProductForDashboard
                                                 {

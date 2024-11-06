@@ -23,7 +23,7 @@ namespace UI.Pages.Promotion
         public int PageSize { get; set; } = 2;
         public bool HasNextPage { get; set; } = true;
 
-        public async Task OnGetAsync(int pageNumber = 1, int pageSize = 2)
+        public async Task OnGetAsync(int pageNumber = 1, int pageSize = 20)
         {
             try
             {

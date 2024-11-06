@@ -33,7 +33,11 @@
             <form method="post" id="shopForm" asp-page-handler="CreateShop">
                 <div class="mb-4">
                     <label class="mb-2 block font-bold text-gray-700" for="shopName">Shop Name</label>
-                    <input type="text" id="shopName" name="ShopName" class="w-full rounded-md border border-gray-300 p-2" required />
+                    <input type="text" id="updateShopName" name="ShopName"
+                           class="w-full rounded-md border border-gray-300 p-2"
+                           value="@Model.Shop.Name" required
+                           pattern="[A-Za-z0-9 ]+"
+                           title="Shop Name only has letters and numbers" />
                 </div>
                 <div class="mb-4">
                     <label class="mb-2 block font-bold text-gray-700" for="shopDescription">Description</label>
@@ -104,10 +108,18 @@ else
     <div id="updateShopModal" class="fixed inset-0 z-50 flex hidden items-center justify-center bg-gray-900 bg-opacity-50">
         <div class="w-full max-w-md rounded-lg bg-white p-8">
             <h3 class="mb-4 text-xl font-semibold">Update Shop Info</h3>
+            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+            {
+                <div class="text-red-500">@Model.ErrorMessage</div>
+            }
             <form method="post" id="updateShopForm" asp-page-handler="UpdateShop">
                 <div class="mb-4">
                     <label class="mb-2 block font-bold text-gray-700" for="updateShopName">Shop Name</label>
-                    <input type="text" id="updateShopName" name="ShopName" class="w-full rounded-md border border-gray-300 p-2" value="@Model.Shop.Name" required />
+                    <input type="text" id="updateShopName" name="ShopName"
+                           class="w-full rounded-md border border-gray-300 p-2"
+                           value="@Model.Shop.Name" required
+                           pattern="[A-Za-z0-9 ]+"
+                           title="Shop Name only has letters and numbers" />
                 </div>
                 <div class="mb-4">
                     <label class="mb-2 block font-bold text-gray-700" for="updateShopDescription">Description</label>

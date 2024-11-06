@@ -10,11 +10,9 @@ using HandmadeProductManagement.ModelViews.VariationModelViews;
 using HandmadeProductManagement.ModelViews.VariationOptionModelViews;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using System.Linq.Expressions;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using UI.Pages.Product;
-using static HandmadeProductManagement.Core.Base.BaseException;
 
 namespace UI.Pages.Seller
 {
@@ -125,13 +123,20 @@ namespace UI.Pages.Seller
                         return RedirectToPage("/Seller/Shop");
                     }
 
+                    // Fallback for when the base response does not indicate success
                     ErrorMessage = "Failed to create shop.";
                     ErrorDetail = baseResponse?.Message;
                     ModelState.AddModelError(string.Empty, baseResponse?.Message ?? "Error updating user information.");
                 }
                 else
                 {
-                    ModelState.AddModelError(string.Empty, "An error occurred while updating user information.");
+                    // Handle error response and extract detail
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    var errorResponse = JsonSerializer.Deserialize<ErrorResponse>(errorContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                    // Set the error message to the detail from the error response
+                    ErrorMessage = errorResponse?.Detail ?? "An error occurred while creating the shop.";
+                    ModelState.AddModelError(string.Empty, ErrorMessage);
                 }
             }
             catch (BaseException.ErrorException ex)
@@ -185,7 +190,11 @@ namespace UI.Pages.Seller
                 }
                 else
                 {
-                    ModelState.AddModelError(string.Empty, "An error occurred while updating shop information.");
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    var errorResponse = JsonSerializer.Deserialize<ErrorResponse>(errorContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                    ErrorMessage = errorResponse?.Detail ?? "An error occurred while updating shop information.";
+                    ModelState.AddModelError(string.Empty, ErrorMessage);
                 }
             }
             catch (BaseException.ErrorException ex)
@@ -199,9 +208,9 @@ namespace UI.Pages.Seller
                 _logger.LogError(ex, "Shop update failed.");
             }
 
+            // Return the same page to display validation errors
             return Page();
         }
-
 
         private async Task<ShopResponseModel> GetCurrentUserShop()
         {

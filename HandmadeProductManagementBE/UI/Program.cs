@@ -1,5 +1,6 @@
 ﻿using HandmadeProductManagement.Core.Store;
 using Microsoft.AspNetCore.Mvc;
+using AutoMapper;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddScoped<ApiResponseHelper>();
@@ -13,6 +14,9 @@ builder.Services.AddRazorPages()
 builder.Services.AddHttpClient();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddHttpClient<ApiResponseHelper>();
+
+// Add AutoMapper
+builder.Services.AddAutoMapper(typeof(Program));
 
 builder.Services.AddSession(options =>
 {

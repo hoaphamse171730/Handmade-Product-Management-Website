@@ -12,6 +12,10 @@ namespace HandmadeProductManagement.Contract.Services.Interface
         Task<bool> DeleteShopAsync(string userId);
         Task<decimal> CalculateShopAverageRatingAsync(string shopId);
         Task<IList<ShopResponseModel>> GetAllShopsAsync();
-
+        Task<IList<ShopDto>> GetShopListByAdmin(int pageNumber, int pageSize);
+        Task<bool> DeleteShopByIdAsync(string id, string userId);
+        Task<IList<ShopDto>> GetDeletedShops(int pageNumber, int pageSize);
+        Task<bool> RecoverDeletedShopAsync(string shopId, string userId);
+        Task<ShopDto> AdminGetShopByIdAsync(string shopId);
     }
 }
