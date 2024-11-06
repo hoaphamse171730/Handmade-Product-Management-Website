@@ -4,7 +4,8 @@ namespace HandmadeProductManagement.Contract.Services.Interface
 {
     public interface IPromotionService
     {
-        Task<IList<PromotionDto>> GetAll(int pageNumber, int pageSize);
+        Task<IList<PromotionDto>> GetAllByPage(int pageNumber, int pageSize);
+        Task<IList<PromotionDto>> GetAll();
         Task<IList<PromotionDto>> GetAllDeleted(int pageNumber, int pageSize);
         Task<PromotionDto> GetById(string id);
         Task<IList<PromotionDto>> GetExpiredPromotions(int pageNumber, int pageSize);

@@ -131,7 +131,7 @@ namespace HandmadeProductManagement.Services.Service
         }
 
 
-        public async Task<CategoryDto> UpdatePromotion(string id, CategoryForUpdatePromotion category)
+        public async Task<bool> UpdatePromotion(string id, CategoryForUpdatePromotion category)
         {
             if (!Guid.TryParse(id, out _))
             {
@@ -165,7 +165,7 @@ namespace HandmadeProductManagement.Services.Service
 
             await _unitOfWork.GetRepository<Category>().UpdateAsync(categoryRepo);
             await _unitOfWork.SaveAsync();
-            return _mapper.Map<CategoryDto>(categoryRepo);
+            return true;
         }
 
         public async Task<bool> SoftDelete(string id)
@@ -201,12 +201,21 @@ namespace HandmadeProductManagement.Services.Service
             return true;
         }
 
-        public async Task<IList<CategoryDto>> GetAllDeleted()
+        public async Task<IList<CategoryDto>> GetAllDeleted(int pageNumber, int pageSize)
         {
+            if (pageNumber <= 0)
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidPageNumber);
+
+            if (pageSize <= 0)
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidPageSize);
+
             var deletedCategories = await _unitOfWork.GetRepository<Category>().Entities
                 .Include(c => c.Promotion)
                 .Where(c => c.DeletedTime != null)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
+
             return _mapper.Map<IList<CategoryDto>>(deletedCategories);
         }
 

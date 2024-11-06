@@ -10,7 +10,7 @@
 <!-- Button to open the modal -->
 <button onclick="openModal()" class="mb-6 inline-block rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700">Create New Category</button>
 
-<a asp-page="DeletedCategories" class="mb-6 inline-block rounded bg-red-500 px-4 py-2 font-bold text-white hover:bg-red-700">Deleted Categories</a>
+<a href="/Categories/Deleted" class="mb-6 inline-block rounded bg-red-500 px-4 py-2 font-bold text-white hover:bg-red-700">Deleted Categories</a>
 
 <!-- Create Modal -->
 <div id="createModal" class="fixed inset-0 z-50 flex hidden items-center justify-center bg-gray-900 bg-opacity-50">
@@ -72,6 +72,28 @@
     </div>
 </div>
 
+<!-- Apply Promotion Modal -->
+<div id="applyPromotionModal" class="fixed inset-0 z-50 flex hidden items-center justify-center bg-gray-900 bg-opacity-50">
+    <div class="w-full max-w-md rounded-lg bg-white p-6">
+        <h2 class="mb-4 text-xl font-semibold">Apply Promotion</h2>
+
+        <!-- Dropdown with promotions populated from @Model.Promotions -->
+        <select id="promotionDropdown" class="mb-4 w-full rounded border p-2">
+            @foreach (var promotion in Model.Promotions)
+            {
+                <option value="@promotion.Id">@promotion.Name</option>
+            }
+        </select>
+
+        <div id="applyPromotionMessage" class="mb-4 hidden text-red-500"></div>
+
+        <div class="flex justify-end">
+            <button onclick="submitApplyPromotion()" class="mr-2 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600">Apply Promotion</button>
+            <button onclick="closeApplyPromotionModal()" class="rounded bg-gray-500 px-4 py-2 text-white hover:bg-gray-600">Close</button>
+        </div>
+    </div>
+</div>
+
 <div class="overflow-x-auto">
     <table class="min-w-full rounded-lg bg-white shadow-md">
         <thead>
@@ -97,6 +119,7 @@
                     <td class="px-6 py-3 text-left">
                         <a onclick="openEditModal('@category.Id', '@category.Name', '@category.Description')" class="rounded bg-blue-500 px-3 py-1 text-xs font-bold text-white hover:bg-blue-800">Edit</a>
                         <a onclick="openDeleteConfirmationModal('@category.Id')" class="ml-2 rounded bg-red-500 px-3 py-1 text-xs font-bold text-white hover:bg-red-800">Delete</a>
+                        <a onclick="openApplyPromotionModal('@category.Id')" class="ml-2 rounded bg-green-500 px-3 py-1 text-xs font-bold text-white hover:bg-green-800">Apply</a>
                     </td>
                 </tr>
             }
@@ -231,5 +254,52 @@
         } finally {
             closeDeleteConfirmationModal();
         }
+    }
+
+    // Open Apply Promotion Modal
+    function openApplyPromotionModal(categoryId) {
+        document.getElementById('applyPromotionModal').dataset.categoryId = categoryId;
+        document.getElementById('applyPromotionModal').classList.remove('hidden');
+    }
+
+    // Close Apply Promotion Modal
+    function closeApplyPromotionModal() {
+        document.getElementById('applyPromotionModal').classList.add('hidden');
+    }
+
+    // Submit the selected promotion to the server
+    async function submitApplyPromotion() {
+        const categoryId = document.getElementById('applyPromotionModal').dataset.categoryId;
+        const promotionId = document.getElementById('promotionDropdown').value;
+
+        try {
+            const response = await fetch(`/Categories/View?handler=UpdatePromotion&categoryId=${categoryId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(promotionId)
+            });
+
+            const result = await response.json();
+            const messageElement = document.getElementById('applyPromotionMessage');
+            messageElement.classList.remove('hidden');
+
+            if (result.success) {
+                messageElement.classList.replace('text-red-500', 'text-green-500');
+                messageElement.textContent = result.message;
+                closeApplyPromotionModal();
+                location.reload();
+            } else {
+                messageElement.textContent = result.message;
+            }
+        } catch (error) {
+            showError('An error occurred while applying the promotion.', 'applyPromotionMessage');
+        }
+    }
+
+    // Helper function to show error messages
+    function showError(message, elementId) {
+        const messageElement = document.getElementById(elementId);
+        messageElement.classList.replace('text-green-500', 'text-red-500');
+        messageElement.textContent = message;
     }
 </script>

@@ -98,13 +98,13 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpPut("updatepromotion/{categoryId}")]
         public async Task<IActionResult> UpdatePromotion(string categoryId, CategoryForUpdatePromotion categoryForUpdatePromotion)
         {
-            var updatePromotionCategory = await _categoryService.UpdatePromotion(categoryId, categoryForUpdatePromotion);
-            var reponse = new BaseResponse<CategoryDto>
+            await _categoryService.UpdatePromotion(categoryId, categoryForUpdatePromotion);
+            var reponse = new BaseResponse<bool>
             {
                 Code = "200",
                 StatusCode = StatusCodeHelper.OK,
                 Message = "Category updated successfully",
-                Data = updatePromotionCategory
+                Data = true
             };
             return Ok(reponse);
         }
@@ -143,9 +143,9 @@ namespace HandmadeProductManagementAPI.Controllers
 
         [HttpGet("GetAllDelete")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> GetAllDeletedCategories()
+        public async Task<IActionResult> GetAllDeletedCategories([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var deletedCategories = await _categoryService.GetAllDeleted();
+            var deletedCategories = await _categoryService.GetAllDeleted(pageNumber, pageSize);
             var response = new BaseResponse<IList<CategoryDto>>
             {
                 Code = "200",

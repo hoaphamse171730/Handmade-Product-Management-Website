@@ -2,6 +2,7 @@ using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Common;
 using HandmadeProductManagement.Core.Store;
 using HandmadeProductManagement.ModelViews.CategoryModelViews;
+using HandmadeProductManagement.ModelViews.PromotionModelViews;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Collections.Generic;
@@ -19,6 +20,7 @@ namespace UI.Pages.Categories
         }
 
         public List<CategoryDtoWithDetail> Categories { get; set; } = new List<CategoryDtoWithDetail>();
+        public List<PromotionDto> Promotions { get; set; } = new List<PromotionDto>();
         public string? ErrorMessage { get; set; }
         public string? ErrorDetail { get; set; }
 
@@ -44,6 +46,36 @@ namespace UI.Pages.Categories
                 else
                 {
                     Categories = new List<CategoryDtoWithDetail>();
+                }
+
+                await OnGetPromotionsAsync();
+            }
+            catch (BaseException.ErrorException ex)
+            {
+                ErrorMessage = ex.ErrorDetail.ErrorCode;
+                ErrorDetail = ex.ErrorDetail.ErrorMessage?.ToString();
+            }
+            catch (Exception)
+            {
+                ErrorMessage = "An unexpected error occurred.";
+            }
+
+            
+        }
+
+        public async Task OnGetPromotionsAsync()
+        {
+            try
+            {
+                var response = await _apiHelper.GetAsync<IList<PromotionDto>>($"{Constants.ApiBaseUrl}/api/Promotions/getall");
+
+                if (response != null && response.Data != null)
+                {
+                    Promotions = (List<PromotionDto>)response.Data;
+                }
+                else
+                {
+                    Promotions = new List<PromotionDto>();
                 }
             }
             catch (BaseException.ErrorException ex)
@@ -108,11 +140,11 @@ namespace UI.Pages.Categories
         }
 
 
-        public async Task<JsonResult> OnDeleteDeleteCategoryAsync(string id)
+        public async Task<JsonResult> OnDeleteDeleteCategoryAsync(string categoryId)
         {
             try
             {
-                var response = await _apiHelper.DeleteAsync<bool>($"{Constants.ApiBaseUrl}/api/Category/{id}");
+                var response = await _apiHelper.DeleteAsync<bool>($"{Constants.ApiBaseUrl}/api/Category/{categoryId}");
 
                 if (response != null && response.Data)
                 {
@@ -133,31 +165,37 @@ namespace UI.Pages.Categories
             }
         }
 
+        public async Task<JsonResult> OnPutUpdatePromotionAsync(string categoryId, [FromBody] string promotionId)
+        {
+            var categoryForUpdatePromotion = new CategoryForUpdatePromotion()
+            {
+                promotionId = promotionId
+            };
 
-        //public async Task<JsonResult> RestoreCategoryAsync(string id)
-        //{
-        //    try
-        //    {
-        //        var response = await _apiHelper.PatchAsync<bool>($"{Constants.ApiBaseUrl}/api/Category/restore/{id}", null);
+            try
+            {
+                var response = await _apiHelper.PutAsync<bool>($"{Constants.ApiBaseUrl}/api/Category/updatepromotion/{categoryId}", categoryForUpdatePromotion);
 
-        //        if (response != null && response.Data)
-        //        {
-        //            return new JsonResult(new { success = true, message = "Category restored successfully." });
-        //        }
-        //        else
-        //        {
-        //            return new JsonResult(new { success = false, message = "Failed to restore category." });
-        //        }
-        //    }
-        //    catch (BaseException.ErrorException ex)
-        //    {
-        //        return new JsonResult(new { success = false, message = ex.ErrorDetail.ErrorMessage });
-        //    }
-        //    catch (Exception)
-        //    {
-        //        return new JsonResult(new { success = false, message = "An unexpected error occurred." });
-        //    }
-        //}
+                if (response != null && response.Data)
+                {
+                    return new JsonResult(new { success = true, message = "Category promotion updated successfully." });
+                }
+                else
+                {
+                    return new JsonResult(new { success = false, message = "Failed to update category promotion." });
+                }
+            }
+            catch (BaseException.ErrorException ex)
+            {
+                return new JsonResult(new { success = false, message = ex.ErrorDetail.ErrorMessage });
+            }
+            catch (Exception)
+            {
+                return new JsonResult(new { success = false, message = "An unexpected error occurred." });
+            }
+        }
+
+        
 
     }
 }
