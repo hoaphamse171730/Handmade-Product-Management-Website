@@ -4,7 +4,7 @@
 @{
     ViewData["Title"] = "Product Seller List";
 }
-
+@Html.AntiForgeryToken()
 
 <h1 class="text-3xl font-bold mb-4">Product List</h1>
 @{
@@ -134,11 +134,15 @@
             *@
                 </div>
                 <div class="mt-3 flex justify-between items-center">
-                    <span class="px-2 py-1 rounded-full text-sm @(product.Status == "Available" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800")">
-                        @product.Status
-                    </span>
+                    <div class="text-sm text-gray-500 mt-2">
+                        <span id="status-label-@product.Id" class="px-2 py-1 rounded-full text-sm @(product.Status == "Available" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800")">@product.Status</span>
+                    </div>
                     <div class="flex space-x-2">
-                        <button onclick="editProduct('@product.Id')"
+                        <button onclick="toggleProductStatus('@product.Id', '@product.Status', this)"
+                                class="@(product.Status == "Available" ? "bg-yellow-500 hover:bg-yellow-600 text-white py-1 px-3 rounded-md" : "bg-green-500 hover:bg-green-600 text-white py-1 px-3 rounded-md")">
+                            @(product.Status == "Available" ? "Deactivate" : "Activate")
+                        </button>
+                        <button onclick="loadProductDetails('@product.Id')"
                                 class="bg-blue-500 text-white py-1 px-3 rounded-md hover:bg-blue-600">
                             Edit
                         </button>
@@ -174,833 +178,1094 @@
 <partial name="~/Pages/Shared/_Pagination.cshtml" model="paginationModel" />
 
 <!-- Add Product Modal -->
-<div id="addProductModal" class="modal hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
-    <div class="modal-content relative top-20 mx-auto p-5 border w-3/4 shadow-lg rounded-md bg-white">
-        <div class="mt-3">
-            <h3 class="text-lg font-medium leading-6 text-gray-900 text-center">Add New Product</h3>
-            <form id="addProductForm" method="post" enctype="multipart/form-data"
-                  asp-page-handler="CreateProduct" class="mt-4">
-                @Html.AntiForgeryToken()
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Product Name</label>
-                        <input type="text" name="NewProduct.Name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"/>
-                        <div class="text-red-500" id="nameError"></div>
-                    </div>
+<div id="addProductModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center">
+    <div class="bg-white p-6 rounded-lg w-3/4 max-h-[90vh] overflow-y-auto">
+        <h2 class="text-2xl font-bold mb-4 text-center">Add New Product</h2>
 
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Category</label>
-                        <select name="NewProduct.CategoryId"
-                                onchange="loadVariations(this.value)"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-                            <option value="">Select Category</option>
-                            @if (Model.Categories != null)
-                            {
-                                foreach (var category in Model.Categories)
-                                {
-                                    <option value="@category.Id">@category.Name</option>
-                                }
-                            }
-                        </select>
-                        <div class="text-red-500" id="categoryError"></div>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Description</label>
-                        <textarea name="NewProduct.Description"
-                                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                                  rows="3"></textarea>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Product Images</label>
-                        <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
-                            <div class="space-y-1 text-center">
-                                <input type="file" multiple accept="image/*"
-                                       onchange="handleImageUpload(event)"
-                                       name="ProductImages" class="hidden" id="productImages" />
-                                <label for="productImages"
-                                       class="cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500">
-                                    Upload Images
-                                </label>
-                            </div>
-                        </div>
-                        <div id="imagePreviewContainer" class="grid grid-cols-4 gap-4 mt-4"></div>
-                    </div>
+        <form asp-page-handler="CreateProduct" method="post" enctype="multipart/form-data" class="space-y-4">
+            <!-- Basic Product Information -->
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Product Name</label>
+                    <input type="text" asp-for="ProductCreation.Name" required
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" />
                 </div>
 
-                <!-- Hidden fields for variations and combinations -->
-                <input type="hidden" id="variationsJson" name="NewProduct.Variations" value="[]" />
-                <input type="hidden" id="combinationsJson" name="NewProduct.VariationCombinations" value="[]" />
-
-                <div id="variationsContainer" class="mt-4">
-                    <h4 class="text-lg font-medium mb-2">Variations</h4>
-                    <div id="existingVariations"></div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Category</label>
+                    <select asp-for="ProductCreation.CategoryId"
+                            asp-items="@(new SelectList(Model.Categories, "Id", "Name"))"
+                            required
+                            id="categorySelect"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                        <option value="">Select Category</option>
+                    </select>
                 </div>
+            </div>
 
-                <div id="variationCombinationsContainer" class="mt-4">
-                    <h4 class="text-lg font-medium mb-2">Variation Combinations</h4>
-                    <div id="combinationsList"></div>
-                </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Description</label>
+                <textarea asp-for="ProductCreation.Description" rows="3"
+                          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></textarea>
+            </div>
 
-                <div class="mt-4">
-                    <button type="submit" class="bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600">
-                        Create Product
-                    </button>
-                    <button type="button" onclick="closeAddProductModal()"
-                            class="ml-2 bg-gray-500 text-white py-2 px-4 rounded-md hover:bg-gray-600">
-                        Cancel
-                    </button>
-                </div>
-            </form>
-        </div>
+            <!-- Existing Variations Section -->
+            <div id="existingVariationsContainer" class="border-t pt-4">
+                <h3 class="text-lg font-medium mb-2">Existing Variations</h3>
+                <div id="existingVariationsList"></div>
+            </div>
+
+            <!-- New Variations Section -->
+            <div id="newVariationsContainer"></div>
+            <button type="button" id="addNewVariationBtn" class="btn btn-secondary mb-4">
+                Add New Variation
+            </button>
+
+            <!-- Update your variation combination section -->
+            <div id="variationCombinationContainer" class="border-t pt-4">
+                <h3 class="text-lg font-medium mb-2">Variation Combinations</h3>
+            </div>
+
+            <!-- Image Upload -->
+            <div class="border-t pt-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Product Images</label>
+                <input type="file" id="productImages" name="ProductImages" multiple accept="image/*"
+                       onchange="previewImages(this)" class="hidden" />
+                <button type="button" onclick="document.getElementById('productImages').click()"
+                        class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
+                    Choose Images
+                </button>
+                <div id="imagePreviewContainer" class="grid grid-cols-4 gap-4 mt-4"></div>
+            </div>
+
+            <div class="flex justify-end space-x-4 pt-4 border-t">
+                <button type="button" onclick="closeAddProductModal()"
+                        class="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600">
+                    Cancel
+                </button>
+                <button type="submit"
+                        class="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600">
+                    Create Product
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 
-<!-- Add Variation Modal -->
-<div id="addVariationModal" class="modal hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
-    <div class="modal-content relative top-20 mx-auto p-5 border w-1/2 shadow-lg rounded-md bg-white">
-        <div class="mt-3">
-            <h3 class="text-lg font-medium leading-6 text-gray-900">Add New Variation</h3>
-            <form id="addVariationForm" method="post" asp-page-handler="AddVariation" class="mt-4">
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Variation Name</label>
-                        <input asp-for="NewVariation.Name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required />
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Variation Values (comma-separated)</label>
-                        <input asp-for="NewVariation.Name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                               placeholder="e.g., Small, Medium, Large" required />
-                    </div>
-
-                    <input type="hidden" asp-for="NewVariation.CategoryId" id="variationCategoryId" />
-
-                    <div class="flex justify-end space-x-2">
-                        <button type="submit" class="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600">
-                            Add Variation
-                        </button>
-                        <button type="button" onclick="closeAddVariationModal()"
-                                class="bg-gray-500 text-white py-2 px-4 rounded-md hover:bg-gray-600">
-                            Cancel
-                        </button>
-                    </div>
+<!-- Edit Product Modal -->
+<div id="editProductModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center">
+    <div class="bg-white p-6 rounded-lg w-3/4 max-h-[90vh] overflow-y-auto">
+        <h2 class="text-2xl font-bold mb-4 text-center">Edit Product</h2>
+        <!-- Basic Information Form -->
+        <form method="post" asp-page-handler="UpdateBasicInfo" id="basicInfoForm" class="space-y-4 mb-8 border-b pb-8">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="productId" id="editProductId" />
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Product Name</label>
+                    <input type="text" asp-for="ProductUpdate.Name" id="editProductName"
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" />
+                    <span asp-validation-for="ProductUpdate.Name" class="text-red-500 text-sm"></span>
                 </div>
-            </form>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Category</label>
+                    <select asp-for="ProductUpdate.CategoryId" id="editCategorySelect"
+                            asp-items="@(new SelectList(Model.Categories, "Id", "Name"))"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                        <option value="">Select Category</option>
+                    </select>
+                </div>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Description</label>
+                <textarea asp-for="ProductUpdate.Description" id="editProductDescription" rows="3"
+                          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></textarea>
+            </div>
+            <div class="flex justify-end">
+                <button type="submit"
+                        class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md">
+                    Save Basic Info
+                </button>
+            </div>
+        </form>
+        <!-- Product Items Form -->
+        <form method="post" asp-page-handler="UpdateProductItems" id="productItemsForm" class="space-y-4">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="productId" id="editProductIdForItems" />
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Product Items</h3>
+            <div id="productItemsContainer" class="space-y-4">
+                <!-- Product items will be populated here -->
+            </div>
+            <div class="flex justify-end mt-4">
+                <button type="submit"
+                        class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md">
+                    Save Product Items
+                </button>
+            </div>
+        </form>
+        <div class="flex justify-end space-x-3 pt-4 mt-8 border-t">
+            <button type="button" onclick="closeEditModal()"
+                    class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md">
+                Close
+            </button>
         </div>
     </div>
 </div>
 
 @section Scripts {
     <script>
-        const antiForgeryToken = document.querySelector('input[name="__RequestVerificationToken"]').value;
-
-        const fetchOptions = {
-            headers: {
-                'RequestVerificationToken': antiForgeryToken
-            }
-        };
-
-        function formatVariationsForApi(variations) {
-            return variations.map(variation => ({
-                id: variation.variationId,
-                variationOptionIds: variation.values
-            }));
-        }
-
-        function formatCombinationsForApi(combinations) {
-            return combinations.map(combination => {
-                const variationOptionIds = [];
-                // Extract all values except price and stock as variationOptionIds
-                for (const key in combination) {
-                    if (key !== 'price' && key !== 'stock') {
-                        variationOptionIds.push(combination[key]);
-                    }
-                }
-                return {
-                    variationOptionIds: variationOptionIds,
-                    price: parseFloat(combination.price) || 0,
-                    quantityInStock: parseInt(combination.stock) || 0
-                };
-            });
-        }
-
-        function openAddProductModal() {
-            document.getElementById('addProductModal').classList.remove('hidden');
-        }
-
-        function closeAddProductModal() {
-            document.getElementById('addProductModal').classList.add('hidden');
-            document.getElementById('addProductForm').reset();
-            document.getElementById('imagePreviewContainer').innerHTML = '';
-        }
-
-        function openAddVariationModal() {
-            const categoryId = document.querySelector('[name="NewProduct.CategoryId"]').value;
-            if (!categoryId) {
-                alert('Please select a category first');
-                return;
-            }
-            document.getElementById('variationCategoryId').value = categoryId;
-            document.getElementById('addVariationModal').classList.remove('hidden');
-        }
-
-        function closeAddVariationModal() {
-            document.getElementById('addVariationModal').classList.add('hidden');
-            document.getElementById('addVariationForm').reset();
-        }
-
-        async function loadVariations(categoryId) {
-            if (!categoryId) {
-                console.warn('No category ID provided');
-                return;
-            }
-
+        async function toggleProductStatus(productId, currentStatus, button) {
             try {
-                const response = await fetch(`?handler=VariationsByCategory&categoryId=${categoryId}`, {
-                    headers: {
-                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
-                    }
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const variations = await response.json();
-                console.log('Variations response:', variations); // Debug log
-
-                // Clear existing variations container
-                const variationsContainer = document.getElementById('existingVariations');
-                if (!variationsContainer) {
-                    console.warn('Variations container not found');
-                    return;
-                }
-
-                if (!variations || variations.length === 0) {
-                    variationsContainer.innerHTML = '<p class="text-gray-500">No variations available for this category.</p>';
-                    return;
-                }
-
-                // Render variations and their options
-                const variationsHtml = variations.map(variation => `
-                    <div class="mb-4 p-3 border rounded" data-variation-id="${variation.id}">
-                        <strong>${variation.name || 'Unnamed Variation'}</strong>
-                        <div class="mt-2">
-                            ${variation.variationOptions && variation.variationOptions.length > 0 ?
-                        variation.variationOptions.map(option => `
-                                    <div class="form-check">
-                                        <input type="checkbox"
-                                               class="form-check-input variation-option"
-                                               id="option_${option.id}"
-                                               value="${option.id}"
-                                               data-variation-id="${variation.id}"
-                                               data-option-value="${option.value}">
-                                        <label class="form-check-label" for="option_${option.id}">
-                                            ${option.value}
-                                        </label>
-                                    </div>
-                                `).join('')
-                        : '<p class="text-gray-500">No options available</p>'}
-                        </div>
-                    </div>
-                `).join('');
-
-                variationsContainer.innerHTML = variationsHtml;
-
-                // Add event listeners to checkboxes
-                document.querySelectorAll('.variation-option').forEach(checkbox => {
-                    checkbox.addEventListener('change', updateVariationCombinations);
-                });
-
-                // Initialize combinations container
-                updateVariationCombinations();
-
-            } catch (error) {
-                console.error('Error loading variations:', error);
-                const variationsContainer = document.getElementById('existingVariations');
-                if (variationsContainer) {
-                    variationsContainer.innerHTML = '<p class="text-red-500">Error loading variations. Please try again.</p>';
-                }
-            }
-        }
-
-        function createVariationElement(variation) {
-            const div = document.createElement('div');
-            div.className = 'variation-item mb-3';
-            div.dataset.variationId = variation.id;
-
-            div.innerHTML = `
-                        <label class="form-label">${variation.name}</label>
-                        <div class="variation-options">
-                            ${variation.options ? variation.options.map(option => `
-                                <div class="form-check">
-                                    <input class="form-check-input variation-option"
-                                           type="checkbox"
-                                           value="${option.id}"
-                                           data-variation-id="${variation.id}"
-                                           id="option_${option.id}">
-                                    <label class="form-check-label" for="option_${option.id}">
-                                        ${option.value}
-                                    </label>
-                                </div>
-                            `).join('') : '<p>No options available</p>'}
-                        </div>
-                    `;
-
-            return div;
-        }
-
-
-        function handleImageUpload(event) {
-            const container = document.getElementById('imagePreviewContainer');
-            container.innerHTML = '';
-
-            Array.from(event.target.files).forEach(file => {
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    const div = document.createElement('div');
-                    div.className = 'relative';
-                    div.innerHTML = `
-                                        <img src="${e.target.result}" class="w-full h-24 object-cover rounded-md" />
-                                        <button type="button" onclick="this.parentElement.remove()"
-                                                class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center">
-                                            ×
-                                        </button>
-                                    `;
-                    container.appendChild(div);
-                };
-                reader.readAsDataURL(file);
-            });
-        }
-
-        function displayExistingVariations(variations) {
-            const container = document.getElementById('existingVariations');
-            if (!container) return;
-
-            if (!variations || variations.length === 0) {
-                container.innerHTML = '<p class="text-gray-500">No variations found for this category.</p>';
-                return;
-            }
-
-            container.innerHTML = variations.map(variation => `
-                        <div class="mb-4 p-3 border rounded">
-                            <strong>${variation.name || 'Unnamed Variation'}</strong>
-                            <div class="mt-2">
-                                <input type="text"
-                                    class="w-full rounded-md border-gray-300 shadow-sm"
-                                    placeholder="Enter values (comma-separated)"
-                                    data-variation-id="${variation.id}"
-                                    onchange="handleVariationValueChange(this)"/>
-                            </div>
-                        </div>
-                    `).join('');
-        }
-
-        function handleVariationValueChange(input) {
-            const variationId = input.dataset.variationId;
-            const values = input.value.split(',').map(v => v.trim()).filter(v => v);
-
-            // Update variations hidden field
-            const variations = [];
-            document.querySelectorAll('#existingVariations input').forEach(input => {
-                if (input.value) {
-                    variations.push({
-                        variationId: input.dataset.variationId,
-                        values: input.value.split(',').map(v => v.trim()).filter(v => v)
-                    });
-                }
-            });
-            document.getElementById('variationsJson').value = JSON.stringify(variations);
-
-            updateVariationCombinations();
-        }
-
-        function updateVariationCombinations() {
-            const selectedOptions = {};
-            const optionLabels = {};
-
-            // Collect all selected options and their labels
-            document.querySelectorAll('.variation-option:checked').forEach(checkbox => {
-                const variationId = checkbox.getAttribute('data-variation-id');
-                if (!selectedOptions[variationId]) {
-                    selectedOptions[variationId] = [];
-                }
-                selectedOptions[variationId].push(checkbox.value);
-                optionLabels[checkbox.value] = checkbox.getAttribute('data-option-value');
-            });
-
-            // Generate combinations
-            const combinations = generateCombinations(selectedOptions);
-
-            // Update combinations display
-            const combinationsContainer = document.getElementById('combinationsList');
-            if (!combinationsContainer) return;
-
-            if (combinations.length === 0) {
-                combinationsContainer.innerHTML = '<p class="text-gray-500">Select variation options to create combinations</p>';
-                return;
-            }
-
-            const combinationsHtml = combinations.map((combination, index) => `
-                <div class="mb-4 p-3 border rounded">
-                    <div class="flex items-center justify-between">
-                        <div class="flex-grow">
-                            <p class="font-medium">Combination ${index + 1}:</p>
-                            <p class="text-sm text-gray-600">
-                                ${combination.map(optionId => optionLabels[optionId]).join(' / ')}
-                            </p>
-                        </div>
-                        <div class="flex gap-2">
-                            <input type="number"
-                                   class="w-32 rounded-md border-gray-300 shadow-sm"
-                                   placeholder="Price"
-                                   min="0"
-                                   step="0.01"
-                                   onchange="updateCombinationData(${index}, 'price', this.value)">
-                            <input type="number"
-                                   class="w-32 rounded-md border-gray-300 shadow-sm"
-                                   placeholder="Stock"
-                                   min="0"
-                                   onchange="updateCombinationData(${index}, 'stock', this.value)">
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-
-            combinationsContainer.innerHTML = combinationsHtml;
-
-            // Update hidden field with combination data
-            updateHiddenCombinationsField(combinations);
-        }
-
-        function updateHiddenCombinationsField(combinations) {
-            const combinationsData = combinations.map(combination => ({
-                variationOptionIds: combination,
-                price: 0,
-                stock: 0
-            }));
-            document.getElementById('combinationsJson').value = JSON.stringify(combinationsData);
-        }
-
-        // Update the combination generation and handling
-        function generateCombinations(selectedOptions) {
-            const variations = Object.values(selectedOptions);
-            if (variations.length === 0) return [];
-
-            return variations.reduce((acc, curr) => {
-                if (acc.length === 0) return curr.map(x => [x]);
-                return acc.flatMap(x => curr.map(y => [...x, y]));
-            }, []);
-        }
-
-        function displayCombinations(combinations, container) {
-            if (combinations.length === 0) {
-                container.innerHTML = '<p class="text-gray-500">No combinations available</p>';
-                return;
-            }
-
-            const combinationsHtml = combinations.map((combo, index) => `
-                                <div class="mb-2 p-2 border rounded flex justify-between items-center">
-                                    <div>
-                                        ${Object.entries(combo).map(([name, value]) =>
-                `<span class="mr-2"><strong>${name}:</strong> ${value}</span>`
-            ).join('')}
-                                    </div>
-                                    <div>
-                                        <input type="number"
-                                               placeholder="Price"
-                                               class="w-24 rounded-md border-gray-300 shadow-sm mr-2"
-                                               onchange="updateCombinationData(${index}, 'price', this.value)"/>
-                                        <input type="number"
-                                               placeholder="Stock"
-                                               class="w-24 rounded-md border-gray-300 shadow-sm"
-                                               onchange="updateCombinationData(${index}, 'stock', this.value)"/>
-                                    </div>
-                                </div>
-                            `).join('');
-
-            container.innerHTML = combinationsHtml;
-        }
-
-        function updateCombinationData(index, field, value) {
-            const combinationsField = document.getElementById('combinationsJson');
-            let combinations;
-
-            try {
-                combinations = JSON.parse(combinationsField.value || '[]');
-            } catch {
-                combinations = [];
-            }
-
-            // Ensure the combination exists
-            if (!combinations[index]) {
-                combinations[index] = {};
-            }
-
-            // Update the field
-            combinations[index][field] = value;
-
-            // Validate numeric values
-            if (field === 'price') {
-                combinations[index][field] = parseFloat(value) || 0;
-            } else if (field === 'stock') {
-                combinations[index][field] = parseInt(value) || 0;
-            }
-
-            combinationsField.value = JSON.stringify(combinations);
-        }
-
-        async function editProduct(productId) {
-            // Implement edit product functionality
-            console.log('Edit product:', productId);
-        }
-
-        async function deleteProduct(productId) {
-            if (confirm('Are you sure you want to delete this product?')) {
-                // Implement delete product functionality
-                console.log('Delete product:', productId);
-            }
-        }
-
-        function debugResponse(response) {
-            console.log('Response Headers:', response.headers);
-            console.log('Response Status:', response.status);
-            response.text().then(text => {
-                try {
-                    const json = JSON.parse(text);
-                    console.log('Response Body:', json);
-                } catch (e) {
-                    console.log('Raw Response:', text);
-                }
-            });
-        }
-
-        // Updated form submission handler
-        async function handleFormSubmission(e) {
-            e.preventDefault();
-            // Clear error messages
-            document.getElementById('nameError').textContent = '';
-            document.getElementById('categoryError').textContent = '';
-
-            // Prepare the product data in JSON format
-            const productData = {
-                Name: document.querySelector('[name="NewProduct.Name"]').value.trim(),
-                CategoryId: document.querySelector('[name="NewProduct.CategoryId"]').value.trim(),
-                Description: document.querySelector('[name="NewProduct.Description"]').value.trim(),
-                Variations: JSON.parse(document.getElementById('variationsJson').value || "[]"),
-                VariationCombinations: JSON.parse(document.getElementById('combinationsJson').value || "[]")
-            };
-
-            // Basic validation
-            if (!productData.Name) {
-                document.getElementById('nameError').textContent = 'Product Name is required';
-                return;
-            }
-            if (!productData.CategoryId) {
-                document.getElementById('categoryError').textContent = 'Category is required';
-                return;
-            }
-
-            // Send as JSON payload
-            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
-            try {
-                const response = await fetch('?handler=CreateProduct', {
+                const isAvailable = currentStatus === "Available" ? false : true;
+                const response = await fetch(`?handler=ToggleProductStatus&productId=${productId}&isAvailable=${isAvailable}`, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'RequestVerificationToken': token
-                    },
-                    body: JSON.stringify({ NewProduct: productData })
+                        '__RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    }
                 });
 
-                const result = await response.json();
+                const data = await response.json();
+                if (data.success) {
+                    // Update the product status label and button text immediately
+                    const statusLabel = document.getElementById(`status-label-${productId}`);
+                    const newStatus = isAvailable ? "Available" : "Unavailable";
+                    statusLabel.textContent = newStatus;
 
-                if (!response.ok) {
-                    if (result.error) {
-                        alert(result.error);
+                    // Update the status label class for color change
+                    if (isAvailable) {
+                        statusLabel.classList.remove("bg-red-100", "text-red-800");
+                        statusLabel.classList.add("bg-green-100", "text-green-800");
                     } else {
-                        for (const [key, messages] of Object.entries(result)) {
-                            const errorElement = document.getElementById(`${key.toLowerCase()}Error`);
-                            if (errorElement) {
-                                errorElement.textContent = Array.isArray(messages) ? messages[0] : messages;
-                            }
-                        }
+                        statusLabel.classList.remove("bg-green-100", "text-green-800");
+                        statusLabel.classList.add("bg-red-100", "text-red-800");
                     }
-                    return;
-                }
 
-                if (result.success) {
-                    alert('Product created successfully!');
-                    window.location.reload();
+                    // Update the button text and style
+                    button.textContent = isAvailable ? "Deactivate" : "Activate";
+                    button.className = isAvailable ? "bg-yellow-500 hover:bg-yellow-600 text-white py-1 px-3 rounded-md"
+                        : "bg-green-500 hover:bg-green-600 text-white py-1 px-3 rounded-md";
+
+                    // Update the button's currentStatus value for next toggle
+                    button.setAttribute("onclick", `toggleProductStatus('${productId}', '${newStatus}', this)`);
                 } else {
-                    alert(result.error || 'Failed to create product');
+                    alert(data.error || 'Failed to update product status');
                 }
             } catch (error) {
-                console.error('Error creating product:', error);
-                alert('An error occurred while creating the product');
+                console.error('Error details:', error);
+                alert('An unexpected error occurred while updating the product status.');
             }
         }
 
-        function handleVariationValueChange(input) {
-            const variationId = input.dataset.variationId;
-            const values = input.value.split(',').map(v => v.trim()).filter(v => v);
-
-            // Update variations hidden field
-            const variations = [];
-            document.querySelectorAll('#existingVariations input').forEach(input => {
-                if (input.value) {
-                    variations.push({
-                        variationId: input.dataset.variationId,
-                        values: input.value.split(',').map(v => v.trim()).filter(v => v)
-                    });
-                }
-            });
-
-            document.getElementById('variationsJson').value = JSON.stringify(variations);
-            updateVariationCombinations();
-        }
-
-        // Helper function to check if a value exists in options
-        function isExistingOption(value, variationId) {
-            // This would need to be implemented based on your data structure
-            // You might want to maintain a list of existing options per variation
-            return false; // For now, treating all options as new
-        }
-
-        // Helper function to parse the form data
-        function getFormData() {
-            const productForm = document.getElementById('addProductForm');
-            const nameInput = productForm.querySelector('[name="NewProduct.Name"]');
-            const categoryInput = productForm.querySelector('[name="NewProduct.CategoryId"]');
-            const descriptionInput = productForm.querySelector('[name="NewProduct.Description"]');
-
-            // Get the values
-            const name = nameInput?.value?.trim();
-            const categoryId = categoryInput?.value?.trim();
-            const description = descriptionInput?.value?.trim();
-
-            // Validate required fields
-            if (!name) {
-                document.getElementById('nameError').textContent = 'The Name field is required.';
-                return null;
-            }
-            if (!categoryId) {
-                document.getElementById('categoryError').textContent = 'The CategoryId field is required.';
-                return null;
-            }
-
-            return {
-                name,
-                categoryId,
-                description
-            };
-        }
-
-        // Helper function to format variation data
-        function formatVariationData(variations) {
-            return variations.map(variation => ({
-                id: variation.variationId,
-                values: variation.values.map(value => ({
-                    value: value,
-                    isNew: true // We'll assume all values are new since we don't have existing options data
-                }))
-            }));
-        }
-
-        function validateForm() {
-            const errors = {};
-            const name = document.querySelector('[name="NewProduct.Name"]').value.trim();
-            const categoryId = document.querySelector('[name="NewProduct.CategoryId"]').value.trim();
-
-            if (!name) errors.name = 'Name is required';
-            if (!categoryId) errors.categoryId = 'Category is required';
-
-            // Validate combinations if they exist
-            const combinationsJson = document.getElementById('combinationsJson').value;
-            if (combinationsJson) {
-                try {
-                    const combinations = JSON.parse(combinationsJson);
-                    combinations.forEach((combo, index) => {
-                        if (!combo.price || combo.price <= 0) {
-                            errors[`combination${index}`] = `Price is required for combination ${index + 1}`;
-                        }
-                        if (!combo.stock || combo.stock < 0) {
-                            errors[`combination${index}`] = `Stock must be 0 or greater for combination ${index + 1}`;
-                        }
-                    });
-                } catch (error) {
-                    errors.combinations = 'Invalid combination data';
-                }
-            }
-
-            return errors;
-        }
-
-        // Install the event listeners
-        async function handleFormSubmission(e) {
-            e.preventDefault();
-
-            // Clear previous errors
-            document.getElementById('nameError').textContent = '';
-            document.getElementById('categoryError').textContent = '';
-
-            // Get form data with detailed logging
-            const name = document.querySelector('[name="NewProduct.Name"]').value.trim();
-            const categoryId = document.querySelector('[name="NewProduct.CategoryId"]').value.trim();
-            const description = document.querySelector('[name="NewProduct.Description"]').value.trim();
-
-            console.log('Form Values:', {
-                name,
-                categoryId,
-                description
-            });
-
-            // Get and parse variations
-            let variations = [];
-            try {
-                variations = JSON.parse(document.getElementById('variationsJson').value || '[]');
-                console.log('Parsed Variations:', variations);
-            } catch (error) {
-                console.error('Error parsing variations:', error);
-            }
-
-            // Get and parse combinations
-            let variationCombinations = [];
-            try {
-                variationCombinations = JSON.parse(document.getElementById('combinationsJson').value || '[]');
-                console.log('Parsed Combinations:', variationCombinations);
-            } catch (error) {
-                console.error('Error parsing combinations:', error);
-            }
-
-            // Create the product data object matching your DTO structure exactly
-            const productData = {
-                name: name,
-                categoryId: categoryId,
-                description: description || "",
-                variations: variations.map(v => ({
-                    id: v.variationId,
-                    variationOptionIds: Array.isArray(v.values) ? v.values : []
-                })),
-                variationCombinations: variationCombinations.map(c => ({
-                    variationOptionIds: Array.isArray(c.variationOptionIds) ? c.variationOptionIds : [],
-                    price: parseFloat(c.price) || 0,
-                    quantityInStock: parseInt(c.stock) || 0
-                }))
-            };
-
-            console.log('Final Product Data:', JSON.stringify(productData, null, 2));
-
-            // Basic validation
-            if (!productData.name) {
-                document.getElementById('nameError').textContent = 'Product Name is required';
-                return;
-            }
-            if (!productData.categoryId) {
-                document.getElementById('categoryError').textContent = 'Category is required';
+        // Delete Product Function
+        async function deleteProduct(productId) {
+            if (!confirm('Are you sure you want to delete this product?')) {
                 return;
             }
 
             try {
                 const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
-
-                // Log the request details
-                console.log('Request URL:', '?handler=CreateProduct');
-                console.log('Request Headers:', {
-                    'Content-Type': 'application/json',
-                    'RequestVerificationToken': token
-                });
-                console.log('Request Body:', JSON.stringify(productData, null, 2));
-
-                const response = await fetch('?handler=CreateProduct', {
+                const response = await fetch(`?handler=DeleteProduct&id=${productId}`, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
                         'RequestVerificationToken': token
-                    },
-                    body: JSON.stringify(productData)
+                    }
                 });
 
-                console.log('Response Status:', response.status);
-                console.log('Response Headers:', Object.fromEntries(response.headers.entries()));
-
-                const result = await response.json();
-                console.log('API Response:', result);
-
-                // Check if the response is the schema example
-                if (result.name === "string" && result.categoryId === "string") {
-                    console.error('Received schema example instead of actual response');
-                    alert('Server returned schema example. Please check server-side implementation.');
-                    return;
-                }
-
                 if (!response.ok) {
-                    if (result.error) {
-                        alert(result.error);
-                    } else if (typeof result === 'object') {
-                        Object.entries(result).forEach(([key, messages]) => {
-                            const errorElement = document.getElementById(`${key.toLowerCase()}Error`);
-                            if (errorElement) {
-                                errorElement.textContent = Array.isArray(messages) ? messages[0] : messages;
-                            } else {
-                                console.warn(`No error element found for key: ${key}`);
-                            }
-                        });
-                    }
-                    return;
+                    throw new Error('Failed to delete product');
                 }
 
-                if (result.success) {
-                    // Handle image uploads if needed
-                    const imageInput = document.getElementById('productImages');
-                    if (imageInput?.files?.length > 0) {
-                        const imageFormData = new FormData();
-                        Array.from(imageInput.files).forEach(file => {
-                            imageFormData.append('ProductImages', file);
-                        });
-
-                        const imageResponse = await fetch(`?handler=UploadImages&productId=${result.productId}`, {
-                            method: 'POST',
-                            body: imageFormData,
-                            headers: {
-                                'RequestVerificationToken': token
-                            }
-                        });
-
-                        console.log('Image upload response:', await imageResponse.json());
-                    }
-
-                    alert('Product created successfully!');
-                    window.location.reload();
-                } else {
-                    alert(result.error || 'Failed to create product');
-                }
+                alert('Product deleted successfully!');
+                window.location.reload();
             } catch (error) {
-                console.error('Error creating product:', error);
-                alert('An error occurred while creating the product');
+                console.error('Error:', error);
+                alert('An error occurred while deleting the product');
             }
         }
 
-        // Add this to your document ready handler
-        document.addEventListener('DOMContentLoaded', function () {
-            const form = document.getElementById('addProductForm');
-            if (form) {
-                form.removeEventListener('submit', handleFormSubmission);
-                form.addEventListener('submit', handleFormSubmission);
+        //Add Product
+        // Global state management
+        const state = {
+            existingVariationsData: [],
+            selectedVariations: [],
+            variationCombinations: []
+        };
 
-                // Log initial form state
-                console.log('Form found and handler attached');
-                console.log('Initial form elements:', {
-                    nameInput: form.querySelector('[name="NewProduct.Name"]'),
-                    categoryInput: form.querySelector('[name="NewProduct.CategoryId"]'),
-                    descriptionInput: form.querySelector('[name="NewProduct.Description"]'),
-                    variationsJson: document.getElementById('variationsJson'),
-                    combinationsJson: document.getElementById('combinationsJson')
+        // Utility functions
+        const generateCombinations = (variations) => {
+            if (variations.length === 0) return [];
+            if (variations.length === 1) return variations[0].map(v => [v]);
+
+            const result = [];
+            const combine = (current, rest) => {
+                if (rest.length === 0) {
+                    result.push(current);
+                    return;
+                }
+                rest[0].forEach(item => {
+                    combine([...current, item], rest.slice(1));
                 });
-            } else {
-                console.error('Form not found!');
+            };
+
+            combine([], variations);
+            return result;
+        };
+
+        const saveNewVariation = async (variationRow) => {
+            try {
+                const nameInput = variationRow.querySelector('input[name*=".Name"]');
+                const optionInputs = variationRow.querySelectorAll('input[name*=".Options"]');
+                const variationName = nameInput.value.trim();
+                const options = Array.from(optionInputs).map(input => input.value.trim()).filter(Boolean);
+
+                if (!variationName || options.length === 0) {
+                    alert('Please enter variation name and at least one option');
+                    return;
+                }
+
+                const categoryId = document.getElementById('categorySelect').value;
+                const response = await fetch(`?handler=CategoryVariations&categoryId=${categoryId}`);
+                const existingVariations = await response.json();
+                const existingVariation = existingVariations.find(v =>
+                    v.name.toLowerCase() === variationName.toLowerCase()
+                );
+
+                let variationId;
+                let optionIds = [];
+
+                if (existingVariation) {
+                    variationId = existingVariation.id;
+                    for (const option of options) {
+                        const optionData = {
+                            value: option,
+                            variationId: variationId
+                        };
+
+                        const createOptionResponse = await fetch('?handler=CreateVariationOption', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                            },
+                            body: JSON.stringify(optionData)
+                        });
+
+                        if (!createOptionResponse.ok) {
+                            throw new Error('Failed to create option');
+                        }
+
+                        const optionResult = await createOptionResponse.json();
+                        if (optionResult.success) {
+                            optionIds.push(optionResult.optionId);
+                        }
+                    }
+                } else {
+                    const variationData = {
+                        name: variationName,
+                        categoryId: categoryId,
+                        options: options
+                    };
+
+                    const createResponse = await fetch('?handler=CreateVariation', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                        },
+                        body: JSON.stringify(variationData)
+                    });
+
+                    if (!createResponse.ok) {
+                        throw new Error('Failed to create variation');
+                    }
+
+                    const result = await createResponse.json();
+                    if (result.success) {
+                        variationId = result.variationId;
+                        optionIds = result.optionIds;
+                    } else {
+                        throw new Error(result.message);
+                    }
+                }
+
+                appendVariationToList(variationId, variationName, options, optionIds);
+                variationRow.remove();
+                updateVariationCombinations();
+                alert('Variation saved successfully!');
+            } catch (error) {
+                console.error('Error saving variation:', error);
+                alert('Failed to save variation: ' + error.message);
+            }
+        };
+
+        const appendVariationToList = (variationId, variationName, options, optionIds) => {
+            const variationDiv = document.createElement('div');
+            variationDiv.classList.add('p-4', 'border', 'rounded-md', 'bg-gray-50', 'mb-4');
+            variationDiv.innerHTML = `
+                <div class="flex items-center justify-between mb-2">
+                    <span class="font-medium">${variationName}</span>
+                    <button type="button"
+                            onclick="removeExistingVariation('${variationId}')"
+                            class="text-red-600 hover:text-red-800">
+                        Remove
+                    </button>
+                </div>
+                <div class="mt-2">
+                    <select name="SelectedVariations"
+                            data-variation-id="${variationId}"
+                            data-variation-name="${variationName}"
+                            class="form-select w-full rounded-md border-gray-300"
+                            onchange="handleExistingVariationSelection(this)">
+                        <option value="">Select ${variationName}</option>
+                        ${options.map((option, index) =>
+                `<option value="${optionIds[index]}">${option}</option>`
+            ).join('')}
+                    </select>
+                </div>
+            `;
+
+            document.getElementById('existingVariationsList').appendChild(variationDiv);
+        };
+
+        const addNewVariationUI = () => {
+            const container = document.getElementById('newVariationsContainer');
+            const variationIndex = container.children.length;
+
+            const newRow = document.createElement('div');
+            newRow.classList.add('variation-row', 'mb-4', 'p-4', 'border', 'rounded');
+            newRow.innerHTML = `
+                <div class="flex items-center mb-2">
+                    <label class="block text-sm font-medium text-gray-700 mr-2">Variation Name:</label>
+                    <input type="text"
+                           name="NewVariations[${variationIndex}].Name"
+                           class="flex-grow mr-2 form-input rounded"
+                           placeholder="Enter variation name"
+                           required />
+                    <button type="button"
+                            onclick="this.closest('.variation-row').remove()"
+                            class="text-red-600 hover:text-red-800">
+                        Remove
+                    </button>
+                </div>
+                <div class="variation-options">
+                    <div class="option-row mb-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Options:</label>
+                        <div class="flex items-center">
+                            <input type="text"
+                                   name="NewVariations[${variationIndex}].Options"
+                                   class="form-input rounded flex-grow mr-2"
+                                   placeholder="Enter option value"
+                                   required />
+                            <button type="button"
+                                    onclick="addVariationOption(this.closest('.option-row'))"
+                                    class="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600">
+                                Add Option
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <button type="button"
+                            onclick="saveNewVariation(this.closest('.variation-row'))"
+                            class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">
+                        Save Variation
+                    </button>
+                </div>
+            `;
+
+            container.appendChild(newRow);
+        };
+
+        const validateInput = {
+            price: (value) => {
+                const price = parseFloat(value);
+                return !isNaN(price) && price > 0;
+            },
+            stock: (value) => {
+                const stock = parseInt(value);
+                return !isNaN(stock) && stock >= 0;
+            }
+        };
+
+        // Variation handling functions
+        const handleExistingVariationSelection = async (selectElement) => {
+            try {
+                const variationId = selectElement.getAttribute('data-variation-id');
+                const variationName = selectElement.getAttribute('data-variation-name');
+                const optionId = selectElement.value;
+                const optionName = selectElement.options[selectElement.selectedIndex].text;
+
+                // Update state
+                const existingIndex = state.existingVariationsData.findIndex(v => v.variationId === variationId);
+                if (existingIndex >= 0) {
+                    if (optionId) {
+                        state.existingVariationsData[existingIndex] = {
+                            variationId,
+                            variationName,
+                            optionId,
+                            optionName
+                        };
+                    } else {
+                        state.existingVariationsData.splice(existingIndex, 1);
+                    }
+                } else if (optionId) {
+                    state.existingVariationsData.push({
+                        variationId,
+                        variationName,
+                        optionId,
+                        optionName
+                    });
+                }
+
+                // Find the form using multiple selectors
+                const form = selectElement.closest('form') ||
+                    document.querySelector('form') ||
+                    document.querySelector('[asp-page-handler="CreateProduct"]');
+
+                if (!form) {
+                    console.warn('Form not found, creating hidden input in the select element\'s parent');
+                    // If no form is found, add the hidden input to the select's parent container
+                    const container = selectElement.closest('.p-4') || selectElement.parentElement;
+
+                    const hiddenInput = container.querySelector(`input[name="variation_${variationId}"]`) ||
+                        document.createElement('input');
+
+                    if (optionId) {
+                        hiddenInput.type = 'hidden';
+                        hiddenInput.name = `variation_${variationId}`;
+                        hiddenInput.value = optionId;
+                        if (!hiddenInput.parentElement) {
+                            container.appendChild(hiddenInput);
+                        }
+                    } else if (hiddenInput.parentElement) {
+                        hiddenInput.remove();
+                    }
+                } else {
+                    // If form is found, proceed with normal hidden input handling
+                    const hiddenInput = form.querySelector(`input[name="variation_${variationId}"]`) ||
+                        document.createElement('input');
+
+                    if (optionId) {
+                        hiddenInput.type = 'hidden';
+                        hiddenInput.name = `variation_${variationId}`;
+                        hiddenInput.value = optionId;
+                        if (!hiddenInput.parentElement) {
+                            form.appendChild(hiddenInput);
+                        }
+                    } else if (hiddenInput.parentElement) {
+                        hiddenInput.remove();
+                    }
+                }
+
+                updateVariationCombinations();
+            } catch (error) {
+                console.error('Error handling variation selection:', error);
+                console.log('Select element:', selectElement);
+                console.log('Current state:', state);
+                alert('Error updating variation selection. Please try again.');
+            }
+        };
+
+        const handleNewVariationInput = (input) => {
+            try {
+                const variationRow = input.closest('.variation-row');
+                if (!variationRow) return;
+
+                const nameInput = variationRow.querySelector('input[name*=".Name"]');
+                const optionInputs = variationRow.querySelectorAll('input[name*=".Options"]');
+
+                if (!nameInput || !optionInputs.length) return;
+
+                if (nameInput.value) {
+                    // Remove existing variation with same name
+                    state.selectedVariations = state.selectedVariations.filter(
+                        v => v.variationId !== `new_${nameInput.value}`
+                    );
+
+                    // Add new options
+                    optionInputs.forEach(optionInput => {
+                        if (optionInput.value) {
+                            state.selectedVariations.push({
+                                variationId: `new_${nameInput.value}`,
+                                variationName: nameInput.value,
+                                optionId: `new_${optionInput.value}`,
+                                optionName: optionInput.value
+                            });
+                        }
+                    });
+
+                    updateVariationCombinations();
+                }
+            } catch (error) {
+                console.error('Error handling new variation input:', error);
+            }
+        };
+
+        const updateVariationCombinations = () => {
+            try {
+                const container = document.getElementById('variationCombinationContainer');
+                if (!container) return;
+
+                container.innerHTML = '<h3 class="text-lg font-medium mb-2">Variation Combinations</h3>';
+
+                // Group variations by name
+                const groupedVariations = new Map();
+
+                // Group existing variations
+                state.existingVariationsData.forEach(v => {
+                    if (!groupedVariations.has(v.variationName)) {
+                        groupedVariations.set(v.variationName, []);
+                    }
+                    groupedVariations.get(v.variationName).push(v);
+                });
+
+                // Group new variations
+                state.selectedVariations.forEach(v => {
+                    if (!groupedVariations.has(v.variationName)) {
+                        groupedVariations.set(v.variationName, []);
+                    }
+                    groupedVariations.get(v.variationName).push(v);
+                });
+
+                // Convert to array format for combination generation
+                const variationsArray = Array.from(groupedVariations.values());
+                if (!variationsArray.length) return;
+
+                // Generate combinations
+                const combinations = generateCombinations(variationsArray);
+
+                combinations.forEach((combination, index) => {
+                    const combinationDiv = document.createElement('div');
+                    combinationDiv.classList.add('mb-4', 'p-4', 'border', 'rounded-md');
+
+                    const optionsText = combination.map(item =>
+                        `${item.variationName}: ${item.optionName}`
+                    ).join(', ');
+
+                    const optionIds = combination.map(item =>
+                        item.optionId
+                    ).join(',');
+
+                    combinationDiv.innerHTML = `
+                                <div class="mb-2 font-medium">${optionsText}</div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Price</label>
+                                        <input type="number"
+                                               name="VariationCombinations[${index}].Price"
+                                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                                               required min="0" step="0.01" />
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Stock</label>
+                                        <input type="number"
+                                               name="VariationCombinations[${index}].Stock"
+                                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                                               required min="0" step="1" />
+                                    </div>
+                                </div>
+                                <input type="hidden"
+                                       name="VariationCombinations[${index}].OptionIds"
+                                       value="${optionIds}" />
+                            `;
+
+                    container.appendChild(combinationDiv);
+                });
+            } catch (error) {
+                console.error('Error updating variation combinations:', error);
+            }
+        };
+
+        // Category and variation loading
+        const loadExistingVariations = async () => {
+            try {
+                const categoryId = document.getElementById('categorySelect')?.value;
+                const container = document.getElementById('existingVariationsList');
+
+                if (!container) return;
+                container.innerHTML = '';
+
+                if (!categoryId) return;
+
+                const response = await fetch(`?handler=CategoryVariations&categoryId=${categoryId}`);
+                if (!response.ok) throw new Error('Failed to load variations');
+
+                const variations = await response.json();
+
+                variations.forEach(variation => {
+                    const variationDiv = document.createElement('div');
+                    variationDiv.classList.add('p-4', 'border', 'rounded-md', 'bg-gray-50', 'mb-4');
+
+                    variationDiv.innerHTML = `
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="font-medium">${variation.name}</span>
+                                    <button type="button"
+                                            onclick="removeExistingVariation('${variation.id}')"
+                                            class="text-red-600 hover:text-red-800">
+                                        Remove
+                                    </button>
+                                </div>
+                                <div class="mt-2">
+                                    <select name="SelectedVariations"
+                                            data-variation-id="${variation.id}"
+                                            data-variation-name="${variation.name}"
+                                            class="form-select w-full rounded-md border-gray-300"
+                                            onchange="handleExistingVariationSelection(this)">
+                                        <option value="">Select ${variation.name}</option>
+                                    </select>
+                                </div>
+                            `;
+
+                    container.appendChild(variationDiv);
+                    loadVariationOptions(variation.id, variationDiv.querySelector('select'));
+                });
+            } catch (error) {
+                console.error('Error loading variations:', error);
+                alert('Failed to load existing variations');
+            }
+        };
+
+        const loadVariationOptions = async (variationId, selectElement) => {
+            try {
+                const response = await fetch(`?handler=VariationOptions&variationId=${variationId}`);
+                if (!response.ok) throw new Error('Failed to load variation options');
+
+                const options = await response.json();
+                const firstOption = selectElement.options[0];
+                selectElement.innerHTML = '';
+                selectElement.appendChild(firstOption);
+
+                options.forEach(option => {
+                    const optionElement = document.createElement('option');
+                    optionElement.value = option.id;
+                    optionElement.textContent = option.value;
+                    selectElement.appendChild(optionElement);
+                });
+            } catch (error) {
+                console.error('Error loading variation options:', error);
+                alert('Failed to load variation options');
+            }
+        };
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', () => {
+            window.addVariationOption = addVariationOption;
+            window.handleExistingVariationSelection = handleExistingVariationSelection;
+            window.removeExistingVariation = removeExistingVariation;
+            window.saveNewVariation = saveNewVariation;
+
+            const categorySelect = document.getElementById('categorySelect');
+            if (categorySelect) {
+                categorySelect.addEventListener('change', loadExistingVariations);
+                if (categorySelect.value) {
+                    loadExistingVariations();
+                }
+            }
+
+            const addVariationBtn = document.getElementById('addNewVariationBtn');
+            if (addVariationBtn) {
+                addVariationBtn.addEventListener('click', addNewVariationUI);
+            }
+
+            const form = document.querySelector('form[asp-page-handler="CreateProduct"]');
+            if (form) {
+                form.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    if (await validateForm()) {
+                        submitForm(form);
+                    }
+                });
+            }
+        });
+        
+        // Form validation and submission
+        const validateForm = async () => {
+            const name = document.querySelector('input[asp-for="ProductCreation.Name"]')?.value;
+            const category = document.querySelector('select[asp-for="ProductCreation.CategoryId"]')?.value;
+
+            if (!name || !category) {
+                alert('Please fill in all required fields (Name and Category)');
+                return false;
+            }
+
+            const hasExistingVariations = state.existingVariationsData.length > 0;
+            const hasNewVariations = state.selectedVariations.length > 0;
+
+            if (!hasExistingVariations && !hasNewVariations) {
+                alert('Please select at least one variation or create a new one');
+                return false;
+            }
+
+            const combinations = document.querySelectorAll('#variationCombinationContainer > div');
+            if (!combinations.length) {
+                alert('Please create at least one variation combination');
+                return false;
+            }
+
+            let isValid = true;
+            combinations.forEach(combo => {
+                const price = combo.querySelector('input[name*=".Price"]')?.value;
+                const stock = combo.querySelector('input[name*=".Stock"]')?.value;
+
+                if (!validateInput.price(price) || !validateInput.stock(stock)) {
+                    isValid = false;
+                }
+            });
+
+            if (!isValid) {
+                alert('Please enter valid price and stock for all variation combinations');
+                return false;
+            }
+
+            return true;
+        };
+
+        const submitForm = async (form) => {
+            try {
+                const formData = new FormData(form);
+                const response = await fetch('?handler=CreateProduct', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    }
+                });
+
+                if (response.redirected) {
+                    window.location.href = response.url;
+                    return;
+                }
+
+                const result = await response.json();
+                if (result.success) {
+                    alert('Product created successfully!');
+                    window.location.reload();
+                } else {
+                    alert(result.message || 'Failed to create product. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error submitting form:', error);
+                alert('An error occurred while creating the product. Please try again.');
+            }
+        };
+
+        // Additional helper functions (continued)
+        function addVariationOption(button) {
+            const optionValue = prompt('Enter option value:');
+            if (!optionValue) return;
+
+            const variationOptions = button.closest('.variation-row').querySelector('.variation-options');
+            const optionRow = document.createElement('div');
+            optionRow.className = 'option-row flex items-center gap-2';
+
+            optionRow.innerHTML = `
+                <label class="inline-flex items-center p-2 border rounded-md bg-white flex-grow">
+                    <input type="checkbox"
+                           class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                           onchange="handleVariationOptionChange(this)"
+                           value="${optionValue}" />
+                    <span class="ml-2">${optionValue}</span>
+                </label>
+                <button type="button"
+                        onclick="removeVariationOption(this)"
+                        class="bg-red-500 text-white p-2 rounded-md hover:bg-red-600">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            `;
+
+            variationOptions.appendChild(optionRow);
+            updateVariationCombinations();
+        }
+
+        const removeExistingVariation = (variationId) => {
+            try {
+                // Remove from state
+                state.existingVariationsData = state.existingVariationsData.filter(
+                    v => v.variationId !== variationId
+                );
+
+                // Remove from DOM
+                const variationElement = document.querySelector(`select[data-variation-id="${variationId}"]`)
+                    ?.closest('.p-4');
+                if (variationElement) {
+                    variationElement.remove();
+                }
+
+                // Remove hidden input
+                const hiddenInput = document.querySelector(`input[name="variation_${variationId}"]`);
+                if (hiddenInput) {
+                    hiddenInput.remove();
+                }
+
+                updateVariationCombinations();
+            } catch (error) {
+                console.error('Error removing variation:', error);
+            }
+        };
+
+        function displayCurrentImages(images) {
+            const container = document.getElementById('currentImagesContainer');
+            if (!container) {
+                console.error('Current images container not found');
+                return;
+            }
+
+            // Clear existing images
+            container.innerHTML = '';
+
+            // Display each image
+            images.forEach((image, index) => {
+                const imageWrapper = document.createElement('div');
+                imageWrapper.className = 'relative';
+
+                const img = document.createElement('img');
+                img.src = image.imageUrl; // Adjust this based on your image object structure
+                img.alt = `Product Image ${index + 1}`;
+                img.className = 'w-full h-32 object-cover rounded-md';
+
+                // Delete button
+                const deleteButton = document.createElement('button');
+                deleteButton.className = 'absolute top-0 right-0 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center m-1';
+                deleteButton.innerHTML = '×';
+                deleteButton.onclick = () => removeImage(image.id); // Adjust based on your image object structure
+
+                imageWrapper.appendChild(img);
+                imageWrapper.appendChild(deleteButton);
+                container.appendChild(imageWrapper);
+            });
+        }
+
+        function removeImage(imageId) {
+            if (confirm('Are you sure you want to remove this image?')) {
+                // Add your image removal logic here
+                console.log(`Removing image with ID: ${imageId}`);
+            }
+        }
+
+        // Image preview functionality
+        function previewImages(input) {
+            const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+            imagePreviewContainer.innerHTML = '';
+
+            if (input.files) {
+                Array.from(input.files).forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        const imgWrapper = document.createElement('div');
+                        imgWrapper.classList.add('relative');
+                        imgWrapper.innerHTML = `
+                                        <img src="${e.target.result}" class="w-full h-32 object-cover rounded-md" />
+                                        <button type="button" onclick="removeImage(this)"
+                                                class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center">
+                                            ✖
+                                        </button>
+                                    `;
+                        imagePreviewContainer.appendChild(imgWrapper);
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+        }
+
+        // Function to remove an image from preview
+        function removeImage(button) {
+            const imgWrapper = button.closest('div');
+            const fileInput = document.getElementById('productImages');
+            const files = Array.from(fileInput.files);
+
+            // Remove the corresponding file from FileList
+            const index = Array.from(imgWrapper.parentNode.children).indexOf(imgWrapper);
+            files.splice(index, 1);
+
+            // Update FileList
+            const dataTransfer = new DataTransfer();
+            files.forEach(file => dataTransfer.items.add(file));
+            fileInput.files = dataTransfer.files;
+
+            // Remove preview
+            imgWrapper.remove();
+        }
+
+        // Modal functionality
+        function openAddProductModal() {
+            document.getElementById('addProductModal').classList.remove('hidden');
+            document.getElementById('addProductModal').classList.add('flex');
+        }
+
+        function closeAddProductModal() {
+            document.getElementById('addProductModal').classList.remove('flex');
+            document.getElementById('addProductModal').classList.add('hidden');
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        //Edit Product
+        const editProductState = {
+            productItems: []
+        };
+
+        async function loadProductDetails(productId) {
+            try {
+                const response = await fetch(`?handler=ProductDetails&productId=${productId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    }
+                });
+                if (!response.ok) {
+                    throw new Error('Failed to load product data');
+                }
+                const data = await response.json();
+                if (data.success && data.product) {
+                    populateEditForm(data.product);
+                    populateProductItems(data.product.productItems);
+                    openEditProductModal();
+                }
+            } catch (error) {
+                console.error('Error loading product details:', error);
+                alert('Failed to load product details: ' + error.message);
+            }
+        }
+
+        function populateEditForm(product) {
+            if (!product) return;
+            document.getElementById('editProductId').value = product.id;
+            document.getElementById('editProductIdForItems').value = product.id;
+            document.getElementById('editProductName').value = product.name || '';
+            document.getElementById('editProductDescription').value = product.description || '';
+            document.getElementById('editCategorySelect').value = product.categoryId || '';
+        }
+
+        function populateProductItems(productItems) {
+            const container = document.getElementById('productItemsContainer');
+            container.innerHTML = '';
+            editProductState.productItems = productItems || [];
+            editProductState.productItems.forEach((item, index) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'p-4 border rounded-md';
+                itemDiv.innerHTML = `
+                            <input type="hidden" name="ProductItemUpdates[${index}].ItemId" value="${item.id}" />
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Quantity in Stock</label>
+                                    <input type="number"
+                                           name="ProductItemUpdates[${index}].QuantityInStock"
+                                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                                           value="${item.quantityInStock}"
+                                           min="0" />
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Price</label>
+                                    <input type="number"
+                                           name="ProductItemUpdates[${index}].Price"
+                                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                                           value="${item.price}"
+                                           min="0" />
+                                </div>
+                            </div>
+                        `;
+                container.appendChild(itemDiv);
+            });
+        }
+
+        function openEditProductModal() {
+            const modal = document.getElementById('editProductModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeEditModal() {
+            const modal = document.getElementById('editProductModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        // Add form submission handlers
+        // Add form submission handlers with improved error checking
+        document.getElementById('basicInfoForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: new FormData(form),
+                    headers: {
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    }
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result.success) {
+                        alert('Product information updated successfully');
+                        closeEditModal();
+                        location.reload(); // Refresh the page
+                    } else {
+                        alert(result.message || 'Failed to update product information');
+                    }
+                } else {
+                    console.error('Non-JSON response received');
+                    alert('An error occurred while updating the product');
+                }
+            } catch (error) {
+                console.error('Error updating product:', error);
+                alert('An error occurred while updating the product');
+            }
+        });
+
+        document.getElementById('productItemsForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: new FormData(form),
+                    headers: {
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    }
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result.success) {
+                        alert('Product items updated successfully');
+                        closeEditModal();
+                        location.reload(); // Refresh the page
+                    } else {
+                        alert(result.message || 'Failed to update product items');
+                    }
+                } else {
+                    console.error('Non-JSON response received');
+                    alert('An error occurred while updating the product items');
+                }
+            } catch (error) {
+                console.error('Error updating product items:', error);
+                alert('An error occurred while updating the product items');
             }
         });
     </script>

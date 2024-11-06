@@ -26,6 +26,28 @@ namespace HandmadeProductManagement.Services.Service
             _updateValidator = updateValidator;
         }
 
+        public async Task<LatestVariationId> GetLatestVariationId(string categoryId, string userId)
+        {
+            // Validate categoryId format
+            if (!Guid.TryParse(categoryId, out _))
+            {
+                throw new BaseException.BadRequestException(
+                    StatusCodeHelper.BadRequest.ToString(),
+                    Constants.ErrorMessageInvalidGuidFormat
+                );
+            }
+
+            // Retrieve the latest variation created by the specified user in the given category
+            var latestVariation = await _unitOfWork.GetRepository<Variation>().Entities
+                .Where(v => v.CategoryId == categoryId &&
+                            v.CreatedBy == userId &&
+                            (!v.DeletedTime.HasValue || v.DeletedBy == null))
+                .OrderByDescending(v => v.CreatedTime)
+                .FirstOrDefaultAsync();
+
+            return _mapper.Map<LatestVariationId>(latestVariation);
+        }
+
         public async Task<IList<VariationDto>> GetByCategoryId(string id)
         {
             // Validate id format
