@@ -27,7 +27,7 @@ namespace UI.Pages.Seller
 
         public string CurrentFilter { get; set; } = "All";
         public int PageNumber { get; set; } = 1;
-        public int PageSize { get; set; } = 2;
+        public int PageSize { get; set; } = 12;
         public bool HasNextPage { get; set; } = true;
 
         // Define valid status transitions
@@ -48,7 +48,7 @@ namespace UI.Pages.Seller
             { Constants.OrderStatusDeliveringRetry, new List<string> { Constants.OrderStatusDelivering } },
         };
 
-        public async Task OnGetAsync(string? filter, int pageNumber = 1, int pageSize = 2)
+        public async Task OnGetAsync(string? filter, int pageNumber = 1, int pageSize = 12)
         {
             try
             {

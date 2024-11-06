@@ -31,7 +31,7 @@ namespace UI.Pages.Product
 
         //Step 2: Define PageNumber & PageSize like this
         public int PageNumber { get; set; } = 1;
-        public int PageSize { get; set; } = 2;
+        public int PageSize { get; set; } = 12;
         public bool HasNextPage { get; set; } = true;
         public string CurrentFilters { get; set; } = string.Empty;
 
