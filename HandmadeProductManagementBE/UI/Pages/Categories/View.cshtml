@@ -79,6 +79,7 @@
 
         <!-- Dropdown with promotions populated from @Model.Promotions -->
         <select id="promotionDropdown" class="mb-4 w-full rounded border p-2">
+            <option value="">None</option> 
             @foreach (var promotion in Model.Promotions)
             {
                 <option value="@promotion.Id">@promotion.Name</option>
@@ -270,7 +271,10 @@
     // Submit the selected promotion to the server
     async function submitApplyPromotion() {
         const categoryId = document.getElementById('applyPromotionModal').dataset.categoryId;
-        const promotionId = document.getElementById('promotionDropdown').value;
+        let promotionId = document.getElementById('promotionDropdown').value;
+
+        // Set promotionId to null if "None" is selected
+        promotionId = promotionId === "" ? null : promotionId;
 
         try {
             const response = await fetch(`/Categories/View?handler=UpdatePromotion&categoryId=${categoryId}`, {

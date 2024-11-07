@@ -2,6 +2,6 @@
 {
     public class CategoryForUpdatePromotion
     {
-        public string promotionId { get; set; }
+        public string? promotionId { get; set; }
     }
 }

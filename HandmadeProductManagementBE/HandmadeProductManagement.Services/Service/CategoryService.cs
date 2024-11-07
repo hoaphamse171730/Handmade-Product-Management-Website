@@ -145,21 +145,28 @@ namespace HandmadeProductManagement.Services.Service
 
                 throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageCategoryNotFound);
 
-            var validationResult = await _updatePromotionValidator.ValidateAsync(category);
-            if (!validationResult.IsValid)
-                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), validationResult.Errors.First().ErrorMessage);
-
-            // Kiểm tra xem promotionId có tồn tại hay không
-
-            var promotionExists = await _unitOfWork.GetRepository<Promotion>()
-                .Entities
-                .AnyAsync(p => p.Id == category.promotionId && p.DeletedTime == null);
-            if (!promotionExists)
+            if (category.promotionId != null)
             {
-                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessagePromotionNotFound);
-            }
+                var validationResult = await _updatePromotionValidator.ValidateAsync(category);
+                if (!validationResult.IsValid)
+                    throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), validationResult.Errors.First().ErrorMessage);
 
-            categoryRepo.PromotionId = category.promotionId;
+                // Kiểm tra xem promotionId có tồn tại hay không
+
+                var promotionExists = await _unitOfWork.GetRepository<Promotion>()
+                    .Entities
+                    .AnyAsync(p => p.Id == category.promotionId && p.DeletedTime == null);
+                if (!promotionExists)
+                {
+                    throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessagePromotionNotFound);
+                }
+
+                categoryRepo.PromotionId = category.promotionId;
+            }
+            else
+            {
+                categoryRepo.PromotionId = null;
+            }
             categoryRepo.LastUpdatedTime = DateTime.UtcNow;
 
             await _unitOfWork.GetRepository<Category>().UpdateAsync(categoryRepo);
