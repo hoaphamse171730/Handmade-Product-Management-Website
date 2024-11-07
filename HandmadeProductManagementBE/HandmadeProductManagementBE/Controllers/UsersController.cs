@@ -21,7 +21,6 @@ namespace HandmadeProductManagementAPI.Controllers
 
         // GET: api/Users
         [HttpGet]
-        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetApplicationUsers(int PageNumber, int PageSize,[FromQuery] string? userName, [FromQuery] string? phoneNumber)
         {
 
