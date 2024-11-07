@@ -1,4 +1,5 @@
-﻿using HandmadeProductManagement.Contract.Repositories.Entity;
+﻿using Firebase.Auth;
+using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
 using HandmadeProductManagement.Core.Base;
@@ -149,8 +150,9 @@ namespace HandmadeProductManagement.Services.Service
             };
         }
 
-        public async Task<bool> CreateAsync(ReviewModel reviewModel, string orderId)
+        public async Task<bool> CreateAsync(ReviewForCreationDto reviewCreate, string userId)
         {
+            var reviewModel = reviewCreate;
             if (string.IsNullOrWhiteSpace(reviewModel.ProductId) || !Guid.TryParse(reviewModel.ProductId, out _))
             {
                 throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat);
@@ -160,7 +162,7 @@ namespace HandmadeProductManagement.Services.Service
             var productExists = await _unitOfWork.GetRepository<Product>().GetByIdAsync(reviewModel.ProductId)
                 ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageProductNotFound);
 
-            if (string.IsNullOrWhiteSpace(orderId) || !Guid.TryParse(orderId, out _))
+            if (string.IsNullOrWhiteSpace(reviewModel.OrderId) || !Guid.TryParse(reviewModel.OrderId, out _))
             {
                 throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat);
             }
@@ -169,11 +171,11 @@ namespace HandmadeProductManagement.Services.Service
             var order = await _unitOfWork.GetRepository<Order>()
                                          .Entities
                                          .Include(o => o.OrderDetails)
-                                         .FirstOrDefaultAsync(o => o.Id == orderId)
+                                         .FirstOrDefaultAsync(o => o.Id == reviewModel.OrderId)
                 ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageOrderNotFound);
 
             // Check if the user owns the order
-            if (order.UserId != reviewModel.UserId)
+            if (order.UserId != Guid.Parse(userId))
             {
                 throw new BaseException.ForbiddenException(StatusCodeHelper.Forbidden.ToString(), Constants.ErrorMessageForbidden);
             }
@@ -187,7 +189,7 @@ namespace HandmadeProductManagement.Services.Service
             // Check if a review already exists for this product by this user
             var existingReview = await _unitOfWork.GetRepository<Review>()
                                                   .Entities
-                                                  .FirstOrDefaultAsync(r => r.ProductId == reviewModel.ProductId && r.UserId == reviewModel.UserId);
+                                                  .FirstOrDefaultAsync(r => r.ProductId == reviewModel.ProductId && r.UserId == Guid.Parse(userId));
             if (existingReview != null)
             {
                 throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageReviewAlreadyExists);
@@ -200,7 +202,7 @@ namespace HandmadeProductManagement.Services.Service
 
             var user = await _unitOfWork.GetRepository<ApplicationUser>()
                                          .Entities
-                                         .FirstOrDefaultAsync(u => u.Id == reviewModel.UserId)
+                                         .FirstOrDefaultAsync(u => u.Id == Guid.Parse(userId))
                 ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageUserNotFound);
 
             var review = new Review
@@ -209,9 +211,9 @@ namespace HandmadeProductManagement.Services.Service
                 Rating = reviewModel.Rating,
                 Date = vietnamTime,
                 ProductId = reviewModel.ProductId,
-                UserId = reviewModel.UserId,
-                CreatedBy = reviewModel.UserId.ToString(),
-                LastUpdatedBy = reviewModel.UserId.ToString()
+                UserId = Guid.Parse(userId),
+                CreatedBy = userId,
+                LastUpdatedBy = userId
             };
 
             await _unitOfWork.GetRepository<Review>().InsertAsync(review);

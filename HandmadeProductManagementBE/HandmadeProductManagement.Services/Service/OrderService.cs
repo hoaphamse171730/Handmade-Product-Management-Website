@@ -459,6 +459,7 @@ namespace HandmadeProductManagement.Services.Service
             }
             
             var shopName = orderDetails.FirstOrDefault()?.ProductItem?.Product?.Shop?.Name;
+            var shopId = orderDetails.FirstOrDefault()?.ProductItem?.Product?.Shop?.Id;
 
             return new OrderWithDetailDto
             {
@@ -471,6 +472,7 @@ namespace HandmadeProductManagement.Services.Service
                 CustomerName = order.CustomerName,
                 Phone = order.Phone,
                 ShopName = shopName,
+                ShopId = shopId,
                 CustomerId = order.UserId.ToString(),
                 Note = order.Note,
                 CancelReasonId = order.CancelReasonId,

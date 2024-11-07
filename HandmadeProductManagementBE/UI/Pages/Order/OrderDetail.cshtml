@@ -1,4 +1,4 @@
-﻿@page
+﻿@page 
 @model UI.Pages.Order.OrderDetailModel
 @{
     ViewData["Title"] = "Order Detail";
@@ -121,21 +121,38 @@
         if (status.Status == "Shipped" && !finalStatuses.Any(kv => kv.Key == "Shipped"))
             finalStatuses.Add(new KeyValuePair<string, Tuple<string, DateTime?>>("Shipped", new Tuple<string, DateTime?>("Order was delivered successfully", status.ChangeTime)));
 
+        }
+
+        if (!IsStatusReached("Shipped"))
+        {
+            finalStatuses.Add(new KeyValuePair<string, Tuple<string, DateTime?>>("Shipped", new Tuple<string, DateTime?>("Order was delivered successfully", null)));
+        }
+
+
+        if (IsStatusReached("Refund Requested"))
+        {
+            finalStatuses.RemoveAll(kv => kv.Key == "Shipped");
+        }
     }
 
-    if (!IsStatusReached("Shipped"))
-    {
-        finalStatuses.Add(new KeyValuePair<string, Tuple<string, DateTime?>>("Shipped", new Tuple<string, DateTime?>("Order was delivered successfully", null)));
-    }
+@if (TempData["SuccessMessage"] != null)
+{
+    <script type="text/javascript">
+        window.onload = function () {
+            alert('@TempData["SuccessMessage"]'); // Show the success message in a popup
+            location.reload(); // Reload the page after the popup is closed
+        }
+    </script>
+}
 
-
-    if (IsStatusReached("Refund Requested"))
-    {
-        finalStatuses.RemoveAll(kv => kv.Key == "Shipped");
-    }
-
-
-
+@if (TempData["ErrorMessage"] != null)
+{
+    <script type="text/javascript">
+        window.onload = function () {
+            alert('@TempData["ErrorMessage"]'); // Show the success message in a popup
+            location.reload(); // Reload the page after the popup is closed
+        }
+    </script>
 }
 
 <div class="flex items-center justify-between py-4">
@@ -212,32 +229,40 @@
 <div class="order-details">
     <div class="flex items-center">
         <h3 class="text-xl font-semibold text-black">@Model.OrderWithDetail?.ShopName</h3>
-        <button class="ml-4 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600">
+        <a href="/Shop/Index?id=@Model.OrderWithDetail?.ShopId" class="ml-4 inline-block rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600">
             View Shop
-        </button>
+        </a>
     </div>
     @if (Model.OrderWithDetail?.OrderDetails != null && Model.OrderWithDetail.OrderDetails.Any())
     {
-        foreach (var orderDetail in Model.OrderWithDetail.OrderDetails)
+        @foreach (var orderDetail in Model.OrderWithDetail.OrderDetails)
         {
             decimal totalPrice = orderDetail.DiscountPrice * orderDetail.ProductQuantity;
 
             <div class="order-detail my-2 flex h-24 items-center justify-between rounded border border-gray-300 p-2">
                 <div class="flex w-1/3 items-center">
                     <img src="@orderDetail.ProductImage" alt="@orderDetail.ProductName" class="h-20 w-20" />
+                    <a href="/ProductDetail/ProductDetail?id=@orderDetail.ProductId" class="ml-4 font-semibold transition-transform">
+                        @orderDetail.ProductName
+                    </a>
                 </div>
+
                 <div class="flex-1 mx-2 w-1/3">
-                    <h2 class="text-lg font-bold">@orderDetail.ProductName</h2>
                     <p class="text-sm text-gray-600">
                         @string.Join(", ", orderDetail.VariationOptionValues)
                     </p>
                     <p class="text-sm">Quantity: x @orderDetail.ProductQuantity</p>
                 </div>
+
                 <div class="ml-4 flex w-1/3 flex-col items-end">
                     <p class="text-lg font-semibold">@totalPrice.ToString("C")</p>
+
                     @if (userId == Model.OrderWithDetail.CustomerId)
                     {
-                        <button class="mt-1 rounded bg-blue-500 px-4 py-2 text-white">Review</button>
+                        <button onclick="openModal('@Model.OrderId', '@orderDetail.ProductId')"
+                                class="mt-1 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600">
+                            Review
+                        </button>
                     }
                 </div>
             </div>
@@ -254,3 +279,108 @@
         <p class="text-gray-600">No order details available.</p>
     }
 </div>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<!-- Review Modal -->
+<div id="reviewModal" class="fixed inset-0 flex hidden items-center justify-center bg-gray-900 bg-opacity-50">
+    <div class="mx-auto w-full max-w-md rounded-lg bg-white p-4 shadow-lg">
+        <h2 class="mb-4 text-lg font-semibold">Submit Your Review</h2>
+
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="text-red-500">@Model.ErrorMessage</div>
+        }
+
+        <!-- Review Form -->
+        <form method="post" asp-page-handler="Review">
+            <!-- Hidden fields for orderId and productId -->
+            <input asp-for="OrderId" type="hidden" />
+            <input asp-for="ProductId" type="hidden" />
+
+            <div class="space-y-6">
+                <!-- Rating Section -->
+                <div>
+                    <label for="rating" class="mb-2 block text-sm text-gray-800">Rating</label>
+                    <div id="starRating" class="flex space-x-1">
+                        <!-- Hidden input to store selected rating value -->
+                        <input asp-for="Rating" type="hidden" id="rating" value="0">
+                        <!-- Star icons -->
+                        <span class="star cursor-pointer text-2xl text-gray-300" data-value="1" onclick="selectRating(1)">
+                            <i class="fas fa-star"></i>
+                        </span>
+                        <span class="star cursor-pointer text-2xl text-gray-300" data-value="2" onclick="selectRating(2)">
+                            <i class="fas fa-star"></i>
+                        </span>
+                        <span class="star cursor-pointer text-2xl text-gray-300" data-value="3" onclick="selectRating(3)">
+                            <i class="fas fa-star"></i>
+                        </span>
+                        <span class="star cursor-pointer text-2xl text-gray-300" data-value="4" onclick="selectRating(4)">
+                            <i class="fas fa-star"></i>
+                        </span>
+                        <span class="star cursor-pointer text-2xl text-gray-300" data-value="5" onclick="selectRating(5)">
+                            <i class="fas fa-star"></i>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Review Text Area -->
+                <div>
+                    <label for="review" class="mb-2 block text-sm text-gray-800">Review</label>
+                    <textarea asp-for="Content" placeholder="Write your review..." required class="w-full rounded-md border border-gray-300 bg-white px-4 py-3 text-sm text-gray-800"></textarea>
+                    <span asp-validation-for="Content" class="text-red-500"></span>
+                </div>
+            </div>
+
+            <!-- Action buttons (Cancel and Submit) -->
+            <div class="mt-4 flex justify-end">
+                <button type="button" onclick="closeModal()" class="mr-2 rounded bg-gray-300 px-4 py-2">Cancel</button>
+                <button type="submit" class="rounded bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700">Submit</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Function to select a rating
+    function selectRating(rating) {
+        // Update hidden input value
+        document.getElementById('rating').value = rating;
+
+        // Update star styles
+        let stars = document.querySelectorAll('#starRating .star');
+        stars.forEach((star, index) => {
+            star.classList.remove('text-yellow-500');
+            star.classList.add('text-gray-300');
+            if (index < rating) {
+                star.classList.remove('text-gray-300');
+                star.classList.add('text-yellow-500');
+            }
+        });
+    }
+
+    // Function to open the review modal and set orderId and productId
+    function openModal(orderId, productId) {
+        document.getElementById('reviewModal').classList.remove('hidden');
+        document.getElementById('OrderId').value = orderId;
+        document.getElementById('ProductId').value = productId;
+    }
+
+    // Function to close the review modal
+    function closeModal() {
+        const modal = document.getElementById('reviewModal');
+        const form = modal.querySelector('form');
+        const stars = document.querySelectorAll('#starRating .star');
+
+        // Reset the form fields
+        form.reset();
+
+        // Reset the star ratings
+        stars.forEach((star) => {
+            star.classList.remove('text-yellow-500'); // Remove filled star class
+            star.classList.add('text-gray-300'); // Add empty star class
+        });
+
+        // Hide the modal
+        modal.classList.add('hidden');
+    }
+</script>

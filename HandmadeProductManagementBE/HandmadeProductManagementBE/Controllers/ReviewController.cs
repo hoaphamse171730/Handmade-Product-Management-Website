@@ -65,20 +65,11 @@ namespace HandmadeProductManagementAPI.Controllers
 
         [Authorize]
         [HttpPost]
-        public async Task<IActionResult> Create(string? content, [Required] int rating, [Required] string productId, [Required] string orderId)
+        public async Task<IActionResult> Create(ReviewForCreationDto review)
         {
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
-            var userName = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
 
-            var reviewModel = new ReviewModel
-            {
-                Content = content,
-                Rating = rating,
-                ProductId = productId,
-                UserId = Guid.Parse(userId)
-            };
-
-            var createdReview = await _reviewService.CreateAsync(reviewModel,orderId);
+            var createdReview = await _reviewService.CreateAsync(review, userId);
 
             var response = new BaseResponse<bool>
             {
