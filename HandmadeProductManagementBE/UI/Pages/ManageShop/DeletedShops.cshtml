@@ -1,0 +1,64 @@
+﻿@page
+@using UI.Pages.Shared
+@model UI.Pages.ManageShop.DeletedShopModel
+@{
+    ViewData["Title"] = "Deleted Shops";
+}
+
+<h1 class="text-3xl font-bold text-center mb-6">Deleted Shops</h1>
+
+@{
+    var errorModel = new ErrorMessageModel
+            {
+                ErrorMessage = Model.ErrorMessage,
+                ErrorDetail = Model.ErrorDetail
+            };
+}
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <partial name="_ErrorMessage" model="errorModel" />
+}
+
+<a asp-page="/ManageShop/Index" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-6 inline-block">Back to Shop</a>
+
+<div class="overflow-x-auto">
+    <table class="min-w-full bg-white shadow-md rounded-lg">
+        <thead>
+            <tr class="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
+                <th class="py-3 px-6 text-left">Name</th>
+                <th class="py-3 px-6 text-left">Description</th>
+                <th class="py-3 px-6 text-left">Rating</th>
+                <th class="py-3 px-6 text-left">Sales</th>
+                <th class="py-3 px-6 text-left">Owner</th>
+            </tr>
+        </thead>
+        <tbody class="text-gray-600 text-sm font-light">
+            @foreach (var shop in Model.DeletedShops)
+            {
+                <tr class="border-b border-gray-200 hover:bg-gray-100">
+                    <td class="py-3 px-6 text-left">@shop.Name</td>
+                    <td class="py-3 px-6 text-left">@shop.Description</td>
+                    <td class="py-3 px-6 text-left">@shop.Rating</td>
+                    <td class="py-3 px-6 text-left">@shop.TotalSales</td>
+                    <td class="py-3 px-6 text-left">@shop.ownerName</td>
+                    <td class="py-3 px-6 text-left">
+                        <form method="post" asp-page-handler="Recover">
+                            <input type="hidden" asp-for="ShopIdToRecover" value="@shop.Id" />
+                            <button type="submit" class="bg-green-500 hover:bg-green-800 text-white font-bold py-1 px-3 rounded text-xs">Activate</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+@{
+    var paginationModel = new Shared.PaginationModel
+            {
+                PageNumber = Model.PageNumber,
+                PageSize = Model.PageSize,
+                HasNextPage = Model.HasNextPage
+            };
+}
+
+<partial name="~/Pages/Shared/_Pagination.cshtml" model="paginationModel" />

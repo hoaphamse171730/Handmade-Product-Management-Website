@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
 using HandmadeProductManagement.ModelViews.CancelReasonModelViews;
+using HandmadeProductManagement.Contract.Repositories.Entity;
 
 namespace UI.Pages.Order
 {
@@ -25,12 +26,18 @@ namespace UI.Pages.Order
 
         public List<OrderByUserDto>? Orders { get; set; }
         public string CurrentFilter { get; set; } = "All";
+        public int PageNumber { get; set; } = 1;
+        public int PageSize { get; set; } = 12;
+        public bool HasNextPage { get; set; } = true;
 
-        public async Task OnGetAsync(string? filter)
+        public async Task OnGetAsync(string? filter, int pageNumber = 1, int pageSize = 12)
         {
             CurrentFilter = filter ?? "All";
 
-            var response = await _apiResponseHelper.GetAsync<List<OrderByUserDto>>(Constants.ApiBaseUrl + "/api/order/user");
+            PageNumber = pageNumber;
+            PageSize = pageSize;
+
+            var response = await _apiResponseHelper.GetAsync<List<OrderByUserDto>>(Constants.ApiBaseUrl + $"/api/order/user?pageNumber={PageNumber}&pageSize={PageSize}");
 
             if (response?.StatusCode == StatusCodeHelper.OK && response.Data != null)
             {
@@ -45,6 +52,7 @@ namespace UI.Pages.Order
                     "Refunded" => orders.Where(o => new[] { "Refund Requested", "Refund Denied", "Refund Approve", "Refunded" }.Contains(o.Status)).ToList(),
                     _ => orders
                 };
+                HasNextPage = Orders.Count == PageSize;
             }
             else
             {

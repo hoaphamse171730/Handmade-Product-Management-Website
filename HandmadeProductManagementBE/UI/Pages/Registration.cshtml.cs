@@ -66,12 +66,12 @@ public class RegistrationModel : PageModel
             Password = this.Password,
         };
         var client = _httpClientFactory.CreateClient();
-        var response = await client.PostAsJsonAsync("http://localhost:5041/api/authentication/register", registrationData);
+        var response = await client.PostAsJsonAsync($"{Constants.ApiBaseUrl}/api/authentication/register", registrationData);
         var errorContent = await response.Content.ReadAsStringAsync();
         Console.WriteLine("Error Details: " + errorContent);
         if (response.IsSuccessStatusCode)
         {
-            return RedirectToPage("/Index");
+            return RedirectToPage("/Login");
         }
         else
         {

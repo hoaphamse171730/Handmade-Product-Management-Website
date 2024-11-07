@@ -65,6 +65,8 @@ public class MappingProfile : Profile
 
         #region Category
         CreateMap<Category, CategoryDto>();
+        CreateMap<Category, CategoryDtoWithDetail>()
+            .ForMember(dest => dest.Promotion, opt => opt.MapFrom(src => src.Promotion));
         CreateMap<CategoryForCreationDto, Category>();
         CreateMap<CategoryForUpdateDto, Category>();
         CreateMap<CategoryForUpdatePromotion, Category>();

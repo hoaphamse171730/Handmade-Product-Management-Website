@@ -4,35 +4,37 @@
     ViewData["Title"] = "Dashboard";
 }
 <div class="dashboard container mx-auto p-6">
-    <h1 class="text-3xl font-bold text-gray-800 mb-8">Dashboard</h1>
+    <h1 class="mb-8 text-3xl font-bold text-gray-800">Dashboard</h1>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="dashboard-section bg-white shadow-md rounded-lg p-6">
-            <h2 class="text-xl font-semibold text-gray-700 mb-4">Total Sale</h2>
+    <div class="grid-cols-1 grid gap-6 md:grid-cols-2">
+        <div class="dashboard-section rounded-lg bg-white p-6 shadow-md">
+            <h2 class="mb-4 text-xl font-semibold text-gray-700">Total Sale</h2>
             <p class="text-lg text-gray-600">Total Sales: <span class="font-bold text-blue-500">@Model.TotalSales</span></p>
         </div>
 
-        <div class="dashboard-section bg-white shadow-md rounded-lg p-6">
-            <h2 class="text-xl font-semibold text-gray-700 mb-4">Sales Trend Over Time</h2>
+        <div class="dashboard-section rounded-lg bg-white p-6 shadow-md">
+            <h2 class="mb-4 text-xl font-semibold text-gray-700">Sales Trend Over Time</h2>
             <div class="relative h-64">
-                <canvas id="salesTrendChart" class="w-full h-full"></canvas>
+                <canvas id="salesTrendChart" class="h-full w-full"></canvas>
             </div>
         </div>
 
-        <div class="dashboard-section bg-white shadow-md rounded-lg p-6">
-            <h2 class="text-xl font-semibold text-gray-700 mb-4">Top 10 Most-Sale Shops</h2>
-            <ul class="list-disc ml-6 text-gray-600">
+        <div class="dashboard-section rounded-lg bg-white p-6 shadow-md">
+            <h2 class="mb-4 text-xl font-semibold text-gray-700">Top 10 Most-Sale Shops</h2>
+            <ul class="ml-6 list-disc text-gray-600">
                 @foreach (var shop in Model.TopShops)
                 {
-                        <li class="py-1"> <span class="font-bold text-blue-500">@shop.Name</span>: @shop.TotalSales</li>
+                    <li class="py-1">
+                        <a href="/Shop/Index?id=@shop.Id" class="font-bold text-blue-500 hover:underline">@shop.Name</a>: @shop.TotalSales
+                    </li>
                 }
             </ul>
         </div>
 
-        <div class="dashboard-section bg-white shadow-md rounded-lg p-6">
-            <h2 class="text-xl font-semibold text-gray-700 mb-4">Type Distribution</h2>
+        <div class="dashboard-section rounded-lg bg-white p-6 shadow-md">
+            <h2 class="mb-4 text-xl font-semibold text-gray-700">Type Distribution</h2>
             <div class="relative h-64">
-                <canvas id="typeDistributionChart" class="w-full h-full"></canvas>
+                <canvas id="typeDistributionChart" class="h-full w-full"></canvas>
             </div>
         </div>
     </div>

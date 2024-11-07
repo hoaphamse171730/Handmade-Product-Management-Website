@@ -13,6 +13,7 @@ using HandmadeProductManagement.ModelViews.StatusChangeModelViews;
 using HandmadeProductManagement.Repositories.Entity;
 using Microsoft.EntityFrameworkCore;
 using System.Text.RegularExpressions;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace HandmadeProductManagement.Services.Service
 {
@@ -353,35 +354,39 @@ namespace HandmadeProductManagement.Services.Service
             }
         }
 
-        public async Task<PaginatedList<OrderResponseModel>> GetOrdersByPageAsync(int pageNumber, int pageSize)
+        public async Task<IList<OrderResponseModel>> GetOrdersByPageAsync(int pageNumber, int pageSize)
         {
             var repository = _unitOfWork.GetRepository<Order>();
-            var orderDetailRepository = _unitOfWork.GetRepository<OrderDetail>();
+            var orderDetailRepository = _unitOfWork.GetRepository<Order>();
+            var userRepository = _unitOfWork.GetRepository<ApplicationUser>();
 
-            var query = repository.Entities.Where(order => !order.DeletedTime.HasValue);
+            // Query to get non-deleted orders
+            var query = from order in repository.Entities
+                        join user in userRepository.Entities on order.UserId equals user.Id
+                        where !order.DeletedTime.HasValue
+                        orderby order.CreatedTime descending
+                        select new OrderResponseModel
+                        {
+                            Id = order.Id,
+                            TotalPrice = order.TotalPrice,
+                            OrderDate = order.OrderDate,
+                            Status = order.Status,
+                            UserId = order.UserId,
+                            Username = user.UserName!,
+                            Address = order.Address,
+                            CustomerName = order.CustomerName,
+                            Phone = order.Phone,
+                            Note = order.Note,
+                            CancelReasonId = order.CancelReasonId
+                        };
 
-            var totalItems = await query.CountAsync();
-
+            // Apply pagination
             var orders = await query
-                .OrderByDescending(order => order.CreatedTime) // Sort by the most recent orders
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
-                .Select(order => new OrderResponseModel
-                {
-                    Id = order.Id,
-                    TotalPrice = order.TotalPrice,
-                    OrderDate = order.OrderDate,
-                    Status = order.Status,
-                    UserId = order.UserId,
-                    Address = order.Address,
-                    CustomerName = order.CustomerName,
-                    Phone = order.Phone,
-                    Note = order.Note,
-                    CancelReasonId = order.CancelReasonId
-                })
                 .ToListAsync();
 
-            return new PaginatedList<OrderResponseModel>(orders, totalItems, pageNumber, pageSize);
+            return orders;
         }
 
         public async Task<OrderWithDetailDto> GetOrderByIdAsync(string orderId, string userId, string role)
@@ -466,6 +471,7 @@ namespace HandmadeProductManagement.Services.Service
                 CustomerName = order.CustomerName,
                 Phone = order.Phone,
                 ShopName = shopName,
+                CustomerId = order.UserId.ToString(),
                 Note = order.Note,
                 CancelReasonId = order.CancelReasonId,
                 OrderDetails = orderInDetailDtos
@@ -534,7 +540,7 @@ namespace HandmadeProductManagement.Services.Service
             return true;
         }
 
-        public async Task<IList<OrderByUserDto>> GetOrderByUserIdAsync(Guid userId)
+        public async Task<IList<OrderByUserDto>> GetOrderByUserIdAsync(Guid userId, int pageNumber, int pageSize)
         {
             var userRepository = _unitOfWork.GetRepository<ApplicationUser>();
             var userExists = await userRepository.Entities
@@ -546,9 +552,13 @@ namespace HandmadeProductManagement.Services.Service
             }
 
             var repository = _unitOfWork.GetRepository<Order>();
-            var orders = await repository.Entities
+
+            // Query to get orders by userId with pagination applied
+            var query = repository.Entities
                 .Where(o => o.UserId == userId && !o.DeletedTime.HasValue)
                 .OrderByDescending(o => o.CreatedTime) // Sort orders by CreatedTime in descending order
+                .Skip((pageNumber - 1) * pageSize) // Apply pagination: Skip the previous pages
+                .Take(pageSize) // Take only the items for the current page
                 .Select(order => new OrderByUserDto
                 {
                     Id = order.Id,
@@ -560,7 +570,9 @@ namespace HandmadeProductManagement.Services.Service
                     Phone = order.Phone,
                     Note = order.Note,
                     CancelReasonId = order.CancelReasonId
-                }).ToListAsync();
+                });
+
+            var orders = await query.ToListAsync();
 
             return orders;
         }

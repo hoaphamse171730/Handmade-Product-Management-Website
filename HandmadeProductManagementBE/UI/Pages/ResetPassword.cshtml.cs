@@ -41,13 +41,8 @@ namespace UI.Pages
 
         public void OnGet()
         {
-            // Logging the entire query string for debugging
-            Console.WriteLine($"Query String: {Request.QueryString}");
-
             Email = Request.Query["email"];
             Token = Request.Query["token"];
-
-            Console.WriteLine($"Email: {Email}, Token: {Token}");
         }
 
         public async Task<IActionResult> OnPostAsync()

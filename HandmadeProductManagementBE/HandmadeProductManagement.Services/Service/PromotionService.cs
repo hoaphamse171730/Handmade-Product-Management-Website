@@ -33,7 +33,17 @@ namespace HandmadeProductManagement.Services.Service
             _updateValidator = updateValidator;
         }
 
-        public async Task<IList<PromotionDto>> GetAll(int pageNumber, int pageSize)
+        public async Task<IList<PromotionDto>> GetAll()
+        {
+            var promotions = await _unitOfWork.GetRepository<Promotion>().Entities
+                .Where(p => p.DeletedTime == null)
+                .OrderByDescending(p => p.CreatedTime)
+                .ToListAsync();
+
+            return _mapper.Map<IList<PromotionDto>>(promotions);
+        }
+
+        public async Task<IList<PromotionDto>> GetAllByPage(int pageNumber, int pageSize)
         {
             if (pageNumber <= 0)
                 throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidPageNumber);

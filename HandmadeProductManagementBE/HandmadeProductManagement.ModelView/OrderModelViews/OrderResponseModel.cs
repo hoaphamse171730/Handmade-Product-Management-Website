@@ -8,6 +8,7 @@
         public string Status { get; set; } = string.Empty;
         public Guid UserId { get; set; }
         public string Address { get; set; } = string.Empty;
+        public string Username { get; set; } = string.Empty;
         public string CustomerName { get; set; } = string.Empty;
         public string? Phone { get; set; } = string.Empty;
         public string? Note { get; set; }

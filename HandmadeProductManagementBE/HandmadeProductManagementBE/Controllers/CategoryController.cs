@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using HandmadeProductManagement.Core.Constants;
+using HandmadeProductManagement.Core.Utils;
 
 namespace HandmadeProductManagementAPI.Controllers
 {
@@ -27,6 +28,21 @@ namespace HandmadeProductManagementAPI.Controllers
                 Code = "200",
                 StatusCode = StatusCodeHelper.OK,
                 Message = "Categories retrieved successfully",
+                Data = categories
+            };
+            return Ok(response);
+        }
+
+        [Authorize]
+        [HttpGet("pagedetail")]
+        public async Task<IActionResult> GetCategoriesWithDetailByPage([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            var categories = await _categoryService.GetAllWithDetailByPageAsync(pageNumber, pageSize);
+            var response = new BaseResponse<IList<CategoryDtoWithDetail>>
+            {
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Categories with details retrieved successfully",
                 Data = categories
             };
             return Ok(response);
@@ -82,13 +98,13 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpPut("updatepromotion/{categoryId}")]
         public async Task<IActionResult> UpdatePromotion(string categoryId, CategoryForUpdatePromotion categoryForUpdatePromotion)
         {
-            var updatePromotionCategory = await _categoryService.UpdatePromotion(categoryId, categoryForUpdatePromotion);
-            var reponse = new BaseResponse<CategoryDto>
+            await _categoryService.UpdatePromotion(categoryId, categoryForUpdatePromotion);
+            var reponse = new BaseResponse<bool>
             {
                 Code = "200",
                 StatusCode = StatusCodeHelper.OK,
                 Message = "Category updated successfully",
-                Data = updatePromotionCategory
+                Data = true
             };
             return Ok(reponse);
         }
@@ -127,9 +143,9 @@ namespace HandmadeProductManagementAPI.Controllers
 
         [HttpGet("GetAllDelete")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> GetAllDeletedCategories()
+        public async Task<IActionResult> GetAllDeletedCategories([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var deletedCategories = await _categoryService.GetAllDeleted();
+            var deletedCategories = await _categoryService.GetAllDeleted(pageNumber, pageSize);
             var response = new BaseResponse<IList<CategoryDto>>
             {
                 Code = "200",

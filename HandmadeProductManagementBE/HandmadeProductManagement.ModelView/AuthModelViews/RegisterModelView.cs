@@ -1,3 +1,4 @@
+using HandmadeProductManagement.Core.Common;
 using System.ComponentModel.DataAnnotations;
 
 namespace HandmadeProductManagement.ModelViews.AuthModelViews;
@@ -11,6 +12,6 @@ public class RegisterModelView
     
     public string Password { get; set; } = default!;
 
-    public string ClientUri { get; set; } = "https://localhost:7159/api/confirm-email";
+    public string ClientUri { get; set; } = $"{Constants.FrontUrl}/ConfirmEmail";
 
 }

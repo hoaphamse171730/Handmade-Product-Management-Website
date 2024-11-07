@@ -22,6 +22,7 @@
             public int PageSize { get; set; } = 12;
             public string SearchName { get; set; }
             public string SearchPhone { get; set; }
+        public bool HasNextPage { get; set; } = true;
             public async Task OnGet(int pageNumber = 1, int pageSize = 10, string? searchName = null, string? searchPhone = null )
             {
             PageNumber = pageNumber;
@@ -45,6 +46,7 @@
                  if (response.StatusCode == StatusCodeHelper.OK && response.Data != null)
                 {
                     users = response.Data;
+                    HasNextPage = users.Count == pageSize;
                 }
                  else
                 {

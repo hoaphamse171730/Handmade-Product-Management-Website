@@ -31,13 +31,13 @@ namespace UI.Pages.Product
 
         //Step 2: Define PageNumber & PageSize like this
         public int PageNumber { get; set; } = 1;
-        public int PageSize { get; set; } = 2;
+        public int PageSize { get; set; } = 12;
         public bool HasNextPage { get; set; } = true;
         public string CurrentFilters { get; set; } = string.Empty;
 
         //Step 3: Remember to add pageNumber & pageSize into parameter of OnGetAsync like below
         //Note: in page, the p is not the P
-        public async Task OnGetAsync([FromQuery] string? Name, [FromQuery] string? CategoryId, [FromQuery] string? Status, [FromQuery] decimal? MinRating, [FromQuery] string SortOption, [FromQuery] bool SortDescending, int pageNumber = 1, int pageSize = 2)
+        public async Task OnGetAsync([FromQuery] string? Name, [FromQuery] string? CategoryId, [FromQuery] string? Status, [FromQuery] decimal? MinRating, [FromQuery] string SortOption, [FromQuery] bool SortDescending, int pageNumber = 1, int pageSize = 12)
         {
             try
             {
