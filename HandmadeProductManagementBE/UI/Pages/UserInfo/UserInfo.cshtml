@@ -9,6 +9,19 @@
 
     <div class="mx-auto mt-8 max-w-md">
         <div class="rounded-lg border bg-white p-4 shadow-lg">
+            <div class="flex flex-col items-center mb-6">
+                @if (!string.IsNullOrEmpty(Model.userInfoDto.AvatarUrl))
+                {
+                    <img src="@Model.userInfoDto.AvatarUrl" alt="User Avatar" class="w-24 h-24 rounded-full shadow-md">
+                }
+                else
+                {
+                    <div class="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 shadow-md">
+                        <span>No Avatar</span>
+                    </div>
+                }
+            </div>
+
             <div class="mb-4">
                 <label class="mb-2 block text-sm font-bold text-gray-700">Name:</label>
                 <p class="text-gray-600">@Model.userInfo.UserName</p>
