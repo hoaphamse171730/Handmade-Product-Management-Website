@@ -101,5 +101,32 @@ namespace HandmadeProductManagementAPI.Controllers
             };
             return Ok(response);
         }
+
+        [HttpGet("by-product/{productId}")]
+        public async Task<IActionResult> GetProductItemByProductId(string productId)
+        {
+            try
+            {
+                var productItem = await _productItemService.GetByProductId(productId);
+
+                var response = new BaseResponse<ProductItemDto>
+                {
+                    Code = "Success",
+                    StatusCode = StatusCodeHelper.OK,
+                    Message = "Product item retrieved successfully.",
+                    Data = productItem
+                };
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new BaseResponse<ProductItemDto>
+                {
+                    Code = "Error",
+                    StatusCode = StatusCodeHelper.BadRequest,
+                    Message = ex.Message
+                });
+            }
+        }
     }
 }

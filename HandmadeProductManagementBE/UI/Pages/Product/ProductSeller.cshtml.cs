@@ -26,6 +26,7 @@ using static HandmadeProductManagement.Core.Base.BaseException;
 using HandmadeProductManagement.ModelViews.ProductDetailModelViews;
 using HandmadeProductManagement.ModelViews.ProductItemModelViews;
 using HandmadeProductManagement.ModelViews.ProductImageModelViews;
+using Newtonsoft.Json;
 
 namespace UI.Pages.Product
 {
@@ -137,7 +138,7 @@ namespace UI.Pages.Product
                 {
                     PropertyNameCaseInsensitive = true
                 };
-                var baseResponse = JsonSerializer.Deserialize<BaseResponse<IList<CategoryDto>>>(content, options);
+                var baseResponse = System.Text.Json.JsonSerializer.Deserialize<BaseResponse<IList<CategoryDto>>>(content, options);
                 if (baseResponse != null && baseResponse.StatusCode == StatusCodeHelper.OK && baseResponse.Data != null)
                 {
                     Categories = baseResponse.Data.ToList();
@@ -218,8 +219,7 @@ namespace UI.Pages.Product
         //    }
         //}
 
-        [BindProperty]
-        public ProductForCreationDto ProductCreation { get; set; } = new ProductForCreationDto();
+
 
         [BindProperty]
         public List<IFormFile> ProductImages { get; set; } = new List<IFormFile>();
@@ -233,6 +233,8 @@ namespace UI.Pages.Product
             public string Name { get; set; } = string.Empty;
             public List<string> Options { get; set; } = new List<string>();
         }
+        [BindProperty]
+        public ProductForCreationDto ProductCreation { get; set; } = new ProductForCreationDto();
 
         public async Task<IActionResult> OnPostCreateProductAsync()
         {
@@ -254,48 +256,36 @@ namespace UI.Pages.Product
 
                 ProductCreation.ShopId = shopResponse.Data.Id;
 
-                var variations = new List<VariationForProductCreationDto>();
-                var existingVariationInputs = Request.Form.Keys
+                // Step 1: Parse variations
+                ProductCreation.Variations = Request.Form.Keys
                     .Where(k => k.StartsWith("variation_"))
-                    .Select(k => new
+                    .Select(k => new VariationForProductCreationDto
                     {
-                        VariationId = k.Replace("variation_", ""),
-                        OptionId = Request.Form[k].ToString()
-                    })
-                    .Where(v => !string.IsNullOrEmpty(v.OptionId))
-                    .Select(v => new VariationForProductCreationDto
-                    {
-                        Id = v.VariationId,
-                        VariationOptionIds = new List<string> { v.OptionId }
+                        Id = k.Replace("variation_", ""),
+                        VariationOptionIds = Request.Form[k]
+                            .ToString()
+                            .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                            .Select(id => id.Trim())
+                            .ToList()
                     })
                     .ToList();
 
-                variations.AddRange(existingVariationInputs);
-
-                if (!variations.Any())
+                if (!ProductCreation.Variations.Any())
                 {
                     return new JsonResult(new { success = false, message = "At least one variation is required" });
                 }
 
-                var variationCombinations = ParseVariationCombinations();
-                if (!variationCombinations.Any())
+                // Step 2: Parse variation combinations
+                ProductCreation.VariationCombinations = ParseVariationCombinations();
+
+                if (!ProductCreation.VariationCombinations.Any())
                 {
                     return new JsonResult(new { success = false, message = "At least one variation combination is required" });
                 }
 
-                var productCreation = new
-                {
-                    name = ProductCreation.Name,
-                    description = ProductCreation.Description,
-                    categoryId = ProductCreation.CategoryId,
-                    shopId = shopResponse.Data.Id,
-                    variations = variations,
-                    variationCombinations = variationCombinations
-                };
-
                 var createProductResponse = await _apiResponseHelper.PostAsync<bool>(
                     $"{Constants.ApiBaseUrl}/api/product",
-                    productCreation);
+                    ProductCreation);
 
                 if (createProductResponse.StatusCode != StatusCodeHelper.OK || !createProductResponse.Data)
                 {
@@ -331,6 +321,7 @@ namespace UI.Pages.Product
                     var optionIds = Request.Form[$"VariationCombinations[{i}].OptionIds"]
                         .ToString()
                         .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                        .Select(id => id.Trim())
                         .ToList();
 
                     combinations.Add(new VariationCombinationDto
@@ -343,34 +334,6 @@ namespace UI.Pages.Product
             }
 
             return combinations;
-        }
-
-        private async Task HandleImageUploads()
-        {
-            var latestProductsResponse = await _apiResponseHelper.GetAsync<List<ProductOverviewDto>>(
-                $"{Constants.ApiBaseUrl}/api/product/user?pageNumber=1&pageSize=1");
-
-            if (latestProductsResponse.StatusCode == StatusCodeHelper.OK &&
-                latestProductsResponse.Data?.Any() == true)
-            {
-                var latestProductId = latestProductsResponse.Data.First().Id;
-
-                foreach (var image in ProductImages)
-                {
-                    if (image != null && image.Length > 0)
-                    {
-                        var uploadResponse = await _apiResponseHelper.UploadImageAsync(
-                            $"{Constants.ApiBaseUrl}/api/productimage/Upload",
-                            image,
-                            latestProductId);
-
-                        if (uploadResponse.StatusCode != StatusCodeHelper.OK || !uploadResponse.Data)
-                        {
-                            _logger.LogError($"Failed to upload image for product {latestProductId}");
-                        }
-                    }
-                }
-            }
         }
 
         public async Task<IActionResult> OnPostCreateVariationAsync([FromBody] CreateVariationRequest request)
@@ -502,6 +465,34 @@ namespace UI.Pages.Product
         {
             public string Value { get; set; }
             public string VariationId { get; set; }
+        }
+
+        private async Task HandleImageUploads()
+        {
+            var latestProductsResponse = await _apiResponseHelper.GetAsync<List<ProductOverviewDto>>(
+                $"{Constants.ApiBaseUrl}/api/product/user?pageNumber=1&pageSize=1");
+
+            if (latestProductsResponse.StatusCode == StatusCodeHelper.OK &&
+                latestProductsResponse.Data?.Any() == true)
+            {
+                var latestProductId = latestProductsResponse.Data.First().Id;
+
+                foreach (var image in ProductImages)
+                {
+                    if (image != null && image.Length > 0)
+                    {
+                        var uploadResponse = await _apiResponseHelper.UploadImageAsync(
+                            $"{Constants.ApiBaseUrl}/api/productimage/Upload",
+                            image,
+                            latestProductId);
+
+                        if (uploadResponse.StatusCode != StatusCodeHelper.OK || !uploadResponse.Data)
+                        {
+                            _logger.LogError($"Failed to upload image for product {latestProductId}");
+                        }
+                    }
+                }
+            }
         }
 
         //public async Task<IActionResult> OnPostCreateVariationAsync([FromBody] dynamic data)
@@ -734,8 +725,7 @@ namespace UI.Pages.Product
         [BindProperty]
         public ProductForUpdateDto ProductUpdate { get; set; } = new();
 
-        [BindProperty]
-        public Dictionary<string, ProductItemForUpdateDto> ProductItemUpdates { get; set; }
+        public List<ProductItemForUpdateDto> ProductItemUpdates { get; set; } = new List<ProductItemForUpdateDto>();
         public async Task<IActionResult> OnGetProductDetailsAsync(string productId)
         {
             try
@@ -767,28 +757,23 @@ namespace UI.Pages.Product
             }
         }
 
-        public async Task<IActionResult> OnPostUpdateBasicInfoAsync(string productId)
+        public async Task<IActionResult> OnPostUpdateBasicInfoAsync([FromBody] JsonElement jsonBody)
         {
             try
             {
-                if (string.IsNullOrEmpty(ProductUpdate.Name))
+                var productId = jsonBody.GetProperty("productId").GetString();
+                var productUpdate = jsonBody.GetProperty("productUpdate").Deserialize<ProductForUpdateDto>();
+
+                if (string.IsNullOrEmpty(productId) || productUpdate == null)
                 {
-                    ModelState.AddModelError("ProductUpdate.Name", "Product name is required");
+                    return new JsonResult(new { success = false, message = "Invalid input data" });
                 }
 
-                if (!ModelState.IsValid)
-                {
-                    await LoadCategoriesAsync();
-                    var errors = ModelState.Values.SelectMany(v => v.Errors.Select(e => e.ErrorMessage));
-                    _logger.LogWarning("Validation errors: {Errors}", string.Join("; ", errors));
-                    return new JsonResult(new { success = false, message = "Invalid data", errors });
-                }
-
-                var productUpdateResponse = await _apiResponseHelper.PatchAsync<bool>(
+                var updateResponse = await _apiResponseHelper.PatchAsync<bool>(
                     $"{Constants.ApiBaseUrl}/api/product/{productId}",
-                    ProductUpdate);
+                    productUpdate);
 
-                if (productUpdateResponse.StatusCode != StatusCodeHelper.OK)
+                if (updateResponse.StatusCode != StatusCodeHelper.OK)
                 {
                     return new JsonResult(new { success = false, message = "Failed to update product information" });
                 }
@@ -801,45 +786,110 @@ namespace UI.Pages.Product
                 return new JsonResult(new { success = false, message = "An error occurred while updating the product information" });
             }
         }
+        //public async Task<IActionResult> OnPostUpdateProductItemsAsync()
+        //{
+        //    try
+        //    {
+        //        bool hasErrors = false;
+        //        List<string> errorMessages = new List<string>();
 
-        public async Task<IActionResult> OnPostUpdateProductItemsAsync(string productId)
+        //        foreach (var itemUpdate in ProductItemUpdates.Where(x => !string.IsNullOrEmpty(x.Id)))
+        //        {
+        //            // Get the ProductItem details by productId
+        //            var productItemResponse = await _apiResponseHelper.GetAsync<BaseResponse<ProductItemDto>>(
+        //                $"{Constants.ApiBaseUrl}/api/productitem/by-product/{itemUpdate.ProductId}");
+
+        //            if (productItemResponse.StatusCode != StatusCodeHelper.OK)
+        //            {
+        //                _logger.LogWarning($"Failed to retrieve product item for productId {itemUpdate.ProductId}");
+        //                hasErrors = true;
+        //                errorMessages.Add($"Failed to retrieve product item {itemUpdate.ProductId}");
+        //                continue;
+        //            }
+
+        //            var productItem = productItemResponse.Data;
+
+        //            // Update fields
+        //            if (itemUpdate.QuantityInStock.HasValue)
+        //            {
+        //                productItem.QuantityInStock = itemUpdate.QuantityInStock.Value;
+        //            }
+
+        //            if (itemUpdate.Price.HasValue)
+        //            {
+        //                productItem.Price = itemUpdate.Price.Value;
+        //            }
+
+        //            // Prepare the patch request
+        //            var patchDocument = new Dictionary<string, object>
+        //        {
+        //            { "QuantityInStock", productItem.QuantityInStock },
+        //            { "Price", productItem.Price }
+        //        };
+
+        //            var patchResponse = await _apiResponseHelper.PatchAsync<bool>(
+        //                $"{Constants.ApiBaseUrl}/api/productitem/{productItem.Id}",
+        //                JsonConvert.SerializeObject(patchDocument));
+
+        //            if (patchResponse.StatusCode != StatusCodeHelper.OK || !patchResponse.Data)
+        //            {
+        //                _logger.LogWarning($"Failed to update product item {productItem.Id}");
+        //                hasErrors = true;
+        //                errorMessages.Add($"Failed to update item {productItem.Id}");
+        //            }
+        //            else
+        //            {
+        //                _logger.LogInformation($"Successfully updated product item {productItem.Id}");
+        //            }
+        //        }
+
+        //        if (hasErrors)
+        //        {
+        //            return new JsonResult(new
+        //            {
+        //                success = false,
+        //                message = "Some product items failed to update",
+        //                errors = errorMessages
+        //            });
+        //        }
+
+        //        return new JsonResult(new { success = true, message = "Product items updated successfully" });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, "Error updating product items");
+        //        return new JsonResult(new { success = false, message = "An error occurred while updating the product items" });
+        //    }
+        //}
+
+        public async Task<IActionResult> OnGetProductImagesAsync(string productId)
         {
             try
             {
-                if (!ModelState.IsValid)
+                // Validate input
+                if (string.IsNullOrWhiteSpace(productId))
                 {
-                    return new JsonResult(new { success = false, message = "Invalid data" });
+                    return new JsonResult(new List<ProductImageByIdResponse>());
                 }
 
-                var hasErrors = false;
-                foreach (var itemUpdate in ProductItemUpdates)
+                var imagesResponse = await _apiResponseHelper.GetAsync<IList<ProductImageByIdResponse>>(
+                    $"{Constants.ApiBaseUrl}/api/productimage/GetImage?productId={productId}");
+
+                if (imagesResponse.StatusCode == StatusCodeHelper.OK && imagesResponse.Data != null)
                 {
-                    var itemUpdateResponse = await _apiResponseHelper.PatchAsync<bool>(
-                        $"{Constants.ApiBaseUrl}/api/productitem/{itemUpdate.Key}",
-                        new
-                        {
-                            QuantityInStock = itemUpdate.Value.QuantityInStock,
-                            Price = itemUpdate.Value.Price
-                        });
-
-                    if (itemUpdateResponse.StatusCode != StatusCodeHelper.OK)
-                    {
-                        _logger.LogWarning($"Failed to update product item {itemUpdate.Key}");
-                        hasErrors = true;
-                    }
+                    _logger.LogInformation($"Loaded {imagesResponse.Data.Count} images for product {productId}");
+                    return new JsonResult(imagesResponse.Data);
                 }
-
-                if (hasErrors)
+                else
                 {
-                    return new JsonResult(new { success = false, message = "Some product items failed to update" });
+                    _logger.LogWarning($"Failed to load product images. Status: {imagesResponse.StatusCode}, Message: {imagesResponse.Message}");
+                    return new JsonResult(new List<ProductImageByIdResponse>());
                 }
-
-                return new JsonResult(new { success = true, message = "Product items updated successfully" });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating product items");
-                return new JsonResult(new { success = false, message = "An error occurred while updating the product items" });
+                _logger.LogError(ex, $"Exception occurred while fetching images for product {productId}");
+                return new JsonResult(new List<ProductImageByIdResponse>());
             }
         }
 
@@ -872,37 +922,6 @@ namespace UI.Pages.Product
             {
                 _logger.LogError(ex, "Error deleting variation");
                 return new JsonResult(new { success = false });
-            }
-        }
-
-        public async Task<IActionResult> OnGetProductImagesAsync(string productId)
-        {
-            try
-            {
-                // Validate input
-                if (string.IsNullOrWhiteSpace(productId))
-                {
-                    return new JsonResult(new List<ProductImageByIdResponse>());
-                }
-
-                var imagesResponse = await _apiResponseHelper.GetAsync<IList<ProductImageByIdResponse>>(
-                    $"{Constants.ApiBaseUrl}/api/productimage/GetImage?productId={productId}");
-
-                if (imagesResponse.StatusCode == StatusCodeHelper.OK && imagesResponse.Data != null)
-                {
-                    _logger.LogInformation($"Loaded {imagesResponse.Data.Count} images for product {productId}");
-                    return new JsonResult(imagesResponse.Data);
-                }
-                else
-                {
-                    _logger.LogWarning($"Failed to load product images. Status: {imagesResponse.StatusCode}, Message: {imagesResponse.Message}");
-                    return new JsonResult(new List<ProductImageByIdResponse>());
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Exception occurred while fetching images for product {productId}");
-                return new JsonResult(new List<ProductImageByIdResponse>());
             }
         }
     }
