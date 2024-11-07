@@ -409,10 +409,8 @@ namespace HandmadeProductManagement.Services.Service
             // If user is not an admin, apply buyer/seller checks
             if (role != Constants.RoleAdmin)
             {
-                // Check if the user is the buyer of the order
                 if (order.CreatedBy != userId)
                 {
-                    // If the user is not the buyer, check if they are the seller of any product in the order
                     bool isSellerOrder = await _unitOfWork.GetRepository<OrderDetail>().Entities
                         .AnyAsync(od => od.OrderId == orderId && od.ProductItem != null && od.ProductItem.CreatedBy == userId && !od.DeletedTime.HasValue);
 
@@ -423,41 +421,35 @@ namespace HandmadeProductManagement.Services.Service
                 }
             }
 
-            // Retrieve order details with product config and variation option value
+            // Retrieve order details and check for reviews
             var orderDetails = await _unitOfWork.GetRepository<OrderDetail>().Entities
                 .Where(od => od.OrderId == orderId && !od.DeletedTime.HasValue)
                 .Include(od => od.ProductItem!)
-                .ThenInclude(pi => pi.Product!) 
+                .ThenInclude(pi => pi.Product!)
                 .ThenInclude(p => p.Shop)
                 .ToListAsync();
 
-            var orderInDetailDtos = orderDetails.Select(od => new OrderInDetailDto
-            {
-                ProductId = od.ProductItem != null && od.ProductItem.Product != null ? od.ProductItem.Product.Id : Guid.Empty.ToString(),
-                ProductName = od.ProductItem != null && od.ProductItem.Product != null ? od.ProductItem.Product.Name : "",
-                ProductQuantity = od.ProductQuantity,
-                DiscountPrice = od.DiscountPrice,
-                VariationOptionValues = _unitOfWork.GetRepository<ProductConfiguration>().Entities
-                    .Where(pc => pc.ProductItemId == od.ProductItemId && pc.VariationOption != null)
-                    .Select(pc => pc.VariationOption!.Value)
-                    .ToList(),
-            }).ToList();
+            var orderInDetailDtos = new List<OrderInDetailDto>();
 
-            if (!orderDetails.Any())
+            foreach (var od in orderDetails)
             {
-                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "No order details found for this order.");
-            }
+                var hasReviewed = await _unitOfWork.GetRepository<Review>().Entities
+                    .AnyAsync(r => r.ProductId == od.ProductItem.Product.Id && r.UserId == Guid.Parse(userId));
 
-            // Fetch product images and set the first image URL
-            foreach (var orderDetail in orderInDetailDtos)
-            {
-                var images = await _productImageService.GetProductImageById(orderDetail.ProductId);
-                if (images != null && images.Count > 0)
+                orderInDetailDtos.Add(new OrderInDetailDto
                 {
-                    orderDetail.ProductImage = images.First().Url;
-                }
+                    ProductId = od.ProductItem.Product.Id,
+                    ProductName = od.ProductItem.Product.Name,
+                    ProductQuantity = od.ProductQuantity,
+                    DiscountPrice = od.DiscountPrice,
+                    VariationOptionValues = _unitOfWork.GetRepository<ProductConfiguration>().Entities
+                        .Where(pc => pc.ProductItemId == od.ProductItemId && pc.VariationOption != null)
+                        .Select(pc => pc.VariationOption.Value)
+                        .ToList(),
+                    HasReviewed = hasReviewed
+                });
             }
-            
+
             var shopName = orderDetails.FirstOrDefault()?.ProductItem?.Product?.Shop?.Name;
             var shopId = orderDetails.FirstOrDefault()?.ProductItem?.Product?.Shop?.Id;
 

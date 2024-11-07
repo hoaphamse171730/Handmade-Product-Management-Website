@@ -257,12 +257,21 @@
                 <div class="ml-4 flex w-1/3 flex-col items-end">
                     <p class="text-lg font-semibold">@totalPrice.ToString("C")</p>
 
-                    @if (userId == Model.OrderWithDetail.CustomerId)
+                    @if (userId == Model.OrderWithDetail.CustomerId && Model.OrderWithDetail.Status == "Shipped")
                     {
-                        <button onclick="openModal('@Model.OrderId', '@orderDetail.ProductId')"
-                                class="mt-1 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600">
-                            Review
-                        </button>
+                        if (orderDetail.HasReviewed)
+                        {
+                            <button class="mt-1 cursor-not-allowed rounded bg-gray-500 px-4 py-2 text-gray-300" disabled>
+                                Reviewed
+                            </button>
+                        }
+                        else
+                        {
+                            <button onclick="openModal('@Model.OrderId', '@orderDetail.ProductId')"
+                                    class="mt-1 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600">
+                                Review
+                            </button>
+                        }
                     }
                 </div>
             </div>
