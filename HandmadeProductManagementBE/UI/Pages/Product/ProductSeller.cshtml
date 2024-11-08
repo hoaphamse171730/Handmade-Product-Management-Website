@@ -1540,22 +1540,8 @@
             const form = modal.querySelector('form');
             form.reset(); // Reset tất cả các trường trong form
 
-            // Clear các biến liên quan đến model
-            editProductState = {
-                productItems: [], // Hoặc giá trị mặc định của model
-            };
-
-            // Xóa lớp nền cho các sản phẩm đã bị xóa
-            const productItemDivs = modal.querySelectorAll('.product-item');
-            productItemDivs.forEach(itemDiv => {
-                itemDiv.classList.remove('bg-gray-100'); // Loại bỏ nền xám
-                itemDiv.querySelector('button').disabled = false; // Kích hoạt lại nút xóa
-                itemDiv.querySelector('input[name^="ProductItemUpdates"]').disabled = false; // Kích hoạt lại các input
-            });
-
-            // (Tuỳ chọn) Clear các thông báo lỗi
-            const errorMessages = modal.querySelectorAll('.error-message');
-            errorMessages.forEach(msg => msg.textContent = ''); // Xóa các thông báo lỗi
+            // Đặt lại các thuộc tính của editProductState mà không gán lại đối tượng
+            editProductState.productItems = [];
         }
 
         // Add form submission handlers
