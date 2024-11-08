@@ -36,6 +36,7 @@ namespace UI.Pages.Promotion
                 }
 
                 var response = await _apiHelper.PostAsync<bool>($"{Constants.ApiBaseUrl}/api/promotions", Promotion);
+
                 if (response != null && response.Data)
                 {
                     TempData["SuccessMessage"] = "Promotion created successfully.";

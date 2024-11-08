@@ -3,8 +3,7 @@ namespace HandmadeProductManagement.Core.Common;
 public static class Constants
 {
     #region Base
-
-    public const string ApiBaseUrl = "https://localhost:7159";
+    public const string ApiBaseUrl = "https://localhost:44328";
     public const string FrontUrl = "https://localhost:7072";
     public const string AvatarBaseUrl = "/images/avatars";
     public const string VNPAY = "VNPAY";
@@ -241,6 +240,8 @@ public static class Constants
     public const string ErrorMessageReplyIsNotDeletedYet = "Reply is not deleted";
 
     public const string ErrorMessageFetchingFailed = "An error occurred while fetching data.";
+
+    public const string ErrorMessageProductItemAlreadyExists = "You have already this product";
     #endregion
 
     #region CancelReason

@@ -31,6 +31,7 @@ namespace HandmadeProductManagement.Services.Service
         public async Task<bool> AddCartItem(CartItemForCreationDto createCartItemDto, string userId)
         {
             var validationResult = await _creationValidator.ValidateAsync(createCartItemDto);
+
             if (!validationResult.IsValid)
             {
                 throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), validationResult.Errors.First().ErrorMessage);
