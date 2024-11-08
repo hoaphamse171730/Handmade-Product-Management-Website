@@ -50,7 +50,7 @@ namespace UI.Pages.Product
         public List<ProductSearchVM>? Products { get; set; }
         public List<CategoryDto>? Categories { get; set; }
         public int PageNumber { get; set; } = 1;
-        public int PageSize { get; set; } = 2;
+        public int PageSize { get; set; } = 12;
         public bool HasNextPage { get; set; } = true;
         public string CurrentFilters { get; set; } = string.Empty;
 
@@ -62,7 +62,7 @@ namespace UI.Pages.Product
             [FromQuery] string SortOption,
             [FromQuery] bool SortDescending,
             int pageNumber = 1,
-            int pageSize = 2)
+            int pageSize = 12)
         {
             try
             {
@@ -786,6 +786,7 @@ namespace UI.Pages.Product
                 return new JsonResult(new { success = false, message = "An error occurred while updating the product information" });
             }
         }
+
         //public async Task<IActionResult> OnPostUpdateProductItemsAsync()
         //{
         //    try
