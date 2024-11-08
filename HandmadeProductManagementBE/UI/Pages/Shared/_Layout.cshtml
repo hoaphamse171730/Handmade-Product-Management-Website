@@ -64,7 +64,6 @@
                 @if (userRole == "Seller")
                 {
                     <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Product/ProductSeller">Product Seller</a>
-                    <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Cart/CartView">Cart</a>
                     <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Seller/Shop">My Shop</a>
                     <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Seller/OrderManagement">Order Management</a>
                     <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Review/Index">Reviews</a>
@@ -81,10 +80,19 @@
 
                 @using Microsoft.AspNetCore.Http
                 @using System.IdentityModel.Tokens.Jwt
-                
- 
+
+               
+
                 @if (Context.Session.GetString("Token") != null)
                 {
+                    <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Cart/CartView">
+                        <i class="fas fa-shopping-cart"></i>
+                    </a>
+                    <!-- Notification Bell Icon and Dropdown (separate from User Menu) -->
+                    <div class="relative ml-4 inline-block">
+                        <!-- Notification Button -->
+                        @await Component.InvokeAsync("NotificationList")
+                    </div>
                     <!-- User Menu Dropdown -->
                     <div class="group relative inline-block text-left">
                         <!-- Button to trigger the dropdown -->
@@ -102,13 +110,6 @@
                                 </form>
                             </div>
                         </div>
-                    </div>
-                    <!-- Notification Bell Icon and Dropdown (separate from User Menu) -->
-                    <div class="relative ml-4 inline-block">
-                        <!-- Notification Button -->
-                        
-
-                        @await Component.InvokeAsync("NotificationList")
                     </div>
                 }
                 else

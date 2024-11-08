@@ -662,7 +662,7 @@ namespace HandmadeProductManagement.Services.Service
                 .ThenInclude(p => p.ProductConfigurations)
                 .ThenInclude(p => p.VariationOption)
                 .ThenInclude(v => v!.Variation)
-                .FirstOrDefaultAsync(p => p.Id == productId)                
+                .FirstOrDefaultAsync(p => p.Id == productId)
                 ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageProductNotFound);
 
             var promotion = await _unitOfWork.GetRepository<Promotion>().Entities
@@ -675,40 +675,44 @@ namespace HandmadeProductManagement.Services.Service
                 Name = product.Name,
                 Description = product.Description ?? string.Empty,
                 CategoryId = product.CategoryId,
-                CategoryName = product.Category?.Name??"",
+                CategoryName = product.Category?.Name ?? "",
                 ShopId = product.ShopId,
-                ShopName = product.Shop?.Name??"",
+                ShopName = product.Shop?.Name ?? "",
                 Rating = product.Rating,
                 Status = product.Status,
                 SoldCount = product.SoldCount,
                 ProductImageUrls = product.ProductImages.Select(pi => pi.Url).ToList(),
-                ProductItems = product.ProductItems.Select(pi => new ProductItemDetailModel
-                {
-                    Id = pi.Id,
-                    QuantityInStock = pi.QuantityInStock,
-                    Price = pi.Price,
-                    DiscountedPrice = promotion != null ? (int)(pi.Price * (1 - promotion.DiscountRate)) : null,
-                    Configurations = pi.ProductConfigurations.Select(pc => new ProductConfigurationDetailModel
+                ProductItems = product.ProductItems
+                    .Where(pi => pi.DeletedBy == null && !pi.DeletedTime.HasValue) // Exclude deleted items
+                    .Select(pi => new ProductItemDetailModel
                     {
-                        VariationName = pc.VariationOption?.Variation?.Name??"",
-                        OptionName = pc.VariationOption?.Value??""
+                        Id = pi.Id,
+                        QuantityInStock = pi.QuantityInStock,
+                        Price = pi.Price,
+                        DiscountedPrice = promotion != null ? (int)(pi.Price * (1 - promotion.DiscountRate)) : null,
+                        Configurations = pi.ProductConfigurations.Select(pc => new ProductConfigurationDetailModel
+                        {
+                            VariationName = pc.VariationOption?.Variation?.Name ?? "",
+                            OptionName = pc.VariationOption?.Value ?? "",
+                            OptionId = pc.VariationOption?.Id ?? ""
+                        }).ToList(),
+                        DeletedBy = pi.DeletedBy,
+                        DeletedTime = pi.DeletedTime
                     }).ToList(),
-                    DeletedBy = pi.DeletedBy,
-                    DeletedTime = pi.DeletedTime
-                }).ToList(),
                 Promotion = promotion == null ? null : new PromotionDetailModel
-                    {
-                        Id = promotion.Id,
-                        Name = promotion.Name,
-                        Description = promotion.Description??"",
-                        DiscountRate = promotion.DiscountRate,
-                        StartDate = promotion.StartDate,
-                        EndDate = promotion.EndDate,
-                        Status = promotion.Status
-                    }
+                {
+                    Id = promotion.Id,
+                    Name = promotion.Name,
+                    Description = promotion.Description ?? "",
+                    DiscountRate = promotion.DiscountRate,
+                    StartDate = promotion.StartDate,
+                    EndDate = promotion.EndDate,
+                    Status = promotion.Status
+                }
             };
             return response;
         }
+
         public async Task<decimal> CalculateAverageRatingAsync(string productId)
         {
             if (string.IsNullOrWhiteSpace(productId))

@@ -232,8 +232,8 @@
             </div>
 
             <!-- New Variations Section -->
-            <div id="newVariationsContainer"></div>
-            <button type="button" id="addNewVariationBtn" class="btn btn-secondary mb-4">
+            <div id="newVariationsContainerForCreation"></div>
+            <button type="button" id="addNewVariationBtnAddProduct" class="btn btn-secondary mb-4 text-blue-500 underline">
                 Add New Variation
             </button>
 
@@ -287,7 +287,8 @@
                     <label class="block text-sm font-medium text-gray-700">Category</label>
                     <select asp-for="ProductUpdate.CategoryId" id="editCategorySelect"
                             asp-items="@(new SelectList(Model.Categories, "Id", "Name"))"
-                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                            id="categorySelectForUpdate">
                         <option value="">Select Category</option>
                     </select>
                 </div>
@@ -318,6 +319,23 @@
                 </button>
             </div>
         </form>
+
+        <!-- Add Product Items Section -->
+        <form method="post" asp-page-handler="AddProductItems" id="addProductItemsForm" class="space-y-4">
+            @Html.AntiForgeryToken()
+
+            <!-- New Variations Section -->
+            <div id="newVariationsContainerForUpdate" class="mt-4"></div>
+            <button type="button" id="addNewVariationBtnEditProduct" class="btn btn-secondary mb-4 text-blue-500 underline">
+                Add New Variation
+            </button>
+
+            <div id="variationCombinationContainerForUpdate" class="border-t pt-4">
+                <h3 class="mb-2 text-lg font-medium">Variation Combinations</h3>
+                <!-- Các kết hợp sẽ được hiển thị tại đây -->
+            </div>
+        </form>
+
         <div class="mt-8 flex justify-end space-x-3 border-t pt-4">
             <button type="button" onclick="closeEditModal()"
                     class="rounded-md bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200">
@@ -438,7 +456,7 @@
             return combine({}, 0);
         };
 
-        const saveNewVariation = async (variationRow) => {
+        const saveNewVariationForCreation = async (variationRow) => {
             try {
                 const nameInput = variationRow.querySelector('input[name*=".Name"]');
                 const optionInputs = variationRow.querySelectorAll('input[name*=".Options"]');
@@ -603,8 +621,8 @@
             }
         };
 
-        const addNewVariationUI = () => {
-            const container = document.getElementById('newVariationsContainer');
+        const addNewVariationForCreationUI = () => {
+            const container = document.getElementById('newVariationsContainerForCreation');
             const variationIndex = container.children.length;
 
             const newRow = document.createElement('div');
@@ -642,7 +660,7 @@
                 </div>
                 <div class="mt-4">
                     <button type="button"
-                            onclick="saveNewVariation(this.closest('.variation-row'))"
+                                    onclick="saveNewVariationForCreation(this.closest('.variation-row'))"
                             class="rounded-md bg-green-500 px-4 py-2 text-white hover:bg-green-600">
                         Save Variation
                     </button>
@@ -910,9 +928,14 @@
                 }
             }
 
-            const addNewVariationBtn = document.getElementById('addNewVariationBtn');
-            if (addNewVariationBtn) {
-                addNewVariationBtn.addEventListener('click', addNewVariationUI);
+            const addNewVariationBtnAddProduct = document.getElementById('addNewVariationBtnAddProduct');
+            if (addNewVariationBtnAddProduct) {
+                addNewVariationBtnAddProduct.addEventListener('click', addNewVariationForCreationUI);
+            }
+
+            const addNewVariationBtnEditProduct = document.getElementById('addNewVariationBtnEditProduct');
+            if (addNewVariationBtnEditProduct) {
+                addNewVariationBtnEditProduct.addEventListener('click', addNewVariationForUpdateUI);
             }
 
             const form = document.querySelector('form[asp-page-handler="CreateProduct"]');
@@ -1284,6 +1307,278 @@
             productItems: []
         };
 
+        const addNewVariationForUpdateUI = async () => {
+            const container = document.getElementById('newVariationsContainerForUpdate');
+            const variationIndex = container.children.length;
+
+            const newRow = document.createElement('div');
+            newRow.classList.add('variation-row', 'mb-4', 'p-4', 'border', 'rounded');
+            newRow.innerHTML = `
+                                <div class="mb-2 flex items-center">
+                                    <label class="mr-2 block text-sm font-medium text-gray-700">Variation Name:</label>
+                                    <input type="text"
+                                           name="NewVariations[${variationIndex}].Name"
+                                           class="form-input mr-2 flex-grow rounded"
+                                           placeholder="Enter variation name"
+                                           required />
+                                    <button type="button"
+                                            onclick="this.closest('.variation-row').remove()"
+                                            class="text-red-600 hover:text-red-800">
+                                        Remove
+                                    </button>
+                                </div>
+                                <div class="variation-options">
+                                    <div class="option-row mb-2">
+                                        <label class="mb-1 block text-sm font-medium text-gray-700">Options:</label>
+                                        <div class="flex items-center">
+                                            <input type="text"
+                                                   name="NewVariations[${variationIndex}].Options"
+                                                   class="form-input mr-2 flex-grow rounded"
+                                                   placeholder="Enter option value"
+                                                   required />
+                                            <button type="button"
+                                                    onclick="addVariationOption(this.closest('.option-row'))"
+                                                    class="rounded-md bg-blue-500 px-3 py-1 text-white hover:bg-blue-600">
+                                                Add Option
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mt-4">
+                                    <button type="button"
+                                            onclick="saveNewVariationForUpdate(this.closest('.variation-row'))"
+                                            class="rounded-md bg-green-500 px-4 py-2 text-white hover:bg-green-600">
+                                        Save Variation
+                                    </button>
+                                </div>
+                            `;
+
+            container.appendChild(newRow);
+        };
+
+        let combinations = []; // Declare a global variable to store the combinations
+
+        const saveNewVariationForUpdate = async (variationRow) => {
+            try {
+                const nameInput = variationRow.querySelector('input[name*=".Name"]');
+                const optionInputs = variationRow.querySelectorAll('input[name*=".Options"]');
+
+                const variationName = nameInput.value.trim();
+                const options = Array.from(optionInputs).map(input => input.value.trim()).filter(Boolean);
+
+                if (!variationName || options.length === 0) {
+                    alert('Please enter variation name and at least one option');
+                    return;
+                }
+
+                const categoryId = document.getElementById('editCategorySelect').value;
+
+                // Create the new variation
+                const variationData = { name: variationName, categoryId: categoryId, options: options };
+
+                const createResponse = await fetch('?handler=CreateVariation', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(variationData)
+                });
+
+                if (!createResponse.ok) {
+                    throw new Error('Failed to create variation');
+                }
+
+                const result = await createResponse.json();
+
+                const optionIds = result.optionIds;
+
+                // Add the new variation options to the current list of variation options
+                const combinedOptions = [...currentVariationOptions];
+
+                optionIds.forEach(optionId => {
+                    const optionExists = currentVariationOptions.some(option => option.varitaionName === variationName);
+
+                    if (!optionExists) {
+                        combinedOptions.push({ variationName: variationName, optionName: options.join(', '), optionId });
+                    }
+                });
+
+                // Generate combinations based on the newly created variation
+                const combinationContainer = document.getElementById('variationCombinationContainerForUpdate');
+
+                const combinationSection = document.createElement('div');
+                combinationSection.classList.add('combination-section', 'mb-4', 'p-4', 'border', 'rounded');
+
+                let combinationHTML = `
+                    <h4 class="text-lg font-medium">Variation Combination</h4>
+                    <div class="grid-cols-1 grid gap-4">
+                `;
+
+                let combinationCounter = 0; // Declare a counter to generate unique IDs
+
+                combinedOptions.forEach((currentOption, currentIdx) => {
+                    if (currentOption.variationName === variationName) {
+                        console.log("Skipping combination because variationName matches currentOption.variationName:", variationName);
+                        return; // Skip if the variationName matches currentOption.variationName
+                    }
+
+                    options.forEach((newOption, newIdx) => {
+                        // Use the combination counter for the combinationId
+                        const combinationId = `combination-${combinationCounter++}`;  // Increment the counter for each new combination
+
+                        combinationHTML += `
+                    <div class="flex gap-4">
+                        <div class="flex-1">
+                            <label class="block text-sm font-medium text-gray-700">Variation Options</label>
+                            <p class="mt-1 block w-full rounded-md border-gray-300 bg-gray-50 p-2 shadow-sm">
+                                ${currentOption.optionName}, ${newOption}
+                            </p>
+                        </div>
+                        <div class="flex-1">
+                            <label class="block text-sm font-medium text-gray-700">Price</label>
+                            <input type="number"
+                                id="price-${combinationId}"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                                placeholder="Enter price"
+                                min="0" required />
+                        </div>
+                        <div class="flex-1">
+                            <label class="block text-sm font-medium text-gray-700">Quantity In Stock</label>
+                            <input type="number"
+                                id="quantity-${combinationId}"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                                placeholder="Enter quantity"
+                                min="0" required />
+                        </div>
+                    </div>
+                `;
+
+                        // Store the combination data in the global array
+                        combinations.push({
+                            variationOptions: [currentOption.optionId, optionIds[0]], // Store optionIds
+                            price: null,  // Placeholder for price (to be filled later)
+                            quantity: null // Placeholder for quantity (to be filled later)
+                        });
+                    });
+                });
+
+                combinationHTML += `</div>`;
+
+                combinationHTML += `
+                    <div class="mt-4 flex justify-end">
+                        <button type="button"
+                                class="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+                                onclick="saveVariationCombination()">Save Combination</button>
+                    </div>
+                `;
+
+                combinationSection.innerHTML = combinationHTML;
+                combinationContainer.appendChild(combinationSection);
+
+                variationRow.remove(); // Optionally remove the new variation row from the UI
+
+                console.log(combinations);
+
+            } catch (error) {
+                console.error('Error saving variation:', error);
+                alert('Failed to save variation: ' + error.message);
+            }
+        };
+
+        const saveVariationCombination = async () => {
+            try {
+                const productId = document.getElementById('editProductId').value.trim();
+
+                if (!productId) {
+                    alert('Product ID is required');
+                    return;
+                }
+
+                // Create an array to hold all the variation combinations
+                const variationCombinations = [];
+
+                // Loop through the global combinations array to collect price and quantity
+                for (let i = 0; i < combinations.length; i++) {
+                    const combination = combinations[i];
+                    const combinationId = `combination-${i}`;
+                    const priceInput = document.getElementById(`price-${combinationId}`);
+                    const quantityInput = document.getElementById(`quantity-${combinationId}`);
+
+                    // Validate and capture price and quantity
+                    const price = parseFloat(priceInput.value.trim());
+                    const quantity = parseInt(quantityInput.value.trim(), 10);
+
+                    if (isNaN(price) || price <= 0) {
+                        alert(`Please enter a valid price for combination ${i + 1}`);
+                        return;
+                    }
+
+                    if (isNaN(quantity) || quantity < 0) {
+                        alert(`Please enter a valid quantity for combination ${i + 1}`);
+                        return;
+                    }
+
+                    // Push the validated combination to the array in the correct format
+                    variationCombinations.push({
+                        VariationOptionIds: combination.variationOptions, // Array of option IDs
+                        Price: price,                                     // Price of the combination
+                        QuantityInStock: quantity                         // Quantity in stock
+                    });
+                }
+
+                // If no combinations to save, show a message and return
+                if (variationCombinations.length === 0) {
+                    alert('No valid variation combinations to save');
+                    return;
+                }
+
+                // Prepare the data to send in the request
+                const variationCombinationDto = variationCombinations; // Directly use the array of combinations
+
+                console.log(variationCombinationDto)
+
+                // Send all the combinations in one POST request
+                const response = await fetch(`${apiBaseUrl}/api/productitem/${productId}/items`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`,
+                        'RequestVerificationToken': requestVerificationToken
+                    },
+                    body: JSON.stringify(variationCombinationDto) // Sending the array directly
+                });
+
+                if (!response.ok) {
+                    const errorResponse = await response.text();
+                    console.error('Error Response:', errorResponse);
+                    alert(`Failed to save variation combinations: ${errorResponse}`);
+                } else {
+                    const result = await response.json();
+                    console.log(result.message || 'Variation combinations saved successfully!');
+                }
+
+                alert('All variation combinations have been saved successfully!');
+
+                combinations = [];
+
+                // Clear the container holding the new variations
+                const newVariationsContainer = document.getElementById('newVariationsContainerForUpdate');
+                if (newVariationsContainer) {
+                    newVariationsContainer.innerHTML = '';
+                }
+
+                // Clear the container holding the variation combinations
+                const combinationContainer = document.getElementById('variationCombinationContainerForUpdate');
+                if (combinationContainer) {
+                    combinationContainer.innerHTML = '';
+                }
+
+                loadProductDetails(productId);
+
+            } catch (error) {
+                console.error('Error saving combination:', error);
+                alert('Failed to save combination: ' + error.message);
+            }
+        };
+
         async function loadProductDetails(productId) {
             try {
                 const response = await fetch(`?handler=ProductDetails&productId=${productId}`, {
@@ -1329,57 +1624,69 @@
             }
         });
 
+        let currentVariationOptions = [];
+
         function populateProductItems(productItems) {
-            console.log(productItems);
             const container = document.getElementById('productItemsContainer');
             container.innerHTML = '';
             editProductState.productItems = productItems || [];
 
+            // Clear and store all the existing variation options globally
+            currentVariationOptions = [];
+
+            // Store current variation options from all product items
             editProductState.productItems.forEach((item, index) => {
-                const variationOptions = item.configurations
-                    .map(config => config.optionName)
-                    .join(', ');
+                const variationOptions = item.configurations.map(config => config.optionName);
+
+                item.configurations.forEach(config => {
+                    // Check if variationName and optionName already exist in currentVariationOptions
+                    const optionExists = currentVariationOptions.some(option =>
+                        option.variationName === config.variationName && option.optionName === config.optionName
+                    );
+
+                    // Add only if it doesn't already exist
+                    if (!optionExists) {
+                        currentVariationOptions.push({
+                            variationName: config.variationName,
+                            optionName: config.optionName,
+                            optionId: config.optionId
+                        });
+                    }
+                });
 
                 const itemDiv = document.createElement('div');
                 itemDiv.className = 'p-4 border rounded-md product-item';
 
-                // Kiểm tra trạng thái xóa
-                const isDeleted = item.deletedBy !== null && item.deletedTime !== null;
                 const isLastItem = editProductState.productItems.length === 1;
 
                 itemDiv.innerHTML = `
                     <input type="hidden" name="ProductItemUpdates[${index}].Id" value="${item.id}" />
                     <div class="flex gap-4">
-                        <!-- Phần làm mờ nếu đã xóa -->
-                        <div class="flex-1 ${isDeleted ? 'opacity-50' : ''}">
+                        <div class="flex-1">
                             <label class="block text-sm font-medium text-gray-700">Variation Options</label>
-                            <p class="mt-1 block w-full rounded-md border-gray-300 bg-gray-50 p-2 shadow-sm">${variationOptions}</p>
+                            <p class="mt-1 block w-full rounded-md border-gray-300 bg-gray-50 p-2 shadow-sm">${variationOptions.join(', ')}</p>
                         </div>
-                        <div class="flex-1 ${isDeleted ? 'opacity-50' : ''}">
+                        <div class="flex-1">
                             <label class="block text-sm font-medium text-gray-700">Quantity in Stock</label>
                             <input type="number"
                                 name="ProductItemUpdates[${index}].QuantityInStock"
                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
                                 value="${item.quantityInStock}"
-                                min="0"
-                                ${isDeleted ? 'disabled' : ''} />
+                                min="0" />
                         </div>
-                        <div class="flex-1 ${isDeleted ? 'opacity-50' : ''}">
+                        <div class="flex-1">
                             <label class="block text-sm font-medium text-gray-700">Price</label>
                             <input type="number"
                                 name="ProductItemUpdates[${index}].Price"
                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
                                 value="${item.price}"
-                                min="0"
-                                ${isDeleted ? 'disabled' : ''} />
+                                min="0" />
                         </div>
-                        <!-- Nút Delete hoặc Recover ở cuối hàng, không bị mờ -->
                         <div class="flex items-center justify-center">
-                            <button class="${isDeleted ? 'text-blue-600' : 'text-red-600'} ${isLastItem && !isDeleted ? 'cursor-not-allowed opacity-50' : ''}"
-                                onclick="${isDeleted ? `recoverProductItem(${index})` : `deleteProductItem(${index})`}"
-                                ${isLastItem && !isDeleted ? 'disabled' : ''}>
-                                <i class="fas ${isDeleted ? 'fa-undo' : 'fa-trash-alt'}"></i>
-                                ${isDeleted ? 'Recover' : 'Delete'}
+                            <button class="text-red-600 ${isLastItem ? 'cursor-not-allowed opacity-50' : ''}"
+                                onclick="${isLastItem ? 'return false;' : `deleteProductItem(${index})`}">
+                                <i class="fas fa-trash-alt"></i>
+                                Delete
                             </button>
                         </div>
                     </div>
@@ -1388,74 +1695,6 @@
                 container.appendChild(itemDiv);
             });
         }
-
-        async function recoverProductItem(index) {
-            const itemId = editProductState.productItems[index].id;
-
-            try {
-                const response = await fetch(`${apiBaseUrl}/api/productitem/restore/${itemId}`, {
-                    method: 'PATCH',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${authToken}`,
-                        'RequestVerificationToken': requestVerificationToken
-                    }
-                });
-
-                if (response.ok) {
-                    // Cập nhật trạng thái của item trong danh sách sau khi phục hồi thành công
-                    editProductState.productItems[index].deletedBy = null;
-                    editProductState.productItems[index].deletedTime = null;
-
-                    // Hiển thị lại danh sách để phản ánh sự thay đổi
-                    populateProductItems(editProductState.productItems);
-                } else {
-                    console.error(`Failed to recover item: ${response.statusText}`);
-                }
-            } catch (error) {
-                console.error('Error:', error);
-            }
-        }
-
-        async function deleteProductItem(index) {
-            const productItem = editProductState.productItems[index];
-            const productItemId = productItem.id;
-
-            try {
-                // Gọi API DELETE ngay khi ấn nút Delete
-                const response = await fetch(`${apiBaseUrl}/api/productitem/${productItemId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${authToken}`, // Thêm token nếu cần
-                        'RequestVerificationToken': requestVerificationToken
-                    }
-                });
-
-                if (!response.ok) {
-                    throw new Error(`Failed to delete ProductItem with ID ${productItemId}`);
-                }
-
-                console.log(`Successfully deleted ProductItem with ID ${productItemId}`);
-
-                // Cập nhật trạng thái UI để phản ánh việc xóa thành công
-                const itemDiv = document.querySelectorAll('.product-item')[index];
-                itemDiv.classList.add('bg-gray-100'); // Thêm nền xám cho item đã xóa
-                itemDiv.querySelector('button').disabled = true; // Vô hiệu hóa nút xóa (để tránh nhấn lại)
-                itemDiv.querySelector('input[name^="ProductItemUpdates"]').disabled = true; // Vô hiệu hóa các input trong item
-
-                // Đánh dấu sản phẩm là đã xóa
-                productItem.deletedBy = true;
-                productItem.deletedTime = new Date().toISOString();
-
-                // Hiển thị lại danh sách để phản ánh sự thay đổi
-                populateProductItems(editProductState.productItems);
-
-            } catch (error) {
-                console.error(error.message);
-            }
-        }
-
 
         document.getElementById('saveProductItemsButton').addEventListener('click', async () => {
             const productItemsContainer = document.getElementById('productItemsContainer');
@@ -1508,6 +1747,54 @@
             alert('Product items update completed.');
         });
 
+        async function deleteProductItem(index) {
+            // Confirm before proceeding with delete
+            const confirmed = confirm("Are you sure you want to delete this product item?");
+            if (!confirmed) {
+                return; // Exit if the user does not confirm
+            }
+
+            const productItem = editProductState.productItems[index];
+            const productItemId = productItem.id;
+
+            try {
+                // Gọi API DELETE ngay khi ấn nút Delete
+                const response = await fetch(`${apiBaseUrl}/api/productitem/${productItemId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`, // Thêm token nếu cần
+                        'RequestVerificationToken': requestVerificationToken
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Failed to delete ProductItem with ID ${productItemId}`);
+                }
+
+                console.log(`Successfully deleted ProductItem with ID ${productItemId}`);
+
+                // Cập nhật trạng thái UI để phản ánh việc xóa thành công
+                const itemDiv = document.querySelectorAll('.product-item')[index];
+                itemDiv.classList.add('bg-gray-100'); // Thêm nền xám cho item đã xóa
+                itemDiv.querySelector('button').disabled = true; // Vô hiệu hóa nút xóa (để tránh nhấn lại)
+                itemDiv.querySelector('input[name^="ProductItemUpdates"]').disabled = true; // Vô hiệu hóa các input trong item
+
+                // Đánh dấu sản phẩm là đã xóa
+                productItem.deletedBy = true;
+                productItem.deletedTime = new Date().toISOString();
+
+                // Remove the deleted product item from the list
+                editProductState.productItems.splice(index, 1);
+
+                // Hiển thị lại danh sách để phản ánh sự thay đổi
+                populateProductItems(editProductState.productItems);
+
+            } catch (error) {
+                console.error(error.message);
+            }
+        }
+
         function populateEditForm(product) {
             if (!product) return;
             document.getElementById('editProductId').value = product.id;
@@ -1535,7 +1822,19 @@
             const modal = document.getElementById('editProductModal');
             modal.classList.add('hidden');
             modal.classList.remove('flex');
+            combinations = [];
 
+            // Clear the container holding the new variations
+            const newVariationsContainer = document.getElementById('newVariationsContainerForUpdate');
+            if (newVariationsContainer) {
+                newVariationsContainer.innerHTML = '';
+            }
+
+            // Clear the container holding the variation combinations
+            const combinationContainer = document.getElementById('variationCombinationContainerForUpdate');
+            if (combinationContainer) {
+                combinationContainer.innerHTML = '';
+            }
             // Clear tất cả các trường input trong form
             const form = modal.querySelector('form');
             form.reset(); // Reset tất cả các trường trong form

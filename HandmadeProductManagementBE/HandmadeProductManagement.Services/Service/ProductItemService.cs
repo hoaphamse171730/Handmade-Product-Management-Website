@@ -83,25 +83,26 @@ namespace HandmadeProductManagement.Services.Service
             {
                 var variationOptionIds = combination.VariationOptionIds.Distinct().ToList();
 
-                // Step 7.1: Ensure that no two variation options in the combination come from the same variation
-                var variationIds = await _unitOfWork.GetRepository<VariationOption>().Entities
+                // Step 7.1: Ensure that no two variation options in the combination have the same variation name
+                var variationNames = await _unitOfWork.GetRepository<VariationOption>().Entities
                     .Where(vo => variationOptionIds.Contains(vo.Id))
-                    .Select(vo => vo.VariationId)
+                    .Select(vo => vo.Variation.Name) // Assuming 'Name' is the property for variation name
                     .Distinct()
                     .ToListAsync();
 
-                if (variationOptionIds.Count != variationIds.Count)
+                if (variationOptionIds.Count != variationNames.Count)
                 {
                     throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidCombination);
                 }
 
-                // Step 7.2: Ensure that the new options are fully combined with all other existing options
+                // Step 7.2: Ensure that new options complete all other existing options by unique variation names
                 foreach (var existingVariation in existingVariations)
                 {
-                    if (variationIds.Contains(existingVariation.Id)) continue;
+                    // Skip if the existing variation is already covered by the combination
+                    if (variationNames.Contains(existingVariation.Name)) continue;
 
-                    var missingVariationOptions = existingVariation.Options.Select(opt => opt.Id).ToList();
-                    if (!variationOptionIds.Any(id => missingVariationOptions.Contains(id)))
+                    var missingVariationOptions = existingVariation.Options?.Select(opt => opt.Id).ToList();
+                    if (!variationOptionIds.Any(id => missingVariationOptions!.Contains(id)))
                     {
                         throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageIncompleteCombinations);
                     }
