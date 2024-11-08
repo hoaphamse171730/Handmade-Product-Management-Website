@@ -144,8 +144,7 @@ namespace UI.Pages.Review
             try
             {
                 var response = await _apiResponseHelper.PutAsync<bool>(
-                    $"{Constants.ApiBaseUrl}/api/reply/{replyId}?content={Uri.EscapeDataString(content)}",
-                    null
+                    $"{Constants.ApiBaseUrl}/api/reply/{replyId}?content={Uri.EscapeDataString(content)}"
                 );
 
                 if (response.StatusCode == StatusCodeHelper.OK)

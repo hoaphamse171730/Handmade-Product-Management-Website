@@ -99,8 +99,9 @@ namespace HandmadeProductManagementAPI.Controllers
             try
             {
                 var updatedReply = await _replyService.UpdateAsync(replyId, Guid.Parse(userId), replyModel);
-                var response = new BaseResponse<ReplyModel>
+                var response = new BaseResponse<bool>
                 {
+                    Data = true,
                     Code = "Success",
                     StatusCode = StatusCodeHelper.OK,
                     Message = "Reply updated successfully."
