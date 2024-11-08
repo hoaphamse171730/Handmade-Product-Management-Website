@@ -6,5 +6,4 @@
         public string ShopName { get; set; }
         public List<CartItemDto> CartItems { get; set; } = new List<CartItemDto>();
     }
-
 }

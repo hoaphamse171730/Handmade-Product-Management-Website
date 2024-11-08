@@ -1,8 +1,10 @@
-﻿namespace HandmadeProductManagement.ModelViews.CartItemModelViews
+﻿using Newtonsoft.Json;
+
+namespace HandmadeProductManagement.ModelViews.CartItemModelViews
 {
     public class CartItemForCreationDto
     {
         public string ProductItemId { get; set; }
         public int ProductQuantity { get; set; }
-    }
+    }   
 }
