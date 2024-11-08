@@ -86,7 +86,7 @@ namespace HandmadeProductManagement.Services.Service
                 // Step 7.1: Ensure that no two variation options in the combination have the same variation name
                 var variationNames = await _unitOfWork.GetRepository<VariationOption>().Entities
                     .Where(vo => variationOptionIds.Contains(vo.Id))
-                    .Select(vo => vo.Variation.Name) // Assuming 'Name' is the property for variation name
+                    .Select(vo => vo.Variation!.Name.ToLower()) // Convert to lowercase for case-insensitive comparison
                     .Distinct()
                     .ToListAsync();
 
@@ -98,8 +98,11 @@ namespace HandmadeProductManagement.Services.Service
                 // Step 7.2: Ensure that new options complete all other existing options by unique variation names
                 foreach (var existingVariation in existingVariations)
                 {
+                    // Convert the existing variation name to lowercase for case-insensitive comparison
+                    var existingVariationName = existingVariation.Name.ToLower();
+
                     // Skip if the existing variation is already covered by the combination
-                    if (variationNames.Contains(existingVariation.Name)) continue;
+                    if (variationNames.Contains(existingVariationName)) continue;
 
                     var missingVariationOptions = existingVariation.Options?.Select(opt => opt.Id).ToList();
                     if (!variationOptionIds.Any(id => missingVariationOptions!.Contains(id)))

@@ -1415,7 +1415,7 @@
                 let combinationCounter = 0; // Declare a counter to generate unique IDs
 
                 combinedOptions.forEach((currentOption, currentIdx) => {
-                    if (currentOption.variationName === variationName) {
+                    if (currentOption.variationName.toLowerCase() === variationName.toLowerCase()) {
                         console.log("Skipping combination because variationName matches currentOption.variationName:", variationName);
                         return; // Skip if the variationName matches currentOption.variationName
                     }
