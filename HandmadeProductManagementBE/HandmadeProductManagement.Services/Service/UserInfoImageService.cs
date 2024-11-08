@@ -38,6 +38,9 @@ namespace HandmadeProductManagement.Services.Service
                 var fileName = $"{Guid.NewGuid()}_{file.FileName}";
                 var imageUrl = await uploadImageService.UploadFileAsync(stream, fileName);
 
+                // Cập nhật AvatarUrl của userinfo
+                userinfo.AvatarUrl = imageUrl;
+
                 var userInfoImage = new UserInfoImage
                 {
                     Url = imageUrl,
@@ -45,11 +48,15 @@ namespace HandmadeProductManagement.Services.Service
                 };
 
                 await _unitOfWork.GetRepository<UserInfoImage>().InsertAsync(userInfoImage);
+
+                // Cập nhật thay đổi userinfo
+                _unitOfWork.GetRepository<UserInfo>().Update(userinfo);
                 await _unitOfWork.SaveAsync();
             }
 
             return true;
         }
+
         public async Task<bool> DeleteUserInfoImage(string ImageId)
         {
             var userInfoImage = await _unitOfWork.GetRepository<UserInfoImage>()

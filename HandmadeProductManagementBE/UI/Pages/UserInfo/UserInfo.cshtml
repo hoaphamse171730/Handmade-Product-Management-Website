@@ -12,13 +12,17 @@
             <div class="flex flex-col items-center mb-6">
                 @if (!string.IsNullOrEmpty(Model.userInfoDto.AvatarUrl))
                 {
-                    <img src="@Model.userInfoDto.AvatarUrl" alt="User Avatar" class="w-24 h-24 rounded-full shadow-md">
+                    <a href="/UserInfo/UserInfo">
+                        <img src="@Model.userInfoDto.AvatarUrl" alt="User Avatar" class="w-24 h-24 rounded-full shadow-md cursor-pointer">
+                    </a>
                 }
                 else
                 {
-                    <div class="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 shadow-md">
-                        <span>No Avatar</span>
-                    </div>
+                    <a href="/UserInfo/UserInfo">
+                        <div class="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 shadow-md cursor-pointer">
+                            <span>No Avatar</span>
+                        </div>
+                    </a>
                 }
             </div>
 
