@@ -81,17 +81,26 @@ namespace UI.Pages.ProductDetail
                                 Name = option.Value
                             })
                             .ToList();
-
-                        return new VariationWithOptionsDto
+                        // Chỉ thêm vào danh sách nếu variation có ít nhất một option phù hợp
+                        if (filteredOptions.Any())
                         {
-                            Id = variation.Id,
-                            Name = variation.Name,
-                            Options = filteredOptions
-                        };
+                            return new VariationWithOptionsDto
+                            {
+                                Id = variation.Id,
+                                Name = variation.Name,
+                                Options = filteredOptions
+                            };
+                        }
+                        else
+                        {
+                            return null; // Trả về null nếu không có option nào khớp
+                        }
                     });
 
                     // Chờ tất cả các tác vụ hoàn thành
-                    variationsWithOptions = (await Task.WhenAll(tasks)).ToList();
+                    variationsWithOptions = (await Task.WhenAll(tasks))
+                        .Where(variation => variation != null)
+                        .ToList();
 
                     // Gán danh sách variationsWithOptions cho thuộc tính VariationOptions
                     VariationOptions = variationsWithOptions;

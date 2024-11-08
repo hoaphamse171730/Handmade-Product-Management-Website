@@ -149,6 +149,42 @@ else
     <p>No products found matching your criteria.</p>
 }
 
+<!-- Swiper for Top Products -->
+
+<script>
+
+    var sellingSwiper = new Swiper('.selling-products-swiper', {
+        slidesPerView: 1,
+        spaceBetween: 30,
+        loop: true,
+        pagination: {
+            el: '.selling-products-swiper .swiper-pagination',
+            clickable: true,
+        },
+        navigation: {
+            nextEl: '.selling-products-swiper .swiper-button-next',
+            prevEl: '.selling-products-swiper .swiper-button-prev',
+        },
+    });
+</script>
+
+<!-- Swiper for New Products -->
+<script>
+    var newProductsSwiper = new Swiper('.new-products-swiper', {
+        slidesPerView: 1,
+        spaceBetween: 30,
+        loop: true,
+        pagination: {
+            el: '.new-products-swiper .swiper-pagination',
+            clickable: true,
+        },
+        navigation: {
+            nextEl: '.new-products-swiper .swiper-button-next',
+            prevEl: '.new-products-swiper .swiper-button-prev',
+        },
+    });
+</script>
+
 <script>
     document.getElementById('sortByPrice').addEventListener('change', function () {
         if (this.checked) {
