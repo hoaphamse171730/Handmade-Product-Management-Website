@@ -14,6 +14,5 @@ namespace HandmadeProductManagement.ModelViews.ProductModelViews
         public string? ShopId { get; set; } = null;
         public List<VariationForProductCreationDto> Variations { get; set; } = [];
         public List<VariationCombinationDto> VariationCombinations { get; set; } = [];
-        public IList<IFormFile> ProductImages { get; set; } = new List<IFormFile>();
     }
 }
