@@ -90,14 +90,6 @@ namespace HandmadeProductManagement.Services.Service
                 await _unitOfWork.GetRepository<Product>().InsertAsync(productEntity);
                 await _unitOfWork.SaveAsync();
 
-                if (productDto.ProductImages != null && productDto.ProductImages.Count > 0)
-                {
-                    foreach (var image in productDto.ProductImages)
-                    {
-                        await _productImageService.UploadProductImage(image, productEntity.Id);
-                    }
-                }
-
                 // Step 7: Validate if each Variation exists and if its ID is a valid GUID
                 foreach (var variation in productDto.Variations)
                 {
