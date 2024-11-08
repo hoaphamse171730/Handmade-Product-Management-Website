@@ -1,8 +1,10 @@
-﻿using HandmadeProductManagement.Contract.Repositories.Entity;
+﻿using Azure;
+using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Common;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.Core.Store;
+using HandmadeProductManagement.ModelViews.CartItemModelViews;
 using HandmadeProductManagement.ModelViews.OrderDetailModelViews;
 using HandmadeProductManagement.ModelViews.ProductDetailModelViews;
 using HandmadeProductManagement.ModelViews.ProductModelViews;
@@ -14,6 +16,8 @@ using HandmadeProductManagement.ModelViews.VariationOptionModelViews;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Reflection.Metadata;
+using UI.Pages.Cart;
+using static Google.Apis.Requests.BatchRequest;
 
 namespace UI.Pages.ProductDetail
 {
@@ -28,6 +32,7 @@ namespace UI.Pages.ProductDetail
         public string? ErrorMessage { get; set; }
         public string? ErrorDetail { get; set; }
         public ProductDetailResponseModel? productDetail { get; set; }
+        public CartItemForCreationDto? cart { get;set; }
         public IList<VariationDto> Variations { get; set; } = new List<VariationDto>();
         public IList<VariationWithOptionsDto> VariationOptions { get; set; } = new List<VariationWithOptionsDto>();
         public IList<ReviewModel> Reviews { get; set; } = new List<ReviewModel>();
@@ -65,15 +70,23 @@ namespace UI.Pages.ProductDetail
                         // Gọi API để lấy variationOptions cho mỗi variation
                         var optionResponse = await _apiResponseHelper.GetAsync<IList<VariationOptionDto>>($"{Constants.ApiBaseUrl}/api/variationoption/variation/{variation.Id}");
 
+                        // Lọc các options chỉ lấy những options thực sự tồn tại trong productItems
+                        var filteredOptions = optionResponse.Data
+                            .Where(option => productDetail.ProductItems
+                                .Any(item => item.Configurations
+                                    .Any(config => config.VariationName == variation.Name && config.OptionName == option.Value)))
+                            .Select(option => new OptionsDto
+                            {
+                                Id = option.Id,
+                                Name = option.Value
+                            })
+                            .ToList();
+
                         return new VariationWithOptionsDto
                         {
                             Id = variation.Id,
                             Name = variation.Name,
-                            Options = optionResponse.Data?.Select(option => new OptionsDto
-                            {
-                                Id = option.Id,
-                                Name = option.Value
-                            }).ToList() // Chuyển đổi danh sách VariationOptionDto thành danh sách OptionsDto
+                            Options = filteredOptions
                         };
                     });
 
@@ -129,5 +142,55 @@ namespace UI.Pages.ProductDetail
             }
             return Page();
         }
+
+        // Nhận ProductId từ chuỗi truy vấn
+        [BindProperty(SupportsGet = true)]
+        public string Id { get; set; }
+
+        public List<CartItemGroupDto> cartItemGroups { get; set; } = new List<CartItemGroupDto>();
+        [BindProperty]
+        public CartItemForCreationDto CartItem { get; set; }
+        public async Task<IActionResult> OnPostAsync()
+        {
+            // Kiểm tra đầu vào
+            if (string.IsNullOrEmpty(CartItem.ProductItemId) || CartItem.ProductQuantity <= 0)
+            {
+                TempData["Message"] = "Please select a valid product and quantity.";
+                return RedirectToPage(new { id = Id });
+            }
+
+            var GETResponse = await _apiResponseHelper.GetAsync<List<CartItemGroupDto>>($"{Constants.ApiBaseUrl}/api/cartitem");
+
+            cartItemGroups = GETResponse.Data ?? new List<CartItemGroupDto>();
+
+            // Kiểm tra xem sản phẩm đã tồn tại trong giỏ hàng hay chưa
+            bool isProductInCart = cartItemGroups
+                .SelectMany(group => group.CartItems)
+                .Any(item => item.ProductItemId == CartItem.ProductItemId);
+
+            if (isProductInCart)
+            {
+                TempData["Message"] = "This product is already in the cart. Please update the quantity if needed.";
+                return RedirectToPage(new { id = Id });
+            }
+
+
+            // Gửi yêu cầu POST với đối tượng CartItem
+            var POSTResponse = await _apiResponseHelper.PostAsync<bool>($"{Constants.ApiBaseUrl}/api/cartitem", CartItem);
+            //var response = await _apiHelper.PostAsync<bool>($"{Constants.ApiBaseUrl}/api/promotions", Promotion);
+
+
+            if (POSTResponse != null && POSTResponse.Data)
+            {
+                TempData["SuccessMessage"] = "Add successfully.";
+                return RedirectToPage(new { id = Id });
+            }
+            else
+            {
+                ModelState.AddModelError(string.Empty, POSTResponse?.Message ?? "An error occurred while creating the promotion.");
+                return RedirectToPage(new { id = Id });
+            }
+        }
+
     }
 }
