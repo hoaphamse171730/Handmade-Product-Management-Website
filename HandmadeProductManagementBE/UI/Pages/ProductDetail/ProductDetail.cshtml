@@ -259,7 +259,8 @@
         <div class="space-y-2">
             <!-- Rating -->
             <div class="flex items-center space-x-2">
-                <span class="text-gray-700">Rating:</span>
+                <span class="mr-2 text-gray-700">Rating:</span>
+                @Model.Shop?.Rating
                 @for (int i = 1; i <= 5; i++)
                 {
                     <svg class="h-5 w-5 @(i <= Model.Shop?.Rating ? "text-yellow-500" : "text-gray-300")" fill="currentColor" viewBox="0 0 24 24">
