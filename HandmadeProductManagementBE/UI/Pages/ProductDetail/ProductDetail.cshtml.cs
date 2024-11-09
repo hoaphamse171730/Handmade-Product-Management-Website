@@ -40,6 +40,7 @@ namespace UI.Pages.ProductDetail
         public int TotalPages { get; set; }
         public IList<UserResponseModel> Users { get; set; } = new List<UserResponseModel>();
         public IList<ShopResponseModel> Shops { get; set; } = new List<ShopResponseModel>();
+        public ShopResponseModel Shop { get; private set; } = new ShopResponseModel();
         public async Task<PageResult> OnGet(string id, int pageNumber = 1, int pageSize = 10)
         {
             string productId = id;
@@ -50,6 +51,8 @@ namespace UI.Pages.ProductDetail
 
                 // Gán thông tin sản phẩm cho thuộc tính productDetail
                 productDetail = response.Data;
+
+                Shop = await GetShopById(productDetail?.ShopId);
 
                 if (productDetail != null && productDetail.CategoryId != null)
                 {
@@ -70,18 +73,26 @@ namespace UI.Pages.ProductDetail
                         // Gọi API để lấy variationOptions cho mỗi variation
                         var optionResponse = await _apiResponseHelper.GetAsync<IList<VariationOptionDto>>($"{Constants.ApiBaseUrl}/api/variationoption/variation/{variation.Id}");
 
-                        // Lọc các options chỉ lấy những options thực sự tồn tại trong productItems
+                        // Lọc các options chỉ lấy những options thực sự tồn tại trong productItems và có thể tạo nên 1 productItem
                         var filteredOptions = optionResponse.Data
                             .Where(option => productDetail.ProductItems
                                 .Any(item => item.Configurations
-                                    .Any(config => config.VariationName == variation.Name && config.OptionName == option.Value)))
+                                    .Any(config =>
+                                        config.VariationName.Equals(variation.Name, StringComparison.OrdinalIgnoreCase) &&
+                                        config.OptionName.Equals(option.Value, StringComparison.OrdinalIgnoreCase)
+                                    )))
+
+                            // Group by option name to handle duplicates
+                            .GroupBy(option => option.Value, StringComparer.OrdinalIgnoreCase) // Group by option name to handle duplicates
+                            .Select(group => group.First()) // Select the first option in each group to avoid duplicates
                             .Select(option => new OptionsDto
                             {
                                 Id = option.Id,
                                 Name = option.Value
                             })
                             .ToList();
-                        // Chỉ thêm vào danh sách nếu variation có ít nhất một option phù hợp
+
+                        // Chỉ thêm vào danh sách nếu variation có ít nhất một option phù hợp và có thể tạo productItem
                         if (filteredOptions.Any())
                         {
                             return new VariationWithOptionsDto
@@ -93,13 +104,24 @@ namespace UI.Pages.ProductDetail
                         }
                         else
                         {
-                            return null; // Trả về null nếu không có option nào khớp
+                            return null; // Trả về null nếu không có option nào khớp và không thể tạo nên productItem
                         }
-                    });
+                    }).Where(task => task != null).ToList(); // Loại bỏ các null results từ task
 
                     // Chờ tất cả các tác vụ hoàn thành
-                    variationsWithOptions = (await Task.WhenAll(tasks))
+                    var variationsWithOptionsResults = (await Task.WhenAll(tasks))
                         .Where(variation => variation != null)
+                        .ToList();
+
+                    // Gộp các variation có cùng tên
+                    variationsWithOptions = variationsWithOptionsResults
+                        .GroupBy(v => v.Name, StringComparer.OrdinalIgnoreCase)
+                        .Select(group => new VariationWithOptionsDto
+                        {
+                            Name = group.Key,
+                            Id = group.First().Id, // Chọn ID của variation đầu tiên trong nhóm
+                            Options = group.SelectMany(v => v.Options).DistinctBy(o => o.Name).ToList() // Kết hợp options và loại bỏ trùng lặp
+                        })
                         .ToList();
 
                     // Gán danh sách variationsWithOptions cho thuộc tính VariationOptions
@@ -150,6 +172,15 @@ namespace UI.Pages.ProductDetail
                 ErrorMessage = "An unexpected error occurred.";
             }
             return Page();
+        }
+
+        private async Task<ShopResponseModel> GetShopById(string id)
+        {
+            var response = await _apiResponseHelper.GetAsync<ShopResponseModel>(Constants.ApiBaseUrl + $"/api/shop/{id}");
+
+            return response.StatusCode == StatusCodeHelper.OK && response.Data != null
+                ? response.Data
+                : new ShopResponseModel();
         }
 
         // Nhận ProductId từ chuỗi truy vấn

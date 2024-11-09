@@ -8,6 +8,7 @@
         public string CategoryId { get; set; }
         public string CategoryName { get; set; }
         public string ShopId { get; set; }
+        public string OwnerId { get; set; }
         public string ShopName { get; set; }
         public decimal Rating { get; set; }
         public string Status { get; set; }

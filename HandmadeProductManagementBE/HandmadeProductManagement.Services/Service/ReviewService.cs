@@ -68,14 +68,14 @@ namespace HandmadeProductManagement.Services.Service
                 Date = r.Date,
                 ProductId = r.ProductId,
                 UserId = r.UserId,
-                Reply = r.Reply == null ? null : new ReplyModel
+                Reply = r.Reply != null && r.Reply.DeletedTime == null ? new ReplyModel
                 {
                     Id = r.Reply.Id,
                     Content = r.Reply.Content,
                     Date = r.Reply.Date,
                     ReviewId = r.Reply.ReviewId,
                     ShopId = r.Reply.ShopId
-                }
+                } : null
             }).ToList();
         }
 
@@ -107,14 +107,14 @@ namespace HandmadeProductManagement.Services.Service
                 Date = r.Date,
                 ProductId = r.ProductId,
                 UserId = r.UserId,
-                Reply = r.Reply == null ? null : new ReplyModel
+                Reply = r.Reply != null && r.Reply.DeletedTime == null ? new ReplyModel
                 {
-                    Id = r.Reply.Id,
+                    Id = r.Reply!.Id,
                     Content = r.Reply.Content,
                     Date = r.Reply.Date,
                     ReviewId = r.Reply.ReviewId,
                     ShopId = r.Reply.ShopId
-                }
+                } : null
             }).ToList();
         }
 
@@ -139,14 +139,14 @@ namespace HandmadeProductManagement.Services.Service
                 Date = review.Date,
                 ProductId = review.ProductId,
                 UserId = review.UserId,
-                Reply = review.Reply == null ? null : new ReplyModel
+                Reply = review.Reply != null && review.Reply.DeletedTime == null ? new ReplyModel
                 {
-                    Id = review.Reply.Id,
+                    Id = review.Reply!.Id,
                     Content = review.Reply.Content,
                     Date = review.Reply.Date,
                     ReviewId = review.Reply.ReviewId,
                     ShopId = review.Reply.ShopId
-                }
+                } : null
             };
         }
 

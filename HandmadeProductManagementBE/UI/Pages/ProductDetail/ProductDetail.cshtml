@@ -1,5 +1,7 @@
 ﻿@page
 @using UI.Pages.Shared
+@using Microsoft.AspNetCore.Http
+@using System.IdentityModel.Tokens.Jwt
 @model UI.Pages.ProductDetail.ProductDetailModel
 
 @{
@@ -7,6 +9,16 @@
     var productItems = Model.productDetail?.ProductItems;
     var message = TempData["Message"];
     var messageType = TempData["MessageType"];
+    string getUserId(string token)
+    {
+        var handler = new JwtSecurityTokenHandler();
+        var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
+        var userId = jsonToken?.Claims.FirstOrDefault(c => c.Type == "nameid")?.Value;
+
+        return userId;
+    }
+    var token = HttpContext.Session.GetString("Token");
+    var userId = token != null ? getUserId(token) : string.Empty;
 }
 
 <style>
@@ -35,12 +47,12 @@
 }
 
 <!-- Toast Container -->
-<div aria-live="polite" aria-atomic="true" class="fixed top-4 right-4 z-50 space-y-4">
+<div aria-live="polite" aria-atomic="true" class="fixed right-4 top-4 z-50 space-y-4">
     <!-- Hiển thị Toast thông báo lỗi nếu có trong TempData -->
     @if (TempData["Message"] != null)
     {
-        <div class="max-w-sm w-full bg-red-500 border-l-4 border-red-700 text-white p-4 rounded-lg shadow-lg transform transition-all duration-300 ease-in-out" role="alert">
-            <div class="flex justify-between items-start">
+        <div class="border-l-4 w-full max-w-sm transform rounded-lg border-red-700 bg-red-500 p-4 text-white shadow-lg transition-all duration-300 ease-in-out" role="alert">
+            <div class="flex items-start justify-between">
                 <span>@TempData["Message"]</span>
                 <button type="button" class="text-white hover:text-gray-200" onclick="this.parentElement.parentElement.remove()">✕</button>
             </div>
@@ -50,8 +62,8 @@
     <!-- Hiển thị Toast thông báo thành công nếu có trong TempData -->
     @if (TempData["SuccessMessage"] != null)
     {
-        <div class="max-w-sm w-full bg-green-500 border-l-4 border-green-700 text-white p-4 rounded-lg shadow-lg transform transition-all duration-300 ease-in-out" role="alert">
-            <div class="flex justify-between items-start">
+        <div class="border-l-4 w-full max-w-sm transform rounded-lg border-green-700 bg-green-500 p-4 text-white shadow-lg transition-all duration-300 ease-in-out" role="alert">
+            <div class="flex items-start justify-between">
                 <span>@TempData["SuccessMessage"]</span>
                 <button type="button" class="text-white hover:text-gray-200" onclick="this.parentElement.parentElement.remove()">✕</button>
             </div>
@@ -60,47 +72,61 @@
 </div>
 
 
-<div class="flex flex-wrap p-6">
+<div class="mb-20 flex flex-wrap p-6">
     <!-- Left side: Product Images -->
-    <div class="z-10 fixed right-0 rounded-full bottom-0 mr-5 mb-5 sm:mr-6 sm:mb-6 shadow-2xl">
-        <div class="flex items-center justify-center bg-teal-500 rounded-full opacity-75 p-3 sm:p-4">
-            <svg class="fill-current text-gray-200 h-6 w-6 sm:h-10 sm:w-10" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+    <div class="z-10 fixed bottom-0 right-0 mb-5 mr-5 rounded-full shadow-2xl sm:mr-6 sm:mb-6">
+        <div class="flex items-center justify-center rounded-full bg-teal-500 p-3 opacity-75 sm:p-4">
+            <svg class="h-6 w-6 fill-current text-gray-200 sm:h-10 sm:w-10" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                 <path d="M2 5a2 2 0 012-2h7a2 2 0 012 2v4a2 2 0 01-2 2H9l-3 3v-3H4a2 2 0 01-2-2V5z" />
                 <path d="M15 7v2a4 4 0 01-4 4H9.828l-1.766 1.767c.28.149.599.233.938.233h2l3 3v-3h2a2 2 0 002-2V9a2 2 0 00-2-2h-1z" />
             </svg>
         </div>
         <div class="absolute left-0 top-0 ml-3 mt-3 sm:ml-4 sm:mt-4">
             <div class="flex h-3 w-3">
-                <span class="animate-ping absolute inline-flex h-2 w-2 sm:h-full sm:w-full rounded-full bg-pink-400 opacity-75"></span>
-                <span class="relative inline-flex rounded-full h-2 w-2 sm:h-3 sm:w-3 bg-pink-500"></span>
+                <span class="absolute inline-flex h-2 w-2 animate-ping rounded-full bg-pink-400 opacity-75 sm:h-full sm:w-full"></span>
+                <span class="relative inline-flex h-2 w-2 rounded-full bg-pink-500 sm:h-3 sm:w-3"></span>
             </div>
         </div>
     </div>
 
-    <div class="w-full md:w-1/2 p-4">
-        <div class="mb-4">
-            <!-- Large Image -->
-            <img src="@Model.productDetail?.ProductImageUrls.FirstOrDefault()" alt="Product Image" class="mx-auto h-[550px] w-[600px] rounded-lg object-cover shadow-md">
+    <div class="w-full p-4 md:w-1/2">
+        <!-- Large Image Swiper with Slide Effect -->
+        <div class="swiper-container main-image-swiper relative mb-4 overflow-hidden">
+            <div class="swiper-wrapper">
+                @if (Model.productDetail?.ProductImageUrls != null)
+                {
+                    @foreach (var imageUrl in Model.productDetail.ProductImageUrls)
+                    {
+                        <div class="swiper-slide">
+                            <img src="@imageUrl" alt="Product Image" class="mx-auto h-[550px] w-[600px] rounded-lg object-cover shadow-md">
+                        </div>
+                    }
+                }
+            </div>
+            <!-- Swiper Navigation Buttons Positioned Inside Large Image -->
+            <div class="swiper-button-next custom-nav-button right-4"></div>
+            <div class="swiper-button-prev custom-nav-button left-4"></div>
         </div>
-        <div class="flex space-x-2">
-            <!-- Small Images -->
+
+        <!-- Small Images as Pagination -->
+        <div class="swiper-pagination custom-pagination mt-4 flex space-x-2">
             @if (Model.productDetail?.ProductImageUrls != null)
             {
-                @for (int i = 1; i < Math.Min(4, Model.productDetail.ProductImageUrls.Count); i++)
+                @for (int i = 0; i < Model.productDetail.ProductImageUrls.Count; i++)
                 {
                     <img src="@Model.productDetail.ProductImageUrls[i]"
                          alt="Product Thumbnail"
-                         class="h-20 w-1/5 cursor-pointer rounded-lg object-cover shadow-md">
+                         class="thumbnail-pagination h-20 w-20 cursor-pointer rounded-lg object-cover shadow-md"
+                         data-index="@i">
                 }
             }
-           
         </div>
     </div>
 
     <!-- Right side: Product Details -->
-    <div class="w-full md:w-1/2 p-4 space-y-6">
+    <div class="w-full space-y-6 p-4 md:w-1/2">
         <a href="javascript:void(0);" onclick="viewProduct()"
-           class="flex items-center px-4 py-2 text-gray-600 bg-gray-200 rounded-lg hover:text-gray-800 font-medium transition duration-300">
+           class="flex items-center rounded-lg bg-gray-200 px-4 py-2 font-medium text-gray-600 transition duration-300 hover:text-gray-800">
             <i class="fa fa-arrow-left mr-2"></i> Back to Products
         </a>
         <!-- Product Name -->
@@ -192,22 +218,65 @@
             <div class="container mx-auto p-4">
                 <div class="flex items-center space-x-4">
                     <h2 class="text-lg font-semibold text-gray-800">Quantity</h2>
-                    <div class="flex items-center border border-gray-300 rounded-lg">
-                        <button type="button" onclick="decreaseQuantity()" class="px-4 py-2 text-gray-700 hover:bg-gray-200 rounded-l-lg">-</button>
-                        <input id="quantityInput" asp-for="CartItem.ProductQuantity" type="number" min="1" max="50" class="w-16 px-4 py-2 text-center text-gray-800" />
-                        <button type="button" onclick="increaseQuantity()" class="px-4 py-2 text-gray-700 hover:bg-gray-200 rounded-r-lg">+</button>
+                    <div class="flex items-center rounded-lg border border-gray-300">
+                        <button type="button" onclick="decreaseQuantity()" class="rounded-l-lg px-4 py-2 text-gray-700 hover:bg-gray-200">-</button>
+                        <input id="quantityInput" asp-for="CartItem.ProductQuantity" type="number" min="1" max="50" class="w-16 px-4 py-2 text-center text-gray-800" value= "1"/>
+                        <button type="button" onclick="increaseQuantity()" class="rounded-r-lg px-4 py-2 text-gray-700 hover:bg-gray-200">+</button>
                     </div>
                 </div>
             </div>
 
-            <div class="flex space-x-4">
-                <button type="submit" class="flex-1 rounded-lg bg-blue-500 px-4 py-3 text-white hover:bg-blue-600">
-                    <i class="fa fa-shopping-cart mr-2"></i> Add to Cart
+            <div class="mb-10 flex space-x-4">
+                <!-- Nút "Add to Cart" với điều kiện disable và thay đổi text -->
+                <button type="submit"
+                        class="flex-1 rounded-lg bg-blue-500 px-4 py-3 text-white hover:bg-blue-600
+@(userId == Model.productDetail?.OwnerId ? "opacity-50 cursor-not-allowed pointer-events-none" : "")">
+                    @if (userId == Model.productDetail?.OwnerId)
+                    {
+                        <span>You cannot add your own product</span>
+                    }
+                    else
+                    {
+                        <span><i class="fa fa-shopping-cart mr-2"></i> Add to Cart</span>
+                    }
                 </button>
             </div>
         </form>
+        </div>
     </div>
-</div>
+
+<!-- Shop Information Section -->
+<a href="/Shop/Index?id=@Model.Shop.Id" class="mb-10 block rounded-lg border border-gray-300 bg-gray-50 p-4 transition duration-200 hover:bg-gray-200">
+    <div class="flex items-center space-x-4">
+        <!-- Large Shop Icon -->
+        <i class="fa fa-store text-5xl text-gray-800"></i>
+        <!-- Shop Information -->
+        <div>
+            <div class="text-lg font-semibold text-gray-800">@Model.Shop?.Name</div>
+            <div class="text-sm text-gray-600">@Model.Shop?.Description</div>
+        </div>
+        <!-- Rating, Product Count, and Joined Column -->
+        <div class="space-y-2">
+            <!-- Rating -->
+            <div class="flex items-center space-x-2">
+                <span class="mr-2 text-gray-700">Rating:</span>
+                @Model.Shop?.Rating
+                @for (int i = 1; i <= 5; i++)
+                {
+                    <svg class="h-5 w-5 @(i <= Model.Shop?.Rating ? "text-yellow-500" : "text-gray-300")" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 .587l3.668 7.568 8.235 1.199-5.964 5.222L19.339 24 12 20.812 4.661 24l1.331-9.424-5.964-5.222 8.235-1.199L12 .587z" />
+                    </svg>
+                }
+            </div>
+
+            <!-- Product Count -->
+            <div class="text-sm text-gray-600">Product Count: @Model.Shop?.ProductCount</div>
+
+            <!-- Joined Time Ago -->
+            <div class="text-sm text-gray-500">Joined: @Model.Shop?.JoinedTimeAgo</div>
+        </div>
+    </div>
+</a>
 
 <h1 class="mb-4 text-center text-4xl font-bold text-red-600">Product Ratings</h1>
 
@@ -261,6 +330,27 @@
 
 @section Scripts{
     <partial name="_ValidationScriptsPartial" />
+    <!-- Swiper Initialization Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var mainImageSwiper = new Swiper('.main-image-swiper', {
+                slidesPerView: 1,
+                spaceBetween: 0,
+                centeredSlides: true,
+                navigation: {
+                    nextEl: '.swiper-button-next',
+                    prevEl: '.swiper-button-prev',
+                },
+            });
+
+            // Add click event to thumbnails to act as pagination
+            document.querySelectorAll('.thumbnail-pagination').forEach((thumbnail, index) => {
+                thumbnail.addEventListener('click', () => {
+                    mainImageSwiper.slideTo(index);
+                });
+            });
+        });
+    </script>
     <script>
         let quantity = 1; // Biến để lưu số lượng
         let maxQuantity = 50; // Số lượng tối đa của productItem
@@ -351,30 +441,33 @@
             const productItemIdElement = document.getElementById("productItemId");
 
             if (matchingProduct) {
-
                 // Cập nhật giá trị id
                 productItemIdElement.value = matchingProduct.id;
-                // Cập nhật nội dung với ID
-                productItemIdElement.textContent = `Product Item ID: ${matchingProduct.id}`;
-                // Cập nhật số lượng tối đa
+                console.log(matchingProduct)
                 remainingQuantityElement.textContent = `Remaining Quantity: ${matchingProduct.quantityInStock}`;
 
                 // Kiểm tra nếu có discountedPrice
                 if (matchingProduct.discountedPrice) {
-                    // Hiển thị giá gốc dạng gạch ngang và giá giảm
                     priceElement.innerHTML = `<s>${formatCurrency(matchingProduct.price)}</s>`;
                     discountedPriceElement.textContent = `${formatCurrency(matchingProduct.discountedPrice)}`;
-
                 } else {
-                    // Hiển thị giá gốc khi không có giá giảm
                     priceElement.textContent = `${formatCurrency(matchingProduct.price)}`;
                     discountedPriceElement.textContent = ""; // Ẩn giá giảm
                 }
                 maxQuantity = matchingProduct.quantityInStock;
-                quantity = Math.min(quantity, maxQuantity); // Đảm bảo số lượng không vượt quá số lượng tối đa
-                updateQuantityDisplay(); // Cập nhật hiển thị số lượng
+                quantity = Math.min(quantity, maxQuantity);
+                updateQuantityDisplay();
+            } else {
+                // Không tìm thấy sản phẩm khớp => Clear giá, số lượng, và ID sản phẩm
+                productItemIdElement.value = ""; // Clear ID
+                priceElement.textContent = "N/A"; // Clear giá hiển thị
+                discountedPriceElement.textContent = ""; // Clear giá giảm
+                remainingQuantityElement.textContent = "Remaining Quantity: N/A"; // Clear số lượng
+                quantity = 1; // Đặt lại số lượng về mặc định
+                updateQuantityDisplay();
             }
         }
+
 
         // Tự động ẩn các Toast sau 3 giây
         document.addEventListener('DOMContentLoaded', function () {

@@ -15,7 +15,14 @@
         <div class="w-1/2 pl-6">
             <div class="mb-4 flex items-center">
                 <h2 class="mr-2 text-xl font-semibold">Rating:</h2>
-                <p>@Model.Shop.Rating</p>
+                <p class="flex items-center">
+                    @Model.Shop.Rating
+                    <div class="ml-2"></div>
+                    @for (int i = 1; i <= 5; i++)
+                    {
+                        <i class="fa fa-star @(i <= Model.Shop.Rating ? "text-yellow-500" : "text-gray-300")"></i>
+                    }
+                </p>
             </div>
 
             <div class="mb-4 flex items-center">

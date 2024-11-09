@@ -181,8 +181,8 @@ namespace HandmadeProductManagement.Services.Service
                                                             CategoryName = p.Category != null ? p.Category.Name : "",
                                                             Price = p.ProductItems.FirstOrDefault() != null ? p.ProductItems.FirstOrDefault()!.Price : 0,
                                                             ImageUrl = p.ProductImages.Any()
-                                                            ? p.ProductImages.OrderByDescending(pi => pi.CreatedTime).First().Url
-                                                            : string.Empty,
+                                                                    ? p.ProductImages.OrderBy(pi => pi.CreatedTime).First().Url  
+                                                                    : string.Empty,
                                                             SoldCount = p.SoldCount
                                                       })
                                                       .ToListAsync();
@@ -206,9 +206,9 @@ namespace HandmadeProductManagement.Services.Service
                                                     Name = p.Name,
                                                     CategoryName = p.Category != null ? p.Category.Name : "",
                                                     Price = p.ProductItems.FirstOrDefault() != null ? p.ProductItems.FirstOrDefault()!.Price : 0,
-                                                    ImageUrl = p.ProductImages.Any()
-                                                    ? p.ProductImages.OrderByDescending(pi => pi.CreatedTime).First().Url
-                                                    : string.Empty,
+                                                   ImageUrl = p.ProductImages.Any()
+                                                                    ? p.ProductImages.OrderBy(pi => pi.CreatedTime).First().Url
+                                                                    : string.Empty,
                                                })
                                               .ToListAsync();
             return topProducts;

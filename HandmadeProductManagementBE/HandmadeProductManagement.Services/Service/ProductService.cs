@@ -267,9 +267,12 @@ namespace HandmadeProductManagement.Services.Service
 
             searchFilter.ShopId = shop.Id;
 
-            return await SearchProductsAsync(searchFilter, pageNumber, pageSize);
-        }
+            // Search for products, but ensure they are sorted by CreatedTime in descending order for sellers
+            var productSearchVMs = await SearchProductsAsync(searchFilter, pageNumber, pageSize);
 
+            // After calling SearchProductsAsync, sort the results by CreatedTime descending (if not already sorted)
+            return productSearchVMs.OrderByDescending(p => p.CreatedTime).ToList();
+        }
 
         public async Task<IEnumerable<ProductSearchVM>> SearchProductsAsync(ProductSearchFilter searchFilter, int pageNumber, int pageSize)
         {
@@ -300,7 +303,7 @@ namespace HandmadeProductManagement.Services.Service
             }
 
             var query = _unitOfWork.GetRepository<Product>().Entities
-                                    .Include(p => p.ProductImages)
+                                    .Include(p => p.ProductImages.OrderBy(pi => pi.CreatedTime))
                                     .Include(p => p.ProductItems)
                                     .Where(p => !p.DeletedTime.HasValue || p.DeletedBy == null)
                                     .AsQueryable();
@@ -369,8 +372,11 @@ namespace HandmadeProductManagement.Services.Service
                     Rating = p.Rating,
                     Status = p.Status,
                     SoldCount = p.SoldCount,
-                    ProductImageUrl = p.ProductImages.FirstOrDefault() != null ? p.ProductImages.FirstOrDefault()!.Url : string.Empty,
-                    LowestPrice = p.ProductItems.Any() ? p.ProductItems.Min(pi => pi.Price) : 0
+                    ProductImageUrl = p.ProductImages.OrderBy(pi => pi.CreatedTime).FirstOrDefault() != null
+                                    ? p.ProductImages.OrderBy(pi => pi.CreatedTime).FirstOrDefault()!.Url
+                                    : string.Empty,
+                    LowestPrice = p.ProductItems.Any() ? p.ProductItems.Min(pi => pi.Price) : 0,
+                    CreatedTime = p.CreatedTime,
                 })
                 .ToListAsync();
 
@@ -662,7 +668,7 @@ namespace HandmadeProductManagement.Services.Service
                 .ThenInclude(p => p.ProductConfigurations)
                 .ThenInclude(p => p.VariationOption)
                 .ThenInclude(v => v!.Variation)
-                .FirstOrDefaultAsync(p => p.Id == productId)                
+                .FirstOrDefaultAsync(p => p.Id == productId)
                 ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageProductNotFound);
 
             var promotion = await _unitOfWork.GetRepository<Promotion>().Entities
@@ -675,38 +681,48 @@ namespace HandmadeProductManagement.Services.Service
                 Name = product.Name,
                 Description = product.Description ?? string.Empty,
                 CategoryId = product.CategoryId,
-                CategoryName = product.Category?.Name??"",
+                CategoryName = product.Category?.Name ?? "",
                 ShopId = product.ShopId,
-                ShopName = product.Shop?.Name??"",
+                OwnerId = product.CreatedBy!,
+                ShopName = product.Shop?.Name ?? "",
                 Rating = product.Rating,
                 Status = product.Status,
                 SoldCount = product.SoldCount,
-                ProductImageUrls = product.ProductImages.Select(pi => pi.Url).ToList(),
-                ProductItems = product.ProductItems.Select(pi => new ProductItemDetailModel
-                {
-                    Id = pi.Id,
-                    QuantityInStock = pi.QuantityInStock,
-                    Price = pi.Price,
-                    DiscountedPrice = promotion != null ? (int)(pi.Price * (1 - promotion.DiscountRate)) : null,
-                    Configurations = pi.ProductConfigurations.Select(pc => new ProductConfigurationDetailModel
+                ProductImageUrls = product.ProductImages
+                                            .OrderBy(pi => pi.CreatedTime)
+                                            .Select(pi => pi.Url)
+                                            .ToList(),
+                ProductItems = product.ProductItems
+                    .Where(pi => pi.DeletedBy == null && !pi.DeletedTime.HasValue) // Exclude deleted items
+                    .Select(pi => new ProductItemDetailModel
                     {
-                        VariationName = pc.VariationOption?.Variation?.Name??"",
-                        OptionName = pc.VariationOption?.Value??""
-                    }).ToList()
-                }).ToList(),
+                        Id = pi.Id,
+                        QuantityInStock = pi.QuantityInStock,
+                        Price = pi.Price,
+                        DiscountedPrice = promotion != null ? (int)(pi.Price * (1 - promotion.DiscountRate)) : null,
+                        Configurations = pi.ProductConfigurations.Select(pc => new ProductConfigurationDetailModel
+                        {
+                            VariationName = pc.VariationOption?.Variation?.Name ?? "",
+                            OptionName = pc.VariationOption?.Value ?? "",
+                            OptionId = pc.VariationOption?.Id ?? ""
+                        }).ToList(),
+                        DeletedBy = pi.DeletedBy,
+                        DeletedTime = pi.DeletedTime
+                    }).ToList(),
                 Promotion = promotion == null ? null : new PromotionDetailModel
-                    {
-                        Id = promotion.Id,
-                        Name = promotion.Name,
-                        Description = promotion.Description??"",
-                        DiscountRate = promotion.DiscountRate,
-                        StartDate = promotion.StartDate,
-                        EndDate = promotion.EndDate,
-                        Status = promotion.Status
-                    }
+                {
+                    Id = promotion.Id,
+                    Name = promotion.Name,
+                    Description = promotion.Description ?? "",
+                    DiscountRate = promotion.DiscountRate,
+                    StartDate = promotion.StartDate,
+                    EndDate = promotion.EndDate,
+                    Status = promotion.Status
+                }
             };
             return response;
         }
+
         public async Task<decimal> CalculateAverageRatingAsync(string productId)
         {
             if (string.IsNullOrWhiteSpace(productId))

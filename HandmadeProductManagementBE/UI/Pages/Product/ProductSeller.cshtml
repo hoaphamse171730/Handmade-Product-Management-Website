@@ -1,4 +1,5 @@
 ﻿@page
+@using HandmadeProductManagement.Core.Common
 @using UI.Pages.Shared
 @model UI.Pages.Product.ProductSellerModel
 @{
@@ -6,24 +7,39 @@
 }
 @Html.AntiForgeryToken()
 
-<h1 class="text-3xl font-bold mb-4">Product List</h1>
+<h1 class="mb-4 text-3xl font-bold">Product List</h1>
 @{
     var errorModel = new ErrorMessageModel
-            {
-                ErrorMessage = Model.ErrorMessage,
-                ErrorDetail = Model.ErrorDetail
-            };
+    {
+        ErrorMessage = Model.ErrorMessage,
+        ErrorDetail = Model.ErrorDetail
+    };
+
+    var token = HttpContext.Session.GetString("Token");
 }
 @if (!string.IsNullOrEmpty(Model.ErrorMessage))
 {
     <partial name="_ErrorMessage" model="errorModel" />
 }
 
+<script>
+    const apiBaseUrl = '@Constants.ApiBaseUrl';
+    var tokenFromRazor = '@token';
+
+    // Kiểm tra nếu token tồn tại và lưu vào localStorage
+    if (tokenFromRazor) {
+        localStorage.setItem('authToken', tokenFromRazor);
+    } else {
+        console.log("Token không tồn tại.");
+    }
+    const authToken = localStorage.getItem('authToken');
+    const requestVerificationToken = document.querySelector('input[name="__RequestVerificationToken"]').value;
+</script>
 
 <div class="search-filter">
-    <form method="get" class="flex space-x-4 items-center">
-        <input class="border border-gray-300 rounded-md p-2" type="text" name="Name" placeholder="Search by name" value="@Request.Query["Name"]" onchange="this.form.submit();" />
-        <select name="CategoryId" class="border border-gray-300 rounded-md p-2">
+    <form method="get" class="flex items-center space-x-4">
+        <input class="rounded-md border border-gray-300 p-2" type="text" name="Name" placeholder="Search by name" value="@Request.Query["Name"]" onchange="this.form.submit();" />
+        <select name="CategoryId" class="rounded-md border border-gray-300 p-2">
             <option value="">Select Category</option>
             @if (Model.Categories != null && Model.Categories.Any())
             {
@@ -45,7 +61,7 @@
             var selectedStatus = Request.Query["Status"].ToString();
         }
 
-        <select name="Status" class="border border-gray-300 rounded-md p-2">
+        <select name="Status" class="rounded-md border border-gray-300 p-2">
             @if (string.IsNullOrEmpty(selectedStatus))
             {
                 <option value="" selected>Select Status</option>
@@ -73,7 +89,7 @@
                 <option value="OutOfStock">Out Of Stock</option>
             }
         </select>
-        <input class="border border-gray-300 rounded-md p-2" type="number" name="MinRating" placeholder="Min Rating" min="0" max="5" value="@Request.Query["MinRating"]" />
+        <input class="rounded-md border border-gray-300 p-2" type="number" name="MinRating" placeholder="Min Rating" min="0" max="5" value="@Request.Query["MinRating"]" />
 
         <div class="flex items-center space-x-4">
             <label class="flex items-center">
@@ -97,45 +113,45 @@
             @(Request.Query["SortDescending"] == "true" ? "checked" : "") onchange="this.form.submit();" />
         </label>
 
-        <button type="submit" class="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600">Search</button>
+        <button type="submit" class="rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600">Search</button>
         <button type="button" onclick="openAddProductModal()"
-                class="bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600">
+                class="rounded-md bg-green-500 px-4 py-2 text-white hover:bg-green-600">
             Add Product
         </button>
     </form>
 </div>
 
 <!-- Product List -->
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-8">
+<div class="grid-cols-1 mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
     @if (Model.Products != null && Model.Products.Any())
     {
         foreach (var product in Model.Products)
         {
-            <div class="border rounded-lg shadow-md p-4">
+            <div class="rounded-lg border p-4 shadow-md">
                 <div class="aspect-w-1 aspect-h-1 mb-4">
                     @if (!string.IsNullOrEmpty(product.ProductImageUrl))
                     {
-                        <img src="@product.ProductImageUrl" alt="@product.Name" class="object-cover rounded-md w-full h-48" />
+                        <img src="@product.ProductImageUrl" alt="@product.Name" class="h-48 w-full rounded-md object-cover" />
                     }
                     else
                     {
-                        <div class="bg-gray-200 rounded-md w-full h-48 flex items-center justify-center">
+                        <div class="flex h-48 w-full items-center justify-center rounded-md bg-gray-200">
                             <span class="text-gray-500">No image</span>
                         </div>
                     }
                 </div>
                 <h3 class="text-lg font-semibold">@product.Name</h3>
-                @*                 <p class="text-gray-600 text-sm mb-2">@product.Category?.Name</p>
-        *@                <p class="text-gray-800 font-medium">$@product.LowestPrice.ToString("F2")</p>
-                <div class="flex items-center mt-2">
+                @*                 <p class="mb-2 text-sm text-gray-600">@product.Category?.Name</p>
+        *@                <p class="font-medium text-gray-800">$@product.LowestPrice.ToString("F2")</p>
+                <div class="mt-2 flex items-center">
                     <span class="text-yellow-400">★</span>
                     <span class="ml-1">@product.Rating.ToString("F1")</span>
-                    @*                     <span class="text-gray-500 ml-2">(@product.ReviewCount reviews)</span>
+                    @*                     <span class="ml-2 text-gray-500">(@product.ReviewCount reviews)</span>
             *@
                 </div>
-                <div class="mt-3 flex justify-between items-center">
-                    <div class="text-sm text-gray-500 mt-2">
-                        <span id="status-label-@product.Id" class="px-2 py-1 rounded-full text-sm @(product.Status == "Available" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800")">@product.Status</span>
+                <div class="mt-3 flex items-center justify-between">
+                    <div class="mt-2 text-sm text-gray-500">
+                        <span id="status-label-@product.Id" class="rounded-full px-2 py-1 text-sm @(product.Status == "Available" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800")">@product.Status</span>
                     </div>
                     <div class="flex space-x-2">
                         <button onclick="toggleProductStatus('@product.Id', '@product.Status', this)"
@@ -143,11 +159,11 @@
                             @(product.Status == "Available" ? "Deactivate" : "Activate")
                         </button>
                         <button onclick="loadProductDetails('@product.Id')"
-                                class="bg-blue-500 text-white py-1 px-3 rounded-md hover:bg-blue-600">
+                                class="rounded-md bg-blue-500 px-3 py-1 text-white hover:bg-blue-600">
                             Edit
                         </button>
                         <button onclick="deleteProduct('@product.Id')"
-                                class="bg-red-500 text-white py-1 px-3 rounded-md hover:bg-red-600">
+                                class="rounded-md bg-red-500 px-3 py-1 text-white hover:bg-red-600">
                             Delete
                         </button>
                     </div>
@@ -157,7 +173,7 @@
     }
     else
     {
-        <div class="col-span-full text-center py-8">
+        <div class="col-span-full py-8 text-center">
             <p class="text-gray-500">No products found.</p>
         </div>
     }
@@ -178,13 +194,13 @@
 <partial name="~/Pages/Shared/_Pagination.cshtml" model="paginationModel" />
 
 <!-- Add Product Modal -->
-<div id="addProductModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center">
-    <div class="bg-white p-6 rounded-lg w-3/4 max-h-[90vh] overflow-y-auto">
-        <h2 class="text-2xl font-bold mb-4 text-center">Add New Product</h2>
+<div id="addProductModal" class="fixed inset-0 hidden items-center justify-center bg-black bg-opacity-50">
+    <div class="max-h-[90vh] w-3/4 overflow-y-auto rounded-lg bg-white p-6">
+        <h2 class="mb-4 text-center text-2xl font-bold">Add New Product</h2>
 
         <form asp-page-handler="CreateProduct" method="post" enctype="multipart/form-data" class="space-y-4">
             <!-- Basic Product Information -->
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid-cols-2 grid gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Product Name</label>
                     <input type="text" asp-for="ProductCreation.Name" required
@@ -211,40 +227,40 @@
 
             <!-- Existing Variations Section -->
             <div id="existingVariationsContainer" class="border-t pt-4">
-                <h3 class="text-lg font-medium mb-2">Existing Variations</h3>
+                <h3 class="mb-2 text-lg font-medium">Existing Variations</h3>
                 <div id="existingVariationsList"></div>
             </div>
 
             <!-- New Variations Section -->
-            <div id="newVariationsContainer"></div>
-            <button type="button" id="addNewVariationBtn" class="btn btn-secondary mb-4">
+            <div id="newVariationsContainerForCreation"></div>
+            <button type="button" id="addNewVariationBtnAddProduct" class="btn btn-secondary mb-4 text-blue-500 underline">
                 Add New Variation
             </button>
 
             <!-- Update your variation combination section -->
             <div id="variationCombinationContainer" class="border-t pt-4">
-                <h3 class="text-lg font-medium mb-2">Variation Combinations</h3>
+                <h3 class="mb-2 text-lg font-medium">Variation Combinations</h3>
             </div>
 
             <!-- Image Upload -->
             <div class="border-t pt-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Product Images</label>
+                <label class="mb-2 block text-sm font-medium text-gray-700">Product Images</label>
                 <input type="file" id="productImages" name="ProductImages" multiple accept="image/*"
                        onchange="previewImages(this)" class="hidden" />
                 <button type="button" onclick="document.getElementById('productImages').click()"
-                        class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
+                        class="rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600">
                     Choose Images
                 </button>
-                <div id="imagePreviewContainer" class="grid grid-cols-4 gap-4 mt-4"></div>
+                <div id="imagePreviewContainer" class="grid-cols-4 mt-4 grid gap-4"></div>
             </div>
 
-            <div class="flex justify-end space-x-4 pt-4 border-t">
+            <div class="flex justify-end space-x-4 border-t pt-4">
                 <button type="button" onclick="closeAddProductModal()"
-                        class="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600">
+                        class="rounded-md bg-gray-500 px-6 py-2 text-white hover:bg-gray-600">
                     Cancel
                 </button>
                 <button type="submit"
-                        class="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600">
+                        class="rounded-md bg-blue-500 px-6 py-2 text-white hover:bg-blue-600">
                     Create Product
                 </button>
             </div>
@@ -253,25 +269,37 @@
 </div>
 
 <!-- Edit Product Modal -->
-<div id="editProductModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center">
-    <div class="bg-white p-6 rounded-lg w-3/4 max-h-[90vh] overflow-y-auto">
-        <h2 class="text-2xl font-bold mb-4 text-center">Edit Product</h2>
+<div id="editProductModal" class="fixed inset-0 hidden items-center justify-center bg-black bg-opacity-50">
+    <div class="max-h-[90vh] w-3/4 overflow-y-auto rounded-lg bg-white p-6">
+        <h2 class="mb-4 text-center text-2xl font-bold">Edit Product</h2>
+        <!-- Image Upload Section -->
+        <div class="border-t pt-4">
+            <label class="mb-2 block text-sm font-medium text-gray-700">Product Images</label>
+            <input type="file" id="productImagesForEdit" name="ProductImages" multiple accept="image/*"
+                   onchange="uploadImages(this.files)" class="hidden" />
+            <button type="button" onclick="document.getElementById('productImagesForEdit').click()"
+                    class="rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600">
+                Choose Images
+            </button>
+            <div id="imagePreviewContainerForEdit" class="grid-cols-4 mt-4 grid gap-4"></div>
+        </div>
         <!-- Basic Information Form -->
-        <form method="post" asp-page-handler="UpdateBasicInfo" id="basicInfoForm" class="space-y-4 mb-8 border-b pb-8">
+        <form method="post" asp-page-handler="UpdateBasicInfo" id="basicInfoForm" class="mb-8 space-y-4 border-b pb-8">
             @Html.AntiForgeryToken()
             <input type="hidden" name="productId" id="editProductId" />
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid-cols-2 grid gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Product Name</label>
                     <input type="text" asp-for="ProductUpdate.Name" id="editProductName"
                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" />
-                    <span asp-validation-for="ProductUpdate.Name" class="text-red-500 text-sm"></span>
+                    <span asp-validation-for="ProductUpdate.Name" class="text-sm text-red-500"></span>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Category</label>
                     <select asp-for="ProductUpdate.CategoryId" id="editCategorySelect"
                             asp-items="@(new SelectList(Model.Categories, "Id", "Name"))"
-                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                            id="categorySelectForUpdate">
                         <option value="">Select Category</option>
                     </select>
                 </div>
@@ -283,7 +311,7 @@
             </div>
             <div class="flex justify-end">
                 <button type="submit"
-                        class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md">
+                        class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
                     Save Basic Info
                 </button>
             </div>
@@ -292,20 +320,36 @@
         <form method="post" asp-page-handler="UpdateProductItems" id="productItemsForm" class="space-y-4">
             @Html.AntiForgeryToken()
             <input type="hidden" name="productId" id="editProductIdForItems" />
-            <h3 class="text-lg font-medium text-gray-900 mb-4">Product Items</h3>
+            <h3 class="mb-4 text-lg font-medium text-gray-900">Product Items</h3>
             <div id="productItemsContainer" class="space-y-4">
                 <!-- Product items will be populated here -->
             </div>
-            <div class="flex justify-end mt-4">
-                <button type="submit"
-                        class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md">
+            <div class="mt-4 flex justify-end">
+                <button type="button" id="saveProductItemsButton" class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
                     Save Product Items
                 </button>
             </div>
         </form>
-        <div class="flex justify-end space-x-3 pt-4 mt-8 border-t">
+
+        <!-- Add Product Items Section -->
+        <form method="post" asp-page-handler="AddProductItems" id="addProductItemsForm" class="space-y-4">
+            @Html.AntiForgeryToken()
+
+            <!-- New Variations Section -->
+            <div id="newVariationsContainerForUpdate" class="mt-4"></div>
+            <button type="button" id="addNewVariationBtnEditProduct" class="btn btn-secondary mb-4 text-blue-500 underline">
+                Add New Variation
+            </button>
+
+            <div id="variationCombinationContainerForUpdate" class="border-t pt-4">
+                <h3 class="mb-2 text-lg font-medium">Variation Combinations</h3>
+                <!-- Các kết hợp sẽ được hiển thị tại đây -->
+            </div>
+        </form>
+
+        <div class="mt-8 flex justify-end space-x-3 border-t pt-4">
             <button type="button" onclick="closeEditModal()"
-                    class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md">
+                    class="rounded-md bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200">
                 Close
             </button>
         </div>
@@ -423,7 +467,7 @@
             return combine({}, 0);
         };
 
-        const saveNewVariation = async (variationRow) => {
+        const saveNewVariationForCreation = async (variationRow) => {
             try {
                 const nameInput = variationRow.querySelector('input[name*=".Name"]');
                 const optionInputs = variationRow.querySelectorAll('input[name*=".Options"]');
@@ -514,20 +558,20 @@
             variationDiv.classList.add('p-4', 'border', 'rounded-md', 'bg-gray-50', 'mb-4');
 
             const optionsHtml = options.map((option, index) => `
-                <div class="flex items-center mt-2">
+                <div class="mt-2 flex items-center">
                     <input type="checkbox"
                            name="variation_${variationId}"
                            value="${optionIds[index]}"
                            data-option-name="${option}"
                            data-variation-name="${variationName}"
-                           class="form-checkbox h-4 w-4 text-blue-600 mr-2"
+                           class="form-checkbox mr-2 h-4 w-4 text-blue-600"
                            onchange="handleVariationOptionCheck(this)" />
                     <label class="text-sm text-gray-700">${option}</label>
                 </div>
             `).join('');
 
             variationDiv.innerHTML = `
-                <div class="flex items-center justify-between mb-2">
+                <div class="mb-2 flex items-center justify-between">
                     <span class="font-medium">${variationName}</span>
                     <button type="button"
                             onclick="removeExistingVariation('${variationId}')"
@@ -588,18 +632,18 @@
             }
         };
 
-        const addNewVariationUI = () => {
-            const container = document.getElementById('newVariationsContainer');
+        const addNewVariationForCreationUI = () => {
+            const container = document.getElementById('newVariationsContainerForCreation');
             const variationIndex = container.children.length;
 
             const newRow = document.createElement('div');
             newRow.classList.add('variation-row', 'mb-4', 'p-4', 'border', 'rounded');
             newRow.innerHTML = `
-                <div class="flex items-center mb-2">
-                    <label class="block text-sm font-medium text-gray-700 mr-2">Variation Name:</label>
+                <div class="mb-2 flex items-center">
+                    <label class="mr-2 block text-sm font-medium text-gray-700">Variation Name:</label>
                     <input type="text"
                            name="NewVariations[${variationIndex}].Name"
-                           class="flex-grow mr-2 form-input rounded"
+                           class="form-input mr-2 flex-grow rounded"
                            placeholder="Enter variation name"
                            required />
                     <button type="button"
@@ -610,16 +654,16 @@
                 </div>
                 <div class="variation-options">
                     <div class="option-row mb-2">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Options:</label>
+                        <label class="mb-1 block text-sm font-medium text-gray-700">Options:</label>
                         <div class="flex items-center">
                             <input type="text"
                                    name="NewVariations[${variationIndex}].Options"
-                                   class="form-input rounded flex-grow mr-2"
+                                   class="form-input mr-2 flex-grow rounded"
                                    placeholder="Enter option value"
                                    required />
                             <button type="button"
                                     onclick="addVariationOption(this.closest('.option-row'))"
-                                    class="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600">
+                                    class="rounded-md bg-blue-500 px-3 py-1 text-white hover:bg-blue-600">
                                 Add Option
                             </button>
                         </div>
@@ -627,8 +671,8 @@
                 </div>
                 <div class="mt-4">
                     <button type="button"
-                            onclick="saveNewVariation(this.closest('.variation-row'))"
-                            class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">
+                                    onclick="saveNewVariationForCreation(this.closest('.variation-row'))"
+                            class="rounded-md bg-green-500 px-4 py-2 text-white hover:bg-green-600">
                         Save Variation
                     </button>
                 </div>
@@ -767,7 +811,7 @@
                 const container = document.getElementById('variationCombinationContainer');
                 if (!container) return;
 
-                container.innerHTML = '<h3 class="text-lg font-medium mb-2">Variation Combinations</h3>';
+                container.innerHTML = '<h3 class="mb-2 text-lg font-medium">Variation Combinations</h3>';
 
                 // Only proceed if we have variations with selected options
                 const variationsWithOptions = state.existingVariationsData.filter(v => v.optionIds.length > 0);
@@ -781,7 +825,7 @@
 
                     combinationDiv.innerHTML = `
                         <div class="mb-2 font-medium">${combination.description.join(', ')}</div>
-                        <div class="grid grid-cols-2 gap-4">
+                        <div class="grid-cols-2 grid gap-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700">Price</label>
                                 <input type="number"
@@ -824,13 +868,18 @@
                 if (!response.ok) throw new Error('Failed to load variations');
 
                 const variations = await response.json();
+                const variationNamesSet = new Set(); // Track unique variation names
 
                 for (const variation of variations) {
+                    // Skip if the variation name already exists
+                    if (variationNamesSet.has(variation.name)) continue;
+                    variationNamesSet.add(variation.name);
+
                     const variationDiv = document.createElement('div');
                     variationDiv.classList.add('p-4', 'border', 'rounded-md', 'bg-gray-50', 'mb-4');
 
                     variationDiv.innerHTML = `
-                        <div class="flex items-center justify-between mb-2">
+                        <div class="mb-2 flex items-center justify-between">
                             <span class="font-medium">${variation.name}</span>
                             <button type="button"
                                     onclick="removeExistingVariation('${variation.id}')"
@@ -839,7 +888,7 @@
                             </button>
                         </div>
                         <div class="variation-options mt-2" id="options-${variation.id}">
-                            <div class="grid grid-cols-2 gap-2">
+                            <div class="grid-cols-2 grid gap-2">
                                 <!-- Options will be loaded here -->
                             </div>
                         </div>
@@ -861,8 +910,13 @@
 
                 const options = await response.json();
                 const optionsContainer = document.getElementById(`options-${variationId}`).querySelector('.grid');
+                const optionValuesSet = new Set(); // Track unique option values for this variation
 
                 options.forEach(option => {
+                    // Skip if the option value already exists for this variation
+                    if (optionValuesSet.has(option.value)) return;
+                    optionValuesSet.add(option.value);
+
                     const optionDiv = document.createElement('div');
                     optionDiv.classList.add('flex', 'items-center');
                     optionDiv.innerHTML = `
@@ -873,7 +927,7 @@
                                data-variation-id="${variationId}"
                                data-variation-name="${variationName}"
                                data-option-name="${option.value}"
-                               class="form-checkbox h-4 w-4 text-blue-600 mr-2"
+                               class="form-checkbox mr-2 h-4 w-4 text-blue-600"
                                onchange="handleVariationOptionCheck(this)" />
                         <label for="option-${option.id}" class="text-sm text-gray-700">${option.value}</label>
                     `;
@@ -895,9 +949,14 @@
                 }
             }
 
-            const addNewVariationBtn = document.getElementById('addNewVariationBtn');
-            if (addNewVariationBtn) {
-                addNewVariationBtn.addEventListener('click', addNewVariationUI);
+            const addNewVariationBtnAddProduct = document.getElementById('addNewVariationBtnAddProduct');
+            if (addNewVariationBtnAddProduct) {
+                addNewVariationBtnAddProduct.addEventListener('click', addNewVariationForCreationUI);
+            }
+
+            const addNewVariationBtnEditProduct = document.getElementById('addNewVariationBtnEditProduct');
+            if (addNewVariationBtnEditProduct) {
+                addNewVariationBtnEditProduct.addEventListener('click', addNewVariationForUpdateUI);
             }
 
             const form = document.querySelector('form[asp-page-handler="CreateProduct"]');
@@ -1097,7 +1156,7 @@
                 <div class="flex items-center">
                     <input type="text"
                            name="NewVariations[${variationIndex}].Options"
-                           class="form-input rounded flex-grow mr-2"
+                           class="form-input mr-2 flex-grow rounded"
                            placeholder="Enter option value"
                            required
                            onchange="handleNewVariationInput(this)" />
@@ -1182,9 +1241,9 @@
                         const imgWrapper = document.createElement('div');
                         imgWrapper.classList.add('relative');
                         imgWrapper.innerHTML = `
-                                        <img src="${e.target.result}" class="w-full h-32 object-cover rounded-md" />
+                                        <img src="${e.target.result}" class="h-32 w-full rounded-md object-cover" />
                                         <button type="button" onclick="removeImage(this)"
-                                                class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center">
+                                                class="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white">
                                             ✖
                                         </button>
                                     `;
@@ -1221,8 +1280,28 @@
         }
 
         function closeAddProductModal() {
-            document.getElementById('addProductModal').classList.remove('flex');
-            document.getElementById('addProductModal').classList.add('hidden');
+            // Hide the modal
+            document.getElementById("addProductModal").classList.add("hidden");
+
+            // Ensure form is accessible when modal is closed
+            const form = document.querySelector("#addProductModal form");
+
+            if (form) {
+                form.reset(); // Reset form values
+            } else {
+                console.error("Form not found.");
+            }
+
+            // Clear dynamically generated content
+            document.getElementById("existingVariationsList").innerHTML = ""; // Clear Existing Variations
+            document.getElementById("newVariationsContainerForCreation").innerHTML = ""; // Clear New Variations
+            document.getElementById("variationCombinationContainer").innerHTML = ""; // Clear Variation Combinations
+
+            // Clear image previews
+            document.getElementById("imagePreviewContainer").innerHTML = ""; // Clear image preview container
+            document.getElementById("productImages").value = ""; // Clear selected files
+
+            // Optional: Remove any custom classes or states if necessary
         }
 
 
@@ -1265,8 +1344,387 @@
 
 
         //Edit Product
+        // Assuming `productId` is available, either passed or retrieved dynamically
+        async function loadProductImagesForEdit(productId) {
+            const imagePreviewContainer = document.getElementById('imagePreviewContainerForEdit');
+            try {
+                const response = await fetch(`${apiBaseUrl}/api/productimage/getimage/${productId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`,
+                        'RequestVerificationToken': requestVerificationToken
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.statusCode === 200 && data.data) {
+                    // Clear previous images
+                    imagePreviewContainer.innerHTML = '';
+
+                    // Display each image as a preview
+                    data.data.forEach(image => {
+                        const imgWrapper = document.createElement('div');
+                        imgWrapper.classList.add('relative');
+                        imgWrapper.innerHTML = `
+                            <img src="${image.url}" class="h-32 w-full rounded-md object-cover" />
+                            <button type="button" onclick="removeImageForEdit(this, '${image.id}')"
+                                    class="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white">
+                                ✖
+                            </button>
+                        `;
+                        imagePreviewContainer.appendChild(imgWrapper);
+                    });
+                } else {
+                    console.log('Failed to fetch images:', data.message);
+                }
+            } catch (error) {
+                console.error('Error fetching product images:', error);
+            }
+        }
+
+        async function removeImageForEdit(button, imageId) {
+            // Show confirmation dialog before deletion
+            const isConfirmed = window.confirm('Are you sure you want to delete this image?');
+
+            if (!isConfirmed) {
+                // If the user cancels, stop the deletion process
+                return;
+            }
+
+            try {
+                const response = await fetch(`${apiBaseUrl}/api/productimage/delete/${imageId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`,
+                        'RequestVerificationToken': requestVerificationToken
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.statusCode === 200) {
+                    // Remove the image preview from the UI
+                    const imgWrapper = button.closest('div');
+                    imgWrapper.remove();
+                    console.log(`Image with ID: ${imageId} removed successfully.`);
+                } else {
+                    console.log('Failed to remove image:', data.message);
+                }
+            } catch (error) {
+                console.error('Error removing image:', error);
+            }
+        }
+
+        async function uploadImages(files) {
+            const productId = document.getElementById('editProductId').value;
+            const formData = new FormData();
+
+            // Thêm các tệp vào FormData
+            Array.from(files).forEach(file => {
+                formData.append('files', file); // 'files' là tên trường mà API của bạn mong đợi
+            });
+
+            try {
+                const response = await fetch(`${apiBaseUrl}/api/productimage/upload/${productId}`, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`, // Token xác thực
+                        'RequestVerificationToken': requestVerificationToken // Token CSRF
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.statusCode === 200 && data.data) {
+                    console.log('Images uploaded successfully');
+                    loadProductImagesForEdit(productId);
+                    // Có thể làm mới hình ảnh đã tải lên hoặc thông báo thành công
+                } else {
+                    console.log('Failed to upload images:', data.message);
+                }
+            } catch (error) {
+                console.error('Error uploading images:', error);
+            }
+        }
+
         const editProductState = {
             productItems: []
+        };
+
+        const addNewVariationForUpdateUI = async () => {
+            const container = document.getElementById('newVariationsContainerForUpdate');
+            const variationIndex = container.children.length;
+
+            const newRow = document.createElement('div');
+            newRow.classList.add('variation-row', 'mb-4', 'p-4', 'border', 'rounded');
+            newRow.innerHTML = `
+                                <div class="mb-2 flex items-center">
+                                    <label class="mr-2 block text-sm font-medium text-gray-700">Variation Name:</label>
+                                    <input type="text"
+                                           name="NewVariations[${variationIndex}].Name"
+                                           class="form-input mr-2 flex-grow rounded"
+                                           placeholder="Enter variation name"
+                                           required />
+                                    <button type="button"
+                                            onclick="this.closest('.variation-row').remove()"
+                                            class="text-red-600 hover:text-red-800">
+                                        Remove
+                                    </button>
+                                </div>
+                                <div class="variation-options">
+                                    <div class="option-row mb-2">
+                                        <label class="mb-1 block text-sm font-medium text-gray-700">Options:</label>
+                                        <div class="flex items-center">
+                                            <input type="text"
+                                                   name="NewVariations[${variationIndex}].Options"
+                                                   class="form-input mr-2 flex-grow rounded"
+                                                   placeholder="Enter option value"
+                                                   required />
+                                            <button type="button"
+                                                    onclick="addVariationOption(this.closest('.option-row'))"
+                                                    class="rounded-md bg-blue-500 px-3 py-1 text-white hover:bg-blue-600">
+                                                Add Option
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mt-4">
+                                    <button type="button"
+                                            onclick="saveNewVariationForUpdate(this.closest('.variation-row'))"
+                                            class="rounded-md bg-green-500 px-4 py-2 text-white hover:bg-green-600">
+                                        Save Variation
+                                    </button>
+                                </div>
+                            `;
+
+            container.appendChild(newRow);
+        };
+
+        let combinations = []; // Declare a global variable to store the combinations
+
+        const saveNewVariationForUpdate = async (variationRow) => {
+            try {
+                const nameInput = variationRow.querySelector('input[name*=".Name"]');
+                const optionInputs = variationRow.querySelectorAll('input[name*=".Options"]');
+
+                const variationName = nameInput.value.trim();
+                const options = Array.from(optionInputs).map(input => input.value.trim()).filter(Boolean);
+
+                if (!variationName || options.length === 0) {
+                    alert('Please enter variation name and at least one option');
+                    return;
+                }
+
+                const categoryId = document.getElementById('editCategorySelect').value;
+
+                // Create the new variation
+                const variationData = { name: variationName, categoryId: categoryId, options: options };
+
+                const createResponse = await fetch('?handler=CreateVariation', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(variationData)
+                });
+
+                if (!createResponse.ok) {
+                    throw new Error('Failed to create variation');
+                }
+
+                const result = await createResponse.json();
+
+                const optionIds = result.optionIds;
+
+                // Add the new variation options to the current list of variation options
+                const combinedOptions = [...currentVariationOptions];
+
+                optionIds.forEach(optionId => {
+                    const optionExists = currentVariationOptions.some(option => option.varitaionName === variationName);
+
+                    if (!optionExists) {
+                        combinedOptions.push({ variationName: variationName, optionName: options.join(', '), optionId });
+                    }
+                });
+
+                // Generate combinations based on the newly created variation
+                const combinationContainer = document.getElementById('variationCombinationContainerForUpdate');
+
+                const combinationSection = document.createElement('div');
+                combinationSection.classList.add('combination-section', 'mb-4', 'p-4', 'border', 'rounded');
+
+                let combinationHTML = `
+                    <h4 class="text-lg font-medium">Variation Combination</h4>
+                    <div class="grid-cols-1 grid gap-4">
+                `;
+
+                let combinationCounter = 0; // Declare a counter to generate unique IDs
+
+                combinedOptions.forEach((currentOption, currentIdx) => {
+                    if (currentOption.variationName.toLowerCase() === variationName.toLowerCase()) {
+                        console.log("Skipping combination because variationName matches currentOption.variationName:", variationName);
+                        return; // Skip if the variationName matches currentOption.variationName
+                    }
+
+                    options.forEach((newOption, newIdx) => {
+                        // Use the combination counter for the combinationId
+                        const combinationId = `combination-${combinationCounter++}`;  // Increment the counter for each new combination
+
+                        combinationHTML += `
+                    <div class="flex gap-4">
+                        <div class="flex-1">
+                            <label class="block text-sm font-medium text-gray-700">Variation Options</label>
+                            <p class="mt-1 block w-full rounded-md border-gray-300 bg-gray-50 p-2 shadow-sm">
+                                ${currentOption.optionName}, ${newOption}
+                            </p>
+                        </div>
+                        <div class="flex-1">
+                            <label class="block text-sm font-medium text-gray-700">Price</label>
+                            <input type="number"
+                                id="price-${combinationId}"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                                placeholder="Enter price"
+                                min="0" required />
+                        </div>
+                        <div class="flex-1">
+                            <label class="block text-sm font-medium text-gray-700">Quantity In Stock</label>
+                            <input type="number"
+                                id="quantity-${combinationId}"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                                placeholder="Enter quantity"
+                                min="0" required />
+                        </div>
+                    </div>
+                `;
+
+                        // Store the combination data in the global array
+                        combinations.push({
+                            variationOptions: [currentOption.optionId, optionIds[0]], // Store optionIds
+                            price: null,  // Placeholder for price (to be filled later)
+                            quantity: null // Placeholder for quantity (to be filled later)
+                        });
+                    });
+                });
+
+                combinationHTML += `</div>`;
+
+                combinationHTML += `
+                    <div class="mt-4 flex justify-end">
+                        <button type="button"
+                                class="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+                                onclick="saveVariationCombination()">Save Combination</button>
+                    </div>
+                `;
+
+                combinationSection.innerHTML = combinationHTML;
+                combinationContainer.appendChild(combinationSection);
+
+                variationRow.remove(); // Optionally remove the new variation row from the UI
+
+                console.log(combinations);
+
+            } catch (error) {
+                console.error('Error saving variation:', error);
+                alert('Failed to save variation: ' + error.message);
+            }
+        };
+
+        const saveVariationCombination = async () => {
+            try {
+                const productId = document.getElementById('editProductId').value.trim();
+
+                if (!productId) {
+                    alert('Product ID is required');
+                    return;
+                }
+
+                // Create an array to hold all the variation combinations
+                const variationCombinations = [];
+
+                // Loop through the global combinations array to collect price and quantity
+                for (let i = 0; i < combinations.length; i++) {
+                    const combination = combinations[i];
+                    const combinationId = `combination-${i}`;
+                    const priceInput = document.getElementById(`price-${combinationId}`);
+                    const quantityInput = document.getElementById(`quantity-${combinationId}`);
+
+                    // Validate and capture price and quantity
+                    const price = parseFloat(priceInput.value.trim());
+                    const quantity = parseInt(quantityInput.value.trim(), 10);
+
+                    if (isNaN(price) || price <= 0) {
+                        alert(`Please enter a valid price for combination ${i + 1}`);
+                        return;
+                    }
+
+                    if (isNaN(quantity) || quantity < 0) {
+                        alert(`Please enter a valid quantity for combination ${i + 1}`);
+                        return;
+                    }
+
+                    // Push the validated combination to the array in the correct format
+                    variationCombinations.push({
+                        VariationOptionIds: combination.variationOptions, // Array of option IDs
+                        Price: price,                                     // Price of the combination
+                        QuantityInStock: quantity                         // Quantity in stock
+                    });
+                }
+
+                // If no combinations to save, show a message and return
+                if (variationCombinations.length === 0) {
+                    alert('No valid variation combinations to save');
+                    return;
+                }
+
+                // Prepare the data to send in the request
+                const variationCombinationDto = variationCombinations; // Directly use the array of combinations
+
+                console.log(variationCombinationDto)
+
+                // Send all the combinations in one POST request
+                const response = await fetch(`${apiBaseUrl}/api/productitem/${productId}/items`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`,
+                        'RequestVerificationToken': requestVerificationToken
+                    },
+                    body: JSON.stringify(variationCombinationDto) // Sending the array directly
+                });
+
+                if (!response.ok) {
+                    const errorResponse = await response.text();
+                    console.error('Error Response:', errorResponse);
+                    alert(`Failed to save variation combinations: ${errorResponse}`);
+                } else {
+                    const result = await response.json();
+                    console.log(result.message || 'Variation combinations saved successfully!');
+                }
+
+                alert('All variation combinations have been saved successfully!');
+
+                combinations = [];
+
+                // Clear the container holding the new variations
+                const newVariationsContainer = document.getElementById('newVariationsContainerForUpdate');
+                if (newVariationsContainer) {
+                    newVariationsContainer.innerHTML = '';
+                }
+
+                // Clear the container holding the variation combinations
+                const combinationContainer = document.getElementById('variationCombinationContainerForUpdate');
+                if (combinationContainer) {
+                    combinationContainer.innerHTML = '';
+                }
+
+                loadProductDetails(productId);
+
+            } catch (error) {
+                console.error('Error saving combination:', error);
+                alert('Failed to save combination: ' + error.message);
+            }
         };
 
         async function loadProductDetails(productId) {
@@ -1314,38 +1772,175 @@
             }
         });
 
+        let currentVariationOptions = [];
 
         function populateProductItems(productItems) {
             const container = document.getElementById('productItemsContainer');
             container.innerHTML = '';
             editProductState.productItems = productItems || [];
 
+            // Clear and store all the existing variation options globally
+            currentVariationOptions = [];
+
+            // Store current variation options from all product items
             editProductState.productItems.forEach((item, index) => {
+                const variationOptions = item.configurations.map(config => config.optionName);
+
+                item.configurations.forEach(config => {
+                    // Check if variationName and optionName already exist in currentVariationOptions
+                    const optionExists = currentVariationOptions.some(option =>
+                        option.variationName === config.variationName && option.optionName === config.optionName
+                    );
+
+                    // Add only if it doesn't already exist
+                    if (!optionExists) {
+                        currentVariationOptions.push({
+                            variationName: config.variationName,
+                            optionName: config.optionName,
+                            optionId: config.optionId
+                        });
+                    }
+                });
+
                 const itemDiv = document.createElement('div');
-                itemDiv.className = 'p-4 border rounded-md';
+                itemDiv.className = 'p-4 border rounded-md product-item';
+
+                const isLastItem = editProductState.productItems.length === 1;
+
                 itemDiv.innerHTML = `
                     <input type="hidden" name="ProductItemUpdates[${index}].Id" value="${item.id}" />
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
+                    <div class="flex gap-4">
+                        <div class="flex-1">
+                            <label class="block text-sm font-medium text-gray-700">Variation Options</label>
+                            <p class="mt-1 block w-full rounded-md border-gray-300 bg-gray-50 p-2 shadow-sm">${variationOptions.join(', ')}</p>
+                        </div>
+                        <div class="flex-1">
                             <label class="block text-sm font-medium text-gray-700">Quantity in Stock</label>
                             <input type="number"
-                                   name="ProductItemUpdates[${index}].QuantityInStock"
-                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                                   value="${item.quantityInStock}"
-                                   min="0" />
+                                name="ProductItemUpdates[${index}].QuantityInStock"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                                value="${item.quantityInStock}"
+                                min="0" />
                         </div>
-                        <div>
+                        <div class="flex-1">
                             <label class="block text-sm font-medium text-gray-700">Price</label>
                             <input type="number"
-                                   name="ProductItemUpdates[${index}].Price"
-                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                                   value="${item.price}"
-                                   min="0" />
+                                name="ProductItemUpdates[${index}].Price"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                                value="${item.price}"
+                                min="0" />
+                        </div>
+                        <div class="flex items-center justify-center">
+                            <button class="text-red-600 ${isLastItem ? 'cursor-not-allowed opacity-50' : ''}"
+                                onclick="${isLastItem ? 'return false;' : `deleteProductItem(${index})`}">
+                                <i class="fas fa-trash-alt"></i>
+                                Delete
+                            </button>
                         </div>
                     </div>
                 `;
+
                 container.appendChild(itemDiv);
             });
+        }
+
+        document.getElementById('saveProductItemsButton').addEventListener('click', async () => {
+            const productItemsContainer = document.getElementById('productItemsContainer');
+            const productItemDivs = productItemsContainer.querySelectorAll('.product-item');
+
+            const requests = Array.from(productItemDivs).map(async (itemDiv, index) => {
+                const id = itemDiv.querySelector('input[name="ProductItemUpdates[' + index + '].Id"]').value;
+                const quantityInStock = itemDiv.querySelector('input[name="ProductItemUpdates[' + index + '].QuantityInStock"]').value;
+                const price = itemDiv.querySelector('input[name="ProductItemUpdates[' + index + '].Price"]').value;
+
+                const productItem = editProductState.productItems.find(item => item.id == id);
+
+                // Kiểm tra xem có thay đổi giá trị không
+                const quantityChanged = productItem.quantityInStock !== parseInt(quantityInStock, 10);
+                const priceChanged = productItem.price !== parseFloat(price);
+
+                if (!quantityChanged && !priceChanged) {
+                    return; // Nếu không có thay đổi, bỏ qua việc cập nhật
+                }
+
+                // Tạo DTO cập nhật
+                const updatedProductItemDto = {
+                    QuantityInStock: parseInt(quantityInStock, 10),
+                    Price: parseFloat(price),
+                };
+
+                try {
+                    const response = await fetch(`${apiBaseUrl}/api/ProductItem/${id}`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${authToken}`,
+                            'RequestVerificationToken': requestVerificationToken
+                        },
+                        body: JSON.stringify(updatedProductItemDto)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`Failed to update ProductItem with ID ${id}`);
+                    }
+
+                    console.log(`Successfully updated ProductItem with ID ${id}`);
+                } catch (error) {
+                    console.error(error.message);
+                }
+            });
+
+            // Đợi tất cả các yêu cầu cập nhật hoàn thành
+            await Promise.all(requests);
+            alert('Product items update completed.');
+        });
+
+        async function deleteProductItem(index) {
+            // Confirm before proceeding with delete
+            const confirmed = confirm("Are you sure you want to delete this product item?");
+            if (!confirmed) {
+                return; // Exit if the user does not confirm
+            }
+
+            const productItem = editProductState.productItems[index];
+            const productItemId = productItem.id;
+
+            try {
+                // Gọi API DELETE ngay khi ấn nút Delete
+                const response = await fetch(`${apiBaseUrl}/api/productitem/${productItemId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`, // Thêm token nếu cần
+                        'RequestVerificationToken': requestVerificationToken
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Failed to delete ProductItem with ID ${productItemId}`);
+                }
+
+                console.log(`Successfully deleted ProductItem with ID ${productItemId}`);
+
+                // Cập nhật trạng thái UI để phản ánh việc xóa thành công
+                const itemDiv = document.querySelectorAll('.product-item')[index];
+                itemDiv.classList.add('bg-gray-100'); // Thêm nền xám cho item đã xóa
+                itemDiv.querySelector('button').disabled = true; // Vô hiệu hóa nút xóa (để tránh nhấn lại)
+                itemDiv.querySelector('input[name^="ProductItemUpdates"]').disabled = true; // Vô hiệu hóa các input trong item
+
+                // Đánh dấu sản phẩm là đã xóa
+                productItem.deletedBy = true;
+                productItem.deletedTime = new Date().toISOString();
+
+                // Remove the deleted product item from the list
+                editProductState.productItems.splice(index, 1);
+
+                // Hiển thị lại danh sách để phản ánh sự thay đổi
+                populateProductItems(editProductState.productItems);
+
+            } catch (error) {
+                console.error(error.message);
+            }
         }
 
         function populateEditForm(product) {
@@ -1368,12 +1963,40 @@
             const modal = document.getElementById('editProductModal');
             modal.classList.remove('hidden');
             modal.classList.add('flex');
+
+            const productId = document.getElementById('editProductId').value.trim();
+
+            // Load the product images
+            loadProductImagesForEdit(productId);
+
+            // Show the modal (assuming you're using CSS classes to show/hide the modal)
+            document.getElementById('editProductModal').classList.remove('hidden');
         }
 
         function closeEditModal() {
+            // Ẩn modal
             const modal = document.getElementById('editProductModal');
             modal.classList.add('hidden');
             modal.classList.remove('flex');
+            combinations = [];
+
+            // Clear the container holding the new variations
+            const newVariationsContainer = document.getElementById('newVariationsContainerForUpdate');
+            if (newVariationsContainer) {
+                newVariationsContainer.innerHTML = '';
+            }
+
+            // Clear the container holding the variation combinations
+            const combinationContainer = document.getElementById('variationCombinationContainerForUpdate');
+            if (combinationContainer) {
+                combinationContainer.innerHTML = '';
+            }
+            // Clear tất cả các trường input trong form
+            const form = modal.querySelector('form');
+            form.reset(); // Reset tất cả các trường trong form
+
+            // Đặt lại các thuộc tính của editProductState mà không gán lại đối tượng
+            editProductState.productItems = [];
         }
 
         // Add form submission handlers
@@ -1440,31 +2063,6 @@
                     updates.push(update);
                 }
             });
-
-            if (updates.length > 0) {
-                try {
-                    const response = await fetch(e.target.action, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
-                        },
-                        body: JSON.stringify({ ProductItemUpdates: updates })
-                    });
-                    const result = await response.json();
-                    if (result.success) {
-                        alert('Product items updated successfully');
-                        location.reload();
-                    } else {
-                        alert(result.message || 'Failed to update product items');
-                    }
-                } catch (error) {
-                    console.error('Error updating product items:', error);
-                    alert('An error occurred while updating the product items');
-                }
-            } else {
-                alert('No changes detected');
-            }
         });
     </script>
 }
