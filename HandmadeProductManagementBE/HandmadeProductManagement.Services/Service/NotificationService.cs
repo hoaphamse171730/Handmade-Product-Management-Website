@@ -62,9 +62,9 @@ namespace HandmadeProductManagement.Services.Service
             var notifications = review.Select(r => new NotificationModel
             {
                 Id = r.Id,
-                Message = $"Sản phẩm của bạn đã được {r.User?.UserInfo.FullName ?? "Unknown User"} review",  // Lấy FullName từ người dùng trong Review
+                Message = $"Your product has been reviewed by {r.User?.UserInfo.FullName ?? "Unknown User"}",  // Lấy FullName từ người dùng trong Review
                 Tag = Constants.NotificationTagReview,
-                URL = Constants.ApiBaseUrl + $"api/review/{r.Id}"
+                URL = Constants.ApiBaseUrl + $"/Review/Details/{r.Id}"
             }).ToList();
 
             return notifications;
@@ -153,9 +153,9 @@ namespace HandmadeProductManagement.Services.Service
                 return new NotificationModel
                 {
                     Id = status.Id,
-                    Message = $"Đơn hàng của bạn được {status.Status} lúc {changeTimeInVietnam.ToString(Constants.DateTimeFormat)}",
+                    Message = $"Your order is {status.Status} at {changeTimeInVietnam.ToString(Constants.DateTimeFormat)}",
                     Tag = Constants.NotificationTagStatusChange, // Use constant for notification tag
-                    URL = Constants.ApiBaseUrl + $"/api/statuschange/order/{status.OrderId}"
+                    URL = Constants.FrontUrl + $"/Order/OrderDetail?orderId={status.OrderId}"
                 };
             }).ToList();
 
