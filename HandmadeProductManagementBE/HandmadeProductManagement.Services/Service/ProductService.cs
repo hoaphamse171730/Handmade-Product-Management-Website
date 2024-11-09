@@ -688,7 +688,10 @@ namespace HandmadeProductManagement.Services.Service
                 Rating = product.Rating,
                 Status = product.Status,
                 SoldCount = product.SoldCount,
-                ProductImageUrls = product.ProductImages.Select(pi => pi.Url).ToList(),
+                ProductImageUrls = product.ProductImages
+                                            .OrderBy(pi => pi.CreatedTime)
+                                            .Select(pi => pi.Url)
+                                            .ToList(),
                 ProductItems = product.ProductItems
                     .Where(pi => pi.DeletedBy == null && !pi.DeletedTime.HasValue) // Exclude deleted items
                     .Select(pi => new ProductItemDetailModel

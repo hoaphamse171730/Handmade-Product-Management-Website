@@ -40,6 +40,7 @@ namespace UI.Pages.ProductDetail
         public int TotalPages { get; set; }
         public IList<UserResponseModel> Users { get; set; } = new List<UserResponseModel>();
         public IList<ShopResponseModel> Shops { get; set; } = new List<ShopResponseModel>();
+        public ShopResponseModel Shop { get; private set; } = new ShopResponseModel();
         public async Task<PageResult> OnGet(string id, int pageNumber = 1, int pageSize = 10)
         {
             string productId = id;
@@ -50,6 +51,8 @@ namespace UI.Pages.ProductDetail
 
                 // Gán thông tin sản phẩm cho thuộc tính productDetail
                 productDetail = response.Data;
+
+                Shop = await GetShopById(productDetail?.ShopId);
 
                 if (productDetail != null && productDetail.CategoryId != null)
                 {
@@ -169,6 +172,15 @@ namespace UI.Pages.ProductDetail
                 ErrorMessage = "An unexpected error occurred.";
             }
             return Page();
+        }
+
+        private async Task<ShopResponseModel> GetShopById(string id)
+        {
+            var response = await _apiResponseHelper.GetAsync<ShopResponseModel>(Constants.ApiBaseUrl + $"/api/shop/{id}");
+
+            return response.StatusCode == StatusCodeHelper.OK && response.Data != null
+                ? response.Data
+                : new ShopResponseModel();
         }
 
         // Nhận ProductId từ chuỗi truy vấn

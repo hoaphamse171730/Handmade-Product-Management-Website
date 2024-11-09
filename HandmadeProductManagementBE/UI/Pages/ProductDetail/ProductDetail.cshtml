@@ -72,7 +72,7 @@
 </div>
 
 
-<div class="flex flex-wrap p-6">
+<div class="mb-20 flex flex-wrap p-6">
     <!-- Left side: Product Images -->
     <div class="z-10 fixed bottom-0 right-0 mb-5 mr-5 rounded-full shadow-2xl sm:mr-6 sm:mb-6">
         <div class="flex items-center justify-center rounded-full bg-teal-500 p-3 opacity-75 sm:p-4">
@@ -90,22 +90,36 @@
     </div>
 
     <div class="w-full p-4 md:w-1/2">
-        <div class="mb-4">
-            <!-- Large Image -->
-            <img src="@Model.productDetail?.ProductImageUrls.FirstOrDefault()" alt="Product Image" class="mx-auto h-[550px] w-[600px] rounded-lg object-cover shadow-md">
+        <!-- Large Image Swiper with Slide Effect -->
+        <div class="swiper-container main-image-swiper relative mb-4 overflow-hidden">
+            <div class="swiper-wrapper">
+                @if (Model.productDetail?.ProductImageUrls != null)
+                {
+                    @foreach (var imageUrl in Model.productDetail.ProductImageUrls)
+                    {
+                        <div class="swiper-slide">
+                            <img src="@imageUrl" alt="Product Image" class="mx-auto h-[550px] w-[600px] rounded-lg object-cover shadow-md">
+                        </div>
+                    }
+                }
+            </div>
+            <!-- Swiper Navigation Buttons Positioned Inside Large Image -->
+            <div class="swiper-button-next custom-nav-button right-4"></div>
+            <div class="swiper-button-prev custom-nav-button left-4"></div>
         </div>
-        <div class="flex space-x-2">
-            <!-- Small Images -->
+
+        <!-- Small Images as Pagination -->
+        <div class="swiper-pagination custom-pagination mt-4 flex space-x-2">
             @if (Model.productDetail?.ProductImageUrls != null)
             {
-                @for (int i = 1; i < Math.Min(4, Model.productDetail.ProductImageUrls.Count); i++)
+                @for (int i = 0; i < Model.productDetail.ProductImageUrls.Count; i++)
                 {
                     <img src="@Model.productDetail.ProductImageUrls[i]"
                          alt="Product Thumbnail"
-                         class="h-20 w-1/5 cursor-pointer rounded-lg object-cover shadow-md">
+                         class="thumbnail-pagination h-20 w-20 cursor-pointer rounded-lg object-cover shadow-md"
+                         data-index="@i">
                 }
             }
-           
         </div>
     </div>
 
@@ -212,7 +226,7 @@
                 </div>
             </div>
 
-            <div class="flex space-x-4">
+            <div class="mb-10 flex space-x-4">
                 <!-- Nút "Add to Cart" với điều kiện disable và thay đổi text -->
                 <button type="submit"
                         class="flex-1 rounded-lg bg-blue-500 px-4 py-3 text-white hover:bg-blue-600
@@ -228,8 +242,40 @@
                 </button>
             </div>
         </form>
+        </div>
     </div>
-</div>
+
+<!-- Shop Information Section -->
+<a href="/Shop/Index?id=@Model.Shop.Id" class="mb-10 block rounded-lg border border-gray-300 bg-gray-50 p-4 transition duration-200 hover:bg-gray-200">
+    <div class="flex items-center space-x-4">
+        <!-- Large Shop Icon -->
+        <i class="fa fa-store text-5xl text-gray-800"></i>
+        <!-- Shop Information -->
+        <div>
+            <div class="text-lg font-semibold text-gray-800">@Model.Shop?.Name</div>
+            <div class="text-sm text-gray-600">@Model.Shop?.Description</div>
+        </div>
+        <!-- Rating, Product Count, and Joined Column -->
+        <div class="space-y-2">
+            <!-- Rating -->
+            <div class="flex items-center space-x-2">
+                <span class="text-gray-700">Rating:</span>
+                @for (int i = 1; i <= 5; i++)
+                {
+                    <svg class="h-5 w-5 @(i <= Model.Shop?.Rating ? "text-yellow-500" : "text-gray-300")" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 .587l3.668 7.568 8.235 1.199-5.964 5.222L19.339 24 12 20.812 4.661 24l1.331-9.424-5.964-5.222 8.235-1.199L12 .587z" />
+                    </svg>
+                }
+            </div>
+
+            <!-- Product Count -->
+            <div class="text-sm text-gray-600">Product Count: @Model.Shop?.ProductCount</div>
+
+            <!-- Joined Time Ago -->
+            <div class="text-sm text-gray-500">Joined: @Model.Shop?.JoinedTimeAgo</div>
+        </div>
+    </div>
+</a>
 
 <h1 class="mb-4 text-center text-4xl font-bold text-red-600">Product Ratings</h1>
 
@@ -283,6 +329,27 @@
 
 @section Scripts{
     <partial name="_ValidationScriptsPartial" />
+    <!-- Swiper Initialization Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var mainImageSwiper = new Swiper('.main-image-swiper', {
+                slidesPerView: 1,
+                spaceBetween: 0,
+                centeredSlides: true,
+                navigation: {
+                    nextEl: '.swiper-button-next',
+                    prevEl: '.swiper-button-prev',
+                },
+            });
+
+            // Add click event to thumbnails to act as pagination
+            document.querySelectorAll('.thumbnail-pagination').forEach((thumbnail, index) => {
+                thumbnail.addEventListener('click', () => {
+                    mainImageSwiper.slideTo(index);
+                });
+            });
+        });
+    </script>
     <script>
         let quantity = 1; // Biến để lưu số lượng
         let maxQuantity = 50; // Số lượng tối đa của productItem
