@@ -2,12 +2,14 @@ using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Common;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.Core.Store;
+using HandmadeProductManagement.ModelViews.ReplyModelViews;
 using HandmadeProductManagement.ModelViews.ReviewModelViews;
 using HandmadeProductManagement.ModelViews.ShopModelViews;
 using HandmadeProductManagement.ModelViews.UserInfoModelViews;
 using HandmadeProductManagement.ModelViews.UserModelViews;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.IdentityModel.Tokens;
 using System.Linq;
 
 namespace UI.Pages.Review
@@ -27,12 +29,32 @@ namespace UI.Pages.Review
         public IList<UserResponseModel> Users { get; set; } = new List<UserResponseModel>();
         public IList<ShopResponseModel> Shops { get; set; } = new List<ShopResponseModel>();
 
+        [TempData]
+        public string? StatusMessage { get; set; }
+        public ShopResponseModel? CurrentUserShop { get; set; }
+        private async Task<ShopResponseModel?> GetCurrentUserShop()
+        {
+            try
+            {
+                // Get the current user's shop
+                var response = await _apiResponseHelper.GetAsync<ShopResponseModel>($"{Constants.ApiBaseUrl}/api/shop/user");
+                if (response.StatusCode == StatusCodeHelper.OK && response.Data != null)
+                {
+                    return response.Data;
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log the error if needed
+                Console.WriteLine($"Error getting current user shop: {ex.Message}");
+            }
+            return null;
+        }
         public async Task<IActionResult> OnGetAsync(int pageNumber = 1, int pageSize = 10)
         {
             PageNumber = pageNumber;
-
+            CurrentUserShop = await GetCurrentUserShop();
             var response = await _apiResponseHelper.GetAsync<IList<ReviewModel>>($"{Constants.ApiBaseUrl}/api/review?pageNumber={pageNumber}&pageSize={pageSize}");
-
             if (response.StatusCode == StatusCodeHelper.OK && response.Data != null)
             {
                 Reviews = response.Data;
@@ -43,21 +65,146 @@ namespace UI.Pages.Review
                 }
             }
 
-            // Fetch all Users
+            await LoadUsersAndShops();
+            return Page();
+        }
+
+        private async Task LoadUsersAndShops()
+        {
             var userResponse = await _apiResponseHelper.GetAsync<IList<UserResponseModel>>($"{Constants.ApiBaseUrl}/api/users");
             if (userResponse.StatusCode == StatusCodeHelper.OK)
             {
-                Users = userResponse.Data ?? new List<UserResponseModel>(); // Fallback to empty list if null
+                Users = userResponse.Data ?? new List<UserResponseModel>();
             }
 
-            // Fetch all Shops
             var shopResponse = await _apiResponseHelper.GetAsync<IList<ShopResponseModel>>($"{Constants.ApiBaseUrl}/api/shop/get-all");
             if (shopResponse.StatusCode == StatusCodeHelper.OK)
             {
-                Shops = shopResponse.Data ?? new List<ShopResponseModel>();  // Fallback to empty list if null;
+                Shops = shopResponse.Data ?? new List<ShopResponseModel>();
+            }
+        }
+
+        [BindProperty]
+        public ReplyModel Reply { get; set; } = new();
+        [BindProperty]
+        public string EditReplyContent { get; set; } = string.Empty;
+
+        public async Task<IActionResult> OnPostCreateReplyAsync()
+        {
+            if (string.IsNullOrEmpty(Reply.Content))
+            {
+                StatusMessage = "Error: Reply content is required.";
+                return RedirectToPage("./Index", new { pageNumber = PageNumber });
             }
 
-            return Page();
+            try
+            {
+                // Get current user's shop
+                var currentShop = await GetCurrentUserShop();
+                if (currentShop == null)
+                {
+                    StatusMessage = "Error: Could not determine the shop for the current user.";
+                    return RedirectToPage("./Index", new { pageNumber = PageNumber });
+                }
+
+                // Create reply payload matching the API expectations
+                var payload = new
+                {
+                    content = Reply.Content,
+                    reviewId = Reply.ReviewId,
+                    shopId = currentShop.Id,
+                    date = DateTime.Now
+                };
+
+                // Make API call with query parameters instead of body
+                var response = await _apiResponseHelper.PostAsync<bool>(
+                    $"{Constants.ApiBaseUrl}/api/reply?content={Uri.EscapeDataString(Reply.Content)}&reviewId={Reply.ReviewId}",
+                    null  // No body needed since we're using query parameters
+                );
+
+                if (response.StatusCode == StatusCodeHelper.OK)
+                {
+                    StatusMessage = "Reply was created successfully!";
+                    return RedirectToPage("./Index", new { pageNumber = PageNumber });
+                }
+
+                StatusMessage = "Error: Failed to create reply.";
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"Error creating reply: {ex.Message}";
+                Console.WriteLine($"Exception details: {ex}");
+            }
+
+            return RedirectToPage("./Index", new { pageNumber = PageNumber });
+        }
+
+        public async Task<IActionResult> OnPostUpdateReplyAsync(string replyId, string content)
+        {
+            try
+            {
+                var response = await _apiResponseHelper.PutAsync<bool>(
+                    $"{Constants.ApiBaseUrl}/api/reply/{replyId}?content={Uri.EscapeDataString(content)}"
+                );
+
+                if (response.StatusCode == StatusCodeHelper.OK)
+                {
+                    StatusMessage = "Reply was updated successfully!";
+                }
+                else
+                {
+                    StatusMessage = "Error: Failed to update reply.";
+                }
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"Error updating reply: {ex.Message}";
+                Console.WriteLine($"Exception details: {ex}");
+            }
+
+            return RedirectToPage("./Index", new { pageNumber = PageNumber });
+        }
+
+        public async Task<IActionResult> OnPostDeleteReplyAsync(string replyId)
+        {
+            try
+            {
+                var response = await _apiResponseHelper.DeleteAsync<bool>(
+                    $"{Constants.ApiBaseUrl}/api/reply/{replyId}/soft-delete"
+                );
+
+                if (response.StatusCode == StatusCodeHelper.OK)
+                {
+                    StatusMessage = "Reply was deleted successfully!";
+                    // Explicitly reload the reviews
+                    await ReloadReviewsAndUserData();
+                }
+                else
+                {
+                    StatusMessage = "Error: Failed to delete reply.";
+                }
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"Error deleting reply: {ex.Message}";
+                Console.WriteLine($"Exception details: {ex}");
+            }
+
+            return RedirectToPage("./Index", new { pageNumber = PageNumber });
+        }
+
+        private async Task ReloadReviewsAndUserData()
+        {
+            // Refresh reviews from API after deletion
+            var reviewResponse = await _apiResponseHelper.GetAsync<IList<ReviewModel>>(
+                $"{Constants.ApiBaseUrl}/api/review?pageNumber={PageNumber}&pageSize=10"
+            );
+
+            if (reviewResponse.StatusCode == StatusCodeHelper.OK && reviewResponse.Data != null)
+            {
+                Reviews = reviewResponse.Data;
+                await LoadUsersAndShops();
+            }
         }
     }
 }
