@@ -20,9 +20,9 @@ namespace HandmadeProductManagement.Services.Service
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<bool> UploadProductImage(IFormFile file, string productId)
+        public async Task<bool> UploadProductImage(List<IFormFile> files, string productId)
         {
-            if (file == null || file.Length == 0)
+            if (files == null || files.Count == 0)
             {
                 throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageFileNotFound);
             }
@@ -34,20 +34,30 @@ namespace HandmadeProductManagement.Services.Service
 
             var uploadImageService = new ManageFirebaseImageService();
 
-            using (var stream = file.OpenReadStream())
+            foreach (var file in files)
             {
-                var fileName = $"{Guid.NewGuid()}_{file.FileName}";
-                var imageUrl = await uploadImageService.UploadFileAsync(stream, fileName);
-
-                var productImage = new ProductImage
+                if (file.Length == 0)
                 {
-                    Url = imageUrl,
-                    ProductId = productId
-                };
+                    throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageFileEmpty);
+                }
 
-                await _unitOfWork.GetRepository<ProductImage>().InsertAsync(productImage);
-                await _unitOfWork.SaveAsync();
+                using (var stream = file.OpenReadStream())
+                {
+                    var fileName = $"{Guid.NewGuid()}_{file.FileName}";
+                    var imageUrl = await uploadImageService.UploadFileAsync(stream, fileName); 
+
+                    // Tạo đối tượng ProductImage và lưu vào cơ sở dữ liệu
+                    var productImage = new ProductImage
+                    {
+                        Url = imageUrl,
+                        ProductId = productId
+                    };
+
+                    await _unitOfWork.GetRepository<ProductImage>().InsertAsync(productImage); 
+                }
             }
+
+            await _unitOfWork.SaveAsync();
 
             return true;
         }
@@ -69,15 +79,19 @@ namespace HandmadeProductManagement.Services.Service
             return true;
         }
 
-        public async Task<IList<productImageByIdResponse>>GetProductImageById(string id)
+        public async Task<IList<productImageByIdResponse>> GetProductImageById(string id)
         {
             var images = await _unitOfWork.GetRepository<ProductImage>()
-                .Entities.Where (pi=>pi.ProductId == id)
-                .Select(pi=> new productImageByIdResponse
+                .Entities
+                .Where(pi => pi.ProductId == id)
+                .OrderBy(pi => pi.CreatedTime)
+                .Select(pi => new productImageByIdResponse
                 {
                     Id = pi.Id,
                     Url = pi.Url,
-                }).ToListAsync();
+                })
+                .ToListAsync();
+
             return images;
         }
     }

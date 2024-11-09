@@ -272,6 +272,17 @@
 <div id="editProductModal" class="fixed inset-0 hidden items-center justify-center bg-black bg-opacity-50">
     <div class="max-h-[90vh] w-3/4 overflow-y-auto rounded-lg bg-white p-6">
         <h2 class="mb-4 text-center text-2xl font-bold">Edit Product</h2>
+        <!-- Image Upload Section -->
+        <div class="border-t pt-4">
+            <label class="mb-2 block text-sm font-medium text-gray-700">Product Images</label>
+            <input type="file" id="productImagesForEdit" name="ProductImages" multiple accept="image/*"
+                   onchange="uploadImages(this.files)" class="hidden" />
+            <button type="button" onclick="document.getElementById('productImagesForEdit').click()"
+                    class="rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600">
+                Choose Images
+            </button>
+            <div id="imagePreviewContainerForEdit" class="grid-cols-4 mt-4 grid gap-4"></div>
+        </div>
         <!-- Basic Information Form -->
         <form method="post" asp-page-handler="UpdateBasicInfo" id="basicInfoForm" class="mb-8 space-y-4 border-b pb-8">
             @Html.AntiForgeryToken()
@@ -857,8 +868,13 @@
                 if (!response.ok) throw new Error('Failed to load variations');
 
                 const variations = await response.json();
+                const variationNamesSet = new Set(); // Track unique variation names
 
                 for (const variation of variations) {
+                    // Skip if the variation name already exists
+                    if (variationNamesSet.has(variation.name)) continue;
+                    variationNamesSet.add(variation.name);
+
                     const variationDiv = document.createElement('div');
                     variationDiv.classList.add('p-4', 'border', 'rounded-md', 'bg-gray-50', 'mb-4');
 
@@ -894,8 +910,13 @@
 
                 const options = await response.json();
                 const optionsContainer = document.getElementById(`options-${variationId}`).querySelector('.grid');
+                const optionValuesSet = new Set(); // Track unique option values for this variation
 
                 options.forEach(option => {
+                    // Skip if the option value already exists for this variation
+                    if (optionValuesSet.has(option.value)) return;
+                    optionValuesSet.add(option.value);
+
                     const optionDiv = document.createElement('div');
                     optionDiv.classList.add('flex', 'items-center');
                     optionDiv.innerHTML = `
@@ -1259,8 +1280,28 @@
         }
 
         function closeAddProductModal() {
-            document.getElementById('addProductModal').classList.remove('flex');
-            document.getElementById('addProductModal').classList.add('hidden');
+            // Hide the modal
+            document.getElementById("addProductModal").classList.add("hidden");
+
+            // Ensure form is accessible when modal is closed
+            const form = document.querySelector("#addProductModal form");
+
+            if (form) {
+                form.reset(); // Reset form values
+            } else {
+                console.error("Form not found.");
+            }
+
+            // Clear dynamically generated content
+            document.getElementById("existingVariationsList").innerHTML = ""; // Clear Existing Variations
+            document.getElementById("newVariationsContainerForCreation").innerHTML = ""; // Clear New Variations
+            document.getElementById("variationCombinationContainer").innerHTML = ""; // Clear Variation Combinations
+
+            // Clear image previews
+            document.getElementById("imagePreviewContainer").innerHTML = ""; // Clear image preview container
+            document.getElementById("productImages").value = ""; // Clear selected files
+
+            // Optional: Remove any custom classes or states if necessary
         }
 
 
@@ -1303,6 +1344,113 @@
 
 
         //Edit Product
+        // Assuming `productId` is available, either passed or retrieved dynamically
+        async function loadProductImagesForEdit(productId) {
+            const imagePreviewContainer = document.getElementById('imagePreviewContainerForEdit');
+            try {
+                const response = await fetch(`${apiBaseUrl}/api/productimage/getimage/${productId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`,
+                        'RequestVerificationToken': requestVerificationToken
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.statusCode === 200 && data.data) {
+                    // Clear previous images
+                    imagePreviewContainer.innerHTML = '';
+
+                    // Display each image as a preview
+                    data.data.forEach(image => {
+                        const imgWrapper = document.createElement('div');
+                        imgWrapper.classList.add('relative');
+                        imgWrapper.innerHTML = `
+                            <img src="${image.url}" class="h-32 w-full rounded-md object-cover" />
+                            <button type="button" onclick="removeImageForEdit(this, '${image.id}')"
+                                    class="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white">
+                                ✖
+                            </button>
+                        `;
+                        imagePreviewContainer.appendChild(imgWrapper);
+                    });
+                } else {
+                    console.log('Failed to fetch images:', data.message);
+                }
+            } catch (error) {
+                console.error('Error fetching product images:', error);
+            }
+        }
+
+        async function removeImageForEdit(button, imageId) {
+            // Show confirmation dialog before deletion
+            const isConfirmed = window.confirm('Are you sure you want to delete this image?');
+
+            if (!isConfirmed) {
+                // If the user cancels, stop the deletion process
+                return;
+            }
+
+            try {
+                const response = await fetch(`${apiBaseUrl}/api/productimage/delete/${imageId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`,
+                        'RequestVerificationToken': requestVerificationToken
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.statusCode === 200) {
+                    // Remove the image preview from the UI
+                    const imgWrapper = button.closest('div');
+                    imgWrapper.remove();
+                    console.log(`Image with ID: ${imageId} removed successfully.`);
+                } else {
+                    console.log('Failed to remove image:', data.message);
+                }
+            } catch (error) {
+                console.error('Error removing image:', error);
+            }
+        }
+
+        async function uploadImages(files) {
+            const productId = document.getElementById('editProductId').value;
+            const formData = new FormData();
+
+            // Thêm các tệp vào FormData
+            Array.from(files).forEach(file => {
+                formData.append('files', file); // 'files' là tên trường mà API của bạn mong đợi
+            });
+
+            try {
+                const response = await fetch(`${apiBaseUrl}/api/productimage/upload/${productId}`, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`, // Token xác thực
+                        'RequestVerificationToken': requestVerificationToken // Token CSRF
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.statusCode === 200 && data.data) {
+                    console.log('Images uploaded successfully');
+                    loadProductImagesForEdit(productId);
+                    // Có thể làm mới hình ảnh đã tải lên hoặc thông báo thành công
+                } else {
+                    console.log('Failed to upload images:', data.message);
+                }
+            } catch (error) {
+                console.error('Error uploading images:', error);
+            }
+        }
+
         const editProductState = {
             productItems: []
         };
@@ -1815,6 +1963,14 @@
             const modal = document.getElementById('editProductModal');
             modal.classList.remove('hidden');
             modal.classList.add('flex');
+
+            const productId = document.getElementById('editProductId').value.trim();
+
+            // Load the product images
+            loadProductImagesForEdit(productId);
+
+            // Show the modal (assuming you're using CSS classes to show/hide the modal)
+            document.getElementById('editProductModal').classList.remove('hidden');
         }
 
         function closeEditModal() {

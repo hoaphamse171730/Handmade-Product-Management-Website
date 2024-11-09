@@ -63,12 +63,10 @@
                 <!-- Seller-Only Links -->
                 @if (userRole == "Seller")
                 {
-                    <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Product/ProductSeller">Product Seller</a>
                     <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Seller/Shop">My Shop</a>
                     <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Seller/OrderManagement">Order Management</a>
-                    <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Review/Index">Reviews</a>
                     <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Order/OrderHistory">Order History</a>
-                    <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Checkout/Index">Checkout</a>
+                    <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Review/Index">Reviews</a>
                 }
 
                 <!-- Customer Links -->

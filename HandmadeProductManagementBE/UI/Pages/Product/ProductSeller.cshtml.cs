@@ -1,4 +1,4 @@
-using HandmadeProductManagement.Contract.Repositories.Entity;
+﻿using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Common;
 using HandmadeProductManagement.Core.Constants;
@@ -27,6 +27,8 @@ using HandmadeProductManagement.ModelViews.ProductDetailModelViews;
 using HandmadeProductManagement.ModelViews.ProductItemModelViews;
 using HandmadeProductManagement.ModelViews.ProductImageModelViews;
 using Newtonsoft.Json;
+using System.Net.Http;
+using GraphQLParser;
 
 namespace UI.Pages.Product
 {
@@ -466,7 +468,7 @@ namespace UI.Pages.Product
             public string Value { get; set; }
             public string VariationId { get; set; }
         }
-
+        public string Token { get; set; }
         private async Task HandleImageUploads()
         {
             var latestProductsResponse = await _apiResponseHelper.GetAsync<List<ProductOverviewDto>>(
@@ -477,20 +479,50 @@ namespace UI.Pages.Product
             {
                 var latestProductId = latestProductsResponse.Data.First().Id;
 
+                var formData = new MultipartFormDataContent();
+
+                // Thêm các ảnh vào FormData
                 foreach (var image in ProductImages)
                 {
                     if (image != null && image.Length > 0)
                     {
-                        var uploadResponse = await _apiResponseHelper.UploadImageAsync(
-                            $"{Constants.ApiBaseUrl}/api/productimage/Upload",
-                            image,
-                            latestProductId);
-
-                        if (uploadResponse.StatusCode != StatusCodeHelper.OK || !uploadResponse.Data)
+                        // Create a memory stream to store the file bytes
+                        using (var memoryStream = new MemoryStream())
                         {
-                            _logger.LogError($"Failed to upload image for product {latestProductId}");
+                            // Copy the file content into the memory stream
+                            await image.CopyToAsync(memoryStream);
+
+                            // Convert the memory stream to a byte array
+                            var fileBytes = memoryStream.ToArray();
+
+                            // Create ByteArrayContent with the file bytes
+                            var fileContent = new ByteArrayContent(fileBytes);
+
+                            // Set the content type (adjust as needed)
+                            fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("image/jpeg");
+
+                            // Add the file to the form data
+                            formData.Add(fileContent, "files", image.FileName); // "files" is the expected field name in the API
                         }
                     }
+                }
+
+                // Gửi yêu cầu POST để upload ảnh
+                var uploadUrl = $"{Constants.ApiBaseUrl}/api/productimage/upload/{latestProductId}"; // API URL for uploading images
+
+                Token = HttpContext.Session.GetString("Token"); // Get the authorization token from the session
+                var client = _httpClientFactory.CreateClient();
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Token); // Add authorization header
+
+                var response = await client.PostAsync(uploadUrl, formData); // Send POST request with form data
+
+                if (response.IsSuccessStatusCode)
+                {
+                    _logger.LogInformation($"Successfully uploaded images for product {latestProductId}");
+                }
+                else
+                {
+                    _logger.LogError($"Failed to upload images for product {latestProductId}");
                 }
             }
         }

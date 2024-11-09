@@ -53,7 +53,7 @@ namespace UI.Pages
 
             if (response.IsSuccessStatusCode)
             {
-                ConfirmationResult = "Email confirmed successfully!";
+                TempData["ConfirmationResult"] = "Email confirmed successfully!";
                 return RedirectToPage("/Login");
             }
             else
