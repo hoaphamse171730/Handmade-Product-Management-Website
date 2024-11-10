@@ -87,8 +87,10 @@
 
             <!-- Action Buttons (Updated) -->
             <div class="mt-4 flex justify-end space-x-4">
-                <button onclick="openEditModal(@review.Id, '@review.Content', @review.Rating)"
-                        class="rounded-md bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                <button data-review-id="@review.Id"
+                        data-review-content="@review.Content"
+                        data-review-rating="@review.Rating"
+                        class="edit-review-btn rounded-md bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
                     Edit
                 </button>
                 <form method="post" asp-page="SoftDelete" asp-route-reviewId="@review.Id" class="inline">
@@ -117,17 +119,96 @@
     </nav>
 }
 
-<script>
-    function toggleEditForm(replyId) {
-        const contentDiv = document.querySelector(`.reply-content-${replyId}`);
-        const editForm = document.getElementById(`edit-form-${replyId}`);
+<div id="editModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center">
+    <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-xl mx-4">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">Edit Review</h2>
+        <form method="post" asp-page-handler="EditReview">
+            <input type="hidden" id="modalReviewId" name="reviewId" />
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Content</label>
+                    <textarea id="modalContent" name="content" rows="4"
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Rating</label>
+                    <div class="flex items-center space-x-2">
+                        @for (var i = 1; i <= 5; i++)
+                        {
+                            <button type="button"
+                                onclick="setModalRating(@i)"
+                                class="modal-star-btn text-2xl focus:outline-none transition-colors duration-200"
+                                data-rating="@i">
+                                ★
+                            </button>
+                        }
+                    </div>
+                    <input type="hidden" id="modalRating" name="rating" />
+                </div>
+                <div class="flex justify-end space-x-3 mt-4">
+                    <button type="button" onclick="closeEditModal()"
+                        class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200">
+                        Cancel
+                    </button>
+                    <button type="submit"
+                        class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">
+                        Save Changes
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
 
-        if (editForm.classList.contains('hidden')) {
-            contentDiv.classList.add('hidden');
-            editForm.classList.remove('hidden');
-        } else {
-            contentDiv.classList.remove('hidden');
-            editForm.classList.add('hidden');
-        }
+<style>
+    .modal-star-btn {
+        color: #d1d5db;
+        cursor: pointer;
+    }
+    .modal-star-btn.active {
+        color: #fbbf24;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add click handlers to all edit buttons
+    document.querySelectorAll('.edit-review-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const reviewId = this.dataset.reviewId;
+            const content = this.dataset.reviewContent;
+            const rating = parseInt(this.dataset.reviewRating);
+            openEditModal(reviewId, content, rating);
+        });
+    });
+});
+
+function openEditModal(reviewId, content, rating) {
+    // Populate modal
+    document.getElementById('modalReviewId').value = reviewId;
+    document.getElementById('modalContent').value = content;
+    setModalRating(rating);
+    
+    // Show modal
+    document.getElementById('editModal').classList.remove('hidden');
+    document.getElementById('editModal').classList.add('flex');
+}
+
+    function closeEditModal() {
+        document.getElementById('editModal').classList.add('hidden');
+        document.getElementById('editModal').classList.remove('flex');
+    }
+
+    function setModalRating(rating) {
+        const stars = document.querySelectorAll('.modal-star-btn');
+        document.getElementById('modalRating').value = rating;
+        
+        stars.forEach((star, index) => {
+            if (index < rating) {
+                star.classList.add('active');
+            } else {
+                star.classList.remove('active');
+            }
+        });
     }
 </script>

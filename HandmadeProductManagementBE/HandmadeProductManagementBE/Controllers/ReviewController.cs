@@ -122,8 +122,9 @@ namespace HandmadeProductManagementAPI.Controllers
             existingReview.Rating = rating ?? existingReview.Rating;
 
             var updatedReview = await _reviewService.UpdateAsync(reviewId, Guid.Parse(userId), existingReview);
-            var response = new BaseResponse<ReviewModel>
+            var response = new BaseResponse<bool>
             {
+                Data = true,
                 Code = "Success",
                 StatusCode = StatusCodeHelper.OK,
                 Message = "Review updated successfully."
