@@ -4,6 +4,7 @@ namespace HandmadeProductManagement.Contract.Services.Interface
 {
     public interface IReviewService
     {
+        Task<IList<ReviewModel>> GetBySellerIdAsync(string sellerId, int pageNumber, int pageSize);
         Task<IList<ReviewModel>> GetByProductIdAsync(string productId, int pageNumber, int pageSize);
         Task<IList<ReviewModel>> GetByPageAsync(int pageNumber, int pageSize);
         Task<ReviewModel> GetByIdAsync(string reviewId);

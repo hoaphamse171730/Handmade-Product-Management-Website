@@ -8,6 +8,7 @@
     ViewData["Title"] = "ProductDetail";
     var productItems = Model.productDetail?.ProductItems;
     var message = TempData["Message"];
+    var userNames = new Dictionary<string, string>();
     var messageType = TempData["MessageType"];
     string getUserId(string token)
     {
@@ -285,16 +286,19 @@
     {
         <div class="rounded-lg border border-gray-300 bg-white p-4 shadow-md">
             <div class="flex flex-col">
-                <span class="font-semibold">@(Model.Users.FirstOrDefault(user => user.Id == review.UserId)?.UserName ?? "Unknown User")</span>
-                <span class="text-sm text-gray-500">@review.Date?.ToString("g")</span>
-                <div class="flex items-center">
-                    @for (int i = 1; i <= 5; i++)
+                @{
+                    // Kiểm tra và lấy UserName từ userId
+                    if (!userNames.TryGetValue(review.UserId.ToString(), out var userName))
                     {
-                        <svg class="h-5 w-5 @(i <= review.Rating ? "text-yellow-500" : "text-gray-300")" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 .587l3.668 7.568 8.235 1.199-5.964 5.222L19.339 24 12 20.812 4.661 24l1.331-9.424-5.964-5.222 8.235-1.199L12 .587z" />
-                        </svg>
+                        var user = await Model.GetUserByIdAsync(review.UserId.ToString());
+                        userName = user?.UserName ?? "Unknown User";
+                        userNames[review.UserId.ToString()] = userName;
                     }
-                </div>
+                }
+                <span class="font-semibold">@userName</span>
+                <span class="text-sm text-gray-500">@review.Date?.ToString("g")</span>
+
+                <!-- Hiển thị nội dung review và các thành phần khác -->
                 <p class="mt-2">@review.Content</p>
             </div>
 

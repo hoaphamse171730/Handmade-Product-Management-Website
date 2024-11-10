@@ -3,6 +3,7 @@
 @model UI.Pages.Review.IndexModel
 @{
 	ViewData["Title"] = "Reviews";
+    var userNames = new Dictionary<string, string>();
 }
 
 <h1 class="mb-4 text-center text-4xl font-bold text-red-600">Reviews</h1>
@@ -18,20 +19,48 @@
     @foreach (var review in Model.Reviews)
     {
         <div class="rounded-lg border border-gray-300 bg-white p-4 shadow-md">
+
+            <!-- Display product info at the top of the review -->
+            @if (review.ProductId != null)
+            {
+                var product = await Model.GetProductByIdAsync(review.ProductId.ToString());
+
+                @* Only display the product information if it exists *@
+                @if (product != null)
+                {
+                    <div class="mb-4 flex items-center rounded-lg border bg-gray-200 px-2 py-2">
+                        <!-- Wrap the entire product info in an anchor tag to make it clickable -->
+                        <a href="/ProductDetail/ProductDetail?id=@product.Id" class="flex w-full items-center">
+                            <img src="@product.ProductImageUrl" alt="Product Image" class="ml-2 mr-2 h-24 w-24 rounded-md object-cover" />
+                            <div>
+                                <h3 class="text-lg font-semibold">@product.Name</h3>
+                                <p class="text-sm text-gray-500">@product.Description</p>
+                            </div>
+                        </a>
+                    </div>
+                }
+                else
+                {
+                    <div class="mb-4">
+                        <p class="text-sm text-red-600">Product not found.</p>
+                    </div>
+                }
+            }
+
             <div class="flex flex-col">
                 @{
-                    var reviewer = Model.Users.FirstOrDefault(u => u.Id == review.UserId);
-                }
-                <span class="font-semibold">@(reviewer?.UserName ?? "Unknown User")</span>                
-                <span class="text-sm text-gray-500">@review.Date?.ToString("g")</span>
-                <div class="flex items-center">
-                    @for (int i = 1; i <= 5; i++)
+                    // Kiểm tra và lấy UserName từ userId
+                    if (!userNames.TryGetValue(review.UserId.ToString(), out var userName))
                     {
-                        <svg class="h-5 w-5 @(i <= review.Rating ? "text-yellow-500" : "text-gray-300")" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 .587l3.668 7.568 8.235 1.199-5.964 5.222L19.339 24 12 20.812 4.661 24l1.331-9.424-5.964-5.222 8.235-1.199L12 .587z" />
-                        </svg>
+                        var user = await Model.GetUserByIdAsync(review.UserId.ToString());
+                        userName = user?.UserName ?? "Unknown User";
+                        userNames[review.UserId.ToString()] = userName;
                     }
-                </div>
+                }
+                <span class="font-semibold">@userName</span>
+                <span class="text-sm text-gray-500">@review.Date?.ToString("g")</span>
+
+                <!-- Hiển thị nội dung review và các thành phần khác -->
                 <p class="mt-2">@review.Content</p>
             </div>
 
@@ -118,13 +147,6 @@
                         </div>
                     </form>
                 }
-            </div>
-
-            <!-- Action Links -->
-            <div class="mt-4 flex justify-end">
-                <a class="text-blue-600 hover:text-blue-800" asp-page="Details" asp-route-reviewId="@review.Id">Details</a> |
-                <a class="text-blue-600 hover:text-blue-800" asp-page="Edit" asp-route-reviewId="@review.Id">Edit</a> |
-                <a class="text-red-600 hover:text-red-800" asp-page="SoftDelete" asp-route-reviewId="@review.Id">Soft Delete</a>
             </div>
         </div>
     }

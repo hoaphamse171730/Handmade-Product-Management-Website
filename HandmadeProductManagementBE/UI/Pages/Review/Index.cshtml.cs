@@ -2,6 +2,7 @@ using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Common;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.Core.Store;
+using HandmadeProductManagement.ModelViews.ProductModelViews;
 using HandmadeProductManagement.ModelViews.ReplyModelViews;
 using HandmadeProductManagement.ModelViews.ReviewModelViews;
 using HandmadeProductManagement.ModelViews.ShopModelViews;
@@ -11,6 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.IdentityModel.Tokens;
 using System.Linq;
+using System.Net.Http;
 
 namespace UI.Pages.Review
 {
@@ -54,7 +56,7 @@ namespace UI.Pages.Review
         {
             PageNumber = pageNumber;
             CurrentUserShop = await GetCurrentUserShop();
-            var response = await _apiResponseHelper.GetAsync<IList<ReviewModel>>($"{Constants.ApiBaseUrl}/api/review?pageNumber={pageNumber}&pageSize={pageSize}");
+            var response = await _apiResponseHelper.GetAsync<IList<ReviewModel>>($"{Constants.ApiBaseUrl}/api/review/seller?pageNumber={pageNumber}&pageSize={pageSize}");
             if (response.StatusCode == StatusCodeHelper.OK && response.Data != null)
             {
                 Reviews = response.Data;
@@ -68,6 +70,41 @@ namespace UI.Pages.Review
             await LoadUsersAndShops();
             return Page();
         }
+
+        public async Task<UserResponseModel?> GetUserByIdAsync(string userId)
+        {
+            try
+            {
+                var response = await _apiResponseHelper.GetAsync<UserResponseModel>($"{Constants.ApiBaseUrl}/api/users/{userId}");
+                if (response.StatusCode == StatusCodeHelper.OK && response.Data != null)
+                {
+                    return response.Data;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error getting user by ID: {ex.Message}");
+            }
+            return null;
+        }
+
+        public async Task<ProductDto?> GetProductByIdAsync(string productId)
+        {
+            try
+            {
+                var response = await _apiResponseHelper.GetAsync<ProductDto>($"{Constants.ApiBaseUrl}/api/product/{productId}");
+                if (response.StatusCode == StatusCodeHelper.OK && response.Data != null)
+                {
+                    return response.Data;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error getting user by ID: {ex.Message}");
+            }
+            return null;
+        }
+
 
         private async Task LoadUsersAndShops()
         {

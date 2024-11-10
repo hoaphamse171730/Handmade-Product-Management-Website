@@ -183,6 +183,23 @@ namespace UI.Pages.ProductDetail
                 : new ShopResponseModel();
         }
 
+        public async Task<UserResponseModel?> GetUserByIdAsync(string userId)
+        {
+            try
+            {
+                var response = await _apiResponseHelper.GetAsync<UserResponseModel>($"{Constants.ApiBaseUrl}/api/users/{userId}");
+                if (response.StatusCode == StatusCodeHelper.OK && response.Data != null)
+                {
+                    return response.Data;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error getting user by ID: {ex.Message}");
+            }
+            return null;
+        }
+
         // Nhận ProductId từ chuỗi truy vấn
         [BindProperty(SupportsGet = true)]
         public string Id { get; set; }

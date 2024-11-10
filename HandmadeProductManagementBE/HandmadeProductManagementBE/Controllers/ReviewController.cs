@@ -20,6 +20,21 @@ namespace HandmadeProductManagementAPI.Controllers
             _reviewService = reviewService;
         }
 
+        [HttpGet("seller")]
+        public async Task<IActionResult> GetBySellerId(int pageNumber = 1, int pageSize = 10)
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
+            var reviews = await _reviewService.GetBySellerIdAsync(userId, pageNumber, pageSize);
+            var response = new BaseResponse<IList<ReviewModel>>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Seller's reviews retrieved successfully.",
+                Data = reviews
+            };
+            return Ok(response);
+        }
+
         [HttpGet("product/{productId}")]
         public async Task<IActionResult> GetByProductId([Required] string productId, int pageNumber = 1, int pageSize = 10)
         {

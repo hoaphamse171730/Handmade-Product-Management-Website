@@ -52,7 +52,7 @@
                     <input type="text" id="updateShopName" name="ShopName"
                            class="w-full rounded-md border border-gray-300 p-2"
                            value="@Model.Shop.Name" required
-                           pattern="[A-Za-z0-9 ]+"
+                           pattern="^[A-Za-z0-9À-ỹáàảãạắằẳẵặéèẻẽẹíìỉĩịóòỏõọốồổỗộúùủũụưáàảãạắằẳẵặýỳỷỹỵđĐ\s]+$"
                            title="Shop Name only has letters and numbers" />
                 </div>
                 <div class="mb-4">
@@ -134,8 +134,8 @@ else
                     <input type="text" id="updateShopName" name="ShopName"
                            class="w-full rounded-md border border-gray-300 p-2"
                            value="@Model.Shop.Name" required
-                           pattern="[A-Za-z0-9 ]+"
-                           title="Shop Name only has letters and numbers" />
+                           pattern="^[A-Za-z0-9À-ỹáàảãạắằẳẵặéèẻẽẹíìỉĩịóòỏõọốồổỗộúùủũụưáàảãạắằẳẵặýỳỷỹỵđĐ\s]+$"
+                           title="Shop Name only has letters (including Vietnamese characters), numbers, and spaces" />
                 </div>
                 <div class="mb-4">
                     <label class="mb-2 block font-bold text-gray-700" for="updateShopDescription">Description</label>
