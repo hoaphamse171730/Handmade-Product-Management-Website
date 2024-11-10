@@ -10,7 +10,7 @@
 
     <!-- Filter Buttons -->
     <div class="mb-4 flex w-full flex-wrap justify-center gap-2">
-        @foreach (var filter in new[] { "All", "Pending", "Processing", "Delivering", "Shipped", "Canceled", "Refunded" })
+        @foreach (var filter in new[] { "All", "Pending", "Awaiting Payment", "Processing", "Delivering", "Shipped", "Canceled", "Refunded" })
         {
             <a href="?filter=@filter"
                class="flex-grow rounded-lg border border-blue-500 p-2 text-center text-lg font-bold
@@ -68,7 +68,14 @@
                                                 Update
                                             </button>
                                         }
-                                        @if (order.Status == "Pending" || order.Status == "Processing")
+                                         @if (order.Status == "Awaiting Payment")
+                                        {
+                                            <button class="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+                                                    onclick="event.stopPropagation()">
+                                                 Process payment
+                                            </button>
+                                        }
+                                        @if (order.Status == "Pending" || order.Status == "Processing" || order.Status == "Awaiting Payment")
                                         {
                                             <button class="rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600"
                                                     onclick="event.stopPropagation(); openConfirmModal('@order.Id')">

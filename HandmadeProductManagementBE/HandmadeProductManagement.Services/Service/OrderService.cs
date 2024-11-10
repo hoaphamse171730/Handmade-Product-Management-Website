@@ -639,7 +639,8 @@ namespace HandmadeProductManagement.Services.Service
                 // Validate Status Flow
                 var validStatusTransitions = new Dictionary<string, List<string>>
                 {
-                    { Constants.OrderStatusPending, new List<string> { Constants.OrderStatusCanceled, Constants.OrderStatusProcessing } },
+                    { Constants.OrderStatusPending, new List<string> { Constants.OrderStatusCanceled, Constants.OrderStatusProcessing, Constants.OrderStatusAwaitingPayment } },
+                    { Constants.OrderStatusAwaitingPayment, new List<string> { Constants.OrderStatusCanceled, Constants.OrderStatusProcessing } },
                     { Constants.OrderStatusProcessing, new List<string> { Constants.OrderStatusCanceled, Constants.OrderStatusDelivering } },
                     { Constants.OrderStatusDelivering, new List<string> { Constants.OrderStatusShipped, Constants.OrderStatusDeliveryFailed } },
                     { Constants.OrderStatusDeliveryFailed, new List<string> { Constants.OrderStatusOnHold } },

@@ -42,7 +42,7 @@
     <header class="bg-white shadow">
         <nav class="container mx-auto flex items-center justify-between py-4">
             <a class="text-4xl font-bold" asp-area="" asp-page="/Index">Handmade Product</a>
-            <div class="space-x-4">
+            <div class="flex items-center space-x-4">
                 <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Index">Home</a>
                 <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Privacy">Privacy</a>
                 <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Product/ProductList">Product</a>
@@ -54,7 +54,6 @@
                     <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/User/User">Manage Users</a>
                     <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Promotion/Index">Promotion</a>
                     <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/ManageShop/Index">Manage Shops</a>
-
                     <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Admin/OrderList">Orders</a>
                     <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/AdminRegistration">Admin Registration</a>
                     <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Categories/View">Category</a>
@@ -63,46 +62,41 @@
                 <!-- Seller-Only Links -->
                 @if (userRole == "Seller")
                 {
-                    <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Seller/Shop">My Shop</a>
-                    <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Seller/OrderManagement">Order Management</a>
                     <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Order/OrderHistory">Order History</a>
-                    <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Review/Index">Reviews</a>
+                    <!-- Dropdown Button with Group -->
+                    <div class="group relative inline-block">
+                        <button class="text-gray-700 hover:text-blue-600">
+                            Seller
+                        </button>
+
+                        <!-- Dropdown Menu -->
+                        <div class="group-hover:block absolute right-0 z-50 hidden w-44 origin-top-right rounded-md bg-white shadow-lg">
+                            <a class="block px-4 py-2 text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Seller/Shop">My Shop</a>
+                            <a class="block px-4 py-2 text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Seller/OrderManagement">Order Management</a>
+                            <a class="block px-4 py-2 text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Review/Index">Reviews</a>
+                        </div>
+                    </div>
                 }
 
-                <!-- Customer Links -->
-                @if (userRole == "Customer")
-                {
-                    <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Order/OrderHistory">Order History</a>
-                    <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Checkout/Index">Checkout</a>
-                }
-
-                @using Microsoft.AspNetCore.Http
-                @using System.IdentityModel.Tokens.Jwt
-
-               
-
+                <!-- Cart Icon, Notifications, User Menu -->
                 @if (Context.Session.GetString("Token") != null)
                 {
                     <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Cart/CartView">
                         <i class="fas fa-shopping-cart"></i>
                     </a>
-                    <!-- Notification Bell Icon and Dropdown (separate from User Menu) -->
                     <div class="relative ml-4 inline-block">
                         <!-- Notification Button -->
                         @await Component.InvokeAsync("NotificationList")
                     </div>
                     <!-- User Menu Dropdown -->
                     <div class="group relative inline-block text-left">
-                        <!-- Button to trigger the dropdown -->
                         <button id="user-menu-button" class="rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white shadow-md transition duration-300 hover:bg-blue-700 focus:outline-none">
                             Welcome, @Context.Session.GetString("UserName")
                             <i class="fa fa-caret-down ml-2"></i>
                         </button>
-                        <!-- Dropdown menu -->
                         <div class="group-hover:block absolute right-0 z-50 hidden w-44 origin-top-right rounded-md bg-white shadow-lg">
                             <div class="py-1">
                                 <a href="@Url.Page("/UserInfo/UserInfo")" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">My Account</a>
-
                                 <form method="post" asp-page-handler="Logout" asp-page="/Login" class="block">
                                     <button type="submit" class="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100">Logout</button>
                                 </form>
@@ -112,9 +106,9 @@
                 }
                 else
                 {
-                <a asp-page="/Login">
-                    <button class="rounded-lg bg-cyan-600 px-4 py-2 font-semibold text-white transition duration-300 hover:bg-cyan-700" asp-area="" asp-page="/Login">Login</button>
-                </a>
+                    <a asp-page="/Login">
+                        <button class="rounded-lg bg-cyan-600 px-4 py-2 font-semibold text-white transition duration-300 hover:bg-cyan-700" asp-area="" asp-page="/Login">Login</button>
+                    </a>
                 }
             </div>
         </nav>
