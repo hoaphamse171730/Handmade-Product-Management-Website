@@ -87,7 +87,7 @@ namespace HandmadeProductManagement.Services.Service
             var vnp_CreateDate = now.ToString(formatter, CultureInfo.InvariantCulture);
             vnp_Params["vnp_CreateDate"] = vnp_CreateDate;
 
-            var expireTime = now.AddMinutes(15);
+            var expireTime = DateTime.UtcNow.AddHours(7).AddMinutes(15);
             var vnp_ExpireDate = expireTime.ToString(formatter, CultureInfo.InvariantCulture);
             vnp_Params["vnp_ExpireDate"] = vnp_ExpireDate;
 
@@ -149,7 +149,7 @@ namespace HandmadeProductManagement.Services.Service
             {
                 OrderId = orderId,
                 CreatedTime = now,
-                ExpirationDate = now.AddHours(24),
+                ExpirationDate = now.AddMinutes(15),
                 TotalAmount = order.TotalPrice,
                 Status = "Processing",
                 Method = Constants.VNPayBanking
@@ -244,7 +244,7 @@ namespace HandmadeProductManagement.Services.Service
 
             var amount = double.Parse(totalPrice) / 100;
             //var returnUrl = $"(url trang web sau khi deploy/{orderInfo}";
-            var returnUrl = "https://localhost:7072/Checkout/OrderSucess";
+            var returnUrl = Constants.FrontUrl + "/Checkout/OrderSucess";
 
 
 

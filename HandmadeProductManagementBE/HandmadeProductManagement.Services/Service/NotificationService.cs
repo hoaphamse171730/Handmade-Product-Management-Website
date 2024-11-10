@@ -101,9 +101,9 @@ namespace HandmadeProductManagement.Services.Service
             var notifications = orders.Select(order => new NotificationModel
             {
                 Id = order.Id,
-                Message = $"Bạn có đơn hàng mới từ {order.CustomerName} với trạng thái: {order.Status} vào ngày: {order.LastUpdatedTime.ToString("dd/MM/yyyy")}",
+                Message = $"You have a new order from {order.CustomerName} with current state: {order.Status} on: {order.LastUpdatedTime.ToString("dd/MM/yyyy")}",
                 Tag = Constants.NotificationTagOrder,
-                URL = Constants.ApiBaseUrl + $"/api/order/{order.Id}"
+                URL = Constants.FrontUrl + $"Seller/OrderManagement?filter=All&pageNumber=1"
             }).ToList();
 
             return notifications;
