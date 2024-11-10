@@ -243,5 +243,37 @@ namespace UI.Pages.Review
                 await LoadUsersAndShops();
             }
         }
+
+        public async Task<IActionResult> OnPostEditReviewAsync(string reviewId, string content, int rating)
+        {
+            try
+            {
+                var payload = new
+                {
+                    Content = content,
+                    Rating = rating
+                };
+
+                var response = await _apiResponseHelper.PutAsync<bool>(
+                    $"{Constants.ApiBaseUrl}/api/review/{reviewId}",
+                    payload
+                );
+
+                if (response.StatusCode == StatusCodeHelper.OK)
+                {
+                    // Refresh the model after saving to reflect the new data
+                    await OnGetAsync();  // Ensure you have a method to reload the updated list of reviews
+                    return Page();  // Return Page to refresh the view with updated data
+                }
+
+                TempData["ErrorMessage"] = response.Message ?? "Failed to update review.";
+                return RedirectToPage();
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Error updating review: {ex.Message}";
+                return RedirectToPage();
+            }
+        }
     }
 }

@@ -373,8 +373,17 @@ namespace HandmadeProductManagement.Services.Service
             existingReview.LastUpdatedBy = existingReview.UserId.ToString();
             existingReview.LastUpdatedTime = vietnamTime;
 
-            await _unitOfWork.GetRepository<Review>().UpdateAsync(existingReview);
-            await _unitOfWork.SaveAsync();
+            try
+            {
+                await _unitOfWork.GetRepository<Review>()
+                                 .UpdateAsync(existingReview);
+                await _unitOfWork.SaveAsync();
+            }
+            catch (Exception ex)
+            {
+                // Log the exception here
+                throw new BaseException.BadRequestException(StatusCodeHelper.ServerError.ToString(), $"Failed to save review: {ex.Message}");
+            }
 
             // Update product rating
             await _productService.CalculateAverageRatingAsync(existingReview.ProductId);

@@ -126,7 +126,7 @@ namespace UI.Pages.Seller
             if (string.IsNullOrEmpty(Reply.Content))
             {
                 StatusMessage = "Error: Reply content is required.";
-                return RedirectToPage("./Index", new { pageNumber = PageNumber });
+                return RedirectToPage("/Seller/ReviewList", new { pageNumber = PageNumber });
             }
 
             try
@@ -157,7 +157,7 @@ namespace UI.Pages.Seller
                 if (response.StatusCode == StatusCodeHelper.OK)
                 {
                     StatusMessage = "Reply was created successfully!";
-                    return RedirectToPage("./Index", new { pageNumber = PageNumber });
+                    return RedirectToPage("/Seller/ReviewList", new { pageNumber = PageNumber });
                 }
 
                 StatusMessage = "Error: Failed to create reply.";
@@ -168,7 +168,7 @@ namespace UI.Pages.Seller
                 Console.WriteLine($"Exception details: {ex}");
             }
 
-            return RedirectToPage("./Index", new { pageNumber = PageNumber });
+            return RedirectToPage("/Seller/ReviewList", new { pageNumber = PageNumber });
         }
 
         public async Task<IActionResult> OnPostUpdateReplyAsync(string replyId, string content)
@@ -194,7 +194,7 @@ namespace UI.Pages.Seller
                 Console.WriteLine($"Exception details: {ex}");
             }
 
-            return RedirectToPage("./Index", new { pageNumber = PageNumber });
+            return RedirectToPage("/Seller/ReviewList", new { pageNumber = PageNumber });
         }
 
         public async Task<IActionResult> OnPostDeleteReplyAsync(string replyId)
@@ -202,7 +202,7 @@ namespace UI.Pages.Seller
             try
             {
                 var response = await _apiResponseHelper.DeleteAsync<bool>(
-                    $"{Constants.ApiBaseUrl}/api/reply/{replyId}/soft-delete"
+                    $"{Constants.ApiBaseUrl}/api/reply/{replyId}"
                 );
 
                 if (response.StatusCode == StatusCodeHelper.OK)
@@ -222,7 +222,7 @@ namespace UI.Pages.Seller
                 Console.WriteLine($"Exception details: {ex}");
             }
 
-            return RedirectToPage("./Index", new { pageNumber = PageNumber });
+            return RedirectToPage("/Seller/ReviewList", new { pageNumber = PageNumber });
         }
 
         private async Task ReloadReviewsAndUserData()
