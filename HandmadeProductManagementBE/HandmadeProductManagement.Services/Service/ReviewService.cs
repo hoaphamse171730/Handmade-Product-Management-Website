@@ -138,20 +138,61 @@ namespace HandmadeProductManagement.Services.Service
             // Lấy các sản phẩm được tạo bởi người bán
             var productsBySeller = await _unitOfWork.GetRepository<Product>()
                                                      .Entities
-                                                     .Where(p => p.CreatedBy == sellerId && p.DeletedTime == null)
+                                                     .Where(p => p.CreatedBy == sellerId && (!p.DeletedTime.HasValue || p.DeletedBy == null))
                                                      .Select(p => p.Id)
                                                      .ToListAsync();
-
-            if (!productsBySeller.Any())
-            {
-                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "No products found for this seller.");
-            }
 
             // Lấy các đánh giá của sản phẩm của người bán với phân trang
             var reviews = await _unitOfWork.GetRepository<Review>()
                                            .Entities
                                            .Include(r => r.Reply)
-                                           .Where(r => productsBySeller.Contains(r.ProductId) && r.DeletedTime == null)
+                                           .Where(r => productsBySeller.Contains(r.ProductId) && (!r.DeletedTime.HasValue || r.DeletedBy == null))
+                                           .OrderByDescending(r => r.Date)
+                                           .Skip((pageNumber - 1) * pageSize)
+                                           .Take(pageSize)
+                                           .ToListAsync();
+
+            return reviews.Select(r => new ReviewModel
+            {
+                Id = r.Id,
+                Content = r.Content,
+                Rating = r.Rating,
+                Date = r.Date,
+                ProductId = r.ProductId,
+                UserId = r.UserId,
+                Reply = r.Reply != null && r.Reply.DeletedTime == null ? new ReplyModel
+                {
+                    Id = r.Reply.Id,
+                    Content = r.Reply.Content,
+                    Date = r.Reply.Date,
+                    ReviewId = r.Reply.ReviewId,
+                    ShopId = r.Reply.ShopId
+                } : null
+            }).ToList();
+        }
+
+        public async Task<IList<ReviewModel>> GetByUserIdAsync(string userId, int pageNumber, int pageSize)
+        {
+            if (string.IsNullOrWhiteSpace(userId) || !Guid.TryParse(userId, out _))
+            {
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat);
+            }
+
+            if (pageNumber <= 0)
+            {
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidPageNumber);
+            }
+
+            if (pageSize <= 0)
+            {
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidPageSize);
+            }
+
+            // Get the reviews for the specific user
+            var reviews = await _unitOfWork.GetRepository<Review>()
+                                           .Entities
+                                           .Include(r => r.Reply)
+                                           .Where(r => r.UserId.ToString() == userId && (!r.DeletedTime.HasValue || r.DeletedBy == null)) // Filter by UserId
                                            .OrderByDescending(r => r.Date)
                                            .Skip((pageNumber - 1) * pageSize)
                                            .Take(pageSize)

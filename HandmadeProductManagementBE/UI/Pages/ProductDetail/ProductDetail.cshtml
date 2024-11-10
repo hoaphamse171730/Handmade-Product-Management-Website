@@ -300,6 +300,17 @@
 
                 <!-- Hiển thị nội dung review và các thành phần khác -->
                 <p class="mt-2">@review.Content</p>
+
+                <!-- Display Rating as stars -->
+                <div class="mt-2 flex items-center">
+                    @for (int i = 1; i <= 5; i++)
+                    {
+                        <svg class="h-5 w-5 @(i <= @review.Rating ? "text-yellow-500" : "text-gray-300")" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 .587l3.668 7.568 8.235 1.199-5.964 5.222L19.339 24 12 20.812 4.661 24l1.331-9.424-5.964-5.222 8.235-1.199L12 .587z" />
+                        </svg>
+                    }
+                    <span class="ml-2 text-sm text-gray-500">(@review.Rating)</span>
+                </div>
             </div>
 
             <!-- Reply Section with Shop ID -->

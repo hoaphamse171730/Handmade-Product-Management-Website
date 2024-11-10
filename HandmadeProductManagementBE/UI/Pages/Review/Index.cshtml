@@ -1,9 +1,10 @@
 ﻿@page
-
+@using HandmadeProductManagement.Core.Common
 @model UI.Pages.Review.IndexModel
 @{
 	ViewData["Title"] = "Reviews";
     var userNames = new Dictionary<string, string>();
+    var token = HttpContext.Session.GetString("Token");
 }
 
 <h1 class="mb-4 text-center text-4xl font-bold text-red-600">Reviews</h1>
@@ -62,91 +63,41 @@
 
                 <!-- Hiển thị nội dung review và các thành phần khác -->
                 <p class="mt-2">@review.Content</p>
+
+                <!-- Display Rating as stars -->
+                <div class="mt-2 flex items-center">
+                    @for (int i = 1; i <= 5; i++)
+                    {
+                        <svg class="h-5 w-5 @(i <= @review.Rating ? "text-yellow-500" : "text-gray-300")" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 .587l3.668 7.568 8.235 1.199-5.964 5.222L19.339 24 12 20.812 4.661 24l1.331-9.424-5.964-5.222 8.235-1.199L12 .587z" />
+                        </svg>
+                    }
+                    <span class="ml-2 text-sm text-gray-500">(@review.Rating)</span>
+                </div>
             </div>
 
             <!-- Reply Section with Shop ID -->
-            <div class="relative ml-4 mt-4 rounded-lg border border-gray-300 bg-gray-50 p-2">
-                @if (review.Reply != null)
-                {
-                    var replyShop = Model.Shops.FirstOrDefault(s => s.Id == review.Reply.ShopId);
-                    <div class="mb-2 font-semibold text-gray-700">
-                        @(replyShop?.Name ?? "Unknown Shop")
-                    </div>
+            @if (review.Reply != null)
+            {
+                <div class="relative ml-4 mt-4 rounded-lg border border-gray-300 bg-gray-50 p-2">
+                    <div class="mb-2 font-semibold text-gray-700">@(Model.Shops.FirstOrDefault(shop => shop.Id == review.Reply?.ShopId)?.Name ?? "Unknown Shop")</div>
+                    <p>@review.Reply.Content</p>
+                </div>
+            }
 
-                    <div class="reply-content-@review.Reply.Id">
-                        <p>@review.Reply.Content</p>
-                        <span class="mt-1 block text-sm text-gray-500">@review.Reply.Date?.ToString("g")</span>
-
-                        @if (Model.CurrentUserShop?.Id == review.Reply.ShopId)
-                        {
-                            <div class="mt-2 flex space-x-2">
-                                <!-- Edit Button -->
-                                <button onclick="toggleEditForm('@review.Reply.Id')"
-                                        class="rounded bg-blue-500 px-2 py-1 text-sm text-white hover:bg-blue-600">
-                                    Edit
-                                </button>
-
-                                <!-- Delete Button -->
-                                <form method="post" asp-page-handler="DeleteReply" class="inline">
-                                    <input type="hidden" name="replyId" value="@review.Reply.Id" />
-                                    <button type="submit"
-                                            onclick="return confirm('Are you sure you want to delete this reply?')"
-                                            class="rounded bg-red-500 px-2 py-1 text-sm text-white hover:bg-red-600">
-                                        Delete
-                                    </button>
-                                </form>
-                            </div>
-                        }
-                    </div>
-
-                    <!-- Edit Form (Hidden by default) -->
-                    <div id="edit-form-@review.Reply.Id" class="mt-2 hidden">
-                        <form method="post" asp-page-handler="UpdateReply">
-                            <input type="hidden" name="replyId" value="@review.Reply.Id" />
-                            <textarea name="content"
-                                      class="w-full rounded-lg border border-gray-300 p-2 focus:border-blue-500 focus:ring-blue-500"
-                                      rows="3"
-                                      required>@review.Reply.Content</textarea>
-                            <div class="mt-2 flex space-x-2">
-                                <button type="submit"
-                                        class="rounded bg-green-500 px-3 py-1 text-sm text-white hover:bg-green-600">
-                                    Save
-                                </button>
-                                <button type="button"
-                                        onclick="toggleEditForm('@review.Reply.Id')"
-                                        class="rounded bg-gray-500 px-3 py-1 text-sm text-white hover:bg-gray-600">
-                                    Cancel
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                }
-                else if (Model.CurrentUserShop != null)
-                {
-                    <div class="mb-2 font-semibold text-gray-700">
-                        @Model.CurrentUserShop.Name
-                    </div>
-                    <form method="post" asp-page-handler="CreateReply" class="mt-2">
-                        <input type="hidden" asp-for="Reply.ReviewId" value="@review.Id" />
-                        <div class="space-y-2">
-                            <textarea asp-for="Reply.Content"
-                                      class="w-full rounded-lg border border-gray-300 p-2 focus:border-blue-500 focus:ring-blue-500"
-                                      rows="3"
-                                      placeholder="Write your reply here..."
-                                      required></textarea>
-                            @if (!ModelState.IsValid && ModelState["Reply.Content"]?.Errors.Count > 0)
-                            {
-                                <span class="text-sm text-red-600">@ModelState["Reply.Content"]?.Errors.First().ErrorMessage</span>
-                            }
-                        </div>
-                        <div class="mt-2 flex justify-end">
-                            <button type="submit"
-                                    class="rounded-lg bg-blue-500 px-4 py-2 text-white transition duration-200 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                                Reply
-                            </button>
-                        </div>
-                    </form>
-                }
+            <!-- Action Buttons (Updated) -->
+            <div class="mt-4 flex justify-end space-x-4">
+                <button onclick="openEditModal(@review.Id, '@review.Content', @review.Rating)"
+                        class="rounded-md bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                    Edit
+                </button>
+                <form method="post" asp-page="SoftDelete" asp-route-reviewId="@review.Id" class="inline">
+                    <button type="submit"
+                            class="rounded-md bg-red-600 px-4 py-2 font-semibold text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                            onclick="return confirm('Are you sure you want to delete this review?')">
+                        Soft Delete
+                    </button>
+                </form>
             </div>
         </div>
     }

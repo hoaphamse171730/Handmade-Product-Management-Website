@@ -1,4 +1,3 @@
-using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Common;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.Core.Store;
@@ -6,21 +5,17 @@ using HandmadeProductManagement.ModelViews.ProductModelViews;
 using HandmadeProductManagement.ModelViews.ReplyModelViews;
 using HandmadeProductManagement.ModelViews.ReviewModelViews;
 using HandmadeProductManagement.ModelViews.ShopModelViews;
-using HandmadeProductManagement.ModelViews.UserInfoModelViews;
 using HandmadeProductManagement.ModelViews.UserModelViews;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.IdentityModel.Tokens;
-using System.Linq;
-using System.Net.Http;
 
-namespace UI.Pages.Review
+namespace UI.Pages.Seller
 {
-    public class IndexModel : PageModel
+    public class ReviewListModel : PageModel
     {
         private readonly ApiResponseHelper _apiResponseHelper;
 
-        public IndexModel(ApiResponseHelper apiResponseHelper)
+        public ReviewListModel(ApiResponseHelper apiResponseHelper)
         {
             _apiResponseHelper = apiResponseHelper;
         }
@@ -56,7 +51,7 @@ namespace UI.Pages.Review
         {
             PageNumber = pageNumber;
             CurrentUserShop = await GetCurrentUserShop();
-            var response = await _apiResponseHelper.GetAsync<IList<ReviewModel>>($"{Constants.ApiBaseUrl}/api/review/user?pageNumber={pageNumber}&pageSize={pageSize}");
+            var response = await _apiResponseHelper.GetAsync<IList<ReviewModel>>($"{Constants.ApiBaseUrl}/api/review/seller?pageNumber={pageNumber}&pageSize={pageSize}");
             if (response.StatusCode == StatusCodeHelper.OK && response.Data != null)
             {
                 Reviews = response.Data;
