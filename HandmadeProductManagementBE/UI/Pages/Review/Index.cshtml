@@ -7,7 +7,7 @@
     var token = HttpContext.Session.GetString("Token");
 }
 
-<h1 class="mb-4 text-center text-4xl font-bold text-red-600">Reviews</h1>
+<h1 class="mb-4 text-center text-4xl font-bold text-red-600">My Reviews</h1>
 
 @if (!string.IsNullOrEmpty(Model.StatusMessage))
 {
@@ -119,9 +119,9 @@
     </nav>
 }
 
-<div id="editModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center">
-    <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-xl mx-4">
-        <h2 class="text-2xl font-bold text-gray-800 mb-4">Edit Review</h2>
+<div id="editModal" class="fixed inset-0 hidden items-center justify-center bg-gray-600 bg-opacity-50">
+    <div class="mx-4 w-full max-w-xl rounded-lg bg-white p-6 shadow-xl">
+        <h2 class="mb-4 text-2xl font-bold text-gray-800">Edit Review</h2>
         <form method="post" asp-page-handler="EditReview">
             <input type="hidden" id="modalReviewId" name="reviewId" />
             <div class="space-y-4">
@@ -137,7 +137,7 @@
                         {
                             <button type="button"
                                 onclick="setModalRating(@i)"
-                                class="modal-star-btn text-2xl focus:outline-none transition-colors duration-200"
+                                class="modal-star-btn text-2xl transition-colors duration-200 focus:outline-none"
                                 data-rating="@i">
                                 ★
                             </button>
@@ -145,13 +145,13 @@
                     </div>
                     <input type="hidden" id="modalRating" name="rating" />
                 </div>
-                <div class="flex justify-end space-x-3 mt-4">
+                <div class="mt-4 flex justify-end space-x-3">
                     <button type="button" onclick="closeEditModal()"
-                        class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200">
+                        class="rounded-md bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200">
                         Cancel
                     </button>
                     <button type="submit"
-                        class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">
+                        class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
                         Save Changes
                     </button>
                 </div>

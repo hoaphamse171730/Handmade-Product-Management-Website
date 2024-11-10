@@ -248,22 +248,15 @@ namespace UI.Pages.Review
         {
             try
             {
-                var payload = new
-                {
-                    Content = content,
-                    Rating = rating
-                };
+                // Build the URL with query parameters for reviewId, content, and rating
+                string url = $"{Constants.ApiBaseUrl}/api/review/{reviewId}?content={Uri.EscapeDataString(content)}&rating={rating}";
 
-                var response = await _apiResponseHelper.PutAsync<bool>(
-                    $"{Constants.ApiBaseUrl}/api/review/{reviewId}",
-                    payload
-                );
+                var response = await _apiResponseHelper.PutAsync<bool>(url);
 
                 if (response.StatusCode == StatusCodeHelper.OK)
                 {
-                    // Refresh the model after saving to reflect the new data
-                    await OnGetAsync();  // Ensure you have a method to reload the updated list of reviews
-                    return Page();  // Return Page to refresh the view with updated data
+                    await OnGetAsync();
+                    return Page();
                 }
 
                 TempData["ErrorMessage"] = response.Message ?? "Failed to update review.";
