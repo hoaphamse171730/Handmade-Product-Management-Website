@@ -59,6 +59,12 @@
                     <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Categories/View">Category</a>
                 }
 
+                <!-- Customer Links -->
+                @if (userRole == "Customer")
+                {
+                    <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Order/OrderHistory">Order History</a>
+                }
+
                 <!-- Seller-Only Links -->
                 @if (userRole == "Seller")
                 {
