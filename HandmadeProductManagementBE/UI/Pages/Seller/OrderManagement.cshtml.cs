@@ -34,7 +34,7 @@ namespace UI.Pages.Seller
         private readonly Dictionary<string, List<string>> validStatusTransitions = new Dictionary<string, List<string>>
         {
             { Constants.OrderStatusPending, new List<string> { Constants.OrderStatusCanceled, Constants.OrderStatusProcessing } },
-            { Constants.OrderStatusProcessing, new List<string> { Constants.OrderStatusDelivering } },
+            { Constants.OrderStatusProcessing, new List<string> { Constants.OrderStatusCanceled, Constants.OrderStatusDelivering } },
             { Constants.OrderStatusDelivering, new List<string> { Constants.OrderStatusShipped, Constants.OrderStatusDeliveryFailed } },
             { Constants.OrderStatusDeliveryFailed, new List<string> { Constants.OrderStatusOnHold } },
             { Constants.OrderStatusOnHold, new List<string> { Constants.OrderStatusDeliveringRetry, Constants.OrderStatusRefundRequested, Constants.OrderStatusReturning } },

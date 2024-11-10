@@ -434,17 +434,25 @@ namespace HandmadeProductManagement.Services.Service
             foreach (var od in orderDetails)
             {
                 var hasReviewed = await _unitOfWork.GetRepository<Review>().Entities
-                    .AnyAsync(r => r.ProductId == od.ProductItem.Product.Id && r.UserId == Guid.Parse(userId));
+                    .AnyAsync(r => r.ProductId == od.ProductItem!.Product!.Id && r.UserId == Guid.Parse(userId));
+
+                // Retrieve the oldest image for the product item, if available
+                var productImage = await _unitOfWork.GetRepository<ProductImage>().Entities
+                    .Where(pi => pi.ProductId == od.ProductItem!.Product!.Id)
+                    .OrderBy(pi => pi.CreatedTime)
+                    .Select(pi => pi.Url)  
+                    .FirstOrDefaultAsync();
 
                 orderInDetailDtos.Add(new OrderInDetailDto
                 {
-                    ProductId = od.ProductItem.Product.Id,
+                    ProductId = od.ProductItem!.Product!.Id,
                     ProductName = od.ProductItem.Product.Name,
                     ProductQuantity = od.ProductQuantity,
+                    ProductImage = productImage!,
                     DiscountPrice = od.DiscountPrice,
                     VariationOptionValues = _unitOfWork.GetRepository<ProductConfiguration>().Entities
                         .Where(pc => pc.ProductItemId == od.ProductItemId && pc.VariationOption != null)
-                        .Select(pc => pc.VariationOption.Value)
+                        .Select(pc => pc.VariationOption!.Value!)
                         .ToList(),
                     HasReviewed = hasReviewed
                 });
@@ -639,7 +647,8 @@ namespace HandmadeProductManagement.Services.Service
                 // Validate Status Flow
                 var validStatusTransitions = new Dictionary<string, List<string>>
                 {
-                    { Constants.OrderStatusPending, new List<string> { Constants.OrderStatusCanceled, Constants.OrderStatusProcessing } },
+                    { Constants.OrderStatusPending, new List<string> { Constants.OrderStatusCanceled, Constants.OrderStatusProcessing, Constants.OrderStatusAwaitingPayment } },
+                    { Constants.OrderStatusAwaitingPayment, new List<string> { Constants.OrderStatusCanceled, Constants.OrderStatusProcessing } },
                     { Constants.OrderStatusProcessing, new List<string> { Constants.OrderStatusCanceled, Constants.OrderStatusDelivering } },
                     { Constants.OrderStatusDelivering, new List<string> { Constants.OrderStatusShipped, Constants.OrderStatusDeliveryFailed } },
                     { Constants.OrderStatusDeliveryFailed, new List<string> { Constants.OrderStatusOnHold } },

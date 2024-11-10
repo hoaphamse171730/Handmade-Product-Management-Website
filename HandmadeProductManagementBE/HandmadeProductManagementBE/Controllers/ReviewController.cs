@@ -20,6 +20,36 @@ namespace HandmadeProductManagementAPI.Controllers
             _reviewService = reviewService;
         }
 
+        [HttpGet("seller")]
+        public async Task<IActionResult> GetBySellerId(int pageNumber = 1, int pageSize = 10)
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
+            var reviews = await _reviewService.GetBySellerIdAsync(userId, pageNumber, pageSize);
+            var response = new BaseResponse<IList<ReviewModel>>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Seller's reviews retrieved successfully.",
+                Data = reviews
+            };
+            return Ok(response);
+        }
+
+        [HttpGet("user")]
+        public async Task<IActionResult> GetByUserId(int pageNumber = 1, int pageSize = 10)
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
+            var reviews = await _reviewService.GetByUserIdAsync(userId, pageNumber, pageSize);
+            var response = new BaseResponse<IList<ReviewModel>>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Seller's reviews retrieved successfully.",
+                Data = reviews
+            };
+            return Ok(response);
+        }
+
         [HttpGet("product/{productId}")]
         public async Task<IActionResult> GetByProductId([Required] string productId, int pageNumber = 1, int pageSize = 10)
         {
@@ -92,8 +122,9 @@ namespace HandmadeProductManagementAPI.Controllers
             existingReview.Rating = rating ?? existingReview.Rating;
 
             var updatedReview = await _reviewService.UpdateAsync(reviewId, Guid.Parse(userId), existingReview);
-            var response = new BaseResponse<ReviewModel>
+            var response = new BaseResponse<bool>
             {
+                Data = true,
                 Code = "Success",
                 StatusCode = StatusCodeHelper.OK,
                 Message = "Review updated successfully."

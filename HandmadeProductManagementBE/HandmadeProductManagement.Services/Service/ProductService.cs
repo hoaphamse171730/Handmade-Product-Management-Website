@@ -489,6 +489,7 @@ namespace HandmadeProductManagement.Services.Service
                     .ThenInclude(pi => pi.ProductConfigurations)
                         .ThenInclude(pc => pc.VariationOption)
                             .ThenInclude(vo => vo!.Variation)
+                .Include(p => p.ProductImages) // Include ProductImages table
                 .FirstOrDefaultAsync(p => p.Id == id && (!p.DeletedTime.HasValue || p.DeletedBy == null))
                 ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageProductNotFound);
 
@@ -514,8 +515,22 @@ namespace HandmadeProductManagement.Services.Service
                 productToReturn.Variations = variations;
             }
 
+            // Check if there are product images and pick the oldest image (by CreatedDate or another field)
+            if (product.ProductImages != null && product.ProductImages.Any())
+            {
+                var oldestImage = product.ProductImages
+                    .OrderBy(pi => pi.CreatedTime) // Assuming CreatedDate field is available to determine the oldest image
+                    .FirstOrDefault(); // Get the oldest image
+
+                if (oldestImage != null)
+                {
+                    productToReturn.ProductImageUrl = oldestImage.Url; // Assuming the image has a 'Url' or similar property
+                }
+            }
+
             return productToReturn;
         }
+
         public async Task<bool> Update(string id, ProductForUpdateDto product, string userId)
         {
             var validationResult = await _updateValidator.ValidateAsync(product);

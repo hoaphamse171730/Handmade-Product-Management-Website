@@ -1,4 +1,3 @@
-using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Common;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.Core.Store;
@@ -6,21 +5,17 @@ using HandmadeProductManagement.ModelViews.ProductModelViews;
 using HandmadeProductManagement.ModelViews.ReplyModelViews;
 using HandmadeProductManagement.ModelViews.ReviewModelViews;
 using HandmadeProductManagement.ModelViews.ShopModelViews;
-using HandmadeProductManagement.ModelViews.UserInfoModelViews;
 using HandmadeProductManagement.ModelViews.UserModelViews;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.IdentityModel.Tokens;
-using System.Linq;
-using System.Net.Http;
 
-namespace UI.Pages.Review
+namespace UI.Pages.Seller
 {
-    public class IndexModel : PageModel
+    public class ReviewListModel : PageModel
     {
         private readonly ApiResponseHelper _apiResponseHelper;
 
-        public IndexModel(ApiResponseHelper apiResponseHelper)
+        public ReviewListModel(ApiResponseHelper apiResponseHelper)
         {
             _apiResponseHelper = apiResponseHelper;
         }
@@ -56,7 +51,7 @@ namespace UI.Pages.Review
         {
             PageNumber = pageNumber;
             CurrentUserShop = await GetCurrentUserShop();
-            var response = await _apiResponseHelper.GetAsync<IList<ReviewModel>>($"{Constants.ApiBaseUrl}/api/review/user?pageNumber={pageNumber}&pageSize={pageSize}");
+            var response = await _apiResponseHelper.GetAsync<IList<ReviewModel>>($"{Constants.ApiBaseUrl}/api/review/seller?pageNumber={pageNumber}&pageSize={pageSize}");
             if (response.StatusCode == StatusCodeHelper.OK && response.Data != null)
             {
                 Reviews = response.Data;
@@ -131,7 +126,7 @@ namespace UI.Pages.Review
             if (string.IsNullOrEmpty(Reply.Content))
             {
                 StatusMessage = "Error: Reply content is required.";
-                return RedirectToPage("./Index", new { pageNumber = PageNumber });
+                return RedirectToPage("/Seller/ReviewList", new { pageNumber = PageNumber });
             }
 
             try
@@ -162,7 +157,8 @@ namespace UI.Pages.Review
                 if (response.StatusCode == StatusCodeHelper.OK)
                 {
                     StatusMessage = "Reply was created successfully!";
-                    return RedirectToPage("./Index", new { pageNumber = PageNumber });
+
+                    return RedirectToPage("/Seller/ReviewList", new { pageNumber = PageNumber });
                 }
 
                 StatusMessage = "Error: Failed to create reply.";
@@ -173,7 +169,7 @@ namespace UI.Pages.Review
                 Console.WriteLine($"Exception details: {ex}");
             }
 
-            return RedirectToPage("./Index", new { pageNumber = PageNumber });
+            return RedirectToPage("/Seller/ReviewList", new { pageNumber = PageNumber });
         }
 
         public async Task<IActionResult> OnPostUpdateReplyAsync(string replyId, string content)
@@ -199,7 +195,7 @@ namespace UI.Pages.Review
                 Console.WriteLine($"Exception details: {ex}");
             }
 
-            return RedirectToPage("./Index", new { pageNumber = PageNumber });
+            return RedirectToPage("/Seller/ReviewList", new { pageNumber = PageNumber });
         }
 
         public async Task<IActionResult> OnPostDeleteReplyAsync(string replyId)
@@ -207,7 +203,7 @@ namespace UI.Pages.Review
             try
             {
                 var response = await _apiResponseHelper.DeleteAsync<bool>(
-                    $"{Constants.ApiBaseUrl}/api/reply/{replyId}/soft-delete"
+                    $"{Constants.ApiBaseUrl}/api/reply/{replyId}"
                 );
 
                 if (response.StatusCode == StatusCodeHelper.OK)
@@ -227,7 +223,7 @@ namespace UI.Pages.Review
                 Console.WriteLine($"Exception details: {ex}");
             }
 
-            return RedirectToPage("./Index", new { pageNumber = PageNumber });
+            return RedirectToPage("/Seller/ReviewList", new { pageNumber = PageNumber });
         }
 
         private async Task ReloadReviewsAndUserData()
@@ -241,31 +237,6 @@ namespace UI.Pages.Review
             {
                 Reviews = reviewResponse.Data;
                 await LoadUsersAndShops();
-            }
-        }
-
-        public async Task<IActionResult> OnPostEditReviewAsync(string reviewId, string content, int rating)
-        {
-            try
-            {
-                // Build the URL with query parameters for reviewId, content, and rating
-                string url = $"{Constants.ApiBaseUrl}/api/review/{reviewId}?content={Uri.EscapeDataString(content)}&rating={rating}";
-
-                var response = await _apiResponseHelper.PutAsync<bool>(url);
-
-                if (response.StatusCode == StatusCodeHelper.OK)
-                {
-                    await OnGetAsync();
-                    return Page();
-                }
-
-                TempData["ErrorMessage"] = response.Message ?? "Failed to update review.";
-                return RedirectToPage();
-            }
-            catch (Exception ex)
-            {
-                TempData["ErrorMessage"] = $"Error updating review: {ex.Message}";
-                return RedirectToPage();
             }
         }
     }

@@ -45,6 +45,7 @@ namespace UI.Pages.Order
                 Orders = CurrentFilter switch
                 {
                     "Pending" => orders.Where(o => o.Status == "Pending").ToList(),
+                    "Awaiting Payment" => orders.Where(o => o.Status == "Awaiting Payment").ToList(),
                     "Processing" => orders.Where(o => o.Status == "Processing").ToList(),
                     "Delivering" => orders.Where(o => new[] { "Delivery Failed", "Delivering", "On Hold", "Delivering Retry" }.Contains(o.Status)).ToList(),
                     "Shipped" => orders.Where(o => o.Status == "Shipped").ToList(),
