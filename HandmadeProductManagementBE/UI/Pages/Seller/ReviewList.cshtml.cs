@@ -157,7 +157,8 @@ namespace UI.Pages.Seller
                 if (response.StatusCode == StatusCodeHelper.OK)
                 {
                     StatusMessage = "Reply was created successfully!";
-                    return RedirectToPage("./Index", new { pageNumber = PageNumber });
+
+                    return RedirectToPage("/Seller/ReviewList", new { pageNumber = PageNumber });
                 }
 
                 StatusMessage = "Error: Failed to create reply.";
