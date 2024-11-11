@@ -718,7 +718,7 @@ namespace HandmadeProductManagement.Services.Service
 
                         productItem.QuantityInStock += detail.ProductQuantity;
 
-                        productItemRepository.Update(productItem);
+                        productItemRepository.Update(productItem);  
                     }
 
                     var payment = await _paymentService.GetPaymentByOrderIdAsync(existingOrder.Id, userId);
