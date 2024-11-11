@@ -3,6 +3,19 @@
 @{
     ViewData["Title"] = "Dashboard";
 }
+@using UI.Pages.Shared
+@{
+    var errorModel = new ErrorMessageModel
+            {
+                ErrorMessage = Model.ErrorMessage,
+                ErrorDetail = Model.ErrorDetail
+            };
+    var token = HttpContext.Session.GetString("Token");
+}
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <partial name="_ErrorMessage" model="errorModel" />
+}
 <div class="dashboard container mx-auto p-6">
     <h1 class="mb-8 text-3xl font-bold text-gray-800">Dashboard</h1>
 

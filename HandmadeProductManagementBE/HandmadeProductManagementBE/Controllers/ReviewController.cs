@@ -20,6 +20,7 @@ namespace HandmadeProductManagementAPI.Controllers
             _reviewService = reviewService;
         }
 
+        [Authorize]
         [HttpGet("seller")]
         public async Task<IActionResult> GetBySellerId(int pageNumber = 1, int pageSize = 10)
         {
@@ -35,6 +36,7 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
+        [Authorize]
         [HttpGet("user")]
         public async Task<IActionResult> GetByUserId(int pageNumber = 1, int pageSize = 10)
         {

@@ -23,42 +23,58 @@ namespace UI.Pages.Order
             _logger = logger;
             _apiResponseHelper = apiResponseHelper;
         }
+        public string? ErrorMessage { get; set; }
+        public string? ErrorDetail { get; set; }
 
         public List<OrderByUserDto>? Orders { get; set; }
         public string CurrentFilter { get; set; } = "All";
         public int PageNumber { get; set; } = 1;
         public int PageSize { get; set; } = 12;
         public bool HasNextPage { get; set; } = true;
-
-        public async Task OnGetAsync(string? filter, int pageNumber = 1, int pageSize = 12)
+        public async Task<IActionResult> OnGetAsync(string? filter, int pageNumber = 1, int pageSize = 12)
         {
-            CurrentFilter = filter ?? "All";
-
-            PageNumber = pageNumber;
-            PageSize = pageSize;
-
-            var response = await _apiResponseHelper.GetAsync<List<OrderByUserDto>>(Constants.ApiBaseUrl + $"/api/order/user?pageNumber={PageNumber}&pageSize={PageSize}");
-
-            if (response?.StatusCode == StatusCodeHelper.OK && response.Data != null)
+            try
             {
-                var orders = response.Data.OrderByDescending(o => o.OrderDate).ToList();
-                Orders = CurrentFilter switch
+                CurrentFilter = filter ?? "All";
+
+                PageNumber = pageNumber;
+                PageSize = pageSize;
+
+                var response = await _apiResponseHelper.GetAsync<List<OrderByUserDto>>(Constants.ApiBaseUrl + $"/api/order/user?pageNumber={PageNumber}&pageSize={PageSize}");
+
+                if (response?.StatusCode == StatusCodeHelper.OK && response.Data != null)
                 {
-                    "Pending" => orders.Where(o => o.Status == "Pending").ToList(),
-                    "Awaiting Payment" => orders.Where(o => o.Status == "Awaiting Payment").ToList(),
-                    "Processing" => orders.Where(o => o.Status == "Processing").ToList(),
-                    "Delivering" => orders.Where(o => new[] { "Delivery Failed", "Delivering", "On Hold", "Delivering Retry" }.Contains(o.Status)).ToList(),
-                    "Shipped" => orders.Where(o => o.Status == "Shipped").ToList(),
-                    "Canceled" => orders.Where(o => o.Status == "Canceled").ToList(),
-                    "Refunded" => orders.Where(o => new[] { "Refund Requested", "Refund Denied", "Refund Approve", "Refunded" }.Contains(o.Status)).ToList(),
-                    _ => orders
-                };
-                HasNextPage = Orders.Count == PageSize;
+                    var orders = response.Data.OrderByDescending(o => o.OrderDate).ToList();
+                    Orders = CurrentFilter switch
+                    {
+                        "Pending" => orders.Where(o => o.Status == "Pending").ToList(),
+                        "Awaiting Payment" => orders.Where(o => o.Status == "Awaiting Payment").ToList(),
+                        "Processing" => orders.Where(o => o.Status == "Processing").ToList(),
+                        "Delivering" => orders.Where(o => new[] { "Delivery Failed", "Delivering", "On Hold", "Delivering Retry" }.Contains(o.Status)).ToList(),
+                        "Shipped" => orders.Where(o => o.Status == "Shipped").ToList(),
+                        "Canceled" => orders.Where(o => o.Status == "Canceled").ToList(),
+                        "Refunded" => orders.Where(o => new[] { "Refund Requested", "Refund Denied", "Refund Approve", "Refunded" }.Contains(o.Status)).ToList(),
+                        _ => orders
+                    };
+                    HasNextPage = Orders.Count == PageSize;
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, response?.Message ?? "An error occurred while fetching orders.");
+                }
             }
-            else
+            catch (BaseException.ErrorException ex)
             {
-                ModelState.AddModelError(string.Empty, response?.Message ?? "An error occurred while fetching orders.");
+                ErrorMessage = ex.ErrorDetail.ErrorCode;
+                ErrorDetail = ex.ErrorDetail.ErrorMessage?.ToString();
+                if (ErrorMessage == "unauthorized") return RedirectToPage("/Login");
             }
+            catch (Exception ex)
+            {
+                ErrorMessage = "An unexpected error occurred.";
+            }
+
+            return Page();
         }
 
         public async Task<IActionResult> OnPatchCancelOrderAsync(string orderId)

@@ -5,19 +5,31 @@
     ViewData["Title"] = "Manage User";
     var apiBaseUrl = Constants.ApiBaseUrl;
 }
-
-<h1 class="text-4xl font-bold mb-4 text-center text-red-600">Manage Users</h1>
+@using UI.Pages.Shared
+@{
+    var errorModel = new ErrorMessageModel
+            {
+                ErrorMessage = Model.ErrorMessage,
+                ErrorDetail = Model.ErrorDetail
+            };
+    var token = HttpContext.Session.GetString("Token");
+}
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <partial name="_ErrorMessage" model="errorModel" />
+}
+<h1 class="mb-4 text-center text-4xl font-bold text-red-600">Manage Users</h1>
 
 <form method="get" class="mb-8 flex space-x-4">
-    <input type="text" name="searchName" placeholder="Search by Name" class="border border-gray-300 p-2 rounded-lg" value="@Model.SearchName" />
-    <input type="text" name="searchPhone" placeholder="Search by Phone Number" class="border border-gray-300 p-2 rounded-lg" value="@Model.SearchPhone" />
-    <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">Search</button>
+    <input type="text" name="searchName" placeholder="Search by Name" class="rounded-lg border border-gray-300 p-2" value="@Model.SearchName" />
+    <input type="text" name="searchPhone" placeholder="Search by Phone Number" class="rounded-lg border border-gray-300 p-2" value="@Model.SearchPhone" />
+    <button type="submit" class="rounded-lg bg-blue-500 px-4 py-2 text-white hover:bg-blue-600">Search</button>
 </form>
 
 <div class="space-y-4">
     @foreach (var user in Model.users )
     {
-        <div class="border border-gray-300 rounded-lg p-4 bg-white shadow-md">
+        <div class="rounded-lg border border-gray-300 bg-white p-4 shadow-md">
             <div class="flex flex-col">
                 <span class="font-semibold">@user.UserName</span>
                 <span class="text-gray-500">@user.Email</span>
@@ -27,11 +39,11 @@
                 </span>
             </div>
             
-            <div class="flex justify-end mt-4 space-x-2">
+            <div class="mt-4 flex justify-end space-x-2">
                 <a class="text-blue-600 hover:text-blue-800" asp-page="Details" asp-route-userId="@user.Id">Details</a> |
                 <a class="text-blue-600 hover:text-blue-800" asp-page="Edit" asp-route-userId="@user.Id">Edit</a> |
-                <a class="text-red-600 hover:text-red-800 cursor-pointer" onclick="deleteUser('@user.Id')">Delete</a> |
-                <a class="text-blue-600 hover:text-blue-800 cursor-pointer" onclick="restoreUser('@user.Id')">Restore</a>
+                <a class="cursor-pointer text-red-600 hover:text-red-800" onclick="deleteUser('@user.Id')">Delete</a> |
+                <a class="cursor-pointer text-blue-600 hover:text-blue-800" onclick="restoreUser('@user.Id')">Restore</a>
             </div>
         </div>
     }

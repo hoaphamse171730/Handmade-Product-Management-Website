@@ -16,7 +16,7 @@ namespace HandmadeProductManagementAPI.Controllers
         private readonly IPromotionService _promotionService;
 
         public PromotionsController(IPromotionService promotionService) => _promotionService = promotionService;
-
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> GetPromotions(int pageNumber = 1, int pageSize = 10)
         {

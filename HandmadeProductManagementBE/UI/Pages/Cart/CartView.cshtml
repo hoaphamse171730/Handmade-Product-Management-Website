@@ -1,7 +1,20 @@
 ﻿@page
+@using UI.Pages.Shared
 @model UI.Pages.Cart.CartViewModel
 @{
     ViewData["Title"] = "Cart";
+}
+@{
+    var errorModel = new ErrorMessageModel
+            {
+                ErrorMessage = Model.ErrorMessage,
+                ErrorDetail = Model.ErrorDetail
+            };
+    var token = HttpContext.Session.GetString("Token");
+}
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <partial name="_ErrorMessage" model="errorModel" />
 }
 <div class="mb-20 h-screen bg-gray-100">
     <div class="container mx-auto px-4">
@@ -57,7 +70,7 @@
                                                 ₫@Math.Round(item.DiscountPrice * item.ProductQuantity, 0, MidpointRounding.AwayFromZero)
                                             </td>
                                             <td>
-                                                <button class="text-white font-bold py-2 px-4 rounded" style="background-color: red" onclick="removeCartItem('@item.Id')">Delete</button>
+                                                <button class="rounded px-4 py-2 font-bold text-white" style="background-color: red" onclick="removeCartItem('@item.Id')">Delete</button>
                                             </td>
                                         </tr>
                                     }

@@ -65,7 +65,7 @@ namespace UI.Pages.Seller
         public Dictionary<string, List<VariationOptionDto>> VariationOptions { get; set; } = new();
 
 
-        public async Task OnGetAsync(
+        public async Task<IActionResult> OnGetAsync(
             [FromQuery] string? Name,
             [FromQuery] string? CategoryId,
             [FromQuery] string? Status,
@@ -90,13 +90,13 @@ namespace UI.Pages.Seller
             {
                 ErrorMessage = ex.ErrorDetail.ErrorCode;
                 ErrorDetail = ex.ErrorDetail.ErrorMessage?.ToString();
+                if (ErrorMessage == "unauthorized") return RedirectToPage("/Login");
             }
             catch (Exception ex)
             {
                 ErrorMessage = "An unexpected error occurred.";
             }
-
-
+            return Page();
         }
 
         public async Task<IActionResult> OnPostCreateShopAsync()

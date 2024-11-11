@@ -18,9 +18,9 @@
                         <div class="text-green-500">@Model.StatusMessage</div>
                     }
 
-                    @if (!ModelState.IsValid)
+                    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
                     {
-                        <div class="text-red-500">Please correct the highlighted errors.</div>
+                        <div class="text-red-500">@Model.ErrorMessage</div>
                     }
 
                     <div>
@@ -38,7 +38,7 @@
                     </div>
 
                     <div class="mt-4">
-                        <a href="javascript:history.back()" class="block w-full rounded-lg bg-gray-300 px-4 py-3 text-center text-sm tracking-wide text-gray-700 shadow-xl hover:bg-gray-400 focus:outline-none">
+                        <a href="/Login" class="block w-full rounded-lg bg-gray-300 px-4 py-3 text-center text-sm tracking-wide text-gray-700 shadow-xl hover:bg-gray-400 focus:outline-none">
                             Cancel
                         </a>
                     </div>

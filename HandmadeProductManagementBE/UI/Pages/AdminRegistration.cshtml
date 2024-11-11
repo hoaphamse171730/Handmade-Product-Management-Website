@@ -1,5 +1,18 @@
 ﻿@page
 @model UI.Pages.AdminRegistrationModel
+@using UI.Pages.Shared
+@{
+    var errorModel = new ErrorMessageModel
+            {
+                ErrorMessage = Model.ErrorMessage,
+                ErrorDetail = Model.ErrorDetail
+            };
+    var token = HttpContext.Session.GetString("Token");
+}
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <partial name="_ErrorMessage" model="errorModel" />
+}
 @{
     <form method="post">
         <div class="font-[sans-serif] flex flex-col justify-center p-4 sm:h-screen">

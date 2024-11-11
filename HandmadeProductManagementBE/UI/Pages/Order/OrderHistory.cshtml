@@ -1,8 +1,25 @@
 ﻿@page
 @model Order.OrderHistoryModel
+@using UI.Pages.Shared
 @{
     ViewData["Title"] = "Order History";
 }
+
+@{
+    var errorModel = new ErrorMessageModel
+            {
+                ErrorMessage = Model.ErrorMessage,
+                ErrorDetail = Model.ErrorDetail
+            };
+
+    var token = HttpContext.Session.GetString("Token");
+}
+
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <partial name="_ErrorMessage" model="errorModel" />
+}
+
 <div class="mx-auto max-w-full">
     <div class="mb-6 flex items-center justify-between">
         <h1 class="ml-4 text-left text-2xl font-bold text-black">Order History</h1>

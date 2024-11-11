@@ -23,7 +23,7 @@ namespace UI.Pages.Promotion
         public int PageSize { get; set; } = 2;
         public bool HasNextPage { get; set; } = true;
 
-        public async Task OnGetAsync(int pageNumber = 1, int pageSize = 20)
+        public async Task<IActionResult> OnGetAsync(int pageNumber = 1, int pageSize = 20)
         {
             try
             {
@@ -40,15 +40,18 @@ namespace UI.Pages.Promotion
                 {
                     Promotions = new List<PromotionDto>();
                 }
-            } catch (BaseException.ErrorException ex)
+            }
+            catch (BaseException.ErrorException ex)
             {
                 ErrorMessage = ex.ErrorDetail.ErrorCode;
                 ErrorDetail = ex.ErrorDetail.ErrorMessage?.ToString();
+                if (ErrorMessage == "unauthorized") return RedirectToPage("/Login");
             }
             catch (Exception ex)
-                {
-                    ErrorMessage = "An unexpected error occurred.";
-                }
+            {
+                ErrorMessage = "An unexpected error occurred.";
+            }
+            return Page();
         }
     }
 }

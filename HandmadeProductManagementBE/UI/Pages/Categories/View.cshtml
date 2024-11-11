@@ -4,6 +4,19 @@
 @{
     ViewData["Title"] = "Category";
 }
+@using UI.Pages.Shared
+@{
+    var errorModel = new ErrorMessageModel
+            {
+                ErrorMessage = Model.ErrorMessage,
+                ErrorDetail = Model.ErrorDetail
+            };
+    var token = HttpContext.Session.GetString("Token");
+}
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <partial name="_ErrorMessage" model="errorModel" />
+}
 
 <h1 class="mb-6 text-center text-3xl font-bold">Categories</h1>
 

@@ -48,7 +48,7 @@ namespace UI.Pages.Seller
             { Constants.OrderStatusDeliveringRetry, new List<string> { Constants.OrderStatusDelivering } },
         };
 
-        public async Task OnGetAsync(string? filter, int pageNumber = 1, int pageSize = 12)
+        public async Task<IActionResult> OnGetAsync(string? filter, int pageNumber = 1, int pageSize = 12)
         {
             try
             {
@@ -76,11 +76,13 @@ namespace UI.Pages.Seller
             {
                 ErrorMessage = ex.ErrorDetail.ErrorCode;
                 ErrorDetail = ex.ErrorDetail.ErrorMessage?.ToString();
+                if (ErrorMessage == "unauthorized") return RedirectToPage("/Login");
             }
             catch (Exception ex)
             {
                 ErrorMessage = "An unexpected error occurred.";
             }
+            return Page();
 
         }
 
