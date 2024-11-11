@@ -50,7 +50,6 @@
         {
             "Pending" => "Order Placed",
             "Processing" => "Order is being prepared",
-            "Payment Failed" => "Payment Failed",
             "Delivering" => "Order is being shipped",
             "Delivery Failed" => "Delivery Failed",
             "On Hold" => "Order is on hold",
@@ -161,7 +160,7 @@
 <div class="flex items-center justify-between py-4">
     <a href="javascript:history.back()" class="text-lg font-semibold text-black hover:underline">← Return</a>
     <div class="text-lg font-semibold">Order Code: @Model.OrderId</div>
-    @if (GetOrderStatusMessage() != "Order has been cancelled")
+    @if (GetOrderStatusMessage() != "Order has been cancelled" && GetOrderStatusMessage() != "Payment failed, please try again")
     {
         @if (GetOrderStatusMessage() == "Order was delivered successfully")
         {
@@ -182,10 +181,6 @@
         {
             <p class="text-lg text-red-600">Order has been cancelled</p>
         }
-        else if (finalStatuses.Any(kv => kv.Key == "Payment Failed") && !finalStatuses.Any(kv => kv.Key == "Processing"))
-        {
-            <p class="text-lg text-red-600">Payment failed, please try again</p>
-        }
         else
         {
             <div class="flex">
@@ -197,39 +192,46 @@
 
                 <div class="border-l border-gray-300" style="margin: 0 30px;"></div>
 
-                <div class="max-h-[370px] w-2/3 overflow-y-auto">
-                    <ol class="relative ms-3 border-s border-gray-200 dark:border-gray-700">
-                        @foreach (var status in finalStatuses.AsEnumerable().Reverse())
-                        {
-                            if (status.Key != "Payment Failed")
+                @if (finalStatuses.Any(kv => kv.Key == "Payment Failed") && !finalStatuses.Any(kv => kv.Key == "Processing"))
+                {
+                    <p class="text-lg text-red-600">Payment failed, please try again</p>
+                }
+                else
+                {
+                    <div class="max-h-[370px] w-2/3 overflow-y-auto">
+                        <ol class="relative ms-3 border-s border-gray-200 dark:border-gray-700">
+                            @foreach (var status in finalStatuses.AsEnumerable().Reverse())
                             {
-                                var statusDate = status.Value.Item2.HasValue ? GetStatusDate(status.Value.Item2.Value) : null;
+                                if (status.Key != "Payment Failed")
+                                {
+                                    var statusDate = status.Value.Item2.HasValue ? GetStatusDate(status.Value.Item2.Value) : null;
 
-                                <li class="mb-10 ms-6 @(IsStatusReached(status.Key) ? "text-blue-600" : "text-black")">
-                                    <span class="absolute -start-3 flex h-6 w-6 items-center justify-center rounded-full @(IsStatusReached(status.Key) ? "bg-blue-200" : "bg-gray-100")">
-                                        <svg class="h-4 w-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                            @if (IsStatusReached(status.Key))
-                                            {
-                                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 11.917 9.724 16.5 19 7.5" />
-                                            }
-                                            else
-                                            {
-                                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h6l2 4m-8-4v8m0-8V6a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v9h2m8 0H9m4 0h2m4 0h2v-4m0 0h-5m3.5 5.5a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0Zm-10 0a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0Z" />
-                                            }
-                                        </svg>
-                                    </span>
-                                    <h4 class="mb-0.5 text-base font-semibold @(IsStatusReached(status.Key) ? "text-blue-600" : "text-black")">
-                                        @status.Value.Item1
-                                    </h4>
-                                    @if (statusDate != null)
-                                    {
-                                        <p class="text-sm">@statusDate</p>
-                                    }
-                                </li>
+                                    <li class="mb-10 ms-6 @(IsStatusReached(status.Key) ? "text-blue-600" : "text-black")">
+                                        <span class="absolute -start-3 flex h-6 w-6 items-center justify-center rounded-full @(IsStatusReached(status.Key) ? "bg-blue-200" : "bg-gray-100")">
+                                            <svg class="h-4 w-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                                @if (IsStatusReached(status.Key))
+                                                {
+                                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 11.917 9.724 16.5 19 7.5" />
+                                                }
+                                                else
+                                                {
+                                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h6l2 4m-8-4v8m0-8V6a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v9h2m8 0H9m4 0h2m4 0h2v-4m0 0h-5m3.5 5.5a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0Zm-10 0a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0Z" />
+                                                }
+                                            </svg>
+                                        </span>
+                                        <h4 class="mb-0.5 text-base font-semibold @(IsStatusReached(status.Key) ? "text-blue-600" : "text-black")">
+                                            @status.Value.Item1
+                                        </h4>
+                                        @if (statusDate != null)
+                                        {
+                                            <p class="text-sm">@statusDate</p>
+                                        }
+                                    </li>
+                                }
                             }
-                        }
-                    </ol>
-                </div>
+                        </ol>
+                    </div>
+                }
             </div>
         }
     </div>
