@@ -7,6 +7,8 @@ namespace HandmadeProductManagement.Contract.Services.Interface
     {
         Task<ShopResponseModel> GetShopByIdAsync(string shopId);
         Task<ShopResponseModel> GetShopByUserIdAsync(Guid userId);
+        Task<bool> HaveShopAsync(Guid userId);
+
         Task<bool> CreateShopAsync(string userId, CreateShopDto createShop);
         Task<bool> UpdateShopAsync(string userId, CreateShopDto shop);
         Task<bool> DeleteShopAsync(string userId);

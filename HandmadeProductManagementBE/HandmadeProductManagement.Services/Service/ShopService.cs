@@ -165,6 +165,24 @@ namespace HandmadeProductManagement.Services.Service
                 ProductCount = productCount
             };
         }
+        public async Task<bool> HaveShopAsync(Guid userId)
+        {
+            var userRepository = _unitOfWork.GetRepository<ApplicationUser>();
+            var userExists = await userRepository.Entities
+                .AnyAsync(u => u.Id == userId && !u.DeletedTime.HasValue);
+
+            if (!userExists)
+            {
+                return false;
+            }
+
+            var shopRepository = _unitOfWork.GetRepository<Shop>();
+
+            var hasShop = await shopRepository.Entities
+                .AnyAsync(s => s.UserId == userId && !s.DeletedTime.HasValue);
+
+            return hasShop;
+        }
 
         public async Task<bool> UpdateShopAsync(string userId, CreateShopDto shop)
         {

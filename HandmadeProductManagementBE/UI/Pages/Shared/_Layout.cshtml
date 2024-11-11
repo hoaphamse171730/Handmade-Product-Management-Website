@@ -1,4 +1,8 @@
-﻿@using HandmadeProductManagement.ModelViews.NotificationModelViews
+﻿@using HandmadeProductManagement.Core.Common
+@using HandmadeProductManagement.Core.Store
+@using HandmadeProductManagement.ModelViews.NotificationModelViews
+@inject ApiResponseHelper _apiResponseHelper
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -37,6 +41,21 @@
 
         var token = Context.Session.GetString("Token");
         var userRole = token != null ? getRole(token) : null;
+
+        bool hasShop = false;
+        if (userRole == "Seller")
+        {
+            try
+            {
+                var response = await _apiResponseHelper.GetAsync<bool>($"{Constants.ApiBaseUrl}/api/shop/hasshop");
+                hasShop = response.Data;
+            }
+            catch (Exception ex)
+            {
+                hasShop = false;
+            }
+        }
+
     }
     <!-- Header -->
     <header class="bg-white shadow">
@@ -60,13 +79,13 @@
                 }
 
                 <!-- Customer Links -->
-                @if (userRole == "Customer")
+                @if (userRole == "Seller" && !hasShop)
                 {
                     <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Order/OrderHistory">Order History</a>
                 }
 
                 <!-- Seller-Only Links -->
-                @if (userRole == "Seller")
+                @if (userRole == "Seller" && hasShop) 
                 {
                     <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Order/OrderHistory">Order History</a>
                     <!-- Dropdown Button with Group -->

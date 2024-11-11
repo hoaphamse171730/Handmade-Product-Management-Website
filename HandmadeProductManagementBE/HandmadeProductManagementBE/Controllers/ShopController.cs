@@ -97,6 +97,21 @@ namespace HandmadeProductManagementAPI.Controllers
             };
             return Ok(response);
         }
+        [Authorize]
+        [HttpGet("hasShop")]
+        public async Task<IActionResult> HasShopByUserId()
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
+            var hasShop = await _shopService.HaveShopAsync(Guid.Parse(userId));
+            var response = new BaseResponse<bool>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Shop retrieved successfully",
+                Data = hasShop
+            };
+            return Ok(response);
+        }
 
         [Authorize]
         [HttpPut("update")]

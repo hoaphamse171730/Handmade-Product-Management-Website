@@ -18,7 +18,7 @@ public class LoginModel : PageModel
 
     private readonly IHttpClientFactory _httpClientFactory;
 
-    public LoginModel(IHttpClientFactory httpClientFactory)
+        public LoginModel(IHttpClientFactory httpClientFactory)
     {
         _httpClientFactory = httpClientFactory;
     }
