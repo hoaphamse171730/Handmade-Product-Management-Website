@@ -204,7 +204,7 @@ namespace HandmadeProductManagement.Services.Service
                 Id = reply.Id,
                 Message = $"Your review has been reply by {reply?.Review?.Product?.Shop?.User?.UserInfo.FullName ?? "Unknown User"}",
                 Tag = Constants.NotificationTagReply,
-                URL = Constants.FrontUrl + $"/ProductDetail/ProductDetail?id={reply!.Review.Product.Id}"
+                URL = Constants.FrontUrl + $"/Review/Index"
             }).ToList();
 
             return replyNotifications;
