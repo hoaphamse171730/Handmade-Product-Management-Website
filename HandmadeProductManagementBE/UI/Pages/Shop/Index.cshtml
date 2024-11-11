@@ -1,7 +1,19 @@
-﻿@page
+﻿@page 
+@using UI.Pages.Shared
 @model UI.Pages.Shop.IndexModel
 @{
     ViewData["Title"] = "Shop";
+}
+@{
+    var errorModel = new ErrorMessageModel
+            {
+                ErrorMessage = Model.ErrorMessage,
+                ErrorDetail = Model.ErrorDetail
+            };
+}
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <partial name="_ErrorMessage" model="errorModel" />
 }
 
 <div class="w-full bg-white px-8 py-6">
@@ -48,6 +60,7 @@
 
 <div class="search-filter">
     <form method="get" class="flex items-center space-x-4">
+        <input type="hidden" name="id" value="@Request.Query["id"]" />
         <input class="rounded-md border border-gray-300 p-2" type="text" name="Name" placeholder="Search by name" value="@Request.Query["Name"]" onchange="this.form.submit();" />
         <select name="CategoryId" class="rounded-md border border-gray-300 p-2">
             <option value="">Select Category</option>
@@ -141,7 +154,11 @@ else
     var paginationModel = new UI.Pages.Shared.PaginationModel
             {
                 PageNumber = Model.PageNumber,
-                PageSize = Model.PageSize
+                PageSize = Model.PageSize,
+
+                CurrentFilter = Model.CurrentFilters,
+                HasNextPage = Model.HasNextPage
+
             };
 }
 

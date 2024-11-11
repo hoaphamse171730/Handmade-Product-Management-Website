@@ -656,6 +656,10 @@ video {
   right: 0.25rem;
 }
 
+.right-2 {
+  right: 0.5rem;
+}
+
 .right-4 {
   right: 1rem;
 }
@@ -668,16 +672,12 @@ video {
   top: 0.25rem;
 }
 
-.top-4 {
-  top: 1rem;
-}
-
-.right-2 {
-  right: 0.5rem;
-}
-
 .top-1\/2 {
   top: 50%;
+}
+
+.top-4 {
+  top: 1rem;
 }
 
 .z-10 {
@@ -1674,12 +1674,12 @@ video {
   padding-left: 1.5rem;
 }
 
-.pt-4 {
-  padding-top: 1rem;
-}
-
 .pr-12 {
   padding-right: 3rem;
+}
+
+.pt-4 {
+  padding-top: 1rem;
 }
 
 .text-left {

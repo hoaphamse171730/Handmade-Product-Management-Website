@@ -319,8 +319,31 @@ namespace HandmadeProductManagement.Services.Service
                     await _unitOfWork.GetRepository<Order>().UpdateAsync(order);
                     await _unitOfWork.SaveAsync();
 
+                    // Retrieve the order details to update product stock
+                    var orderDetailRepository = _unitOfWork.GetRepository<OrderDetail>();
+                    var orderDetails = await orderDetailRepository.Entities
+                        .Where(od => od.OrderId == order.Id)
+                        .ToListAsync();
+
+                    var productItemRepository = _unitOfWork.GetRepository<ProductItem>();
+
+                    // Add back the product quantities to the stock
+                    foreach (var detail in orderDetails)
+                    {
+                        var productItem = await productItemRepository.Entities
+                            .FirstOrDefaultAsync(p => p.Id == detail.ProductItemId && !p.DeletedTime.HasValue)
+                            ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(),
+                                string.Format(Constants.ErrorMessageProductItemNotFound, detail.ProductItemId));
+
+                        productItem.QuantityInStock += detail.ProductQuantity;
+
+                        productItemRepository.Update(productItem);
+                        await _unitOfWork.SaveAsync();
+                    }
+
+                    returnUrl = Constants.FrontUrl + "/Order/OrderHistory";
                     response.IsSucceed = false;
-                    response.Text = Constants.PaymentApproveFailed;
+                    response.Text = returnUrl;
                     return response;
                 }
 
@@ -349,9 +372,35 @@ namespace HandmadeProductManagement.Services.Service
                 await _unitOfWork.GetRepository<Order>().UpdateAsync(order);
                 await _unitOfWork.SaveAsync();
 
+
+                // Retrieve the order details to update product stock
+                var orderDetailRepository = _unitOfWork.GetRepository<OrderDetail>();
+                var orderDetails = await orderDetailRepository.Entities
+                    .Where(od => od.OrderId == order.Id)
+                    .ToListAsync();
+
+                var productItemRepository = _unitOfWork.GetRepository<ProductItem>();
+
+                // Add back the product quantities to the stock
+                foreach (var detail in orderDetails)
+                {
+                    var productItem = await productItemRepository.Entities
+                        .FirstOrDefaultAsync(p => p.Id == detail.ProductItemId && !p.DeletedTime.HasValue)
+                        ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(),
+                            string.Format(Constants.ErrorMessageProductItemNotFound, detail.ProductItemId));
+
+                    productItem.QuantityInStock += detail.ProductQuantity;
+
+                    productItemRepository.Update(productItem);
+                    await _unitOfWork.SaveAsync();
+                }
+
+
                 response.IsSucceed = false;
-                response.Text = Constants.PaymentApproveFailed;
+                returnUrl = Constants.FrontUrl + "/Order/OrderHistory";
+                response.Text = returnUrl;
                 return response;
+
             }
         }
 

@@ -112,7 +112,7 @@ namespace HandmadeProductManagement.Services.Service
                 ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageOrderNotFound);
 
             var statusChangeEntity = _mapper.Map<StatusChange>(createStatusChange);
-            statusChangeEntity.ChangeTime = DateTime.UtcNow;
+            statusChangeEntity.ChangeTime = DateTime.UtcNow.AddHours(7);
 
             // Set metadata
             statusChangeEntity.CreatedBy = userId;
