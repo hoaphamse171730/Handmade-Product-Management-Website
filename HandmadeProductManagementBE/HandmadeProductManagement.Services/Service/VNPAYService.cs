@@ -319,6 +319,16 @@ namespace HandmadeProductManagement.Services.Service
                     await _unitOfWork.GetRepository<Order>().UpdateAsync(order);
                     await _unitOfWork.SaveAsync();
 
+                    // Create a new status change record after updating the order status
+                    var statusChangeDto = new StatusChangeForCreationDto
+                    {
+                        OrderId = order.Id,
+                        Status = order.Status
+                    };
+
+                    await _statusChangeService.Create(statusChangeDto, order.UserId.ToString());
+                    await _unitOfWork.SaveAsync();
+
                     // Retrieve the order details to update product stock
                     var orderDetailRepository = _unitOfWork.GetRepository<OrderDetail>();
                     var orderDetails = await orderDetailRepository.Entities
@@ -372,6 +382,15 @@ namespace HandmadeProductManagement.Services.Service
                 await _unitOfWork.GetRepository<Order>().UpdateAsync(order);
                 await _unitOfWork.SaveAsync();
 
+                // Create a new status change record after updating the order status
+                var statusChangeDto = new StatusChangeForCreationDto
+                {
+                    OrderId = order.Id,
+                    Status = order.Status
+                };
+
+                await _statusChangeService.Create(statusChangeDto, order.UserId.ToString());
+                await _unitOfWork.SaveAsync();
 
                 // Retrieve the order details to update product stock
                 var orderDetailRepository = _unitOfWork.GetRepository<OrderDetail>();
