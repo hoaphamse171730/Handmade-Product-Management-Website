@@ -142,18 +142,14 @@ namespace HandmadeProductManagement.Services.Service
                 .OrderBy(s => s.ChangeTime) // Order by change time ascending
                 .ToListAsync();
 
-            // Define UTC+7 timezone (Vietnam)
-            var vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById(Constants.TimeZoneSEAsiaStandard);
-
             // Create response notifications
             var notifications = statusChanges.Select(status => {
                 // Convert time from UTC to UTC+7
-                var changeTimeInVietnam = TimeZoneInfo.ConvertTimeFromUtc(status.ChangeTime, vietnamTimeZone);
 
                 return new NotificationModel
                 {
                     Id = status.Id,
-                    Message = $"Your order is {status.Status} at {changeTimeInVietnam.ToString(Constants.DateTimeFormat)}",
+                    Message = $"Your order is {status.Status} at {status.ChangeTime}",
                     Tag = Constants.NotificationTagStatusChange, // Use constant for notification tag
                     URL = Constants.FrontUrl + $"/Order/OrderDetail?orderId={status.OrderId}"
                 };
