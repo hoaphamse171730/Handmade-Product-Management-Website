@@ -125,8 +125,30 @@ namespace HandmadeProductManagement.Services.Service
                 }
             }
 
-            // Step 9: Call the ProductService to add the variation options for new combinations
+            // Step 9: Remove old ProductItems that no longer fit the new combinations
+            var productItemsToRemove = await _unitOfWork.GetRepository<ProductItem>().Entities
+                .Where(pi => pi.ProductId == product.Id) // Lọc theo ProductId
+                .ToListAsync(); // Chuyển tất cả các ProductItem sang client-side
+
+            var productItemsToDelete = productItemsToRemove
+                .Where(pi => !newVariationCombinations.Any(vc =>
+                    // Kiểm tra nếu tất cả VariationOptionIds trong sự kết hợp mới có thể được tìm thấy trong ProductConfigurations của ProductItem
+                    vc.VariationOptionIds.Intersect(
+                        pi.ProductConfigurations.Select(pc => pc.VariationOptionId)
+                    ).Count() == vc.VariationOptionIds.Count // Đảm bảo rằng tất cả các VariationOptionIds đều có trong ProductConfiguration
+                ))
+                .ToList();
+
+            // Xóa các ProductItem không hợp lệ
+            foreach (var itemToRemove in productItemsToDelete)
+            {
+                _unitOfWork.GetRepository<ProductItem>().Delete(itemToRemove.Id);
+            }
+
+
+            // Step 10: Call the ProductService to add the variation options for new combinations
             await _productService.AddVariationOptionsToProduct(product, newVariationCombinations, userId);
+
             return true;
         }
 

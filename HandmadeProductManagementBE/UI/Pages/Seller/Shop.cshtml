@@ -12,7 +12,7 @@
                 ErrorMessage = Model.ErrorMessage,
                 ErrorDetail = Model.ErrorDetail
             };
-     var token = HttpContext.Session.GetString("Token");
+    var token = HttpContext.Session.GetString("Token");
 }
 @if (!string.IsNullOrEmpty(Model.ErrorMessage) && Model.ErrorMessage != "NotFoundException")
 {
@@ -83,44 +83,44 @@
 else
 {
     <div class="relative w-full bg-white px-8 py-6">
-    <!-- Update Button -->
-    <button onclick="openUpdateModal()" class="absolute right-4 top-4 rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600">
-        Update Shop Info
-    </button>
+        <!-- Update Button -->
+        <button onclick="openUpdateModal()" class="absolute right-4 top-4 rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600">
+            Update Shop Info
+        </button>
 
-    <div class="flex">
-        <!-- Left half for Shop Name -->
-        <div class="flex w-1/2 items-center justify-center">
-            <h1 class="mb-4 text-4xl font-bold">@Model.Shop.Name</h1>
+        <div class="flex">
+            <!-- Left half for Shop Name -->
+            <div class="flex w-1/2 items-center justify-center">
+                <h1 class="mb-4 text-4xl font-bold">@Model.Shop.Name</h1>
+            </div>
+
+            <!-- Right half for other shop details -->
+            <div class="w-1/2 pl-6">
+                <div class="mb-4 flex items-center">
+                    <h2 class="mr-2 text-xl font-semibold">Rating:</h2>
+                    <p>@Model.Shop.Rating</p>
+                </div>
+
+                <div class="mb-4 flex items-center">
+                    <h2 class="mr-2 text-xl font-semibold">Products:</h2>
+                    <p>@Model.Shop.ProductCount</p>
+                </div>
+
+                <div class="mb-4 flex items-center">
+                    <h2 class="mr-2 text-xl font-semibold">Joined:</h2>
+                    <p>@Model.Shop.JoinedTimeAgo</p>
+                </div>
+            </div>
         </div>
 
-        <!-- Right half for other shop details -->
-        <div class="w-1/2 pl-6">
-            <div class="mb-4 flex items-center">
-                <h2 class="mr-2 text-xl font-semibold">Rating:</h2>
-                <p>@Model.Shop.Rating</p>
-            </div>
-
-            <div class="mb-4 flex items-center">
-                <h2 class="mr-2 text-xl font-semibold">Products:</h2>
-                <p>@Model.Shop.ProductCount</p>
-            </div>
-
-            <div class="mb-4 flex items-center">
-                <h2 class="mr-2 text-xl font-semibold">Joined:</h2>
-                <p>@Model.Shop.JoinedTimeAgo</p>
-            </div>
+        <!-- Full-width description section -->
+        <div class="mt-6">
+            <h2 class="text-xl font-semibold">Description</h2>
+            <span class="text-gray-600">@Model.Shop.Description</span>
         </div>
     </div>
 
-    <!-- Full-width description section -->
-    <div class="mt-6">
-        <h2 class="text-xl font-semibold">Description</h2>
-        <span class="text-gray-600">@Model.Shop.Description</span>
-    </div>
-    </div>
-
-   <!-- Update Shop Modal -->
+    <!-- Update Shop Modal -->
     <div id="updateShopModal" class="fixed inset-0 z-50 flex hidden items-center justify-center bg-gray-900 bg-opacity-50">
         <div class="w-full max-w-md rounded-lg bg-white p-8">
             <h3 class="mb-4 text-xl font-semibold">Update Shop Info</h3>
@@ -271,12 +271,12 @@ else
                     </div>
                     <h3 class="text-lg font-semibold">@product.Name</h3>
                     @*                 <p class="mb-2 text-sm text-gray-600">@product.Category?.Name</p>
-        *@                <p class="font-medium text-gray-800">₫@product.LowestPrice.ToString("N0").Replace(",", ".")</p>
+        *@                <p class="font-medium text-gray-800">$@product.LowestPrice.ToString("F2")</p>
                     <div class="mt-2 flex items-center">
                         <span class="text-yellow-400">★</span>
                         <span class="ml-1">@product.Rating.ToString("F1")</span>
                         @*                     <span class="ml-2 text-gray-500">(@product.ReviewCount reviews)</span>
-                *@
+            *@
                     </div>
                     <div class="mt-3 flex items-center justify-between">
                         <div class="mt-2 text-sm text-gray-500">
@@ -691,31 +691,31 @@ else
             variationDiv.classList.add('p-4', 'border', 'rounded-md', 'bg-gray-50', 'mb-4');
 
             const optionsHtml = options.map((option, index) => `
-                        <div class="mt-2 flex items-center">
-                            <input type="checkbox"
-                                   name="variation_${variationId}"
-                                   value="${optionIds[index]}"
-                                   data-option-name="${option}"
-                                   data-variation-name="${variationName}"
-                                   class="form-checkbox mr-2 h-4 w-4 text-blue-600"
-                                   onchange="handleVariationOptionCheck(this)" />
-                            <label class="text-sm text-gray-700">${option}</label>
-                        </div>
-                    `).join('');
+                                <div class="mt-2 flex items-center">
+                                    <input type="checkbox"
+                                           name="variation_${variationId}"
+                                           value="${optionIds[index]}"
+                                           data-option-name="${option}"
+                                           data-variation-name="${variationName}"
+                                           class="form-checkbox mr-2 h-4 w-4 text-blue-600"
+                                           onchange="handleVariationOptionCheck(this)" />
+                                    <label class="text-sm text-gray-700">${option}</label>
+                                </div>
+                            `).join('');
 
             variationDiv.innerHTML = `
-                        <div class="mb-2 flex items-center justify-between">
-                            <span class="font-medium">${variationName}</span>
-                            <button type="button"
-                                    onclick="removeExistingVariation('${variationId}')"
-                                    class="text-red-600 hover:text-red-800">
-                                Remove
-                            </button>
-                        </div>
-                        <div class="variation-options">
-                            ${optionsHtml}
-                        </div>
-                    `;
+                                <div class="mb-2 flex items-center justify-between">
+                                    <span class="font-medium">${variationName}</span>
+                                    <button type="button"
+                                            onclick="removeExistingVariation('${variationId}')"
+                                            class="text-red-600 hover:text-red-800">
+                                        Remove
+                                    </button>
+                                </div>
+                                <div class="variation-options">
+                                    ${optionsHtml}
+                                </div>
+                            `;
 
             document.getElementById('existingVariationsList').appendChild(variationDiv);
         };
@@ -772,44 +772,44 @@ else
             const newRow = document.createElement('div');
             newRow.classList.add('variation-row', 'mb-4', 'p-4', 'border', 'rounded');
             newRow.innerHTML = `
-                        <div class="mb-2 flex items-center">
-                            <label class="mr-2 block text-sm font-medium text-gray-700">Variation Name:</label>
-                            <input type="text"
-                                   name="NewVariations[${variationIndex}].Name"
-                                   class="form-input mr-2 flex-grow rounded"
-                                   placeholder="Enter variation name"
-                                   required />
-                            <button type="button"
-                                    onclick="this.closest('.variation-row').remove()"
-                                    class="text-red-600 hover:text-red-800">
-                                Remove
-                            </button>
-                        </div>
-                        <div class="variation-options">
-                            <div class="option-row mb-2">
-                                <label class="mb-1 block text-sm font-medium text-gray-700">Options:</label>
-                                <div class="flex items-center">
+                                <div class="mb-2 flex items-center">
+                                    <label class="mr-2 block text-sm font-medium text-gray-700">Variation Name:</label>
                                     <input type="text"
-                                           name="NewVariations[${variationIndex}].Options"
+                                           name="NewVariations[${variationIndex}].Name"
                                            class="form-input mr-2 flex-grow rounded"
-                                           placeholder="Enter option value"
+                                           placeholder="Enter variation name"
                                            required />
                                     <button type="button"
-                                            onclick="addVariationOption(this.closest('.option-row'))"
-                                            class="rounded-md bg-blue-500 px-3 py-1 text-white hover:bg-blue-600">
-                                        Add Option
+                                            onclick="this.closest('.variation-row').remove()"
+                                            class="text-red-600 hover:text-red-800">
+                                        Remove
                                     </button>
                                 </div>
-                            </div>
-                        </div>
-                        <div class="mt-4">
-                            <button type="button"
-                                            onclick="saveNewVariationForCreation(this.closest('.variation-row'))"
-                                    class="rounded-md bg-green-500 px-4 py-2 text-white hover:bg-green-600">
-                                Save Variation
-                            </button>
-                        </div>
-                    `;
+                                <div class="variation-options">
+                                    <div class="option-row mb-2">
+                                        <label class="mb-1 block text-sm font-medium text-gray-700">Options:</label>
+                                        <div class="flex items-center">
+                                            <input type="text"
+                                                   name="NewVariations[${variationIndex}].Options"
+                                                   class="form-input mr-2 flex-grow rounded"
+                                                   placeholder="Enter option value"
+                                                   required />
+                                            <button type="button"
+                                                    onclick="addVariationOption(this.closest('.option-row'))"
+                                                    class="rounded-md bg-blue-500 px-3 py-1 text-white hover:bg-blue-600">
+                                                Add Option
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mt-4">
+                                    <button type="button"
+                                                    onclick="saveNewVariationForCreation(this.closest('.variation-row'))"
+                                            class="rounded-md bg-green-500 px-4 py-2 text-white hover:bg-green-600">
+                                        Save Variation
+                                    </button>
+                                </div>
+                            `;
 
             container.appendChild(newRow);
         };
@@ -957,27 +957,27 @@ else
                     combinationDiv.classList.add('mb-4', 'p-4', 'border', 'rounded-md');
 
                     combinationDiv.innerHTML = `
-                                <div class="mb-2 font-medium">${combination.description.join(', ')}</div>
-                                <div class="grid-cols-2 grid gap-4">
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700">Price</label>
-                                        <input type="number"
-                                               name="VariationCombinations[${index}].Price"
-                                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                                               required min="0" step="0.01" />
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700">Stock</label>
-                                        <input type="number"
-                                               name="VariationCombinations[${index}].Stock"
-                                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                                               required min="0" step="1" />
-                                    </div>
-                                </div>
-                                <input type="hidden"
-                                       name="VariationCombinations[${index}].OptionIds"
-                                       value="${combination.optionIds.join(',')}" />
-                            `;
+                                        <div class="mb-2 font-medium">${combination.description.join(', ')}</div>
+                                        <div class="grid-cols-2 grid gap-4">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700">Price</label>
+                                                <input type="number"
+                                                       name="VariationCombinations[${index}].Price"
+                                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                                                       required min="0" step="0.01" />
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700">Stock</label>
+                                                <input type="number"
+                                                       name="VariationCombinations[${index}].Stock"
+                                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                                                       required min="0" step="1" />
+                                            </div>
+                                        </div>
+                                        <input type="hidden"
+                                               name="VariationCombinations[${index}].OptionIds"
+                                               value="${combination.optionIds.join(',')}" />
+                                    `;
 
                     container.appendChild(combinationDiv);
                 });
@@ -1012,20 +1012,20 @@ else
                     variationDiv.classList.add('p-4', 'border', 'rounded-md', 'bg-gray-50', 'mb-4');
 
                     variationDiv.innerHTML = `
-                                <div class="mb-2 flex items-center justify-between">
-                                    <span class="font-medium">${variation.name}</span>
-                                    <button type="button"
-                                            onclick="removeExistingVariation('${variation.id}')"
-                                            class="text-red-600 hover:text-red-800">
-                                        Remove
-                                    </button>
-                                </div>
-                                <div class="variation-options mt-2" id="options-${variation.id}">
-                                    <div class="grid-cols-2 grid gap-2">
-                                        <!-- Options will be loaded here -->
-                                    </div>
-                                </div>
-                            `;
+                                        <div class="mb-2 flex items-center justify-between">
+                                            <span class="font-medium">${variation.name}</span>
+                                            <button type="button"
+                                                    onclick="removeExistingVariation('${variation.id}')"
+                                                    class="text-red-600 hover:text-red-800">
+                                                Remove
+                                            </button>
+                                        </div>
+                                        <div class="variation-options mt-2" id="options-${variation.id}">
+                                            <div class="grid-cols-2 grid gap-2">
+                                                <!-- Options will be loaded here -->
+                                            </div>
+                                        </div>
+                                    `;
 
                     container.appendChild(variationDiv);
                     await loadVariationOptions(variation.id, variation.name);
@@ -1053,17 +1053,17 @@ else
                     const optionDiv = document.createElement('div');
                     optionDiv.classList.add('flex', 'items-center');
                     optionDiv.innerHTML = `
-                                <input type="checkbox"
-                                       id="option-${option.id}"
-                                       name="variation_${variationId}"
-                                       value="${option.id}"
-                                       data-variation-id="${variationId}"
-                                       data-variation-name="${variationName}"
-                                       data-option-name="${option.value}"
-                                       class="form-checkbox mr-2 h-4 w-4 text-blue-600"
-                                       onchange="handleVariationOptionCheck(this)" />
-                                <label for="option-${option.id}" class="text-sm text-gray-700">${option.value}</label>
-                            `;
+                                        <input type="checkbox"
+                                               id="option-${option.id}"
+                                               name="variation_${variationId}"
+                                               value="${option.id}"
+                                               data-variation-id="${variationId}"
+                                               data-variation-name="${variationName}"
+                                               data-option-name="${option.value}"
+                                               class="form-checkbox mr-2 h-4 w-4 text-blue-600"
+                                               onchange="handleVariationOptionCheck(this)" />
+                                        <label for="option-${option.id}" class="text-sm text-gray-700">${option.value}</label>
+                                    `;
                     optionsContainer.appendChild(optionDiv);
                 });
             } catch (error) {
@@ -1305,20 +1305,20 @@ else
             newOptionRow.classList.add('option-row', 'mb-2');
 
             newOptionRow.innerHTML = `
-                        <div class="flex items-center">
-                            <input type="text"
-                                   name="NewVariations[${variationIndex}].Options"
-                                   class="form-input mr-2 flex-grow rounded"
-                                   placeholder="Enter option value"
-                                   required
-                                   onchange="handleNewVariationInput(this)" />
-                            <button type="button"
-                                    onclick="this.closest('.option-row').remove(); updateVariationCombinations();"
-                                    class="text-red-600 hover:text-red-800">
-                                Remove
-                            </button>
-                        </div>
-                    `;
+                                <div class="flex items-center">
+                                    <input type="text"
+                                           name="NewVariations[${variationIndex}].Options"
+                                           class="form-input mr-2 flex-grow rounded"
+                                           placeholder="Enter option value"
+                                           required
+                                           onchange="handleNewVariationInput(this)" />
+                                    <button type="button"
+                                            onclick="this.closest('.option-row').remove(); updateVariationCombinations();"
+                                            class="text-red-600 hover:text-red-800">
+                                        Remove
+                                    </button>
+                                </div>
+                            `;
 
             variationOptions.appendChild(newOptionRow);
         }
@@ -1393,12 +1393,12 @@ else
                         const imgWrapper = document.createElement('div');
                         imgWrapper.classList.add('relative');
                         imgWrapper.innerHTML = `
-                                                <img src="${e.target.result}" class="h-32 w-full rounded-md object-cover" />
-                                                <button type="button" onclick="removeImage(this)"
-                                                        class="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white">
-                                                    ✖
-                                                </button>
-                                            `;
+                                                        <img src="${e.target.result}" class="h-32 w-full rounded-md object-cover" />
+                                                        <button type="button" onclick="removeImage(this)"
+                                                                class="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white">
+                                                            ✖
+                                                        </button>
+                                                    `;
                         imagePreviewContainer.appendChild(imgWrapper);
                     };
                     reader.readAsDataURL(file);
@@ -1520,12 +1520,12 @@ else
                         const imgWrapper = document.createElement('div');
                         imgWrapper.classList.add('relative');
                         imgWrapper.innerHTML = `
-                                    <img src="${image.url}" class="h-32 w-full rounded-md object-cover" />
-                                    <button type="button" onclick="removeImageForEdit(this, '${image.id}')"
-                                            class="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white">
-                                        ✖
-                                    </button>
-                                `;
+                                            <img src="${image.url}" class="h-32 w-full rounded-md object-cover" />
+                                            <button type="button" onclick="removeImageForEdit(this, '${image.id}')"
+                                                    class="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white">
+                                                ✖
+                                            </button>
+                                        `;
                         imagePreviewContainer.appendChild(imgWrapper);
                     });
                 } else {
@@ -1614,49 +1614,56 @@ else
             const newRow = document.createElement('div');
             newRow.classList.add('variation-row', 'mb-4', 'p-4', 'border', 'rounded');
             newRow.innerHTML = `
-                                        <div class="mb-2 flex items-center">
-                                            <label class="mr-2 block text-sm font-medium text-gray-700">Variation Name:</label>
-                                            <input type="text"
-                                                   name="NewVariations[${variationIndex}].Name"
-                                                   class="form-input mr-2 flex-grow rounded"
-                                                   placeholder="Enter variation name"
-                                                   required />
-                                            <button type="button"
-                                                    onclick="this.closest('.variation-row').remove()"
-                                                    class="text-red-600 hover:text-red-800">
-                                                Remove
-                                            </button>
-                                        </div>
-                                        <div class="variation-options">
-                                            <div class="option-row mb-2">
-                                                <label class="mb-1 block text-sm font-medium text-gray-700">Options:</label>
-                                                <div class="flex items-center">
+                                                <div class="mb-2 flex items-center">
+                                                    <label class="mr-2 block text-sm font-medium text-gray-700">Variation Name:</label>
                                                     <input type="text"
-                                                           name="NewVariations[${variationIndex}].Options"
+                                                           name="NewVariations[${variationIndex}].Name"
                                                            class="form-input mr-2 flex-grow rounded"
-                                                           placeholder="Enter option value"
+                                                           placeholder="Enter variation name"
                                                            required />
                                                     <button type="button"
-                                                            onclick="addVariationOption(this.closest('.option-row'))"
-                                                            class="rounded-md bg-blue-500 px-3 py-1 text-white hover:bg-blue-600">
-                                                        Add Option
+                                                            onclick="this.closest('.variation-row').remove()"
+                                                            class="text-red-600 hover:text-red-800">
+                                                        Remove
                                                     </button>
                                                 </div>
-                                            </div>
-                                        </div>
-                                        <div class="mt-4">
-                                            <button type="button"
-                                                    onclick="saveNewVariationForUpdate(this.closest('.variation-row'))"
-                                                    class="rounded-md bg-green-500 px-4 py-2 text-white hover:bg-green-600">
-                                                Save Variation
-                                            </button>
-                                        </div>
-                                    `;
+                                                <div class="variation-options">
+                                                    <div class="option-row mb-2">
+                                                        <label class="mb-1 block text-sm font-medium text-gray-700">Options:</label>
+                                                        <div class="flex items-center">
+                                                            <input type="text"
+                                                                   name="NewVariations[${variationIndex}].Options"
+                                                                   class="form-input mr-2 flex-grow rounded"
+                                                                   placeholder="Enter option value"
+                                                                   required />
+                                                            <button type="button"
+                                                                    onclick="addVariationOption(this.closest('.option-row'))"
+                                                                    class="rounded-md bg-blue-500 px-3 py-1 text-white hover:bg-blue-600">
+                                                                Add Option
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="mt-4">
+                                                    <button type="button"
+                                                            onclick="saveNewVariationForUpdate(this.closest('.variation-row'))"
+                                                            class="rounded-md bg-green-500 px-4 py-2 text-white hover:bg-green-600">
+                                                        Save Variation
+                                                    </button>
+                                                </div>
+                                            `;
 
             container.appendChild(newRow);
         };
 
         let combinations = []; // Declare a global variable to store the combinations
+
+        // Helper function to compute the cartesian product of options
+        const cartesianProduct = (...arrays) => {
+            return arrays.reduce((acc, curr) => {
+                return acc.flatMap(d => curr.map(e => [d, e].flat()));
+            });
+        };
 
         const saveNewVariationForUpdate = async (variationRow) => {
             try {
@@ -1672,8 +1679,6 @@ else
                 }
 
                 const categoryId = document.getElementById('editCategorySelect').value;
-
-                // Create the new variation
                 const variationData = { name: variationName, categoryId: categoryId, options: options };
 
                 const createResponse = await fetch('?handler=CreateVariation', {
@@ -1687,95 +1692,96 @@ else
                 }
 
                 const result = await createResponse.json();
-
                 const optionIds = result.optionIds;
+                console.log("New variation created:", result);
 
-                // Add the new variation options to the current list of variation options
                 const combinedOptions = [...currentVariationOptions];
-
                 optionIds.forEach(optionId => {
-                    const optionExists = currentVariationOptions.some(option => option.varitaionName === variationName);
+                    const optionExists = currentVariationOptions.some(option => option.variationName === variationName);
 
                     if (!optionExists) {
                         combinedOptions.push({ variationName: variationName, optionName: options.join(', '), optionId });
                     }
                 });
 
-                // Generate combinations based on the newly created variation
-                const combinationContainer = document.getElementById('variationCombinationContainerForUpdate');
-
-                const combinationSection = document.createElement('div');
-                combinationSection.classList.add('combination-section', 'mb-4', 'p-4', 'border', 'rounded');
-
-                let combinationHTML = `
-                            <h4 class="text-lg font-medium">Variation Combination</h4>
-                            <div class="grid-cols-1 grid gap-4">
-                        `;
-
-                let combinationCounter = 0; // Declare a counter to generate unique IDs
-
-                combinedOptions.forEach((currentOption, currentIdx) => {
-                    if (currentOption.variationName.toLowerCase() === variationName.toLowerCase()) {
-                        console.log("Skipping combination because variationName matches currentOption.variationName:", variationName);
-                        return; // Skip if the variationName matches currentOption.variationName
+                // Group options by variation name
+                const groupedOptions = combinedOptions.reduce((acc, option) => {
+                    if (!acc[option.variationName]) {
+                        acc[option.variationName] = [];
                     }
+                    acc[option.variationName].push(option);
+                    return acc;
+                }, {});
 
-                    options.forEach((newOption, newIdx) => {
-                        // Use the combination counter for the combinationId
-                        const combinationId = `combination-${combinationCounter++}`;  // Increment the counter for each new combination
+                // Prepare option arrays for cartesian product
+                const optionArrays = Object.values(groupedOptions).map(options =>
+                    options.map(option => ({ optionName: option.optionName, optionId: option.optionId }))
+                );
 
-                        combinationHTML += `
-                            <div class="flex gap-4">
-                                <div class="flex-1">
-                                    <label class="block text-sm font-medium text-gray-700">Variation Options</label>
-                                    <p class="mt-1 block w-full rounded-md border-gray-300 bg-gray-50 p-2 shadow-sm">
-                                        ${currentOption.optionName}, ${newOption}
-                                    </p>
-                                </div>
-                                <div class="flex-1">
-                                    <label class="block text-sm font-medium text-gray-700">Price</label>
-                                    <input type="number"
-                                        id="price-${combinationId}"
-                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                                        placeholder="Enter price"
-                                        min="0" required />
-                                </div>
-                                <div class="flex-1">
-                                    <label class="block text-sm font-medium text-gray-700">Quantity In Stock</label>
-                                    <input type="number"
-                                        id="quantity-${combinationId}"
-                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                                        placeholder="Enter quantity"
-                                        min="0" required />
-                                </div>
+                // Generate all possible combinations
+                const allCombinations = cartesianProduct(...optionArrays);
+
+                // Generate HTML for each combination
+                const combinationContainer = document.getElementById('variationCombinationContainerForUpdate');
+                let combinationCounter = 0;
+                combinationContainer.innerHTML = ''; // Clear previous content if needed
+
+                allCombinations.forEach(combination => {
+                    const combinationSection = document.createElement('div');
+                    combinationSection.classList.add('combination-section', 'mb-4', 'p-4', 'border', 'rounded');
+
+                    const combinationId = `combination-${combinationCounter++}`;
+                    const combinationNames = combination.map(opt => opt.optionName).join(', ');
+
+                    let combinationHTML = `
+                        <div class="flex gap-4">
+                            <div class="flex-1">
+                                <label class="block text-sm font-medium text-gray-700">Variation Options</label>
+                                <p class="mt-1 block w-full rounded-md border-gray-300 bg-gray-50 p-2 shadow-sm">
+                                    ${combinationNames}
+                                </p>
                             </div>
-                        `;
+                            <div class="flex-1">
+                                <label class="block text-sm font-medium text-gray-700">Price</label>
+                                <input type="number"
+                                    id="price-${combinationId}"
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                                    placeholder="Enter price"
+                                    min="0" required />
+                            </div>
+                            <div class="flex-1">
+                                <label class="block text-sm font-medium text-gray-700">Quantity In Stock</label>
+                                <input type="number"
+                                    id="quantity-${combinationId}"
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                                    placeholder="Enter quantity"
+                                    min="0" required />
+                            </div>
+                        </div>`;
 
-                        // Store the combination data in the global array
-                        combinations.push({
-                            variationOptions: [currentOption.optionId, optionIds[0]], // Store optionIds
-                            price: null,  // Placeholder for price (to be filled later)
-                            quantity: null // Placeholder for quantity (to be filled later)
-                        });
+                    combinations.push({
+                        variationOptions: combination.map(opt => opt.optionId),
+                        price: null,
+                        quantity: null
                     });
+
+                    combinationSection.innerHTML = combinationHTML;
+                    combinationContainer.appendChild(combinationSection);
                 });
 
-                combinationHTML += `</div>`;
+                // Add the single Save Combination button at the end
+                const saveButtonContainer = document.createElement('div');
+                saveButtonContainer.classList.add('mt-4', 'flex', 'justify-end');
+                saveButtonContainer.innerHTML = `
+                    <button type="button"
+                            class="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+                            onclick="saveVariationCombination()">Save All Combinations</button>
+                `;
+                combinationContainer.appendChild(saveButtonContainer);
 
-                combinationHTML += `
-                            <div class="mt-4 flex justify-end">
-                                <button type="button"
-                                        class="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-                                        onclick="saveVariationCombination()">Save Combination</button>
-                            </div>
-                        `;
+                variationRow.remove();
 
-                combinationSection.innerHTML = combinationHTML;
-                combinationContainer.appendChild(combinationSection);
-
-                variationRow.remove(); // Optionally remove the new variation row from the UI
-
-                console.log(combinations);
+                console.log("Final combinations list:", combinations);
 
             } catch (error) {
                 console.error('Error saving variation:', error);
@@ -1853,9 +1859,9 @@ else
                 } else {
                     const result = await response.json();
                     console.log(result.message || 'Variation combinations saved successfully!');
+                    alert('All variation combinations have been saved successfully!');
                 }
 
-                alert('All variation combinations have been saved successfully!');
 
                 combinations = [];
 
@@ -1960,37 +1966,37 @@ else
                 const isLastItem = editProductState.productItems.length === 1;
 
                 itemDiv.innerHTML = `
-                            <input type="hidden" name="ProductItemUpdates[${index}].Id" value="${item.id}" />
-                            <div class="flex gap-4">
-                                <div class="flex-1">
-                                    <label class="block text-sm font-medium text-gray-700">Variation Options</label>
-                                    <p class="mt-1 block w-full rounded-md border-gray-300 bg-gray-50 p-2 shadow-sm">${variationOptions.join(', ')}</p>
-                                </div>
-                                <div class="flex-1">
-                                    <label class="block text-sm font-medium text-gray-700">Quantity in Stock</label>
-                                    <input type="number"
-                                        name="ProductItemUpdates[${index}].QuantityInStock"
-                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                                        value="${item.quantityInStock}"
-                                        min="0" />
-                                </div>
-                                <div class="flex-1">
-                                    <label class="block text-sm font-medium text-gray-700">Price</label>
-                                    <input type="number"
-                                        name="ProductItemUpdates[${index}].Price"
-                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                                        value="${item.price}"
-                                        min="0" />
-                                </div>
-                                <div class="flex items-center justify-center">
-                                    <button class="text-red-600 ${isLastItem ? 'cursor-not-allowed opacity-50' : ''}"
-                                        onclick="${isLastItem ? 'return false;' : `deleteProductItem(${index})`}">
-                                        <i class="fas fa-trash-alt"></i>
-                                        Delete
-                                    </button>
-                                </div>
-                            </div>
-                        `;
+                                    <input type="hidden" name="ProductItemUpdates[${index}].Id" value="${item.id}" />
+                                    <div class="flex gap-4">
+                                        <div class="flex-1">
+                                            <label class="block text-sm font-medium text-gray-700">Variation Options</label>
+                                            <p class="mt-1 block w-full rounded-md border-gray-300 bg-gray-50 p-2 shadow-sm">${variationOptions.join(', ')}</p>
+                                        </div>
+                                        <div class="flex-1">
+                                            <label class="block text-sm font-medium text-gray-700">Quantity in Stock</label>
+                                            <input type="number"
+                                                name="ProductItemUpdates[${index}].QuantityInStock"
+                                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                                                value="${item.quantityInStock}"
+                                                min="0" />
+                                        </div>
+                                        <div class="flex-1">
+                                            <label class="block text-sm font-medium text-gray-700">Price</label>
+                                            <input type="number"
+                                                name="ProductItemUpdates[${index}].Price"
+                                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                                                value="${item.price}"
+                                                min="0" />
+                                        </div>
+                                        <div class="flex items-center justify-center">
+                                            <button class="text-red-600 ${isLastItem ? 'cursor-not-allowed opacity-50' : ''}"
+                                                onclick="${isLastItem ? 'return false;' : `deleteProductItem(${index})`}">
+                                                <i class="fas fa-trash-alt"></i>
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </div>
+                                `;
 
                 container.appendChild(itemDiv);
             });
