@@ -8,6 +8,7 @@ using HandmadeProductManagement.Core.Common;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.CartItemModelViews;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace HandmadeProductManagement.Services.Service
 {
