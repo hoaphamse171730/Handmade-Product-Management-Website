@@ -656,10 +656,6 @@ video {
   right: 0.25rem;
 }
 
-.right-3 {
-  right: 0.75rem;
-}
-
 .right-4 {
   right: 1rem;
 }
@@ -1678,12 +1674,12 @@ video {
   padding-left: 1.5rem;
 }
 
-.pr-12 {
-  padding-right: 3rem;
-}
-
 .pt-4 {
   padding-top: 1rem;
+}
+
+.pr-12 {
+  padding-right: 3rem;
 }
 
 .text-left {
