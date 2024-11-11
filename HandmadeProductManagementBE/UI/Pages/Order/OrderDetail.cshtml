@@ -192,7 +192,8 @@
 
                 <div class="border-l border-gray-300" style="margin: 0 30px;"></div>
 
-                @if (finalStatuses.Any(kv => kv.Key == "Payment Failed") && !finalStatuses.Any(kv => kv.Key == "Processing"))
+                @if (finalStatuses.Any(kv => kv.Key == "Payment Failed") &&
+               (!finalStatuses.Any(kv => kv.Key == "Processing" && kv.Value.Item2 != null)))
                 {
                     <p class="text-lg text-red-600">Payment failed, please try again</p>
                 }
@@ -417,3 +418,10 @@
         modal.classList.add('hidden');
     }
 </script>
+
+@{
+    foreach (var kv in finalStatuses)
+    {
+        <script>console.log('@kv.Key: @kv.Value');</script>
+    }
+}
