@@ -1,8 +1,22 @@
 ﻿@page
 @model UserInfoModel
+@using UI.Pages.Shared
 @{
     ViewData["Title"] = "User Info";
 }
+@{
+    var errorModel = new ErrorMessageModel
+            {
+                ErrorMessage = Model.ErrorMessage,
+                ErrorDetail = Model.ErrorDetail
+            };
+    var token = HttpContext.Session.GetString("Token");
+}
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <partial name="_ErrorMessage" model="errorModel" />
+}
+
 
 <div class="container mx-auto mt-10">
     <h2 class="text-center text-lg font-bold text-blue-600">User Information</h2>
