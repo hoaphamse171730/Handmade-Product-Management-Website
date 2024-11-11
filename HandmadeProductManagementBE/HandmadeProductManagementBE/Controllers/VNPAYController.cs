@@ -87,12 +87,11 @@ namespace HandmadeProductManagementAPI.Controllers
 
             var paymentStatus = await _VNPAYService.VNPAYPayment(request);
             //redirect về webpage của project, sau khi deploy set lại returnUrl trong service có thể mở ra
-            if (paymentStatus.IsSucceed && paymentStatus.Text != null)
-            {
-                return Redirect(paymentStatus.Text);
-            }
 
-            return Ok(paymentStatus);
+                return Redirect(paymentStatus.Text);
+
+
+
         }
     }
 }
