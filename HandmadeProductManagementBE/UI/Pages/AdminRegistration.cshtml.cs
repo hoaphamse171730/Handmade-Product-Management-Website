@@ -82,7 +82,7 @@ namespace UI.Pages
                 Console.WriteLine("Error Details: " + errorContent);
                 if (response.IsSuccessStatusCode)
                 {
-                    return RedirectToPage("/Login");
+                    return RedirectToPage("/Index");
                 }
                 else
                 {
