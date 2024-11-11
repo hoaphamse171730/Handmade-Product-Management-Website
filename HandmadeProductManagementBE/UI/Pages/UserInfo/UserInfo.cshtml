@@ -16,40 +16,270 @@
 {
     <partial name="_ErrorMessage" model="errorModel" />
 }
+@using HandmadeProductManagement.Core.Common
+<script>
+    const apiBaseUrl = '@Constants.ApiBaseUrl';
+    var tokenFromRazor = '@token';
 
+    // Kiểm tra nếu token tồn tại và lưu vào localStorage
+    if (tokenFromRazor) {
+        localStorage.setItem('authToken', tokenFromRazor);
+    } else {
+        console.log("Token không tồn tại.");
+    }
+    const authToken = localStorage.getItem('authToken');
+    const requestVerificationToken = document.querySelector('input[name="__RequestVerificationToken"]').value;
+</script>
 
 <div class="container mx-auto mt-10">
     <h2 class="text-center text-lg font-bold text-blue-600">User Information</h2>
 
-    <div class="mx-auto mt-8 max-w-md">
-        <div class="rounded-lg border bg-white p-4 shadow-lg">
-            <div class="mb-4">
-                <label class="mb-2 block text-sm font-bold text-gray-700">Name:</label>
-                <p class="text-gray-600">@Model.userInfo.UserName</p>
-            </div>
-            <div class="mb-4">
-                <label class="mb-2 block text-sm font-bold text-gray-700">Email:</label>
-                <p class="text-gray-600">@Model.userInfo.Email</p>
-            </div>
-            <div class="mb-4">
-                <label class="mb-2 block text-sm font-bold text-gray-700">Phone Number:</label>
-                <p class="text-gray-600">@Model.userInfo.PhoneNumber</p>
-            </div>
-            <div class="mb-4">
-                <label class="mb-2 block text-sm font-bold text-gray-700">Two factor enabled:</label>
-                <p class="text-gray-600">@Model.userInfo.TwoFactorEnabled</p>
-            </div>
+    <div class="mt-8 flex justify-between">
+        <!-- User Info Section -->
+        <div class="w-full px-4 md:w-1/2">
+            <div class="rounded-lg border bg-white p-4 shadow-lg">
+                <!-- Avatar at the top with click to upload functionality -->
+                <div class="relative mb-4 text-center">
+                    @if (!string.IsNullOrEmpty(Model.UserInfo.AvatarUrl))
+                    {
+                        <img id="userAvatar" src="@Model.UserInfo.AvatarUrl" alt="User Avatar" class="mx-auto h-32 w-32 cursor-pointer rounded-full object-cover" onclick="document.getElementById('avatarUpload').click();" />
+                        <!-- Button to change avatar, placed below the avatar image -->
+                        <div class="mt-2">
+                            <button onclick="document.getElementById('avatarUpload').click();" class="rounded-lg bg-blue-500 px-4 py-2 text-white hover:bg-blue-600">
+                                Change Avatar
+                            </button>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-gray-600">No avatar available.</p>
+                    }
+                    <input type="file" id="avatarUpload" class="hidden" accept="image/*" onchange="uploadAvatar(event)" />
+                </div>
 
-            <div class="mt-6 text-center">
-                <form method="get" asp-page="/UserInfo/EditUser">
-                    <button type="submit" class="rounded-lg bg-cyan-600 px-4 py-2 font-semibold text-white transition duration-300 hover:bg-cyan-700">
+                <!-- User Info -->
+                <div class="mb-4">
+                    <label class="mb-2 block text-sm font-bold text-gray-700">Name:</label>
+                    <p class="text-gray-600">@Model.user.UserName</p>
+                </div>
+                <div class="mb-4">
+                    <label class="mb-2 block text-sm font-bold text-gray-700">Email:</label>
+                    <p class="text-gray-600">@Model.user.Email</p>
+                </div>
+                <div class="mb-4">
+                    <label class="mb-2 block text-sm font-bold text-gray-700">Phone Number:</label>
+                    <p class="text-gray-600">@Model.user.PhoneNumber</p>
+                </div>
+                <div class="mb-4">
+                    <label class="mb-2 block text-sm font-bold text-gray-700">Two factor enabled:</label>
+                    <p class="text-gray-600">@Model.user.TwoFactorEnabled</p>
+                </div>
+
+                <div class="mt-6 text-center">
+                    <form method="get" asp-page="/UserInfo/EditUser">
+                        <button type="submit" class="rounded-lg bg-cyan-600 px-4 py-2 font-semibold text-white transition duration-300 hover:bg-cyan-700">
+                            Edit Profile
+                        </button>
+                    </form>
+                    <a href="/ChangePassword" class="mt-4 inline-block rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white transition duration-300 hover:bg-blue-700">
+                        Change Password
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Info Detailed Section -->
+        <div class="w-full px-4 md:w-1/2">
+            <div class="rounded-lg border bg-white p-4 shadow-lg">
+                <div id="userInfoDetailedSection">
+                    <div class="mb-4">
+                        <label class="mb-2 block text-sm font-bold text-gray-700">Full Name:</label>
+                        <p class="text-gray-600" id="userFullName">@Model.UserInfo.FullName</p>
+                    </div>
+                    <div class="mb-4">
+                        <label class="mb-2 block text-sm font-bold text-gray-700">Phone Number:</label>
+                        <p class="text-gray-600" id="userPhoneNumber">@Model.UserInfo.PhoneNumber</p>
+                    </div>
+                    <div class="mb-4">
+                        <label class="mb-2 block text-sm font-bold text-gray-700">Display Name:</label>
+                        <p class="text-gray-600" id="userDisplayName">@Model.UserInfo.DisplayName</p>
+                    </div>
+                    <div class="mb-4">
+                        <label class="mb-2 block text-sm font-bold text-gray-700">Bio:</label>
+                        <p class="text-gray-600" id="userBio">@Model.UserInfo.Bio</p>
+                    </div>
+                    <div class="mb-4">
+                        <label class="mb-2 block text-sm font-bold text-gray-700">Bank Account:</label>
+                        <p class="text-gray-600" id="userBankAccount">@Model.UserInfo.BankAccount</p>
+                    </div>
+                    <div class="mb-4">
+                        <label class="mb-2 block text-sm font-bold text-gray-700">Bank Account Name:</label>
+                        <p class="text-gray-600" id="userBankAccountName">@Model.UserInfo.BankAccountName</p>
+                    </div>
+                    <div class="mb-4">
+                        <label class="mb-2 block text-sm font-bold text-gray-700">Bank:</label>
+                        <p class="text-gray-600" id="userBank">@Model.UserInfo.Bank</p>
+                    </div>
+                    <div class="mb-4">
+                        <label class="mb-2 block text-sm font-bold text-gray-700">Address:</label>
+                        <p class="text-gray-600" id="userAddress">@Model.UserInfo.Address</p>
+                    </div>
+                </div>
+
+                <!-- Edit Button -->
+                <div id="editButtonsDetailed" class="mt-4 text-center">
+                    <button id="editButtonDetailed" class="rounded-lg bg-yellow-500 px-4 py-2 text-white hover:bg-yellow-600" onclick="editUserInfoDetailed()">
                         Edit Profile
                     </button>
-                </form>
-                <a href="/ChangePassword" class="mt-4 inline-block rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white transition duration-300 hover:bg-blue-700">
-                    Change Password
-                </a>
+                </div>
+
+                <!-- Editable User Info Fields (Detailed) -->
+                <div id="editUserInfoDetailedSection" class="hidden">
+                    <div class="mb-4">
+                        <label class="mb-2 block text-sm font-bold text-gray-700">Full Name:</label>
+                        <input type="text" id="editUserFullName" class="w-full rounded-md border px-3 py-2" value="@Model.UserInfo.FullName" />
+                    </div>
+                    <div class="mb-4">
+                        <label class="mb-2 block text-sm font-bold text-gray-700">Phone Number:</label>
+                        <input type="text" id="editUserPhoneNumber" class="w-full rounded-md border px-3 py-2" value="@Model.UserInfo.PhoneNumber" />
+                    </div>
+                    <div class="mb-4">
+                        <label class="mb-2 block text-sm font-bold text-gray-700">Display Name:</label>
+                        <input type="text" id="editUserDisplayName" class="w-full rounded-md border px-3 py-2" value="@Model.UserInfo.DisplayName" />
+                    </div>
+                    <div class="mb-4">
+                        <label class="mb-2 block text-sm font-bold text-gray-700">Bio:</label>
+                        <textarea id="editUserBio" class="w-full rounded-md border px-3 py-2">@Model.UserInfo.Bio</textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label class="mb-2 block text-sm font-bold text-gray-700">Bank Account:</label>
+                        <input type="text" id="editUserBankAccount" class="w-full rounded-md border px-3 py-2" value="@Model.UserInfo.BankAccount" />
+                    </div>
+                    <div class="mb-4">
+                        <label class="mb-2 block text-sm font-bold text-gray-700">Bank Account Name:</label>
+                        <input type="text" id="editUserBankAccountName" class="w-full rounded-md border px-3 py-2" value="@Model.UserInfo.BankAccountName" />
+                    </div>
+                    <div class="mb-4">
+                        <label class="mb-2 block text-sm font-bold text-gray-700">Bank:</label>
+                        <input type="text" id="editUserBank" class="w-full rounded-md border px-3 py-2" value="@Model.UserInfo.Bank" />
+                    </div>
+                    <div class="mb-4">
+                        <label class="mb-2 block text-sm font-bold text-gray-700">Address:</label>
+                        <input type="text" id="editUserAddress" class="w-full rounded-md border px-3 py-2" value="@Model.UserInfo.Address" />
+                    </div>
+                </div>
+
+                <!-- Save/Cancel buttons for Detailed Info (hidden by default) -->
+                <div id="saveCancelButtonsDetailed" class="mt-4 hidden text-center">
+                    <button id="saveButtonDetailed" class="rounded-lg bg-green-500 px-4 py-2 text-white hover:bg-green-600" onclick="saveUserInfoDetailed()">Save</button>
+                    <button id="cancelButtonDetailed" class="rounded-lg bg-red-500 px-4 py-2 text-white hover:bg-red-600" onclick="cancelEditDetailed()">Cancel</button>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+@section Scripts{
+    <script>
+        async function uploadAvatar(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const formData = new FormData();
+                formData.append("file", file);
+
+                try {
+                    const response = await fetch(`${apiBaseUrl}/api/userinfo/Upload`, {
+                        method: "POST",
+                        headers: {
+                            'Authorization': `Bearer ${authToken}`,
+                            'RequestVerificationToken': requestVerificationToken
+                        },
+                        body: formData
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.statusCode === 200) {
+                            location.reload();
+                        } else {
+                            alert("Error uploading avatar.");
+                        }
+                    } else {
+                        alert(`Error uploading avatar: ${response.statusText}`);
+                    }
+                } catch (error) {
+                    console.error("Error uploading avatar:", error);
+                    alert("An error occurred while uploading the avatar.");
+                }
+            }
+        }
+    </script>
+
+    <script>
+        function editUserInfoDetailed() {
+            // Show the editable fields and hide the read-only fields
+            document.getElementById('userInfoDetailedSection').classList.add('hidden');
+            document.getElementById('editUserInfoDetailedSection').classList.remove('hidden');
+            document.getElementById('editButtonsDetailed').classList.add('hidden');
+            document.getElementById('saveCancelButtonsDetailed').classList.remove('hidden');
+        }
+
+        async function saveUserInfoDetailed() {
+            // Get the values from the input fields
+            const userFullName = document.getElementById('editUserFullName').value;
+            const userPhoneNumber = document.getElementById('editUserPhoneNumber').value; // You may need to include this field in your C# model if necessary
+            const userDisplayName = document.getElementById('editUserDisplayName').value;
+            const userBio = document.getElementById('editUserBio').value;
+            const userBankAccount = document.getElementById('editUserBankAccount').value;
+            const userBankAccountName = document.getElementById('editUserBankAccountName').value;
+            const userBank = document.getElementById('editUserBank').value;
+            const userAddress = document.getElementById('editUserAddress').value;
+
+            // Prepare the data to be saved
+            const updatedData = {
+                FullName: userFullName,
+                DisplayName: userDisplayName,
+                Bio: userBio,
+                BankAccount: userBankAccount,
+                BankAccountName: userBankAccountName,
+                Bank: userBank,
+                Address: userAddress
+            };
+
+            try {
+                const response = await fetch(`${apiBaseUrl}/api/userinfo/`, {
+                    method: "PATCH",
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'RequestVerificationToken': requestVerificationToken,
+                        'Content-Type': 'application/json'  // Important: Add this header for JSON data
+                    },
+                    body: JSON.stringify(updatedData)  // Convert the data to JSON
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.statusCode === 200) {
+                        // Only reload the page after the data is successfully updated
+                        location.reload();
+                    } else {
+                        alert("Error updating user information.");
+                    }
+                } else {
+                    alert(`Error: ${response.statusText}`);
+                }
+            } catch (error) {
+                console.error("Error updating user info:", error);
+                alert("An error occurred while updating the user information.");
+            }
+        }
+
+        function cancelEditDetailed() {
+            // Hide the editable fields and show the read-only fields
+            document.getElementById('userInfoDetailedSection').classList.remove('hidden');
+            document.getElementById('editUserInfoDetailedSection').classList.add('hidden');
+            document.getElementById('editButtonsDetailed').classList.remove('hidden');
+            document.getElementById('saveCancelButtonsDetailed').classList.add('hidden');
+        }
+    </script>
+}

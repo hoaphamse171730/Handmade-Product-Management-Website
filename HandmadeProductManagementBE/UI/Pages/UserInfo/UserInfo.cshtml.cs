@@ -5,6 +5,7 @@ using HandmadeProductManagement.Core.Common;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.Core.Store;
 using HandmadeProductManagement.ModelViews.ProductModelViews;
+using HandmadeProductManagement.ModelViews.UserInfoModelViews;
 using HandmadeProductManagement.ModelViews.UserModelViews;
 using HotChocolate.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -29,7 +30,8 @@ namespace UI.Pages.UserInfo
         public string? ErrorMessage { get; set; }
         public string? ErrorDetail { get; set; }
 
-        public UserResponseByIdModel userInfo { get; set; }
+        public UserResponseByIdModel user { get; set; }
+        public UserInfoDto UserInfo { get; set; }
         public async Task<IActionResult> OnGet()
         {
             try
@@ -46,7 +48,14 @@ namespace UI.Pages.UserInfo
                     return RedirectToPage("/Login");
                 }
 
-                userInfo = await GetUserResponseById(userId);
+                user = await GetUserResponseById(userId);
+
+                // Fetch UserInfo
+                var userInfoResponse = await _apiResponseHelper.GetAsync<UserInfoDto>($"{Constants.ApiBaseUrl}/api/userinfo");
+                if (userInfoResponse.StatusCode == StatusCodeHelper.OK && userInfoResponse.Data != null)
+                {
+                    UserInfo = userInfoResponse.Data;
+                }
             }
             catch (BaseException.ErrorException ex)
             {

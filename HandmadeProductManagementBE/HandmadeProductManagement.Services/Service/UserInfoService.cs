@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Firebase.Auth;
 using FluentValidation;
 using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Contract.Repositories.Interface;
@@ -24,6 +25,46 @@ namespace HandmadeProductManagement.Services.Service
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _updateValidator = updateValidator;
+        }
+
+        public async Task<bool> UploadUserAvatar(IFormFile file, string userId)
+        {
+            if (file == null)
+            {
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageFileNotFound);
+            }
+
+            var user = await _unitOfWork.GetRepository<ApplicationUser>()
+                .Entities
+                .Include(u => u.UserInfo)
+                .FirstOrDefaultAsync(u => u.Id.ToString() == userId)
+                ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageUserNotFound);
+
+            if (file.Length == 0)
+            {
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageFileEmpty);
+            }
+
+            var uploadImageService = new ManageFirebaseImageService();
+
+            using (var stream = file.OpenReadStream())
+            {
+                var fileName = $"{Guid.NewGuid()}_{file.FileName}";
+                var imageUrl = await uploadImageService.UploadFileAsync(stream, fileName);
+
+                if (user.UserInfo == null)
+                {
+                    throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageUserInfoNotFound);
+                }
+
+                user.UserInfo.AvatarUrl = imageUrl;
+
+                _unitOfWork.GetRepository<UserInfo>().Update(user.UserInfo);
+            }
+
+            await _unitOfWork.SaveAsync();
+
+            return true;
         }
 
         public async Task<UserInfoDto> GetUserInfoByIdAsync(string id)
@@ -55,17 +96,16 @@ namespace HandmadeProductManagement.Services.Service
             return userInfoDto;
         }
 
-        public async Task<bool> PatchUserInfoAsync(string id, UserInfoUpdateRequest request)
+        public async Task<bool> PatchUserInfoAsync(string id, UserInfoForUpdateDto request)
         {
-            var patchDto = request.UserInfo!;
-            var avtFile = request.AvtFile!;
-            
+            var patchDto = request!;
+
             // Validate
             var validationResult = await _updateValidator.ValidateAsync(patchDto);
 
             if (!validationResult.IsValid)
             {
-                    throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), validationResult.Errors.Select(e => e.ErrorMessage).FirstOrDefault() ?? string.Empty);
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), validationResult.Errors.Select(e => e.ErrorMessage).FirstOrDefault() ?? string.Empty);
             }
 
             if (!Guid.TryParse(id, out _))
@@ -107,24 +147,6 @@ namespace HandmadeProductManagement.Services.Service
                 }
             }
 
-            if (avtFile != null && avtFile.Length > 0)
-            {
-                // Check file type is valid image
-                var allowedMimeTypes = new[] { "image/jpeg", "image/png", "image/gif" };
-                if (!allowedMimeTypes.Contains(avtFile.ContentType.ToLower()))
-                {
-                    throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidFileType);
-                }
-
-                var uploadImageService = new ManageFirebaseImageService();
-                using (var stream = avtFile.OpenReadStream())
-                {
-                    var fileName = $"{Guid.NewGuid()}_{avtFile.FileName}";
-                    var imageUrl = await uploadImageService.UploadFileAsync(stream, fileName);
-                    userInfo.AvatarUrl = imageUrl;
-                }
-            }
-
             userInfo.LastUpdatedTime = DateTime.UtcNow;
             userInfo.LastUpdatedBy = id;
 
@@ -133,5 +155,6 @@ namespace HandmadeProductManagement.Services.Service
 
             return true;
         }
+
     }
 }
