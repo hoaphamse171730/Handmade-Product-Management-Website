@@ -38,7 +38,7 @@ namespace UI.Pages.ProductDetail
         public IList<ReviewModel> Reviews { get; set; } = new List<ReviewModel>();
         public int PageNumber { get; set; } = 1;
         public int TotalPages { get; set; }
-        public IList<UserResponseModel> Users { get; set; } = new List<UserResponseModel>();
+        public IList<UserDto> Users { get; set; } = new List<UserDto>();
         public IList<ShopResponseModel> Shops { get; set; } = new List<ShopResponseModel>();
         public ShopResponseModel Shop { get; private set; } = new ShopResponseModel();
         public async Task<PageResult> OnGet(string id, int pageNumber = 1, int pageSize = 10)
@@ -146,19 +146,19 @@ namespace UI.Pages.ProductDetail
                     }
                 }
 
-                // Fetch all Users
-                var userResponse = await _apiResponseHelper.GetAsync<IList<UserResponseModel>>($"{Constants.ApiBaseUrl}/api/users");
-                if (userResponse.StatusCode == StatusCodeHelper.OK)
-                {
-                    Users = userResponse.Data ?? new List<UserResponseModel>(); // Fallback to empty list if null
-                }
+                //// Fetch all Users
+                //var userResponse = await _apiResponseHelper.GetAsync<IList<UserDto>>($"{Constants.ApiBaseUrl}/api/users/usernames?");
+                //if (userResponse.StatusCode == StatusCodeHelper.OK)
+                //{
+                //    Users = userResponse.Data ?? new List<UserDto>(); // Fallback to empty list if null
+                //}
 
-                // Fetch all Shops
-                var shopResponse = await _apiResponseHelper.GetAsync<IList<ShopResponseModel>>($"{Constants.ApiBaseUrl}/api/shop/get-all");
-                if (shopResponse.StatusCode == StatusCodeHelper.OK)
-                {
-                    Shops = shopResponse.Data ?? new List<ShopResponseModel>();  // Fallback to empty list if null;
-                }
+                //// Fetch all Shops
+                //var shopResponse = await _apiResponseHelper.GetAsync<IList<ShopResponseModel>>($"{Constants.ApiBaseUrl}/api/shop/get-all");
+                //if (shopResponse.StatusCode == StatusCodeHelper.OK)
+                //{
+                //    Shops = shopResponse.Data ?? new List<ShopResponseModel>();  // Fallback to empty list if null;
+                //}
 
                 return Page();
             }
@@ -183,20 +183,26 @@ namespace UI.Pages.ProductDetail
                 : new ShopResponseModel();
         }
 
-        public async Task<UserResponseModel?> GetUserByIdAsync(string userId)
+        public async Task<string?> GetUserNameByIdAsync(string userId)
         {
             try
             {
-                var response = await _apiResponseHelper.GetAsync<UserResponseModel>($"{Constants.ApiBaseUrl}/api/users/{userId}");
-                if (response.StatusCode == StatusCodeHelper.OK && response.Data != null)
+                var response = await _apiResponseHelper.GetAsync<string>($"{Constants.ApiBaseUrl}/api/users/username/{userId}");
+
+                if (response.StatusCode == StatusCodeHelper.OK && !string.IsNullOrEmpty(response.Data))
                 {
                     return response.Data;
+                }
+                else
+                {
+                    Console.WriteLine($"Error: Received status code {response.StatusCode}");
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error getting user by ID: {ex.Message}");
             }
+
             return null;
         }
 

@@ -150,24 +150,13 @@
         </div>
 
         <!-- Product Price -->
-        <div class="flex items-center space-x-4">
-            @if (Model.productDetail?.ProductItems?.FirstOrDefault()?.DiscountedPrice != null
-            && Model.productDetail?.ProductItems?.FirstOrDefault()?.DiscountedPrice
-            < Model.productDetail?.ProductItems?.FirstOrDefault()?.Price)
-            {
-                <span class="text-2xl font-semibold text-red-500">
-                    ₫@Model.productDetail?.ProductItems?.FirstOrDefault()?.DiscountedPrice?.ToString("N0")
-                </span>
-                <span class="text-lg text-gray-400 line-through">
-                    ₫@Model.productDetail?.ProductItems?.FirstOrDefault()?.Price.ToString("N0")
-                </span>
-            }
-            else
-            {
-                <span class="text-2xl font-semibold text-red-500">
-                    ₫@Model.productDetail?.ProductItems?.FirstOrDefault()?.Price.ToString("N0")
-                </span>
-            }
+        <div id="priceSection" class="flex items-center space-x-4">
+            <span id="discountedPrice" class="text-2xl font-semibold text-red-500">
+                ₫@Model.productDetail?.ProductItems?.FirstOrDefault()?.DiscountedPrice?.ToString("N0")
+            </span>
+            <span id="price" class="text-lg text-gray-400 line-through">
+                ₫@Model.productDetail?.ProductItems?.FirstOrDefault()?.Price.ToString("N0")
+            </span>
         </div>
 
         <!-- Product Materials -->
@@ -201,12 +190,6 @@
                     </div>
                 }
             </div>
-        </div>
-
-      
-        <div class="price-container">
-            <span id="price" class="text-lg font-bold text-gray-800"></span>
-            <span id="discountedPrice" class="ml-2 hidden text-lg font-bold text-red-600"></span> <!-- Định nghĩa giá giảm -->
         </div>
 
         <span id="remainingQuantity" class="text-sm text-gray-600"></span>
@@ -287,18 +270,26 @@
         <div class="rounded-lg border border-gray-300 bg-white p-4 shadow-md">
             <div class="flex flex-col">
                 @{
-                    // Kiểm tra và lấy UserName từ userId
+                    // Check if the username is already in the dictionary
                     if (!userNames.TryGetValue(review.UserId.ToString(), out var userName))
                     {
-                        var user = await Model.GetUserByIdAsync(review.UserId.ToString());
-                        userName = user?.UserName ?? "Unknown User";
-                        userNames[review.UserId.ToString()] = userName;
+                        // Fetch the username if it's not in the dictionary
+                        userName = await Model.GetUserNameByIdAsync(review.UserId.ToString());
+                        if (userName != null)
+                        {
+                            // Cache the fetched username in the dictionary
+                            userNames[review.UserId.ToString()] = userName;
+                        }
+                        else
+                        {
+                            userName = "Unknown User";  // Default if no username is found
+                        }
                     }
                 }
                 <span class="font-semibold">@userName</span>
                 <span class="text-sm text-gray-500">@review.Date?.ToString("g")</span>
 
-                <!-- Hiển thị nội dung review và các thành phần khác -->
+                <!-- Display Review Content -->
                 <p class="mt-2">@review.Content</p>
 
                 <!-- Display Rating as stars -->
@@ -314,11 +305,12 @@
             </div>
 
             <!-- Reply Section with Shop ID -->
-            @if (review.Reply != null){
-            <div class="relative ml-4 mt-4 rounded-lg border border-gray-300 bg-gray-50 p-2">
-                <div class="mb-2 font-semibold text-gray-700">@(Model.Shops.FirstOrDefault(shop => shop.Id == review.Reply?.ShopId)?.Name ?? "Unknown Shop")</div>
+            @if (review.Reply != null)
+            {
+                <div class="relative ml-4 mt-4 rounded-lg border border-gray-300 bg-gray-50 p-2">
+                    <div class="mb-2 font-semibold text-gray-700">@(Model.Shop.Name)</div>
                     <p>@review.Reply.Content</p>
-            </div>
+                </div>
             }
         </div>
     }
@@ -434,51 +426,52 @@
 
         // Hàm cập nhật giá dựa trên lựa chọn của người dùng
         function updateProductInfo() {
-            // Tạo một đối tượng lưu trữ các lựa chọn hiện tại của người dùng
+            // Collect selected options
             const selectedOptions = {};
-
-            // Duyệt qua tất cả các radio button đang được chọn
             document.querySelectorAll('input[type="radio"]:checked').forEach(input => {
                 selectedOptions[input.name] = input.value;
             });
 
-            // Tìm sản phẩm khớp với các tùy chọn đã chọn
+            // Find the matching product item based on selected options
             const matchingProduct = productItems.find(item =>
                 item.configurations.every(config =>
                     selectedOptions[config.variationName] === config.optionName
                 )
             );
 
-            // Cập nhật giá hiển thị
+            // Elements for updating price, discounted price, and remaining quantity
             const priceElement = document.getElementById("price");
             const discountedPriceElement = document.getElementById("discountedPrice");
             const remainingQuantityElement = document.getElementById("remainingQuantity");
             const productItemIdElement = document.getElementById("productItemId");
 
             if (matchingProduct) {
-                // Cập nhật giá trị id
+                // Update product item ID
                 productItemIdElement.value = matchingProduct.id;
-                console.log(matchingProduct)
                 remainingQuantityElement.textContent = `Remaining Quantity: ${matchingProduct.quantityInStock}`;
 
-                // Kiểm tra nếu có discountedPrice
-                if (matchingProduct.discountedPrice) {
-                    priceElement.innerHTML = `<s>${formatCurrency(matchingProduct.price)}</s>`;
-                    discountedPriceElement.textContent = `${formatCurrency(matchingProduct.discountedPrice)}`;
+                // Display price and discounted price if applicable
+                if (matchingProduct.discountedPrice && matchingProduct.discountedPrice < matchingProduct.price) {
+                    priceElement.innerHTML = `<s>₫${formatCurrency(matchingProduct.price)}</s>`;
+                    discountedPriceElement.textContent = `₫${formatCurrency(matchingProduct.discountedPrice)}`;
+                    discountedPriceElement.classList.remove("hidden");
                 } else {
-                    priceElement.textContent = `${formatCurrency(matchingProduct.price)}`;
-                    discountedPriceElement.textContent = ""; // Ẩn giá giảm
+                    priceElement.textContent = `₫${formatCurrency(matchingProduct.price)}`;
+                    discountedPriceElement.textContent = "";
+                    discountedPriceElement.classList.add("hidden");
                 }
+
+                // Update max quantity and quantity display
                 maxQuantity = matchingProduct.quantityInStock;
                 quantity = Math.min(quantity, maxQuantity);
                 updateQuantityDisplay();
             } else {
-                // Không tìm thấy sản phẩm khớp => Clear giá, số lượng, và ID sản phẩm
-                productItemIdElement.value = ""; // Clear ID
-                priceElement.textContent = "N/A"; // Clear giá hiển thị
-                discountedPriceElement.textContent = ""; // Clear giá giảm
-                remainingQuantityElement.textContent = "Remaining Quantity: N/A"; // Clear số lượng
-                quantity = 1; // Đặt lại số lượng về mặc định
+                // Clear product details if no match
+                productItemIdElement.value = "";
+                priceElement.textContent = "N/A";
+                discountedPriceElement.textContent = "";
+                remainingQuantityElement.textContent = "Remaining Quantity: N/A";
+                quantity = 1;
                 updateQuantityDisplay();
             }
         }
