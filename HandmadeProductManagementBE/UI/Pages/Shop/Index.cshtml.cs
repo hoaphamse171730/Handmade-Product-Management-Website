@@ -1,3 +1,4 @@
+using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Common;
 using HandmadeProductManagement.Core.Constants;
@@ -21,6 +22,10 @@ namespace UI.Pages.Shop
             _apiResponseHelper = apiResponseHelper ?? throw new ArgumentNullException(nameof(apiResponseHelper));
             _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
         }
+        public string? ErrorMessage { get; set; }
+        public string? ErrorDetail { get; set; }
+        public bool HasNextPage { get; set; } = true;
+        public string CurrentFilters { get; set; } = string.Empty;
 
         public ShopResponseModel Shop { get; private set; } = new ShopResponseModel();
         public List<ProductSearchVM>? Products { get; private set; }
@@ -36,20 +41,32 @@ namespace UI.Pages.Shop
             string sortOption = "Name",
             bool sortDescending = false,
             string? id = null,
-            int pageNumber = 1, int pageSize = 12)
+            int pageNumber = 1, int pageSize = 2)
         {
-            PageNumber = pageNumber;
-            PageSize = pageSize;
-
-            if (string.IsNullOrEmpty(id))
+            try
             {
-                ModelState.AddModelError(string.Empty, "Shop ID is required.");
-                return;
-            }
+                PageNumber = pageNumber;
+                PageSize = pageSize;
 
-            Shop = await GetShopById(id);
-            Products = await GetProducts(name, categoryId, status, minRating, sortOption, sortDescending, id);
-            await LoadCategoriesAsync();
+                if (string.IsNullOrEmpty(id))
+                {
+                    ModelState.AddModelError(string.Empty, "Shop ID is required.");
+                    return;
+                }
+
+                Shop = await GetShopById(id);
+                Products = await GetProducts(name, categoryId, status, minRating, sortOption, sortDescending, id);
+                await LoadCategoriesAsync();
+            }
+            catch (BaseException.ErrorException ex)
+            {
+                ErrorMessage = ex.ErrorDetail.ErrorCode;
+                ErrorDetail = ex.ErrorDetail.ErrorMessage?.ToString();
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = "An unexpected error occurred.";
+            }
         }
 
         private async Task<ShopResponseModel> GetShopById(string id)
@@ -80,12 +97,34 @@ namespace UI.Pages.Shop
                 SortDescending = sortDescending
             };
 
+            var queryParameters = new Dictionary<string, string?>
+            {
+                    { "Name", name },
+                    { "CategoryId", categoryId },
+                    { "Status", status },
+                    { "MinRating", minRating?.ToString() },
+                    { "SortOption", sortOption },
+                    { "SortDescending", sortDescending.ToString() },
+                    {"id",id }
+                };
+
+            // Remove null or empty parameters
+            var filteredParams = queryParameters
+            .Where(kvp => !string.IsNullOrEmpty(kvp.Value))
+            .Select(kvp => $"{kvp.Key}={Uri.EscapeDataString(kvp.Value!)}");
+
+            CurrentFilters = string.Join("&", filteredParams);
+
+
             var response = await _apiResponseHelper.GetAsync<List<ProductSearchVM>>(
                 $"{Constants.ApiBaseUrl}/api/product/shop/{id}?pageNumber={PageNumber}&pageSize={PageSize}", searchFilter);
-
-            return response.StatusCode == StatusCodeHelper.OK && response.Data != null
-                ? response.Data
-                : new List<ProductSearchVM>();
+            
+            if (response.StatusCode == StatusCodeHelper.OK && response.Data != null)
+            { 
+                HasNextPage = response.Data.Count == PageSize;
+                return response.Data;
+            }
+            return new List<ProductSearchVM>();
         }
 
         private async Task LoadCategoriesAsync()
