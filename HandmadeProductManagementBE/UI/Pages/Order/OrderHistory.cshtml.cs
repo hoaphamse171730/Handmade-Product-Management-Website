@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using HandmadeProductManagement.ModelViews.CancelReasonModelViews;
 using HandmadeProductManagement.Contract.Repositories.Entity;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace UI.Pages.Order
 {
@@ -125,5 +126,32 @@ namespace UI.Pages.Order
             }
         }
 
+        public async Task<IActionResult> OnGetProcessPaymentAsync(string orderId)
+        {
+            string token = HttpContext.Session.GetString("Token");
+            string userId = GetUserIdFromToken(token);
+            string encodedUri = Uri.EscapeDataString(Constants.ApiBaseUrl);
+
+
+            var response = await _apiResponseHelper
+                .GetAsync<string>(Constants.ApiBaseUrl + $"/api/vnpay/get-transaction-status-vnpay?orderId={orderId}&userId={userId}&urlReturn={encodedUri}");
+
+            if (response?.StatusCode == StatusCodeHelper.OK)
+            {
+                await OnGetAsync(CurrentFilter);
+                return new JsonResult(new { success = true, data = response.Data.ToString() });
+            }
+            else
+            {
+                return new JsonResult(new { success = false, message = response?.Message ?? "An error occurred while processing payment of the order." });
+            }
+        }
+        private string GetUserIdFromToken(string token)
+        {
+            var handler = new JwtSecurityTokenHandler();
+            var jwtToken = handler.ReadJwtToken(token);
+            var userIdClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "nameid");
+            return userIdClaim?.Value;
+        }
     }
 }
