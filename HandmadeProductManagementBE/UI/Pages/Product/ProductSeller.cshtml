@@ -1,23 +1,20 @@
 ﻿@page
 @using HandmadeProductManagement.Core.Common
-@using UI.Pages.Shared
-@model UI.Pages.Product.ProductSellerModel
+@model UI.Pages.Seller.ShopModel
 @{
-    ViewData["Title"] = "Product Seller List";
+    ViewData["Title"] = "My Shop";
 }
 @Html.AntiForgeryToken()
-
-<h1 class="mb-4 text-3xl font-bold">Product List</h1>
+@using UI.Pages.Shared
 @{
     var errorModel = new ErrorMessageModel
-    {
-        ErrorMessage = Model.ErrorMessage,
-        ErrorDetail = Model.ErrorDetail
-    };
-
+            {
+                ErrorMessage = Model.ErrorMessage,
+                ErrorDetail = Model.ErrorDetail
+            };
     var token = HttpContext.Session.GetString("Token");
 }
-@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+@if (!string.IsNullOrEmpty(Model.ErrorMessage) && Model.ErrorMessage != "NotFoundException")
 {
     <partial name="_ErrorMessage" model="errorModel" />
 }
@@ -36,148 +33,281 @@
     const requestVerificationToken = document.querySelector('input[name="__RequestVerificationToken"]').value;
 </script>
 
-<div class="search-filter">
-    <form method="get" class="flex items-center space-x-4">
-        <input class="rounded-md border border-gray-300 p-2" type="text" name="Name" placeholder="Search by name" value="@Request.Query["Name"]" onchange="this.form.submit();" />
-        <select name="CategoryId" class="rounded-md border border-gray-300 p-2">
-            <option value="">Select Category</option>
-            @if (Model.Categories != null && Model.Categories.Any())
-            {
-                foreach (var category in Model.Categories)
-                {
-                    var isSelected = Request.Query["CategoryId"] == category.Id.ToString();
-                    if (isSelected)
-                    {
-                        <option value="@category.Id" selected>@category.Name</option>
-                    }
-                    else
-                    {
-                        <option value="@category.Id">@category.Name</option>
-                    }
-                }
-            }
-        </select>
-        @{
-            var selectedStatus = Request.Query["Status"].ToString();
-        }
-
-        <select name="Status" class="rounded-md border border-gray-300 p-2">
-            @if (string.IsNullOrEmpty(selectedStatus))
-            {
-                <option value="" selected>Select Status</option>
-            }
-            else
-            {
-                <option value="">Select Status</option>
-            }
-
-            @if (selectedStatus == "Available")
-            {
-                <option value="Available" selected>Available</option>
-            }
-            else
-            {
-                <option value="Available">Available</option>
-            }
-
-            @if (selectedStatus == "OutOfStock")
-            {
-                <option value="OutOfStock" selected>Out Of Stock</option>
-            }
-            else
-            {
-                <option value="OutOfStock">Out Of Stock</option>
-            }
-        </select>
-        <input class="rounded-md border border-gray-300 p-2" type="number" name="MinRating" placeholder="Min Rating" min="0" max="5" value="@Request.Query["MinRating"]" />
-
-        <div class="flex items-center space-x-4">
-            <label class="flex items-center">
-                <input type="radio" id="sortByPrice" name="SortOption" value="SortByPrice"
-                @(Request.Query["SortOption"] == "SortByPrice" ? "checked" : "") onchange="this.form.submit();" />
-                <span class="ml-2">Sort by Price</span>
-            </label>
-
-            <label class="flex items-center">
-                <input type="radio" id="sortByRating" name="SortOption" value="SortByRating"
-                @(Request.Query["SortOption"] == "SortByRating" ? "checked" : "") onchange="this.form.submit();" />
-                <span class="ml-2">Sort by Rating</span>
-            </label>
-        </div>
-
-
-
-        <label class="flex items-center">
-            <span class="mr-2">Sort Descending:</span>
-            <input type="checkbox" name="sortDescending" value="true"
-            @(Request.Query["SortDescending"] == "true" ? "checked" : "") onchange="this.form.submit();" />
-        </label>
-
-        <button type="submit" class="rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600">Search</button>
-        <button type="button" onclick="openAddProductModal()"
-                class="rounded-md bg-green-500 px-4 py-2 text-white hover:bg-green-600">
-            Add Product
+@if (Model.ErrorMessage == "NotFoundException")
+{
+    <div class="flex h-screen flex-col items-center justify-center text-center">
+        <h2 class="mb-4 text-6xl font-semibold">Open Your Own Shop Today!</h2>
+        <button onclick="openShopModal()" class="rounded-lg bg-blue-500 px-6 py-3 font-bold text-white hover:bg-blue-600">
+            Open Your Shop
         </button>
-    </form>
-</div>
+    </div>
 
-<!-- Product List -->
-<div class="grid-cols-1 mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-    @if (Model.Products != null && Model.Products.Any())
-    {
-        foreach (var product in Model.Products)
-        {
-            <div class="rounded-lg border p-4 shadow-md">
-                <div class="aspect-w-1 aspect-h-1 mb-4">
-                    @if (!string.IsNullOrEmpty(product.ProductImageUrl))
-                    {
-                        <img src="@product.ProductImageUrl" alt="@product.Name" class="h-48 w-full rounded-md object-cover" />
-                    }
-                    else
-                    {
-                        <div class="flex h-48 w-full items-center justify-center rounded-md bg-gray-200">
-                            <span class="text-gray-500">No image</span>
-                        </div>
-                    }
+    <!-- Shop creation modal -->
+    <div id="shopModal" class="fixed inset-0 flex hidden items-center justify-center bg-gray-900 bg-opacity-50">
+        <div class="w-full max-w-md rounded-lg bg-white p-8">
+            <h3 class="mb-4 text-xl font-semibold">Create Your Shop</h3>
+            <form method="post" id="shopForm" asp-page-handler="CreateShop">
+                <div class="mb-4">
+                    <label class="mb-2 block font-bold text-gray-700" for="shopName">Shop Name</label>
+                    <input type="text" id="updateShopName" name="ShopName"
+                           class="w-full rounded-md border border-gray-300 p-2"
+                           value="@Model.Shop.Name" required
+                           pattern="^[A-Za-z0-9À-ỹáàảãạắằẳẵặéèẻẽẹíìỉĩịóòỏõọốồổỗộúùủũụưáàảãạắằẳẵặýỳỷỹỵđĐ\s]+$"
+                           title="Shop Name only has letters and numbers" />
                 </div>
-                <h3 class="text-lg font-semibold">@product.Name</h3>
-                @*                 <p class="mb-2 text-sm text-gray-600">@product.Category?.Name</p>
-        *@                <p class="font-medium text-gray-800">$@product.LowestPrice.ToString("F2")</p>
-                <div class="mt-2 flex items-center">
-                    <span class="text-yellow-400">★</span>
-                    <span class="ml-1">@product.Rating.ToString("F1")</span>
-                    @*                     <span class="ml-2 text-gray-500">(@product.ReviewCount reviews)</span>
-            *@
+                <div class="mb-4">
+                    <label class="mb-2 block font-bold text-gray-700" for="shopDescription">Description</label>
+                    <textarea id="shopDescription" name="ShopDescription" class="w-full rounded-md border border-gray-300 p-2" required></textarea>
                 </div>
-                <div class="mt-3 flex items-center justify-between">
-                    <div class="mt-2 text-sm text-gray-500">
-                        <span id="status-label-@product.Id" class="rounded-full px-2 py-1 text-sm @(product.Status == "Available" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800")">@product.Status</span>
-                    </div>
-                    <div class="flex space-x-2">
-                        <button onclick="toggleProductStatus('@product.Id', '@product.Status', this)"
-                                class="@(product.Status == "Available" ? "bg-yellow-500 hover:bg-yellow-600 text-white py-1 px-3 rounded-md" : "bg-green-500 hover:bg-green-600 text-white py-1 px-3 rounded-md")">
-                            @(product.Status == "Available" ? "Deactivate" : "Activate")
-                        </button>
-                        <button onclick="loadProductDetails('@product.Id')"
-                                class="rounded-md bg-blue-500 px-3 py-1 text-white hover:bg-blue-600">
-                            Edit
-                        </button>
-                        <button onclick="deleteProduct('@product.Id')"
-                                class="rounded-md bg-red-500 px-3 py-1 text-white hover:bg-red-600">
-                            Delete
-                        </button>
-                    </div>
+                <div class="flex justify-end space-x-4">
+                    <button type="button" onclick="closeShopModal()" class="rounded-md bg-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-400">
+                        Cancel
+                    </button>
+                    <button type="submit" class="rounded-md bg-green-500 px-4 py-2 text-white hover:bg-green-600">
+                        Create Shop
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openShopModal() {
+            document.getElementById("shopModal").classList.remove("hidden");
+        }
+        function closeShopModal() {
+            document.getElementById("shopModal").classList.add("hidden");
+        }
+    </script>
+}
+else
+{
+    <div class="relative w-full bg-white px-8 py-6">
+        <!-- Update Button -->
+        <button onclick="openUpdateModal()" class="absolute right-4 top-4 rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600">
+            Update Shop Info
+        </button>
+
+        <div class="flex">
+            <!-- Left half for Shop Name -->
+            <div class="flex w-1/2 items-center justify-center">
+                <h1 class="mb-4 text-4xl font-bold">@Model.Shop.Name</h1>
+            </div>
+
+            <!-- Right half for other shop details -->
+            <div class="w-1/2 pl-6">
+                <div class="mb-4 flex items-center">
+                    <h2 class="mr-2 text-xl font-semibold">Rating:</h2>
+                    <p>@Model.Shop.Rating</p>
+                </div>
+
+                <div class="mb-4 flex items-center">
+                    <h2 class="mr-2 text-xl font-semibold">Products:</h2>
+                    <p>@Model.Shop.ProductCount</p>
+                </div>
+
+                <div class="mb-4 flex items-center">
+                    <h2 class="mr-2 text-xl font-semibold">Joined:</h2>
+                    <p>@Model.Shop.JoinedTimeAgo</p>
                 </div>
             </div>
-        }
-    }
-    else
-    {
-        <div class="col-span-full py-8 text-center">
-            <p class="text-gray-500">No products found.</p>
         </div>
-    }
-</div>
+
+        <!-- Full-width description section -->
+        <div class="mt-6">
+            <h2 class="text-xl font-semibold">Description</h2>
+            <span class="text-gray-600">@Model.Shop.Description</span>
+        </div>
+    </div>
+
+    <!-- Update Shop Modal -->
+    <div id="updateShopModal" class="fixed inset-0 z-50 flex hidden items-center justify-center bg-gray-900 bg-opacity-50">
+        <div class="w-full max-w-md rounded-lg bg-white p-8">
+            <h3 class="mb-4 text-xl font-semibold">Update Shop Info</h3>
+            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+            {
+                <div class="text-red-500">@Model.ErrorMessage</div>
+            }
+            <form method="post" id="updateShopForm" asp-page-handler="UpdateShop">
+                <div class="mb-4">
+                    <label class="mb-2 block font-bold text-gray-700" for="updateShopName">Shop Name</label>
+                    <input type="text" id="updateShopName" name="ShopName"
+                           class="w-full rounded-md border border-gray-300 p-2"
+                           value="@Model.Shop.Name" required
+                           pattern="^[A-Za-z0-9À-ỹáàảãạắằẳẵặéèẻẽẹíìỉĩịóòỏõọốồổỗộúùủũụưáàảãạắằẳẵặýỳỷỹỵđĐ\s]+$"
+                           title="Shop Name only has letters (including Vietnamese characters), numbers, and spaces" />
+                </div>
+                <div class="mb-4">
+                    <label class="mb-2 block font-bold text-gray-700" for="updateShopDescription">Description</label>
+                    <textarea id="updateShopDescription" name="ShopDescription" class="w-full rounded-md border border-gray-300 p-2" required>@Model.Shop.Description</textarea>
+                </div>
+                <div class="flex justify-end space-x-4">
+                    <button type="button" onclick="closeUpdateModal()" class="rounded-md bg-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-400">
+                        Cancel
+                    </button>
+                    <button type="submit" class="rounded-md bg-green-500 px-4 py-2 text-white hover:bg-green-600">
+                        Update Shop
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openUpdateModal() {
+            document.getElementById("updateShopModal").classList.remove("hidden");
+        }
+
+        function closeUpdateModal() {
+            document.getElementById("updateShopModal").classList.add("hidden");
+        }
+    </script>
+
+    <h1 class="mb-4 mt-4 text-3xl font-bold">Product List</h1>
+
+    <div class="search-filter">
+        <form method="get" class="flex items-center space-x-4">
+            <input class="rounded-md border border-gray-300 p-2" type="text" name="Name" placeholder="Search by name" value="@Request.Query["Name"]" onchange="this.form.submit();" />
+            <select name="CategoryId" class="rounded-md border border-gray-300 p-2">
+                <option value="">Select Category</option>
+                @if (Model.Categories != null && Model.Categories.Any())
+                {
+                    foreach (var category in Model.Categories)
+                    {
+                        var isSelected = Request.Query["CategoryId"] == category.Id.ToString();
+                        if (isSelected)
+                        {
+                            <option value="@category.Id" selected>@category.Name</option>
+                        }
+                        else
+                        {
+                            <option value="@category.Id">@category.Name</option>
+                        }
+                    }
+                }
+            </select>
+            @{
+                var selectedStatus = Request.Query["Status"].ToString();
+            }
+
+            <select name="Status" class="rounded-md border border-gray-300 p-2">
+                @if (string.IsNullOrEmpty(selectedStatus))
+                {
+                    <option value="" selected>Select Status</option>
+                }
+                else
+                {
+                    <option value="">Select Status</option>
+                }
+
+                @if (selectedStatus == "Available")
+                {
+                    <option value="Available" selected>Available</option>
+                }
+                else
+                {
+                    <option value="Available">Available</option>
+                }
+
+                @if (selectedStatus == "OutOfStock")
+                {
+                    <option value="OutOfStock" selected>Out Of Stock</option>
+                }
+                else
+                {
+                    <option value="OutOfStock">Out Of Stock</option>
+                }
+            </select>
+            <input class="rounded-md border border-gray-300 p-2" type="number" name="MinRating" placeholder="Min Rating" min="0" max="5" value="@Request.Query["MinRating"]" />
+
+            <div class="flex items-center space-x-4">
+                <label class="flex items-center">
+                    <input type="radio" id="sortByPrice" name="SortOption" value="SortByPrice"
+                    @(Request.Query["SortOption"] == "SortByPrice" ? "checked" : "") onchange="this.form.submit();" />
+                    <span class="ml-2">Sort by Price</span>
+                </label>
+
+                <label class="flex items-center">
+                    <input type="radio" id="sortByRating" name="SortOption" value="SortByRating"
+                    @(Request.Query["SortOption"] == "SortByRating" ? "checked" : "") onchange="this.form.submit();" />
+                    <span class="ml-2">Sort by Rating</span>
+                </label>
+            </div>
+
+
+
+            <label class="flex items-center">
+                <span class="mr-2">Sort Descending:</span>
+                <input type="checkbox" name="sortDescending" value="true"
+                @(Request.Query["SortDescending"] == "true" ? "checked" : "") onchange="this.form.submit();" />
+            </label>
+
+            <button type="submit" class="rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600">Search</button>
+            <button type="button" onclick="openAddProductModal()"
+                    class="rounded-md bg-green-500 px-4 py-2 text-white hover:bg-green-600">
+                Add Product
+            </button>
+        </form>
+    </div>
+
+    <!-- Product List -->
+    <div class="grid-cols-1 mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        @if (Model.Products != null && Model.Products.Any())
+        {
+            foreach (var product in Model.Products)
+            {
+                <div class="rounded-lg border p-4 shadow-md">
+                    <div class="aspect-w-1 aspect-h-1 mb-4">
+                        @if (!string.IsNullOrEmpty(product.ProductImageUrl))
+                        {
+                            <img src="@product.ProductImageUrl" alt="@product.Name" class="h-48 w-full rounded-md object-cover" />
+                        }
+                        else
+                        {
+                            <div class="flex h-48 w-full items-center justify-center rounded-md bg-gray-200">
+                                <span class="text-gray-500">No image</span>
+                            </div>
+                        }
+                    </div>
+                    <h3 class="text-lg font-semibold">@product.Name</h3>
+                    @*                 <p class="mb-2 text-sm text-gray-600">@product.Category?.Name</p>
+        *@                <p class="font-medium text-gray-800">₫@product.LowestPrice.ToString("N0").Replace(",", ".")</p>
+                    <div class="mt-2 flex items-center">
+                        <span class="text-yellow-400">★</span>
+                        <span class="ml-1">@product.Rating.ToString("F1")</span>
+                        @*                     <span class="ml-2 text-gray-500">(@product.ReviewCount reviews)</span>
+            *@
+                    </div>
+                    <div class="mt-3 flex items-center justify-between">
+                        <div class="mt-2 text-sm text-gray-500">
+                            <span id="status-label-@product.Id" class="rounded-full px-2 py-1 text-sm @(product.Status == "Available" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800")">@product.Status</span>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button onclick="toggleProductStatus('@product.Id', '@product.Status', this)"
+                                    class="@(product.Status == "Available" ? "bg-yellow-500 hover:bg-yellow-600 text-white py-1 px-3 rounded-md" : "bg-green-500 hover:bg-green-600 text-white py-1 px-3 rounded-md")">
+                                @(product.Status == "Available" ? "Deactivate" : "Activate")
+                            </button>
+                            <button onclick="loadProductDetails('@product.Id')"
+                                    class="rounded-md bg-blue-500 px-3 py-1 text-white hover:bg-blue-600">
+                                Edit
+                            </button>
+                            <button onclick="deleteProduct('@product.Id')"
+                                    class="rounded-md bg-red-500 px-3 py-1 text-white hover:bg-red-600">
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-span-full py-8 text-center">
+                <p class="text-gray-500">No products found.</p>
+            </div>
+        }
+    </div>
+}
 
 @{
     var paginationModel = new UI.Pages.Shared.PaginationModel
@@ -191,7 +321,10 @@
             };
 }
 
-<partial name="~/Pages/Shared/_Pagination.cshtml" model="paginationModel" />
+@if (string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <partial name="~/Pages/Shared/_Pagination.cshtml" model="paginationModel" />
+}
 
 <!-- Add Product Modal -->
 <div id="addProductModal" class="fixed inset-0 hidden items-center justify-center bg-black bg-opacity-50">
@@ -558,31 +691,31 @@
             variationDiv.classList.add('p-4', 'border', 'rounded-md', 'bg-gray-50', 'mb-4');
 
             const optionsHtml = options.map((option, index) => `
-                <div class="mt-2 flex items-center">
-                    <input type="checkbox"
-                           name="variation_${variationId}"
-                           value="${optionIds[index]}"
-                           data-option-name="${option}"
-                           data-variation-name="${variationName}"
-                           class="form-checkbox mr-2 h-4 w-4 text-blue-600"
-                           onchange="handleVariationOptionCheck(this)" />
-                    <label class="text-sm text-gray-700">${option}</label>
-                </div>
-            `).join('');
+                                <div class="mt-2 flex items-center">
+                                    <input type="checkbox"
+                                           name="variation_${variationId}"
+                                           value="${optionIds[index]}"
+                                           data-option-name="${option}"
+                                           data-variation-name="${variationName}"
+                                           class="form-checkbox mr-2 h-4 w-4 text-blue-600"
+                                           onchange="handleVariationOptionCheck(this)" />
+                                    <label class="text-sm text-gray-700">${option}</label>
+                                </div>
+                            `).join('');
 
             variationDiv.innerHTML = `
-                <div class="mb-2 flex items-center justify-between">
-                    <span class="font-medium">${variationName}</span>
-                    <button type="button"
-                            onclick="removeExistingVariation('${variationId}')"
-                            class="text-red-600 hover:text-red-800">
-                        Remove
-                    </button>
-                </div>
-                <div class="variation-options">
-                    ${optionsHtml}
-                </div>
-            `;
+                                <div class="mb-2 flex items-center justify-between">
+                                    <span class="font-medium">${variationName}</span>
+                                    <button type="button"
+                                            onclick="removeExistingVariation('${variationId}')"
+                                            class="text-red-600 hover:text-red-800">
+                                        Remove
+                                    </button>
+                                </div>
+                                <div class="variation-options">
+                                    ${optionsHtml}
+                                </div>
+                            `;
 
             document.getElementById('existingVariationsList').appendChild(variationDiv);
         };
@@ -639,44 +772,44 @@
             const newRow = document.createElement('div');
             newRow.classList.add('variation-row', 'mb-4', 'p-4', 'border', 'rounded');
             newRow.innerHTML = `
-                <div class="mb-2 flex items-center">
-                    <label class="mr-2 block text-sm font-medium text-gray-700">Variation Name:</label>
-                    <input type="text"
-                           name="NewVariations[${variationIndex}].Name"
-                           class="form-input mr-2 flex-grow rounded"
-                           placeholder="Enter variation name"
-                           required />
-                    <button type="button"
-                            onclick="this.closest('.variation-row').remove()"
-                            class="text-red-600 hover:text-red-800">
-                        Remove
-                    </button>
-                </div>
-                <div class="variation-options">
-                    <div class="option-row mb-2">
-                        <label class="mb-1 block text-sm font-medium text-gray-700">Options:</label>
-                        <div class="flex items-center">
-                            <input type="text"
-                                   name="NewVariations[${variationIndex}].Options"
-                                   class="form-input mr-2 flex-grow rounded"
-                                   placeholder="Enter option value"
-                                   required />
-                            <button type="button"
-                                    onclick="addVariationOption(this.closest('.option-row'))"
-                                    class="rounded-md bg-blue-500 px-3 py-1 text-white hover:bg-blue-600">
-                                Add Option
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <div class="mt-4">
-                    <button type="button"
-                                    onclick="saveNewVariationForCreation(this.closest('.variation-row'))"
-                            class="rounded-md bg-green-500 px-4 py-2 text-white hover:bg-green-600">
-                        Save Variation
-                    </button>
-                </div>
-            `;
+                                <div class="mb-2 flex items-center">
+                                    <label class="mr-2 block text-sm font-medium text-gray-700">Variation Name:</label>
+                                    <input type="text"
+                                           name="NewVariations[${variationIndex}].Name"
+                                           class="form-input mr-2 flex-grow rounded"
+                                           placeholder="Enter variation name"
+                                           required />
+                                    <button type="button"
+                                            onclick="this.closest('.variation-row').remove()"
+                                            class="text-red-600 hover:text-red-800">
+                                        Remove
+                                    </button>
+                                </div>
+                                <div class="variation-options">
+                                    <div class="option-row mb-2">
+                                        <label class="mb-1 block text-sm font-medium text-gray-700">Options:</label>
+                                        <div class="flex items-center">
+                                            <input type="text"
+                                                   name="NewVariations[${variationIndex}].Options"
+                                                   class="form-input mr-2 flex-grow rounded"
+                                                   placeholder="Enter option value"
+                                                   required />
+                                            <button type="button"
+                                                    onclick="addVariationOption(this.closest('.option-row'))"
+                                                    class="rounded-md bg-blue-500 px-3 py-1 text-white hover:bg-blue-600">
+                                                Add Option
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mt-4">
+                                    <button type="button"
+                                                    onclick="saveNewVariationForCreation(this.closest('.variation-row'))"
+                                            class="rounded-md bg-green-500 px-4 py-2 text-white hover:bg-green-600">
+                                        Save Variation
+                                    </button>
+                                </div>
+                            `;
 
             container.appendChild(newRow);
         };
@@ -824,27 +957,27 @@
                     combinationDiv.classList.add('mb-4', 'p-4', 'border', 'rounded-md');
 
                     combinationDiv.innerHTML = `
-                        <div class="mb-2 font-medium">${combination.description.join(', ')}</div>
-                        <div class="grid-cols-2 grid gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">Price</label>
-                                <input type="number"
-                                       name="VariationCombinations[${index}].Price"
-                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                                       required min="0" step="0.01" />
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">Stock</label>
-                                <input type="number"
-                                       name="VariationCombinations[${index}].Stock"
-                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                                       required min="0" step="1" />
-                            </div>
-                        </div>
-                        <input type="hidden"
-                               name="VariationCombinations[${index}].OptionIds"
-                               value="${combination.optionIds.join(',')}" />
-                    `;
+                                        <div class="mb-2 font-medium">${combination.description.join(', ')}</div>
+                                        <div class="grid-cols-2 grid gap-4">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700">Price</label>
+                                                <input type="number"
+                                                       name="VariationCombinations[${index}].Price"
+                                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                                                       required min="0" step="0.01" />
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700">Stock</label>
+                                                <input type="number"
+                                                       name="VariationCombinations[${index}].Stock"
+                                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                                                       required min="0" step="1" />
+                                            </div>
+                                        </div>
+                                        <input type="hidden"
+                                               name="VariationCombinations[${index}].OptionIds"
+                                               value="${combination.optionIds.join(',')}" />
+                                    `;
 
                     container.appendChild(combinationDiv);
                 });
@@ -879,20 +1012,20 @@
                     variationDiv.classList.add('p-4', 'border', 'rounded-md', 'bg-gray-50', 'mb-4');
 
                     variationDiv.innerHTML = `
-                        <div class="mb-2 flex items-center justify-between">
-                            <span class="font-medium">${variation.name}</span>
-                            <button type="button"
-                                    onclick="removeExistingVariation('${variation.id}')"
-                                    class="text-red-600 hover:text-red-800">
-                                Remove
-                            </button>
-                        </div>
-                        <div class="variation-options mt-2" id="options-${variation.id}">
-                            <div class="grid-cols-2 grid gap-2">
-                                <!-- Options will be loaded here -->
-                            </div>
-                        </div>
-                    `;
+                                        <div class="mb-2 flex items-center justify-between">
+                                            <span class="font-medium">${variation.name}</span>
+                                            <button type="button"
+                                                    onclick="removeExistingVariation('${variation.id}')"
+                                                    class="text-red-600 hover:text-red-800">
+                                                Remove
+                                            </button>
+                                        </div>
+                                        <div class="variation-options mt-2" id="options-${variation.id}">
+                                            <div class="grid-cols-2 grid gap-2">
+                                                <!-- Options will be loaded here -->
+                                            </div>
+                                        </div>
+                                    `;
 
                     container.appendChild(variationDiv);
                     await loadVariationOptions(variation.id, variation.name);
@@ -920,17 +1053,17 @@
                     const optionDiv = document.createElement('div');
                     optionDiv.classList.add('flex', 'items-center');
                     optionDiv.innerHTML = `
-                        <input type="checkbox"
-                               id="option-${option.id}"
-                               name="variation_${variationId}"
-                               value="${option.id}"
-                               data-variation-id="${variationId}"
-                               data-variation-name="${variationName}"
-                               data-option-name="${option.value}"
-                               class="form-checkbox mr-2 h-4 w-4 text-blue-600"
-                               onchange="handleVariationOptionCheck(this)" />
-                        <label for="option-${option.id}" class="text-sm text-gray-700">${option.value}</label>
-                    `;
+                                        <input type="checkbox"
+                                               id="option-${option.id}"
+                                               name="variation_${variationId}"
+                                               value="${option.id}"
+                                               data-variation-id="${variationId}"
+                                               data-variation-name="${variationName}"
+                                               data-option-name="${option.value}"
+                                               class="form-checkbox mr-2 h-4 w-4 text-blue-600"
+                                               onchange="handleVariationOptionCheck(this)" />
+                                        <label for="option-${option.id}" class="text-sm text-gray-700">${option.value}</label>
+                                    `;
                     optionsContainer.appendChild(optionDiv);
                 });
             } catch (error) {
@@ -971,10 +1104,11 @@
         });
 
         // Form validation and submission
-        const validateForm = async () => {
+        const validateForm = async (event) => {
             const name = document.querySelector('input[asp-for="ProductCreation.Name"]')?.value;
             const category = document.querySelector('select[asp-for="ProductCreation.CategoryId"]')?.value;
 
+            // Validate required fields: Name and Category
             if (!name || !category) {
                 alert('Please fill in all required fields (Name and Category)');
                 return false;
@@ -997,11 +1131,28 @@
                 const price = combo.querySelector('input[name*=".Price"]')?.value;
                 const stock = combo.querySelector('input[name*=".Stock"]')?.value;
 
+                // Validate price and stock
                 if (!validateInput.price(price) || !validateInput.stock(stock)) {
                     isValid = false;
                 }
             });
 
+            // File validation for images (manual validation)
+            const fileInput = document.getElementById('productImages');
+            const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+
+            console.log(fileInput.files.length)
+
+            if (fileInput.files.length === 0) {
+                alert('Please upload at least one product image.');
+                return false; // Prevent form submission if no images are selected
+            } else {
+                // If files are selected, update the preview
+                imagePreviewContainer.innerHTML = ''; // Clear any previous previews
+                previewImages(fileInput); // Call the preview function
+            }
+
+            // If price/stock is invalid, return false
             if (!isValid) {
                 alert('Please enter valid price and stock for all variation combinations');
                 return false;
@@ -1009,6 +1160,7 @@
 
             return true;
         };
+
 
         const submitForm = async (form) => {
             try {
@@ -1153,20 +1305,20 @@
             newOptionRow.classList.add('option-row', 'mb-2');
 
             newOptionRow.innerHTML = `
-                <div class="flex items-center">
-                    <input type="text"
-                           name="NewVariations[${variationIndex}].Options"
-                           class="form-input mr-2 flex-grow rounded"
-                           placeholder="Enter option value"
-                           required
-                           onchange="handleNewVariationInput(this)" />
-                    <button type="button"
-                            onclick="this.closest('.option-row').remove(); updateVariationCombinations();"
-                            class="text-red-600 hover:text-red-800">
-                        Remove
-                    </button>
-                </div>
-            `;
+                                <div class="flex items-center">
+                                    <input type="text"
+                                           name="NewVariations[${variationIndex}].Options"
+                                           class="form-input mr-2 flex-grow rounded"
+                                           placeholder="Enter option value"
+                                           required
+                                           onchange="handleNewVariationInput(this)" />
+                                    <button type="button"
+                                            onclick="this.closest('.option-row').remove(); updateVariationCombinations();"
+                                            class="text-red-600 hover:text-red-800">
+                                        Remove
+                                    </button>
+                                </div>
+                            `;
 
             variationOptions.appendChild(newOptionRow);
         }
@@ -1241,12 +1393,12 @@
                         const imgWrapper = document.createElement('div');
                         imgWrapper.classList.add('relative');
                         imgWrapper.innerHTML = `
-                                        <img src="${e.target.result}" class="h-32 w-full rounded-md object-cover" />
-                                        <button type="button" onclick="removeImage(this)"
-                                                class="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white">
-                                            ✖
-                                        </button>
-                                    `;
+                                                        <img src="${e.target.result}" class="h-32 w-full rounded-md object-cover" />
+                                                        <button type="button" onclick="removeImage(this)"
+                                                                class="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white">
+                                                            ✖
+                                                        </button>
+                                                    `;
                         imagePreviewContainer.appendChild(imgWrapper);
                     };
                     reader.readAsDataURL(file);
@@ -1368,12 +1520,12 @@
                         const imgWrapper = document.createElement('div');
                         imgWrapper.classList.add('relative');
                         imgWrapper.innerHTML = `
-                            <img src="${image.url}" class="h-32 w-full rounded-md object-cover" />
-                            <button type="button" onclick="removeImageForEdit(this, '${image.id}')"
-                                    class="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white">
-                                ✖
-                            </button>
-                        `;
+                                            <img src="${image.url}" class="h-32 w-full rounded-md object-cover" />
+                                            <button type="button" onclick="removeImageForEdit(this, '${image.id}')"
+                                                    class="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white">
+                                                ✖
+                                            </button>
+                                        `;
                         imagePreviewContainer.appendChild(imgWrapper);
                     });
                 } else {
@@ -1462,44 +1614,44 @@
             const newRow = document.createElement('div');
             newRow.classList.add('variation-row', 'mb-4', 'p-4', 'border', 'rounded');
             newRow.innerHTML = `
-                                <div class="mb-2 flex items-center">
-                                    <label class="mr-2 block text-sm font-medium text-gray-700">Variation Name:</label>
-                                    <input type="text"
-                                           name="NewVariations[${variationIndex}].Name"
-                                           class="form-input mr-2 flex-grow rounded"
-                                           placeholder="Enter variation name"
-                                           required />
-                                    <button type="button"
-                                            onclick="this.closest('.variation-row').remove()"
-                                            class="text-red-600 hover:text-red-800">
-                                        Remove
-                                    </button>
-                                </div>
-                                <div class="variation-options">
-                                    <div class="option-row mb-2">
-                                        <label class="mb-1 block text-sm font-medium text-gray-700">Options:</label>
-                                        <div class="flex items-center">
-                                            <input type="text"
-                                                   name="NewVariations[${variationIndex}].Options"
-                                                   class="form-input mr-2 flex-grow rounded"
-                                                   placeholder="Enter option value"
-                                                   required />
-                                            <button type="button"
-                                                    onclick="addVariationOption(this.closest('.option-row'))"
-                                                    class="rounded-md bg-blue-500 px-3 py-1 text-white hover:bg-blue-600">
-                                                Add Option
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="mt-4">
-                                    <button type="button"
-                                            onclick="saveNewVariationForUpdate(this.closest('.variation-row'))"
-                                            class="rounded-md bg-green-500 px-4 py-2 text-white hover:bg-green-600">
-                                        Save Variation
-                                    </button>
-                                </div>
-                            `;
+                                                <div class="mb-2 flex items-center">
+                                                    <label class="mr-2 block text-sm font-medium text-gray-700">Variation Name:</label>
+                                                    <input type="text"
+                                                           name="NewVariations[${variationIndex}].Name"
+                                                           class="form-input mr-2 flex-grow rounded"
+                                                           placeholder="Enter variation name"
+                                                           required />
+                                                    <button type="button"
+                                                            onclick="this.closest('.variation-row').remove()"
+                                                            class="text-red-600 hover:text-red-800">
+                                                        Remove
+                                                    </button>
+                                                </div>
+                                                <div class="variation-options">
+                                                    <div class="option-row mb-2">
+                                                        <label class="mb-1 block text-sm font-medium text-gray-700">Options:</label>
+                                                        <div class="flex items-center">
+                                                            <input type="text"
+                                                                   name="NewVariations[${variationIndex}].Options"
+                                                                   class="form-input mr-2 flex-grow rounded"
+                                                                   placeholder="Enter option value"
+                                                                   required />
+                                                            <button type="button"
+                                                                    onclick="addVariationOption(this.closest('.option-row'))"
+                                                                    class="rounded-md bg-blue-500 px-3 py-1 text-white hover:bg-blue-600">
+                                                                Add Option
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="mt-4">
+                                                    <button type="button"
+                                                            onclick="saveNewVariationForUpdate(this.closest('.variation-row'))"
+                                                            class="rounded-md bg-green-500 px-4 py-2 text-white hover:bg-green-600">
+                                                        Save Variation
+                                                    </button>
+                                                </div>
+                                            `;
 
             container.appendChild(newRow);
         };
@@ -1556,9 +1708,9 @@
                 combinationSection.classList.add('combination-section', 'mb-4', 'p-4', 'border', 'rounded');
 
                 let combinationHTML = `
-                    <h4 class="text-lg font-medium">Variation Combination</h4>
-                    <div class="grid-cols-1 grid gap-4">
-                `;
+                                    <h4 class="text-lg font-medium">Variation Combination</h4>
+                                    <div class="grid-cols-1 grid gap-4">
+                                `;
 
                 let combinationCounter = 0; // Declare a counter to generate unique IDs
 
@@ -1573,31 +1725,31 @@
                         const combinationId = `combination-${combinationCounter++}`;  // Increment the counter for each new combination
 
                         combinationHTML += `
-                    <div class="flex gap-4">
-                        <div class="flex-1">
-                            <label class="block text-sm font-medium text-gray-700">Variation Options</label>
-                            <p class="mt-1 block w-full rounded-md border-gray-300 bg-gray-50 p-2 shadow-sm">
-                                ${currentOption.optionName}, ${newOption}
-                            </p>
-                        </div>
-                        <div class="flex-1">
-                            <label class="block text-sm font-medium text-gray-700">Price</label>
-                            <input type="number"
-                                id="price-${combinationId}"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                                placeholder="Enter price"
-                                min="0" required />
-                        </div>
-                        <div class="flex-1">
-                            <label class="block text-sm font-medium text-gray-700">Quantity In Stock</label>
-                            <input type="number"
-                                id="quantity-${combinationId}"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                                placeholder="Enter quantity"
-                                min="0" required />
-                        </div>
-                    </div>
-                `;
+                                    <div class="flex gap-4">
+                                        <div class="flex-1">
+                                            <label class="block text-sm font-medium text-gray-700">Variation Options</label>
+                                            <p class="mt-1 block w-full rounded-md border-gray-300 bg-gray-50 p-2 shadow-sm">
+                                                ${currentOption.optionName}, ${newOption}
+                                            </p>
+                                        </div>
+                                        <div class="flex-1">
+                                            <label class="block text-sm font-medium text-gray-700">Price</label>
+                                            <input type="number"
+                                                id="price-${combinationId}"
+                                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                                                placeholder="Enter price"
+                                                min="0" required />
+                                        </div>
+                                        <div class="flex-1">
+                                            <label class="block text-sm font-medium text-gray-700">Quantity In Stock</label>
+                                            <input type="number"
+                                                id="quantity-${combinationId}"
+                                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                                                placeholder="Enter quantity"
+                                                min="0" required />
+                                        </div>
+                                    </div>
+                                `;
 
                         // Store the combination data in the global array
                         combinations.push({
@@ -1611,12 +1763,12 @@
                 combinationHTML += `</div>`;
 
                 combinationHTML += `
-                    <div class="mt-4 flex justify-end">
-                        <button type="button"
-                                class="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-                                onclick="saveVariationCombination()">Save Combination</button>
-                    </div>
-                `;
+                                    <div class="mt-4 flex justify-end">
+                                        <button type="button"
+                                                class="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+                                                onclick="saveVariationCombination()">Save Combination</button>
+                                    </div>
+                                `;
 
                 combinationSection.innerHTML = combinationHTML;
                 combinationContainer.appendChild(combinationSection);
@@ -1808,37 +1960,37 @@
                 const isLastItem = editProductState.productItems.length === 1;
 
                 itemDiv.innerHTML = `
-                    <input type="hidden" name="ProductItemUpdates[${index}].Id" value="${item.id}" />
-                    <div class="flex gap-4">
-                        <div class="flex-1">
-                            <label class="block text-sm font-medium text-gray-700">Variation Options</label>
-                            <p class="mt-1 block w-full rounded-md border-gray-300 bg-gray-50 p-2 shadow-sm">${variationOptions.join(', ')}</p>
-                        </div>
-                        <div class="flex-1">
-                            <label class="block text-sm font-medium text-gray-700">Quantity in Stock</label>
-                            <input type="number"
-                                name="ProductItemUpdates[${index}].QuantityInStock"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                                value="${item.quantityInStock}"
-                                min="0" />
-                        </div>
-                        <div class="flex-1">
-                            <label class="block text-sm font-medium text-gray-700">Price</label>
-                            <input type="number"
-                                name="ProductItemUpdates[${index}].Price"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                                value="${item.price}"
-                                min="0" />
-                        </div>
-                        <div class="flex items-center justify-center">
-                            <button class="text-red-600 ${isLastItem ? 'cursor-not-allowed opacity-50' : ''}"
-                                onclick="${isLastItem ? 'return false;' : `deleteProductItem(${index})`}">
-                                <i class="fas fa-trash-alt"></i>
-                                Delete
-                            </button>
-                        </div>
-                    </div>
-                `;
+                                    <input type="hidden" name="ProductItemUpdates[${index}].Id" value="${item.id}" />
+                                    <div class="flex gap-4">
+                                        <div class="flex-1">
+                                            <label class="block text-sm font-medium text-gray-700">Variation Options</label>
+                                            <p class="mt-1 block w-full rounded-md border-gray-300 bg-gray-50 p-2 shadow-sm">${variationOptions.join(', ')}</p>
+                                        </div>
+                                        <div class="flex-1">
+                                            <label class="block text-sm font-medium text-gray-700">Quantity in Stock</label>
+                                            <input type="number"
+                                                name="ProductItemUpdates[${index}].QuantityInStock"
+                                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                                                value="${item.quantityInStock}"
+                                                min="0" />
+                                        </div>
+                                        <div class="flex-1">
+                                            <label class="block text-sm font-medium text-gray-700">Price</label>
+                                            <input type="number"
+                                                name="ProductItemUpdates[${index}].Price"
+                                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                                                value="${item.price}"
+                                                min="0" />
+                                        </div>
+                                        <div class="flex items-center justify-center">
+                                            <button class="text-red-600 ${isLastItem ? 'cursor-not-allowed opacity-50' : ''}"
+                                                onclick="${isLastItem ? 'return false;' : `deleteProductItem(${index})`}">
+                                                <i class="fas fa-trash-alt"></i>
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </div>
+                                `;
 
                 container.appendChild(itemDiv);
             });

@@ -32,8 +32,17 @@ public class RecoveryModel : PageModel
 
     public string? ErrorMessage { get; set; }
 
-    public void OnGet()
+    public IActionResult OnGet()
     {
+        var token = HttpContext.Session.GetString("Token");
+
+        // Nếu đã có token trong session, chuyển hướng người dùng đến trang chính
+        if (!string.IsNullOrEmpty(token))
+        {
+            return RedirectToPage("/Index"); // Hoặc trang bạn muốn chuyển đến
+        }
+
+        return Page();
     }
 
     public async Task<IActionResult> OnPostAsync()
