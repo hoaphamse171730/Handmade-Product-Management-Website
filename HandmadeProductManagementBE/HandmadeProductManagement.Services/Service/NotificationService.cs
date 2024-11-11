@@ -103,7 +103,7 @@ namespace HandmadeProductManagement.Services.Service
                 Id = order.Id,
                 Message = $"You have a new order from {order.CustomerName} with current state: {order.Status} on: {order.LastUpdatedTime.ToString("dd/MM/yyyy")}",
                 Tag = Constants.NotificationTagOrder,
-                URL = Constants.FrontUrl + $"Seller/OrderManagement?filter=All&pageNumber=1"
+                URL = Constants.FrontUrl + $"/Seller/OrderManagement"
             }).ToList();
 
             return notifications;
