@@ -11,6 +11,7 @@ using HandmadeProductManagement.ModelViews.VariationCombinationModelViews;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.Core.Common;
 using HandmadeProductManagement.ModelViews.VariationModelViews;
+using Microsoft.IdentityModel.Tokens;
 
 namespace HandmadeProductManagement.Services.Service
 {
@@ -685,6 +686,7 @@ namespace HandmadeProductManagement.Services.Service
                 .ThenInclude(v => v!.Variation)
                 .FirstOrDefaultAsync(p => p.Id == productId)
                 ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageProductNotFound);
+            if(product.Category!.PromotionId.IsNullOrEmpty()) await _promotionService.UpdatePromotionStatusByRealtime(product!.Category!.PromotionId!);
 
             var promotion = await _unitOfWork.GetRepository<Promotion>().Entities
                 .FirstOrDefaultAsync(p => p.Categories.Any(c => c.Id == product.CategoryId) &&
