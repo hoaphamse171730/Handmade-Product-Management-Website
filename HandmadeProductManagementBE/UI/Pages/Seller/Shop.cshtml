@@ -464,21 +464,13 @@ else
             </div>
         </form>
 
-        <!-- Add Product Items Section -->
-        <form method="post" asp-page-handler="AddProductItems" id="addProductItemsForm" class="space-y-4">
-            @Html.AntiForgeryToken()
 
-            <!-- New Variations Section -->
-            <div id="newVariationsContainerForUpdate" class="mt-4"></div>
-            <button type="button" id="addNewVariationBtnEditProduct" class="btn btn-secondary mb-4 text-blue-500 underline">
-                Add New Variation
-            </button>
 
-            <div id="variationCombinationContainerForUpdate" class="border-t pt-4">
-                <h3 class="mb-2 text-lg font-medium">Variation Combinations</h3>
-                <!-- Các kết hợp sẽ được hiển thị tại đây -->
-            </div>
-        </form>
+
+        <!-- Add product -->
+
+
+
 
         <div class="mt-8 flex justify-end space-x-3 border-t pt-4">
             <button type="button" onclick="closeEditModal()"
@@ -1607,284 +1599,6 @@ else
             productItems: []
         };
 
-        const addNewVariationForUpdateUI = async () => {
-            const container = document.getElementById('newVariationsContainerForUpdate');
-            const variationIndex = container.children.length;
-
-            const newRow = document.createElement('div');
-            newRow.classList.add('variation-row', 'mb-4', 'p-4', 'border', 'rounded');
-            newRow.innerHTML = `
-                                                <div class="mb-2 flex items-center">
-                                                    <label class="mr-2 block text-sm font-medium text-gray-700">Variation Name:</label>
-                                                    <input type="text"
-                                                           name="NewVariations[${variationIndex}].Name"
-                                                           class="form-input mr-2 flex-grow rounded"
-                                                           placeholder="Enter variation name"
-                                                           required />
-                                                    <button type="button"
-                                                            onclick="this.closest('.variation-row').remove()"
-                                                            class="text-red-600 hover:text-red-800">
-                                                        Remove
-                                                    </button>
-                                                </div>
-                                                <div class="variation-options">
-                                                    <div class="option-row mb-2">
-                                                        <label class="mb-1 block text-sm font-medium text-gray-700">Options:</label>
-                                                        <div class="flex items-center">
-                                                            <input type="text"
-                                                                   name="NewVariations[${variationIndex}].Options"
-                                                                   class="form-input mr-2 flex-grow rounded"
-                                                                   placeholder="Enter option value"
-                                                                   required />
-                                                            <button type="button"
-                                                                    onclick="addVariationOption(this.closest('.option-row'))"
-                                                                    class="rounded-md bg-blue-500 px-3 py-1 text-white hover:bg-blue-600">
-                                                                Add Option
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="mt-4">
-                                                    <button type="button"
-                                                            onclick="saveNewVariationForUpdate(this.closest('.variation-row'))"
-                                                            class="rounded-md bg-green-500 px-4 py-2 text-white hover:bg-green-600">
-                                                        Save Variation
-                                                    </button>
-                                                </div>
-                                            `;
-
-            container.appendChild(newRow);
-        };
-
-        let combinations = []; // Declare a global variable to store the combinations
-
-        // Helper function to compute the cartesian product of options
-        const cartesianProduct = (...arrays) => {
-            return arrays.reduce((acc, curr) => {
-                return acc.flatMap(d => curr.map(e => [d, e].flat()));
-            });
-        };
-
-        const saveNewVariationForUpdate = async (variationRow) => {
-            try {
-                const nameInput = variationRow.querySelector('input[name*=".Name"]');
-                const optionInputs = variationRow.querySelectorAll('input[name*=".Options"]');
-
-                const variationName = nameInput.value.trim();
-                const options = Array.from(optionInputs).map(input => input.value.trim()).filter(Boolean);
-
-                if (!variationName || options.length === 0) {
-                    alert('Please enter variation name and at least one option');
-                    return;
-                }
-
-                const categoryId = document.getElementById('editCategorySelect').value;
-                const variationData = { name: variationName, categoryId: categoryId, options: options };
-
-                const createResponse = await fetch('?handler=CreateVariation', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(variationData)
-                });
-
-                if (!createResponse.ok) {
-                    throw new Error('Failed to create variation');
-                }
-
-                const result = await createResponse.json();
-                const optionIds = result.optionIds;
-                console.log("New variation created:", result);
-
-                const combinedOptions = [...currentVariationOptions];
-                optionIds.forEach(optionId => {
-                    const optionExists = currentVariationOptions.some(option => option.variationName === variationName);
-
-                    if (!optionExists) {
-                        combinedOptions.push({ variationName: variationName, optionName: options.join(', '), optionId });
-                    }
-                });
-
-                // Group options by variation name
-                const groupedOptions = combinedOptions.reduce((acc, option) => {
-                    if (!acc[option.variationName]) {
-                        acc[option.variationName] = [];
-                    }
-                    acc[option.variationName].push(option);
-                    return acc;
-                }, {});
-
-                // Prepare option arrays for cartesian product
-                const optionArrays = Object.values(groupedOptions).map(options =>
-                    options.map(option => ({ optionName: option.optionName, optionId: option.optionId }))
-                );
-
-                // Generate all possible combinations
-                const allCombinations = cartesianProduct(...optionArrays);
-
-                // Generate HTML for each combination
-                const combinationContainer = document.getElementById('variationCombinationContainerForUpdate');
-                let combinationCounter = 0;
-                combinationContainer.innerHTML = ''; // Clear previous content if needed
-
-                allCombinations.forEach(combination => {
-                    const combinationSection = document.createElement('div');
-                    combinationSection.classList.add('combination-section', 'mb-4', 'p-4', 'border', 'rounded');
-
-                    const combinationId = `combination-${combinationCounter++}`;
-                    const combinationNames = combination.map(opt => opt.optionName).join(', ');
-
-                    let combinationHTML = `
-                        <div class="flex gap-4">
-                            <div class="flex-1">
-                                <label class="block text-sm font-medium text-gray-700">Variation Options</label>
-                                <p class="mt-1 block w-full rounded-md border-gray-300 bg-gray-50 p-2 shadow-sm">
-                                    ${combinationNames}
-                                </p>
-                            </div>
-                            <div class="flex-1">
-                                <label class="block text-sm font-medium text-gray-700">Price</label>
-                                <input type="number"
-                                    id="price-${combinationId}"
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                                    placeholder="Enter price"
-                                    min="0" required />
-                            </div>
-                            <div class="flex-1">
-                                <label class="block text-sm font-medium text-gray-700">Quantity In Stock</label>
-                                <input type="number"
-                                    id="quantity-${combinationId}"
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                                    placeholder="Enter quantity"
-                                    min="0" required />
-                            </div>
-                        </div>`;
-
-                    combinations.push({
-                        variationOptions: combination.map(opt => opt.optionId),
-                        price: null,
-                        quantity: null
-                    });
-
-                    combinationSection.innerHTML = combinationHTML;
-                    combinationContainer.appendChild(combinationSection);
-                });
-
-                // Add the single Save Combination button at the end
-                const saveButtonContainer = document.createElement('div');
-                saveButtonContainer.classList.add('mt-4', 'flex', 'justify-end');
-                saveButtonContainer.innerHTML = `
-                    <button type="button"
-                            class="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-                            onclick="saveVariationCombination()">Save All Combinations</button>
-                `;
-                combinationContainer.appendChild(saveButtonContainer);
-
-                variationRow.remove();
-
-                console.log("Final combinations list:", combinations);
-
-            } catch (error) {
-                console.error('Error saving variation:', error);
-                alert('Failed to save variation: ' + error.message);
-            }
-        };
-
-        const saveVariationCombination = async () => {
-            try {
-                const productId = document.getElementById('editProductId').value.trim();
-
-                if (!productId) {
-                    alert('Product ID is required');
-                    return;
-                }
-
-                // Create an array to hold all the variation combinations
-                const variationCombinations = [];
-
-                // Loop through the global combinations array to collect price and quantity
-                for (let i = 0; i < combinations.length; i++) {
-                    const combination = combinations[i];
-                    const combinationId = `combination-${i}`;
-                    const priceInput = document.getElementById(`price-${combinationId}`);
-                    const quantityInput = document.getElementById(`quantity-${combinationId}`);
-
-                    // Validate and capture price and quantity
-                    const price = parseFloat(priceInput.value.trim());
-                    const quantity = parseInt(quantityInput.value.trim(), 10);
-
-                    if (isNaN(price) || price <= 0) {
-                        alert(`Please enter a valid price for combination ${i + 1}`);
-                        return;
-                    }
-
-                    if (isNaN(quantity) || quantity < 0) {
-                        alert(`Please enter a valid quantity for combination ${i + 1}`);
-                        return;
-                    }
-
-                    // Push the validated combination to the array in the correct format
-                    variationCombinations.push({
-                        VariationOptionIds: combination.variationOptions, // Array of option IDs
-                        Price: price,                                     // Price of the combination
-                        QuantityInStock: quantity                         // Quantity in stock
-                    });
-                }
-
-                // If no combinations to save, show a message and return
-                if (variationCombinations.length === 0) {
-                    alert('No valid variation combinations to save');
-                    return;
-                }
-
-                // Prepare the data to send in the request
-                const variationCombinationDto = variationCombinations; // Directly use the array of combinations
-
-                console.log(variationCombinationDto)
-
-                // Send all the combinations in one POST request
-                const response = await fetch(`${apiBaseUrl}/api/productitem/${productId}/items`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${authToken}`,
-                        'RequestVerificationToken': requestVerificationToken
-                    },
-                    body: JSON.stringify(variationCombinationDto) // Sending the array directly
-                });
-
-                if (!response.ok) {
-                    const errorResponse = await response.text();
-                    console.error('Error Response:', errorResponse);
-                    alert(`Failed to save variation combinations: ${errorResponse}`);
-                } else {
-                    const result = await response.json();
-                    console.log(result.message || 'Variation combinations saved successfully!');
-                    alert('All variation combinations have been saved successfully!');
-                }
-
-
-                combinations = [];
-
-                // Clear the container holding the new variations
-                const newVariationsContainer = document.getElementById('newVariationsContainerForUpdate');
-                if (newVariationsContainer) {
-                    newVariationsContainer.innerHTML = '';
-                }
-
-                // Clear the container holding the variation combinations
-                const combinationContainer = document.getElementById('variationCombinationContainerForUpdate');
-                if (combinationContainer) {
-                    combinationContainer.innerHTML = '';
-                }
-
-                loadProductDetails(productId);
-
-            } catch (error) {
-                console.error('Error saving combination:', error);
-                alert('Failed to save combination: ' + error.message);
-            }
-        };
-
         async function loadProductDetails(productId) {
             try {
                 const response = await fetch(`?handler=ProductDetails&productId=${productId}`, {
@@ -1901,6 +1615,7 @@ else
                 if (data.success && data.product) {
                     populateEditForm(data.product);
                     populateProductItems(data.product.productItems);
+                    console.log(data.product.productItems)
                     openEditProductModal();
                 }
             } catch (error) {
@@ -1942,15 +1657,14 @@ else
 
             // Store current variation options from all product items
             editProductState.productItems.forEach((item, index) => {
-                const variationOptions = item.configurations.map(config => config.optionName);
+                // Concatenate both variationName and optionName for each configuration
+                const variationOptions = item.configurations.map(config => `${config.variationName}: ${config.optionName}`);
 
                 item.configurations.forEach(config => {
-                    // Check if variationName and optionName already exist in currentVariationOptions
                     const optionExists = currentVariationOptions.some(option =>
                         option.variationName === config.variationName && option.optionName === config.optionName
                     );
 
-                    // Add only if it doesn't already exist
                     if (!optionExists) {
                         currentVariationOptions.push({
                             variationName: config.variationName,
@@ -1960,43 +1674,45 @@ else
                     }
                 });
 
+                console.log(currentVariationOptions);
+
                 const itemDiv = document.createElement('div');
                 itemDiv.className = 'p-4 border rounded-md product-item';
 
                 const isLastItem = editProductState.productItems.length === 1;
 
                 itemDiv.innerHTML = `
-                                    <input type="hidden" name="ProductItemUpdates[${index}].Id" value="${item.id}" />
-                                    <div class="flex gap-4">
-                                        <div class="flex-1">
-                                            <label class="block text-sm font-medium text-gray-700">Variation Options</label>
-                                            <p class="mt-1 block w-full rounded-md border-gray-300 bg-gray-50 p-2 shadow-sm">${variationOptions.join(', ')}</p>
-                                        </div>
-                                        <div class="flex-1">
-                                            <label class="block text-sm font-medium text-gray-700">Quantity in Stock</label>
-                                            <input type="number"
-                                                name="ProductItemUpdates[${index}].QuantityInStock"
-                                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                                                value="${item.quantityInStock}"
-                                                min="0" />
-                                        </div>
-                                        <div class="flex-1">
-                                            <label class="block text-sm font-medium text-gray-700">Price</label>
-                                            <input type="number"
-                                                name="ProductItemUpdates[${index}].Price"
-                                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                                                value="${item.price}"
-                                                min="0" />
-                                        </div>
-                                        <div class="flex items-center justify-center">
-                                            <button class="text-red-600 ${isLastItem ? 'cursor-not-allowed opacity-50' : ''}"
-                                                onclick="${isLastItem ? 'return false;' : `deleteProductItem(${index})`}">
-                                                <i class="fas fa-trash-alt"></i>
-                                                Delete
-                                            </button>
-                                        </div>
-                                    </div>
-                                `;
+                    <input type="hidden" name="ProductItemUpdates[${index}].Id" value="${item.id}" />
+                    <div class="flex gap-4">
+                        <div class="flex-1">
+                            <label class="block text-sm font-medium text-gray-700">Variation Options</label>
+                            <p class="mt-1 block w-full rounded-md border-gray-300 bg-gray-50 p-2 shadow-sm">${variationOptions.join(', ')}</p>
+                        </div>
+                        <div class="flex-1">
+                            <label class="block text-sm font-medium text-gray-700">Quantity in Stock</label>
+                            <input type="number"
+                                name="ProductItemUpdates[${index}].QuantityInStock"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                                value="${item.quantityInStock}"
+                                min="0" />
+                        </div>
+                        <div class="flex-1">
+                            <label class="block text-sm font-medium text-gray-700">Price</label>
+                            <input type="number"
+                                name="ProductItemUpdates[${index}].Price"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                                value="${item.price}"
+                                min="0" />
+                        </div>
+                        <div class="flex items-center justify-center">
+                            <button class="text-red-600 ${isLastItem ? 'cursor-not-allowed opacity-50' : ''}"
+                                onclick="${isLastItem ? 'return false;' : `deleteProductItem(${index})`}">
+                                <i class="fas fa-trash-alt"></i>
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                `;
 
                 container.appendChild(itemDiv);
             });
@@ -2092,7 +1808,6 @@ else
 
                 // Remove the deleted product item from the list
                 editProductState.productItems.splice(index, 1);
-
                 // Hiển thị lại danh sách để phản ánh sự thay đổi
                 populateProductItems(editProductState.productItems);
 
