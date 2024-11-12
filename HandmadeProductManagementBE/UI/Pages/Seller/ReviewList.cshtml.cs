@@ -15,7 +15,7 @@ namespace UI.Pages.Seller
     public class ReviewListModel : PageModel
     {
         private readonly ApiResponseHelper _apiResponseHelper;
-
+        //
         public ReviewListModel(ApiResponseHelper apiResponseHelper)
         {
             _apiResponseHelper = apiResponseHelper;
