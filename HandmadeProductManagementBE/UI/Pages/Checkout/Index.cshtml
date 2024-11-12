@@ -5,7 +5,7 @@
     ViewData["Title"] = "Checkout Page";
 }
 
-<div class="mb-20 h-screen bg-gray-100">
+<div class="mb-20 bg-gray-100">
     <div class="container mx-auto px-4">
         <h1 class="mb-4 text-4xl font-semibold">Checkout</h1>
         
@@ -20,6 +20,16 @@
 {
     <partial name="_ErrorMessage" model="errorModel" />
 }
+        @if (TempData["ExceedInStockAlert"] != null)
+        {
+            <script>
+                // Hiển thị cảnh báo ngay lập tức
+                alert('@TempData["ExceedInStockAlert"]');
+
+                // Sau khi cảnh báo được hiển thị, chuyển hướng đến trang giỏ hàng
+                window.location.href = '/Cart/CartView';
+            </script>
+        }
 
         <form method="post">
             <!-- Section: Shipping Info -->

@@ -7,7 +7,6 @@ using HandmadeProductManagement.ModelViews.OrderModelViews;
 using HandmadeProductManagement.ModelViews.UserInfoModelViews;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -42,21 +41,18 @@ namespace UI.Pages.Checkout
 
         public string Token { get; set; }
 
-        public async Task OnGetAsync()
+        public async Task<IActionResult> OnGetAsync()
         {
-            CartItems = await GetCartItemsAsync();
-            //if (CartItems == null || !CartItems.Any())
-            //{
-            //    // Redirect to the previous page if the cart is empty
-            //    Response.Redirect("/Index");
-            //    return;
-            //}
-            UserInfo = await GetUserInfoAsync();
-            Token = HttpContext.Session.GetString("Token");
             try
             {
-
                 CartItems = await GetCartItemsAsync();
+                if (CartItems == null || !CartItems.Any())
+                {
+                    // Redirect to the previous page if the cart is empty
+                    return RedirectToPage("/Cart/CartView");
+                }
+                UserInfo = await GetUserInfoAsync();
+                Token = HttpContext.Session.GetString("Token");
                 UserInfo = await GetUserInfoAsync();
                 Token = HttpContext.Session.GetString("Token");
             }
@@ -64,11 +60,13 @@ namespace UI.Pages.Checkout
             {
                 ErrorMessage = ex.ErrorDetail.ErrorCode;
                 ErrorDetail = ex.ErrorDetail.ErrorMessage?.ToString();
+                if (ErrorMessage == "unauthorized") return RedirectToPage("/Login");
             }
             catch (Exception ex)
             {
                 ErrorMessage = "An unexpected error occurred.";
             }
+            return Page();
 
         }
 
@@ -100,6 +98,29 @@ namespace UI.Pages.Checkout
             else if (!Regex.IsMatch(UserInfo.Address, @"^[\p{L}\p{N}\s,\.Đđ]+$"))
             {
                 ModelState.AddModelError(nameof(UserInfo.Address), "Please enter a valid address (can include letters, numbers, spaces, commas, and periods).");
+            }
+
+            // Check if cart quantity exceeds stock
+            bool isQuantityExceeded = false;
+            CartItems = await GetCartItemsAsync();
+            foreach (var group in CartItems)
+            {
+                foreach (var item in group.CartItems)
+                {
+                    if (!item.InStock)
+                    {
+                        isQuantityExceeded = true;
+                        break;
+                    }
+                }
+
+                if (isQuantityExceeded) break;
+            }
+
+            if (isQuantityExceeded)
+            {
+                TempData["ExceedInStockAlert"] = "One or more products exceed the available stock quantity. Please adjust your order.";
+                return Page();
             }
 
             // Check if ModelState is valid
@@ -176,7 +197,7 @@ namespace UI.Pages.Checkout
                             string userId = baseResponse.Data.UserId.ToString();
                             string encodedUri = Uri.EscapeDataString(Constants.ApiBaseUrl);
 
-                         var VNPayResponse = await _apiResponseHelper.GetAsync<string>(Constants.ApiBaseUrl + $"/api/vnpay/get-transaction-status-vnpay?orderId={orderId}&userId={userId}&urlReturn={encodedUri}");
+                            var VNPayResponse = await _apiResponseHelper.GetAsync<string>(Constants.ApiBaseUrl + $"/api/vnpay/get-transaction-status-vnpay?orderId={orderId}&userId={userId}&urlReturn={encodedUri}");
 
                             if (VNPayResponse != null && VNPayResponse.StatusCode == StatusCodeHelper.OK && VNPayResponse.Data != null)
                             {
@@ -191,10 +212,6 @@ namespace UI.Pages.Checkout
                         ModelState.AddModelError(string.Empty, "An error occurred while updating user information.");
                     }
                 }
-            }
-            else
-            {
-                ModelState.AddModelError(string.Empty, "An error occurred while updating user information.");
             }
 
             return Page();
