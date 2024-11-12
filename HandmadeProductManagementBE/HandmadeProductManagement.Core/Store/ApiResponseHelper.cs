@@ -133,24 +133,9 @@ public class ApiResponseHelper
         return await HandleApiResponse<T>(response);
     }
 
-public async Task<BaseResponse<T>> PutAsync<T>(string url, object payload = null)
-{
-    var request = new HttpRequestMessage(HttpMethod.Put, url);
-
-    if (payload != null)
+    public async Task<BaseResponse<T>> PutAsync<T>(string url, object payload = null)
     {
-        request.Content = JsonContent.Create(payload);
-    }
-    AddAuthorizationHeader(request);
-
-    var response = await _httpClient.SendAsync(request);
-
-    if (response.StatusCode == HttpStatusCode.RedirectKeepVerb ||
-        response.StatusCode == HttpStatusCode.MovedPermanently ||
-        response.StatusCode == HttpStatusCode.Found)
-    {
-        var newUrl = response.Headers.Location.ToString();
-        request = new HttpRequestMessage(HttpMethod.Put, newUrl);
+        var request = new HttpRequestMessage(HttpMethod.Put, url);
 
         if (payload != null)
         {
@@ -158,11 +143,26 @@ public async Task<BaseResponse<T>> PutAsync<T>(string url, object payload = null
         }
         AddAuthorizationHeader(request);
 
-        response = await _httpClient.SendAsync(request);
-    }
+        var response = await _httpClient.SendAsync(request);
 
-    return await HandleApiResponse<T>(response);
-}
+        if (response.StatusCode == HttpStatusCode.RedirectKeepVerb ||
+            response.StatusCode == HttpStatusCode.MovedPermanently ||
+            response.StatusCode == HttpStatusCode.Found)
+        {
+            var newUrl = response.Headers.Location.ToString();
+            request = new HttpRequestMessage(HttpMethod.Put, newUrl);
+
+            if (payload != null)
+            {
+                request.Content = JsonContent.Create(payload);
+            }
+            AddAuthorizationHeader(request);
+
+            response = await _httpClient.SendAsync(request);
+        }
+
+        return await HandleApiResponse<T>(response);
+    }
 
     public async Task<BaseResponse<T>> PatchAsync<T>(string url, object payload)
     {

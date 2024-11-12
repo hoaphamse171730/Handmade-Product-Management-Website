@@ -12,6 +12,8 @@ using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.Core.Common;
 using HandmadeProductManagement.ModelViews.VariationModelViews;
 using Microsoft.IdentityModel.Tokens;
+using HandmadeProductManagement.Core.Utils;
+using HandmadeProductManagement.ModelViews.VariationOptionModelViews;
 
 namespace HandmadeProductManagement.Services.Service
 {
@@ -38,6 +40,194 @@ namespace HandmadeProductManagement.Services.Service
             _promotionService = promotionService;
             _shopService = shopService;
             _productImageService = productImageService;
+        }
+
+        public async Task<ProductForUpdateNewFormatResponseDto> GetProductUpdateNewFormat(string productId)
+        {
+            if (!Guid.TryParse(productId, out _))
+            {
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat);
+            }
+
+            var product = await _unitOfWork.GetRepository<Product>().Entities
+                .Include(p => p.ProductItems)
+                    .ThenInclude(pi => pi.ProductConfigurations)
+                        .ThenInclude(pc => pc.VariationOption)
+                            .ThenInclude(vo => vo.Variation)
+                .Include(p => p.Category)
+                .FirstOrDefaultAsync(p => p.Id == productId);
+
+            if (product == null)
+            {
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageProductNotFound);
+            }
+
+            // Map product details to DTO with Variation and VariationOption names
+            var response = new ProductForUpdateNewFormatResponseDto
+            {
+                Id = product.Id,
+                Name = product.Name,
+                Description = product.Description,
+                CategoryId = product.CategoryId,
+                Variations = product.ProductItems
+                    .SelectMany(pi => pi.ProductConfigurations)
+                    .GroupBy(pc => pc.VariationOption!.Variation)
+                    .Select(g => new VariationForProductUpdateNewFormatResponseDto
+                    {
+                        Id = g.Key!.Id,
+                        Name = g.Key.Name,
+                        VariationOptionIds = g.Select(pc => pc.VariationOption!.Id).ToList()
+                    }).ToList(),
+                ProductItems = product.ProductItems.Select(pi => new VariationCombinationUpdateNewFormatDto
+                {
+                    ProductItemId = pi.Id,
+                    Price = pi.Price,
+                    QuantityInStock = pi.QuantityInStock,
+                    Combinations = pi.ProductConfigurations.Select(pc => new OptionsDto
+                    {
+                        Id = pc.VariationOptionId,
+                        Value = pc.VariationOption!.Value
+                    }).ToList()
+                }).ToList()
+            };
+
+            return response;
+        }
+
+
+        public async Task<bool> UpdateNewFormat(string productId, ProductForUpdateNewFormatDto productDto, string userId)
+        {
+            if (!Guid.TryParse(productId, out _))
+            {
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat);
+            }
+
+            _unitOfWork.BeginTransaction();
+            try
+            {
+                var productEntity = await _unitOfWork.GetRepository<Product>().Entities
+                    .Include(p => p.ProductItems)
+                    .ThenInclude(pi => pi.ProductConfigurations)
+                    .FirstOrDefaultAsync(p => p.Id == productId);
+
+                if (productEntity == null)
+                {
+                    throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageProductNotFound);
+                }
+
+                if (!string.IsNullOrEmpty(productDto.Name)) productEntity.Name = productDto.Name;
+                if (!string.IsNullOrEmpty(productDto.Description)) productEntity.Description = productDto.Description;
+                if (!string.IsNullOrEmpty(productDto.CategoryId))
+                {
+                    if (!Guid.TryParse(productDto.CategoryId, out _))
+                    {
+                        throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat);
+                    }
+
+                    var categoryExists = await _unitOfWork.GetRepository<Category>().Entities
+                        .AnyAsync(c => c.Id == productDto.CategoryId);
+                    if (!categoryExists)
+                    {
+                        throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageCategoryNotFound);
+                    }
+                    productEntity.CategoryId = productDto.CategoryId;
+                }
+
+                if (productDto.Variations != null)
+                {
+                    foreach (var variationDto in productDto.Variations)
+                    {
+                        if (variationDto.Id == null || !Guid.TryParse(variationDto.Id, out _))
+                        {
+                            throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat);
+                        }
+
+                        var variationExists = await _unitOfWork.GetRepository<Variation>().Entities
+                            .AnyAsync(v => v.Id == variationDto.Id);
+                        if (!variationExists)
+                        {
+                            throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageVariationNotFound);
+                        }
+
+                        if (variationDto.VariationOptionIds != null)
+                        {
+                            foreach (var variationOptionId in variationDto.VariationOptionIds)
+                            {
+                                if (!Guid.TryParse(variationOptionId, out _))
+                                {
+                                    throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat);
+                                }
+
+                                var variationOptionExists = await _unitOfWork.GetRepository<VariationOption>().Entities
+                                    .AnyAsync(vo => vo.Id == variationOptionId && vo.VariationId == variationDto.Id);
+                                if (!variationOptionExists)
+                                {
+                                    throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(),
+                                        string.Format(Constants.ErrorMessageVariationOptionNotBelongToVariation, variationOptionId, variationDto.Id));
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (productDto.VariationCombinations != null)
+                {
+                    await UpdateVariationOptionsForProduct(productEntity, productDto.VariationCombinations, userId);
+                }
+
+                productEntity.LastUpdatedBy = userId;
+                productEntity.LastUpdatedTime = CoreHelper.SystemTimeNow;
+
+                _unitOfWork.GetRepository<Product>().Update(productEntity);
+                await _unitOfWork.SaveAsync();
+
+                _unitOfWork.CommitTransaction();
+                return true;
+            }
+            catch (Exception)
+            {
+                _unitOfWork.RollBack();
+                throw;
+            }
+        }
+
+        public async Task UpdateVariationOptionsForProduct(Product product, List<VariationCombinationUpdateNewFormatDto> variationCombinations, string userId)
+        {
+            // Delete all existing ProductItems and ProductConfigurations associated with this product
+            var productItems = product.ProductItems.ToList();
+            _unitOfWork.GetRepository<ProductItem>().DeleteRange(productItems);
+            await _unitOfWork.SaveAsync();
+
+            // Insert updated ProductItems and ProductConfigurations
+            foreach (var combination in variationCombinations)
+            {
+                var productItem = new ProductItem
+                {
+                    ProductId = product.Id,
+                    Price = combination.Price ?? 0,  // Defaulting to 0 if Price is not provided
+                    QuantityInStock = combination.QuantityInStock ?? 0,  // Defaulting to 0 if QuantityInStock is not provided
+                    CreatedBy = userId,
+                    LastUpdatedBy = userId
+                };
+
+                await _unitOfWork.GetRepository<ProductItem>().InsertAsync(productItem);
+                await _unitOfWork.SaveAsync();
+
+                if (combination.Combinations != null)
+                {
+                    foreach (var variationOptionId in combination.Combinations)
+                    {
+                        var productConfiguration = new ProductConfiguration
+                        {
+                            ProductItemId = productItem.Id,
+                            VariationOptionId = variationOptionId.Id
+                        };
+
+                        await _unitOfWork.GetRepository<ProductConfiguration>().InsertAsync(productConfiguration);
+                    }
+                }
+                await _unitOfWork.SaveAsync();
+            }
         }
 
         public async Task<bool> Create(ProductForCreationDto productDto, string userId)
@@ -252,6 +442,7 @@ namespace HandmadeProductManagement.Services.Service
 
             return result.Select(c => c.ToList());
         }
+
         public async Task<IEnumerable<ProductSearchVM>> GetProductByShopId(ProductSearchFilter searchFilter, string shopId, int pageNumber, int pageSize)
         {
             var shop = await _shopService.GetShopByIdAsync(shopId);
