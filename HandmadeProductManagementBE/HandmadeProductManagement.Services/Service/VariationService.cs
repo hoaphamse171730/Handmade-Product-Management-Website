@@ -48,7 +48,7 @@ namespace HandmadeProductManagement.Services.Service
             return _mapper.Map<LatestVariationId>(latestVariation);
         }
 
-        public async Task<IList<VariationDto>> GetByCategoryId(string id)
+        public async Task<IList<VariationDto>> GetByCategoryId(string id, string userId)
         {
             // Validate id format
             if (!Guid.TryParse(id, out var guidId))
@@ -60,7 +60,7 @@ namespace HandmadeProductManagement.Services.Service
             }
 
             var variations = await _unitOfWork.GetRepository<Variation>().Entities
-                .Where(v => v.CategoryId == id && (!v.DeletedTime.HasValue || v.DeletedBy == null))
+                .Where(v => v.CategoryId == id && (!v.DeletedTime.HasValue || v.DeletedBy == null) && v.CreatedBy == userId)
                 .ToListAsync();
 
             return _mapper.Map<IList<VariationDto>>(variations);
