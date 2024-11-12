@@ -43,17 +43,24 @@
                     @if (!string.IsNullOrEmpty(Model.UserInfo.AvatarUrl))
                     {
                         <img id="userAvatar" src="@Model.UserInfo.AvatarUrl" alt="User Avatar" class="mx-auto h-32 w-32 cursor-pointer rounded-full object-cover" onclick="document.getElementById('avatarUpload').click();" />
-                        <!-- Button to change avatar, placed below the avatar image -->
-                        <div class="mt-2">
-                            <button onclick="document.getElementById('avatarUpload').click();" class="rounded-lg bg-blue-500 px-4 py-2 text-white hover:bg-blue-600">
-                                Change Avatar
-                            </button>
-                        </div>
                     }
                     else
                     {
                         <p class="text-gray-600">No avatar available.</p>
                     }
+                    <!-- Button to change/upload avatar, with dynamic text based on avatar existence -->
+                    <div class="mt-2">
+                        <button onclick="document.getElementById('avatarUpload').click();" class="rounded-lg bg-blue-500 px-4 py-2 text-white hover:bg-blue-600">
+                            @if (!string.IsNullOrEmpty(Model.UserInfo.AvatarUrl))
+                            {
+                                <text>Change Avatar</text>
+                            }
+                            else
+                            {
+                                <text>Upload Avatar</text>
+                            }
+                        </button>
+                    </div>
                     <input type="file" id="avatarUpload" class="hidden" accept="image/*" onchange="uploadAvatar(event)" />
                 </div>
 
