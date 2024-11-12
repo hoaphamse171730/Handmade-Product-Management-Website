@@ -20,6 +20,22 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [Authorize]
+        [HttpGet("usedVariation/{categoryId}")]
+        public async Task<IActionResult> GetUsedVariation(string categoryId)
+        {
+            // Retrieve user ID from the current user context
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var response = new BaseResponse<IList<VariationWithOptionsDto>>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Get Variations by Category successfully.",
+                Data = await _variationService.GetAllVariationsAndOptionsForProductItems(categoryId, userId)
+            };
+            return Ok(response);
+        }
+
+        [Authorize]
         [HttpGet("latest")]
         public async Task<IActionResult> GetLatestVariationId(string categoryId)
         {

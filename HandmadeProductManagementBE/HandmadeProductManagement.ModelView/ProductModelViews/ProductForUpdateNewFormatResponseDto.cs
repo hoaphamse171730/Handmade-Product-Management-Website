@@ -11,6 +11,6 @@ namespace HandmadeProductManagement.ModelViews.ProductModelViews
         public string? CategoryId { get; set; }
 
         public List<VariationForProductUpdateNewFormatResponseDto>? Variations { get; set; }
-        public List<VariationCombinationUpdateNewFormatDto>? VariationCombinations { get; set; }
+        public List<VariationCombinationUpdateNewFormatDto>? ProductItems { get; set; }
     }
 }

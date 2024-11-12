@@ -1,5 +1,7 @@
 ﻿@page
 @using HandmadeProductManagement.Core.Common
+@using Microsoft.AspNetCore.Http
+@using System.IdentityModel.Tokens.Jwt
 @model UI.Pages.Seller.ShopModel
 @{
     ViewData["Title"] = "My Shop";
@@ -13,6 +15,15 @@
                 ErrorDetail = Model.ErrorDetail
             };
      var token = HttpContext.Session.GetString("Token");
+    string getUserId(string token)
+    {
+        var handler = new JwtSecurityTokenHandler();
+        var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
+        var userId = jsonToken?.Claims.FirstOrDefault(c => c.Type == "nameid")?.Value;
+
+        return userId;
+    }
+    var userId = token != null ? getUserId(token) : string.Empty;
 }
 @if (!string.IsNullOrEmpty(Model.ErrorMessage) && Model.ErrorMessage != "NotFoundException")
 {
@@ -1659,7 +1670,6 @@ else
 
                 if (result.success && result.data) {
                     const productData = result.data;
-
                     // Store the product data in editState
                     editState.productData = productData;
 
@@ -1676,10 +1686,9 @@ else
 
                     // Load variations
                     await loadExistingVariationsForEdit();
-
                     // Load variation combinations if they exist
-                    if (productData.variationCombinations?.length > 0) {
-                        await loadVariationCombinationsForEdit(productData.variationCombinations);
+                    if (productData.productItems?.length > 0) {
+                        await loadVariationCombinationsForEdit(productData.productItems);
                     }
 
                     // Show the modal
@@ -1695,36 +1704,56 @@ else
                 alert('Failed to load product details. Please try again.');
             }
         }
+
         async function loadExistingVariationsForEdit() {
             const categoryId = document.getElementById('editCategorySelect').value;
             const container = document.getElementById('existingVariationsListForEdit');
             const productId = document.getElementById('editProductId').value;
+            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
 
             try {
-                // Load category variations
-                const variationsResponse = await fetch(`?handler=CategoryVariations&categoryId=${categoryId}`);
+                // Fetch existing variations that are involved in products for the given category
+                const variationsResponse = await fetch(`${apiBaseUrl}/api/variation/usedvariation/${categoryId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`,
+                        'RequestVerificationToken': token
+                    }
+                });
+
+                // Check if the response is successful
                 if (!variationsResponse.ok) {
-                    throw new Error('Failed to fetch category variations');
+                    throw new Error(`Failed to load variations: ${variationsResponse.status} ${variationsResponse.statusText}`);
                 }
-                const variations = await variationsResponse.json();
 
-                container.innerHTML = '';
+                const variationsData = await variationsResponse.json();  // This will fail if not valid JSON
+                console.log(variationsData);
+                container.innerHTML = '';  // Clear the container before adding new content
 
-                // Get the product's existing variations from the editState
+                // Get the product's existing variations from the product data
                 const productVariations = editState.productData?.variations || [];
 
-                for (const variation of variations) {
+                // Iterate over the variations received from the API
+                for (const variation of variationsData.data) {
                     const variationDiv = document.createElement('div');
                     variationDiv.classList.add('p-4', 'border', 'rounded-md', 'bg-gray-50', 'mb-4');
 
-                    const productVariation = productVariations.find(pv => pv.variationId === variation.id);
-                    const selectedOptionIds = productVariation?.optionIds || [];
+                    // Get the product's variation that matches this one
+                    const productVariation = productVariations.find(pv => pv.id === variation.id);
+                    const selectedOptionIds = productVariation?.variationOptionIds || [];
 
-                    const optionsHtml = await generateVariationOptionsForEdit(
-                        variation.id,
-                        variation.name,
-                        selectedOptionIds
-                    );
+                    // Generate the HTML for the variation options (checkboxes)
+                    const optionsHtml = variation.options.map(option => {
+                        // Check if the current option is selected (part of variationOptionIds)
+                        const isChecked = selectedOptionIds.includes(option.id) ? 'checked' : '';
+                        return `
+                            <label class="inline-flex items-center space-x-2">
+                                <input type="checkbox" name="variation_${variation.id}" value="${option.id}" ${isChecked} class="form-checkbox">
+                                <span>${option.value}</span>
+                            </label>
+                        `;
+                    }).join('');
 
                     variationDiv.innerHTML = `
                         <div class="mb-2 flex items-center justify-between">
@@ -1738,7 +1767,7 @@ else
                     container.appendChild(variationDiv);
                 }
             } catch (error) {
-                console.error('Error loading variations for edit:', error);
+                console.error('Error loading existing variations for edit:', error);
                 alert('Failed to load variations. Please try again.');
             }
         }
@@ -1854,7 +1883,7 @@ else
 
                     combinationDiv.innerHTML = `
                         <div class="mb-2 font-medium">${optionDescriptions}</div>
-                        <div class="grid grid-cols-2 gap-4">
+                        <div class="grid-cols-2 grid gap-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700">Price</label>
                                 <input type="number"
@@ -1917,46 +1946,53 @@ else
             }
         }
 
-        async function loadVariationCombinationsForEdit(combinations) {
+        async function loadVariationCombinationsForEdit(productItems) {
             const container = document.getElementById('variationCombinationsListForEdit');
-            container.innerHTML = '';
+            container.innerHTML = '';  // Clear any existing content
 
-            combinations.forEach((combination, index) => {
-                const combinationDiv = document.createElement('div');
-                combinationDiv.classList.add('mb-4', 'p-4', 'border', 'rounded-md');
+            // Create a table to display the combinations, price, and stock
+            const table = document.createElement('table');
+            table.classList.add('min-w-full', 'table-auto', 'border-collapse');
 
-                const optionDescriptions = combination.variationOptionIds.map(id => {
-                    const checkbox = document.querySelector(`input[value="${id}"]`);
-                    return `${checkbox?.getAttribute('data-variation-name')}: ${checkbox?.getAttribute('data-option-name')}`;
-                }).filter(Boolean);
+            // Create the table header
+            const headerRow = document.createElement('tr');
+            headerRow.classList.add('bg-gray-100');
+            headerRow.innerHTML = `
+                <th class="px-4 py-2 text-left">Combination</th>
+                <th class="px-4 py-2 text-left">Price</th>
+                <th class="px-4 py-2 text-left">Stock</th>
+            `;
+            table.appendChild(headerRow);
 
-                combinationDiv.innerHTML = `
-                    <div class="mb-2 font-medium">${optionDescriptions.join(', ')}</div>
-                    <div class="grid-cols-2 grid gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Price</label>
-                            <input type="number"
-                                   name="VariationCombinations[${index}].Price"
-                                   value="${combination.price}"
-                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                                   required min="0" step="0.01" />
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Stock</label>
-                            <input type="number"
-                                   name="VariationCombinations[${index}].Stock"
-                                   value="${combination.quantityInStock}"
-                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                                   required min="0" step="1" />
-                        </div>
-                    </div>
-                    <input type="hidden"
-                           name="VariationCombinations[${index}].OptionIds"
-                           value="${combination.variationOptionIds.join(',')}" />
+            // Create the table rows for each product item
+            productItems.forEach((productItem, index) => {
+                const row = document.createElement('tr');
+
+                // Combination column
+                const optionDescriptions = productItem.combinations.map(combination => combination.value).join(', ');
+                row.innerHTML = `
+                    <td class="border px-4 py-2">${optionDescriptions}</td>
+                    <td class="border px-4 py-2">
+                        <input type="number"
+                               name="VariationCombinations[${index}].Price"
+                               value="${productItem.price || 0}"
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                               required min="0" step="0.01" />
+                    </td>
+                    <td class="border px-4 py-2">
+                        <input type="number"
+                               name="VariationCombinations[${index}].Stock"
+                               value="${productItem.quantityInStock || 0}"
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                               required min="0" step="1" />
+                    </td>
                 `;
 
-                container.appendChild(combinationDiv);
+                table.appendChild(row);
             });
+
+            // Append the table to the container
+            container.appendChild(table);
         }
 
         function addNewVariationForUpdateUI() {

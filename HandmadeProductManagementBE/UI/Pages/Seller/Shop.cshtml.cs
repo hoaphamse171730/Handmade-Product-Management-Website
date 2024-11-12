@@ -927,6 +927,8 @@ namespace UI.Pages.Seller
         {
             try
             {
+                ModelState.Clear();
+
                 if (!ModelState.IsValid)
                 {
                     return new JsonResult(new
@@ -949,7 +951,7 @@ namespace UI.Pages.Seller
 
                 if (response.StatusCode == StatusCodeHelper.OK && response.Data == true)
                 {
-                    return new JsonResult(new { success = true, message = "Product updated successfully" });
+                    return RedirectToPage("/Seller/Shop");
                 }
 
                 return new JsonResult(new

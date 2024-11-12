@@ -174,12 +174,12 @@
                                     <input type="radio"
                                            id="@option.Id"
                                            name="@variation.Name"
-                                           value="@option.Name"
+                                           value="@option.Value"
                                            class="mr-2"
                                            onclick="handleRadioClick(this)"
                                            onchange="updateProductInfo()"
                                            data-variation-name="@variation.Name" />
-                                    <label for="@option.Id" class="text-sm">@option.Name</label>
+                                    <label for="@option.Id" class="text-sm">@option.Value</label>
                                 }
                             }
                             else

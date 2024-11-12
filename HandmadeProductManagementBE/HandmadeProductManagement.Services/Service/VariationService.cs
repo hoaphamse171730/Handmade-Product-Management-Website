@@ -8,6 +8,7 @@ using HandmadeProductManagement.Core.Base;
 using Microsoft.EntityFrameworkCore;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.Core.Common;
+using HandmadeProductManagement.ModelViews.VariationOptionModelViews;
 
 namespace HandmadeProductManagement.Services.Service
 {
@@ -25,6 +26,80 @@ namespace HandmadeProductManagement.Services.Service
             _creationValidator = creationValidator;
             _updateValidator = updateValidator;
         }
+
+        public async Task<IList<VariationWithOptionsDto>> GetAllVariationsAndOptionsForProductItems(string categoryId, string userId)
+        {
+            // Validate categoryId format
+            if (!Guid.TryParse(categoryId, out var categoryGuid))
+            {
+                throw new BaseException.BadRequestException(
+                    StatusCodeHelper.BadRequest.ToString(),
+                    Constants.ErrorMessageInvalidGuidFormat
+                );
+            }
+
+            // Retrieve all product items for the user that belong to the given categoryId
+            var productItems = await _unitOfWork.GetRepository<ProductItem>().Entities
+                .Where(pi => pi.Product!.CategoryId == categoryId && pi.Product.CreatedBy == userId)
+                .Include(pi => pi.ProductConfigurations)  // Ensure ProductConfigurations are loaded
+                .ThenInclude(pc => pc.VariationOption)  // Ensure VariationOption is loaded in ProductConfiguration
+                .ToListAsync();
+
+            // Check if productItems have ProductConfigurations with VariationOptions
+            if (!productItems.Any(pi => pi.ProductConfigurations.Any(pc => pc.VariationOption != null)))
+            {
+                throw new BaseException.NotFoundException(
+                    StatusCodeHelper.NotFound.ToString(),
+                    "No valid product configurations with variation options found."
+                );
+            }
+
+            // Get all the variation IDs used in the product items (via ProductConfiguration and VariationOption)
+            var variationIdsUsedByUser = productItems
+                .SelectMany(pi => pi.ProductConfigurations)  // Get all product configurations
+                .Where(pc => pc.VariationOption != null)  // Ensure the VariationOption is not null
+                .Select(pc => pc.VariationOption!.VariationId)  // Get the associated VariationId
+                .Distinct()  // Ensure uniqueness
+                .ToList();
+
+            // Check if we have any variation IDs
+            if (!variationIdsUsedByUser.Any())
+            {
+                throw new BaseException.NotFoundException(
+                    StatusCodeHelper.NotFound.ToString(),
+                    "No variations found for the provided product items."
+                );
+            }
+
+            // Retrieve all variations that belong to the given categoryId and are used in the product items of the user
+            var variations = await _unitOfWork.GetRepository<Variation>().Entities
+                .Where(v => v.CategoryId == categoryId && variationIdsUsedByUser.Contains(v.Id) && (!v.DeletedTime.HasValue || v.DeletedBy == null))
+                .ToListAsync();
+
+            // Retrieve all variation options for those variations
+            var variationOptionIds = variations.SelectMany(v => v.VariationOptions.Select(vo => vo.Id)).ToList();
+            var variationOptions = await _unitOfWork.GetRepository<VariationOption>().Entities
+                .Where(vo => variationOptionIds.Contains(vo.Id))
+                .ToListAsync();
+
+            // Map the retrieved data to the DTOs
+            var result = variations.Select(v => new VariationWithOptionsDto
+            {
+                Id = v.Id,
+                Name = v.Name,
+                Options = v.VariationOptions
+                    .Where(vo => variationOptions.Any(opt => opt.Id == vo.Id))
+                    .Select(vo => new OptionsDto
+                    {
+                        Id = vo.Id,
+                        Value = vo.Value
+                    }).ToList()
+            }).ToList();
+
+            // Return the list of variations and their options
+            return result;
+        }
+
 
         public async Task<LatestVariationId> GetLatestVariationId(string categoryId, string userId)
         {
