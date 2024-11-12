@@ -109,5 +109,10 @@ namespace HandmadeProductManagement.Repositories.UOW
         {
             return await _context.Set<T>().CountAsync();
         }
+
+        public void DeleteRange(IEnumerable<T> entities)
+        {
+            _dbSet.RemoveRange(entities);
+        }
     }
 }

@@ -747,40 +747,40 @@ namespace UI.Pages.Seller
 
         [BindProperty]
         public Dictionary<string, string> VariationOptionUpdates { get; set; } = new();
-        [BindProperty]
-        public ProductForUpdateDto ProductUpdate { get; set; } = new();
+        //[BindProperty]
+        //public ProductForUpdateDto ProductUpdate { get; set; } = new();
 
         public List<ProductItemForUpdateDto> ProductItemUpdates { get; set; } = new List<ProductItemForUpdateDto>();
-        public async Task<IActionResult> OnGetProductDetailsAsync(string productId)
-        {
-            try
-            {
-                var response = await _apiResponseHelper.GetAsync<ProductDetailResponseModel>(
-                    $"{Constants.ApiBaseUrl}/api/product/detail/{productId}");
+        //public async Task<IActionResult> OnGetProductDetailsAsync(string productId)
+        //{
+        //    try
+        //    {
+        //        var response = await _apiResponseHelper.GetAsync<ProductDetailResponseModel>(
+        //            $"{Constants.ApiBaseUrl}/api/product/detail/{productId}");
 
-                if (response.StatusCode != StatusCodeHelper.OK)
-                {
-                    return new JsonResult(new { success = false, message = "Failed to load product details" });
-                }
+        //        if (response.StatusCode != StatusCodeHelper.OK)
+        //        {
+        //            return new JsonResult(new { success = false, message = "Failed to load product details" });
+        //        }
 
-                var result = new
-                {
-                    success = true,
-                    product = response.Data
-                };
+        //        var result = new
+        //        {
+        //            success = true,
+        //            product = response.Data
+        //        };
 
-                return new JsonResult(result);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error loading product details");
-                return new JsonResult(new
-                {
-                    success = false,
-                    message = "An error occurred while loading product details"
-                });
-            }
-        }
+        //        return new JsonResult(result);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, "Error loading product details");
+        //        return new JsonResult(new
+        //        {
+        //            success = false,
+        //            message = "An error occurred while loading product details"
+        //        });
+        //    }
+        //}
 
         public async Task<IActionResult> OnPostUpdateBasicInfoAsync([FromBody] JsonElement jsonBody)
         {
@@ -872,6 +872,96 @@ namespace UI.Pages.Seller
             {
                 _logger.LogError(ex, "Error deleting variation");
                 return new JsonResult(new { success = false });
+            }
+        }
+
+
+
+
+
+
+
+
+
+        //----------------------------------------------------------------------------------------------------------------------------//
+        [BindProperty]
+        public ProductForUpdateNewFormatDto ProductUpdate { get; set; } = new ProductForUpdateNewFormatDto();
+
+        public async Task<IActionResult> OnGetProductDetailsAsync(string productId)
+        {
+            try
+            {
+                var response = await _apiResponseHelper.GetAsync<ProductForUpdateNewFormatResponseDto>(
+                    $"{Constants.ApiBaseUrl}/api/product/updateproductresponse/{productId}");
+
+                if (response.StatusCode == StatusCodeHelper.OK && response.Data != null)
+                {
+                    return new JsonResult(new
+                    {
+                        success = true, // Added success flag
+                        data = response.Data,
+                        message = "Product details retrieved successfully"
+                    });
+                }
+
+                return new JsonResult(new
+                {
+                    success = false,
+                    statusCode = 404,
+                    message = "Failed to fetch product details",
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching product details for edit");
+                return new JsonResult(new
+                {
+                    success = false,
+                    statusCode = 500,
+                    message = "An error occurred while fetching product details"
+                });
+            }
+        }
+
+        public async Task<IActionResult> OnPostUpdateProductAsync()
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return new JsonResult(new
+                    {
+                        success = false,
+                        message = "Invalid model state",
+                        errors = ModelState.Values.SelectMany(v => v.Errors.Select(e => e.ErrorMessage))
+                    });
+                }
+
+                var productId = Request.Form["ProductId"].ToString();
+                if (string.IsNullOrEmpty(productId))
+                {
+                    return new JsonResult(new { success = false, message = "Product ID is required" });
+                }
+
+                var response = await _apiResponseHelper.PutAsync<bool>(
+                    $"{Constants.ApiBaseUrl}/api/product/updateproduct/{productId}",
+                    ProductUpdate);
+
+                if (response.StatusCode == StatusCodeHelper.OK && response.Data == true)
+                {
+                    return new JsonResult(new { success = true, message = "Product updated successfully" });
+                }
+
+                return new JsonResult(new
+                {
+                    success = false,
+                    message = response.Message ?? "Failed to update product"
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating product");
+                return new JsonResult(new { success = false, message = "An error occurred while updating the product" });
             }
         }
     }
