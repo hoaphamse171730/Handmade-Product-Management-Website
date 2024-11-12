@@ -44,6 +44,7 @@ namespace UI.Pages.ProductDetail
                 var response = await _apiResponseHelper.GetAsync<ProductDetailResponseModel>($"{Constants.ApiBaseUrl}/api/product/detail/{productId}");
 
                 // Gán thông tin sản phẩm cho thuộc tính productDetail
+                // 
                 productDetail = response.Data;
 
                 if (productDetail != null && productDetail.CategoryId != null)
