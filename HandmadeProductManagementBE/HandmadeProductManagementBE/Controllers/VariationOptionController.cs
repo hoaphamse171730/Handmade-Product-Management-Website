@@ -18,7 +18,6 @@ namespace HandmadeProductManagementAPI.Controllers
             _variationOptionService = variationOptionService;
         }
 
-        [Authorize]
         [HttpGet("latest")]
         public async Task<IActionResult> GetLatestVariationOptionId(string variationId)
         {
@@ -34,8 +33,6 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
-        // GET: api/variationoption/variation/{variationId}
-        [Authorize]
         [HttpGet("variation/{variationId}")]
         public async Task<IActionResult> GetByVariationId(string variationId)
         {
