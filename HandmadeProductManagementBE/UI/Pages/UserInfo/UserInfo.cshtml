@@ -97,10 +97,6 @@
                         <p class="text-gray-600" id="userFullName">@Model.UserInfo.FullName</p>
                     </div>
                     <div class="mb-4">
-                        <label class="mb-2 block text-sm font-bold text-gray-700">Phone Number:</label>
-                        <p class="text-gray-600" id="userPhoneNumber">@Model.UserInfo.PhoneNumber</p>
-                    </div>
-                    <div class="mb-4">
                         <label class="mb-2 block text-sm font-bold text-gray-700">Display Name:</label>
                         <p class="text-gray-600" id="userDisplayName">@Model.UserInfo.DisplayName</p>
                     </div>
@@ -227,7 +223,6 @@
         async function saveUserInfoDetailed() {
             // Get the values from the input fields
             const userFullName = document.getElementById('editUserFullName').value;
-            const userPhoneNumber = document.getElementById('editUserPhoneNumber').value; // You may need to include this field in your C# model if necessary
             const userDisplayName = document.getElementById('editUserDisplayName').value;
             const userBio = document.getElementById('editUserBio').value;
             const userBankAccount = document.getElementById('editUserBankAccount').value;
