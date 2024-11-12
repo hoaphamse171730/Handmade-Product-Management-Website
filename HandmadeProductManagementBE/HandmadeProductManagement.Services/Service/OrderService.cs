@@ -84,6 +84,12 @@ namespace HandmadeProductManagement.Services.Service
                     .FirstOrDefaultAsync(c => c.Id == product.CategoryId && (!c.DeletedTime.HasValue || c.DeletedBy == null))
                     ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageCategoryNotFound);
 
+                // Check if the cart item's quantity exceeds available stock
+                if (cartItem.ProductQuantity > productItem.QuantityInStock)
+                {
+                    throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInsufficientStock);
+                }
+
                 decimal finalPrice = productItem.Price;
                 if (category != null && !string.IsNullOrWhiteSpace(category.PromotionId))
                 {

@@ -146,7 +146,7 @@
                         <i class="fa fa-star" style="color: gray;"></i> <!-- Gray star -->
                     }
                 }
-                <span class="text-lg text-gray-700 mx-3">|</span>
+                <span class="mx-3 text-lg text-gray-700">|</span>
 
                 <span class="text-lg text-gray-700">Sold Count: @Model.productDetail?.SoldCount</span>
 
@@ -156,12 +156,12 @@
 
             <div class="container mx-auto p-4">
                 <!-- Display Category Name -->
-                <div class="text-lg text-gray-800 font-semibold">
+                <div class="text-lg font-semibold text-gray-800">
                     Category: <span class="text-blue-600">@Model.productDetail?.CategoryName</span>
                 </div>
 
                 <!-- Display Promotion Name -->
-                <div class="text-lg text-gray-800 font-semibold mt-2">
+                <div class="mt-2 text-lg font-semibold text-gray-800">
                     Promotion:
                     <span class="text-green-600">@Model.productDetail?.Promotion?.Name</span>
                     @if (Model.productDetail?.Promotion != null)
@@ -174,7 +174,7 @@
                 </div>
             
                 <!-- Product Price -->
-                <div class="flex items-center space-x-4 mt-4">
+                <div class="mt-4 flex items-center space-x-4">
                     @if (Model.productDetail?.Promotion != null)
                     {
                         <span id="discountedPrice" class="text-2xl font-semibold text-red-500">
@@ -183,7 +183,7 @@
                         <span id="price" class="text-lg text-gray-400 line-through">
                             @Model.productDetail?.ProductItems?.FirstOrDefault()?.Price.ToString("N0") ₫
                         </span>
-                        <span id="percentDiscount" class="text-2xl font-semibold text-red-500 bg-red-100 rounded px-2 py-1">
+                        <span id="percentDiscount" class="rounded bg-red-100 px-2 py-1 text-2xl font-semibold text-red-500">
                         </span>
                     }
                     else
@@ -207,7 +207,7 @@
                     <span id="price" class="text-lg text-gray-400 line-through">
                         @Model.productDetail?.ProductItems?.FirstOrDefault()?.Price.ToString("N0") ₫
                     </span>
-                        <span id="percentDiscount" class="text-2xl font-semibold text-red-500 bg-red-100 rounded px-2 py-1">
+                        <span id="percentDiscount" class="rounded bg-red-100 px-2 py-1 text-2xl font-semibold text-red-500">
                     </span>
                 }
                 else
@@ -278,7 +278,7 @@
                     <!-- Nút "Add to Cart" với điều kiện disable và thay đổi text -->
                     <button type="submit"
                             class="flex-1 rounded-lg bg-blue-500 px-4 py-3 text-white hover:bg-blue-600
-    @(userId == Model.productDetail?.OwnerId ? "opacity-50 cursor-not-allowed pointer-events-none" : "")">
+@(userId == Model.productDetail?.OwnerId ? "opacity-50 cursor-not-allowed pointer-events-none" : "")">
                         @if (userId == Model.productDetail?.OwnerId)
                         {
                             <span>You cannot add your own product</span>
@@ -519,7 +519,6 @@
 
         const productItems = @Html.Raw(Json.Serialize(productItems));
 
-        // Hàm cập nhật giá dựa trên lựa chọn của người dùng
         function updateProductInfo() {
             // Collect selected options
             const selectedOptions = {};
@@ -539,24 +538,33 @@
             const discountedPriceElement = document.getElementById("discountedPrice");
             const remainingQuantityElement = document.getElementById("remainingQuantity");
             const productItemIdElement = document.getElementById("productItemId");
-            const percentDiscountElement = document.getElementById("percentDiscount");
+            const addToCartButton = document.querySelector("button[type='submit']");
+
             if (matchingProduct) {
                 // Update product item ID
                 productItemIdElement.value = matchingProduct.id;
-               
+
                 remainingQuantityElement.textContent = `Remaining Quantity: ${matchingProduct.quantityInStock}`;
 
+                // Update price and discount
                 priceElement.textContent = `${formatCurrency(matchingProduct.price)}`;
-
                 discountedPriceElement.textContent = `${formatCurrency(matchingProduct.discountedPrice)}`;
 
-                const percentDiscount = ((matchingProduct.price - matchingProduct.discountedPrice) / matchingProduct.price * 100).toFixed(2);
-
-                percentDiscountElement.textContent = `-${percentDiscount}%`;
-
+                // Update quantity constraints
                 maxQuantity = matchingProduct.quantityInStock;
                 quantity = Math.min(quantity, maxQuantity);
                 updateQuantityDisplay();
+
+                // Disable "Add to Cart" if out of stock
+                if (matchingProduct.quantityInStock === 0) {
+                    addToCartButton.disabled = true;
+                    addToCartButton.classList.add("opacity-50", "cursor-not-allowed", "pointer-events-none"); // Add gray and disable styles
+                    addToCartButton.innerHTML = "<span>Out of stock</span>";
+                } else {
+                    addToCartButton.disabled = false;
+                    addToCartButton.classList.remove("opacity-50", "cursor-not-allowed", "pointer-events-none"); // Remove disable styles
+                    addToCartButton.innerHTML = "<i class='fa fa-shopping-cart mr-2'></i> Add to Cart";
+                }
             } else {
                 // Clear product details if no match
                 productItemIdElement.value = "";
@@ -565,8 +573,14 @@
                 remainingQuantityElement.textContent = "Remaining Quantity: N/A";
                 quantity = 1;
                 updateQuantityDisplay();
+
+                // Ensure the button is disabled and gray if no product found
+                addToCartButton.disabled = true;
+                addToCartButton.classList.add("opacity-50", "cursor-not-allowed", "pointer-events-none"); // Add disable styles
+                addToCartButton.innerHTML = "<span>Out of stock</span>";
             }
         }
+
         // Tự động ẩn các Toast sau 3 giây
         document.addEventListener('DOMContentLoaded', function () {
     setTimeout(() => {

@@ -232,12 +232,6 @@ namespace UI.Pages.ProductDetail
                 .SelectMany(group => group.CartItems)
                 .Any(item => item.ProductItemId == CartItem.ProductItemId);
 
-            if (isProductInCart)
-            {
-                TempData["Message"] = "This product is already in the cart. Please update the quantity if needed.";
-                return RedirectToPage(new { id = Id });
-            }
-
 
             // Gửi yêu cầu POST với đối tượng CartItem
             var POSTResponse = await _apiResponseHelper.PostAsync<bool>($"{Constants.ApiBaseUrl}/api/cartitem", CartItem);
