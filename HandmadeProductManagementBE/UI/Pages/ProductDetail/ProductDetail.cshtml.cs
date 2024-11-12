@@ -224,16 +224,6 @@ namespace UI.Pages.ProductDetail
                 return RedirectToPage(new { id = Id });
             }
 
-            var GETResponse = await _apiResponseHelper.GetAsync<List<CartItemGroupDto>>($"{Constants.ApiBaseUrl}/api/cartitem");
-
-            cartItemGroups = GETResponse.Data ?? new List<CartItemGroupDto>();
-
-            // Kiểm tra xem sản phẩm đã tồn tại trong giỏ hàng hay chưa
-            bool isProductInCart = cartItemGroups
-                .SelectMany(group => group.CartItems)
-                .Any(item => item.ProductItemId == CartItem.ProductItemId);
-
-
             // Gửi yêu cầu POST với đối tượng CartItem
             var POSTResponse = await _apiResponseHelper.PostAsync<bool>($"{Constants.ApiBaseUrl}/api/cartitem", CartItem);
             //var response = await _apiHelper.PostAsync<bool>($"{Constants.ApiBaseUrl}/api/promotions", Promotion);
