@@ -36,13 +36,12 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpGet("variation/{variationId}")]
         public async Task<IActionResult> GetByVariationId(string variationId)
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             var response = new BaseResponse<IList<VariationOptionDto>>
             {
                 Code = "Success",
                 StatusCode = StatusCodeHelper.OK,
                 Message = "Get Variation Options by Variation ID successfully.",
-                Data = await _variationOptionService.GetByVariationId(variationId, userId)
+                Data = await _variationOptionService.GetByVariationId(variationId)
             };
             return Ok(response);
         }
