@@ -32,7 +32,10 @@
                                     <tr>
                                         <th class="text-left font-normal">Product</th>
                                         <th class="text-left font-normal">Price</th>
-                                        <th class="text-left font-normal">Discount Price</th>
+                                        @if (group.CartItems.Any(item => item.DiscountPrice != item.UnitPrice))
+                                        {
+                                            <th class="text-left font-normal">Discount Price</th>
+                                        }
                                         <th class="text-left font-normal">Variation Options</th>
                                         <th class="text-left font-normal">In Stock</th>
                                         <th class="text-left font-normal">Quantity</th>
@@ -40,6 +43,7 @@
                                         <th class="text-left font-normal">Actions</th>
                                     </tr>
                                 </thead>
+
                                 <tbody>
                                     @foreach (var item in group.CartItems)
                                     {
@@ -50,10 +54,23 @@
                                                     <a href="/ProductDetail/ProductDetail?id=@item.ProductId" class="ml-4 block font-semibold">@item.ProductName</a>
                                                 </div>
                                             </td>
-                                            <td>₫<s>@item.UnitPrice.ToString("N0").Replace(",", ".")</s></td>
-                                            <td class="text-red-500">
-                                                ₫@Math.Round(item.DiscountPrice, 0, MidpointRounding.AwayFromZero).ToString("N0").Replace(",", ".")
+                                            <td>
+                                                ₫@item.UnitPrice.ToString("N0").Replace(",", ".")
                                             </td>
+
+                                            @if (item.DiscountPrice != item.UnitPrice)
+                                            {
+                                                <td>
+                                                    <s>₫@item.UnitPrice.ToString("N0").Replace(",", ".")</s>
+                                                    <span class="text-red-500">₫@Math.Round(item.DiscountPrice, 0, MidpointRounding.AwayFromZero).ToString("N0").Replace(",", ".")</span>
+                                                </td>
+                                            }
+                                            else
+                                            {
+                                                <!-- No "Discount Price" column when there's no discount -->
+                                                <!-- Do nothing here; this will remove the column for this row -->
+                                            }
+
                                             <td>
                                                 <!-- Loop through VariationOptionValues and add a comma except after the last item -->
                                                 @for (int i = 0; i < item.VariationOptionValues.Count; i++)
@@ -65,6 +82,7 @@
                                                     }
                                                 }
                                             </td>
+
                                             <td class="text-gray-500">
                                                 @item.StockQuantity
                                             </td>

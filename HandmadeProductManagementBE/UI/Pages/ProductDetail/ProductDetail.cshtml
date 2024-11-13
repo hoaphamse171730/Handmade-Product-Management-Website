@@ -1,6 +1,7 @@
 ﻿@page
 @using UI.Pages.Shared
 @using Microsoft.AspNetCore.Http
+@using HandmadeProductManagement.Core.Common
 @using System.IdentityModel.Tokens.Jwt
 @model UI.Pages.ProductDetail.ProductDetailModel
 
@@ -275,26 +276,36 @@
                 </div>
 
                 <div class="mb-10 flex space-x-4">
-                    @if (userId == "")
+                    @if (Model.productDetail?.Status == @Constants.ProductStatusUnavailable)
                     {
-                        <button type="button" onclick="showLoginModal()" class="flex-1 rounded-lg bg-blue-500 px-4 py-3 text-white hover:bg-blue-600">
-                            <span><i class="fa fa-shopping-cart mr-2"></i> Add to Cart</span>
+                        <!-- If status is unavailable, show "Unavailable" instead of the Add to Cart button -->
+                        <button type="button" class="flex-1 cursor-not-allowed rounded-lg bg-gray-500 px-4 py-3 text-white">
+                            <span>Unavailable</span>
                         </button>
                     }
                     else
                     {
-                        <button type="submit" 
-                                class="flex-1 rounded-lg bg-blue-500 px-4 py-3 text-white hover:bg-blue-600
-@(userId == Model.productDetail?.OwnerId ? "opacity-50 cursor-not-allowed pointer-events-none" : "")">
-                            @if (userId == Model.productDetail?.OwnerId)
-                            {
-                                <span>You cannot add your own product</span>
-                            }
-                            else
-                            {
+                        @if (userId == "")
+                        {
+                            <button type="button" onclick="showLoginModal()" class="flex-1 rounded-lg bg-blue-500 px-4 py-3 text-white hover:bg-blue-600">
                                 <span><i class="fa fa-shopping-cart mr-2"></i> Add to Cart</span>
-                            }
-                        </button>
+                            </button>
+                        }
+                        else
+                        {
+                            <button type="submit"
+                                    class="flex-1 rounded-lg bg-blue-500 px-4 py-3 text-white hover:bg-blue-600
+@(userId == Model.productDetail?.OwnerId ? "opacity-50 cursor-not-allowed pointer-events-none" : "")">
+                                @if (userId == Model.productDetail?.OwnerId)
+                                {
+                                    <span>You cannot add your own product</span>
+                                }
+                                else
+                                {
+                                    <span><i class="fa fa-shopping-cart mr-2"></i> Add to Cart</span>
+                                }
+                            </button>
+                        }
                     }
                 </div>
             </form>
