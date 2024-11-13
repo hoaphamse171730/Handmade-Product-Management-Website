@@ -18,7 +18,28 @@ namespace HandmadeProductManagement.Services.Service
         {
             _unitOfWork = unitOfWork;
         }
+        public async Task<SalesTrendDto> GetSalesTrendAsync()
+        {
+            var repository = _unitOfWork.GetRepository<Order>();
 
+            var shippedOrders = await repository.Entities
+                .Where(order => order.Status == "Shipped" && !order.DeletedTime.HasValue)
+                .GroupBy(order => order.OrderDate.Date)
+                .Select(group => new
+                {
+                    Date = group.Key,
+                    Sales = group.Sum(order => order.TotalPrice)
+                })
+                .OrderBy(result => result.Date)
+                .ToListAsync();
+
+            return new SalesTrendDto
+            {
+                Dates = shippedOrders.Select(o => o.Date.ToString("yyyy-MM-dd")).ToList(),
+                Sales = shippedOrders.Select(o => o.Sales).ToList()
+            };
+        }
+    
         public async Task<TotalOrdersByStatusDTO> GetTotalOrdersByStatus()
         {
             var orders = await _unitOfWork.GetRepository<Order>().Entities.ToListAsync();
@@ -86,6 +107,34 @@ namespace HandmadeProductManagement.Services.Service
 
             return topShops;
         }
+        public async Task<List<TopShopDto>> GetTop10ShopsByTotalSalesAsync()
+        {
+            var shippedOrders = await _unitOfWork.GetRepository<Order>()
+                .Entities
+                .Where(order => order.Status == Constants.OrderStatusShipped)
+                .GroupBy(order => order.OrderDetails
+                    .Select(od => od!.ProductItem!.Product!.ShopId).FirstOrDefault())
+                .Select(group => new
+                {
+                    ShopId = group.Key,
+                    TotalSales = group.Sum(order => order.TotalPrice)
+                })
+                .OrderByDescending(g => g.TotalSales)
+                .Take(10)
+                .ToListAsync();
+
+            var topShops = shippedOrders.Select(s => new TopShopDto
+            {
+                Id = _unitOfWork.GetRepository<Shop>().Entities.FirstOrDefault(shop => shop.Id == s.ShopId)?.Id!,
+                Name = _unitOfWork.GetRepository<Shop>().Entities.FirstOrDefault(shop => shop.Id == s.ShopId)?.Name ?? "Unknown",
+                TotalSales = s.TotalSales
+            }).ToList();
+
+            return topShops;
+        }
+
+
+
 
         public async Task<decimal> GetTotalSaleByShopId(string Id, DashboardDTO dashboardDTO)
         {
@@ -123,13 +172,17 @@ namespace HandmadeProductManagement.Services.Service
                                                       .Include(p => p.Category)
                                                       .Include(p => p.ProductItems)
                                                       .OrderByDescending(p => p.SoldCount)
+                                                      .Where(p => p.DeletedTime == null)
                                                       .Take(10)
                                                       .Select(p => new TopSellingProducts
-                                                      { 
+                                                      {
+                                                            Id = p.Id,
                                                             Name = p.Name,
                                                             CategoryName = p.Category != null ? p.Category.Name : "",
                                                             Price = p.ProductItems.FirstOrDefault() != null ? p.ProductItems.FirstOrDefault()!.Price : 0,
-                                                            ImageUrls = p.ProductImages.Select(pi => pi.Url).ToList(),
+                                                            ImageUrl = p.ProductImages.Any()
+                                                                    ? p.ProductImages.OrderBy(pi => pi.CreatedTime).First().Url  
+                                                                    : string.Empty,
                                                             SoldCount = p.SoldCount
                                                       })
                                                       .ToListAsync();
@@ -145,13 +198,17 @@ namespace HandmadeProductManagement.Services.Service
                                                .Include(p => p.ProductItems)
                                                .OrderByDescending(p =>  p.CreatedTime)
                                                .ThenByDescending(p => p.LastUpdatedTime)
+                                               .Where(p => p.DeletedTime == null)
                                                .Take(10)
                                                .Select(p => new ProductForDashboard
                                                 {
+                                                    Id = p.Id,
                                                     Name = p.Name,
                                                     CategoryName = p.Category != null ? p.Category.Name : "",
                                                     Price = p.ProductItems.FirstOrDefault() != null ? p.ProductItems.FirstOrDefault()!.Price : 0,
-                                                    ImageUrls = p.ProductImages.Select(pi => pi.Url).ToList()
+                                                   ImageUrl = p.ProductImages.Any()
+                                                                    ? p.ProductImages.OrderBy(pi => pi.CreatedTime).First().Url
+                                                                    : string.Empty,
                                                })
                                               .ToListAsync();
             return topProducts;

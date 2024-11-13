@@ -1,0 +1,177 @@
+﻿@page
+@using UI.Pages.Shared
+@model UI.Pages.Seller.OrderManagementModel
+@{
+    ViewData["Title"] = "Order Management";
+}
+<div class="mx-auto max-w-full">
+    <div class="mb-6 text-center">
+        <h1 class="ml-4 text-left text-2xl font-bold text-black">Order Management</h1>
+    </div>
+    @{
+        var errorModel = new ErrorMessageModel
+            {
+                ErrorMessage = Model.ErrorMessage,
+                ErrorDetail = Model.ErrorDetail
+            };
+    }
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <partial name="_ErrorMessage" model="errorModel" />
+    }
+
+    <div class="mb-4 flex w-full flex-wrap justify-center gap-2">
+        <a href="?filter=All&pageNumber=1"
+           class="flex-grow rounded-lg border border-blue-500 p-2 text-center text-lg font-bold
+@(Model.CurrentFilter == "All" ? "bg-blue-500 text-white" : "bg-white text-black hover:bg-blue-100")">
+            All Orders
+        </a>
+        <a href="?filter=Pending&pageNumber=1"
+           class="flex-grow rounded-lg border border-blue-500 p-2 text-center text-lg font-bold
+@(Model.CurrentFilter == "Pending" ? "bg-blue-500 text-white" : "bg-white text-black hover:bg-blue-100")">
+            Pending
+        </a>
+        <a href="?filter=Awaiting%20Payment&pageNumber=1"
+           class="flex-grow rounded-lg border border-blue-500 p-2 text-center text-lg font-bold
+@(Model.CurrentFilter == "Awaiting Payment" ? "bg-blue-500 text-white" : "bg-white text-black hover:bg-blue-100")">
+            Awaiting Payment
+        </a>
+        <a href="?filter=Processing&pageNumber=1"
+           class="flex-grow rounded-lg border border-blue-500 p-2 text-center text-lg font-bold
+@(Model.CurrentFilter == "Processing" ? "bg-blue-500 text-white" : "bg-white text-black hover:bg-blue-100")">
+            Processing
+        </a>
+        <a href="?filter=Delivering&pageNumber=1"
+           class="flex-grow rounded-lg border border-blue-500 p-2 text-center text-lg font-bold
+@(Model.CurrentFilter == "Delivering" ? "bg-blue-500 text-white" : "bg-white text-black hover:bg-blue-100")">
+            Delivering
+        </a>
+        <a href="?filter=Shipped&pageNumber=1"
+           class="flex-grow rounded-lg border border-blue-500 p-2 text-center text-lg font-bold
+@(Model.CurrentFilter == "Shipped" ? "bg-blue-500 text-white" : "bg-white text-black hover:bg-blue-100")">
+            Shipped
+        </a>
+        <a href="?filter=Canceled&pageNumber=1"
+           class="flex-grow rounded-lg border border-blue-500 p-2 text-center text-lg font-bold
+@(Model.CurrentFilter == "Canceled" ? "bg-blue-500 text-white" : "bg-white text-black hover:bg-blue-100")">
+            Canceled
+        </a>
+        <a href="?filter=Refunded&pageNumber=1"
+           class="flex-grow rounded-lg border border-blue-500 p-2 text-center text-lg font-bold
+@(Model.CurrentFilter == "Refunded" ? "bg-blue-500 text-white" : "bg-white text-black hover:bg-blue-100")">
+            Refunded
+        </a>
+    </div>
+
+    @if (Model.Orders == null || !Model.Orders.Any())
+    {
+        <p class="text-black">You don't have any orders yet</p>
+    }
+    else
+    {
+        <div class="relative flex h-full w-full flex-col rounded-lg bg-white bg-clip-border text-gray-700 shadow-md">
+            <div class="overflow-x-auto">
+                <table class="min-w-[1100px] table-auto text-left">
+                    <thead>
+                        <tr class="border-b border-slate-300 bg-slate-50">
+                            <th class="w-1/8 whitespace-nowrap p-6 text-lg font-bold leading-none text-black">No</th>
+                            <th class="w-1/4 whitespace-nowrap p-6 text-lg font-bold leading-none text-black">Name</th>
+                            <th class="w-[11ch] max-w-[11ch] whitespace-nowrap p-6 text-lg font-bold leading-none text-black">Phone</th>
+                            <th class="w-[11ch] max-w-[11ch] whitespace-nowrap p-6 text-lg font-bold leading-none text-black">Order Date</th>
+                            <th class="whitespace-nowrap p-6 text-lg font-bold leading-none text-black">Total Price</th>
+                            <th class="w-1/4 whitespace-nowrap p-6 text-lg font-bold leading-none text-black">Address</th>
+                            <th class="w-1/4 whitespace-nowrap p-6 text-lg font-bold leading-none text-black">Status</th>
+                            <th class="w-1/4 whitespace-nowrap p-6 text-lg font-bold leading-none text-black">Note</th>
+                            <th class="w-1/4 whitespace-nowrap p-6 text-lg font-bold leading-none text-black"></th>
+                            <th class="w-[8ch] max-w-[8ch] whitespace-nowrap p-6 text-lg font-bold leading-none text-black"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{var index = 1 + (Model.PageNumber - 1) * Model.PageSize;}
+                        @foreach (var order in Model.Orders)
+                        {
+                            <tr class="cursor-pointer hover:bg-slate-50">
+                                <td class="border-b border-slate-200 p-6 text-lg">@index</td>
+                                <td class="border-b border-slate-200 p-6 text-lg">@order.CustomerName</td>
+                                <td class="border-b border-slate-200 p-6 text-lg">@order.Phone</td>
+                                <td class="border-b border-slate-200 p-6 text-lg">@order.OrderDate.ToString("dd/MM/yyyy")</td>
+                                <td class="border-b border-slate-200 p-6 text-lg">₫@order.TotalPrice.ToString("N0").Replace(",", ".")</td>
+                                <td class="border-b border-slate-200 p-6 text-lg">@order.Address</td>
+                                <td class="border-b border-slate-200 p-6 text-lg">@order.Status</td>
+                                <td class="border-b border-slate-200 p-6 text-lg">@order.Note</td>
+                                <td class="border-b border-slate-200 p-6 text-lg">
+                                    @if (order.Status != "Closed" && order.Status != "Shipped" && order.Status != "Awaiting Payment")
+                                    {
+                                        <form method="post" asp-page-handler="UpdateStatus" class="flex items-center justify-between space-x-2">
+                                            <input type="hidden" name="orderId" value="@order.Id" />
+                                            <select name="newStatus" class="rounded border p-1" onchange="toggleCancelReason(this)">
+                                                @{
+                                                    var validStatuses = Model.GetValidStatusTransitions(order.Status);
+                                                }
+                                                @foreach (var status in validStatuses)
+                                                {
+                                                    <option value="@status" selected="@(status == order.Status ? "selected" : null)">@status</option>
+                                                }
+                                            </select>
+                                            <select name="cancelReasonId" class="hidden rounded border p-1" id="cancelReasonDropdown-@order.Id">
+                                                @foreach (var reason in Model.CancelReasons)
+                                                {
+                                                    <option value="@reason.Id">@reason.Description</option>
+                                                }
+                                            </select>
+                                            <button type="submit" class="rounded bg-blue-500 px-4 py-1 text-white hover:bg-blue-600">
+                                                Update
+                                            </button>
+                                        </form>
+                                    }
+                                </td>
+                                <td class="border-b border-slate-200 p-6 text-lg">
+                                    <a href='@Url.Page("/Order/OrderDetail", new { orderId = order.Id })'
+                                       class="text-blue-600 hover:underline"
+                                       onclick="(e) => e.stopPropagation()">View Detail</a>
+                                </td>
+                            </tr>
+                            index++;
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    }
+
+</div>
+
+@section Scripts {
+    <script>
+        function toggleCancelReason(selectElement) {
+            const cancelReasonDropdown = document.getElementById(`cancelReasonDropdown-${selectElement.closest('form').querySelector('input[name="orderId"]').value}`);
+            const selectedValue = selectElement.value;
+
+            // Show the cancel reason dropdown if the selected status is "Canceled"
+            if (selectedValue === "Canceled") {
+                cancelReasonDropdown.classList.remove('hidden');
+                cancelReasonDropdown.classList.add('block'); // Show the dropdown
+            } else {
+                cancelReasonDropdown.classList.remove('block');
+                cancelReasonDropdown.classList.add('hidden'); // Hide the dropdown
+            }
+        }
+
+        // Optionally, trigger the toggle function on page load to set the correct state
+        document.querySelectorAll('select[name="newStatus"]').forEach(select => {
+            toggleCancelReason(select);
+        });
+    </script>
+}
+@{
+    var paginationModel = new UI.Pages.Shared.PaginationModel
+            {
+                PageNumber = Model.PageNumber,
+                PageSize = Model.PageSize,
+                CurrentFilter = "filter=" + Model.CurrentFilter, // Pass the current filter
+                HasNextPage = Model.HasNextPage
+
+            };
+}
+<partial name="~/Pages/Shared/_Pagination.cshtml" model="paginationModel" />

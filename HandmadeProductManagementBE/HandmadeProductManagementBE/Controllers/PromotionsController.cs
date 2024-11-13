@@ -16,11 +16,25 @@ namespace HandmadeProductManagementAPI.Controllers
         private readonly IPromotionService _promotionService;
 
         public PromotionsController(IPromotionService promotionService) => _promotionService = promotionService;
-
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> GetPromotions(int pageNumber = 1, int pageSize = 10)
         {
-            var result = await _promotionService.GetAll(pageNumber, pageSize);
+            var result = await _promotionService.GetAllByPage(pageNumber, pageSize);
+            var response = new BaseResponse<IList<PromotionDto>>
+            {
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Promotions retrieved successfully.",
+                Data = result
+            };
+            return Ok(response);
+        }
+
+        [HttpGet("getall")]
+        public async Task<IActionResult> GetAll()
+        {
+            var result = await _promotionService.GetAll();
             var response = new BaseResponse<IList<PromotionDto>>
             {
                 Code = "200",

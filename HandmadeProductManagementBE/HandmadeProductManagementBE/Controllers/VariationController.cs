@@ -19,21 +19,39 @@ namespace HandmadeProductManagementAPI.Controllers
             _variationService = variationService;
         }
 
+        [Authorize]
+        [HttpGet("latest")]
+        public async Task<IActionResult> GetLatestVariationId(string categoryId)
+        {
+            // Retrieve user ID from the current user context
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var response = new BaseResponse<LatestVariationId>
+            {
+                Code = "Success",   
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Get Variations by Category successfully.",
+                Data = await _variationService.GetLatestVariationId(categoryId, userId ?? string.Empty)
+            };
+            return Ok(response);
+        }
+
         // GET: api/variation/category/{categoryId}
+        [Authorize]
         [HttpGet("category/{categoryId}")]
         public async Task<IActionResult> GetByCategoryId(string categoryId)
         {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             var response = new BaseResponse<IList<VariationDto>>
             {
                 Code = "Success",
                 StatusCode = StatusCodeHelper.OK,
                 Message = "Get Variations by Category successfully.",
-                Data = await _variationService.GetByCategoryId(categoryId)
+                Data = await _variationService.GetByCategoryId(categoryId, userId ?? string.Empty)
             };
             return Ok(response);
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin, Seller")]
         // POST: api/variation
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] VariationForCreationDto variation)
@@ -51,7 +69,7 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Seller")]
         // PATCH: api/variation/{id}
         [HttpPatch("{id}")]
         public async Task<IActionResult> Patch(string id, [FromBody] VariationForUpdateDto variation)
@@ -70,7 +88,7 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin, Seller")]
         // DELETE: api/variation/{id}
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(string id)

@@ -51,18 +51,19 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
-        [Authorize(Roles = "Admin")]
-        [HttpGet]
-        public async Task<IActionResult> GetShopsByPage([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        [HttpGet("{shopId}")]
+        public async Task<IActionResult> GetShopById(string shopId)
         {
-            var paginatedShops = await _shopService.GetShopsByPageAsync(pageNumber, pageSize);
-            var response = new BaseResponse<PaginatedList<ShopResponseModel>>
+            var shop = await _shopService.GetShopByIdAsync(shopId);
+
+            var response = new BaseResponse<ShopResponseModel>
             {
                 Code = "Success",
                 StatusCode = StatusCodeHelper.OK,
-                Message = "Shops retrieved successfully",
-                Data = paginatedShops
+                Message = "Shop retrieved successfully",
+                Data = shop
             };
+
             return Ok(response);
         }
 
@@ -96,6 +97,21 @@ namespace HandmadeProductManagementAPI.Controllers
             };
             return Ok(response);
         }
+        [Authorize]
+        [HttpGet("hasShop")]
+        public async Task<IActionResult> HasShopByUserId()
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
+            var hasShop = await _shopService.HaveShopAsync(Guid.Parse(userId));
+            var response = new BaseResponse<bool>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Shop retrieved successfully",
+                Data = hasShop
+            };
+            return Ok(response);
+        }
 
         [Authorize]
         [HttpPut("update")]
@@ -126,5 +142,96 @@ namespace HandmadeProductManagementAPI.Controllers
             };
             return Ok(response);
         }
+
+
+        [HttpGet("get-all")]
+        public async Task<IActionResult> GetAllShops()
+        {
+            var shops = await _shopService.GetAllShopsAsync();
+            var response = new BaseResponse<IList<ShopResponseModel>>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "All shops retrieved successfully",
+                Data = shops
+            };
+            return Ok(response);
+        }
+        [HttpGet("admin_get/{shopId}")]
+        public async Task<IActionResult> AdminGetShopById(string shopId)
+        {
+            var shop = await _shopService.AdminGetShopByIdAsync(shopId);
+
+            var response = new BaseResponse<ShopDto>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Shop retrieved successfully",
+                Data = shop
+            };
+
+            return Ok(response);
+        }
+
+        [HttpGet("admin")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetShopListByAdmin(int pageNumber, int pageSize)
+        {
+            var shops = await _shopService.GetShopListByAdmin(pageNumber, pageSize);
+            var response = new BaseResponse<IList<ShopDto>>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "All shops retrieved successfully",
+                Data = shops
+            };
+            return Ok(response);
+        }
+        [HttpGet("deleted")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetDeleteShops(int pageNumber, int pageSize)
+        {
+            var shops = await _shopService.GetDeletedShops(pageNumber, pageSize);
+            var response = new BaseResponse<IList<ShopDto>>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "All shops retrieved successfully",
+                Data = shops
+            };
+            return Ok(response);
+        }
+        [Authorize(Roles = "Admin")]
+        [HttpDelete("deleteById/{shopId}")]
+        public async Task<IActionResult> DeleteShopById(string shopId)
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
+            var result = await _shopService.DeleteShopByIdAsync(shopId, userId);
+            var response = new BaseResponse<bool>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Shop deleted successfully",
+                Data = result
+            };
+            return Ok(response);
+        }
+        [Authorize(Roles = "Admin")]
+        [HttpPut("{shopId}/recover")]
+        public async Task<IActionResult> RecoverDeletedShop(string shopId)
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
+            var result = await _shopService.RecoverDeletedShopAsync(shopId, userId);
+            var response = new BaseResponse<bool>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Shop recover successfully",
+                Data = result
+            };
+            return Ok(response);
+        }
+
+
     }
 }

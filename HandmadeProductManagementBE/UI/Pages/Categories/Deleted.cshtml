@@ -1,0 +1,63 @@
+﻿@page
+@model UI.Pages.Categories.DeletedModel
+@{
+    ViewData["Title"] = "Deleted Categories";
+}
+
+<h1 class="mb-6 text-center text-3xl font-bold">Deleted Categories</h1>
+
+<!-- Return Button -->
+<div class="mb-4">
+    <a href="javascript:history.back()" class="rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700">Return</a>
+</div>
+
+<div class="overflow-x-auto">
+    <table class="min-w-full rounded-lg bg-white shadow-md">
+        <thead>
+            <tr class="bg-gray-200 text-sm uppercase leading-normal text-gray-600">
+                <th class="px-6 py-3 text-left">#</th>
+                <th class="px-6 py-3 text-left">Name</th>
+                <th class="px-6 py-3 text-left">Description</th>
+                <th class="px-6 py-3 text-left">Actions</th>
+            </tr>
+        </thead>
+        <tbody class="text-sm font-light text-gray-600">
+            @for (int i = 0; i < Model.Categories.Count; i++)
+            {
+                var category = Model.Categories[i];
+                <tr id="category-@category.Id" class="border-b border-gray-200 hover:bg-gray-100">
+                    <td class="px-6 py-3 text-left">@((i + 1) + ((Model.PageNumber - 1) * Model.PageSize))</td>
+                    <td class="px-6 py-3 text-left">@category.Name</td>
+                    <td class="px-6 py-3 text-left">@category.Description</td>
+                    <td class="px-6 py-3 text-left">
+                        <a onclick="restoreCategory('@category.Id')" class="rounded bg-green-500 px-3 py-1 text-xs font-bold text-white hover:bg-green-800">Restore</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<script>
+    async function restoreCategory(id) {
+        try {
+            const response = await fetch(`/Categories/Deleted?handler=RestoreCategory&id=${id}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                document.getElementById(`category-${id}`).remove();
+            } else {
+                alert(result.message);
+            }
+        } catch (error) {
+            alert("An error occurred while trying to restore the category.");
+        }
+    }
+</script>
+

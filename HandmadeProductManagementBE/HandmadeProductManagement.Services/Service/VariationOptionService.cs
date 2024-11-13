@@ -8,6 +8,7 @@ using HandmadeProductManagement.Core.Common;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.VariationOptionModelViews;
 using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace HandmadeProductManagement.Services.Service
 {
@@ -30,7 +31,29 @@ namespace HandmadeProductManagement.Services.Service
             _updateValidator = updateValidator;
         }
 
-        public async Task<IList<VariationOptionDto>> GetByVariationId(string variationId)
+        public async Task<LatestVariationOptionId> GetLatestVariationOptionId(string variationId, string userId)
+        {
+            // Validate variationId format
+            if (!Guid.TryParse(variationId, out var guid))
+            {
+                throw new BaseException.BadRequestException(
+                    StatusCodeHelper.BadRequest.ToString(),
+                    Constants.ErrorMessageInvalidGuidFormat
+                );
+            }
+
+            // Retrieve the latest variation option for the specified variation and user
+            var latestOption = await _unitOfWork.GetRepository<VariationOption>().Entities
+                .Where(vo => vo.VariationId == variationId &&
+                             vo.CreatedBy == userId &&
+                             (!vo.DeletedTime.HasValue || vo.DeletedBy == null))
+                .OrderByDescending(vo => vo.CreatedTime)
+                .FirstOrDefaultAsync();
+
+            return _mapper.Map<LatestVariationOptionId>(latestOption);
+        }
+
+        public async Task<IList<VariationOptionDto>> GetByVariationId(string variationId, string userId)
         {
             // Validate id format
             if (!Guid.TryParse(variationId, out var guidId))
@@ -50,7 +73,7 @@ namespace HandmadeProductManagement.Services.Service
             }
 
             var options = await _unitOfWork.GetRepository<VariationOption>().Entities
-                .Where(vo => vo.VariationId == variationId && (!vo.DeletedTime.HasValue || vo.DeletedBy == null))
+                .Where(vo => vo.VariationId == variationId && (!vo.DeletedTime.HasValue || vo.DeletedBy == null) && vo.CreatedBy == userId)
                 .ToListAsync();
 
             return _mapper.Map<IList<VariationOptionDto>>(options);

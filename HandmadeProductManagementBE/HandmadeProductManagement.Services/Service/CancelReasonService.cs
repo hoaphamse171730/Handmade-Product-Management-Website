@@ -185,5 +185,22 @@ namespace HandmadeProductManagement.Services.Service
             return true;
         }
 
+        // Get cancel reason by description
+        public async Task<CancelReasonDto> GetByDescription(string description)
+        {
+            var cancelReasonEntity = await _unitOfWork.GetRepository<CancelReason>().Entities
+                .FirstOrDefaultAsync(cr => cr.Description == description && (!cr.DeletedTime.HasValue || cr.DeletedBy == null))
+                ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageCancelReasonNotFound);
+
+            var cancelReasonDto = new CancelReasonDto
+            {
+                Id = cancelReasonEntity.Id.ToString(),
+                Description = cancelReasonEntity.Description,
+                RefundRate = cancelReasonEntity.RefundRate
+            };
+
+            return cancelReasonDto;
+        }
+
     }
 }

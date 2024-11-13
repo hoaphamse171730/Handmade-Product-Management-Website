@@ -1,0 +1,427 @@
+﻿@page 
+@model UI.Pages.Order.OrderDetailModel
+@{
+    ViewData["Title"] = "Order Detail";
+
+    var statusList = Model.StatusChanges;
+    var statusMapping = new List<KeyValuePair<string, string>>
+    {
+        new("Pending", "Order Placed"),
+        new("Processing", "Order is being prepared"),
+        new("Delivering", "Order is being shipped"),
+        new("Delivery Failed", "Delivery Failed"),
+        new("On Hold", "Order is on hold"),
+        new("Delivering Retry", "Retrying Delivery"),
+        new("Refund Requested", "Refund has been requested"),
+        new("Refund Denied", "Refund request was denied"),
+        new("Refund Approve", "Refund request was approved"),
+        new("Refunded", "Order was refunded successfully"),
+        new("Shipped", "Order was delivered successfully"),
+        new("Canceled", "Order has been cancelled"),
+        new("Payment Failed", "Payment failed, please try again")
+    };
+
+    @using Microsoft.AspNetCore.Http
+    @using System.IdentityModel.Tokens.Jwt
+
+    string getUserId(string token)
+    {
+        var handler = new JwtSecurityTokenHandler();
+        var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
+        var userId = jsonToken?.Claims.FirstOrDefault(c => c.Type == "nameid")?.Value;
+
+        return userId;
+    }
+
+    var token = HttpContext.Session.GetString("Token");
+    var userId = token != null ? getUserId(token) : string.Empty;
+
+    // Helper methods to get status information
+    string GetStatusDate(DateTime changeTime) =>
+        changeTime.ToString("dd MMM yyyy, HH:mm");
+
+    bool IsStatusReached(string status) =>
+        statusList.Any(s => s.Status == status);
+
+    string GetOrderStatusMessage()
+    {
+        var lastStatus = statusList?.OrderByDescending(s => s.ChangeTime).FirstOrDefault()?.Status;
+        return lastStatus switch
+        {
+            "Pending" => "Order Placed",
+            "Processing" => "Order is being prepared",
+            "Delivering" => "Order is being shipped",
+            "Delivery Failed" => "Delivery Failed",
+            "On Hold" => "Order is on hold",
+            "Delivering Retry" => "Retrying Delivery",
+            "Refund Requested" => "Refund has been requested",
+            "Refund Denied" => "Refund request was denied",
+            "Refund Approve" => "Refund request was approved",
+            "Refunded" => "Order was refunded successfully",
+            "Shipped" => "Order was delivered successfully",
+            "Canceled" => "Order has been cancelled",
+            "Payment Failed" => "Payment failed, please try again",
+            _ => "Unknown Order Status"
+        };
+    }
+
+    // Final list of statuses to display
+    var finalStatuses = new List<KeyValuePair<string, Tuple<string, DateTime?>>>();
+
+    if (!finalStatuses.Any(kv => kv.Key == "Pending"))
+        finalStatuses.Add(new KeyValuePair<string, Tuple<string, DateTime?>>("Pending", new Tuple<string, DateTime?>("Order Placed", null)));
+
+    if (!finalStatuses.Any(kv => kv.Key == "Processing"))
+        finalStatuses.Add(new KeyValuePair<string, Tuple<string, DateTime?>>("Processing", new Tuple<string, DateTime?>("Order is being prepared", null)));
+
+    if (!finalStatuses.Any(kv => kv.Key == "Delivering"))
+        finalStatuses.Add(new KeyValuePair<string, Tuple<string, DateTime?>>("Delivering", new Tuple<string, DateTime?>("Order is being shipped", null)));
+
+
+    bool isDeliveringAdded = true;
+
+    foreach (var status in statusList)
+    {
+        if (status.Status == "Pending" || status.Status == "Processing")
+        {
+            var existingStatus = finalStatuses.FirstOrDefault(kv => kv.Key == status.Status);
+            if (existingStatus.Key != null)
+            {
+                finalStatuses[finalStatuses.IndexOf(existingStatus)] =
+                    new KeyValuePair<string, Tuple<string, DateTime?>>(
+                        existingStatus.Key,
+                        new Tuple<string, DateTime?>(existingStatus.Value.Item1, status.ChangeTime));
+            }
+        }
+
+        if (status.Status == "Delivering" && isDeliveringAdded)
+        {
+            var existingStatus = finalStatuses.FirstOrDefault(kv => kv.Key == status.Status);
+            if (existingStatus.Key != null)
+            {
+                finalStatuses[finalStatuses.IndexOf(existingStatus)] =
+                    new KeyValuePair<string, Tuple<string, DateTime?>>(
+                        existingStatus.Key,
+                        new Tuple<string, DateTime?>(existingStatus.Value.Item1, status.ChangeTime));
+            }
+        }
+
+        if (status.Status == "Delivering" && !isDeliveringAdded)
+        {
+            finalStatuses.Add(new KeyValuePair<string, Tuple<string, DateTime?>>("Delivering", new Tuple<string, DateTime?>("Order is being shipped", status.ChangeTime)));
+        }
+        else if (status.Status != "Pending" && status.Status != "Processing" && status.Status != "Delivering")
+        {
+            var matchingStatus = statusMapping.FirstOrDefault(kv => kv.Key == status.Status);
+            if (matchingStatus.Key != null)
+            {
+                finalStatuses.Add(new KeyValuePair<string, Tuple<string, DateTime?>>(matchingStatus.Key, new Tuple<string, DateTime?>(matchingStatus.Value, status.ChangeTime)));
+            }
+            isDeliveringAdded = false;
+        }
+
+        if (status.Status == "Shipped" && !finalStatuses.Any(kv => kv.Key == "Shipped"))
+            finalStatuses.Add(new KeyValuePair<string, Tuple<string, DateTime?>>("Shipped", new Tuple<string, DateTime?>("Order was delivered successfully", status.ChangeTime)));
+
+        }
+
+        if (!IsStatusReached("Shipped"))
+        {
+            finalStatuses.Add(new KeyValuePair<string, Tuple<string, DateTime?>>("Shipped", new Tuple<string, DateTime?>("Order was delivered successfully", null)));
+        }
+
+
+        if (IsStatusReached("Refund Requested"))
+        {
+            finalStatuses.RemoveAll(kv => kv.Key == "Shipped");
+        }
+    }
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <script type="text/javascript">
+        window.onload = function () {
+            alert('@TempData["SuccessMessage"]'); // Show the success message in a popup
+            location.reload(); // Reload the page after the popup is closed
+        }
+    </script>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <script type="text/javascript">
+        window.onload = function () {
+            alert('@TempData["ErrorMessage"]'); // Show the success message in a popup
+            location.reload(); // Reload the page after the popup is closed
+        }
+    </script>
+}
+
+<div class="flex items-center justify-between py-4">
+    <a href="javascript:history.back()" class="text-lg font-semibold text-black hover:underline">← Return</a>
+    <div class="text-lg font-semibold">Order Code: @Model.OrderId</div>
+    @if (GetOrderStatusMessage() != "Order has been cancelled" && GetOrderStatusMessage() != "Payment failed, please try again")
+    {
+        @if (GetOrderStatusMessage() == "Order was delivered successfully")
+        {
+            <div class="text-lg font-semibold text-green-700">@GetOrderStatusMessage()</div>
+        } 
+        else
+        {
+            <div class="text-lg font-semibold text-black">@GetOrderStatusMessage()</div>
+        }
+    }
+</div>
+
+<div class="mb-8 mt-6 h-[480px] gap-6 sm:mt-8 lg:mt-0">
+    <div class="h-full space-y-6 rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-black dark:bg-gray-200">
+        <h3 class="text-xl font-semibold text-black">Order Information</h3>
+
+        @if (finalStatuses.Any(kv => kv.Key == "Canceled"))
+        {
+            <p class="text-lg text-red-600">Order has been cancelled</p>
+        }
+        else
+        {
+            <div class="flex">
+                <div class="w-1/3 space-y-4 rounded-lg bg-white p-6 shadow-sm dark:bg-gray-200">
+                    <p><strong>Name:</strong> @Model.OrderWithDetail.CustomerName</p>
+                    <p><strong>Phone:</strong> @Model.OrderWithDetail.Phone</p>
+                    <p><strong>Address:</strong> @Model.OrderWithDetail.Address</p>
+                </div>
+
+                <div class="border-l border-gray-300" style="margin: 0 30px;"></div>
+
+                @if (finalStatuses.Any(kv => kv.Key == "Payment Failed") &&
+               (!finalStatuses.Any(kv => kv.Key == "Processing" && kv.Value.Item2 != null)))
+                {
+                    <p class="text-lg text-red-600">Payment failed, please try again</p>
+                }
+                else
+                {
+                    <div class="max-h-[370px] w-2/3 overflow-y-auto">
+                        <ol class="relative ms-3 border-s border-gray-200 dark:border-gray-700">
+                            @foreach (var status in finalStatuses.AsEnumerable().Reverse())
+                            {
+                                if (status.Key != "Payment Failed")
+                                {
+                                    var statusDate = status.Value.Item2.HasValue ? GetStatusDate(status.Value.Item2.Value) : null;
+
+                                    <li class="mb-10 ms-6 @(IsStatusReached(status.Key) ? "text-blue-600" : "text-black")">
+                                        <span class="absolute -start-3 flex h-6 w-6 items-center justify-center rounded-full @(IsStatusReached(status.Key) ? "bg-blue-200" : "bg-gray-100")">
+                                            <svg class="h-4 w-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                                @if (IsStatusReached(status.Key))
+                                                {
+                                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 11.917 9.724 16.5 19 7.5" />
+                                                }
+                                                else
+                                                {
+                                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h6l2 4m-8-4v8m0-8V6a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v9h2m8 0H9m4 0h2m4 0h2v-4m0 0h-5m3.5 5.5a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0Zm-10 0a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0Z" />
+                                                }
+                                            </svg>
+                                        </span>
+                                        <h4 class="mb-0.5 text-base font-semibold @(IsStatusReached(status.Key) ? "text-blue-600" : "text-black")">
+                                            @status.Value.Item1
+                                        </h4>
+                                        @if (statusDate != null)
+                                        {
+                                            <p class="text-sm">@statusDate</p>
+                                        }
+                                    </li>
+                                }
+                            }
+                        </ol>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+<div class="order-details">
+    <div class="flex items-center">
+        <h3 class="text-xl font-semibold text-black">@Model.OrderWithDetail?.ShopName</h3>
+        <a href="/Shop/Index?id=@Model.OrderWithDetail?.ShopId" class="ml-4 inline-block rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600">
+            View Shop
+        </a>
+    </div>
+    @if (Model.OrderWithDetail?.OrderDetails != null && Model.OrderWithDetail.OrderDetails.Any())
+    {
+        @foreach (var orderDetail in Model.OrderWithDetail.OrderDetails)
+        {
+            decimal totalPrice = orderDetail.DiscountPrice * orderDetail.ProductQuantity;
+
+            <div class="order-detail my-2 flex h-24 items-center justify-between rounded border border-gray-300 p-2">
+                <div class="flex w-1/3 items-center">
+                    <img src="@orderDetail.ProductImage" alt="@orderDetail.ProductName" class="h-20 w-20" />
+                    <a href="/ProductDetail/ProductDetail?id=@orderDetail.ProductId" class="ml-4 font-semibold transition-transform">
+                        @orderDetail.ProductName
+                    </a>
+                </div>
+
+                <div class="flex-1 mx-2 w-1/3">
+                    <p class="text-sm text-gray-600">
+                        @string.Join(", ", orderDetail.VariationOptionValues)
+                    </p>
+                    <p class="text-sm">Quantity: x @orderDetail.ProductQuantity</p>
+                </div>
+
+                <div class="flex-1 mx-2 w-1/3">
+                    <p class="text-sm text-gray-600">
+                        Unit Price
+                    </p>
+                    <p class="text-sm">₫@orderDetail.DiscountPrice.ToString("N0").Replace(",", ".")</p>
+                </div>
+
+                <div class="ml-4 flex w-1/3 flex-col items-end">
+                    <div class="flex-1 mx-2 w-1/3">
+                        <p class="text-sm text-gray-600">
+                            Total Price
+                        </p>
+                        <p class="text-sm">₫@((orderDetail.DiscountPrice * orderDetail.ProductQuantity).ToString("N0").Replace(",", "."))</p>
+                    </div>
+
+
+                    @if (userId == Model.OrderWithDetail.CustomerId && Model.OrderWithDetail.Status == "Shipped")
+                    {
+                        if (orderDetail.HasReviewed)
+                        {
+                            <button class="mt-1 cursor-not-allowed rounded bg-gray-500 px-4 py-2 text-gray-300" disabled>
+                                Reviewed
+                            </button>
+                        }
+                        else
+                        {
+                            <button onclick="openModal('@Model.OrderId', '@orderDetail.ProductId')"
+                                    class="mt-1 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600">
+                                Review
+                            </button>
+                        }
+                    }
+                </div>
+            </div>
+        }
+
+        <div class="mt-4 flex justify-end">
+            <div class="text-lg font-semibold">
+                Total Price: ₫@Model.OrderWithDetail?.TotalPrice.ToString("N0").Replace(",", ".")
+            </div>
+        </div>
+    }
+    else
+    {
+        <p class="text-gray-600">No order details available.</p>
+    }
+</div>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<!-- Review Modal -->
+<div id="reviewModal" class="fixed inset-0 flex hidden items-center justify-center bg-gray-900 bg-opacity-50">
+    <div class="mx-auto w-full max-w-md rounded-lg bg-white p-4 shadow-lg">
+        <h2 class="mb-4 text-lg font-semibold">Submit Your Review</h2>
+
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="text-red-500">@Model.ErrorMessage</div>
+        }
+
+        <!-- Review Form -->
+        <form method="post" asp-page-handler="Review">
+            <!-- Hidden fields for orderId and productId -->
+            <input asp-for="OrderId" type="hidden" />
+            <input asp-for="ProductId" type="hidden" />
+
+            <div class="space-y-6">
+                <!-- Rating Section -->
+                <div>
+                    <label for="rating" class="mb-2 block text-sm text-gray-800">Rating</label>
+                    <div id="starRating" class="flex space-x-1">
+                        <!-- Hidden input to store selected rating value -->
+                        <input asp-for="Rating" type="hidden" id="rating" value="0">
+                        <!-- Star icons -->
+                        <span class="star cursor-pointer text-2xl text-gray-300" data-value="1" onclick="selectRating(1)">
+                            <i class="fas fa-star"></i>
+                        </span>
+                        <span class="star cursor-pointer text-2xl text-gray-300" data-value="2" onclick="selectRating(2)">
+                            <i class="fas fa-star"></i>
+                        </span>
+                        <span class="star cursor-pointer text-2xl text-gray-300" data-value="3" onclick="selectRating(3)">
+                            <i class="fas fa-star"></i>
+                        </span>
+                        <span class="star cursor-pointer text-2xl text-gray-300" data-value="4" onclick="selectRating(4)">
+                            <i class="fas fa-star"></i>
+                        </span>
+                        <span class="star cursor-pointer text-2xl text-gray-300" data-value="5" onclick="selectRating(5)">
+                            <i class="fas fa-star"></i>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Review Text Area -->
+                <div>
+                    <label for="review" class="mb-2 block text-sm text-gray-800">Review</label>
+                    <textarea asp-for="Content" placeholder="Write your review..." required class="w-full rounded-md border border-gray-300 bg-white px-4 py-3 text-sm text-gray-800"></textarea>
+                    <span asp-validation-for="Content" class="text-red-500"></span>
+                </div>
+            </div>
+
+            <!-- Action buttons (Cancel and Submit) -->
+            <div class="mt-4 flex justify-end">
+                <button type="button" onclick="closeModal()" class="mr-2 rounded bg-gray-300 px-4 py-2">Cancel</button>
+                <button type="submit" class="rounded bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700">Submit</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Function to select a rating
+    function selectRating(rating) {
+        // Update hidden input value
+        document.getElementById('rating').value = rating;
+
+        // Update star styles
+        let stars = document.querySelectorAll('#starRating .star');
+        stars.forEach((star, index) => {
+            star.classList.remove('text-yellow-500');
+            star.classList.add('text-gray-300');
+            if (index < rating) {
+                star.classList.remove('text-gray-300');
+                star.classList.add('text-yellow-500');
+            }
+        });
+    }
+
+    // Function to open the review modal and set orderId and productId
+    function openModal(orderId, productId) {
+        document.getElementById('reviewModal').classList.remove('hidden');
+        document.getElementById('OrderId').value = orderId;
+        document.getElementById('ProductId').value = productId;
+    }
+
+    // Function to close the review modal
+    function closeModal() {
+        const modal = document.getElementById('reviewModal');
+        const form = modal.querySelector('form');
+        const stars = document.querySelectorAll('#starRating .star');
+
+        // Reset the form fields
+        form.reset();
+
+        // Reset the star ratings
+        stars.forEach((star) => {
+            star.classList.remove('text-yellow-500'); // Remove filled star class
+            star.classList.add('text-gray-300'); // Add empty star class
+        });
+
+        // Hide the modal
+        modal.classList.add('hidden');
+    }
+</script>
+
+@{
+    foreach (var kv in finalStatuses)
+    {
+        <script>console.log('@kv.Key: @kv.Value');</script>
+    }
+}

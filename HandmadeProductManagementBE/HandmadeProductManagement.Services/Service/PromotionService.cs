@@ -33,7 +33,17 @@ namespace HandmadeProductManagement.Services.Service
             _updateValidator = updateValidator;
         }
 
-        public async Task<IList<PromotionDto>> GetAll(int pageNumber, int pageSize)
+        public async Task<IList<PromotionDto>> GetAll()
+        {
+            var promotions = await _unitOfWork.GetRepository<Promotion>().Entities
+                .Where(p => p.DeletedTime == null)
+                .OrderByDescending(p => p.CreatedTime)
+                .ToListAsync();
+
+            return _mapper.Map<IList<PromotionDto>>(promotions);
+        }
+
+        public async Task<IList<PromotionDto>> GetAllByPage(int pageNumber, int pageSize)
         {
             if (pageNumber <= 0)
                 throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidPageNumber);
@@ -141,13 +151,13 @@ namespace HandmadeProductManagement.Services.Service
                 ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(),
                     Constants.ErrorMessagePromotionNotFound);
 
-            var isNameDuplicated = promotionEntity.Name == promotion.Name;
+            var isNameDuplicated = await _unitOfWork.GetRepository<Promotion>().Entities
+                .AnyAsync(p => p.Name == promotion.Name && p.Id != id && p.DeletedTime == null);
 
             if (isNameDuplicated)
                 throw new ValidationException(
-            [
-                new(nameof(promotion.Name), Constants.ErrorMessageNameInUse)
-            ]);
+                 Constants.ErrorMessageNameInUse
+            );
 
             // Update fields only if they are not null or provided
             if (!string.IsNullOrEmpty(promotion.Name))

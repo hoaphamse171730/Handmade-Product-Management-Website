@@ -108,11 +108,6 @@ namespace HandmadeProductManagement.Services.Service
                 .FirstOrDefaultAsync(o => o.Id == orderId && !o.DeletedTime.HasValue)
                 ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageOrderNotFound);
 
-            if (order.Status != Constants.OrderStatusAwaitingPayment)
-            {
-                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidOrderStatus);
-            }
-
             if (order.UserId.ToString() != userId)
             {
                 throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageUserNotOwner);
@@ -144,11 +139,6 @@ namespace HandmadeProductManagement.Services.Service
             payment.CreatedBy = userId;
             payment.LastUpdatedBy = userId;
 
-            await OrderService.UpdateOrderStatusAsync(userId, new UpdateStatusOrderDto
-            {
-                OrderId = orderId,
-                Status = "Processing"
-            });
             await paymentRepository.InsertAsync(payment);
             await _unitOfWork.SaveAsync();
 
@@ -167,7 +157,7 @@ namespace HandmadeProductManagement.Services.Service
             // Validate Status Flow
             var validStatusTransitions = new Dictionary<string, List<string>>
             {
-                { Constants.PaymentStatusPending, new List<string> { Constants.PaymentStatusCompleted, Constants.PaymentStatusExpired } },
+                { Constants.PaymentStatusPending, new List<string> { Constants.PaymentStatusCompleted, Constants.PaymentStatusExpired, Constants.PaymentStatusFailed } },
                 { Constants.PaymentStatusCompleted, new List<string> { Constants.PaymentStatusRefunded } }
             };
 
@@ -258,11 +248,24 @@ namespace HandmadeProductManagement.Services.Service
             {
                 throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageOrderNotFound);
             }
+
+            // Check if the user is the buyer
             if (order.UserId.ToString() != userId)
             {
-                throw new BaseException.ForbiddenException(StatusCodeHelper.Forbidden.ToString(), Constants.ErrorMessageForbidden);
-            }
+                // If not the buyer, check if the user is the seller associated with any item in the order
+                var orderDetailRepository = _unitOfWork.GetRepository<OrderDetail>();
 
+                // Filter for order details with a valid ProductItem and check for a match on CreatedBy
+                var isSeller = await orderDetailRepository.Entities
+                    .Where(od => od.OrderId == orderId && !od.DeletedTime.HasValue && od.ProductItem != null)
+                    .Select(od => od.ProductItem!.CreatedBy)
+                    .AnyAsync(createdBy => createdBy.ToString() == userId);
+
+                if (!isSeller)
+                {
+                    throw new BaseException.ForbiddenException(StatusCodeHelper.Forbidden.ToString(), Constants.ErrorMessageForbidden);
+                }
+            }
 
             var paymentRepository = _unitOfWork.GetRepository<Payment>();
             var payment = await paymentRepository.Entities

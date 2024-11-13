@@ -1,0 +1,16 @@
+﻿@page
+@model UI.Pages.ConfirmEmailModel
+@{
+    ViewData["Title"] = "Email Confirmation";
+}
+
+<!-- Place this script in the `<head>` or at the bottom of your page -->
+@if (TempData["ConfirmationResult"] != null)
+{
+    <script>
+        window.onload = function() {
+            alert('@TempData["ConfirmationResult"]');
+        };
+    </script>
+}
+

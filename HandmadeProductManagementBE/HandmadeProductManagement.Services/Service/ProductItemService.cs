@@ -83,25 +83,29 @@ namespace HandmadeProductManagement.Services.Service
             {
                 var variationOptionIds = combination.VariationOptionIds.Distinct().ToList();
 
-                // Step 7.1: Ensure that no two variation options in the combination come from the same variation
-                var variationIds = await _unitOfWork.GetRepository<VariationOption>().Entities
+                // Step 7.1: Ensure that no two variation options in the combination have the same variation name
+                var variationNames = await _unitOfWork.GetRepository<VariationOption>().Entities
                     .Where(vo => variationOptionIds.Contains(vo.Id))
-                    .Select(vo => vo.VariationId)
+                    .Select(vo => vo.Variation!.Name.ToLower()) // Convert to lowercase for case-insensitive comparison
                     .Distinct()
                     .ToListAsync();
 
-                if (variationOptionIds.Count != variationIds.Count)
+                if (variationOptionIds.Count != variationNames.Count)
                 {
                     throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidCombination);
                 }
 
-                // Step 7.2: Ensure that the new options are fully combined with all other existing options
+                // Step 7.2: Ensure that new options complete all other existing options by unique variation names
                 foreach (var existingVariation in existingVariations)
                 {
-                    if (variationIds.Contains(existingVariation.Id)) continue;
+                    // Convert the existing variation name to lowercase for case-insensitive comparison
+                    var existingVariationName = existingVariation.Name.ToLower();
 
-                    var missingVariationOptions = existingVariation.Options.Select(opt => opt.Id).ToList();
-                    if (!variationOptionIds.Any(id => missingVariationOptions.Contains(id)))
+                    // Skip if the existing variation is already covered by the combination
+                    if (variationNames.Contains(existingVariationName)) continue;
+
+                    var missingVariationOptions = existingVariation.Options?.Select(opt => opt.Id).ToList();
+                    if (!variationOptionIds.Any(id => missingVariationOptions!.Contains(id)))
                     {
                         throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageIncompleteCombinations);
                     }
@@ -121,8 +125,30 @@ namespace HandmadeProductManagement.Services.Service
                 }
             }
 
-            // Step 9: Call the ProductService to add the variation options for new combinations
+            // Step 9: Remove old ProductItems that no longer fit the new combinations
+            var productItemsToRemove = await _unitOfWork.GetRepository<ProductItem>().Entities
+                .Where(pi => pi.ProductId == product.Id) // Lọc theo ProductId
+                .ToListAsync(); // Chuyển tất cả các ProductItem sang client-side
+
+            var productItemsToDelete = productItemsToRemove
+                .Where(pi => !newVariationCombinations.Any(vc =>
+                    // Kiểm tra nếu tất cả VariationOptionIds trong sự kết hợp mới có thể được tìm thấy trong ProductConfigurations của ProductItem
+                    vc.VariationOptionIds.Intersect(
+                        pi.ProductConfigurations.Select(pc => pc.VariationOptionId)
+                    ).Count() == vc.VariationOptionIds.Count // Đảm bảo rằng tất cả các VariationOptionIds đều có trong ProductConfiguration
+                ))
+                .ToList();
+
+            // Xóa các ProductItem không hợp lệ
+            foreach (var itemToRemove in productItemsToDelete)
+            {
+                _unitOfWork.GetRepository<ProductItem>().Delete(itemToRemove.Id);
+            }
+
+
+            // Step 10: Call the ProductService to add the variation options for new combinations
             await _productService.AddVariationOptionsToProduct(product, newVariationCombinations, userId);
+
             return true;
         }
 

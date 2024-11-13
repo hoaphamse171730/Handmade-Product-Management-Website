@@ -1,0 +1,322 @@
+﻿@page
+@using UI.Pages.Categories
+@model UI.Pages.Categories.ViewModel
+@{
+    ViewData["Title"] = "Category";
+}
+@using UI.Pages.Shared
+@{
+    var errorModel = new ErrorMessageModel
+            {
+                ErrorMessage = Model.ErrorMessage,
+                ErrorDetail = Model.ErrorDetail
+            };
+    var token = HttpContext.Session.GetString("Token");
+}
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <partial name="_ErrorMessage" model="errorModel" />
+}
+
+<h1 class="mb-6 text-center text-3xl font-bold">Categories</h1>
+
+<!-- Button to open the modal -->
+<button onclick="openModal()" class="mb-6 inline-block rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700">Create New Category</button>
+
+<a href="/Categories/Deleted" class="mb-6 inline-block rounded bg-red-500 px-4 py-2 font-bold text-white hover:bg-red-700">Deleted Categories</a>
+
+<!-- Create Modal -->
+<div id="createModal" class="fixed inset-0 z-50 flex hidden items-center justify-center bg-gray-900 bg-opacity-50">
+    <div class="w-full max-w-md rounded-lg bg-white p-6">
+        <h2 class="mb-4 text-xl font-semibold">Create New Category</h2>
+
+        <div class="mb-4">
+            <label class="block text-gray-700">Name</label>
+            <input type="text" id="categoryName" class="w-full rounded border px-3 py-2">
+        </div>
+
+        <div class="mb-4">
+            <label class="block text-gray-700">Description</label>
+            <textarea id="categoryDescription" class="w-full rounded border px-3 py-2"></textarea>
+        </div>
+
+        <div class="flex justify-end">
+            <button onclick="closeModal()" class="mr-2 rounded bg-gray-500 px-4 py-2 text-white hover:bg-gray-600">Cancel</button>
+            <button onclick="submitCategory()" class="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-700">Save</button>
+        </div>
+
+        <p id="responseMessage" class="mt-4 hidden text-sm text-red-500"></p>
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div id="editModal" class="fixed inset-0 z-50 flex hidden items-center justify-center bg-gray-900 bg-opacity-50">
+    <div class="w-full max-w-md rounded-lg bg-white p-6">
+        <h2 class="mb-4 text-xl font-semibold">Edit Category</h2>
+
+        <div class="mb-4">
+            <label class="block text-gray-700">Name</label>
+            <input type="text" id="editCategoryName" class="w-full rounded border px-3 py-2">
+        </div>
+
+        <div class="mb-4">
+            <label class="block text-gray-700">Description</label>
+            <textarea id="editCategoryDescription" class="w-full rounded border px-3 py-2"></textarea>
+        </div>
+
+        <div class="flex justify-end">
+            <button onclick="closeEditModal()" class="mr-2 rounded bg-gray-500 px-4 py-2 text-white hover:bg-gray-600">Cancel</button>
+            <button onclick="submitEditCategory()" class="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-700">Save</button>
+        </div>
+
+        <p id="editResponseMessage" class="mt-4 hidden text-sm text-red-500"></p>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteConfirmationModal" class="fixed inset-0 z-50 flex hidden items-center justify-center bg-gray-900 bg-opacity-50">
+    <div class="w-full max-w-md rounded-lg bg-white p-6">
+        <h2 class="mb-4 text-xl font-semibold">Confirm Deletion</h2>
+        <p>Are you sure you want to delete this category?</p>
+        <div class="flex justify-end">
+            <button onclick="closeDeleteConfirmationModal()" class="mr-2 rounded bg-gray-500 px-4 py-2 text-white hover:bg-gray-600">Cancel</button>
+            <button onclick="confirmDeleteCategory()" class="rounded bg-red-500 px-4 py-2 text-white hover:bg-red-700">Delete</button>
+        </div>
+    </div>
+</div>
+
+<!-- Apply Promotion Modal -->
+<div id="applyPromotionModal" class="fixed inset-0 z-50 flex hidden items-center justify-center bg-gray-900 bg-opacity-50">
+    <div class="w-full max-w-md rounded-lg bg-white p-6">
+        <h2 class="mb-4 text-xl font-semibold">Apply Promotion</h2>
+
+        <!-- Dropdown with promotions populated from @Model.Promotions -->
+        <select id="promotionDropdown" class="mb-4 w-full rounded border p-2">
+            <option value="">None</option> 
+            @foreach (var promotion in Model.Promotions)
+            {
+                <option value="@promotion.Id">@promotion.Name</option>
+            }
+        </select>
+
+        <div id="applyPromotionMessage" class="mb-4 hidden text-red-500"></div>
+
+        <div class="flex justify-end">
+            <button onclick="submitApplyPromotion()" class="mr-2 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600">Apply Promotion</button>
+            <button onclick="closeApplyPromotionModal()" class="rounded bg-gray-500 px-4 py-2 text-white hover:bg-gray-600">Close</button>
+        </div>
+    </div>
+</div>
+
+<div class="overflow-x-auto">
+    <table class="min-w-full rounded-lg bg-white shadow-md">
+        <thead>
+            <tr class="bg-gray-200 text-sm uppercase leading-normal text-gray-600">
+                <th class="px-6 py-3 text-left">#</th>
+                <th class="px-6 py-3 text-left">Name</th>
+                <th class="px-6 py-3 text-left">Description</th>
+                <th class="px-6 py-3 text-left">Promotion</th>
+                <th class="px-6 py-3 text-left">Rate</th>
+                <th class="px-6 py-3 text-left">Actions</th>
+            </tr>
+        </thead>
+        <tbody class="text-sm font-light text-gray-600">
+            @for (int i = 0; i < Model.Categories.Count; i++)
+            {
+                var category = Model.Categories[i];
+                <tr class="border-b border-gray-200 hover:bg-gray-100">
+                    <td class="px-6 py-3 text-left">@((i + 1) + ((Model.PageNumber - 1) * Model.PageSize))</td>
+                    <td class="px-6 py-3 text-left">@category.Name</td>
+                    <td class="px-6 py-3 text-left">@category.Description</td>
+                    <td class="px-6 py-3 text-left">@category.Promotion?.Name</td>
+                    <td class="px-6 py-3 text-left">@category.Promotion?.DiscountRate</td>
+                    <td class="px-6 py-3 text-left">
+                        <a onclick="openEditModal('@category.Id', '@category.Name', '@category.Description')" class="rounded bg-blue-500 px-3 py-1 text-xs font-bold text-white hover:bg-blue-800">Edit</a>
+                        <a onclick="openDeleteConfirmationModal('@category.Id')" class="ml-2 rounded bg-red-500 px-3 py-1 text-xs font-bold text-white hover:bg-red-800">Delete</a>
+                        <a onclick="openApplyPromotionModal('@category.Id')" class="ml-2 rounded bg-green-500 px-3 py-1 text-xs font-bold text-white hover:bg-green-800">Apply</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<script>
+    // Handle Create Modal
+    async function submitCategory() {
+        const categoryName = document.getElementById('categoryName').value;
+        const categoryDescription = document.getElementById('categoryDescription').value;
+
+        const categoryData = {
+            name: categoryName,
+            description: categoryDescription
+        };
+
+        try {
+            const response = await fetch('@Url.Page("View", "CreateCategory")', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(categoryData)
+            });
+
+            const result = await response.json();
+
+            const messageElement = document.getElementById('responseMessage');
+            messageElement.classList.remove('hidden');
+
+            if (result.success) {
+                messageElement.classList.replace('text-red-500', 'text-green-500');
+                messageElement.textContent = result.message;
+                closeModal();
+                location.reload();
+            } else {
+                messageElement.textContent = result.message;
+            }
+        } catch (error) {
+            showError('An error occurred while creating the category.', 'responseMessage');
+        }
+    }
+
+    function openModal() {
+        document.getElementById('createModal').classList.remove('hidden');
+    }
+
+    function closeModal() {
+        document.getElementById('createModal').classList.add('hidden');
+        resetForm('categoryName', 'categoryDescription', 'responseMessage');
+    }
+
+    // Handle Edit Modal
+    function openEditModal(categoryId, categoryName, categoryDescription) {
+        document.getElementById('editCategoryName').value = categoryName;
+        document.getElementById('editCategoryDescription').value = categoryDescription;
+        document.getElementById('editModal').dataset.categoryId = categoryId;
+        document.getElementById('editModal').classList.remove('hidden');
+    }
+
+    function closeEditModal() {
+        document.getElementById('editModal').classList.add('hidden');
+        resetForm('editCategoryName', 'editCategoryDescription', 'editResponseMessage');
+    }
+
+    async function submitEditCategory() {
+        const categoryId = document.getElementById('editModal').dataset.categoryId;
+        const categoryData = {
+            name: document.getElementById('editCategoryName').value,
+            description: document.getElementById('editCategoryDescription').value
+        };
+
+        try {
+            const response = await fetch(`/Categories/View?handler=UpdateCategory&categoryId=${categoryId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(categoryData)
+            });
+
+            const result = await response.json();
+            const messageElement = document.getElementById('editResponseMessage');
+            messageElement.classList.remove('hidden');
+
+            if (result.success) {
+                messageElement.classList.replace('text-red-500', 'text-green-500');
+                messageElement.textContent = result.message;
+                closeEditModal();
+                location.reload();
+            } else {
+                messageElement.textContent = result.message;
+            }
+        } catch (error) {
+            showError('An error occurred while updating the category.', 'editResponseMessage');
+        }
+    }
+
+    function showError(message, elementId) {
+        const messageElement = document.getElementById(elementId);
+        messageElement.classList.replace('text-green-500', 'text-red-500');
+        messageElement.textContent = message;
+    }
+
+    function resetForm(...elementIds) {
+        elementIds.forEach(id => document.getElementById(id).value = '');
+        document.getElementById(elementIds.slice(-1)[0]).classList.add('hidden');
+    }
+
+    // Handle Delete Modal
+    function openDeleteConfirmationModal(categoryId) {
+        document.getElementById('deleteConfirmationModal').dataset.categoryId = categoryId;
+        document.getElementById('deleteConfirmationModal').classList.remove('hidden');
+    }
+
+    function closeDeleteConfirmationModal() {
+        document.getElementById('deleteConfirmationModal').classList.add('hidden');
+    }
+
+    async function confirmDeleteCategory() {
+        const categoryId = document.getElementById('deleteConfirmationModal').dataset.categoryId;
+
+        try {
+            const response = await fetch(`/Categories/View?handler=DeleteCategory&categoryId=${categoryId}`, { method: 'DELETE' });
+            const result = await response.json();
+
+            if (result.success) {
+                location.reload();
+            } else {
+                alert(result.message);
+            }
+        } catch (error) {
+            alert('An error occurred while deleting the category.');
+        } finally {
+            closeDeleteConfirmationModal();
+        }
+    }
+
+    // Open Apply Promotion Modal
+    function openApplyPromotionModal(categoryId) {
+        document.getElementById('applyPromotionModal').dataset.categoryId = categoryId;
+        document.getElementById('applyPromotionModal').classList.remove('hidden');
+    }
+
+    // Close Apply Promotion Modal
+    function closeApplyPromotionModal() {
+        document.getElementById('applyPromotionModal').classList.add('hidden');
+    }
+
+    // Submit the selected promotion to the server
+    async function submitApplyPromotion() {
+        const categoryId = document.getElementById('applyPromotionModal').dataset.categoryId;
+        let promotionId = document.getElementById('promotionDropdown').value;
+
+        // Set promotionId to null if "None" is selected
+        promotionId = promotionId === "" ? null : promotionId;
+
+        try {
+            const response = await fetch(`/Categories/View?handler=UpdatePromotion&categoryId=${categoryId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(promotionId)
+            });
+
+            const result = await response.json();
+            const messageElement = document.getElementById('applyPromotionMessage');
+            messageElement.classList.remove('hidden');
+
+            if (result.success) {
+                messageElement.classList.replace('text-red-500', 'text-green-500');
+                messageElement.textContent = result.message;
+                closeApplyPromotionModal();
+                location.reload();
+            } else {
+                messageElement.textContent = result.message;
+            }
+        } catch (error) {
+            showError('An error occurred while applying the promotion.', 'applyPromotionMessage');
+        }
+    }
+
+    // Helper function to show error messages
+    function showError(message, elementId) {
+        const messageElement = document.getElementById(elementId);
+        messageElement.classList.replace('text-green-500', 'text-red-500');
+        messageElement.textContent = message;
+    }
+</script>

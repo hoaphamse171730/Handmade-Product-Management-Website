@@ -10,6 +10,7 @@ public interface IAuthenticationService
     Task<BaseResponse<string>> RegisterAsync(RegisterModelView registerModelView);
     Task<BaseResponse<string>> RegisterAdminAsync(RegisterModelView registerModelView);
     Task<BaseResponse<string>> ForgotPasswordAsync(ForgotPasswordModelView forgotPasswordModelView);
+    Task<BaseResponse<string>> ChangePasswordAsync(ChangePasswordModelView changePasswordModelView, string userId);
     Task<BaseResponse<string>> ResetPasswordAsync(ResetPasswordModelView resetPasswordModelView);
     Task<BaseResponse<string>> ConfirmEmailAsync(ConfirmEmailModelView confirmEmailModelView);
     Task<BaseResponse<string>> GoogleLoginAsync(string token);

@@ -62,9 +62,9 @@ namespace HandmadeProductManagement.Services.Service
             var notifications = review.Select(r => new NotificationModel
             {
                 Id = r.Id,
-                Message = $"Sản phẩm của bạn đã được {r.User?.UserInfo.FullName ?? "Unknown User"} review",  // Lấy FullName từ người dùng trong Review
+                Message = $"Your product has been reviewed by {r.User?.UserInfo.FullName ?? "Unknown User"}",  // Lấy FullName từ người dùng trong Review
                 Tag = Constants.NotificationTagReview,
-                URL = Constants.ApiBaseUrl + $"api/review/{r.Id}"
+                URL = Constants.FrontUrl + $"/Seller/ReviewList"
             }).ToList();
 
             return notifications;
@@ -101,9 +101,9 @@ namespace HandmadeProductManagement.Services.Service
             var notifications = orders.Select(order => new NotificationModel
             {
                 Id = order.Id,
-                Message = $"Bạn có đơn hàng mới từ {order.CustomerName} với trạng thái: {order.Status} vào ngày: {order.LastUpdatedTime.ToString("dd/MM/yyyy")}",
+                Message = $"You have a new order from {order.CustomerName} with current state: {order.Status} on: {order.LastUpdatedTime.ToString("dd/MM/yyyy")}",
                 Tag = Constants.NotificationTagOrder,
-                URL = Constants.ApiBaseUrl + $"/api/order/{order.Id}"
+                URL = Constants.FrontUrl + $"/Seller/OrderManagement"
             }).ToList();
 
             return notifications;
@@ -142,20 +142,16 @@ namespace HandmadeProductManagement.Services.Service
                 .OrderBy(s => s.ChangeTime) // Order by change time ascending
                 .ToListAsync();
 
-            // Define UTC+7 timezone (Vietnam)
-            var vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById(Constants.TimeZoneSEAsiaStandard);
-
             // Create response notifications
             var notifications = statusChanges.Select(status => {
                 // Convert time from UTC to UTC+7
-                var changeTimeInVietnam = TimeZoneInfo.ConvertTimeFromUtc(status.ChangeTime, vietnamTimeZone);
 
                 return new NotificationModel
                 {
                     Id = status.Id,
-                    Message = $"Đơn hàng của bạn được {status.Status} lúc {changeTimeInVietnam.ToString(Constants.DateTimeFormat)}",
+                    Message = $"Your order is {status.Status} at {status.ChangeTime}",
                     Tag = Constants.NotificationTagStatusChange, // Use constant for notification tag
-                    URL = Constants.ApiBaseUrl + $"/api/statuschange/order/{status.OrderId}"
+                    URL = Constants.FrontUrl + $"/Order/OrderDetail?orderId={status.OrderId}"
                 };
             }).ToList();
 
@@ -202,9 +198,9 @@ namespace HandmadeProductManagement.Services.Service
             var replyNotifications = replies.Select(reply => new NotificationModel
             {
                 Id = reply.Id,
-                Message = $"Bạn đã nhận được phản hồi mới cho review sản phẩm {reply?.Review?.Product?.Shop?.User?.UserInfo.FullName ?? "Unknown User"}",
+                Message = $"Your review has been reply by {reply?.Review?.Product?.Shop?.User?.UserInfo.FullName ?? "Unknown User"}",
                 Tag = Constants.NotificationTagReply,
-                URL = Constants.ApiBaseUrl + $"api/reply/{reply!.Id}"
+                URL = Constants.FrontUrl + $"/Review/Index"
             }).ToList();
 
             return replyNotifications;

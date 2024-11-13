@@ -1,0 +1,15 @@
+﻿@page "{replyId}"
+@model UI.Pages.Reply.EditModel
+@{
+    ViewData["Title"] = "Edit Reply";
+}
+
+<h2>Edit Reply</h2>
+
+<form method="post">
+    <div class="form-group">
+        <label for="Content">Content</label>
+        <input type="text" id="Content" name="Content" class="form-control" value="@Model.Reply.Content" />
+    </div>
+    <button type="submit" class="btn btn-primary">Save</button>
+</form>

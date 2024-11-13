@@ -53,16 +53,20 @@ public class MappingProfile : Profile
         CreateMap<Variation, VariationDto>();
         CreateMap<VariationForCreationDto, Variation>();
         CreateMap<VariationForUpdateDto, Variation>();
+        CreateMap<Variation, LatestVariationId>();
         #endregion
 
         #region VariationOption
         CreateMap<VariationOption, VariationOptionDto>();
         CreateMap<VariationOptionForCreationDto, VariationOption>();
         CreateMap<VariationOptionForUpdateDto, VariationOption>();
+        CreateMap<VariationOption, LatestVariationOptionId>();
         #endregion
 
         #region Category
         CreateMap<Category, CategoryDto>();
+        CreateMap<Category, CategoryDtoWithDetail>()
+            .ForMember(dest => dest.Promotion, opt => opt.MapFrom(src => src.Promotion));
         CreateMap<CategoryForCreationDto, Category>();
         CreateMap<CategoryForUpdateDto, Category>();
         CreateMap<CategoryForUpdatePromotion, Category>();

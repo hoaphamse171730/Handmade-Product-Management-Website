@@ -1,0 +1,56 @@
+﻿@page
+@using UI.Pages.Shared
+@model UI.Pages.Promotion.CreateModel
+@{
+    ViewData["Title"] = "Create Promotion";
+}
+
+<h1 class="text-3xl font-bold text-center mb-6">Create Promotion</h1>
+
+@{
+    var errorModel = new ErrorMessageModel
+            {
+                ErrorMessage = Model.ErrorMessage,
+                ErrorDetail = Model.ErrorDetail
+            };
+}
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <partial name="_ErrorMessage" model="errorModel" />
+}
+
+<form method="post" class="bg-white shadow-md rounded-lg p-6">
+    <div class="mb-4">
+        <label asp-for="Promotion.Name" class="block text-gray-700 text-sm font-bold mb-2"></label>
+        <input asp-for="Promotion.Name" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
+        <span asp-validation-for="Promotion.Name" class="text-red-500 text-xs italic"></span>
+    </div>
+    <div class="mb-4">
+        <label asp-for="Promotion.Description" class="block text-gray-700 text-sm font-bold mb-2"></label>
+        <textarea asp-for="Promotion.Description" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"></textarea>
+        <span asp-validation-for="Promotion.Description" class="text-red-500 text-xs italic"></span>
+    </div>
+    <div class="mb-4">
+        <label asp-for="Promotion.DiscountRate" class="block text-gray-700 text-sm font-bold mb-2"></label>
+        <input asp-for="Promotion.DiscountRate" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="number" step="0.01" min="0" max="1" />
+        <span asp-validation-for="Promotion.DiscountRate" class="text-red-500 text-xs italic"></span>
+    </div>
+    <div class="mb-4">
+        <label asp-for="Promotion.StartDate" class="block text-gray-700 text-sm font-bold mb-2"></label>
+        <input asp-for="Promotion.StartDate" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="date" min="1990-01-01" value="@DateTime.Today.ToString("yyyy-MM-dd")" />
+        <span asp-validation-for="Promotion.StartDate" class="text-red-500 text-xs italic"></span>
+    </div>
+    <div class="mb-4">
+        <label asp-for="Promotion.EndDate" class="block text-gray-700 text-sm font-bold mb-2"></label>
+        <input asp-for="Promotion.EndDate" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="date" min="1990-01-01" value="@DateTime.Today.ToString("yyyy-MM-dd")" />
+        <span asp-validation-for="Promotion.EndDate" class="text-red-500 text-xs italic"></span>
+    </div>
+    <div class="flex items-center justify-between">
+        <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Create</button>
+        <a asp-page="Index" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded ml-2">Cancel</a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

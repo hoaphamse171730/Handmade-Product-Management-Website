@@ -1,0 +1,61 @@
+﻿@page
+@model UI.Pages.ManageShop.ShopModel
+@{
+    ViewData["Title"] = "Shops";
+}
+
+<h1 class="mb-6 text-center text-3xl font-bold">Shops</h1>
+@{
+    var errorModel = new Shared.ErrorMessageModel
+            {
+                ErrorMessage = Model.ErrorMessage,
+                ErrorDetail = Model.ErrorDetail
+            };
+}
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <partial name="_ErrorMessage" model="errorModel" />
+}
+
+<a asp-page="DeletedShops" class="mb-6 inline-block rounded bg-red-500 px-4 py-2 font-bold text-white hover:bg-red-700">View Deleted Shops</a>
+
+<div class="overflow-x-auto">
+    <table class="min-w-full rounded-lg bg-white shadow-md">
+        <thead>
+            <tr class="bg-gray-200 text-sm uppercase leading-normal text-gray-600">
+                <th class="px-6 py-3 text-left">Name</th>
+                <th class="px-6 py-3 text-left">Description</th>
+                <th class="px-6 py-3 text-left">Rating</th>
+                <th class="px-6 py-3 text-left">Sales</th>
+                <th class="px-6 py-3 text-left">Owner</th>
+                <th class="px-6 py-3 text-left">Actions</th>
+            </tr>
+        </thead>
+        <tbody class="text-sm font-light text-gray-600">
+            @foreach (var shop in Model.Shops)
+            {
+                <tr class="border-b border-gray-200 hover:bg-gray-100">
+                    <td class="px-6 py-3 text-left">@shop.Name</td>
+                    <td class="px-6 py-3 text-left">@shop.Description</td>
+                    <td class="px-6 py-3 text-left">@shop.Rating</td>
+                    <td class="px-6 py-3 text-left">@shop.TotalSales.ToString("N0").Replace(",", ".")₫</td>
+                    <td class="px-6 py-3 text-left">@shop.ownerName</td>
+                    <td class="px-6 py-3 text-left">
+                        <a asp-page="Delete" asp-route-id="@shop.Id" class="ml-2 rounded bg-red-500 px-3 py-1 text-xs font-bold text-white hover:bg-red-800">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@{
+    var paginationModel = new Shared.PaginationModel
+            {
+                PageNumber = Model.PageNumber,
+                PageSize = Model.PageSize,
+                HasNextPage = Model.HasNextPage
+            };
+}
+
+<partial name="~/Pages/Shared/_Pagination.cshtml" model="paginationModel" />

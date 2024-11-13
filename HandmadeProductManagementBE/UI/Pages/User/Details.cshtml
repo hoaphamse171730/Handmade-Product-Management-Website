@@ -1,0 +1,55 @@
+﻿@page
+@model UI.Pages.User.DetailsModel
+
+@{
+    ViewData["Title"] = "User Details";
+}
+
+<h1 class="text-4xl font-bold mb-4 text-center text-red-600">User Details</h1>
+
+<table class="details-table border border-gray-300 rounded-lg w-full bg-white shadow-md">
+    <tr>
+        <th>ID</th>
+        <td>@Model.User.Id</td>
+    </tr>
+    <tr>
+        <th>User Name</th>
+        <td>@Model.User.UserName</td>
+    </tr>
+    <tr>
+        <th>Normalized User Name</th>
+        <td>@Model.User.NormalizedUserName</td>
+    </tr>
+    <tr>
+        <th>Email</th>
+        <td>@Model.User.Email</td>
+    </tr>
+    <tr>
+        <th>Normalized Email</th>
+        <td>@Model.User.NormalizedEmail</td>
+    </tr>
+    <tr>
+        <th>Email Confirmed</th>
+        <td>@Model.User.EmailConfirmed</td>
+    </tr>
+    <tr>
+        <th>Phone Number</th>
+        <td>@Model.User.PhoneNumber</td>
+    </tr>
+    <tr>
+        <th>Phone Number Confirmed</th>
+        <td>@Model.User.PhoneNumberConfirmed</td>
+    </tr>
+    <tr>
+        <th>Two Factor Enabled</th>
+        <td>@Model.User.TwoFactorEnabled</td>
+    </tr>
+    <tr>
+        <th>Access Failed Count</th>
+        <td>@Model.User.AccessFailedCount</td>
+    </tr>
+</table>
+
+<div class="flex justify-end mt-4">
+    <a class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600" asp-page="/User/User">Back to List</a>
+</div>

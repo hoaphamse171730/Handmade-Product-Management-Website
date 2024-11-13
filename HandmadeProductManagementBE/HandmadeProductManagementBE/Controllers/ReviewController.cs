@@ -20,6 +20,38 @@ namespace HandmadeProductManagementAPI.Controllers
             _reviewService = reviewService;
         }
 
+        [Authorize]
+        [HttpGet("seller")]
+        public async Task<IActionResult> GetBySellerId(int pageNumber = 1, int pageSize = 10)
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
+            var reviews = await _reviewService.GetBySellerIdAsync(userId, pageNumber, pageSize);
+            var response = new BaseResponse<IList<ReviewModel>>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Seller's reviews retrieved successfully.",
+                Data = reviews
+            };
+            return Ok(response);
+        }
+
+        [Authorize]
+        [HttpGet("user")]
+        public async Task<IActionResult> GetByUserId(int pageNumber = 1, int pageSize = 10)
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
+            var reviews = await _reviewService.GetByUserIdAsync(userId, pageNumber, pageSize);
+            var response = new BaseResponse<IList<ReviewModel>>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Seller's reviews retrieved successfully.",
+                Data = reviews
+            };
+            return Ok(response);
+        }
+
         [HttpGet("product/{productId}")]
         public async Task<IActionResult> GetByProductId([Required] string productId, int pageNumber = 1, int pageSize = 10)
         {
@@ -65,20 +97,11 @@ namespace HandmadeProductManagementAPI.Controllers
 
         [Authorize]
         [HttpPost]
-        public async Task<IActionResult> Create(string? content, [Required] int rating, [Required] string productId, [Required] string orderId)
+        public async Task<IActionResult> Create(ReviewForCreationDto review)
         {
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
-            var userName = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
 
-            var reviewModel = new ReviewModel
-            {
-                Content = content,
-                Rating = rating,
-                ProductId = productId,
-                UserId = Guid.Parse(userId)
-            };
-
-            var createdReview = await _reviewService.CreateAsync(reviewModel,orderId);
+            var createdReview = await _reviewService.CreateAsync(review, userId);
 
             var response = new BaseResponse<bool>
             {
@@ -101,8 +124,9 @@ namespace HandmadeProductManagementAPI.Controllers
             existingReview.Rating = rating ?? existingReview.Rating;
 
             var updatedReview = await _reviewService.UpdateAsync(reviewId, Guid.Parse(userId), existingReview);
-            var response = new BaseResponse<ReviewModel>
+            var response = new BaseResponse<bool>
             {
+                Data = true,
                 Code = "Success",
                 StatusCode = StatusCodeHelper.OK,
                 Message = "Review updated successfully."
@@ -172,6 +196,20 @@ namespace HandmadeProductManagementAPI.Controllers
                 StatusCode = StatusCodeHelper.OK,
                 Message = "Retrieve deleted review successfully.",
                 Data = result
+            };
+            return Ok(response);
+        }
+
+        [HttpGet("totalpages")]
+        public async Task<IActionResult> GetTotalPages(int pageSize)
+        {
+            var totalPages = await _reviewService.GetTotalPagesAsync(pageSize);
+            var response = new BaseResponse<int>
+            {
+                Code = "Success",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Total pages retrieved successfully.",
+                Data = totalPages
             };
             return Ok(response);
         }

@@ -1,0 +1,184 @@
+﻿@page 
+@using UI.Pages.Shared
+@model UI.Pages.Shop.IndexModel
+@{
+    ViewData["Title"] = "Shop";
+}
+@{
+    var errorModel = new ErrorMessageModel
+            {
+                ErrorMessage = Model.ErrorMessage,
+                ErrorDetail = Model.ErrorDetail
+            };
+}
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <partial name="_ErrorMessage" model="errorModel" />
+}
+
+<div class="w-full bg-white px-8 py-6">
+    <div class="flex">
+        <!-- Left half for Shop Name -->
+        <div class="flex w-1/2 items-center justify-center">
+            <h1 class="mb-4 text-4xl font-bold">@Model.Shop.Name</h1>
+        </div>
+
+        <!-- Right half for other shop details -->
+        <div class="w-1/2 pl-6">
+            <div class="mb-4 flex items-center">
+                <h2 class="mr-2 text-xl font-semibold">Rating:</h2>
+                <p class="flex items-center">
+                    @Model.Shop.Rating
+                    <div class="ml-2"></div>
+                    @for (int i = 1; i <= 5; i++)
+                    {
+                        <i class="fa fa-star @(i <= Model.Shop.Rating ? "text-yellow-500" : "text-gray-300")"></i>
+                    }
+                </p>
+            </div>
+
+            <div class="mb-4 flex items-center">
+                <h2 class="mr-2 text-xl font-semibold">Products:</h2>
+                <p>@Model.Shop.ProductCount</p>
+            </div>
+
+            <div class="mb-4 flex items-center">
+                <h2 class="mr-2 text-xl font-semibold">Joined:</h2>
+                <p>@Model.Shop.JoinedTimeAgo</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Full-width description section -->
+    <div class="mt-6">
+        <h2 class="text-xl font-semibold">Description</h2>
+        <span class="text-gray-600">@Model.Shop.Description</span>
+    </div>
+</div>
+
+<h1 class="mb-4 mt-4 text-3xl font-bold">Product List</h1>
+
+<div class="search-filter">
+    <form method="get" class="flex items-center space-x-4">
+        <input type="hidden" name="id" value="@Request.Query["id"]" />
+        <input class="rounded-md border border-gray-300 p-2" type="text" name="Name" placeholder="Search by name" value="@Request.Query["Name"]" onchange="this.form.submit();" />
+        <select name="CategoryId" class="rounded-md border border-gray-300 p-2">
+            <option value="">Select Category</option>
+            @if (Model.Categories != null && Model.Categories.Any())
+            {
+                foreach (var category in Model.Categories)
+                {
+                    var isSelected = Request.Query["CategoryId"] == category.Id.ToString();
+                    if (isSelected)
+                    {
+                        <option value="@category.Id" selected>@category.Name</option>
+                    }
+                    else
+                    {
+                        <option value="@category.Id">@category.Name</option>
+                    }
+                }
+            }
+        </select>
+        @{
+            var selectedStatus = Request.Query["Status"].ToString();
+        }
+
+        <select name="Status" class="rounded-md border border-gray-300 p-2">
+            @if (string.IsNullOrEmpty(selectedStatus))
+            {
+                <option value="" selected>Select Status</option>
+            }
+            else
+            {
+                <option value="">Select Status</option>
+            }
+
+            @if (selectedStatus == "Available")
+            {
+                <option value="Available" selected>Available</option>
+            }
+            else
+            {
+                <option value="Available">Available</option>
+            }
+
+            @if (selectedStatus == "OutOfStock")
+            {
+                <option value="OutOfStock" selected>Out Of Stock</option>
+            }
+            else
+            {
+                <option value="OutOfStock">Out Of Stock</option>
+            }
+        </select>
+        <input class="rounded-md border border-gray-300 p-2" type="number" name="MinRating" placeholder="Min Rating" min="0" max="5" value="@Request.Query["MinRating"]" />
+
+        <div class="flex items-center space-x-4">
+            <label class="flex items-center">
+                <input type="radio" id="sortByPrice" name="SortOption" value="SortByPrice"
+                @(Request.Query["SortOption"] == "SortByPrice" ? "checked" : "") onchange="this.form.submit();" />
+                <span class="ml-2">Sort by Price</span>
+            </label>
+
+            <label class="flex items-center">
+                <input type="radio" id="sortByRating" name="SortOption" value="SortByRating"
+                @(Request.Query["SortOption"] == "SortByRating" ? "checked" : "") onchange="this.form.submit();" />
+                <span class="ml-2">Sort by Rating</span>
+            </label>
+        </div>
+
+
+
+        <label class="flex items-center">
+            <span class="mr-2">Sort Descending:</span>
+            <input type="checkbox" name="sortDescending" value="true"
+            @(Request.Query["SortDescending"] == "true" ? "checked" : "") onchange="this.form.submit();" />
+        </label>
+
+        <button type="submit" class="rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600">Search</button>
+    </form>
+</div>
+
+<!-- Product List -->
+@if (Model.Products != null && Model.Products.Any())
+{
+    @await Html.PartialAsync("Shared/_ProductList", Model.Products)
+}
+else
+{
+    <p>No products found matching your criteria.</p>
+}
+
+@{
+    var paginationModel = new UI.Pages.Shared.PaginationModel
+            {
+                PageNumber = Model.PageNumber,
+                PageSize = Model.PageSize,
+
+                CurrentFilter = Model.CurrentFilters,
+                HasNextPage = Model.HasNextPage
+
+            };
+}
+
+<partial name="~/Pages/Shared/_Pagination.cshtml" model="paginationModel" />
+
+<script>
+    document.getElementById('sortByPrice').addEventListener('change', function () {
+        if (this.checked) {
+            document.getElementById('sortByRating').checked = false;
+        }
+    });
+
+    document.getElementById('sortByRating').addEventListener('change', function () {
+        if (this.checked) {
+            document.getElementById('sortByPrice').checked = false;
+        }
+    });
+</script>
+<script>
+    function viewProduct(productId) {
+        window.location.href = `/ProductDetail/ProductDetail?id=${productId}`;
+    }
+</script>

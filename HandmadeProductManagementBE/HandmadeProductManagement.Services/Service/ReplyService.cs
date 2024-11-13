@@ -5,6 +5,7 @@ using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Common;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.ReplyModelViews;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace HandmadeProductManagement.Services.Service
@@ -121,10 +122,11 @@ namespace HandmadeProductManagement.Services.Service
                 Content = replyModel.Content,
                 ReviewId = replyModel.ReviewId,
                 ShopId = replyModel.ShopId,
-                Date = vietnamTime,
-                CreatedBy = replyModel.ShopId,
-                LastUpdatedBy = replyModel.ShopId
+                Date = vietnamTime
             };
+
+            reply.CreatedBy = replyModel.ShopId;
+            reply.LastUpdatedBy = replyModel.ShopId;
 
             await _unitOfWork.GetRepository<Reply>().InsertAsync(reply);
             await _unitOfWork.SaveAsync();

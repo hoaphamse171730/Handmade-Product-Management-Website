@@ -1,0 +1,19 @@
+﻿@model UI.Pages.Shared.ErrorMessageModel
+
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+        <span class="flex">
+            <svg class="fill-current w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                <path d="M10 0C4.486 0 0 4.486 0 10s4.486 10 10 10 10-4.486 10-10S15.514 0 10 0zm1 15H9v-2h2v2zm0-4H9V5h2v6z" />
+            </svg>
+            <strong class="font-bold">Error:</strong>
+            <span class="ml-1">@Model.ErrorMessage</span>
+        </span>
+
+        @if (!string.IsNullOrEmpty(Model.ErrorDetail))
+        {
+            <p class="mt-2"><strong>Details:</strong> @Model.ErrorDetail</p>
+        }
+    </div>
+}

@@ -23,28 +23,44 @@ namespace HandmadeProductManagement.Services.Service
             _updateValidator = updateValidator;
         }
 
-        public async Task<IList<UserResponseModel>> GetAll()
+        public async Task<IList<UserResponseModel>> GetAll(int PageNumber, int PageSize, string? userName = null, string? phoneNumber = null)
         {
 
-            var users = await _unitOfWork.GetRepository<ApplicationUser>()
+            var query =  _unitOfWork.GetRepository<ApplicationUser>()
                 .Entities
-                .Select(user => new UserResponseModel
-                {
-                    Id = user.Id,
-                    UserName = user.UserName,
-                    Email = user.Email,
-                    PhoneNumber = user.PhoneNumber,
-                    CreatedBy = user.CreatedBy,
-                    LastUpdatedBy = user.LastUpdatedBy,
-                    DeletedBy = user.DeletedBy,
-                    CreatedTime = user.CreatedTime,
-                    LastUpdatedTime = user.LastUpdatedTime,
-                    DeletedTime = user.DeletedTime,
-                    Status = user.Status,
-                })
-                .ToListAsync();
+                .AsQueryable();
 
-            return users;
+            if(!string.IsNullOrEmpty(userName) )
+            {
+                query = query.Where(x => x.UserName.Contains(userName));
+            }
+
+            if (!string.IsNullOrEmpty(phoneNumber))
+            {
+                query = query.Where(x => x.PhoneNumber.Contains(phoneNumber));
+            }
+
+
+            var users = await query
+           .Select(user => new UserResponseModel
+           {
+               Id = user.Id,
+               UserName = user.UserName,
+               Email = user.Email,
+               PhoneNumber = user.PhoneNumber,
+               CreatedBy = user.CreatedBy,
+               LastUpdatedBy = user.LastUpdatedBy,
+               DeletedBy = user.DeletedBy,
+               CreatedTime = user.CreatedTime,
+               LastUpdatedTime = user.LastUpdatedTime,
+               DeletedTime = user.DeletedTime,
+               Status = user.Status,
+           })
+           .Skip((PageNumber - 1) * PageSize)
+           .Take(PageSize)
+           .ToListAsync();
+
+            return users; ;
 
         }
 
@@ -77,6 +93,51 @@ namespace HandmadeProductManagement.Services.Service
                 .FirstOrDefaultAsync() ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageUserNotFound);
 
             return user;
+        }
+
+        public async Task<IList<UserDto>> GetUserNames(string? userName = null, string? phoneNumber = null)
+        {
+            var query = _unitOfWork.GetRepository<ApplicationUser>()
+                .Entities
+                .AsQueryable();
+
+            if (!string.IsNullOrEmpty(userName))
+            {
+                query = query.Where(x => x.UserName!.Contains(userName));
+            }
+
+            if (!string.IsNullOrEmpty(phoneNumber))
+            {
+                query = query.Where(x => x.PhoneNumber!.Contains(phoneNumber));
+            }
+
+            // Select both UserId and UserName
+            var userNames = await query
+                .Select(user => new UserDto
+                {
+                    UserId = user.Id.ToString(),  // Assuming user.Id is of type Guid or another non-string type, convert to string if necessary
+                    UserName = user.UserName!
+                })
+                .ToListAsync();
+
+            return userNames;
+        }
+
+        public async Task<string> GetUserNameById(string id)
+        {
+            // Ensure the id is a valid Guid
+            if (!Guid.TryParse(id, out Guid userId))
+            {
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat);
+            }
+
+            var userName = await _unitOfWork.GetRepository<ApplicationUser>()
+                .Entities
+                .Where(u => u.Id == userId)
+                .Select(u => u.UserName)
+                .FirstOrDefaultAsync() ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageUserNotFound);
+
+            return userName;
         }
 
         public async Task<bool> UpdateUser(string id, UpdateUserDTO updateUserDTO)
@@ -305,7 +366,7 @@ namespace HandmadeProductManagement.Services.Service
 
             if (shopID == null || !shopID.Any())
             {
-                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageUserNotFound);
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageShopNotFound);
             }
 
             var twoDaysAgo = DateTime.UtcNow.AddDays(-2); // Use UTC for consistency
@@ -346,7 +407,7 @@ namespace HandmadeProductManagement.Services.Service
 
             if (orders == null || !orders.Any())
             {
-                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageUserNotFound); // Use constant for user not found
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageShopNotFound); // Use constant for user not found
             }
 
             var twoDaysAgo = DateTime.UtcNow.AddDays(-2); // Use UTC for consistency

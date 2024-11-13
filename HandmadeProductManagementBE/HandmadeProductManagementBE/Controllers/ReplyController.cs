@@ -99,8 +99,9 @@ namespace HandmadeProductManagementAPI.Controllers
             try
             {
                 var updatedReply = await _replyService.UpdateAsync(replyId, Guid.Parse(userId), replyModel);
-                var response = new BaseResponse<ReplyModel>
+                var response = new BaseResponse<bool>
                 {
+                    Data = true,
                     Code = "Success",
                     StatusCode = StatusCodeHelper.OK,
                     Message = "Reply updated successfully."
@@ -119,7 +120,7 @@ namespace HandmadeProductManagementAPI.Controllers
             }
         }
 
-        /*[Authorize]
+        [Authorize]
         [HttpDelete("{replyId}")]
         public async Task<IActionResult> Delete([Required] string replyId)
         {
@@ -146,7 +147,7 @@ namespace HandmadeProductManagementAPI.Controllers
                 };
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
-        }*/
+        }
 
         [Authorize]
         [HttpDelete("{replyId}/soft-delete")]

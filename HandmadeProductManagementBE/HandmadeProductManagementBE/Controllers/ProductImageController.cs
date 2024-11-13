@@ -17,21 +17,22 @@ namespace HandmadeProductManagementAPI.Controllers
             _productImageService = productImageService;
         }
 
-        [HttpPost("Upload")]
-        public async Task<IActionResult> UploadProductImage(IFormFile file, string productId)
+        [HttpPost("Upload/{productId}")]
+        public async Task<IActionResult> UploadProductImage(List<IFormFile> files, string productId)
         {
+            // Tiến hành xử lý các tệp đã gửi
             var response = new BaseResponse<bool>
             {
                 Code = "200",
                 StatusCode = StatusCodeHelper.OK,
                 Message = "Success",
-                Data = await _productImageService.UploadProductImage(file, productId)
+                Data = await _productImageService.UploadProductImage(files, productId)
             };
-            return Ok(response);
 
+            return Ok(response);
         }
 
-        [HttpDelete("Delete")]
+        [HttpDelete("Delete/{imageId}")]
         public async Task<IActionResult> DeleteProductImage(string imageId)
         {
             var response = new BaseResponse<bool>
@@ -45,7 +46,7 @@ namespace HandmadeProductManagementAPI.Controllers
 
         }
 
-        [HttpGet("GetImage")]
+        [HttpGet("GetImage/{productId}")]
         public async Task<IActionResult> GetProductImagesByProductId(string productId)
         {
             var response = new BaseResponse<IList<productImageByIdResponse>>

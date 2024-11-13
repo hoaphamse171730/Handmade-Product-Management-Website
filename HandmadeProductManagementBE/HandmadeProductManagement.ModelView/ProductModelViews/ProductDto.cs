@@ -9,5 +9,6 @@ namespace HandmadeProductManagement.ModelViews.ProductModelViews
         public string? Description { get; set; }
         public string? CategoryId { get; set; } = string.Empty;
         public List<VariationForProductCreationDto> Variations { get; set; } = [];
+        public string ProductImageUrl { get; set; }
     }
 }

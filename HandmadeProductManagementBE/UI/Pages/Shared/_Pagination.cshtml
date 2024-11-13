@@ -1,0 +1,48 @@
+﻿@model UI.Pages.Shared.PaginationModel
+
+<nav aria-label="Page navigation" class="flex justify-center my-4">
+    <ul class="flex space-x-2">
+        <!-- Previous Button -->
+        <li class="page-item">
+            @if (Model.PageNumber > 1)
+            {
+                <a href="?@Model.CurrentFilter&pageNumber=@(Model.PageNumber - 1)&pageSize=@Model.PageSize"
+                    class="page-link px-3 py-1 border border-gray-300 rounded hover:bg-gray-200">
+                    Previous
+                </a>
+            }
+            else
+            {
+                <span class="page-link px-3 py-1 border border-gray-300 rounded opacity-50 cursor-not-allowed">
+                    Previous
+                </span>
+            }
+        </li>
+
+        <!-- Current Page Display -->
+        <li class="page-item">
+            <span class="px-3 py-1 border border-gray-300 rounded bg-gray-100">
+                Page @Model.PageNumber
+            </span>
+        </li>
+
+        <!-- Next Button -->
+        <li class="page-item">
+                        @if (Model.HasNextPage)
+            {
+
+                <a href="?@Model.CurrentFilter&pageNumber=@(Model.PageNumber + 1)&pageSize=@Model.PageSize"
+                class="page-link px-3 py-1 border border-gray-300 rounded hover:bg-gray-200">
+                    Next
+                </a>
+            }
+            else
+            {
+                <span class="page-link px-3 py-1 border border-gray-300 rounded opacity-50 cursor-not-allowed">
+                    Next
+                </span>
+            }
+
+        </li>
+    </ul>
+</nav>

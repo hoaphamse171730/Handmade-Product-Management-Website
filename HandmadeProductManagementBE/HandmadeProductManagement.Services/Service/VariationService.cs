@@ -26,7 +26,29 @@ namespace HandmadeProductManagement.Services.Service
             _updateValidator = updateValidator;
         }
 
-        public async Task<IList<VariationDto>> GetByCategoryId(string id)
+        public async Task<LatestVariationId> GetLatestVariationId(string categoryId, string userId)
+        {
+            // Validate categoryId format
+            if (!Guid.TryParse(categoryId, out _))
+            {
+                throw new BaseException.BadRequestException(
+                    StatusCodeHelper.BadRequest.ToString(),
+                    Constants.ErrorMessageInvalidGuidFormat
+                );
+            }
+
+            // Retrieve the latest variation created by the specified user in the given category
+            var latestVariation = await _unitOfWork.GetRepository<Variation>().Entities
+                .Where(v => v.CategoryId == categoryId &&
+                            v.CreatedBy == userId &&
+                            (!v.DeletedTime.HasValue || v.DeletedBy == null))
+                .OrderByDescending(v => v.CreatedTime)
+                .FirstOrDefaultAsync();
+
+            return _mapper.Map<LatestVariationId>(latestVariation);
+        }
+
+        public async Task<IList<VariationDto>> GetByCategoryId(string id, string userId)
         {
             // Validate id format
             if (!Guid.TryParse(id, out var guidId))
@@ -38,7 +60,7 @@ namespace HandmadeProductManagement.Services.Service
             }
 
             var variations = await _unitOfWork.GetRepository<Variation>().Entities
-                .Where(v => v.CategoryId == id && (!v.DeletedTime.HasValue || v.DeletedBy == null))
+                .Where(v => v.CategoryId == id && (!v.DeletedTime.HasValue || v.DeletedBy == null) && v.CreatedBy == userId)
                 .ToListAsync();
 
             return _mapper.Map<IList<VariationDto>>(variations);
@@ -70,18 +92,6 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.NotFoundException(
                     StatusCodeHelper.NotFound.ToString(),
                     Constants.ErrorMessageCategoryNotFound
-                );
-            }
-
-            // Check if the variation name already exists for the given category
-            var variationNameExists = await _unitOfWork.GetRepository<Variation>()
-                .Entities.AnyAsync(v => v.Name == variationForCreation.Name && v.CategoryId == variationForCreation.CategoryId);
-
-            if (variationNameExists)
-            {
-                throw new BaseException.BadRequestException(
-                    StatusCodeHelper.BadRequest.ToString(),
-                    Constants.ErrorMessageDuplicateVariationName
                 );
             }
 

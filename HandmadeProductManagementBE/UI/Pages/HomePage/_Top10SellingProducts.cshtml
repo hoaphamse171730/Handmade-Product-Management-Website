@@ -1,0 +1,29 @@
+﻿@model List<HandmadeProductManagement.ModelViews.ProductModelViews.TopSellingProducts>
+
+<!-- Top 10 Selling Products Swiper -->
+<div class="swiper-container selling-products-swiper relative mb-10">
+    <h2 class="mb-4 text-center text-lg font-bold text-blue-600">Top 10 Selling Products</h2>
+    <div class="swiper-wrapper">
+        @foreach (var product in Model)
+        {
+            <div class="swiper-slide">
+                <div class="mb-10 text-center">
+                    <a href="/ProductDetail/ProductDetail?id=@product.Id" class="block transform transition-transform hover:scale-105">
+                        <div class="relative inline-block">
+                            <img class="mx-auto h-40 w-40" src="@product.ImageUrl" alt="@product.Name" />
+                            <!-- Sold Count Overlay -->
+                            <div class="bg-opacity-50text-center bg-gray-700 text-sm text-white">
+                                Sold: @product.SoldCount
+                            </div>
+                        </div>
+                        <h3 class="text-md font-semibold">@product.Name</h3>
+                        <p class="text-sm text-gray-600">₫@product.Price.ToString("N0").Replace(",", ".")</p>
+                    </a>
+                </div>
+            </div>
+        }
+    </div>
+    <div class="swiper-pagination"></div>
+    <div class="swiper-button-next"></div>
+    <div class="swiper-button-prev"></div>
+</div>

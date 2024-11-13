@@ -1,0 +1,84 @@
+﻿@page
+@model UI.Pages.Admin.OrderListModel
+@{
+    ViewData["Title"] = "Order List";
+}
+<div class="mx-auto max-w-full">
+    <div class="mb-6 text-center">
+        <h1 class="ml-4 text-left text-2xl font-bold text-black">Order History</h1>
+    </div>
+
+    <!-- Filter Buttons -->
+    <div class="mb-4 flex w-full flex-wrap justify-center gap-2">
+        @foreach (var filter in new[] { "All", "Pending", "Processing", "Delivering", "Shipped", "Canceled", "Refunded" })
+        {
+            <a href="?filter=@filter"
+               class="flex-grow rounded-lg border border-blue-500 p-2 text-center text-lg font-bold
+@(Model.CurrentFilter == filter ? "bg-blue-500 text-white" : "bg-white text-black hover:bg-blue-100")">
+                @filter Orders
+            </a>
+        }
+    </div>
+
+    <!-- Orders Table -->
+    @if (Model.Orders == null || !Model.Orders.Any())
+    {
+        <p class="text-center text-gray-600">You don't have any orders yet</p>
+    }
+    else
+    {
+        <div class="relative flex h-full w-full flex-col rounded-lg bg-white bg-clip-border text-gray-700 shadow-md">
+            <div class="overflow-x-auto">
+                <table class="w-full table-auto text-left">
+                    <thead>
+                        <tr class="border-b border-gray-300 bg-gray-50">
+                            <th class="w-1/12 p-6 text-lg font-bold text-black">No</th>
+                            <th class="w-1/5 p-6 text-lg font-bold text-black">Name</th>
+                            <th class="w-[11ch] p-6 text-lg font-bold text-black">Phone</th>
+                            <th class="w-[11ch] p-6 text-lg font-bold text-black">Order Date</th>
+                            <th class="p-6 text-lg font-bold text-black">Total Price</th>
+                            <th class="w-1/6 p-6 text-lg font-bold text-black">Status</th>
+                            <th class="w-1/6 p-6 text-lg font-bold text-black">Address</th>
+                            <th class="w-1/5 p-6 text-lg font-bold text-black">Note</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            var index = 1;
+                        }
+                        @foreach (var order in Model.Orders)
+                        {
+                            <tr class="hover:bg-gray-50"
+                                onclick="location.href='@Url.Page("/Order/OrderDetail", new { orderId = order.Id })'">
+                                <td class="border-b border-gray-200 p-6 text-lg">@index</td>
+                                <td class="border-b border-gray-200 p-6 text-lg">@order.CustomerName</td>
+                                <td class="border-b border-gray-200 p-6 text-lg">@order.Phone</td>
+                                <td class="border-b border-gray-200 p-6 text-lg">@order.OrderDate.ToString("dd/MM/yyyy")</td>
+                                <td class="border-b border-gray-200 p-6 text-lg">@order.TotalPrice.ToString("N0").Replace(",", ".")₫</td>
+                                <td class="border-b border-gray-200 p-6 text-lg">@order.Status</td>
+                                <td class="border-b border-gray-200 p-6 text-lg">@order.Address</td>
+                                <td class="border-b border-gray-200 p-6 text-lg">@order.Note</td>
+                            </tr>
+
+                            index++;
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>
+
+@{
+    // Create the pagination model with CurrentFilters
+    var paginationModel = new UI.Pages.Shared.PaginationModel
+            {
+                PageNumber = Model.PageNumber,
+                PageSize = Model.PageSize,
+                // Pass the serialized CurrentFilters
+                CurrentFilter = Model.CurrentFilter,
+                HasNextPage = Model.HasNextPage
+            };
+}
+
+<partial name="~/Pages/Shared/_Pagination.cshtml" model="paginationModel" />

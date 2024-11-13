@@ -1,0 +1,36 @@
+﻿@page
+@model UI.Pages.Reply.IndexModel
+@{
+    ViewData["Title"] = "Reply List";
+}
+
+<h2>Reply List</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Content</th>
+            <th>Review ID</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var reply in Model.Replies)
+        {
+            <tr>
+                <td>@reply.Content</td>
+                <td>@reply.ReviewId</td>
+                <td>
+                    <a asp-page="./Edit" asp-route-replyId="@reply.Id">Edit</a> |
+                    <a asp-page="./SoftDelete" asp-route-replyId="@reply.Id">Soft Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div>
+    Page @(Model.PageNumber) of @(Model.TotalPages)
+    <a asp-page="./Index" asp-route-pageNumber="@(Model.PageNumber - 1)" asp-route-pageSize="10" disabled="@(!Model.HasPreviousPage)">Previous</a>
+    <a asp-page="./Index" asp-route-pageNumber="@(Model.PageNumber + 1)" asp-route-pageSize="10" disabled="@(!Model.HasNextPage)">Next</a>
+</div>
