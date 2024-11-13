@@ -923,31 +923,38 @@ namespace UI.Pages.Seller
             }
         }
 
-        public async Task<IActionResult> OnPostUpdateProductAsync()
+        public async Task<IActionResult> OnPostUpdateProductAsync([FromBody] ProductForUpdateNewFormatDto updateData)
         {
             try
             {
-                if (!ModelState.IsValid)
+                if (updateData == null)
                 {
-                    return new JsonResult(new
-                    {
-                        success = false,
-                        message = "Invalid model state",
-                        errors = ModelState.Values.SelectMany(v => v.Errors.Select(e => e.ErrorMessage))
-                    });
+                    return new JsonResult(new { success = false, message = "No update data provided" });
                 }
 
-                var productId = Request.Form["ProductId"].ToString();
+                var productId = Request.Query["productId"].ToString();
                 if (string.IsNullOrEmpty(productId))
                 {
                     return new JsonResult(new { success = false, message = "Product ID is required" });
                 }
 
+                // Clean up the update data to ensure no null collections
+                if (updateData.Variations == null)
+                {
+                    updateData.Variations = new List<VariationForProductUpdateNewFormatDto>();
+                }
+
+                if (updateData.VariationCombinations == null)
+                {
+                    updateData.VariationCombinations = new List<VariationCombinationUpdateNewFormatDto>();
+                }
+
+                // Make the API call
                 var response = await _apiResponseHelper.PutAsync<bool>(
                     $"{Constants.ApiBaseUrl}/api/product/updateproduct/{productId}",
-                    ProductUpdate);
+                    updateData);
 
-                if (response.StatusCode == StatusCodeHelper.OK && response.Data == true)
+                if (response.StatusCode == StatusCodeHelper.OK && response.Data)
                 {
                     return new JsonResult(new { success = true, message = "Product updated successfully" });
                 }
@@ -955,14 +962,57 @@ namespace UI.Pages.Seller
                 return new JsonResult(new
                 {
                     success = false,
-                    message = response.Message ?? "Failed to update product"
+                    message = response.Message ?? "Failed to update product",
+                    statusCode = response.StatusCode
                 });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating product");
-                return new JsonResult(new { success = false, message = "An error occurred while updating the product" });
+                _logger.LogError(ex, "Error updating product: {Message}", ex.Message);
+                return new JsonResult(new
+                {
+                    success = false,
+                    message = "An error occurred while updating the product",
+                    statusCode = 500
+                });
             }
+        }
+
+        public async Task<IActionResult> OnPostAddOptionsToVariationAsync([FromBody] AddOptionsToVariationRequest request)
+        {
+            try
+            {
+                foreach (var optionValue in request.Options)
+                {
+                    var optionDto = new
+                    {
+                        value = optionValue,
+                        variationId = request.VariationId
+                    };
+
+                    var createOptionResponse = await _apiResponseHelper.PostAsync<bool>(
+                        $"{Constants.ApiBaseUrl}/api/variationoption",
+                        optionDto);
+
+                    if (createOptionResponse.StatusCode != StatusCodeHelper.OK || !createOptionResponse.Data)
+                    {
+                        return new JsonResult(new { success = false, message = $"Failed to create option: {optionValue}" });
+                    }
+                }
+
+                return new JsonResult(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error adding options to variation");
+                return new JsonResult(new { success = false, message = ex.Message });
+            }
+        }
+
+        public class AddOptionsToVariationRequest
+        {
+            public string VariationId { get; set; }
+            public List<string> Options { get; set; }
         }
     }
 }
