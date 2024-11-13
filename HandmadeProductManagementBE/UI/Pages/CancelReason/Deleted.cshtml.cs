@@ -1,51 +1,41 @@
+using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Common;
 using HandmadeProductManagement.Core.Store;
-using HandmadeProductManagement.ModelViews.PromotionModelViews;
+using HandmadeProductManagement.ModelViews.CancelReasonModelViews;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace UI.Pages.Promotion
+namespace UI.Pages.CancelReasons
 {
-    public class CreateModel : PageModel
+    public class DeletedModel : PageModel
     {
         private readonly ApiResponseHelper _apiHelper;
 
-        public CreateModel(ApiResponseHelper apiHelper)
+        public DeletedModel(ApiResponseHelper apiHelper)
         {
             _apiHelper = apiHelper;
         }
+
+        public List<CancelReasonDeletedDto> CancelReasons { get; set; } = new List<CancelReasonDeletedDto>();
         public string? ErrorMessage { get; set; }
         public string? ErrorDetail { get; set; }
-
-        [BindProperty]
-        public PromotionForCreationDto Promotion { get; set; }
-
-        public void OnGet()
-        {
-            // Initialize if necessary
-        }
-
-        public async Task<IActionResult> OnPostAsync()
+        public async Task<IActionResult> OnGetAsync()
         {
             try
             {
-                if (!ModelState.IsValid)
-                {
-                    return Page();
-                }
 
-                var response = await _apiHelper.PostAsync<bool>($"{Constants.ApiBaseUrl}/api/promotions", Promotion);
+                // Get the deleted cancel reasons instead of categories
+                var response = await _apiHelper.GetAsync<List<CancelReasonDeletedDto>>(
+                    $"{Constants.ApiBaseUrl}/api/cancelreason/deleted");
 
-                if (response != null && response.Data)
+                if (response != null && response.Data != null)
                 {
-                    TempData["SuccessMessage"] = "Promotion created successfully.";
-                    return RedirectToPage("Index");
+                    CancelReasons = response.Data;
                 }
                 else
                 {
-                    ModelState.AddModelError(string.Empty, response?.Message ?? "An error occurred while creating the promotion.");
-                    return Page();
+                    CancelReasons = new List<CancelReasonDeletedDto>();
                 }
             }
             catch (BaseException.ErrorException ex)

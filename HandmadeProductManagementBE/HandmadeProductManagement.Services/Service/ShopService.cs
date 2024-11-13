@@ -217,7 +217,7 @@ namespace HandmadeProductManagement.Services.Service
                     throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidShopDescription);
                 }
 
-                if (Regex.IsMatch(shop.Description, @"[^a-zA-Z0-9\s]"))
+                if (Regex.IsMatch(shop.Description, @"[^a-zA-Z0-9À-ỹáàảãạắằẳẵặéèẻẽẹíìỉĩịóòỏõọốồổỗộúùủũụưáàảãạắằẳẵặýỳỷỹỵđĐ\s]"))
                 {
                     throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidShopDescriptionFormat);
                 }

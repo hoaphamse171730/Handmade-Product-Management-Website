@@ -51,18 +51,19 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 
                 }
-                catch (BaseException.ErrorException ex)
-                {
-                    ErrorMessage = ex.ErrorDetail.ErrorCode;
-                    ErrorDetail = ex.ErrorDetail.ErrorMessage?.ToString();
-                }
-                catch (Exception ex)
-                {
-                    ErrorMessage = "An unexpected error occurred.";
-                }
-                return Page();
-
+            catch (BaseException.ErrorException ex)
+            {
+                ErrorMessage = ex.ErrorDetail.ErrorCode;
+                ErrorDetail = ex.ErrorDetail.ErrorMessage?.ToString();
+                if (ErrorMessage == "unauthorized") return RedirectToPage("/Login");
             }
+            catch (Exception ex)
+            {
+                ErrorMessage = "An unexpected error occurred.";
+            }
+            return Page();
+
+        }
 
             public async Task<IActionResult> OnPostAsync(string id)
             {

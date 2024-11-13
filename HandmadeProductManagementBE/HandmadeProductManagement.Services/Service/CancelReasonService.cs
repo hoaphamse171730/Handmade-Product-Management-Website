@@ -30,7 +30,7 @@ namespace HandmadeProductManagement.Services.Service
         public async Task<IList<CancelReasonDto>> GetAll()
         {
             IQueryable<CancelReason> query = _unitOfWork.GetRepository<CancelReason>().Entities
-                .Where(cr => !cr.DeletedTime.HasValue || cr.DeletedBy == null)
+                .Where(cr => !cr.DeletedTime.HasValue ||( cr.DeletedBy == null || !cr.DeletedTime.HasValue))
                 .OrderByDescending(cr => cr.CreatedTime); // Sort by CreatedBy in descending order
 
             var cancelReasons = await query
@@ -135,13 +135,13 @@ namespace HandmadeProductManagement.Services.Service
         }
 
         // Get all soft-deleted cancel reasons
-        public async Task<IList<CancelReason>> GetDeletedCancelReasons()
+        public async Task<IList<CancelReasonDeletedDto>> GetDeletedCancelReasons()
         {
             var query = _unitOfWork.GetRepository<CancelReason>().Entities
                 .Where(cr => cr.DeletedTime.HasValue && cr.DeletedBy != null);
 
             var cancelReasons = await query
-                .Select(cancelReason => new CancelReason
+                .Select(cancelReason => new CancelReasonDeletedDto
                 {
                     Id = cancelReason.Id.ToString(),
                     Description = cancelReason.Description,
@@ -166,7 +166,7 @@ namespace HandmadeProductManagement.Services.Service
             var cancelReasonEntity = await cancelReasonRepo.Entities
                 .FirstOrDefaultAsync(cr => cr.Id == id) ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageCancelReasonNotFound);
             
-            if (cancelReasonEntity.DeletedTime.HasValue && cancelReasonEntity.DeletedBy != null)
+            if (!cancelReasonEntity.DeletedTime.HasValue && cancelReasonEntity.DeletedBy == null)
             {
                 throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageCancelReasonDeleted);
             }

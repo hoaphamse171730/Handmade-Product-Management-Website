@@ -1,47 +1,41 @@
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Common;
 using HandmadeProductManagement.Core.Store;
-using HandmadeProductManagement.ModelViews.CategoryModelViews;
+using HandmadeProductManagement.ModelViews.CancelReasonModelViews;  // Import the CancelReasonModelViews
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace UI.Pages.Categories
+namespace UI.Pages.CancelReason
 {
-    public class DeletedModel : PageModel
+    public class IndexModel : PageModel
     {
         private readonly ApiResponseHelper _apiHelper;
 
-        public DeletedModel(ApiResponseHelper apiHelper)
+        public IndexModel(ApiResponseHelper apiHelper)
         {
             _apiHelper = apiHelper;
         }
 
-        public List<CategoryDtoWithDetail> Categories { get; set; } = new List<CategoryDtoWithDetail>();
+        public List<CancelReasonDto> CancelReasons { get; set; } = new List<CancelReasonDto>(); // Change from CategoryDto
         public string? ErrorMessage { get; set; }
         public string? ErrorDetail { get; set; }
 
-        public int PageNumber { get; set; } = 1;
-        public int PageSize { get; set; } = 10;
-        public bool HasNextPage { get; set; } = true;
-
-        public async Task<IActionResult> OnGetAsync(int pageNumber = 1, int pageSize = 10)
+        // Fetch Cancel Reasons with pagination
+        public async Task<IActionResult> OnGetAsync()
         {
             try
             {
-                PageNumber = pageNumber;
-                PageSize = pageSize;
-
-                var response = await _apiHelper.GetAsync<List<CategoryDtoWithDetail>>(
-                    $"{Constants.ApiBaseUrl}/api/Category/GetAllDelete?pageNumber={PageNumber}&pageSize={PageSize}");
+                // Modify API endpoint to get cancel reasons
+                var response = await _apiHelper.GetAsync<List<CancelReasonDto>>(
+                    $"{Constants.ApiBaseUrl}/api/cancelreason");
 
                 if (response != null && response.Data != null)
                 {
-                    Categories = response.Data;
-                    HasNextPage = Categories.Count == PageSize;
+                    CancelReasons = response.Data;
                 }
                 else
                 {
-                    Categories = new List<CategoryDtoWithDetail>();
+                    CancelReasons = new List<CancelReasonDto>();
                 }
             }
             catch (BaseException.ErrorException ex)
@@ -57,24 +51,25 @@ namespace UI.Pages.Categories
             return Page();
         }
 
-        public async Task<JsonResult> OnPatchRestoreCategoryAsync(string id)
+        // Create new Cancel Reason
+        public async Task<JsonResult> OnPostCreateCancelReasonAsync([FromBody] CancelReasonForCreationDto cancelReasonForCreation)
         {
             try
             {
-                var response = await _apiHelper.PatchAsync<bool>($"{Constants.ApiBaseUrl}/api/Category/restore/{id}", null);
+                var response = await _apiHelper.PostAsync<bool>($"{Constants.ApiBaseUrl}/api/cancelreason", cancelReasonForCreation);
 
                 if (response != null && response.Data)
                 {
-                    return new JsonResult(new { success = true, message = "Category restored successfully." });
+                    return new JsonResult(new { success = true, message = "Cancel reason created successfully." });
                 }
                 else
                 {
-                    return new JsonResult(new { success = false, message = "Failed to restore category." });
+                    return new JsonResult(new { success = false, message = "Failed to create cancel reason." });
                 }
             }
             catch (BaseException.ErrorException ex)
             {
-                return new JsonResult(new { success = false, message = ex.ErrorDetail.ErrorMessage });
+                return new JsonResult(new { success = false, message = ex.ErrorDetail.ErrorMessage?.ToString() });
             }
             catch (Exception)
             {
