@@ -1667,19 +1667,24 @@ else
 
                 if (result.success && result.data) {
                     const productData = result.data;
-                    console.log('Loaded product data:', productData);
+                    console.log('Loaded product data 2:', productData); // thay vì tên của cái mà có quantity với price là variationCombinations thì nó tên là productItems
 
                     editState.productData = productData;
-                    editState.existingCombinations = productData.variationCombinations?.map(combo => {
-                        console.log('Processing combination:', combo);
+                    editState.existingCombinations = productData.productItems?.map((productItem) => {
+                        console.log('Processing combination 2:', productItem);
+
+                        const variationNames = productItem.combinations.map((combo) => {
+                            const variation = productData.variations.find((variation) =>
+                                variation.variationOptionIds.includes(combo.id)
+                            );
+                            return variation ? `${variation.name}: ${combo.value}` : '';
+                        });
+
                         return {
-                            variationOptionIds: combo.variationOptionIds,
-                            price: combo.price || 0, // Add fallback value
-                            quantityInStock: combo.quantityInStock || 0, // Add fallback value
-                            variationNames: combo.variationOptionIds.map(id => {
-                                const option = productData.variations.find(v => v.variationOptionIds.includes(id));
-                                return option?.variationName || '';
-                            })
+                            variationOptionIds: productItem.combinations.map((combo) => combo.id),
+                            price: productItem.price || 0, // Add fallback value
+                            quantityInStock: productItem.quantityInStock || 0, // Add fallback value
+                            variationNames,
                         };
                     }) || [];
 
@@ -1715,6 +1720,7 @@ else
                 alert('Failed to load product details. Please try again.');
             }
         }
+
 
         async function loadExistingVariationsForEdit() {
             const categoryId = document.getElementById('editCategorySelect').value;
