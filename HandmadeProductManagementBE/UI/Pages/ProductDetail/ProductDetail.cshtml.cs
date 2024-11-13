@@ -89,7 +89,7 @@ namespace UI.Pages.ProductDetail
                             .Select(option => new OptionsDto
                             {
                                 Id = option.Id,
-                                Name = option.Value
+                                Value = option.Value
                             })
                             .ToList();
 
@@ -121,7 +121,7 @@ namespace UI.Pages.ProductDetail
                         {
                             Name = group.Key,
                             Id = group.First().Id, // Chọn ID của variation đầu tiên trong nhóm
-                            Options = group.SelectMany(v => v.Options).DistinctBy(o => o.Name).ToList() // Kết hợp options và loại bỏ trùng lặp
+                            Options = group.SelectMany(v => v.Options).DistinctBy(o => o.Value).ToList() // Kết hợp options và loại bỏ trùng lặp
                         })
                         .ToList();
 
