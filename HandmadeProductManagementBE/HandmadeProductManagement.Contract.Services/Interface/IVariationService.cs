@@ -5,6 +5,7 @@ namespace HandmadeProductManagement.Contract.Services.Interface
 {
     public interface IVariationService
     {
+        Task<IList<VariationWithOptionsDto>> GetAllVariationsAndOptionsForProductItems(string categoryId, string userId);
         Task<IList<VariationDto>> GetByCategoryId(string id);
         Task<bool> Create(VariationForCreationDto cancelReason, string userId);
         Task<bool> Update(string id, VariationForUpdateDto cancelReason, string username);

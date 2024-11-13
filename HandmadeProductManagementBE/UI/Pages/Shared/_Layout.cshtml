@@ -63,7 +63,6 @@
             <a class="text-4xl font-bold" asp-area="" asp-page="/Index">Handmade Product</a>
             <div class="flex items-center space-x-4">
                 <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Index">Home</a>
-                <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Privacy">Privacy</a>
                 <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Product/ProductList">Product</a>
 
                 <!-- Admin-Only Links -->
@@ -106,7 +105,7 @@
                 }
 
                 <!-- Cart Icon, Notifications, User Menu -->
-                @if (Context.Session.GetString("Token") != null)
+                @if (Context.Session.GetString("Token") != null )
                 {
                     <div class="relative ml-4 inline-block">
                         <!-- Cart Button -->

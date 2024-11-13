@@ -13,6 +13,7 @@ using HandmadeProductManagement.Core.Common;
 using HandmadeProductManagement.ModelViews.VariationModelViews;
 using Microsoft.IdentityModel.Tokens;
 using HandmadeProductManagement.Core.Utils;
+using HandmadeProductManagement.ModelViews.VariationOptionModelViews;
 
 namespace HandmadeProductManagement.Services.Service
 {
@@ -51,7 +52,8 @@ namespace HandmadeProductManagement.Services.Service
             var product = await _unitOfWork.GetRepository<Product>().Entities
                 .Include(p => p.ProductItems)
                     .ThenInclude(pi => pi.ProductConfigurations)
-                .ThenInclude(pc => pc.VariationOption)
+                        .ThenInclude(pc => pc.VariationOption)
+                            .ThenInclude(vo => vo.Variation)
                 .Include(p => p.Category)
                 .FirstOrDefaultAsync(p => p.Id == productId);
 
@@ -60,7 +62,7 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageProductNotFound);
             }
 
-            // Map product details to DTO
+            // Map product details to DTO with Variation and VariationOption names
             var response = new ProductForUpdateNewFormatResponseDto
             {
                 Id = product.Id,
@@ -69,22 +71,29 @@ namespace HandmadeProductManagement.Services.Service
                 CategoryId = product.CategoryId,
                 Variations = product.ProductItems
                     .SelectMany(pi => pi.ProductConfigurations)
-                    .GroupBy(pc => pc.VariationOption.VariationId)
+                    .GroupBy(pc => pc.VariationOption!.Variation)
                     .Select(g => new VariationForProductUpdateNewFormatResponseDto
                     {
-                        Id = g.Key,
-                        VariationOptionIds = g.Select(pc => pc.VariationOptionId).ToList()
+                        Id = g.Key!.Id,
+                        Name = g.Key.Name,
+                        VariationOptionIds = g.Select(pc => pc.VariationOption!.Id).ToList()
                     }).ToList(),
-                VariationCombinations = product.ProductItems.Select(pi => new VariationCombinationUpdateNewFormatDto
+                ProductItems = product.ProductItems.Select(pi => new VariationCombinationUpdateNewFormatDto
                 {
+                    ProductItemId = pi.Id,
                     Price = pi.Price,
                     QuantityInStock = pi.QuantityInStock,
-                    VariationOptionIds = pi.ProductConfigurations.Select(pc => pc.VariationOptionId).ToList()
+                    Combinations = pi.ProductConfigurations.Select(pc => new OptionsDto
+                    {
+                        Id = pc.VariationOptionId,
+                        Value = pc.VariationOption!.Value
+                    }).ToList()
                 }).ToList()
             };
 
             return response;
         }
+
 
         public async Task<bool> UpdateNewFormat(string productId, ProductForUpdateNewFormatDto productDto, string userId)
         {
@@ -204,14 +213,14 @@ namespace HandmadeProductManagement.Services.Service
                 await _unitOfWork.GetRepository<ProductItem>().InsertAsync(productItem);
                 await _unitOfWork.SaveAsync();
 
-                if (combination.VariationOptionIds != null)
+                if (combination.Combinations != null)
                 {
-                    foreach (var variationOptionId in combination.VariationOptionIds)
+                    foreach (var variationOptionId in combination.Combinations)
                     {
                         var productConfiguration = new ProductConfiguration
                         {
                             ProductItemId = productItem.Id,
-                            VariationOptionId = variationOptionId
+                            VariationOptionId = variationOptionId.Id
                         };
 
                         await _unitOfWork.GetRepository<ProductConfiguration>().InsertAsync(productConfiguration);

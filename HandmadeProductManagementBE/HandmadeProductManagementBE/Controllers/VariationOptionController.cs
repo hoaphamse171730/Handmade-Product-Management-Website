@@ -33,7 +33,6 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
-        // GET: api/variationoption/variation/{variationId}
         [HttpGet("variation/{variationId}")]
         public async Task<IActionResult> GetByVariationId(string variationId)
         {
