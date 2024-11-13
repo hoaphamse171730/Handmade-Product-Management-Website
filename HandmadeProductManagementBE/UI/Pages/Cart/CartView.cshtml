@@ -40,7 +40,7 @@
                                         <th class="text-left font-normal">In Stock</th>
                                         <th class="text-left font-normal">Quantity</th>
                                         <th class="text-left font-normal">Total</th>
-                                        <th class="text-left font-normal">Actions</th>
+                                        <th class="text-left font-normal"></th>
                                     </tr>
                                 </thead>
 
@@ -99,7 +99,9 @@
                                                 ₫@Math.Round(item.DiscountPrice * item.ProductQuantity, 0, MidpointRounding.AwayFromZero).ToString("N0").Replace(",", ".")
                                             </td>
                                             <td>
-                                                <button class="rounded px-4 py-2 font-bold text-white" style="background-color: red" onclick="removeCartItem('@item.Id')">Delete</button>
+                                                <button class="rounded px-4 py-2 font-bold text-white" style="background-color: red" onclick="removeCartItem('@item.Id')">
+                                                    <i class="fas fa-trash-alt"></i> <!-- Font Awesome Trash Icon -->
+                                                </button>
                                             </td>
                                         </tr>
                                     }
