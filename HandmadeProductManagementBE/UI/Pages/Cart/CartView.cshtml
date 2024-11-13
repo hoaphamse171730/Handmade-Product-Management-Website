@@ -38,11 +38,19 @@
                                                 </div>
                                             </td>
                                             <td>₫<s>@item.UnitPrice.ToString("N0").Replace(",", ".")</s></td>
-                                            <td class="text-red-500">₫@Math.Round(item.DiscountPrice, 0, MidpointRounding.AwayFromZero).ToString("N0").Replace(",", ".")</td>
+                                            <td class="text-red-500">
+                                                ₫@Math.Round(item.DiscountPrice, 0, MidpointRounding.AwayFromZero).ToString("N0").Replace(",", ".")
+                                            </td>
                                             <td>
-                                                <input type="number" id="quantity-@item.Id" min="1" max="@item.StockQuantity" value="@item.ProductQuantity"
-                                                       class="w-16 text-center @(item.InStock ? "" : "border-red-500")"
-                                                       onchange="updateQuantity('@item.Id', this.value)" />
+                                                <!-- Loop through VariationOptionValues and add a comma except after the last item -->
+                                                @for (int i = 0; i < item.VariationOptionValues.Count; i++)
+                                                {
+                                                    <span>@item.VariationOptionValues[i]</span>
+                                                    @if (i < item.VariationOptionValues.Count - 1)
+                                                    {
+                                                        <span>, </span> <!-- Add a comma if it's not the last item -->
+                                                    }
+                                                }
                                             </td>
                                             <td class="text-gray-500">
                                                 @item.StockQuantity
