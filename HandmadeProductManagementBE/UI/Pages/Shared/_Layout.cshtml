@@ -107,9 +107,11 @@
                 <!-- Cart Icon, Notifications, User Menu -->
                 @if (Context.Session.GetString("Token") != null)
                 {
-                    <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Cart/CartView">
-                        <i class="fas fa-shopping-cart"></i>
-                    </a>
+                    <div class="relative ml-4 inline-block">
+                        <!-- Cart Button -->
+                        @await Component.InvokeAsync("CartItemList")
+                    </div>
+
                     <div class="relative ml-4 inline-block">
                         <!-- Notification Button -->
                         @await Component.InvokeAsync("NotificationList")
