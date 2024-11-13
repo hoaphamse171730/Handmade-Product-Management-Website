@@ -19,7 +19,6 @@ namespace HandmadeProductManagementAPI.Controllers
             _variationService = variationService;
         }
 
-        [Authorize]
         [HttpGet("latest")]
         public async Task<IActionResult> GetLatestVariationId(string categoryId)
         {
@@ -36,17 +35,15 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         // GET: api/variation/category/{categoryId}
-        [Authorize]
         [HttpGet("category/{categoryId}")]
         public async Task<IActionResult> GetByCategoryId(string categoryId)
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             var response = new BaseResponse<IList<VariationDto>>
             {
                 Code = "Success",
                 StatusCode = StatusCodeHelper.OK,
                 Message = "Get Variations by Category successfully.",
-                Data = await _variationService.GetByCategoryId(categoryId, userId ?? string.Empty)
+                Data = await _variationService.GetByCategoryId(categoryId)
             };
             return Ok(response);
         }
