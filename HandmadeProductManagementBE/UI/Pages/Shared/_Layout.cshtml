@@ -63,7 +63,6 @@
             <a class="text-4xl font-bold" asp-area="" asp-page="/Index">Handmade Product</a>
             <div class="flex items-center space-x-4">
                 <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Index">Home</a>
-                <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Privacy">Privacy</a>
                 <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Product/ProductList">Product</a>
 
                 <!-- Admin-Only Links -->
@@ -82,6 +81,7 @@
                 @if (userRole == "Seller" && !hasShop)
                 {
                     <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Order/OrderHistory">Order History</a>
+                    <a class="block px-4 py-2 text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Seller/Shop">Open Your Shop</a>
                 }
 
                 <!-- Seller-Only Links -->
@@ -104,15 +104,19 @@
                 }
 
                 <!-- Cart Icon, Notifications, User Menu -->
-                @if (Context.Session.GetString("Token") != null)
+                @if (Context.Session.GetString("Token") != null )
                 {
-                    <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Cart/CartView">
-                        <i class="fas fa-shopping-cart"></i>
-                    </a>
-                    <div class="relative ml-4 inline-block">
-                        <!-- Notification Button -->
-                        @await Component.InvokeAsync("NotificationList")
-                    </div>
+                    @if (userRole != "Admin")
+                    {
+                        <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Cart/CartView">
+                            <i class="fas fa-shopping-cart"></i>
+                        </a>
+                        <div class="relative ml-4 inline-block">
+                            <!-- Notification Button -->
+                            @await Component.InvokeAsync("NotificationList")
+                        </div>
+
+                    }
                     <!-- User Menu Dropdown -->
                     <div class="group relative inline-block text-left">
                         <button id="user-menu-button" class="rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white shadow-md transition duration-300 hover:bg-blue-700 focus:outline-none">

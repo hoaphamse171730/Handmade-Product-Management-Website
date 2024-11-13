@@ -2,6 +2,7 @@
 using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.UserInfoModelViews;
+using HandmadeProductManagement.Services.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,6 +16,23 @@ namespace HandmadeProductManagementAPI.Controllers
         public UserInfoController(IUserInfoService userInfoService)
         {
             _userInfoService = userInfoService;
+        }
+
+        [HttpPost("Upload")]
+        [Authorize]
+        public async Task<IActionResult> UploadUserAvatar(IFormFile file)
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
+            // Tiến hành xử lý các tệp đã gửi
+            var response = new BaseResponse<bool>
+            {
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Success",
+                Data = await _userInfoService.UploadUserAvatar(file, userId)
+            };
+
+            return Ok(response);
         }
 
         [HttpGet]
@@ -35,7 +53,7 @@ namespace HandmadeProductManagementAPI.Controllers
         // PATCH api/userinfo
         [HttpPatch]
         [Authorize]
-        public async Task<IActionResult> PatchUserInfo([FromForm]UserInfoUpdateRequest request)
+        public async Task<IActionResult> PatchUserInfo(UserInfoForUpdateDto request)
         {
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
             var updatedUserInfo = await _userInfoService.PatchUserInfoAsync(userId, request);

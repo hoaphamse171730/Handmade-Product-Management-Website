@@ -1,9 +1,22 @@
 ﻿@page
-
+@using UI.Pages.Shared
 @model UI.Pages.Seller.ReviewListModel
 @{
     ViewData["Title"] = "Reviews";
     var userNames = new Dictionary<string, string>();
+}
+
+@{
+    var errorModel = new ErrorMessageModel
+            {
+                ErrorMessage = Model.ErrorMessage,
+                ErrorDetail = Model.ErrorDetail
+            };
+    var token = HttpContext.Session.GetString("Token");
+}
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <partial name="_ErrorMessage" model="errorModel" />
 }
 
 <h1 class="mb-4 text-center text-4xl font-bold text-red-600">Review List</h1>

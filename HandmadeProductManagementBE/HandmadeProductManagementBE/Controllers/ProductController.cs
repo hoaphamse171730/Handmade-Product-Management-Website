@@ -156,6 +156,35 @@ namespace HandmadeProductManagementAPI.Controllers
             return Ok(response);
         }
 
+        [HttpPut("updateProduct/{id}")]
+        [Authorize(Roles = "Seller")]
+        public async Task<IActionResult> UpdateProduct(string id, [FromBody] ProductForUpdateNewFormatDto product)
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
+            var response = new BaseResponse<bool>
+            {
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Product updated successfully.",
+                Data = await _productService.UpdateNewFormat(id, product, userId)
+            };
+
+            return Ok(response);
+        }
+
+        [HttpGet("updateProductResponse/{id}")]
+        public async Task<IActionResult> GetProductUpdateNewFormat(string id)
+        {
+            var response = new BaseResponse<ProductForUpdateNewFormatResponseDto>
+            {
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Product details retrieved successfully.",
+                Data = await _productService.GetProductUpdateNewFormat(id)
+            };
+
+            return Ok(response);
+        }
 
         [HttpDelete("soft-delete/{id}")]
         [Authorize(Roles = "Admin, Seller")] 

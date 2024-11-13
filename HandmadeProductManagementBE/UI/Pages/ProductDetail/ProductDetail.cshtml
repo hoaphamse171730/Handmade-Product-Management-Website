@@ -48,7 +48,7 @@
 }
 
 <!-- Toast Container -->
-<div aria-live="polite" aria-atomic="true" class="fixed right-4 top-4 z-50 space-y-4">
+<div aria-live="polite" aria-atomic="true" class="toast fixed right-4 top-4 z-50 space-y-4">
     <!-- Hiển thị Toast thông báo lỗi nếu có trong TempData -->
     @if (TempData["Message"] != null)
     {
@@ -132,7 +132,6 @@
         </a>
         <!-- Product Name -->
         <h1 class="text-3xl font-bold text-gray-800">@Model.productDetail?.Name</h1>
-        <h2 class="text-3xl font-bold text-gray-800">@Model.productDetail?.Description</h2>
         <!-- Product Rating -->
         <div class="rating-stars flex items-center space-x-1">
             <span class="text-lg text-gray-700">@Model.productDetail?.Rating.ToString("0.0")/5</span> <!-- Display rating in "4.6/5" format -->
@@ -147,28 +146,77 @@
                     <i class="fa fa-star" style="color: gray;"></i> <!-- Gray star -->
                 }
             }
+            <span class="mx-3 text-lg text-gray-700">|</span>
+
+            <span class="text-lg text-gray-700">Sold Count: @Model.productDetail?.SoldCount</span>
+
+        </div>
+        <h2 class="text-3xl font-bold text-gray-800">@Model.productDetail?.Description</h2>
+
+
+        <div class="container mx-auto p-4">
+            <!-- Display Category Name -->
+            <div class="text-lg font-semibold text-gray-800">
+                Category: <span class="text-blue-600">@Model.productDetail?.CategoryName</span>
+            </div>
+
+            <!-- Display Promotion Name -->
+            <div class="mt-2 text-lg font-semibold text-gray-800">
+                Promotion:
+                <span class="text-green-600">@Model.productDetail?.Promotion?.Name</span>
+                @if (Model.productDetail?.Promotion != null)
+                {
+                    <!-- Display Percent Discount -->
+                    <span class="text-red-500">
+                        - @(((Model.productDetail?.Promotion?.DiscountRate ?? 0) * 100).ToString("0.#"))% off
+                    </span>
+                }
+            </div>
+
+            <!-- Product Price -->
+            <div class="mt-4 flex items-center space-x-4">
+                @if (Model.productDetail?.Promotion != null)
+                {
+                    <span id="discountedPrice" class="text-2xl font-semibold text-red-500">
+                        @Model.productDetail?.ProductItems?.FirstOrDefault()?.DiscountedPrice?.ToString("N0") ₫
+                    </span>
+                    <span id="price" class="text-lg text-gray-400 line-through">
+                        @Model.productDetail?.ProductItems?.FirstOrDefault()?.Price.ToString("N0") ₫
+                    </span>
+                    <span id="percentDiscount" class="rounded bg-red-100 px-2 py-1 text-2xl font-semibold text-red-500">
+                    </span>
+                }
+                else
+                {
+                    <span id="price" class="text-2xl font-semibold text-red-500">
+                        @Model.productDetail?.ProductItems?.FirstOrDefault()?.Price.ToString("N0") ₫
+                    </span>
+                }
+            </div>
         </div>
 
+
+
         <!-- Product Price -->
-        <div class="flex items-center space-x-4">
-            @if (Model.productDetail?.ProductItems?.FirstOrDefault()?.DiscountedPrice != null
-            && Model.productDetail?.ProductItems?.FirstOrDefault()?.DiscountedPrice
-            < Model.productDetail?.ProductItems?.FirstOrDefault()?.Price)
-            {
-                <span class="text-2xl font-semibold text-red-500">
-                    ₫@Model.productDetail?.ProductItems?.FirstOrDefault()?.DiscountedPrice?.ToString("N0")
-                </span>
-                <span class="text-lg text-gray-400 line-through">
-                    ₫@Model.productDetail?.ProductItems?.FirstOrDefault()?.Price.ToString("N0")
-                </span>
-            }
-            else
-            {
-                <span class="text-2xl font-semibold text-red-500">
-                    ₫@Model.productDetail?.ProductItems?.FirstOrDefault()?.Price.ToString("N0")
-                </span>
-            }
-        </div>
+        @*   <div class="flex items-center space-x-4">
+        @if (Model.productDetail?.Promotion != null)
+        {
+        <span id="discountedPrice" class="text-2xl font-semibold text-red-500">
+        @Model.productDetail?.ProductItems?.FirstOrDefault()?.DiscountedPrice?.ToString("N0") ₫
+        </span>
+        <span id="price" class="text-lg text-gray-400 line-through">
+        @Model.productDetail?.ProductItems?.FirstOrDefault()?.Price.ToString("N0") ₫
+        </span>
+        <span id="percentDiscount" class="rounded bg-red-100 px-2 py-1 text-2xl font-semibold text-red-500">
+        </span>
+        }
+        else
+        {
+        <span id="price" class="text-2xl font-semibold text-red-500">
+        @Model.productDetail?.ProductItems?.FirstOrDefault()?.Price.ToString("N0") ₫
+        </span>
+        }
+        </div> *@
 
         <!-- Product Materials -->
         <div>
@@ -185,12 +233,12 @@
                                     <input type="radio"
                                            id="@option.Id"
                                            name="@variation.Name"
-                                           value="@option.Name"
+                                           value="@option.Value"
                                            class="mr-2"
                                            onclick="handleRadioClick(this)"
                                            onchange="updateProductInfo()"
                                            data-variation-name="@variation.Name" />
-                                    <label for="@option.Id" class="text-sm">@option.Name</label>
+                                    <label for="@option.Id" class="text-sm">@option.Value</label>
                                 }
                             }
                             else
@@ -203,14 +251,13 @@
             </div>
         </div>
 
-      
+
         <div class="price-container">
             <span id="price" class="text-lg font-bold text-gray-800"></span>
             <span id="discountedPrice" class="ml-2 hidden text-lg font-bold text-red-600"></span> <!-- Định nghĩa giá giảm -->
         </div>
 
         <span id="remainingQuantity" class="text-sm text-gray-600"></span>
-
         <!-- ADD TO CART-->
 
         <form method="post">
@@ -221,7 +268,7 @@
                     <h2 class="text-lg font-semibold text-gray-800">Quantity</h2>
                     <div class="flex items-center rounded-lg border border-gray-300">
                         <button type="button" onclick="decreaseQuantity()" class="rounded-l-lg px-4 py-2 text-gray-700 hover:bg-gray-200">-</button>
-                        <input id="quantityInput" asp-for="CartItem.ProductQuantity" type="number" min="1" max="50" class="w-16 px-4 py-2 text-center text-gray-800" value= "1"/>
+                        <input id="quantityInput" asp-for="CartItem.ProductQuantity" type="number" min="1" max="50" class="w-16 px-4 py-2 text-center text-gray-800" value="1" onchange="handleInputChange()" />
                         <button type="button" onclick="increaseQuantity()" class="rounded-r-lg px-4 py-2 text-gray-700 hover:bg-gray-200">+</button>
                     </div>
                 </div>
@@ -229,7 +276,7 @@
 
             <div class="mb-10 flex space-x-4">
                 <!-- Nút "Add to Cart" với điều kiện disable và thay đổi text -->
-                <button type="submit"
+                <button type="submit" id="addToCartButton"
                         class="flex-1 rounded-lg bg-blue-500 px-4 py-3 text-white hover:bg-blue-600
 @(userId == Model.productDetail?.OwnerId ? "opacity-50 cursor-not-allowed pointer-events-none" : "")">
                     @if (userId == Model.productDetail?.OwnerId)
@@ -243,8 +290,8 @@
                 </button>
             </div>
         </form>
-        </div>
     </div>
+</div>
 
 <!-- Shop Information Section -->
 <a href="/Shop/Index?id=@Model.Shop.Id" class="mb-10 block rounded-lg border border-gray-300 bg-gray-50 p-4 transition duration-200 hover:bg-gray-200">
@@ -287,18 +334,26 @@
         <div class="rounded-lg border border-gray-300 bg-white p-4 shadow-md">
             <div class="flex flex-col">
                 @{
-                    // Kiểm tra và lấy UserName từ userId
+                    // Check if the username is already in the dictionary
                     if (!userNames.TryGetValue(review.UserId.ToString(), out var userName))
                     {
-                        var user = await Model.GetUserByIdAsync(review.UserId.ToString());
-                        userName = user?.UserName ?? "Unknown User";
-                        userNames[review.UserId.ToString()] = userName;
+                        // Fetch the username if it's not in the dictionary
+                        userName = await Model.GetUserNameByIdAsync(review.UserId.ToString());
+                        if (userName != null)
+                        {
+                            // Cache the fetched username in the dictionary
+                            userNames[review.UserId.ToString()] = userName;
+                        }
+                        else
+                        {
+                            userName = "Unknown User";  // Default if no username is found
+                        }
                     }
                 }
                 <span class="font-semibold">@userName</span>
                 <span class="text-sm text-gray-500">@review.Date?.ToString("g")</span>
 
-                <!-- Hiển thị nội dung review và các thành phần khác -->
+                <!-- Display Review Content -->
                 <p class="mt-2">@review.Content</p>
 
                 <!-- Display Rating as stars -->
@@ -314,11 +369,12 @@
             </div>
 
             <!-- Reply Section with Shop ID -->
-            @if (review.Reply != null){
-            <div class="relative ml-4 mt-4 rounded-lg border border-gray-300 bg-gray-50 p-2">
-                <div class="mb-2 font-semibold text-gray-700">@(Model.Shops.FirstOrDefault(shop => shop.Id == review.Reply?.ShopId)?.Name ?? "Unknown Shop")</div>
+            @if (review.Reply != null)
+            {
+                <div class="relative ml-4 mt-4 rounded-lg border border-gray-300 bg-gray-50 p-2">
+                    <div class="mb-2 font-semibold text-gray-700">@(Model.Shop.Name)</div>
                     <p>@review.Reply.Content</p>
-            </div>
+                </div>
             }
         </div>
     }
@@ -338,12 +394,34 @@
     </nav>
 }
 
-
+<div id="loginModal" class="fixed inset-0 z-50 flex hidden items-center justify-center bg-gray-900 bg-opacity-50">
+    <div class="relative w-full max-w-sm rounded-lg bg-white p-6">
+        <h2 class="mb-4 text-xl font-semibold">You need to be logged in to add items to the cart</h2>
+        <p class="mb-4">Please log in or sign up to continue.</p>
+        <div class="mb-4 flex justify-between">
+            <button onclick="location.href='/Login'" class="rounded-lg bg-blue-500 px-4 py-2 text-white">Login</button>
+            <button onclick="location.href='/Registration'" class="rounded-lg bg-green-500 px-4 py-2 text-white">Sign Up</button>
+        </div>
+        <!-- Close Button -->
+        <button onclick="closeLoginModal()" class="absolute right-4 top-4 text-2xl font-semibold text-gray-600">&times;</button>
+    </div>
+</div>
 
 <!-- Include Font Awesome for Icons -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
-@section Scripts{
+@section Scripts {
+    <script>
+        function showLoginModal() {
+            console.log("Modal opened"); // Kiểm tra khi modal được mở
+            document.getElementById('loginModal').classList.remove('hidden');
+        }
+
+
+        function closeLoginModal() {
+            document.getElementById('loginModal').classList.add('hidden');
+        }
+    </script>
     <partial name="_ValidationScriptsPartial" />
     <!-- Swiper Initialization Script -->
     <script>
@@ -366,45 +444,54 @@
             });
         });
     </script>
-    <script>
-        let quantity = 1; // Biến để lưu số lượng
-        let maxQuantity = 50; // Số lượng tối đa của productItem
 
+    <script>
+        // Đặt giá trị ban đầu cho biến quantity
+        let quantity = 1;
+        let maxQuantity = 50;
+
+        // Hàm cập nhật giá trị hiển thị trong input
         function updateQuantityDisplay() {
-            // Cập nhật hiển thị số lượng
-            document.getElementById('quantityInput').value = quantity;
-        }
-        function decreaseQuantity() {
-            if (quantity > 1) { // Đảm bảo số lượng không âm
-                quantity--; // Giảm số lượng
-                updateQuantityDisplay(); // Cập nhật hiển thị
+            const quantityInput = document.getElementById('quantityInput');
+            if (quantityInput) {
+                quantityInput.value = quantity;
             }
         }
 
+        // Hàm giảm số lượng
+        function decreaseQuantity() {
+            if (quantity > 1) {
+                quantity--;  // Giảm số lượng
+                updateQuantityDisplay();  // Cập nhật giá trị vào input
+            }
+        }
+
+        // Hàm tăng số lượng
         function increaseQuantity() {
-            if (quantity < maxQuantity) { // Không vượt quá số lượng tối đa
-                quantity++; // Tăng số lượng
-                updateQuantityDisplay(); // Cập nhật hiển thị
+            if (quantity < maxQuantity) {
+                quantity++;  // Tăng số lượng
+                updateQuantityDisplay();  // Cập nhật giá trị vào input
             } else {
-                // Thông báo cho người dùng khi vượt quá số lượng
                 alert(`You cannot increase the quantity beyond ${maxQuantity}.`);
             }
         }
+
+        // Hàm xử lý sự kiện thay đổi trực tiếp trong input
         function handleInputChange() {
             const input = document.getElementById('quantityInput');
             let value = parseInt(input.value, 10);
 
-            // Kiểm tra nếu giá trị nhập vào không hợp lệ hoặc nhỏ hơn 1
+            // Kiểm tra giá trị nhập vào
             if (isNaN(value) || value < 1) {
-                quantity = 1; // Đặt giá trị về 1 nếu không hợp lệ
+                quantity = 1;  // Đặt lại nếu giá trị không hợp lệ
             } else if (value > maxQuantity) {
-                quantity = maxQuantity; // Giới hạn ở số lượng tối đa
+                quantity = maxQuantity;  // Giới hạn số lượng tối đa
                 alert(`You cannot increase the quantity beyond ${maxQuantity}.`);
             } else {
-                quantity = value; // Cập nhật số lượng
+                quantity = value;  // Cập nhật số lượng
             }
 
-            updateQuantityDisplay();
+            updateQuantityDisplay();  // Cập nhật giá trị trong input
         }
         // Định dạng giá theo kiểu Việt Nam
         const formatCurrency = (amount) => {
@@ -432,72 +519,80 @@
 
         const productItems = @Html.Raw(Json.Serialize(productItems));
 
-        // Hàm cập nhật giá dựa trên lựa chọn của người dùng
         function updateProductInfo() {
-            // Tạo một đối tượng lưu trữ các lựa chọn hiện tại của người dùng
+            // Collect selected options
             const selectedOptions = {};
-
-            // Duyệt qua tất cả các radio button đang được chọn
             document.querySelectorAll('input[type="radio"]:checked').forEach(input => {
                 selectedOptions[input.name] = input.value;
             });
 
-            // Tìm sản phẩm khớp với các tùy chọn đã chọn
+            // Find the matching product item based on selected options
             const matchingProduct = productItems.find(item =>
                 item.configurations.every(config =>
                     selectedOptions[config.variationName] === config.optionName
                 )
             );
 
-            // Cập nhật giá hiển thị
+            // Elements for updating price, discounted price, and remaining quantity
             const priceElement = document.getElementById("price");
             const discountedPriceElement = document.getElementById("discountedPrice");
             const remainingQuantityElement = document.getElementById("remainingQuantity");
             const productItemIdElement = document.getElementById("productItemId");
+            const addToCartButton = document.getElementById("addToCartButton");
 
             if (matchingProduct) {
-                // Cập nhật giá trị id
+                // Update product item ID
                 productItemIdElement.value = matchingProduct.id;
-                console.log(matchingProduct)
+
                 remainingQuantityElement.textContent = `Remaining Quantity: ${matchingProduct.quantityInStock}`;
 
-                // Kiểm tra nếu có discountedPrice
-                if (matchingProduct.discountedPrice) {
-                    priceElement.innerHTML = `<s>${formatCurrency(matchingProduct.price)}</s>`;
-                    discountedPriceElement.textContent = `${formatCurrency(matchingProduct.discountedPrice)}`;
-                } else {
-                    priceElement.textContent = `${formatCurrency(matchingProduct.price)}`;
-                    discountedPriceElement.textContent = ""; // Ẩn giá giảm
-                }
+                // Update price and discount
+                priceElement.textContent = `${formatCurrency(matchingProduct.price)}`;
+                discountedPriceElement.textContent = `${formatCurrency(matchingProduct.discountedPrice)}`;
+
+                // Update quantity constraints
                 maxQuantity = matchingProduct.quantityInStock;
                 quantity = Math.min(quantity, maxQuantity);
                 updateQuantityDisplay();
+
+                // Disable "Add to Cart" if out of stock
+                if (matchingProduct.quantityInStock === 0) {
+                    addToCartButton.disabled = true;
+                    addToCartButton.classList.add("opacity-50", "cursor-not-allowed", "pointer-events-none"); // Add gray and disable styles
+                    addToCartButton.innerHTML = "<span>Out of stock</span>";
+                } else {
+                    addToCartButton.disabled = false;
+                    addToCartButton.classList.remove("opacity-50", "cursor-not-allowed", "pointer-events-none"); // Remove disable styles
+                    addToCartButton.innerHTML = "<i class='fa fa-shopping-cart mr-2'></i> Add to Cart";
+                }
             } else {
-                // Không tìm thấy sản phẩm khớp => Clear giá, số lượng, và ID sản phẩm
-                productItemIdElement.value = ""; // Clear ID
-                priceElement.textContent = "N/A"; // Clear giá hiển thị
-                discountedPriceElement.textContent = ""; // Clear giá giảm
-                remainingQuantityElement.textContent = "Remaining Quantity: N/A"; // Clear số lượng
-                quantity = 1; // Đặt lại số lượng về mặc định
+                // Clear product details if no match
+                productItemIdElement.value = "";
+                priceElement.textContent = "N/A";
+                discountedPriceElement.textContent = "";
+                remainingQuantityElement.textContent = "Remaining Quantity: N/A";
+                quantity = 1;
                 updateQuantityDisplay();
+
+                // Ensure the button is disabled and gray if no product found
+                addToCartButton.disabled = true;
+                addToCartButton.classList.add("opacity-50", "cursor-not-allowed", "pointer-events-none"); // Add disable styles
+                addToCartButton.innerHTML = "<span>Out of stock</span>";
             }
         }
-
 
         // Tự động ẩn các Toast sau 3 giây
         document.addEventListener('DOMContentLoaded', function () {
             setTimeout(() => {
-                document.querySelectorAll('.fixed > div').forEach(toast => {
+                document.querySelectorAll('.toast').forEach(toast => { // Chỉ chọn các phần tử toast
                     toast.remove();
                 });
             }, 3000); // 3000ms = 3 giây
         });
-         function viewProduct() {
-        window.location.href = `/Product/ProductList/ProductList`;
-    }
+
+        function viewProduct() {
+            window.location.href = `/Product/ProductList/ProductList`;
+        }
     </script>
 }
-
-
-
 

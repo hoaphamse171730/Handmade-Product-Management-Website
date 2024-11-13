@@ -3,13 +3,26 @@
 @{
     ViewData["Title"] = "Dashboard";
 }
+@using UI.Pages.Shared
+@{
+    var errorModel = new ErrorMessageModel
+            {
+                ErrorMessage = Model.ErrorMessage,
+                ErrorDetail = Model.ErrorDetail
+            };
+    var token = HttpContext.Session.GetString("Token");
+}
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <partial name="_ErrorMessage" model="errorModel" />
+}
 <div class="dashboard container mx-auto p-6">
     <h1 class="mb-8 text-3xl font-bold text-gray-800">Dashboard</h1>
 
     <div class="grid-cols-1 grid gap-6 md:grid-cols-2">
         <div class="dashboard-section rounded-lg bg-white p-6 shadow-md">
             <h2 class="mb-4 text-xl font-semibold text-gray-700">Total Sale</h2>
-            <p class="text-lg text-gray-600">Total Sales: <span class="font-bold text-blue-500">@Model.TotalSales</span></p>
+            <p class="text-lg text-gray-600">Total Sales: <span class="font-bold text-blue-500">@Model.TotalSales.ToString("N0").Replace(",", ".")₫</span></p>
         </div>
 
         <div class="dashboard-section rounded-lg bg-white p-6 shadow-md">
@@ -25,7 +38,7 @@
                 @foreach (var shop in Model.TopShops)
                 {
                     <li class="py-1">
-                        <a href="/Shop/Index?id=@shop.Id" class="font-bold text-blue-500 hover:underline">@shop.Name</a>: @shop.TotalSales
+                        <a href="/Shop/Index?id=@shop.Id" class="font-bold text-blue-500 hover:underline">@shop.Name</a>: @shop.TotalSales.ToString("N0").Replace(",", ".")₫
                     </li>
                 }
             </ul>

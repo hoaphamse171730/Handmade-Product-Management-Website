@@ -21,6 +21,7 @@ namespace HandmadeProductManagementAPI.Controllers
 
         // GET: api/Users
         [HttpGet]
+        [Authorize]
         public async Task<IActionResult> GetApplicationUsers(int PageNumber, int PageSize,[FromQuery] string? userName, [FromQuery] string? phoneNumber)
         {
 
@@ -35,6 +36,39 @@ namespace HandmadeProductManagementAPI.Controllers
 
 
         }
+
+        // GET: api/Users/UserNames
+        [HttpGet("UserNames")]
+        public async Task<IActionResult> GetUserNames([FromQuery] string? userName, [FromQuery] string? phoneNumber)
+        {
+            var response = new BaseResponse<IList<UserDto>>
+            {
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Success",
+                Data = await _userService.GetUserNames(userName, phoneNumber)
+            };
+
+            return Ok(response);
+        }
+
+        // GET: api/Users/UserName/{id}
+        [HttpGet("UserName/{id}")]
+        public async Task<IActionResult> GetUserNameById(string id)
+        {
+            var userName = await _userService.GetUserNameById(id);
+
+            var response = new BaseResponse<string>
+            {
+                Code = "200",
+                StatusCode = StatusCodeHelper.OK,
+                Message = "Success",
+                Data = userName
+            };
+
+            return Ok(response);
+        }
+
 
         [HttpGet("{id}")]
         [Authorize]

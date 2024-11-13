@@ -65,7 +65,7 @@ namespace UI.Pages.Seller
         public Dictionary<string, List<VariationOptionDto>> VariationOptions { get; set; } = new();
 
 
-        public async Task OnGetAsync(
+        public async Task<IActionResult> OnGetAsync(
             [FromQuery] string? Name,
             [FromQuery] string? CategoryId,
             [FromQuery] string? Status,
@@ -90,13 +90,13 @@ namespace UI.Pages.Seller
             {
                 ErrorMessage = ex.ErrorDetail.ErrorCode;
                 ErrorDetail = ex.ErrorDetail.ErrorMessage?.ToString();
+                if (ErrorMessage == "unauthorized") return RedirectToPage("/Login");
             }
             catch (Exception ex)
             {
                 ErrorMessage = "An unexpected error occurred.";
             }
-
-
+            return Page();
         }
 
         public async Task<IActionResult> OnPostCreateShopAsync()
@@ -747,40 +747,40 @@ namespace UI.Pages.Seller
 
         [BindProperty]
         public Dictionary<string, string> VariationOptionUpdates { get; set; } = new();
-        [BindProperty]
-        public ProductForUpdateDto ProductUpdate { get; set; } = new();
+        //[BindProperty]
+        //public ProductForUpdateDto ProductUpdate { get; set; } = new();
 
         public List<ProductItemForUpdateDto> ProductItemUpdates { get; set; } = new List<ProductItemForUpdateDto>();
-        public async Task<IActionResult> OnGetProductDetailsAsync(string productId)
-        {
-            try
-            {
-                var response = await _apiResponseHelper.GetAsync<ProductDetailResponseModel>(
-                    $"{Constants.ApiBaseUrl}/api/product/detail/{productId}");
+        //public async Task<IActionResult> OnGetProductDetailsAsync(string productId)
+        //{
+        //    try
+        //    {
+        //        var response = await _apiResponseHelper.GetAsync<ProductDetailResponseModel>(
+        //            $"{Constants.ApiBaseUrl}/api/product/detail/{productId}");
 
-                if (response.StatusCode != StatusCodeHelper.OK)
-                {
-                    return new JsonResult(new { success = false, message = "Failed to load product details" });
-                }
+        //        if (response.StatusCode != StatusCodeHelper.OK)
+        //        {
+        //            return new JsonResult(new { success = false, message = "Failed to load product details" });
+        //        }
 
-                var result = new
-                {
-                    success = true,
-                    product = response.Data
-                };
+        //        var result = new
+        //        {
+        //            success = true,
+        //            product = response.Data
+        //        };
 
-                return new JsonResult(result);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error loading product details");
-                return new JsonResult(new
-                {
-                    success = false,
-                    message = "An error occurred while loading product details"
-                });
-            }
-        }
+        //        return new JsonResult(result);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, "Error loading product details");
+        //        return new JsonResult(new
+        //        {
+        //            success = false,
+        //            message = "An error occurred while loading product details"
+        //        });
+        //    }
+        //}
 
         public async Task<IActionResult> OnPostUpdateBasicInfoAsync([FromBody] JsonElement jsonBody)
         {
@@ -873,6 +873,146 @@ namespace UI.Pages.Seller
                 _logger.LogError(ex, "Error deleting variation");
                 return new JsonResult(new { success = false });
             }
+        }
+
+
+
+
+
+
+
+
+
+        //----------------------------------------------------------------------------------------------------------------------------//
+        [BindProperty]
+        public ProductForUpdateNewFormatDto ProductUpdate { get; set; } = new ProductForUpdateNewFormatDto();
+
+        public async Task<IActionResult> OnGetProductDetailsAsync(string productId)
+        {
+            try
+            {
+                var response = await _apiResponseHelper.GetAsync<ProductForUpdateNewFormatResponseDto>(
+                    $"{Constants.ApiBaseUrl}/api/product/updateproductresponse/{productId}");
+
+                if (response.StatusCode == StatusCodeHelper.OK && response.Data != null)
+                {
+                    return new JsonResult(new
+                    {
+                        success = true, // Added success flag
+                        data = response.Data,
+                        message = "Product details retrieved successfully"
+                    });
+                }
+
+                return new JsonResult(new
+                {
+                    success = false,
+                    statusCode = 404,
+                    message = "Failed to fetch product details",
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching product details for edit");
+                return new JsonResult(new
+                {
+                    success = false,
+                    statusCode = 500,
+                    message = "An error occurred while fetching product details"
+                });
+            }
+        }
+
+        public async Task<IActionResult> OnPostUpdateProductAsync([FromBody] ProductForUpdateNewFormatDto updateData)
+        {
+            try
+            {
+                if (updateData == null)
+                {
+                    return new JsonResult(new { success = false, message = "No update data provided" });
+                }
+
+                var productId = Request.Query["productId"].ToString();
+                if (string.IsNullOrEmpty(productId))
+                {
+                    return new JsonResult(new { success = false, message = "Product ID is required" });
+                }
+
+                // Clean up the update data to ensure no null collections
+                if (updateData.Variations == null)
+                {
+                    updateData.Variations = new List<VariationForProductUpdateNewFormatDto>();
+                }
+
+                if (updateData.VariationCombinations == null)
+                {
+                    updateData.VariationCombinations = new List<VariationCombinationUpdateNewFormatDto>();
+                }
+
+                // Make the API call
+                var response = await _apiResponseHelper.PutAsync<bool>(
+                    $"{Constants.ApiBaseUrl}/api/product/updateproduct/{productId}",
+                    updateData);
+
+                if (response.StatusCode == StatusCodeHelper.OK && response.Data)
+                {
+                    return new JsonResult(new { success = true, message = "Product updated successfully" });
+                }
+
+                return new JsonResult(new
+                {
+                    success = false,
+                    message = response.Message ?? "Failed to update product",
+                    statusCode = response.StatusCode
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating product: {Message}", ex.Message);
+                return new JsonResult(new
+                {
+                    success = false,
+                    message = "An error occurred while updating the product",
+                    statusCode = 500
+                });
+            }
+        }
+
+        public async Task<IActionResult> OnPostAddOptionsToVariationAsync([FromBody] AddOptionsToVariationRequest request)
+        {
+            try
+            {
+                foreach (var optionValue in request.Options)
+                {
+                    var optionDto = new
+                    {
+                        value = optionValue,
+                        variationId = request.VariationId
+                    };
+
+                    var createOptionResponse = await _apiResponseHelper.PostAsync<bool>(
+                        $"{Constants.ApiBaseUrl}/api/variationoption",
+                        optionDto);
+
+                    if (createOptionResponse.StatusCode != StatusCodeHelper.OK || !createOptionResponse.Data)
+                    {
+                        return new JsonResult(new { success = false, message = $"Failed to create option: {optionValue}" });
+                    }
+                }
+
+                return new JsonResult(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error adding options to variation");
+                return new JsonResult(new { success = false, message = ex.Message });
+            }
+        }
+
+        public class AddOptionsToVariationRequest
+        {
+            public string VariationId { get; set; }
+            public List<string> Options { get; set; }
         }
     }
 }

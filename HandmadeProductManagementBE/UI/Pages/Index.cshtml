@@ -32,9 +32,9 @@
 
 
 <div class="search-filter">
-    <form method="get" class="flex space-x-4 items-center">
-        <input class="border border-gray-300 rounded-md p-2" type="text" name="Name" placeholder="Search by name" value="@Request.Query["Name"]" onchange="this.form.submit();" />
-        <select name="CategoryId" class="border border-gray-300 rounded-md p-2">
+    <form method="get" class="flex items-center space-x-4">
+        <input class="rounded-md border border-gray-300 p-2" type="text" name="Name" placeholder="Search by name" value="@Request.Query["Name"]" onchange="this.form.submit();" />
+        <select name="CategoryId" class="rounded-md border border-gray-300 p-2">
             <option value="">Select Category</option>
             @if (Model.Categories != null && Model.Categories.Any())
             {
@@ -56,7 +56,7 @@
             var selectedStatus = Request.Query["Status"].ToString();
         }
 
-        <select name="Status" class="border border-gray-300 rounded-md p-2">
+        <select name="Status" class="rounded-md border border-gray-300 p-2">
             @if (string.IsNullOrEmpty(selectedStatus))
             {
                 <option value="" selected>Select Status</option>
@@ -84,7 +84,7 @@
                 <option value="OutOfStock">Out Of Stock</option>
             }
         </select>
-        <input class="border border-gray-300 rounded-md p-2" type="number" name="MinRating" placeholder="Min Rating" min="0" max="5" value="@Request.Query["MinRating"]" />
+        <input class="rounded-md border border-gray-300 p-2" type="number" name="MinRating" placeholder="Min Rating" min="0" max="5" value="@Request.Query["MinRating"]" />
 
         <div class="flex items-center space-x-4">
             <label class="flex items-center">
@@ -108,7 +108,7 @@
             @(Request.Query["SortDescending"] == "true" ? "checked" : "") onchange="this.form.submit();" />
         </label>
 
-        <button type="submit" class="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600">Search</button>
+        <button type="submit" class="rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600">Search</button>
     </form>
 </div>
 
@@ -117,27 +117,26 @@
 {
     <div class="py-16">
         <div class="container mx-auto px-4">
-            <h2 class="text-3xl font-bold mb-8">Introducing Our Latest Products</h2>
+            <h2 class="mb-8 text-3xl font-bold">Introducing Our Latest Products</h2>
 
             <!-- Responsive Grid Layout: 1 column on mobile, 2 columns on small screens, 4 columns on larger screens -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div class="grid-cols-1 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
                 @foreach (var product in Model.Products)
                 {
-                    <div class="bg-white rounded-lg shadow-lg p-6">
-                        <div class="relative overflow-hidden h-48">
-                            <img class="object-cover w-full h-full" src="@product.ProductImageUrl" alt="@product.Name" />
-                            <div class="absolute inset-0 bg-black opacity-40"></div>
+                    <div class="rounded-lg bg-white p-6 shadow-lg">
+                        <div class="relative h-48 overflow-hidden">
+                            <img class="h-full w-full object-cover" src="@product.ProductImageUrl" alt="@product.Name" />
+                            <div class="opacity-40 absolute inset-0 bg-black"></div>
                             <div class="absolute inset-0 flex items-center justify-center">
-                                <button class="bg-white text-gray-900 py-2 px-6 rounded-full font-bold hover:bg-gray-300" onclick="viewProduct('@product.Id')">View Product</button>
+                                <button class="rounded-full bg-white px-6 py-2 font-bold text-gray-900 hover:bg-gray-300" onclick="viewProduct('@product.Id')">View Product</button>
                             </div>
                         </div>
-                        <h3 class="text-xl font-bold text-gray-900 mt-4">@product.Name</h3>
-                        <p class="text-gray-500 text-sm mt-2">@product.Description</p>
-                        <div class="flex items-center justify-between mt-4">
-                            <span class="text-gray-900 font-bold text-lg">$@product.LowestPrice</span>
-                            <button class="bg-gray-900 text-white py-2 px-4 rounded-full font-bold hover:bg-gray-800">Add to Cart</button>
+                        <h3 class="mt-4 text-xl font-bold text-gray-900">@product.Name</h3>
+                        <p class="mt-2 text-sm text-gray-500">@product.Description</p>
+                        <div class="mt-4 flex items-center justify-between">
+                            <span class="text-lg font-bold text-gray-900">₫@product.LowestPrice.ToString("N0").Replace(",", ".")</span>
                         </div>
-                        <div class="text-sm text-gray-500 mt-2">Rating: @product.Rating | Status: @product.Status</div>
+                        <div class="mt-2 text-sm text-gray-500">Rating: @product.Rating | Status: @product.Status</div>
                     </div>
                 }
             </div>

@@ -15,7 +15,7 @@
                             <div class="h-4 w-full bg-transparent bg-opacity-50"></div>
                         </div>
                         <h3 class="text-md font-semibold transition-colors duration-300 hover:text-blue-600">@product.Name</h3>
-                        <p class="text-sm text-gray-600">₫@product.Price</p>
+                        <p class="text-sm text-gray-600">₫@product.Price.ToString("N0").Replace(",", ".")</p>
                     </a>
                 </div>
             </div>

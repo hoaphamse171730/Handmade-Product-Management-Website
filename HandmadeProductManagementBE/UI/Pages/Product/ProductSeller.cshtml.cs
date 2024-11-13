@@ -1,5 +1,4 @@
-﻿using HandmadeProductManagement.Contract.Repositories.Entity;
-using HandmadeProductManagement.Core.Base;
+﻿using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Common;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.Core.Store;
@@ -10,25 +9,12 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Text.Json;
-using Microsoft.Extensions.Logging;
-using System.Linq;
 using HandmadeProductManagement.ModelViews.VariationModelViews;
 using HandmadeProductManagement.ModelViews.VariationOptionModelViews;
 using System.Net.Http.Headers;
-using Azure;
-using Microsoft.IdentityModel.Tokens;
-using System.ComponentModel.DataAnnotations;
 using HandmadeProductManagement.ModelViews.VariationCombinationModelViews;
-using System.Security.Claims;
-using System.Collections.Generic;
-using Microsoft.Extensions.Primitives;
-using static HandmadeProductManagement.Core.Base.BaseException;
 using HandmadeProductManagement.ModelViews.ProductDetailModelViews;
 using HandmadeProductManagement.ModelViews.ProductItemModelViews;
-using HandmadeProductManagement.ModelViews.ProductImageModelViews;
-using Newtonsoft.Json;
-using System.Net.Http;
-using GraphQLParser;
 
 namespace UI.Pages.Product
 {
@@ -119,6 +105,7 @@ namespace UI.Pages.Product
             {
                 ErrorMessage = ex.ErrorDetail.ErrorCode;
                 ErrorDetail = ex.ErrorDetail.ErrorMessage?.ToString();
+                if (ErrorMessage == "unauthorized") return RedirectToPage("/Login");
             }
             catch (Exception ex)
                 {

@@ -32,15 +32,16 @@ namespace UI.Pages.ProductDetail
         public string? ErrorMessage { get; set; }
         public string? ErrorDetail { get; set; }
         public ProductDetailResponseModel? productDetail { get; set; }
-        public CartItemForCreationDto? cart { get;set; }
+        public CartItemForCreationDto? cart { get; set; }
         public IList<VariationDto> Variations { get; set; } = new List<VariationDto>();
         public IList<VariationWithOptionsDto> VariationOptions { get; set; } = new List<VariationWithOptionsDto>();
         public IList<ReviewModel> Reviews { get; set; } = new List<ReviewModel>();
         public int PageNumber { get; set; } = 1;
         public int TotalPages { get; set; }
-        public IList<UserResponseModel> Users { get; set; } = new List<UserResponseModel>();
+        public IList<UserDto> Users { get; set; } = new List<UserDto>();
         public IList<ShopResponseModel> Shops { get; set; } = new List<ShopResponseModel>();
         public ShopResponseModel Shop { get; private set; } = new ShopResponseModel();
+
         public async Task<PageResult> OnGet(string id, int pageNumber = 1, int pageSize = 10)
         {
             string productId = id;
@@ -50,6 +51,7 @@ namespace UI.Pages.ProductDetail
                 var response = await _apiResponseHelper.GetAsync<ProductDetailResponseModel>($"{Constants.ApiBaseUrl}/api/product/detail/{productId}");
 
                 // Gán thông tin sản phẩm cho thuộc tính productDetail
+                // 
                 productDetail = response.Data;
 
                 Shop = await GetShopById(productDetail?.ShopId);
@@ -88,7 +90,7 @@ namespace UI.Pages.ProductDetail
                             .Select(option => new OptionsDto
                             {
                                 Id = option.Id,
-                                Name = option.Value
+                                Value = option.Value
                             })
                             .ToList();
 
@@ -120,7 +122,7 @@ namespace UI.Pages.ProductDetail
                         {
                             Name = group.Key,
                             Id = group.First().Id, // Chọn ID của variation đầu tiên trong nhóm
-                            Options = group.SelectMany(v => v.Options).DistinctBy(o => o.Name).ToList() // Kết hợp options và loại bỏ trùng lặp
+                            Options = group.SelectMany(v => v.Options).DistinctBy(o => o.Value).ToList() // Kết hợp options và loại bỏ trùng lặp
                         })
                         .ToList();
 
@@ -146,19 +148,19 @@ namespace UI.Pages.ProductDetail
                     }
                 }
 
-                // Fetch all Users
-                var userResponse = await _apiResponseHelper.GetAsync<IList<UserResponseModel>>($"{Constants.ApiBaseUrl}/api/users");
-                if (userResponse.StatusCode == StatusCodeHelper.OK)
-                {
-                    Users = userResponse.Data ?? new List<UserResponseModel>(); // Fallback to empty list if null
-                }
+                //// Fetch all Users
+                //var userResponse = await _apiResponseHelper.GetAsync<IList<UserDto>>($"{Constants.ApiBaseUrl}/api/users/usernames?");
+                //if (userResponse.StatusCode == StatusCodeHelper.OK)
+                //{
+                //    Users = userResponse.Data ?? new List<UserDto>(); // Fallback to empty list if null
+                //}
 
-                // Fetch all Shops
-                var shopResponse = await _apiResponseHelper.GetAsync<IList<ShopResponseModel>>($"{Constants.ApiBaseUrl}/api/shop/get-all");
-                if (shopResponse.StatusCode == StatusCodeHelper.OK)
-                {
-                    Shops = shopResponse.Data ?? new List<ShopResponseModel>();  // Fallback to empty list if null;
-                }
+                //// Fetch all Shops
+                //var shopResponse = await _apiResponseHelper.GetAsync<IList<ShopResponseModel>>($"{Constants.ApiBaseUrl}/api/shop/get-all");
+                //if (shopResponse.StatusCode == StatusCodeHelper.OK)
+                //{
+                //    Shops = shopResponse.Data ?? new List<ShopResponseModel>();  // Fallback to empty list if null;
+                //}
 
                 return Page();
             }
@@ -183,20 +185,26 @@ namespace UI.Pages.ProductDetail
                 : new ShopResponseModel();
         }
 
-        public async Task<UserResponseModel?> GetUserByIdAsync(string userId)
+        public async Task<string?> GetUserNameByIdAsync(string userId)
         {
             try
             {
-                var response = await _apiResponseHelper.GetAsync<UserResponseModel>($"{Constants.ApiBaseUrl}/api/users/{userId}");
-                if (response.StatusCode == StatusCodeHelper.OK && response.Data != null)
+                var response = await _apiResponseHelper.GetAsync<string>($"{Constants.ApiBaseUrl}/api/users/username/{userId}");
+
+                if (response.StatusCode == StatusCodeHelper.OK && !string.IsNullOrEmpty(response.Data))
                 {
                     return response.Data;
+                }
+                else
+                {
+                    Console.WriteLine($"Error: Received status code {response.StatusCode}");
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error getting user by ID: {ex.Message}");
             }
+
             return null;
         }
 
@@ -215,22 +223,6 @@ namespace UI.Pages.ProductDetail
                 TempData["Message"] = "Please select a valid product and quantity.";
                 return RedirectToPage(new { id = Id });
             }
-
-            var GETResponse = await _apiResponseHelper.GetAsync<List<CartItemGroupDto>>($"{Constants.ApiBaseUrl}/api/cartitem");
-
-            cartItemGroups = GETResponse.Data ?? new List<CartItemGroupDto>();
-
-            // Kiểm tra xem sản phẩm đã tồn tại trong giỏ hàng hay chưa
-            bool isProductInCart = cartItemGroups
-                .SelectMany(group => group.CartItems)
-                .Any(item => item.ProductItemId == CartItem.ProductItemId);
-
-            if (isProductInCart)
-            {
-                TempData["Message"] = "This product is already in the cart. Please update the quantity if needed.";
-                return RedirectToPage(new { id = Id });
-            }
-
 
             // Gửi yêu cầu POST với đối tượng CartItem
             var POSTResponse = await _apiResponseHelper.PostAsync<bool>($"{Constants.ApiBaseUrl}/api/cartitem", CartItem);

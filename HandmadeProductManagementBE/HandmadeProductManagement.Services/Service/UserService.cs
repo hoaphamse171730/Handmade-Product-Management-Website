@@ -95,6 +95,51 @@ namespace HandmadeProductManagement.Services.Service
             return user;
         }
 
+        public async Task<IList<UserDto>> GetUserNames(string? userName = null, string? phoneNumber = null)
+        {
+            var query = _unitOfWork.GetRepository<ApplicationUser>()
+                .Entities
+                .AsQueryable();
+
+            if (!string.IsNullOrEmpty(userName))
+            {
+                query = query.Where(x => x.UserName!.Contains(userName));
+            }
+
+            if (!string.IsNullOrEmpty(phoneNumber))
+            {
+                query = query.Where(x => x.PhoneNumber!.Contains(phoneNumber));
+            }
+
+            // Select both UserId and UserName
+            var userNames = await query
+                .Select(user => new UserDto
+                {
+                    UserId = user.Id.ToString(),  // Assuming user.Id is of type Guid or another non-string type, convert to string if necessary
+                    UserName = user.UserName!
+                })
+                .ToListAsync();
+
+            return userNames;
+        }
+
+        public async Task<string> GetUserNameById(string id)
+        {
+            // Ensure the id is a valid Guid
+            if (!Guid.TryParse(id, out Guid userId))
+            {
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat);
+            }
+
+            var userName = await _unitOfWork.GetRepository<ApplicationUser>()
+                .Entities
+                .Where(u => u.Id == userId)
+                .Select(u => u.UserName)
+                .FirstOrDefaultAsync() ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageUserNotFound);
+
+            return userName;
+        }
+
         public async Task<bool> UpdateUser(string id, UpdateUserDTO updateUserDTO)
         {
             if (!Guid.TryParse(id, out Guid userId))

@@ -1,8 +1,25 @@
 ﻿@page
 @model Order.OrderHistoryModel
+@using UI.Pages.Shared
 @{
     ViewData["Title"] = "Order History";
 }
+
+@{
+    var errorModel = new ErrorMessageModel
+            {
+                ErrorMessage = Model.ErrorMessage,
+                ErrorDetail = Model.ErrorDetail
+            };
+
+    var token = HttpContext.Session.GetString("Token");
+}
+
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <partial name="_ErrorMessage" model="errorModel" />
+}
+
 <div class="mx-auto max-w-full">
     <div class="mb-6 flex items-center justify-between">
         <h1 class="ml-4 text-left text-2xl font-bold text-black">Order History</h1>
@@ -58,7 +75,7 @@
                                 <td class="border-b border-gray-200 p-6 text-lg">@order.CustomerName</td>
                                 <td class="border-b border-gray-200 p-6 text-lg">@order.Phone</td>
                                 <td class="border-b border-gray-200 p-6 text-lg">@order.OrderDate.ToString("dd/MM/yyyy")</td>
-                                <td class="border-b border-gray-200 p-6 text-lg">@order.TotalPrice.ToString("C")</td>
+                                <td class="border-b border-gray-200 p-6 text-lg">₫@order.TotalPrice.ToString("N0").Replace(",", ".")</td>
                                 <td class="border-b border-gray-200 p-6 text-lg">@order.Status</td>
                                 <td class="border-b border-gray-200 p-6 text-lg">@order.Address</td>
                                 <td class="border-b border-gray-200 p-6 text-lg">@order.Note</td>
@@ -74,7 +91,7 @@
                                          @if (order.Status == "Awaiting Payment")
                                         {
                                             <button class="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
-                                                    onclick="event.stopPropagation()">
+                                                    onclick="event.stopPropagation(); processPayment('@order.Id')">
                                                  Process payment
                                             </button>
                                         }
@@ -97,6 +114,40 @@
         </div>
     }
 </div>
+
+
+<script>
+    async function processPayment(orderId) {
+        try {
+            console.log(`Processing payment for order: ${orderId}`);
+
+
+            const response = await fetch(`/Order/OrderHistory?handler=ProcessPayment&orderId=${orderId}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+
+            const result = await response.json();
+            if (result.success) {
+                console.log(`Payment processed successfully for order ${orderId}.`);
+                window.location.href = result.data;
+            } else {
+                console.error(`Failed to process payment for order ${orderId}. Message: ${result.message}`);
+                alert(result.message || 'Failed to process payment.');
+            }
+        } catch (error) {
+            console.error('There was a problem with the payment operation:', error);
+            alert('An error occurred while processing the payment.');
+        }
+    }
+</script>
+
 
 <!-- Confirmation Modal -->
 <div id="confirmModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" style="display: none;">

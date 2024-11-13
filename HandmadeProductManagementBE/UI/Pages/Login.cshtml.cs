@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using HandmadeProductManagement.Core.Common;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -15,10 +15,11 @@ public class LoginModel : PageModel
 
     [BindProperty]
     public string Password { get; set; }
+    public string UserId { get; set; }
 
     private readonly IHttpClientFactory _httpClientFactory;
 
-    public LoginModel(IHttpClientFactory httpClientFactory)
+        public LoginModel(IHttpClientFactory httpClientFactory)
     {
         _httpClientFactory = httpClientFactory;
     }
@@ -34,6 +35,20 @@ public class LoginModel : PageModel
         }
 
         return RedirectToPage("/Login");
+    }
+
+    // Phương thức OnGet để kiểm tra trạng thái đăng nhập
+    public IActionResult OnGet()
+    {
+        var token = HttpContext.Session.GetString("Token");
+
+        // Nếu đã có token trong session, chuyển hướng người dùng đến trang chính
+        if (!string.IsNullOrEmpty(token))
+        {
+            return RedirectToPage("/Index"); // Hoặc trang bạn muốn chuyển đến
+        }
+
+        return Page();
     }
 
     public async Task<IActionResult> OnPostAsync()

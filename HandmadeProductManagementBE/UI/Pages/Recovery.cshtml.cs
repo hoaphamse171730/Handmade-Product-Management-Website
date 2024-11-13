@@ -30,8 +30,19 @@ public class RecoveryModel : PageModel
         public bool AcceptTerms { get; set; }
     }
 
-    public void OnGet()
+    public string? ErrorMessage { get; set; }
+
+    public IActionResult OnGet()
     {
+        var token = HttpContext.Session.GetString("Token");
+
+        // Nếu đã có token trong session, chuyển hướng người dùng đến trang chính
+        if (!string.IsNullOrEmpty(token))
+        {
+            return RedirectToPage("/Index"); // Hoặc trang bạn muốn chuyển đến
+        }
+
+        return Page();
     }
 
     public async Task<IActionResult> OnPostAsync()
@@ -57,8 +68,13 @@ public class RecoveryModel : PageModel
             }
             else
             {
-                var error = await response.Content.ReadAsStringAsync();
-                ModelState.AddModelError(string.Empty, $"Error: {error}");
+                // Handle error response and extract detail
+                var errorContent = await response.Content.ReadAsStringAsync();
+                var errorResponse = JsonSerializer.Deserialize<ErrorResponse>(errorContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                // Set the error message to the detail from the error response
+                ErrorMessage = errorResponse?.Detail ?? "An error occurred while creating the shop.";
+                ModelState.AddModelError(string.Empty, ErrorMessage);
             }
 
             return Page();

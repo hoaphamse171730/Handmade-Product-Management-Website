@@ -1,10 +1,12 @@
 using GraphQLParser;
+using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Common;
 using HandmadeProductManagement.Core.Store;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.ComponentModel.DataAnnotations;
 using System.Net.Http.Headers;
+using static HandmadeProductManagement.Core.Base.BaseException;
 
 namespace UI.Pages
 {
@@ -51,52 +53,67 @@ namespace UI.Pages
         public string? ErrorMessage { get; set; }
 
         public string Token { get; set; }
+        public string? ErrorDetail { get; set; }
 
         public async Task<IActionResult> OnPostAsync()
         {
-            if (!ModelState.IsValid)
+            try
             {
-                ErrorMessage = "Please correct the errors in the form.";
-                return Page();
-            }
-
-             Token = HttpContext.Session.GetString("Token");
-
-            var registrationData = new
-            {
-                UserName = this.UserName,
-                FullName = this.FullName,
-                Email = this.Email,
-                PhoneNumber = this.PhoneNumber,
-                Password = this.Password,
-            };
-            var client = _httpClientFactory.CreateClient();
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Token);
-            var response = await client.PostAsJsonAsync($"{Constants.ApiBaseUrl}/api/authentication/admin/register", registrationData);
-            var errorContent = await response.Content.ReadAsStringAsync();
-            Console.WriteLine("Error Details: " + errorContent);
-            if (response.IsSuccessStatusCode)
-            {
-                return RedirectToPage("/Login");
-            }
-            else
-            {
-
-                if (errorContent.Contains("Email already in use"))
+                if (!ModelState.IsValid)
                 {
-                    ModelState.AddModelError("Email", "Email is already in use.");
+                    ErrorMessage = "Please correct the errors in the form.";
+                    return Page();
                 }
-                if (errorContent.Contains("Phone number already in use"))
+
+                Token = HttpContext.Session.GetString("Token");
+
+                var registrationData = new
                 {
-                    ModelState.AddModelError("PhoneNumber", "Phone number is already in use.");
-                }
-                if (errorContent.Contains("This username is already taken"))
+                    UserName = this.UserName,
+                    FullName = this.FullName,
+                    Email = this.Email,
+                    PhoneNumber = this.PhoneNumber,
+                    Password = this.Password,
+                };
+                var client = _httpClientFactory.CreateClient();
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Token);
+                var response = await client.PostAsJsonAsync($"{Constants.ApiBaseUrl}/api/authentication/admin/register", registrationData);
+                var errorContent = await response.Content.ReadAsStringAsync();
+                Console.WriteLine("Error Details: " + errorContent);
+                if (response.IsSuccessStatusCode)
                 {
-                    ModelState.AddModelError("UserName", "This username is already taken.");
+                    return RedirectToPage("/Index");
                 }
-                ErrorMessage = "Registration failed. Please correct the errors and try again.";
-                return Page();
+                else
+                {
+
+                    if (errorContent.Contains("Email already in use"))
+                    {
+                        ModelState.AddModelError("Email", "Email is already in use.");
+                    }
+                    if (errorContent.Contains("Phone number already in use"))
+                    {
+                        ModelState.AddModelError("PhoneNumber", "Phone number is already in use.");
+                    }
+                    if (errorContent.Contains("This username is already taken"))
+                    {
+                        ModelState.AddModelError("UserName", "This username is already taken.");
+                    }
+                    ErrorMessage = "Registration failed. Please correct the errors and try again.";
+                    return Page();
+                }
             }
+            catch (BaseException.ErrorException ex)
+            {
+                ErrorMessage = ex.ErrorDetail.ErrorCode;
+                ErrorDetail = ex.ErrorDetail.ErrorMessage?.ToString();
+                if (ErrorMessage == "unauthorized") return RedirectToPage("/Login");
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = "An unexpected error occurred.";
+            }
+            return Page();
         }
     }
 }

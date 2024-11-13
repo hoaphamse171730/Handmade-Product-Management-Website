@@ -8,6 +8,7 @@ using HandmadeProductManagement.Core.Common;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.ModelViews.CartItemModelViews;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace HandmadeProductManagement.Services.Service
 {
@@ -139,8 +140,8 @@ namespace HandmadeProductManagement.Services.Service
                             .ThenInclude(cat => cat.Promotion)
                 .Include(ci => ci.ProductItem!.Product!.Shop)
                 .Include(ci => ci.ProductItem!.Product!.ProductImages)
-                .Where(ci => ci.UserId == userIdGuid 
-                    && ci.DeletedTime == null 
+                .Where(ci => ci.UserId == userIdGuid
+                    && ci.DeletedTime == null
                     && ci.ProductItem != null
                     && ci.ProductItem.Product != null
                     && ci.ProductItem.Product.Shop != null
@@ -150,14 +151,16 @@ namespace HandmadeProductManagement.Services.Service
                     ci.Id,
                     ci.ProductItemId,
                     ci.ProductQuantity,
-                    ci.CreatedTime, // Include CreatedBy for sorting
+                    ci.CreatedTime,
                     ShopId = ci.ProductItem!.Product!.Shop!.Id,
                     ShopName = ci.ProductItem.Product.Shop.Name,
                     UnitPrice = ci.ProductItem.Price,
-                    DiscountPrice = ci.ProductItem.Price * (1 - (ci.ProductItem.Product!.Category!.Promotion != null && ci.ProductItem.Product.Category.Promotion.Status.Equals("active", StringComparison.OrdinalIgnoreCase) ? ci.ProductItem.Product.Category.Promotion.DiscountRate : 0)),
+                    StockQuantity = ci.ProductItem.QuantityInStock,
+                    DiscountPrice = ci.ProductItem.Price * (1 - (ci.ProductItem.Product!.Category!.Promotion != null
+                        && ci.ProductItem.Product.Category.Promotion.Status.Equals("active", StringComparison.OrdinalIgnoreCase)
+                        ? ci.ProductItem.Product.Category.Promotion.DiscountRate : 0)),
                     ProductId = ci.ProductItem.Product.Id,
                     ProductName = ci.ProductItem.Product.Name,
-                    // Lấy URL của hình ảnh cuối cùng
                     ImageUrl = ci.ProductItem.Product.ProductImages
                         .OrderByDescending(pi => pi.CreatedTime)
                         .Select(pi => pi.Url)
@@ -165,12 +168,12 @@ namespace HandmadeProductManagement.Services.Service
                     VariationOptionValues = _unitOfWork.GetRepository<ProductConfiguration>().Entities
                         .Where(pc => pc.ProductItemId == ci.ProductItemId)
                         .Select(pc => pc.VariationOption!.Value)
-                        .ToList()
+                        .ToList(),
+                    ExceedsStock = ci.ProductQuantity > ci.ProductItem.QuantityInStock // Flag if quantity exceeds stock
                 })
-                .OrderByDescending(ci => ci.CreatedTime) // Sort by CreatedBy in descending order
+                .OrderByDescending(ci => ci.CreatedTime)
                 .ToListAsync();
 
-            // Group cart items by ShopId and ShopName
             var cartItemGroups = cartItems
                 .GroupBy(ci => new { ci.ShopId, ci.ShopName })
                 .Select(group => new CartItemGroupDto
@@ -180,15 +183,17 @@ namespace HandmadeProductManagement.Services.Service
                     CartItems = group.Select(ci => new CartItemDto
                     {
                         Id = ci.Id,
-                        ProductId= ci.ProductId,
+                        ProductId = ci.ProductId,
                         ProductName = ci.ProductName,
                         ImageUrl = ci.ImageUrl,
                         ProductItemId = ci.ProductItemId,
                         ProductQuantity = ci.ProductQuantity,
+                        StockQuantity = ci.StockQuantity,
                         UnitPrice = ci.UnitPrice,
                         DiscountPrice = ci.DiscountPrice,
                         TotalPriceEachProduct = ci.DiscountPrice * ci.ProductQuantity,
-                        VariationOptionValues = ci.VariationOptionValues
+                        VariationOptionValues = ci.VariationOptionValues,
+                        InStock = !ci.ExceedsStock // Check the flag for stock status
                     }).ToList()
                 })
                 .ToList();
