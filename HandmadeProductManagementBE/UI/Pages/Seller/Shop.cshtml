@@ -282,7 +282,7 @@ else
                     </div>
                     <h3 class="text-lg font-semibold">@product.Name</h3>
                     @*                 <p class="mb-2 text-sm text-gray-600">@product.Category?.Name</p>
-            *@                <p class="font-medium text-gray-800">$@product.LowestPrice.ToString("F2")</p>
+        *@                <p class="font-medium text-gray-800">₫@product.LowestPrice.ToString("N0").Replace(",", ".")</p>
                     <div class="mt-2 flex items-center">
                         <span class="text-yellow-400">★</span>
                         <span class="ml-1">@product.Rating.ToString("F1")</span>
@@ -1633,6 +1633,8 @@ else
                 // Reset the form and state
                 editState.existingVariationsData = [];
                 editState.variationCombinations = [];
+                selectedOptions = {};
+                existingCombinations = {};
 
                 const form = document.querySelector('#editProductModal form');
                 if (form) {
@@ -1684,12 +1686,14 @@ else
                         categorySelect.value = productData.categoryId || '';
                     }
 
-                    // Load variations
-                    await loadExistingVariationsForEdit();
+
                     // Load variation combinations if they exist
                     if (productData.productItems?.length > 0) {
                         await loadVariationCombinationsForEdit(productData.productItems);
                     }
+
+                    // Load variations
+                    await loadExistingVariationsForEdit();
 
                     // Show the modal
                     openEditProductModal(productId);
@@ -1705,6 +1709,7 @@ else
             }
         }
 
+        let selectedOptions = {};
         async function loadExistingVariationsForEdit() {
             const categoryId = document.getElementById('editCategorySelect').value;
             const container = document.getElementById('existingVariationsListForEdit');
@@ -1728,8 +1733,8 @@ else
                 }
 
                 const variationsData = await variationsResponse.json();  // This will fail if not valid JSON
-                console.log(variationsData);
                 container.innerHTML = '';  // Clear the container before adding new content
+                selectedOptions = {};  // Reset selected options
 
                 // Get the product's existing variations from the product data
                 const productVariations = editState.productData?.variations || [];
@@ -1743,10 +1748,18 @@ else
                     const productVariation = productVariations.find(pv => pv.id === variation.id);
                     const selectedOptionIds = productVariation?.variationOptionIds || [];
 
+                    // Initialize selectedOptions[variation.name] as an empty array if not already done
+                    if (!selectedOptions[variation.name]) {
+                        selectedOptions[variation.name] = [];
+                    }
+
                     // Generate the HTML for the variation options (checkboxes)
                     const optionsHtml = variation.options.map(option => {
                         // Check if the current option is selected (part of variationOptionIds)
                         const isChecked = selectedOptionIds.includes(option.id) ? 'checked' : '';
+                        if (isChecked) {
+                            selectedOptions[variation.name].push(option.value);
+                        }
                         return `
                             <label class="inline-flex items-center space-x-2">
                                 <input type="checkbox" name="variation_${variation.id}" value="${option.id}" ${isChecked} class="form-checkbox">
@@ -1766,11 +1779,192 @@ else
 
                     container.appendChild(variationDiv);
                 }
+
+                // Call regenerateCombinations to generate initial combinations
+                regenerateCombinations();
             } catch (error) {
                 console.error('Error loading existing variations for edit:', error);
                 alert('Failed to load variations. Please try again.');
             }
         }
+
+        let existingCombinations = {};  // Store combinations with price and quantity
+        // Initialize existing combinations when modal opens
+        function initializeExistingCombinations(productItems) {
+            existingCombinations = {};  // Reset existing combinations
+
+            // Build combinations from the product items
+            productItems.forEach(item => {
+                if (Array.isArray(item.combinations)) {
+                    // Create a key by combining the option values and sorting
+                    const combinationKey = item.combinations.map(opt => opt.value).sort().join(', ');
+
+                    // Store the combination key with price and quantity
+                    existingCombinations[combinationKey] = {
+                        price: item.price || null,
+                        quantity: item.quantityInStock || null
+                    };
+                } else {
+                    console.warn("Unexpected combinations format:", item.combinations);
+                }
+            });
+
+            // Now convert this into the desired format
+            const combinationResults = Object.keys(existingCombinations).map(key => {
+                const combination = key.split(', ');  // Split the key to get the individual options
+                const { price, quantity } = existingCombinations[key];
+                return {
+                    combination: combination,
+                    price: price,
+                    quantity: quantity
+                };
+            });
+
+            // Store the combination results directly in existingCombinations with numeric indices
+            existingCombinations = combinationResults.reduce((acc, comb, index) => {
+                // Use the index as the key for storing the combination
+                acc.push({
+                    combination: comb.combination,
+                    price: comb.price,
+                    quantity: comb.quantity
+                });
+                return acc;
+            }, []);
+        }
+
+
+        // Function to regenerate combinations when checkboxes are toggled
+        function regenerateCombinations() {
+            // Step 1: Get selected options grouped by variation
+            const selectedOptions = {};
+            const variationDivs = document.querySelectorAll('#existingVariationsListForEdit > div');
+
+            variationDivs.forEach(variationDiv => {
+                const variationName = variationDiv.querySelector('.font-medium').textContent;
+                const checkboxes = variationDiv.querySelectorAll('input[type="checkbox"]:checked');
+                selectedOptions[variationName] = Array.from(checkboxes).map(checkbox => checkbox.nextElementSibling.textContent);
+            });
+
+            // Step 2: Generate combinations by cross-combining options from different variations
+            const allVariations = Object.values(selectedOptions);
+            const combinations = generateCombinationsForEdit(allVariations);
+            // Step 3: Log combinations with existing price and quantity, or set to null if new
+            const combinationResults = combinations.map(optionSet => {
+                const sortedCombinationKey = optionSet.slice().sort().join(', ');  // Sort to normalize the key format
+
+                // Find the matching combination regardless of order
+                const match = Object.values(existingCombinations).find(comb => {
+                    const sortedComb = comb.combination.slice().sort().join(', ');
+                    return sortedComb === sortedCombinationKey;
+                });
+
+                const price = match ? match.price : null;
+                const quantity = match ? match.quantity : null;
+
+                return {
+                    combination: optionSet,
+                    price,
+                    quantity
+                };
+            });
+
+            // Log the final results
+            console.log('Generated Combinations with Price and Quantity:', combinationResults);
+        }
+
+        function generateCombinationsForEdit(arrays, prefix = []) {
+            console.log('Arrays:', arrays);  // Log the current state of the arrays
+            console.log('Prefix:', prefix);  // Log the current prefix
+
+            if (arrays.length === 0) {
+                console.log('Base case reached, returning prefix:', prefix);
+                return [prefix];
+            }
+
+            const [first, ...rest] = arrays;
+
+            // Log the first array and the rest of the arrays
+            console.log('First:', first);
+            console.log('Rest:', rest);
+
+            // Use flatMap to combine the first array's elements with the results of the recursive call on the rest
+            return first.flatMap(option => {
+                // Log the current option being added to the prefix
+                console.log('Current option:', option);
+                return generateCombinationsForEdit(rest, [...prefix, option]);
+            });
+        }
+
+
+        // Event listener using event delegation for dynamically added checkboxes
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.getElementById('existingVariationsListForEdit');
+
+            // Attach event listener to the container (parent element of the checkboxes)
+            container.addEventListener('change', (event) => {
+                // Only trigger for checkboxes (input elements of type 'checkbox')
+                if (event.target && event.target.type === 'checkbox') {
+                    regenerateCombinations();  // Re-run combinations when a checkbox is clicked
+                }
+            });
+        });
+
+        async function loadVariationCombinationsForEdit(productItems) {
+            const container = document.getElementById('variationCombinationsListForEdit');
+            container.innerHTML = '';  // Clear any existing content
+
+            // Initialize existing combinations from the product's current items
+            initializeExistingCombinations(productItems);
+
+            // Create a table to display the combinations, price, and stock
+            const table = document.createElement('table');
+            table.classList.add('min-w-full', 'table-auto', 'border-collapse');
+
+            // Create the table header
+            const headerRow = document.createElement('tr');
+            headerRow.classList.add('bg-gray-100');
+            headerRow.innerHTML = `
+                        <th class="px-4 py-2 text-left">Combination</th>
+                        <th class="px-4 py-2 text-left">Price</th>
+                        <th class="px-4 py-2 text-left">Stock</th>
+                    `;
+            table.appendChild(headerRow);
+
+            // Create the table rows for each product item
+            productItems.forEach((productItem, index) => {
+                const row = document.createElement('tr');
+
+                // Combination column
+                const optionDescriptions = productItem.combinations.map(combination => combination.value).join(', ');
+                row.innerHTML = `
+                            <td class="border px-4 py-2">${optionDescriptions}</td>
+                            <td class="border px-4 py-2">
+                                <input type="number"
+                                       name="VariationCombinations[${index}].Price"
+                                       value="${productItem.price || 0}"
+                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                                       required min="0" step="0.01" />
+                            </td>
+                            <td class="border px-4 py-2">
+                                <input type="number"
+                                       name="VariationCombinations[${index}].Stock"
+                                       value="${productItem.quantityInStock || 0}"
+                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                                       required min="0" step="1" />
+                            </td>
+                        `;
+
+                table.appendChild(row);
+            });
+
+            // Append the table to the container
+            container.appendChild(table);
+        }
+
+        // Event listener for each checkbox in existing variations
+        document.querySelectorAll('#existingVariationsListForEdit input[type="checkbox"]').forEach(checkbox => {
+            checkbox.addEventListener('change', regenerateCombinations);
+        });
 
         async function generateVariationOptionsForEdit(variationId, variationName, selectedOptionIds) {
             try {
@@ -1944,55 +2138,6 @@ else
                 console.error('Error generating combinations:', error);
                 return [];
             }
-        }
-
-        async function loadVariationCombinationsForEdit(productItems) {
-            const container = document.getElementById('variationCombinationsListForEdit');
-            container.innerHTML = '';  // Clear any existing content
-
-            // Create a table to display the combinations, price, and stock
-            const table = document.createElement('table');
-            table.classList.add('min-w-full', 'table-auto', 'border-collapse');
-
-            // Create the table header
-            const headerRow = document.createElement('tr');
-            headerRow.classList.add('bg-gray-100');
-            headerRow.innerHTML = `
-                <th class="px-4 py-2 text-left">Combination</th>
-                <th class="px-4 py-2 text-left">Price</th>
-                <th class="px-4 py-2 text-left">Stock</th>
-            `;
-            table.appendChild(headerRow);
-
-            // Create the table rows for each product item
-            productItems.forEach((productItem, index) => {
-                const row = document.createElement('tr');
-
-                // Combination column
-                const optionDescriptions = productItem.combinations.map(combination => combination.value).join(', ');
-                row.innerHTML = `
-                    <td class="border px-4 py-2">${optionDescriptions}</td>
-                    <td class="border px-4 py-2">
-                        <input type="number"
-                               name="VariationCombinations[${index}].Price"
-                               value="${productItem.price || 0}"
-                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                               required min="0" step="0.01" />
-                    </td>
-                    <td class="border px-4 py-2">
-                        <input type="number"
-                               name="VariationCombinations[${index}].Stock"
-                               value="${productItem.quantityInStock || 0}"
-                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                               required min="0" step="1" />
-                    </td>
-                `;
-
-                table.appendChild(row);
-            });
-
-            // Append the table to the container
-            container.appendChild(table);
         }
 
         function addNewVariationForUpdateUI() {
