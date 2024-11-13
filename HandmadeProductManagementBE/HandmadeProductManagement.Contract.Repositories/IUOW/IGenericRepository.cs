@@ -15,6 +15,7 @@ namespace HandmadeProductManagement.Contract.Repositories.Interface
         void Update(T obj);
         void Delete(object id);
         void Save();
+        void DeleteRange(IEnumerable<T> entities);
 
         // async
         Task<IList<T>> GetAllAsync();
