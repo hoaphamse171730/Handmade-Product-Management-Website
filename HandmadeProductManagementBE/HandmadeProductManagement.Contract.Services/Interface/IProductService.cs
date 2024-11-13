@@ -25,5 +25,7 @@ namespace HandmadeProductManagement.Contract.Services.Interface
         Task<bool> UpdateStatusProduct(string productId, bool isAvailable, string userId);
 
         public Task UpdateProductSoldCountAsync(string orderId);
+        Task<bool> UpdateNewFormat(string productId, ProductForUpdateNewFormatDto productDto, string userId);
+        Task<ProductForUpdateNewFormatResponseDto> GetProductUpdateNewFormat(string productId);
     }
 }

@@ -11,6 +11,9 @@ using HandmadeProductManagement.ModelViews.VariationCombinationModelViews;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.Core.Common;
 using HandmadeProductManagement.ModelViews.VariationModelViews;
+using Microsoft.IdentityModel.Tokens;
+using HandmadeProductManagement.Core.Utils;
+using HandmadeProductManagement.ModelViews.VariationOptionModelViews;
 
 namespace HandmadeProductManagement.Services.Service
 {
@@ -37,6 +40,194 @@ namespace HandmadeProductManagement.Services.Service
             _promotionService = promotionService;
             _shopService = shopService;
             _productImageService = productImageService;
+        }
+
+        public async Task<ProductForUpdateNewFormatResponseDto> GetProductUpdateNewFormat(string productId)
+        {
+            if (!Guid.TryParse(productId, out _))
+            {
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat);
+            }
+
+            var product = await _unitOfWork.GetRepository<Product>().Entities
+                .Include(p => p.ProductItems)
+                    .ThenInclude(pi => pi.ProductConfigurations)
+                        .ThenInclude(pc => pc.VariationOption)
+                            .ThenInclude(vo => vo.Variation)
+                .Include(p => p.Category)
+                .FirstOrDefaultAsync(p => p.Id == productId);
+
+            if (product == null)
+            {
+                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageProductNotFound);
+            }
+
+            // Map product details to DTO with Variation and VariationOption names
+            var response = new ProductForUpdateNewFormatResponseDto
+            {
+                Id = product.Id,
+                Name = product.Name,
+                Description = product.Description,
+                CategoryId = product.CategoryId,
+                Variations = product.ProductItems
+                    .SelectMany(pi => pi.ProductConfigurations)
+                    .GroupBy(pc => pc.VariationOption!.Variation)
+                    .Select(g => new VariationForProductUpdateNewFormatResponseDto
+                    {
+                        Id = g.Key!.Id,
+                        Name = g.Key.Name,
+                        VariationOptionIds = g.Select(pc => pc.VariationOption!.Id).ToList()
+                    }).ToList(),
+                ProductItems = product.ProductItems.Select(pi => new VariationCombinationUpdateNewFormatDto
+                {
+                    ProductItemId = pi.Id,
+                    Price = pi.Price,
+                    QuantityInStock = pi.QuantityInStock,
+                    Combinations = pi.ProductConfigurations.Select(pc => new OptionsDto
+                    {
+                        Id = pc.VariationOptionId,
+                        Value = pc.VariationOption!.Value
+                    }).ToList()
+                }).ToList()
+            };
+
+            return response;
+        }
+
+
+        public async Task<bool> UpdateNewFormat(string productId, ProductForUpdateNewFormatDto productDto, string userId)
+        {
+            if (!Guid.TryParse(productId, out _))
+            {
+                throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat);
+            }
+
+            _unitOfWork.BeginTransaction();
+            try
+            {
+                var productEntity = await _unitOfWork.GetRepository<Product>().Entities
+                    .Include(p => p.ProductItems)
+                    .ThenInclude(pi => pi.ProductConfigurations)
+                    .FirstOrDefaultAsync(p => p.Id == productId);
+
+                if (productEntity == null)
+                {
+                    throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageProductNotFound);
+                }
+
+                if (!string.IsNullOrEmpty(productDto.Name)) productEntity.Name = productDto.Name;
+                if (!string.IsNullOrEmpty(productDto.Description)) productEntity.Description = productDto.Description;
+                if (!string.IsNullOrEmpty(productDto.CategoryId))
+                {
+                    if (!Guid.TryParse(productDto.CategoryId, out _))
+                    {
+                        throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat);
+                    }
+
+                    var categoryExists = await _unitOfWork.GetRepository<Category>().Entities
+                        .AnyAsync(c => c.Id == productDto.CategoryId);
+                    if (!categoryExists)
+                    {
+                        throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageCategoryNotFound);
+                    }
+                    productEntity.CategoryId = productDto.CategoryId;
+                }
+
+                if (productDto.Variations != null)
+                {
+                    foreach (var variationDto in productDto.Variations)
+                    {
+                        if (variationDto.Id == null || !Guid.TryParse(variationDto.Id, out _))
+                        {
+                            throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat);
+                        }
+
+                        var variationExists = await _unitOfWork.GetRepository<Variation>().Entities
+                            .AnyAsync(v => v.Id == variationDto.Id);
+                        if (!variationExists)
+                        {
+                            throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageVariationNotFound);
+                        }
+
+                        if (variationDto.VariationOptionIds != null)
+                        {
+                            foreach (var variationOptionId in variationDto.VariationOptionIds)
+                            {
+                                if (!Guid.TryParse(variationOptionId, out _))
+                                {
+                                    throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidGuidFormat);
+                                }
+
+                                var variationOptionExists = await _unitOfWork.GetRepository<VariationOption>().Entities
+                                    .AnyAsync(vo => vo.Id == variationOptionId && vo.VariationId == variationDto.Id);
+                                if (!variationOptionExists)
+                                {
+                                    throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(),
+                                        string.Format(Constants.ErrorMessageVariationOptionNotBelongToVariation, variationOptionId, variationDto.Id));
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (productDto.VariationCombinations != null)
+                {
+                    await UpdateVariationOptionsForProduct(productEntity, productDto.VariationCombinations, userId);
+                }
+
+                productEntity.LastUpdatedBy = userId;
+                productEntity.LastUpdatedTime = CoreHelper.SystemTimeNow;
+
+                _unitOfWork.GetRepository<Product>().Update(productEntity);
+                await _unitOfWork.SaveAsync();
+
+                _unitOfWork.CommitTransaction();
+                return true;
+            }
+            catch (Exception)
+            {
+                _unitOfWork.RollBack();
+                throw;
+            }
+        }
+
+        public async Task UpdateVariationOptionsForProduct(Product product, List<VariationCombinationUpdateNewFormatDto> variationCombinations, string userId)
+        {
+            // Delete all existing ProductItems and ProductConfigurations associated with this product
+            var productItems = product.ProductItems.ToList();
+            _unitOfWork.GetRepository<ProductItem>().DeleteRange(productItems);
+            await _unitOfWork.SaveAsync();
+
+            // Insert updated ProductItems and ProductConfigurations
+            foreach (var combination in variationCombinations)
+            {
+                var productItem = new ProductItem
+                {
+                    ProductId = product.Id,
+                    Price = combination.Price ?? 0,  // Defaulting to 0 if Price is not provided
+                    QuantityInStock = combination.QuantityInStock ?? 0,  // Defaulting to 0 if QuantityInStock is not provided
+                    CreatedBy = userId,
+                    LastUpdatedBy = userId
+                };
+
+                await _unitOfWork.GetRepository<ProductItem>().InsertAsync(productItem);
+                await _unitOfWork.SaveAsync();
+
+                if (combination.Combinations != null)
+                {
+                    foreach (var variationOptionId in combination.Combinations)
+                    {
+                        var productConfiguration = new ProductConfiguration
+                        {
+                            ProductItemId = productItem.Id,
+                            VariationOptionId = variationOptionId.Id
+                        };
+
+                        await _unitOfWork.GetRepository<ProductConfiguration>().InsertAsync(productConfiguration);
+                    }
+                }
+                await _unitOfWork.SaveAsync();
+            }
         }
 
         public async Task<bool> Create(ProductForCreationDto productDto, string userId)
@@ -89,14 +280,6 @@ namespace HandmadeProductManagement.Services.Service
                 // Step 6: Insert the product into the repository
                 await _unitOfWork.GetRepository<Product>().InsertAsync(productEntity);
                 await _unitOfWork.SaveAsync();
-
-                if (productDto.ProductImages != null && productDto.ProductImages.Count > 0)
-                {
-                    foreach (var image in productDto.ProductImages)
-                    {
-                        await _productImageService.UploadProductImage(image, productEntity.Id);
-                    }
-                }
 
                 // Step 7: Validate if each Variation exists and if its ID is a valid GUID
                 foreach (var variation in productDto.Variations)
@@ -259,6 +442,7 @@ namespace HandmadeProductManagement.Services.Service
 
             return result.Select(c => c.ToList());
         }
+
         public async Task<IEnumerable<ProductSearchVM>> GetProductByShopId(ProductSearchFilter searchFilter, string shopId, int pageNumber, int pageSize)
         {
             var shop = await _shopService.GetShopByIdAsync(shopId);
@@ -275,9 +459,12 @@ namespace HandmadeProductManagement.Services.Service
 
             searchFilter.ShopId = shop.Id;
 
-            return await SearchProductsAsync(searchFilter, pageNumber, pageSize);
-        }
+            // Search for products, but ensure they are sorted by CreatedTime in descending order for sellers
+            var productSearchVMs = await SearchProductsAsync(searchFilter, pageNumber, pageSize);
 
+            // After calling SearchProductsAsync, sort the results by CreatedTime descending (if not already sorted)
+            return productSearchVMs.OrderByDescending(p => p.CreatedTime).ToList();
+        }
 
         public async Task<IEnumerable<ProductSearchVM>> SearchProductsAsync(ProductSearchFilter searchFilter, int pageNumber, int pageSize)
         {
@@ -308,7 +495,7 @@ namespace HandmadeProductManagement.Services.Service
             }
 
             var query = _unitOfWork.GetRepository<Product>().Entities
-                                    .Include(p => p.ProductImages)
+                                    .Include(p => p.ProductImages.OrderBy(pi => pi.CreatedTime))
                                     .Include(p => p.ProductItems)
                                     .Where(p => !p.DeletedTime.HasValue || p.DeletedBy == null)
                                     .AsQueryable();
@@ -377,8 +564,11 @@ namespace HandmadeProductManagement.Services.Service
                     Rating = p.Rating,
                     Status = p.Status,
                     SoldCount = p.SoldCount,
-                    ProductImageUrl = p.ProductImages.FirstOrDefault() != null ? p.ProductImages.FirstOrDefault()!.Url : string.Empty,
-                    LowestPrice = p.ProductItems.Any() ? p.ProductItems.Min(pi => pi.Price) : 0
+                    ProductImageUrl = p.ProductImages.OrderBy(pi => pi.CreatedTime).FirstOrDefault() != null
+                                    ? p.ProductImages.OrderBy(pi => pi.CreatedTime).FirstOrDefault()!.Url
+                                    : string.Empty,
+                    LowestPrice = p.ProductItems.Any() ? p.ProductItems.Min(pi => pi.Price) : 0,
+                    CreatedTime = p.CreatedTime,
                 })
                 .ToListAsync();
 
@@ -491,6 +681,7 @@ namespace HandmadeProductManagement.Services.Service
                     .ThenInclude(pi => pi.ProductConfigurations)
                         .ThenInclude(pc => pc.VariationOption)
                             .ThenInclude(vo => vo!.Variation)
+                .Include(p => p.ProductImages) // Include ProductImages table
                 .FirstOrDefaultAsync(p => p.Id == id && (!p.DeletedTime.HasValue || p.DeletedBy == null))
                 ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageProductNotFound);
 
@@ -516,8 +707,22 @@ namespace HandmadeProductManagement.Services.Service
                 productToReturn.Variations = variations;
             }
 
+            // Check if there are product images and pick the oldest image (by CreatedDate or another field)
+            if (product.ProductImages != null && product.ProductImages.Any())
+            {
+                var oldestImage = product.ProductImages
+                    .OrderBy(pi => pi.CreatedTime) // Assuming CreatedDate field is available to determine the oldest image
+                    .FirstOrDefault(); // Get the oldest image
+
+                if (oldestImage != null)
+                {
+                    productToReturn.ProductImageUrl = oldestImage.Url; // Assuming the image has a 'Url' or similar property
+                }
+            }
+
             return productToReturn;
         }
+
         public async Task<bool> Update(string id, ProductForUpdateDto product, string userId)
         {
             var validationResult = await _updateValidator.ValidateAsync(product);
@@ -670,8 +875,9 @@ namespace HandmadeProductManagement.Services.Service
                 .ThenInclude(p => p.ProductConfigurations)
                 .ThenInclude(p => p.VariationOption)
                 .ThenInclude(v => v!.Variation)
-                .FirstOrDefaultAsync(p => p.Id == productId)                
+                .FirstOrDefaultAsync(p => p.Id == productId)
                 ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageProductNotFound);
+            if(!product.Category!.PromotionId.IsNullOrEmpty()) await _promotionService.UpdatePromotionStatusByRealtime(product!.Category!.PromotionId!);
 
             var promotion = await _unitOfWork.GetRepository<Promotion>().Entities
                 .FirstOrDefaultAsync(p => p.Categories.Any(c => c.Id == product.CategoryId) &&
@@ -683,38 +889,48 @@ namespace HandmadeProductManagement.Services.Service
                 Name = product.Name,
                 Description = product.Description ?? string.Empty,
                 CategoryId = product.CategoryId,
-                CategoryName = product.Category?.Name??"",
+                CategoryName = product.Category?.Name ?? "",
                 ShopId = product.ShopId,
-                ShopName = product.Shop?.Name??"",
+                OwnerId = product.CreatedBy!,
+                ShopName = product.Shop?.Name ?? "",
                 Rating = product.Rating,
                 Status = product.Status,
                 SoldCount = product.SoldCount,
-                ProductImageUrls = product.ProductImages.Select(pi => pi.Url).ToList(),
-                ProductItems = product.ProductItems.Select(pi => new ProductItemDetailModel
-                {
-                    Id = pi.Id,
-                    QuantityInStock = pi.QuantityInStock,
-                    Price = pi.Price,
-                    DiscountedPrice = promotion != null ? (int)(pi.Price * (1 - promotion.DiscountRate)) : null,
-                    Configurations = pi.ProductConfigurations.Select(pc => new ProductConfigurationDetailModel
+                ProductImageUrls = product.ProductImages
+                                            .OrderBy(pi => pi.CreatedTime)
+                                            .Select(pi => pi.Url)
+                                            .ToList(),
+                ProductItems = product.ProductItems
+                    .Where(pi => pi.DeletedBy == null && !pi.DeletedTime.HasValue) // Exclude deleted items
+                    .Select(pi => new ProductItemDetailModel
                     {
-                        VariationName = pc.VariationOption?.Variation?.Name??"",
-                        OptionName = pc.VariationOption?.Value??""
-                    }).ToList()
-                }).ToList(),
+                        Id = pi.Id,
+                        QuantityInStock = pi.QuantityInStock,
+                        Price = pi.Price,
+                        DiscountedPrice = promotion != null ? (int)(pi.Price * (1 - promotion.DiscountRate)) : null,
+                        Configurations = pi.ProductConfigurations.Select(pc => new ProductConfigurationDetailModel
+                        {
+                            VariationName = pc.VariationOption?.Variation?.Name ?? "",
+                            OptionName = pc.VariationOption?.Value ?? "",
+                            OptionId = pc.VariationOption?.Id ?? ""
+                        }).ToList(),
+                        DeletedBy = pi.DeletedBy,
+                        DeletedTime = pi.DeletedTime
+                    }).ToList(),
                 Promotion = promotion == null ? null : new PromotionDetailModel
-                    {
-                        Id = promotion.Id,
-                        Name = promotion.Name,
-                        Description = promotion.Description??"",
-                        DiscountRate = promotion.DiscountRate,
-                        StartDate = promotion.StartDate,
-                        EndDate = promotion.EndDate,
-                        Status = promotion.Status
-                    }
+                {
+                    Id = promotion.Id,
+                    Name = promotion.Name,
+                    Description = promotion.Description ?? "",
+                    DiscountRate = promotion.DiscountRate,
+                    StartDate = promotion.StartDate,
+                    EndDate = promotion.EndDate,
+                    Status = promotion.Status
+                }
             };
             return response;
         }
+
         public async Task<decimal> CalculateAverageRatingAsync(string productId)
         {
             if (string.IsNullOrWhiteSpace(productId))
