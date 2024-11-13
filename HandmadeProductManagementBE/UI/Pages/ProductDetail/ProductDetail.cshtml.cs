@@ -32,7 +32,7 @@ namespace UI.Pages.ProductDetail
         public string? ErrorMessage { get; set; }
         public string? ErrorDetail { get; set; }
         public ProductDetailResponseModel? productDetail { get; set; }
-        public CartItemForCreationDto? cart { get;set; }
+        public CartItemForCreationDto? cart { get; set; }
         public IList<VariationDto> Variations { get; set; } = new List<VariationDto>();
         public IList<VariationWithOptionsDto> VariationOptions { get; set; } = new List<VariationWithOptionsDto>();
         public IList<ReviewModel> Reviews { get; set; } = new List<ReviewModel>();
@@ -41,6 +41,7 @@ namespace UI.Pages.ProductDetail
         public IList<UserDto> Users { get; set; } = new List<UserDto>();
         public IList<ShopResponseModel> Shops { get; set; } = new List<ShopResponseModel>();
         public ShopResponseModel Shop { get; private set; } = new ShopResponseModel();
+
         public async Task<PageResult> OnGet(string id, int pageNumber = 1, int pageSize = 10)
         {
             string productId = id;
@@ -89,7 +90,7 @@ namespace UI.Pages.ProductDetail
                             .Select(option => new OptionsDto
                             {
                                 Id = option.Id,
-                                Name = option.Value
+                                Value = option.Value
                             })
                             .ToList();
 
@@ -121,7 +122,7 @@ namespace UI.Pages.ProductDetail
                         {
                             Name = group.Key,
                             Id = group.First().Id, // Chọn ID của variation đầu tiên trong nhóm
-                            Options = group.SelectMany(v => v.Options).DistinctBy(o => o.Name).ToList() // Kết hợp options và loại bỏ trùng lặp
+                            Options = group.SelectMany(v => v.Options).DistinctBy(o => o.Value).ToList() // Kết hợp options và loại bỏ trùng lặp
                         })
                         .ToList();
 
@@ -222,16 +223,6 @@ namespace UI.Pages.ProductDetail
                 TempData["Message"] = "Please select a valid product and quantity.";
                 return RedirectToPage(new { id = Id });
             }
-
-            var GETResponse = await _apiResponseHelper.GetAsync<List<CartItemGroupDto>>($"{Constants.ApiBaseUrl}/api/cartitem");
-
-            cartItemGroups = GETResponse.Data ?? new List<CartItemGroupDto>();
-
-            // Kiểm tra xem sản phẩm đã tồn tại trong giỏ hàng hay chưa
-            bool isProductInCart = cartItemGroups
-                .SelectMany(group => group.CartItems)
-                .Any(item => item.ProductItemId == CartItem.ProductItemId);
-
 
             // Gửi yêu cầu POST với đối tượng CartItem
             var POSTResponse = await _apiResponseHelper.PostAsync<bool>($"{Constants.ApiBaseUrl}/api/cartitem", CartItem);

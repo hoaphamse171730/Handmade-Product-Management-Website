@@ -172,7 +172,7 @@ namespace HandmadeProductManagement.Services.Service
                     Options = g.Select(pc => new OptionsDto
                     {
                         Id = pc.VariationOption!.Id,
-                        Name = pc.VariationOption.Value
+                        Value = pc.VariationOption.Value
                     }).ToList()
                 })
                 .ToList();
