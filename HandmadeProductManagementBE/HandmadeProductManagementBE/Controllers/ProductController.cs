@@ -202,7 +202,7 @@ namespace HandmadeProductManagementAPI.Controllers
         }
 
         [HttpGet("all-deleted-products")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin, Seller")]
         public async Task<IActionResult> GetAllDeletedProducts([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
@@ -212,14 +212,14 @@ namespace HandmadeProductManagementAPI.Controllers
                 Code = "200",
                 StatusCode = StatusCodeHelper.OK,
                 Message = "All deleted products retrieved successfully",
-                Data = await _productService.GetAllDeletedProducts(pageNumber, pageSize)
+                Data = await _productService.GetAllDeletedProducts(pageNumber, pageSize, userId ?? string.Empty)
             };
 
             return Ok(response);
         }
 
         [HttpPut("{id}/recover")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin, Seller")]
         public async Task<IActionResult> RecoverProduct(string id)
         {
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;

@@ -16,7 +16,7 @@ namespace HandmadeProductManagement.Contract.Services.Interface
         Task<bool> Create(ProductForCreationDto productDto, string userId);
         Task<bool> Update(string id, ProductForUpdateDto product, string userId);
         Task<bool> SoftDelete(string id, string userId);
-        Task<IList<Product>> GetAllDeletedProducts(int pageNumber, int pageSize);
+        Task<IList<Product>> GetAllDeletedProducts(int pageNumber, int pageSize, string userId);
         Task<IEnumerable<ProductSearchVM>> SearchProductsBySellerAsync(ProductSearchFilter searchFilter, string userId, int pageNumber, int pageSize);
         Task<bool> RecoverProduct(string id, string userId);
         Task<ProductDetailResponseModel> GetProductDetailsByIdAsync(string productId);

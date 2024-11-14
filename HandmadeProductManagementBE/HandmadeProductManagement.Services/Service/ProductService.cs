@@ -782,10 +782,10 @@ namespace HandmadeProductManagement.Services.Service
             return true;
         }
 
-        public async Task<IList<Product>> GetAllDeletedProducts(int pageNumber, int pageSize)
+        public async Task<IList<Product>> GetAllDeletedProducts(int pageNumber, int pageSize, string userId)
         {
             var deletedProductsQuery = _unitOfWork.GetRepository<Product>().Entities
-                .Where(p => p.DeletedTime.HasValue || p.DeletedBy != null);
+                .Where(p => p.DeletedTime.HasValue || p.DeletedBy != null && p.DeletedBy == userId);
 
             var totalRecords = await deletedProductsQuery.CountAsync();
 
