@@ -13,7 +13,6 @@ using HandmadeProductManagement.Core.Common;
 using HandmadeProductManagement.ModelViews.VariationModelViews;
 using Microsoft.IdentityModel.Tokens;
 using HandmadeProductManagement.Core.Utils;
-using HandmadeProductManagement.ModelViews.VariationOptionModelViews;
 
 namespace HandmadeProductManagement.Services.Service
 {
@@ -52,8 +51,7 @@ namespace HandmadeProductManagement.Services.Service
             var product = await _unitOfWork.GetRepository<Product>().Entities
                 .Include(p => p.ProductItems)
                     .ThenInclude(pi => pi.ProductConfigurations)
-                        .ThenInclude(pc => pc.VariationOption)
-                            .ThenInclude(vo => vo.Variation)
+                .ThenInclude(pc => pc.VariationOption)
                 .Include(p => p.Category)
                 .FirstOrDefaultAsync(p => p.Id == productId);
 
@@ -62,7 +60,7 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageProductNotFound);
             }
 
-            // Map product details to DTO with Variation and VariationOption names
+            // Map product details to DTO
             var response = new ProductForUpdateNewFormatResponseDto
             {
                 Id = product.Id,
@@ -71,29 +69,22 @@ namespace HandmadeProductManagement.Services.Service
                 CategoryId = product.CategoryId,
                 Variations = product.ProductItems
                     .SelectMany(pi => pi.ProductConfigurations)
-                    .GroupBy(pc => pc.VariationOption!.Variation)
+                    .GroupBy(pc => pc.VariationOption.VariationId)
                     .Select(g => new VariationForProductUpdateNewFormatResponseDto
                     {
-                        Id = g.Key!.Id,
-                        Name = g.Key.Name,
-                        VariationOptionIds = g.Select(pc => pc.VariationOption!.Id).ToList()
+                        Id = g.Key,
+                        VariationOptionIds = g.Select(pc => pc.VariationOptionId).ToList()
                     }).ToList(),
-                ProductItems = product.ProductItems.Select(pi => new VariationCombinationUpdateNewFormatDto
+                VariationCombinations = product.ProductItems.Select(pi => new VariationCombinationUpdateNewFormatDto
                 {
-                    ProductItemId = pi.Id,
                     Price = pi.Price,
                     QuantityInStock = pi.QuantityInStock,
-                    Combinations = pi.ProductConfigurations.Select(pc => new OptionsDto
-                    {
-                        Id = pc.VariationOptionId,
-                        Value = pc.VariationOption!.Value
-                    }).ToList()
+                    VariationOptionIds = pi.ProductConfigurations.Select(pc => pc.VariationOptionId).ToList()
                 }).ToList()
             };
 
             return response;
         }
-
 
         public async Task<bool> UpdateNewFormat(string productId, ProductForUpdateNewFormatDto productDto, string userId)
         {
@@ -213,14 +204,14 @@ namespace HandmadeProductManagement.Services.Service
                 await _unitOfWork.GetRepository<ProductItem>().InsertAsync(productItem);
                 await _unitOfWork.SaveAsync();
 
-                if (combination.Combinations != null)
+                if (combination.VariationOptionIds != null)
                 {
-                    foreach (var variationOptionId in combination.Combinations)
+                    foreach (var variationOptionId in combination.VariationOptionIds)
                     {
                         var productConfiguration = new ProductConfiguration
                         {
                             ProductItemId = productItem.Id,
-                            VariationOptionId = variationOptionId.Id
+                            VariationOptionId = variationOptionId
                         };
 
                         await _unitOfWork.GetRepository<ProductConfiguration>().InsertAsync(productConfiguration);
@@ -449,7 +440,7 @@ namespace HandmadeProductManagement.Services.Service
 
             searchFilter.ShopId = shop.Id;
 
-            return await SearchProductsAsync( searchFilter, pageNumber, pageSize);
+            return await SearchProductsAsync(searchFilter, pageNumber, pageSize);
         }
 
         public async Task<IEnumerable<ProductSearchVM>> SearchProductsBySellerAsync(ProductSearchFilter searchFilter, string userId, int pageNumber, int pageSize)
@@ -540,7 +531,7 @@ namespace HandmadeProductManagement.Services.Service
                         ? query.OrderByDescending(p => p.Rating)
                         : query.OrderBy(p => p.Rating);
                     break;
-                
+
                 default:
                     query = query.OrderByDescending(p => p.Rating);
                     break;
@@ -810,7 +801,7 @@ namespace HandmadeProductManagement.Services.Service
             var productRepo = _unitOfWork.GetRepository<Product>();
 
             var productEntity = await productRepo.Entities.FirstOrDefaultAsync(x => x.Id == id) ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageProductNotFound);
-            
+
             if (productEntity.DeletedBy == null || !productEntity.DeletedTime.HasValue)
             {
                 throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageProductDeleted);
@@ -877,7 +868,7 @@ namespace HandmadeProductManagement.Services.Service
                 .ThenInclude(v => v!.Variation)
                 .FirstOrDefaultAsync(p => p.Id == productId)
                 ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageProductNotFound);
-            if(!product.Category!.PromotionId.IsNullOrEmpty()) await _promotionService.UpdatePromotionStatusByRealtime(product!.Category!.PromotionId!);
+            if (!product.Category!.PromotionId.IsNullOrEmpty()) await _promotionService.UpdatePromotionStatusByRealtime(product!.Category!.PromotionId!);
 
             var promotion = await _unitOfWork.GetRepository<Promotion>().Entities
                 .FirstOrDefaultAsync(p => p.Categories.Any(c => c.Id == product.CategoryId) &&
@@ -992,4 +983,3 @@ namespace HandmadeProductManagement.Services.Service
 
     }
 }
-
