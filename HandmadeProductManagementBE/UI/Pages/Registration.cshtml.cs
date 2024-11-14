@@ -89,17 +89,17 @@ public class RegistrationModel : PageModel
         else
         {
 
-            if (errorContent.Contains("This email address is already in use"))
+            if (errorContent.Contains(Constants.ErrorMessageEmailTaken))
             {
-                ModelState.AddModelError("Email", "This email address is already in use");
+                ModelState.AddModelError("Email", Constants.ErrorMessageEmailTaken);
             }
-            if (errorContent.Contains("This phone number already in use"))
+            if (errorContent.Contains(Constants.ErrorMessagePhoneTaken))
             {
-                ModelState.AddModelError("PhoneNumber", "This phone number is already in use.");
+                ModelState.AddModelError("PhoneNumber", Constants.ErrorMessagePhoneTaken);
             }
-            if (errorContent.Contains("This username is already taken"))
+            if (errorContent.Contains(Constants.ErrorMessageUsernameTaken))
             {
-                ModelState.AddModelError("UserName", "This username is already taken.");
+                ModelState.AddModelError("UserName", Constants.ErrorMessageUsernameTaken);
             }
             ErrorMessage = "Registration failed. Please correct the errors and try again.";
             return Page();
