@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using HandmadeProductManagement.Core.Common;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
@@ -56,7 +57,7 @@ public class RecoveryModel : PageModel
         {
             var client = _httpClientFactory.CreateClient();
             
-            var request = new HttpRequestMessage(HttpMethod.Post, "http://localhost:5041/api/authentication/forgot-password");
+            var request = new HttpRequestMessage(HttpMethod.Post, $"{Constants.ApiBaseUrl}/api/authentication/forgot-password");
             var jsonContent = JsonSerializer.Serialize(new { email = Input.Email });
             request.Content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
