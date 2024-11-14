@@ -225,7 +225,7 @@
                 @foreach (var variation in Model.VariationOptions)
                 {
                     <div class="variation-options mb-4">
-                        <span class="rounded-full bg-gray-200 px-3 py-1 text-sm">@variation.Name</span>
+                        <span class="px-3 py-1 text-sm text-gray-700">@variation.Name</span>
                         <div class="mt-1 flex flex-wrap gap-2">
                             @if (variation.Options != null && variation.Options.Any())
                             {

@@ -88,14 +88,14 @@ public class RegistrationModel : PageModel
         }
         else
         {
-          
-            if (errorContent.Contains("Email already in use"))
+
+            if (errorContent.Contains("This email address is already in use"))
             {
-                ModelState.AddModelError("Email", "Email is already in use.");
+                ModelState.AddModelError("Email", "This email address is already in use");
             }
-            if (errorContent.Contains("Phone number already in use"))
+            if (errorContent.Contains("This phone number already in use"))
             {
-                ModelState.AddModelError("PhoneNumber", "Phone number is already in use.");
+                ModelState.AddModelError("PhoneNumber", "This phone number is already in use.");
             }
             if (errorContent.Contains("This username is already taken"))
             {
