@@ -1692,12 +1692,12 @@ video {
   padding-right: 3rem;
 }
 
-.pt-4 {
-  padding-top: 1rem;
-}
-
 .pr-4 {
   padding-right: 1rem;
+}
+
+.pt-4 {
+  padding-top: 1rem;
 }
 
 .text-left {
