@@ -24,7 +24,7 @@ namespace UI.Pages.Categories
         public int PageSize { get; set; } = 2;
         public bool HasNextPage { get; set; } = true;
 
-        public async Task OnGetAsync(int pageNumber = 1, int pageSize = 2)
+        public async Task<IActionResult> OnGetAsync(int pageNumber = 1, int pageSize = 2)
         {
             try
             {
