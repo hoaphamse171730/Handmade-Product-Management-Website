@@ -107,15 +107,19 @@
                 <!-- Cart Icon, Notifications, User Menu -->
                 @if (Context.Session.GetString("Token") != null )
                 {
-                    <div class="relative ml-4 inline-block">
-                        <!-- Cart Button -->
-                        @await Component.InvokeAsync("CartItemList")
-                    </div>
+                    @if (userRole != "Admin")
+                    {
 
-                    <div class="relative ml-4 inline-block">
-                        <!-- Notification Button -->
-                        @await Component.InvokeAsync("NotificationList")
-                    </div>
+                        <div class="relative ml-4 inline-block">
+                            <!-- Cart Button -->
+                            @await Component.InvokeAsync("CartItemList")
+                        </div>
+
+                        <div class="relative ml-4 inline-block">
+                            <!-- Notification Button -->
+                            @await Component.InvokeAsync("NotificationList")
+                        </div>
+                    }
                     <!-- User Menu Dropdown -->
                     <div class="group relative inline-block text-left">
                         <button id="user-menu-button" class="rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white shadow-md transition duration-300 hover:bg-blue-700 focus:outline-none">

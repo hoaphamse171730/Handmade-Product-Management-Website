@@ -152,7 +152,7 @@
                 <span class="text-lg text-gray-700">Sold Count: @Model.productDetail?.SoldCount</span>
 
             </div>
-            <h2 class="text-3xl font-bold text-gray-800">@Model.productDetail?.Description</h2>
+        <h2 class="text-base text-gray-800">@Model.productDetail?.Description</h2>
 
 
             <div class="container mx-auto p-4">
@@ -219,38 +219,48 @@
                 }
             </div> *@
 
-            <!-- Product Materials -->
-            <div>
-                <div class="mt-2 flex space-x-2">
-                    @foreach (var variation in Model.VariationOptions)
-                    {
-                        <div class="variation-options">
-                            <span class="rounded-full bg-gray-200 px-3 py-1 text-sm">@variation.Name</span>
-                            <div class="mt-1">
-                                @if (variation.Options != null && variation.Options.Any())
+        <!-- Product Materials -->
+        <div>
+            <div class="mt-2">
+                @foreach (var variation in Model.VariationOptions)
+                {
+                    <div class="variation-options mb-4">
+                        <span class="px-3 py-1 text-sm text-gray-700">@variation.Name</span>
+                        <div class="mt-1 flex flex-wrap gap-2">
+                            @if (variation.Options != null && variation.Options.Any())
+                            {
+                                @foreach (var option in variation.Options)
                                 {
-                                    foreach (var option in variation.Options)
-                                    {
+                                    <!-- Wrap each radio input and label pair in a div to scope peer styles -->
+                                    <div class="flex">
                                         <input type="radio"
-                                               id="@option.Id"
+                                               id="@($"{variation.Name}-{option.Id}")"
                                                name="@variation.Name"
                                                value="@option.Value"
-                                               class="mr-2"
+                                               class="peer hidden"
                                                onclick="handleRadioClick(this)"
                                                onchange="updateProductInfo()"
                                                data-variation-name="@variation.Name" />
-                                    <label for="@option.Id" class="text-sm">@option.Value</label>
-                                    }
+
+                                        <label for="@($"{variation.Name}-{option.Id}")"
+                                               class="option-label cursor-pointer rounded border border-gray-300 px-4 py-2 text-sm
+transition duration-150 ease-in-out
+hover:bg-blue-100 hover:border-blue-400
+peer-checked:bg-blue-500 peer-checked:text-white peer-checked:border-blue-500">
+                                            @option.Value
+                                        </label>
+                                    </div>
                                 }
-                                else
-                                {
-                                    <span class="text-sm text-gray-500">No options available</span>
-                                }
-                            </div>
+                            }
+                            else
+                            {
+                                <span class="text-sm text-gray-500">No options available</span>
+                            }
                         </div>
-                    }
-                </div>
+                    </div>
+                }
             </div>
+        </div>
 
       
             <div class="price-container">
