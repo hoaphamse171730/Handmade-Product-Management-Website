@@ -48,13 +48,13 @@ namespace UI.Pages.Categories
             {
                 ErrorMessage = ex.ErrorDetail.ErrorCode;
                 ErrorDetail = ex.ErrorDetail.ErrorMessage?.ToString();
-                if (ErrorMessage == "unauthorized") return RedirectToPage("/Login");
+              //  if (ErrorMessage == "unauthorized") return RedirectToPage("/Login");
             }
             catch (Exception ex)
             {
                 ErrorMessage = "An unexpected error occurred.";
             }
-            return Page();
+           // return Page();
         }
 
         public async Task<JsonResult> OnPatchRestoreCategoryAsync(string id)
