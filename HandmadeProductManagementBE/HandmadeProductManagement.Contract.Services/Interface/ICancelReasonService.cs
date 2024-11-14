@@ -9,7 +9,7 @@ namespace HandmadeProductManagement.Contract.Services.Interface
         Task<bool> Create(CancelReasonForCreationDto cancelReason, string userId);
         Task<bool> Update(string id, CancelReasonForUpdateDto cancelReason, string userId);
         Task<bool> Delete(string id, string userId);
-        Task<IList<CancelReason>> GetDeletedCancelReasons();
+        Task<IList<CancelReasonDeletedDto>> GetDeletedCancelReasons();
         Task<bool> PatchReverseDelete(string id, string userId);
         Task<CancelReasonDto> GetByDescription(string description);
     }

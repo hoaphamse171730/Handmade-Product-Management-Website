@@ -4,9 +4,8 @@ using HandmadeProductManagement.ModelViews.OrderModelViews;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc;
 using HandmadeProductManagement.Core.Common;
-using HandmadeProductManagement.Contract.Repositories.Entity;
-using System.Net.Http;
 using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.ModelViews.CancelReasonModelViews;
 
 namespace UI.Pages.Seller
 {
@@ -23,7 +22,7 @@ namespace UI.Pages.Seller
 
         public List<OrderByUserDto>? Orders { get; set; }
 
-        public List<CancelReason> CancelReasons { get; set; } = new List<CancelReason>();
+        public List<CancelReasonDto> CancelReasons { get; set; } = new List<CancelReasonDto>();
 
         public string CurrentFilter { get; set; } = "All";
         public int PageNumber { get; set; } = 1;
@@ -149,7 +148,7 @@ namespace UI.Pages.Seller
 
         private async Task LoadCancelReasonsAsync()
         {
-            var response = await _apiResponseHelper.GetAsync<List<CancelReason>>(Constants.ApiBaseUrl + "/api/cancelreason?");
+            var response = await _apiResponseHelper.GetAsync<List<CancelReasonDto>>(Constants.ApiBaseUrl + "/api/cancelreason?");
             if (response.StatusCode == StatusCodeHelper.OK && response.Data != null)
             {
                 CancelReasons = response.Data;
