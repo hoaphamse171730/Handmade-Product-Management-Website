@@ -244,6 +244,6 @@ public static class Constants
     #endregion
 
     #region CancelReason
-    public const string CustomerCancelReason = "Customer changed mind";
+    public const string CustomerCancelReason = "Customer change mind";
     #endregion
 }
