@@ -951,8 +951,8 @@ namespace UI.Pages.Seller
 
                 // Make the API call
                 var response = await _apiResponseHelper.PutAsync<bool>(
-                    $"{Constants.ApiBaseUrl}/api/product/updateproduct/{productId}",
-                    updateData);
+                    $"{Constants.ApiBaseUrl}/api/product/updateproduct/{productId}", updateData);
+
 
                 if (response.StatusCode == StatusCodeHelper.OK && response.Data)
                 {
@@ -972,7 +972,7 @@ namespace UI.Pages.Seller
                 return new JsonResult(new
                 {
                     success = false,
-                    message = "An error occurred while updating the product",
+                    message = ex.Message,
                     statusCode = 500
                 });
             }

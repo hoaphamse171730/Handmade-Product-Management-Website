@@ -69,7 +69,7 @@ namespace HandmadeProductManagement.Services.Service
                 CategoryId = product.CategoryId,
                 Variations = product.ProductItems
                     .SelectMany(pi => pi.ProductConfigurations)
-                    .GroupBy(pc => pc.VariationOption.VariationId)
+                    .GroupBy(pc => pc!.VariationOption!.VariationId)
                     .Select(g => new VariationForProductUpdateNewFormatResponseDto
                     {
                         Id = g.Key,
