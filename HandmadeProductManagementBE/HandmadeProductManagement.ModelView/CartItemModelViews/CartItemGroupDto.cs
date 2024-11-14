@@ -4,6 +4,7 @@
     {
         public string ShopId { get; set; }
         public string ShopName { get; set; }
+        public int TotalCartItemCount { get; set; }
         public List<CartItemDto> CartItems { get; set; } = new List<CartItemDto>();
     }
 

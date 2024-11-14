@@ -63,7 +63,6 @@
             <a class="text-4xl font-bold" asp-area="" asp-page="/Index">Handmade Product</a>
             <div class="flex items-center space-x-4">
                 <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Index">Home</a>
-                <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Privacy">Privacy</a>
                 <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Product/ProductList">Product</a>
 
                 <!-- Admin-Only Links -->
@@ -76,6 +75,7 @@
                     <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Admin/OrderList">Orders</a>
                     <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/AdminRegistration">Admin Registration</a>
                     <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Categories/View">Category</a>
+                    <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/CancelReason/Index">Cancel Reason</a>
                 }
 
                 <!-- Customer Links -->
@@ -105,11 +105,13 @@
                 }
 
                 <!-- Cart Icon, Notifications, User Menu -->
-                @if (Context.Session.GetString("Token") != null)
+                @if (Context.Session.GetString("Token") != null )
                 {
-                    <a class="text-gray-700 hover:text-blue-600" asp-area="" asp-page="/Cart/CartView">
-                        <i class="fas fa-shopping-cart"></i>
-                    </a>
+                    <div class="relative ml-4 inline-block">
+                        <!-- Cart Button -->
+                        @await Component.InvokeAsync("CartItemList")
+                    </div>
+
                     <div class="relative ml-4 inline-block">
                         <!-- Notification Button -->
                         @await Component.InvokeAsync("NotificationList")

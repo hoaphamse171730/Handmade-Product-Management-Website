@@ -507,7 +507,8 @@ namespace HandmadeProductManagement.Services.Service
 
             if (!string.IsNullOrWhiteSpace(order.Address))
             {
-                if (Regex.IsMatch(order.Address, @"[^a-zA-Z0-9\s,\.]"))
+                // Regex allowing Vietnamese letters, numbers, spaces, commas, and periods
+                if (Regex.IsMatch(order.Address, @"[^A-Za-z0-9À-ỹ\s,\.]"))
                 {
                     throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidAddressFormat);
                 }
@@ -516,7 +517,8 @@ namespace HandmadeProductManagement.Services.Service
 
             if (!string.IsNullOrWhiteSpace(order.CustomerName))
             {
-                if (Regex.IsMatch(order.CustomerName, @"[^a-zA-Z\s]"))
+                // Regex allowing only Vietnamese letters and spaces
+                if (Regex.IsMatch(order.CustomerName, @"[^A-Za-zÀ-ỹ\s]"))
                 {
                     throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidCustomerNameFormat);
                 }

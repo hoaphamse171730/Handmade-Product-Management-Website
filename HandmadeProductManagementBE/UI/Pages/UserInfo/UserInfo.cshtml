@@ -141,34 +141,37 @@
                     <div class="mb-4">
                         <label class="mb-2 block text-sm font-bold text-gray-700">Full Name:</label>
                         <input type="text" id="editUserFullName" class="w-full rounded-md border px-3 py-2" value="@Model.UserInfo.FullName" />
-                    </div>
-                    <div class="mb-4">
-                        <label class="mb-2 block text-sm font-bold text-gray-700">Phone Number:</label>
-                        <input type="text" id="editUserPhoneNumber" class="w-full rounded-md border px-3 py-2" value="@Model.UserInfo.PhoneNumber" />
+                        <span id="fullNameError" class="hidden text-sm text-red-500">Full name can only contain letters (including accents) and spaces. Max 255 characters.</span>
                     </div>
                     <div class="mb-4">
                         <label class="mb-2 block text-sm font-bold text-gray-700">Display Name:</label>
                         <input type="text" id="editUserDisplayName" class="w-full rounded-md border px-3 py-2" value="@Model.UserInfo.DisplayName" />
+                        <span id="displayNameError" class="hidden text-sm text-red-500">Display name can only contain letters. Max 100 characters.</span>
                     </div>
                     <div class="mb-4">
                         <label class="mb-2 block text-sm font-bold text-gray-700">Bio:</label>
                         <textarea id="editUserBio" class="w-full rounded-md border px-3 py-2">@Model.UserInfo.Bio</textarea>
+                        <span id="bioError" class="hidden text-sm text-red-500">Bio cannot be longer than 500 characters.</span>
                     </div>
                     <div class="mb-4">
                         <label class="mb-2 block text-sm font-bold text-gray-700">Bank Account:</label>
                         <input type="text" id="editUserBankAccount" class="w-full rounded-md border px-3 py-2" value="@Model.UserInfo.BankAccount" />
+                        <span id="bankAccountError" class="hidden text-sm text-red-500">Bank account should contain only digits.</span>
                     </div>
                     <div class="mb-4">
                         <label class="mb-2 block text-sm font-bold text-gray-700">Bank Account Name:</label>
                         <input type="text" id="editUserBankAccountName" class="w-full rounded-md border px-3 py-2" value="@Model.UserInfo.BankAccountName" />
+                        <span id="bankAccountNameError" class="hidden text-sm text-red-500">Bank account name can only contain letters and spaces. Max 255 characters.</span>
                     </div>
                     <div class="mb-4">
                         <label class="mb-2 block text-sm font-bold text-gray-700">Bank:</label>
                         <input type="text" id="editUserBank" class="w-full rounded-md border px-3 py-2" value="@Model.UserInfo.Bank" />
+                        <span id="bankError" class="hidden text-sm text-red-500">Bank name can only contain letters and spaces. Max 255 characters.</span>
                     </div>
                     <div class="mb-4">
                         <label class="mb-2 block text-sm font-bold text-gray-700">Address:</label>
                         <input type="text" id="editUserAddress" class="w-full rounded-md border px-3 py-2" value="@Model.UserInfo.Address" />
+                        <span id="addressError" class="hidden text-sm text-red-500">Address can only contain letters, numbers, spaces, commas, and periods. Max 500 characters.</span>
                     </div>
                 </div>
 
@@ -237,42 +240,107 @@
             const userBank = document.getElementById('editUserBank').value;
             const userAddress = document.getElementById('editUserAddress').value;
 
-            // Prepare the data to be saved
-            const updatedData = {
-                FullName: userFullName,
-                DisplayName: userDisplayName,
-                Bio: userBio,
-                BankAccount: userBankAccount,
-                BankAccountName: userBankAccountName,
-                Bank: userBank,
-                Address: userAddress
-            };
+            let isValid = true;
 
-            try {
-                const response = await fetch(`${apiBaseUrl}/api/userinfo/`, {
-                    method: "PATCH",
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`,
-                        'RequestVerificationToken': requestVerificationToken,
-                        'Content-Type': 'application/json'  // Important: Add this header for JSON data
-                    },
-                    body: JSON.stringify(updatedData)  // Convert the data to JSON
-                });
+            // Validate Full Name (Max 255 characters, only letters and spaces)
+            const fullNameRegex = /^[A-Za-zÀ-ỹ\s]+$/;;  // Unicode property for letters and spaces
+            if (!fullNameRegex.test(userFullName) || userFullName.length > 255) {
+                document.getElementById('fullNameError').classList.remove('hidden');
+                isValid = false;
+            } else {
+                document.getElementById('fullNameError').classList.add('hidden');
+            }
 
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data.statusCode === 200) {
-                        // Only reload the page after the data is successfully updated
-                        location.reload();
+            // Validate Display Name (Max 100 characters, only letters)
+            const displayNameRegex = /^[A-Za-zÀ-ỹ\s]+$/;;  // Only English letters
+            if (!displayNameRegex.test(userDisplayName) || userDisplayName.length > 100) {
+                document.getElementById('displayNameError').classList.remove('hidden');
+                isValid = false;
+            } else {
+                document.getElementById('displayNameError').classList.add('hidden');
+            }
+
+            // Validate Bio (Max 500 characters)
+            if (userBio.length > 500) {
+                document.getElementById('bioError').classList.remove('hidden');
+                isValid = false;
+            } else {
+                document.getElementById('bioError').classList.add('hidden');
+            }
+
+            // Validate Bank Account (Only digits)
+            const bankAccountRegex = /^\d+$/;  // Only digits
+            if (!bankAccountRegex.test(userBankAccount)) {
+                document.getElementById('bankAccountError').classList.remove('hidden');
+                isValid = false;
+            } else {
+                document.getElementById('bankAccountError').classList.add('hidden');
+            }
+
+            // Validate Bank Account Name (Max 255 characters, only letters and spaces)
+            const bankAccountNameRegex = /^[a-zA-Z\s]+$/;  // Only English letters and spaces
+            if (!bankAccountNameRegex.test(userBankAccountName) || userBankAccountName.length > 255) {
+                document.getElementById('bankAccountNameError').classList.remove('hidden');
+                isValid = false;
+            } else {
+                document.getElementById('bankAccountNameError').classList.add('hidden');
+            }
+
+            // Validate Bank (Max 255 characters, only letters and spaces)
+            const bankRegex = /^[a-zA-Z\s]+$/;  // Only English letters and spaces
+            if (!bankRegex.test(userBank) || userBank.length > 255) {
+                document.getElementById('bankError').classList.remove('hidden');
+                isValid = false;
+            } else {
+                document.getElementById('bankError').classList.add('hidden');
+            }
+
+            // Validate Address (Max 500 characters, only letters, numbers, spaces, commas, and periods)
+            const addressRegex = /^[A-Za-z0-9À-ỹ\s,\.]+$/;
+            if (!addressRegex.test(userAddress) || userAddress.length > 500) {
+                document.getElementById('addressError').classList.remove('hidden');
+                isValid = false;
+            } else {
+                document.getElementById('addressError').classList.add('hidden');
+            }
+
+            // Proceed only if all validations pass
+            if (isValid) {
+                const updatedData = {
+                    FullName: userFullName,
+                    DisplayName: userDisplayName,
+                    Bio: userBio,
+                    BankAccount: userBankAccount,
+                    BankAccountName: userBankAccountName,
+                    Bank: userBank,
+                    Address: userAddress
+                };
+
+                try {
+                    const response = await fetch(`${apiBaseUrl}/api/userinfo/`, {
+                        method: "PATCH",
+                        headers: {
+                            'Authorization': `Bearer ${authToken}`,
+                            'RequestVerificationToken': requestVerificationToken,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(updatedData)
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.statusCode === 200) {
+                            location.reload();
+                        } else {
+                            alert("Error updating user information.");
+                        }
                     } else {
-                        alert("Error updating user information.");
+                        alert(`Error: ${response.statusText}`);
                     }
-                } else {
-                    alert(`Error: ${response.statusText}`);
+                } catch (error) {
+                    console.error("Error updating user info:", error);
+                    alert("An error occurred while updating the user information.");
                 }
-            } catch (error) {
-                console.error("Error updating user info:", error);
-                alert("An error occurred while updating the user information.");
             }
         }
 

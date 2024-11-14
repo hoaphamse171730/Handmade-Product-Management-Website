@@ -1,7 +1,20 @@
 ﻿@page
+@using UI.Pages.Shared
 @model UI.Pages.Cart.CartViewModel
 @{
     ViewData["Title"] = "Cart";
+}
+@{
+    var errorModel = new ErrorMessageModel
+            {
+                ErrorMessage = Model.ErrorMessage,
+                ErrorDetail = Model.ErrorDetail
+            };
+    var token = HttpContext.Session.GetString("Token");
+}
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <partial name="_ErrorMessage" model="errorModel" />
 }
 <div class="mb-20 h-screen bg-gray-100">
     <div class="container mx-auto px-4">
@@ -19,14 +32,18 @@
                                     <tr>
                                         <th class="text-left font-normal">Product</th>
                                         <th class="text-left font-normal">Price</th>
-                                        <th class="text-left font-normal">Discount Price</th>
+                                        @if (group.CartItems.Any(item => item.DiscountPrice != item.UnitPrice))
+                                        {
+                                            <th class="text-left font-normal">Discount Price</th>
+                                        }
                                         <th class="text-left font-normal">Variation Options</th>
                                         <th class="text-left font-normal">In Stock</th>
                                         <th class="text-left font-normal">Quantity</th>
                                         <th class="text-left font-normal">Total</th>
-                                        <th class="text-left font-normal">Actions</th>
+                                        <th class="text-left font-normal"></th>
                                     </tr>
                                 </thead>
+
                                 <tbody>
                                     @foreach (var item in group.CartItems)
                                     {
@@ -37,10 +54,23 @@
                                                     <a href="/ProductDetail/ProductDetail?id=@item.ProductId" class="ml-4 block font-semibold">@item.ProductName</a>
                                                 </div>
                                             </td>
-                                            <td>₫<s>@item.UnitPrice.ToString("N0").Replace(",", ".")</s></td>
-                                            <td class="text-red-500">
-                                                ₫@Math.Round(item.DiscountPrice, 0, MidpointRounding.AwayFromZero).ToString("N0").Replace(",", ".")
+                                            <td>
+                                                ₫@item.UnitPrice.ToString("N0").Replace(",", ".")
                                             </td>
+
+                                            @if (item.DiscountPrice != item.UnitPrice)
+                                            {
+                                                <td>
+                                                    <s>₫@item.UnitPrice.ToString("N0").Replace(",", ".")</s>
+                                                    <span class="text-red-500">₫@Math.Round(item.DiscountPrice, 0, MidpointRounding.AwayFromZero).ToString("N0").Replace(",", ".")</span>
+                                                </td>
+                                            }
+                                            else
+                                            {
+                                                <!-- No "Discount Price" column when there's no discount -->
+                                                <!-- Do nothing here; this will remove the column for this row -->
+                                            }
+
                                             <td>
                                                 <!-- Loop through VariationOptionValues and add a comma except after the last item -->
                                                 @for (int i = 0; i < item.VariationOptionValues.Count; i++)
@@ -52,6 +82,7 @@
                                                     }
                                                 }
                                             </td>
+
                                             <td class="text-gray-500">
                                                 @item.StockQuantity
                                             </td>
@@ -68,7 +99,9 @@
                                                 ₫@Math.Round(item.DiscountPrice * item.ProductQuantity, 0, MidpointRounding.AwayFromZero).ToString("N0").Replace(",", ".")
                                             </td>
                                             <td>
-                                                <button class="text-white font-bold py-2 px-4 rounded" style="background-color: red" onclick="removeCartItem('@item.Id')">Delete</button>
+                                                <button class="rounded px-4 py-2 font-bold text-white" style="background-color: red" onclick="removeCartItem('@item.Id')">
+                                                    <i class="fas fa-trash-alt"></i> <!-- Font Awesome Trash Icon -->
+                                                </button>
                                             </td>
                                         </tr>
                                     }

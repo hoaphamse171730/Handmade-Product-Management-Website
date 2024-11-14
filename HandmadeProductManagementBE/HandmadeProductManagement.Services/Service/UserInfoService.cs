@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using FluentValidation;
+using Google.Apis.Storage.v1.Data;
 using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
@@ -10,6 +11,7 @@ using HandmadeProductManagement.ModelViews.UserInfoModelViews;
 using HandmadeProductManagement.Repositories.Entity;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using System.Text.RegularExpressions;
 
 namespace HandmadeProductManagement.Services.Service
 {
@@ -66,6 +68,33 @@ namespace HandmadeProductManagement.Services.Service
             if (!validationResult.IsValid)
             {
                     throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), validationResult.Errors.Select(e => e.ErrorMessage).FirstOrDefault() ?? string.Empty);
+            }
+
+            if (!string.IsNullOrWhiteSpace(patchDto.Address))
+            {
+                // Regex allowing Vietnamese letters, numbers, spaces, commas, and periods
+                if (Regex.IsMatch(patchDto.Address, @"[^A-Za-z0-9À-ỹ\s,\.]"))
+                {
+                    throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidAddressFormat);
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(patchDto.FullName))
+            {
+                // Regex allowing only Vietnamese letters and spaces
+                if (Regex.IsMatch(patchDto.FullName, @"[^A-Za-zÀ-ỹ\s]"))
+                {
+                    throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidCustomerNameFormat);
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(patchDto.Bio))
+            {
+                // Regex allowing only Vietnamese letters and spaces
+                if (Regex.IsMatch(patchDto.Bio, @"[^A-Za-zÀ-ỹ\s]"))
+                {
+                    throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidCustomerNameFormat);
+                }
             }
 
             if (!Guid.TryParse(id, out _))
