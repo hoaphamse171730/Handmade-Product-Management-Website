@@ -32,7 +32,7 @@ namespace UI.Pages.ProductDetail
         public string? ErrorMessage { get; set; }
         public string? ErrorDetail { get; set; }
         public ProductDetailResponseModel? productDetail { get; set; }
-        public CartItemForCreationDto? cart { get;set; }
+        public CartItemForCreationDto? cart { get; set; }
         public IList<VariationDto> Variations { get; set; } = new List<VariationDto>();
         public IList<VariationWithOptionsDto> VariationOptions { get; set; } = new List<VariationWithOptionsDto>();
         public IList<ReviewModel> Reviews { get; set; } = new List<ReviewModel>();

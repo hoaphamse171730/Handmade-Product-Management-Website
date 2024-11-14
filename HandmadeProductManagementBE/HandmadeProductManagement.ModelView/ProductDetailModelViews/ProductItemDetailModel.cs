@@ -7,5 +7,7 @@
         public int Price { get; set; }
         public int? DiscountedPrice { get; set; }
         public List<ProductConfigurationDetailModel> Configurations { get; set; }
+        public string? DeletedBy { get; set; }
+        public DateTimeOffset? DeletedTime { get; set; }
     }
 }

@@ -1,9 +1,11 @@
-﻿using HandmadeProductManagement.Core.Common;
+﻿using HandmadeProductManagement.Core.Base;
+using HandmadeProductManagement.Core.Common;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.Core.Store;
 using HandmadeProductManagement.ModelViews.CartItemModelViews;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using static HandmadeProductManagement.Core.Base.BaseException;
 namespace UI.Pages.Cart
 {
     public class CartViewModel : PageModel
@@ -16,9 +18,25 @@ namespace UI.Pages.Cart
         public List<CartItemGroupDto> CartItems { get; set; } = new List<CartItemGroupDto>();
         public decimal Subtotal { get; set; }
         public decimal Total { get; set; }
-        public async Task OnGetAsync()
+        public string? ErrorMessage { get; set; }
+        public string? ErrorDetail { get; set; }
+        public async Task<IActionResult> OnGetAsync()
         {
-            await LoadCartItemsAsync();
+            try
+            {
+                await LoadCartItemsAsync();
+            }
+            catch (BaseException.ErrorException ex)
+            {
+                ErrorMessage = ex.ErrorDetail.ErrorCode;
+                ErrorDetail = ex.ErrorDetail.ErrorMessage?.ToString();
+                if (ErrorMessage == "unauthorized") return RedirectToPage("/Login");
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = "An unexpected error occurred.";
+            }
+            return Page();
         }
         // Phương thức để xóa mục khỏi giỏ hàng
         public async Task<IActionResult> OnPostDeleteAsync(string cartItemId)

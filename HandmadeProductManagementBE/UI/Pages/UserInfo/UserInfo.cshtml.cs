@@ -1,5 +1,6 @@
 using GraphQLParser;
 using HandmadeProductManagement.Contract.Repositories.Entity;
+using HandmadeProductManagement.Core.Base;
 using HandmadeProductManagement.Core.Common;
 using HandmadeProductManagement.Core.Constants;
 using HandmadeProductManagement.Core.Store;
@@ -14,38 +15,59 @@ using System.Security.Claims;
 
 namespace UI.Pages.UserInfo
 {
+
     public class UserInfoModel : PageModel
     {
         private readonly ApiResponseHelper _apiResponseHelper;
         private readonly IHttpClientFactory _httpClientFactory;
 
+
         public UserInfoModel(ApiResponseHelper apiResponseHelper, IHttpClientFactory httpClientFactory)
         {
             _apiResponseHelper = apiResponseHelper ?? throw new ArgumentNullException(nameof(apiResponseHelper));
-            _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
+            _httpClientFactory = httpClientFactory;
         }
+        public string? ErrorMessage { get; set; }
+        public string? ErrorDetail { get; set; }
 
-        // Gi? nguyên UserResponseByIdModel ?? l?y thông tin chi ti?t ng??i dùng
-        public UserResponseByIdModel userInfo { get; set; }
-
-        // Thêm UserInfoDto ?? l?y AvatarUrl và các thông tin khác
-        public UserInfoDto userInfoDto { get; set; }
-
-        public void OnGet()
+        public UserResponseByIdModel user { get; set; }
+        public UserInfoDto UserInfo { get; set; }
+        public async Task<IActionResult> OnGet()
         {
-            string token = HttpContext.Session.GetString("Token");
-            if (!string.IsNullOrEmpty(token))
+            try
             {
-                string userId = GetUserIdFromToken(token);
-                if (!string.IsNullOrEmpty(userId))
+                string token = HttpContext.Session.GetString("Token");
+                if (string.IsNullOrEmpty(token))
                 {
-                    // L?y thông tin chi ti?t ng??i dùng
-                    userInfo = GetUserResponseById(userId);
+                    return RedirectToPage("/Login");
+                }
 
-                    // L?y thông tin AvatarUrl
-                    userInfoDto = GetUserInfoById(userId);
+                string userId = GetUserIdFromToken(token);
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return RedirectToPage("/Login");
+                }
+
+                user = await GetUserResponseById(userId);
+
+                // Fetch UserInfo
+                var userInfoResponse = await _apiResponseHelper.GetAsync<UserInfoDto>($"{Constants.ApiBaseUrl}/api/userinfo");
+                if (userInfoResponse.StatusCode == StatusCodeHelper.OK && userInfoResponse.Data != null)
+                {
+                    UserInfo = userInfoResponse.Data;
                 }
             }
+            catch (BaseException.ErrorException ex)
+            {
+                ErrorMessage = ex.ErrorDetail.ErrorCode;
+                ErrorDetail = ex.ErrorDetail.ErrorMessage?.ToString();
+                if (ErrorMessage == "unauthorized") return RedirectToPage("/Login");
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = "An unexpected error occurred.";
+            }
+            return Page();
         }
 
         private string GetUserIdFromToken(string token)
@@ -56,24 +78,14 @@ namespace UI.Pages.UserInfo
             return userIdClaim?.Value;
         }
 
-        private UserResponseByIdModel GetUserResponseById(string id)
+        private async Task<UserResponseByIdModel> GetUserResponseById(string id)
         {
-            var response = _apiResponseHelper.GetAsync<UserResponseByIdModel>(Constants.ApiBaseUrl + $"/api/users/{id}").Result;
-            if (response.StatusCode == StatusCodeHelper.OK && response.Data != null)
+            var response = await _apiResponseHelper.GetAsync<UserResponseByIdModel>($"{Constants.ApiBaseUrl}/api/users/{id}");
+            if (response?.StatusCode == StatusCodeHelper.OK && response.Data != null)
             {
                 return response.Data;
             }
             return new UserResponseByIdModel();
-        }
-
-        private UserInfoDto GetUserInfoById(string id)
-        {
-            var response = _apiResponseHelper.GetAsync<UserInfoDto>(Constants.ApiBaseUrl + $"/api/userinfo").Result;
-            if (response.StatusCode == StatusCodeHelper.OK && response.Data != null)
-            {
-                return response.Data;
-            }
-            return new UserInfoDto();
         }
     }
 }
