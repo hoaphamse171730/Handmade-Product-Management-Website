@@ -8,7 +8,7 @@
 
 <!-- Return Button -->
 <div class="mb-4">
-    <a href="javascript:history.back()" class="rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700">Return</a>
+    <a asp-page="/Categories/View" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-6 inline-block">Back to Category</a>
 </div>
 
 <div class="overflow-x-auto">
@@ -61,3 +61,14 @@
     }
 </script>
 
+@{
+    // Create the pagination model with CurrentFilters
+    var paginationModel = new UI.Pages.Shared.PaginationModel
+            {
+                PageNumber = Model.PageNumber,
+                PageSize = Model.PageSize,
+                // Pass the serialized CurrentFilters
+                HasNextPage = Model.HasNextPage
+            };
+}
+<partial name="~/Pages/Shared/_Pagination.cshtml" model="paginationModel" />

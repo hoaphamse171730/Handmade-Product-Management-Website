@@ -320,3 +320,14 @@
         messageElement.textContent = message;
     }
 </script>
+@{
+    // Create the pagination model with CurrentFilters
+    var paginationModel = new UI.Pages.Shared.PaginationModel
+            {
+                PageNumber = Model.PageNumber,
+                PageSize = Model.PageSize,
+                // Pass the serialized CurrentFilters
+                HasNextPage = Model.HasNextPage
+            };
+}
+<partial name="~/Pages/Shared/_Pagination.cshtml" model="paginationModel" />
