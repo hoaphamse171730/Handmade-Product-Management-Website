@@ -24,6 +24,7 @@ namespace UI.Pages.Shared
             var response = await _apiResponseHelper.GetAsync<List<NotificationModel>>($"{Constants.ApiBaseUrl}/api/notification/getnotificationlist");
             if (response.StatusCode == StatusCodeHelper.OK && response.Data != null)
             {
+                var unRead = response.Data.Count(n => !n.HaveSeen);
                 return (response.Data, response.Data.Count);
             }
             return (new List<NotificationModel>(), 0);
