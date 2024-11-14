@@ -75,14 +75,14 @@ namespace HandmadeProductManagementAPI.Controllers
         public async Task<ActionResult> SoftDeleteCancelReason(string id)
         {
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
-            await _cancelReasonService.Delete(id, userId);
+            
 
-            var response = new BaseResponse<string>
+            var response = new BaseResponse<bool>
             {
                 Code = "Success",
                 StatusCode = StatusCodeHelper.OK,
                 Message = $"Cancel Reason with ID {id} has been successfully deleted.",
-                Data = null
+                Data = await _cancelReasonService.Delete(id, userId)
             };
             return Ok(response);
         }
@@ -92,7 +92,7 @@ namespace HandmadeProductManagementAPI.Controllers
         [HttpGet("deleted")]
         public async Task<IActionResult> GetDeletedCancelReasons()
         {
-            var response = new BaseResponse<IList<CancelReason>>
+            var response = new BaseResponse<IList<CancelReasonDeletedDto>>
             {
                 Code = "Success",
                 StatusCode = StatusCodeHelper.OK,

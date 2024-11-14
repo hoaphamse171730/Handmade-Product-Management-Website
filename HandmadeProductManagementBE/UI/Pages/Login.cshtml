@@ -63,6 +63,14 @@
 </div>
 
 <script>
+    // Function to show alert after page load
+    document.addEventListener('DOMContentLoaded', function () {
+        var confirmationResult = '@TempData["ConfirmationResult"]';
+        if (confirmationResult) {
+            alert(confirmationResult);
+        }
+    });
+
     function togglePassword() {
         const passwordInput = document.getElementById('passwordInput');
         const eyeIcon = document.getElementById('eyeIcon');

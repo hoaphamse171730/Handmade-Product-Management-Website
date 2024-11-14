@@ -432,7 +432,7 @@ namespace UI.Pages.Seller
                     await HandleImageUploads();
                 }
 
-                return RedirectToPage("/Product/ProductSeller");
+                return RedirectToPage("/Seller/Shop");
             }
             catch (Exception ex)
             {

@@ -1144,10 +1144,6 @@ video {
   table-layout: auto;
 }
 
-.border-collapse {
-  border-collapse: collapse;
-}
-
 .origin-top-left {
   transform-origin: top left;
 }
