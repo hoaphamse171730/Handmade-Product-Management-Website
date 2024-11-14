@@ -502,7 +502,7 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.ForbiddenException(StatusCodeHelper.Forbidden.ToString(), Constants.ErrorMessageForbidden);
             }
 
-            if (existingOrder.Status != Constants.OrderStatusPending)
+            if (existingOrder.Status != Constants.OrderStatusPending && existingOrder.Status != Constants.OrderStatusPaymentFailed && existingOrder.Status != Constants.OrderStatusAwaitingPayment)
             {
                 throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidOrderStatus);
             }
@@ -656,7 +656,8 @@ namespace HandmadeProductManagement.Services.Service
                 var validStatusTransitions = new Dictionary<string, List<string>>
                 {
                     { Constants.OrderStatusPending, new List<string> { Constants.OrderStatusCanceled, Constants.OrderStatusProcessing, Constants.OrderStatusAwaitingPayment } },
-                    { Constants.OrderStatusAwaitingPayment, new List<string> { Constants.OrderStatusCanceled, Constants.OrderStatusProcessing } },
+                    { Constants.OrderStatusAwaitingPayment, new List<string> { Constants.OrderStatusCanceled, Constants.OrderStatusProcessing, Constants.OrderStatusPaymentFailed } },
+                    { Constants.OrderStatusPaymentFailed, new List<string> { Constants.OrderStatusCanceled, Constants.OrderStatusProcessing } },
                     { Constants.OrderStatusProcessing, new List<string> { Constants.OrderStatusCanceled, Constants.OrderStatusDelivering } },
                     { Constants.OrderStatusDelivering, new List<string> { Constants.OrderStatusShipped, Constants.OrderStatusDeliveryFailed } },
                     { Constants.OrderStatusDeliveryFailed, new List<string> { Constants.OrderStatusOnHold } },
