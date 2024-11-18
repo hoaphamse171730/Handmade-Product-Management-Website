@@ -7,7 +7,7 @@ public static class Constants
     //public const string ApiBaseUrl = "https://localhost:7159";
     public const string ApiBaseUrl = "https://handmadeproductmanagement-gucpemetf2gchfa7.southeastasia-01.azurewebsites.net";
 
-    //public const string ApiBaseUrl = "https://localhost:7159";
+    public const string ApiBaseUrl = "https://localhost:7159";
     public const string AvatarBaseUrl = "/images/avatars";
     public const string VNPAY = "VNPAY";
     public const string TimeZoneSEAsiaStandard = "SE Asia Standard Time";
