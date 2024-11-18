@@ -81,21 +81,21 @@
                                 <td class="border-b border-gray-200 p-6 text-lg">@order.Note</td>
                                 <td class="border-b border-gray-200 p-6 text-lg">
                                     <div class="flex space-x-2">
-                                        @if (order.Status == "Pending" || order.Status == "Awaiting Payment")
+                                        @if (order.Status == "Pending" || order.Status == "Awaiting Payment" || order.Status == "Payment Failed")
                                         {
                                             <button class="rounded bg-green-500 px-4 py-2 text-white hover:bg-green-600"
                                                     onclick="event.stopPropagation(); openUpdateModal('@order.Id', '@order.CustomerName', '@order.Phone', '@order.Address', '@order.Note')">
                                                 Update
                                             </button>
                                         }
-                                        @if (order.Status == "Awaiting Payment" || order.Status == "Pending")
+                                        @if (order.Status == "Awaiting Payment" || order.Status == "Pending" || order.Status == "Payment Failed")
                                         {
                                             <button class="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
                                                     onclick="event.stopPropagation(); processPayment('@order.Id')">
                                                  Process payment
                                             </button>
                                         }
-                                        @if (order.Status == "Pending" || order.Status == "Processing" || order.Status == "Awaiting Payment")
+                                        @if (order.Status == "Pending" || order.Status == "Processing" || order.Status == "Awaiting Payment" || order.Status == "Payment Failed")
                                         {
                                             <button class="rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600"
                                                     onclick="event.stopPropagation(); openConfirmModal('@order.Id')">

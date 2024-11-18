@@ -127,7 +127,13 @@ namespace HandmadeProductManagement.Services.Service
             var existedPayment = await _unitOfWork.GetRepository<Payment>().Entities
                 .Where(p => p.OrderId == orderId).FirstOrDefaultAsync();
 
-            if(existedPayment != null)
+            var updateDto = new UpdateStatusOrderDto
+            {
+                OrderId = orderId,
+                Status = "Awaiting Payment"
+            };
+
+            if (existedPayment != null)
             {
                 if(existedPayment.ExpirationDate < now) {
                     throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), "Payment Expired");
@@ -137,9 +143,7 @@ namespace HandmadeProductManagement.Services.Service
                 await _unitOfWork.GetRepository<Payment>().UpdateAsync(existedPayment);
                 await _unitOfWork.SaveAsync();
 
-                order.Status = "Awaiting Payment";
-                await _unitOfWork.GetRepository<Order>().UpdateAsync(order);
-                await _unitOfWork.SaveAsync();
+                await _orderService.UpdateOrderStatusAsync(order.UserId.ToString(), updateDto);
                 return vnp_PayUrl + "?" + queryUrl;
             }
 
@@ -157,11 +161,8 @@ namespace HandmadeProductManagement.Services.Service
             };
             await _unitOfWork.GetRepository<Payment>().InsertAsync(payment);
             await _unitOfWork.SaveAsync();
-           
 
-            order.Status = "Awaiting Payment";
-            await _unitOfWork.GetRepository<Order>().UpdateAsync(order);
-            await _unitOfWork.SaveAsync();
+            await _orderService.UpdateOrderStatusAsync(order.UserId.ToString(), updateDto);
 
             return vnp_PayUrl + "?" + queryUrl;
         }
@@ -202,6 +203,12 @@ namespace HandmadeProductManagement.Services.Service
 
             }
 
+            var updateDto = new UpdateStatusOrderDto
+            {
+                OrderId = order.Id,
+                Status = "Payment Failed"
+            };
+
             if (response == null) {
                 //tao payment detail
                 PaymentDetail paymentDetail = new()
@@ -215,10 +222,8 @@ namespace HandmadeProductManagement.Services.Service
                 };
                 await _unitOfWork.GetRepository<PaymentDetail>().InsertAsync(paymentDetail);
                 await _unitOfWork.SaveAsync();
-
-                order.Status = "Payment Failed";
-                await _unitOfWork.GetRepository<Order>().UpdateAsync(order);
-                await _unitOfWork.SaveAsync();
+                
+                await _orderService.UpdateOrderStatusAsync(order.UserId.ToString(), updateDto);
 
                 response = new VNPAYResponse
                 {
@@ -287,9 +292,13 @@ namespace HandmadeProductManagement.Services.Service
                     await _unitOfWork.GetRepository<Payment>().UpdateAsync(payment);
                     await _unitOfWork.SaveAsync();
 
-                    order.Status = "Processing";
-                    await _unitOfWork.GetRepository<Order>().UpdateAsync(order);
-                    await _unitOfWork.SaveAsync();
+                    updateDto = new UpdateStatusOrderDto
+                    {
+                        OrderId = order.Id,
+                        Status = "Processing"
+                    };
+
+                    await _orderService.UpdateOrderStatusAsync(order.UserId.ToString(), updateDto);
 
                     var statusChangeDto = new StatusChangeForCreationDto
                     {
@@ -315,9 +324,13 @@ namespace HandmadeProductManagement.Services.Service
                     await _unitOfWork.GetRepository<PaymentDetail>().InsertAsync(paymentDetail);
                     await _unitOfWork.SaveAsync();
 
-                    order.Status = "Payment Failed";
-                    await _unitOfWork.GetRepository<Order>().UpdateAsync(order);
-                    await _unitOfWork.SaveAsync();
+                    updateDto = new UpdateStatusOrderDto
+                    {
+                        OrderId = order.Id,
+                        Status = "Payment Failed"
+                    };
+
+                    await _orderService.UpdateOrderStatusAsync(order.UserId.ToString(), updateDto);
 
                     response.IsSucceed = false;
                     response.Text = Constants.PaymentApproveFailed;
@@ -345,9 +358,13 @@ namespace HandmadeProductManagement.Services.Service
                 await _unitOfWork.GetRepository<PaymentDetail>().InsertAsync(paymentDetail);
                 await _unitOfWork.SaveAsync();
 
-                order.Status = "Payment Failed";
-                await _unitOfWork.GetRepository<Order>().UpdateAsync(order);
-                await _unitOfWork.SaveAsync();
+                updateDto = new UpdateStatusOrderDto
+                {
+                    OrderId = order.Id,
+                    Status = "Payment Failed"
+                };
+
+                await _orderService.UpdateOrderStatusAsync(order.UserId.ToString(), updateDto);
 
                 response.IsSucceed = false;
                 response.Text = Constants.PaymentApproveFailed;

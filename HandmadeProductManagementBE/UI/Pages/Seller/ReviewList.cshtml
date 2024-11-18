@@ -1,0 +1,206 @@
+﻿@page
+@using UI.Pages.Shared
+@model UI.Pages.Seller.ReviewListModel
+@{
+    ViewData["Title"] = "Reviews";
+    var userNames = new Dictionary<string, string>();
+}
+
+@{
+    var errorModel = new ErrorMessageModel
+            {
+                ErrorMessage = Model.ErrorMessage,
+                ErrorDetail = Model.ErrorDetail
+            };
+    var token = HttpContext.Session.GetString("Token");
+}
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <partial name="_ErrorMessage" model="errorModel" />
+}
+
+<h1 class="mb-4 text-center text-4xl font-bold text-red-600">Review List</h1>
+
+@if (!string.IsNullOrEmpty(Model.StatusMessage))
+{
+    <div class="mb-4 rounded-lg p-4 @(Model.StatusMessage.StartsWith("Error") ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700")">
+        @Model.StatusMessage
+    </div>
+}
+
+<div class="space-y-4">
+    @foreach (var review in Model.Reviews)
+    {
+        <div class="rounded-lg border border-gray-300 bg-white p-4 shadow-md">
+
+            <!-- Display product info at the top of the review -->
+            @if (review.ProductId != null)
+            {
+                var product = await Model.GetProductByIdAsync(review.ProductId.ToString());
+
+                @* Only display the product information if it exists *@
+                @if (product != null)
+                {
+                    <div class="mb-4 flex items-center rounded-lg border bg-gray-200 px-2 py-2">
+                        <!-- Wrap the entire product info in an anchor tag to make it clickable -->
+                        <a href="/ProductDetail/ProductDetail?id=@product.Id" class="flex w-full items-center">
+                            <img src="@product.ProductImageUrl" alt="Product Image" class="ml-2 mr-2 h-24 w-24 rounded-md object-cover" />
+                            <div>
+                                <h3 class="text-lg font-semibold">@product.Name</h3>
+                                <p class="text-sm text-gray-500">@product.Description</p>
+                            </div>
+                        </a>
+                    </div>
+                }
+                else
+                {
+                    <div class="mb-4">
+                        <p class="text-sm text-red-600">Product not found.</p>
+                    </div>
+                }
+            }
+
+            <div class="flex flex-col">
+                @{
+                    // Kiểm tra và lấy UserName từ userId
+                    if (!userNames.TryGetValue(review.UserId.ToString(), out var userName))
+                    {
+                        var user = await Model.GetUserByIdAsync(review.UserId.ToString());
+                        userName = user?.UserName ?? "Unknown User";
+                        userNames[review.UserId.ToString()] = userName;
+                    }
+                }
+                <span class="font-semibold">@userName</span>
+                <span class="text-sm text-gray-500">@review.Date?.ToString("g")</span>
+
+                <!-- Hiển thị nội dung review và các thành phần khác -->
+                <p class="mt-2">@review.Content</p>
+
+                <!-- Display Rating as stars -->
+                <div class="mt-2 flex items-center">
+                    @for (int i = 1; i <= 5; i++)
+                    {
+                        <svg class="h-5 w-5 @(i <= @review.Rating ? "text-yellow-500" : "text-gray-300")" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 .587l3.668 7.568 8.235 1.199-5.964 5.222L19.339 24 12 20.812 4.661 24l1.331-9.424-5.964-5.222 8.235-1.199L12 .587z" />
+                        </svg>
+                    }
+                    <span class="ml-2 text-sm text-gray-500">(@review.Rating)</span>
+                </div>
+            </div>
+
+            <!-- Reply Section with Shop ID -->
+            <div class="relative ml-4 mt-4 rounded-lg border border-gray-300 bg-gray-50 p-2">
+                @if (review.Reply != null)
+                {
+                    var replyShop = Model.Shops.FirstOrDefault(s => s.Id == review.Reply.ShopId);
+                    <a href="/Shop/Index?id=@replyShop.Id" class="text-blue-500 hover:underline">
+                        @replyShop.Name
+                    </a>
+
+                    <div class="reply-content-@review.Reply.Id">
+                        <p>@review.Reply.Content</p>
+                        <span class="mt-1 block text-sm text-gray-500">@review.Reply.Date?.ToString("g")</span>
+
+                        @if (Model.CurrentUserShop?.Id == review.Reply.ShopId)
+                        {
+                            <div class="mt-2 flex space-x-2">
+                                <!-- Edit Button -->
+                                <button onclick="toggleEditForm('@review.Reply.Id')"
+                                        class="rounded bg-blue-500 px-2 py-1 text-sm text-white hover:bg-blue-600">
+                                    Edit
+                                </button>
+
+                                <!-- Delete Button -->
+                                <form method="post" asp-page-handler="DeleteReply" class="inline">
+                                    <input type="hidden" name="replyId" value="@review.Reply.Id" />
+                                    <button type="submit"
+                                            onclick="return confirm('Are you sure you want to delete this reply?')"
+                                            class="rounded bg-red-500 px-2 py-1 text-sm text-white hover:bg-red-600">
+                                        Delete
+                                    </button>
+                                </form>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Edit Form (Hidden by default) -->
+                    <div id="edit-form-@review.Reply.Id" class="mt-2 hidden">
+                        <form method="post" asp-page-handler="UpdateReply">
+                            <input type="hidden" name="replyId" value="@review.Reply.Id" />
+                            <textarea name="content"
+                                      class="w-full rounded-lg border border-gray-300 p-2 focus:border-blue-500 focus:ring-blue-500"
+                                      rows="3"
+                                      required>@review.Reply.Content</textarea>
+                            <div class="mt-2 flex space-x-2">
+                                <button type="submit"
+                                        class="rounded bg-green-500 px-3 py-1 text-sm text-white hover:bg-green-600">
+                                    Save
+                                </button>
+                                <button type="button"
+                                        onclick="toggleEditForm('@review.Reply.Id')"
+                                        class="rounded bg-gray-500 px-3 py-1 text-sm text-white hover:bg-gray-600">
+                                    Cancel
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                }
+                else if (Model.CurrentUserShop != null)
+                {
+                    <div class="mb-2 font-semibold text-gray-700">
+                        @Model.CurrentUserShop.Name
+                    </div>
+                    <form method="post" asp-page-handler="CreateReply" class="mt-2">
+                        <input type="hidden" asp-for="Reply.ReviewId" value="@review.Id" />
+                        <div class="space-y-2">
+                            <textarea asp-for="Reply.Content"
+                                      class="w-full rounded-lg border border-gray-300 p-2 focus:border-blue-500 focus:ring-blue-500"
+                                      rows="3"
+                                      placeholder="Write your reply here..."
+                                      required></textarea>
+                            @if (!ModelState.IsValid && ModelState["Reply.Content"]?.Errors.Count > 0)
+                            {
+                                <span class="text-sm text-red-600">@ModelState["Reply.Content"]?.Errors.First().ErrorMessage</span>
+                            }
+                        </div>
+                        <div class="mt-2 flex justify-end">
+                            <button type="submit"
+                                    class="rounded-lg bg-blue-500 px-4 py-2 text-white transition duration-200 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                                Reply
+                            </button>
+                        </div>
+                    </form>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@if (Model.TotalPages > 1)
+{
+    <nav class="mt-4">
+        <ul class="flex justify-center space-x-2">
+            @for (int i = 1; i <= Model.TotalPages; i++)
+            {
+                <li class="page-item @(Model.PageNumber == i ? "active" : "")">
+                    <a class="rounded-md border border-gray-300 px-4 py-2" class="page-link" asp-page="Index" asp-route-pageNumber="@i">@i</a>
+                </li>
+            }
+        </ul>
+    </nav>
+}
+
+<script>
+    function toggleEditForm(replyId) {
+        const contentDiv = document.querySelector(`.reply-content-${replyId}`);
+        const editForm = document.getElementById(`edit-form-${replyId}`);
+
+        if (editForm.classList.contains('hidden')) {
+            contentDiv.classList.add('hidden');
+            editForm.classList.remove('hidden');
+        } else {
+            contentDiv.classList.remove('hidden');
+            editForm.classList.add('hidden');
+        }
+    }
+</script>

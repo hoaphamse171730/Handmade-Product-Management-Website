@@ -1,4 +1,5 @@
-﻿using Google.Apis.Storage.v1.Data;
+﻿using Firebase.Auth;
+using Google.Apis.Storage.v1.Data;
 using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
@@ -360,37 +361,24 @@ namespace HandmadeProductManagement.Services.Service
             }
         }
 
-        public async Task<IList<OrderResponseModel>> GetOrdersByPageAsync(int pageNumber, int pageSize)
+        public async Task<IList<OrderByUserDto>> GetOrdersByPageAsync(int pageNumber, int pageSize)
         {
             var repository = _unitOfWork.GetRepository<Order>();
-            var orderDetailRepository = _unitOfWork.GetRepository<Order>();
-            var userRepository = _unitOfWork.GetRepository<ApplicationUser>();
-
-            // Query to get non-deleted orders
-            var query = from order in repository.Entities
-                        join user in userRepository.Entities on order.UserId equals user.Id
-                        where !order.DeletedTime.HasValue
-                        orderby order.CreatedTime descending
-                        select new OrderResponseModel
-                        {
-                            Id = order.Id,
-                            TotalPrice = order.TotalPrice,
-                            OrderDate = order.OrderDate,
-                            Status = order.Status,
-                            UserId = order.UserId,
-                            Username = user.UserName!,
-                            Address = order.Address,
-                            CustomerName = order.CustomerName,
-                            Phone = order.Phone,
-                            Note = order.Note,
-                            CancelReasonId = order.CancelReasonId
-                        };
-
-            // Apply pagination
-            var orders = await query
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
+            var orders = await repository.Entities
+                .Where(o => !o.DeletedTime.HasValue)
+                .OrderByDescending(o => o.CreatedTime) // Sort orders by CreatedTime in descending order
+                .Select(order => new OrderByUserDto
+                {
+                    Id = order.Id,
+                    TotalPrice = order.TotalPrice,
+                    OrderDate = order.OrderDate,
+                    Status = order.Status,
+                    Address = order.Address,
+                    CustomerName = order.CustomerName,
+                    Phone = order.Phone,
+                    Note = order.Note,
+                    CancelReasonId = order.CancelReasonId
+                }).ToListAsync();
 
             return orders;
         }
@@ -415,10 +403,8 @@ namespace HandmadeProductManagement.Services.Service
             // If user is not an admin, apply buyer/seller checks
             if (role != Constants.RoleAdmin)
             {
-                // Check if the user is the buyer of the order
                 if (order.CreatedBy != userId)
                 {
-                    // If the user is not the buyer, check if they are the seller of any product in the order
                     bool isSellerOrder = await _unitOfWork.GetRepository<OrderDetail>().Entities
                         .AnyAsync(od => od.OrderId == orderId && od.ProductItem != null && od.ProductItem.CreatedBy == userId && !od.DeletedTime.HasValue);
 
@@ -429,42 +415,45 @@ namespace HandmadeProductManagement.Services.Service
                 }
             }
 
-            // Retrieve order details with product config and variation option value
+            // Retrieve order details and check for reviews
             var orderDetails = await _unitOfWork.GetRepository<OrderDetail>().Entities
                 .Where(od => od.OrderId == orderId && !od.DeletedTime.HasValue)
                 .Include(od => od.ProductItem!)
-                .ThenInclude(pi => pi.Product!) 
+                .ThenInclude(pi => pi.Product!)
                 .ThenInclude(p => p.Shop)
                 .ToListAsync();
 
-            var orderInDetailDtos = orderDetails.Select(od => new OrderInDetailDto
-            {
-                ProductId = od.ProductItem != null && od.ProductItem.Product != null ? od.ProductItem.Product.Id : Guid.Empty.ToString(),
-                ProductName = od.ProductItem != null && od.ProductItem.Product != null ? od.ProductItem.Product.Name : "",
-                ProductQuantity = od.ProductQuantity,
-                DiscountPrice = od.DiscountPrice,
-                VariationOptionValues = _unitOfWork.GetRepository<ProductConfiguration>().Entities
-                    .Where(pc => pc.ProductItemId == od.ProductItemId && pc.VariationOption != null)
-                    .Select(pc => pc.VariationOption!.Value)
-                    .ToList(),
-            }).ToList();
+            var orderInDetailDtos = new List<OrderInDetailDto>();
 
-            if (!orderDetails.Any())
+            foreach (var od in orderDetails)
             {
-                throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), "No order details found for this order.");
-            }
+                var hasReviewed = await _unitOfWork.GetRepository<Review>().Entities
+                    .AnyAsync(r => r.ProductId == od.ProductItem!.Product!.Id && r.UserId == Guid.Parse(userId));
 
-            // Fetch product images and set the first image URL
-            foreach (var orderDetail in orderInDetailDtos)
-            {
-                var images = await _productImageService.GetProductImageById(orderDetail.ProductId);
-                if (images != null && images.Count > 0)
+                // Retrieve the oldest image for the product item, if available
+                var productImage = await _unitOfWork.GetRepository<ProductImage>().Entities
+                    .Where(pi => pi.ProductId == od.ProductItem!.Product!.Id)
+                    .OrderBy(pi => pi.CreatedTime)
+                    .Select(pi => pi.Url)  
+                    .FirstOrDefaultAsync();
+
+                orderInDetailDtos.Add(new OrderInDetailDto
                 {
-                    orderDetail.ProductImage = images.First().Url;
-                }
+                    ProductId = od.ProductItem!.Product!.Id,
+                    ProductName = od.ProductItem.Product.Name,
+                    ProductQuantity = od.ProductQuantity,
+                    ProductImage = productImage!,
+                    DiscountPrice = od.DiscountPrice,
+                    VariationOptionValues = _unitOfWork.GetRepository<ProductConfiguration>().Entities
+                        .Where(pc => pc.ProductItemId == od.ProductItemId && pc.VariationOption != null)
+                        .Select(pc => pc.VariationOption!.Value!)
+                        .ToList(),
+                    HasReviewed = hasReviewed
+                });
             }
-            
+
             var shopName = orderDetails.FirstOrDefault()?.ProductItem?.Product?.Shop?.Name;
+            var shopId = orderDetails.FirstOrDefault()?.ProductItem?.Product?.Shop?.Id;
 
             return new OrderWithDetailDto
             {
@@ -477,6 +466,7 @@ namespace HandmadeProductManagement.Services.Service
                 CustomerName = order.CustomerName,
                 Phone = order.Phone,
                 ShopName = shopName,
+                ShopId = shopId,
                 CustomerId = order.UserId.ToString(),
                 Note = order.Note,
                 CancelReasonId = order.CancelReasonId,
@@ -500,7 +490,7 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.ForbiddenException(StatusCodeHelper.Forbidden.ToString(), Constants.ErrorMessageForbidden);
             }
 
-            if (existingOrder.Status != Constants.OrderStatusPending)
+            if (existingOrder.Status != Constants.OrderStatusPending && existingOrder.Status != Constants.OrderStatusPaymentFailed && existingOrder.Status != Constants.OrderStatusAwaitingPayment)
             {
                 throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidOrderStatus);
             }
@@ -653,7 +643,9 @@ namespace HandmadeProductManagement.Services.Service
                 // Validate Status Flow
                 var validStatusTransitions = new Dictionary<string, List<string>>
                 {
-                    { Constants.OrderStatusPending, new List<string> { Constants.OrderStatusCanceled, Constants.OrderStatusProcessing } },
+                    { Constants.OrderStatusPending, new List<string> { Constants.OrderStatusCanceled, Constants.OrderStatusProcessing, Constants.OrderStatusAwaitingPayment } },
+                    { Constants.OrderStatusAwaitingPayment, new List<string> { Constants.OrderStatusCanceled, Constants.OrderStatusProcessing, Constants.OrderStatusPaymentFailed } },
+                    { Constants.OrderStatusPaymentFailed, new List<string> { Constants.OrderStatusCanceled, Constants.OrderStatusProcessing } },
                     { Constants.OrderStatusProcessing, new List<string> { Constants.OrderStatusCanceled, Constants.OrderStatusDelivering } },
                     { Constants.OrderStatusDelivering, new List<string> { Constants.OrderStatusShipped, Constants.OrderStatusDeliveryFailed } },
                     { Constants.OrderStatusDeliveryFailed, new List<string> { Constants.OrderStatusOnHold } },
@@ -723,7 +715,7 @@ namespace HandmadeProductManagement.Services.Service
 
                         productItem.QuantityInStock += detail.ProductQuantity;
 
-                        productItemRepository.Update(productItem);
+                        productItemRepository.Update(productItem);  
                     }
 
                     var payment = await _paymentService.GetPaymentByOrderIdAsync(existingOrder.Id, userId);

@@ -10,7 +10,7 @@
 
     <!-- Filter Buttons -->
     <div class="mb-4 flex w-full flex-wrap justify-center gap-2">
-        @foreach (var filter in new[] { "All", "Pending", "Processing", "Delivering", "Shipped", "Canceled", "Refunded" })
+        @foreach (var filter in new[] { "All", "Pending", "Awaiting Payment", "Processing", "Delivering", "Shipped", "Canceled", "Refunded" })
         {
             <a href="?filter=@filter"
                class="flex-grow rounded-lg border border-blue-500 p-2 text-center text-lg font-bold
@@ -54,7 +54,7 @@
                                 <td class="border-b border-gray-200 p-6 text-lg">@order.CustomerName</td>
                                 <td class="border-b border-gray-200 p-6 text-lg">@order.Phone</td>
                                 <td class="border-b border-gray-200 p-6 text-lg">@order.OrderDate.ToString("dd/MM/yyyy")</td>
-                                <td class="border-b border-gray-200 p-6 text-lg">@order.TotalPrice.ToString("C")</td>
+                                <td class="border-b border-gray-200 p-6 text-lg">₫@order.TotalPrice.ToString("N0").Replace(",", ".")</td>
                                 <td class="border-b border-gray-200 p-6 text-lg">@order.Status</td>
                                 <td class="border-b border-gray-200 p-6 text-lg">@order.Address</td>
                                 <td class="border-b border-gray-200 p-6 text-lg">@order.Note</td>
@@ -82,3 +82,14 @@
 }
 
 <partial name="~/Pages/Shared/_Pagination.cshtml" model="paginationModel" />
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const buttons = document.querySelectorAll('a[href^="?filter="]');
+        buttons.forEach(button => {
+            button.addEventListener('click', function () {
+                console.log('Filter clicked');
+            });
+        });
+    });
+</script>
