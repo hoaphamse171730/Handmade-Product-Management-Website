@@ -42,7 +42,7 @@ namespace HandmadeProductManagementAPI.Controllers
         public async Task<IActionResult> GetOrdersByPage([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             var paginatedOrders = await _orderService.GetOrdersByPageAsync(pageNumber, pageSize);
-            var response = new BaseResponse<IList<OrderResponseModel>>
+            var response = new BaseResponse<IList<OrderByUserDto>>
             {
                 Code = "Success",
                 StatusCode = StatusCodeHelper.OK,

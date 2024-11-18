@@ -49,7 +49,7 @@ namespace UI.Pages.Order
                     Orders = CurrentFilter switch
                     {
                         "Pending" => orders.Where(o => o.Status == "Pending").ToList(),
-                        "Awaiting Payment" => orders.Where(o => o.Status == "Awaiting Payment").ToList(),
+                        "Awaiting Payment" => orders.Where(o => new[] { "Awaiting Payment", "Payment Failed" }.Contains(o.Status)).ToList(),
                         "Processing" => orders.Where(o => o.Status == "Processing").ToList(),
                         "Delivering" => orders.Where(o => new[] { "Delivery Failed", "Delivering", "On Hold", "Delivering Retry" }.Contains(o.Status)).ToList(),
                         "Shipped" => orders.Where(o => o.Status == "Shipped").ToList(),
@@ -70,7 +70,7 @@ namespace UI.Pages.Order
                 ErrorDetail = ex.ErrorDetail.ErrorMessage?.ToString();
                 if (ErrorMessage == "unauthorized") return RedirectToPage("/Login");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 ErrorMessage = "An unexpected error occurred.";
             }
@@ -109,7 +109,7 @@ namespace UI.Pages.Order
             }
         }
 
-        public async Task<IActionResult> OnPutUpdateOrderAsync(string orderId,[FromBody] UpdateOrderDto updateOrderDto)
+        public async Task<IActionResult> OnPutUpdateOrderAsync(string orderId, [FromBody] UpdateOrderDto updateOrderDto)
         {
             // Make the PUT request to update the order
             var response = await _apiResponseHelper.PutAsync<bool>(Constants.ApiBaseUrl + $"/api/order/{orderId}", updateOrderDto);
@@ -125,6 +125,7 @@ namespace UI.Pages.Order
                 return new JsonResult(new { success = false, message = response?.Message ?? "An error occurred while updating the order." });
             }
         }
+
 
         public async Task<IActionResult> OnGetProcessPaymentAsync(string orderId)
         {
