@@ -10,7 +10,7 @@
 
     <!-- Filter Buttons -->
     <div class="mb-4 flex w-full flex-wrap justify-center gap-2">
-        @foreach (var filter in new[] { "All", "Pending", "Processing", "Delivering", "Shipped", "Canceled", "Refunded" })
+        @foreach (var filter in new[] { "All", "Pending", "Awaiting Payment", "Processing", "Delivering", "Shipped", "Canceled", "Refunded" })
         {
             <a href="?filter=@filter"
                class="flex-grow rounded-lg border border-blue-500 p-2 text-center text-lg font-bold
