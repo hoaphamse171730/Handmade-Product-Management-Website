@@ -1,0 +1,111 @@
+﻿@page
+@model UI.Pages.Seller.DeletedProductsModel
+@{
+    ViewData["Title"] = "Deleted Products";
+}
+
+@Html.AntiForgeryToken()
+
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+        <strong class="font-bold">Error!</strong>
+        <span class="block sm:inline">@Model.ErrorMessage</span>
+        @if (!string.IsNullOrEmpty(Model.ErrorDetail))
+        {
+            <span class="block sm:inline">Details: @Model.ErrorDetail</span>
+        }
+    </div>
+}
+
+<div class="container mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold">Deleted Products</h1>
+        <a asp-page="./Shop" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded">
+            Back to Shop
+        </a>
+    </div>
+
+    <div class="bg-white shadow-md rounded-lg overflow-hidden">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Product Name
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Deleted Time
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Deleted By
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Actions
+                    </th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                @if (Model.DeletedProducts != null && Model.DeletedProducts.Any())
+                {
+                    @foreach (var product in Model.DeletedProducts)
+                    {
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                @product.Name
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                @(product.DeletedTime?.ToString("MMM dd, yyyy HH:mm") ?? "N/A")
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                @(product.DeletedBy ?? "N/A")
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <button onclick="recoverProduct('@product.Id')"
+                                        class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
+                                    Recover
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="4" class="px-6 py-4 text-center text-sm text-gray-500">
+                            No deleted products found
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    const requestVerificationToken = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+    async function recoverProduct(productId) {
+        if (!confirm('Are you sure you want to recover this product?')) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`${window.location.pathname}?handler=RecoverProduct&productId=${productId}`, {
+                method: 'POST',
+                headers: {
+                    'RequestVerificationToken': requestVerificationToken
+                }
+            });
+
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                const error = await response.text();
+                alert('Failed to recover product: ' + error);
+            }
+        } catch (error) {
+            alert('An error occurred while recovering the product');
+            console.error('Error:', error);
+        }
+    }
+</script>

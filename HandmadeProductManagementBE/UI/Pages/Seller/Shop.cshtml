@@ -247,6 +247,13 @@ else
                     class="rounded-md bg-green-500 px-4 py-2 text-white hover:bg-green-600">
                 Add Product
             </button>
+            <a asp-page="./DeletedProducts" 
+               class="inline-flex items-center rounded-md bg-red-500 px-4 py-2 text-white hover:bg-red-600">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                Deleted Products List
+            </a>
         </form>
     </div>
 
@@ -592,7 +599,9 @@ else
                 const nameInput = variationRow.querySelector('input[name*=".Name"]');
                 const optionInputs = variationRow.querySelectorAll('input[name*=".Options"]');
                 const variationName = nameInput.value.trim();
-                const options = Array.from(optionInputs).map(input => input.value.trim()).filter(Boolean);
+                const options = Array.from(optionInputs)
+                    .map(input => input.value.trim())
+                    .filter(Boolean);
 
                 if (!variationName || options.length === 0) {
                     alert('Please enter variation name and at least one option');
@@ -602,16 +611,32 @@ else
                 const categoryId = document.getElementById('categorySelect').value;
                 const response = await fetch(`?handler=CategoryVariations&categoryId=${categoryId}`);
                 const existingVariations = await response.json();
-                const existingVariation = existingVariations.find(v =>
+        
+                // Find existing variation with same name (case insensitive)
+                const existingVariation = existingVariations.find(v => 
                     v.name.toLowerCase() === variationName.toLowerCase()
                 );
 
                 let variationId;
                 let optionIds = [];
+                let newOptionsToAdd = [];
 
                 if (existingVariation) {
                     variationId = existingVariation.id;
-                    for (const option of options) {
+            
+                    // Get existing options for this variation
+                    const existingOptionsResponse = await fetch(`?handler=VariationOptions&variationId=${variationId}`);
+                    const existingOptions = await existingOptionsResponse.json();
+            
+                    // Filter out options that already exist (case insensitive)
+                    newOptionsToAdd = options.filter(newOption => 
+                        !existingOptions.some(existingOption => 
+                            existingOption.value.toLowerCase() === newOption.toLowerCase()
+                        )
+                    );
+
+                    // Only add new options that don't exist yet
+                    for (const option of newOptionsToAdd) {
                         const optionData = {
                             value: option,
                             variationId: variationId
@@ -635,7 +660,19 @@ else
                             optionIds.push(optionResult.optionId);
                         }
                     }
+
+                    // Add existing option IDs to our list
+                    existingOptions.forEach(existingOption => {
+                        const matchingNewOption = options.find(newOption => 
+                            newOption.toLowerCase() === existingOption.value.toLowerCase()
+                        );
+                        if (matchingNewOption) {
+                            optionIds.push(existingOption.id);
+                        }
+                    });
+
                 } else {
+                    // Create new variation with all options
                     const variationData = {
                         name: variationName,
                         categoryId: categoryId,
@@ -664,9 +701,23 @@ else
                     }
                 }
 
-                appendVariationToList(variationId, variationName, options, optionIds);
+                // Reload existing variations to show updated list
+                await loadExistingVariations();
+        
+                // Remove the new variation input row since it's been processed
                 variationRow.remove();
-                alert('Variation saved successfully!');
+
+                // Show appropriate message
+                if (existingVariation) {
+                    if (newOptionsToAdd.length > 0) {
+                        alert(`Added ${newOptionsToAdd.length} new option(s) to existing variation "${variationName}"`);
+                    } else {
+                        alert(`All options already exist for variation "${variationName}"`);
+                    }
+                } else {
+                    alert('New variation created successfully!');
+                }
+
             } catch (error) {
                 console.error('Error saving variation:', error);
                 alert('Failed to save variation: ' + error.message);
@@ -973,7 +1024,7 @@ else
             }
         };
 
-        // Category and variation loading
+                // Category and variation loading
         const loadExistingVariations = async () => {
             try {
                 const categoryId = document.getElementById('categorySelect')?.value;
@@ -988,31 +1039,40 @@ else
                 if (!response.ok) throw new Error('Failed to load variations');
 
                 const variations = await response.json();
-                const variationNamesSet = new Set(); // Track unique variation names
+                const variationGroups = new Map(); // Group variations by lowercase name
 
-                for (const variation of variations) {
-                    // Skip if the variation name already exists
-                    if (variationNamesSet.has(variation.name)) continue;
-                    variationNamesSet.add(variation.name);
+                // Group variations by name (case insensitive)
+                variations.forEach(variation => {
+                    const lowerName = variation.name.toLowerCase();
+                    if (!variationGroups.has(lowerName)) {
+                        variationGroups.set(lowerName, {
+                            id: variation.id,
+                            name: variation.name, // Keep original case for display
+                            options: new Set() // Will store option IDs
+                        });
+                    }
+                });
 
+                // Create UI for each unique variation
+                for (const [_, variation] of variationGroups) {
                     const variationDiv = document.createElement('div');
                     variationDiv.classList.add('p-4', 'border', 'rounded-md', 'bg-gray-50', 'mb-4');
 
                     variationDiv.innerHTML = `
-                                        <div class="mb-2 flex items-center justify-between">
-                                            <span class="font-medium">${variation.name}</span>
-                                            <button type="button"
-                                                    onclick="removeExistingVariation('${variation.id}')"
-                                                    class="text-red-600 hover:text-red-800">
-                                                Remove
-                                            </button>
-                                        </div>
-                                        <div class="variation-options mt-2" id="options-${variation.id}">
-                                            <div class="grid-cols-2 grid gap-2">
-                                                <!-- Options will be loaded here -->
-                                            </div>
-                                        </div>
-                                    `;
+                        <div class="mb-2 flex items-center justify-between">
+                            <span class="font-medium">${variation.name}</span>
+                            <button type="button" 
+                                    onclick="removeExistingVariation('${variation.id}')"
+                                    class="text-red-600 hover:text-red-800">
+                                Remove
+                            </button>
+                        </div>
+                        <div class="variation-options mt-2" id="options-${variation.id}">
+                            <div class="grid-cols-2 grid gap-2">
+                                <!-- Options will be loaded here -->
+                            </div>
+                        </div>
+                    `;
 
                     container.appendChild(variationDiv);
                     await loadVariationOptions(variation.id, variation.name);
@@ -1030,27 +1090,35 @@ else
 
                 const options = await response.json();
                 const optionsContainer = document.getElementById(`options-${variationId}`).querySelector('.grid');
-                const optionValuesSet = new Set(); // Track unique option values for this variation
+                const uniqueOptions = new Map(); // Use Map to keep track of unique options
 
+                // Group options by lowercase value to handle case-insensitive duplicates
                 options.forEach(option => {
-                    // Skip if the option value already exists for this variation
-                    if (optionValuesSet.has(option.value)) return;
-                    optionValuesSet.add(option.value);
+                    const lowerValue = option.value.toLowerCase();
+                    if (!uniqueOptions.has(lowerValue)) {
+                        uniqueOptions.set(lowerValue, {
+                            id: option.id,
+                            value: option.value // Keep original case for display
+                        });
+                    }
+                });
 
+                // Create UI for each unique option
+                uniqueOptions.forEach(option => {
                     const optionDiv = document.createElement('div');
                     optionDiv.classList.add('flex', 'items-center');
                     optionDiv.innerHTML = `
-                                        <input type="checkbox"
-                                               id="option-${option.id}"
-                                               name="variation_${variationId}"
-                                               value="${option.id}"
-                                               data-variation-id="${variationId}"
-                                               data-variation-name="${variationName}"
-                                               data-option-name="${option.value}"
-                                               class="form-checkbox mr-2 h-4 w-4 text-blue-600"
-                                               onchange="handleVariationOptionCheck(this)" />
-                                        <label for="option-${option.id}" class="text-sm text-gray-700">${option.value}</label>
-                                    `;
+                        <input type="checkbox"
+                               id="option-${option.id}"
+                               name="variation_${variationId}"
+                               value="${option.id}"
+                               data-variation-id="${variationId}"
+                               data-variation-name="${variationName}"
+                               data-option-name="${option.value}"
+                               class="form-checkbox mr-2 h-4 w-4 text-blue-600"
+                               onchange="handleVariationOptionCheck(this)" />
+                        <label for="option-${option.id}" class="text-sm text-gray-700">${option.value}</label>
+                    `;
                     optionsContainer.appendChild(optionDiv);
                 });
             } catch (error) {
