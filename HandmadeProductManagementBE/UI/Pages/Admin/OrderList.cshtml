@@ -54,7 +54,7 @@
                                 <td class="border-b border-gray-200 p-6 text-lg">@order.CustomerName</td>
                                 <td class="border-b border-gray-200 p-6 text-lg">@order.Phone</td>
                                 <td class="border-b border-gray-200 p-6 text-lg">@order.OrderDate.ToString("dd/MM/yyyy")</td>
-                                <td class="border-b border-gray-200 p-6 text-lg">@order.TotalPrice.ToString("N0").Replace(",", ".")₫</td>
+                                <td class="border-b border-gray-200 p-6 text-lg">₫@order.TotalPrice.ToString("N0").Replace(",", ".")</td>
                                 <td class="border-b border-gray-200 p-6 text-lg">@order.Status</td>
                                 <td class="border-b border-gray-200 p-6 text-lg">@order.Address</td>
                                 <td class="border-b border-gray-200 p-6 text-lg">@order.Note</td>
@@ -82,3 +82,14 @@
 }
 
 <partial name="~/Pages/Shared/_Pagination.cshtml" model="paginationModel" />
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const buttons = document.querySelectorAll('a[href^="?filter="]');
+        buttons.forEach(button => {
+            button.addEventListener('click', function () {
+                console.log('Filter clicked');
+            });
+        });
+    });
+</script>

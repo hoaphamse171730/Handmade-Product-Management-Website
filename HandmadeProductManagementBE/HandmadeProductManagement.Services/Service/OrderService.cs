@@ -1,4 +1,5 @@
-﻿using Google.Apis.Storage.v1.Data;
+﻿using Firebase.Auth;
+using Google.Apis.Storage.v1.Data;
 using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
@@ -360,37 +361,24 @@ namespace HandmadeProductManagement.Services.Service
             }
         }
 
-        public async Task<IList<OrderResponseModel>> GetOrdersByPageAsync(int pageNumber, int pageSize)
+        public async Task<IList<OrderByUserDto>> GetOrdersByPageAsync(int pageNumber, int pageSize)
         {
             var repository = _unitOfWork.GetRepository<Order>();
-            var orderDetailRepository = _unitOfWork.GetRepository<Order>();
-            var userRepository = _unitOfWork.GetRepository<ApplicationUser>();
-
-            // Query to get non-deleted orders
-            var query = from order in repository.Entities
-                        join user in userRepository.Entities on order.UserId equals user.Id
-                        where !order.DeletedTime.HasValue
-                        orderby order.CreatedTime descending
-                        select new OrderResponseModel
-                        {
-                            Id = order.Id,
-                            TotalPrice = order.TotalPrice,
-                            OrderDate = order.OrderDate,
-                            Status = order.Status,
-                            UserId = order.UserId,
-                            Username = user.UserName!,
-                            Address = order.Address,
-                            CustomerName = order.CustomerName,
-                            Phone = order.Phone,
-                            Note = order.Note,
-                            CancelReasonId = order.CancelReasonId
-                        };
-
-            // Apply pagination
-            var orders = await query
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
+            var orders = await repository.Entities
+                .Where(o => !o.DeletedTime.HasValue)
+                .OrderByDescending(o => o.CreatedTime) // Sort orders by CreatedTime in descending order
+                .Select(order => new OrderByUserDto
+                {
+                    Id = order.Id,
+                    TotalPrice = order.TotalPrice,
+                    OrderDate = order.OrderDate,
+                    Status = order.Status,
+                    Address = order.Address,
+                    CustomerName = order.CustomerName,
+                    Phone = order.Phone,
+                    Note = order.Note,
+                    CancelReasonId = order.CancelReasonId
+                }).ToListAsync();
 
             return orders;
         }

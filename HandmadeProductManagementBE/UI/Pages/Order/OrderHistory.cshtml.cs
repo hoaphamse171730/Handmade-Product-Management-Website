@@ -70,7 +70,7 @@ namespace UI.Pages.Order
                 ErrorDetail = ex.ErrorDetail.ErrorMessage?.ToString();
                 if (ErrorMessage == "unauthorized") return RedirectToPage("/Login");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 ErrorMessage = "An unexpected error occurred.";
             }
