@@ -10,5 +10,6 @@ namespace HandmadeProductManagement.ModelViews.OrderDetailModelViews
         public int ProductQuantity { get; set; }
         public decimal DiscountPrice { get; set; }
         public List<string> VariationOptionValues { get; set; } = [];
+        public bool HasReviewed { get; set; }
     }
 }
