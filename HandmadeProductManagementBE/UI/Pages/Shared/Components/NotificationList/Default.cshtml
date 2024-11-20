@@ -105,10 +105,23 @@
     function updateNotificationCount() {
         var notificationCountElement = document.getElementById("notificationCount");
         var count = parseInt(notificationCountElement.innerText);
+        var unreadCount = 0;
 
-        // Kiểm tra nếu số lượng thông báo chưa xem còn lớn hơn 0
-        if (count > 0) {
-            notificationCountElement.innerText = count - 1;
+        // Đếm số thông báo chưa xem
+        notificationItems.forEach(function (item) {
+            var notificationId = item.getAttribute('data-notification-id');
+            if (!isNotificationSeen(notificationId)) {
+                unreadCount++;
+            }
+        });
+
+        // Cập nhật số lượng thông báo chưa xem
+        if (unreadCount > 0) {
+            notificationCountElement.innerText = unreadCount;
+            notificationCountElement.style.display = "inline-flex";
+        } else {
+            notificationCountElement.innerText = "0";
+            notificationCountElement.style.display = "none"; // Ẩn số nếu không có thông báo chưa xem
         }
     }
 
@@ -128,6 +141,6 @@
         });
 
         // Cập nhật lại số lượng thông báo chưa xem sau khi trang tải lại
-        document.getElementById("notificationCount").innerText = unreadCount;
+        //document.getElementById("notificationCount").innerText = unreadCount;
     };
 </script>
