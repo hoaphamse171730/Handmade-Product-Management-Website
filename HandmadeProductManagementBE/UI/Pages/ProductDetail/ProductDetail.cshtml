@@ -297,18 +297,18 @@ peer-checked:bg-blue-500 peer-checked:text-white peer-checked:border-blue-500">
                     {
                         @if (userId == "")
                         {
-                            <button type="button" onclick="showLoginModal()" class="flex-1 rounded-lg bg-blue-500 px-4 py-3 text-white hover:bg-blue-600">
+                        <button type="button" onclick="showLoginModal()" id="addToCartButton" class="flex-1 rounded-lg bg-blue-500 px-4 py-3 text-white hover:bg-blue-600">
                                 <span><i class="fa fa-shopping-cart mr-2"></i> Add to Cart</span>
                             </button>
                         }
                         else
                         {
-                            <button type="submit"
+                        <button type="submit" id="addToCartButton"
                                     class="flex-1 rounded-lg bg-blue-500 px-4 py-3 text-white hover:bg-blue-600
 @(userId == Model.productDetail?.OwnerId ? "opacity-50 cursor-not-allowed pointer-events-none" : "")">
                                 @if (userId == Model.productDetail?.OwnerId)
                                 {
-                                    <span>You cannot add your own product</span>
+                                    <span>You cannot add your own product to cart.</span>
                                 }
                                 else
                                 {
@@ -547,6 +547,8 @@ peer-checked:bg-blue-500 peer-checked:text-white peer-checked:border-blue-500">
         }
 
         const productItems = @Html.Raw(Json.Serialize(productItems));
+        const userId = "@userId";
+        const productOwnerId = "@Model.productDetail?.OwnerId";
 
         function updateProductInfo() {
             // Collect selected options
@@ -569,6 +571,9 @@ peer-checked:bg-blue-500 peer-checked:text-white peer-checked:border-blue-500">
             const productItemIdElement = document.getElementById("productItemId");
             const addToCartButton = document.getElementById("addToCartButton");
 
+            // Check if the current user is the owner of the product
+            const isOwner = userId === productOwnerId; // Assuming `userId` and `productOwnerId` are globally available
+
             if (matchingProduct) {
                 // Update product item ID
                 productItemIdElement.value = matchingProduct.id;
@@ -584,14 +589,18 @@ peer-checked:bg-blue-500 peer-checked:text-white peer-checked:border-blue-500">
                 quantity = Math.min(quantity, maxQuantity);
                 updateQuantityDisplay();
 
-                // Disable "Add to Cart" if out of stock
-                if (matchingProduct.quantityInStock === 0) {
+                // Handle "You cannot add your own product" condition
+                if (isOwner) {
                     addToCartButton.disabled = true;
-                    addToCartButton.classList.add("opacity-50", "cursor-not-allowed", "pointer-events-none"); // Add gray and disable styles
+                    addToCartButton.classList.add("opacity-50", "cursor-not-allowed", "pointer-events-none");
+                    addToCartButton.innerHTML = "<span>You cannot add your own product</span>";
+                } else if (matchingProduct.quantityInStock === 0) {
+                    addToCartButton.disabled = true;
+                    addToCartButton.classList.add("opacity-50", "cursor-not-allowed", "pointer-events-none");
                     addToCartButton.innerHTML = "<span>Out of stock</span>";
                 } else {
                     addToCartButton.disabled = false;
-                    addToCartButton.classList.remove("opacity-50", "cursor-not-allowed", "pointer-events-none"); // Remove disable styles
+                    addToCartButton.classList.remove("opacity-50", "cursor-not-allowed", "pointer-events-none");
                     addToCartButton.innerHTML = "<i class='fa fa-shopping-cart mr-2'></i> Add to Cart";
                 }
             } else {
@@ -606,7 +615,18 @@ peer-checked:bg-blue-500 peer-checked:text-white peer-checked:border-blue-500">
                 // Ensure the button is disabled and gray if no product found
                 addToCartButton.disabled = true;
                 addToCartButton.classList.add("opacity-50", "cursor-not-allowed", "pointer-events-none"); // Add disable styles
-                addToCartButton.innerHTML = "<span>Out of stock</span>";
+                addToCartButton.innerHTML = "<span>Out of Stock.</span>";
+
+                // Ensure the button is disabled and gray if no product found
+                if (isOwner) {
+                    addToCartButton.disabled = true;
+                    addToCartButton.classList.add("opacity-50", "cursor-not-allowed", "pointer-events-none");
+                    addToCartButton.innerHTML = "<span>You cannot add your own product</span>";
+                } else {
+                    addToCartButton.disabled = true;
+                    addToCartButton.classList.add("opacity-50", "cursor-not-allowed", "pointer-events-none");
+                    addToCartButton.innerHTML = "<span>Out of stock</span>";
+                }
             }
         }
 
