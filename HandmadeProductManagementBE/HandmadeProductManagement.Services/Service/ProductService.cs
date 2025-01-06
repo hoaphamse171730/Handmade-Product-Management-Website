@@ -69,7 +69,7 @@ namespace HandmadeProductManagement.Services.Service
                 CategoryId = product.CategoryId,
                 Variations = product.ProductItems
                     .SelectMany(pi => pi.ProductConfigurations)
-                    .GroupBy(pc => pc.VariationOption.VariationId)
+                    .GroupBy(pc => pc!.VariationOption!.VariationId)
                     .Select(g => new VariationForProductUpdateNewFormatResponseDto
                     {
                         Id = g.Key,
@@ -440,7 +440,7 @@ namespace HandmadeProductManagement.Services.Service
 
             searchFilter.ShopId = shop.Id;
 
-            return await SearchProductsAsync( searchFilter, pageNumber, pageSize);
+            return await SearchProductsAsync(searchFilter, pageNumber, pageSize);
         }
 
         public async Task<IEnumerable<ProductSearchVM>> SearchProductsBySellerAsync(ProductSearchFilter searchFilter, string userId, int pageNumber, int pageSize)
@@ -531,7 +531,7 @@ namespace HandmadeProductManagement.Services.Service
                         ? query.OrderByDescending(p => p.Rating)
                         : query.OrderBy(p => p.Rating);
                     break;
-                
+
                 default:
                     query = query.OrderByDescending(p => p.Rating);
                     break;
@@ -781,10 +781,10 @@ namespace HandmadeProductManagement.Services.Service
             return true;
         }
 
-        public async Task<IList<Product>> GetAllDeletedProducts(int pageNumber, int pageSize)
+        public async Task<IList<Product>> GetAllDeletedProducts(int pageNumber, int pageSize, string userId)
         {
             var deletedProductsQuery = _unitOfWork.GetRepository<Product>().Entities
-                .Where(p => p.DeletedTime.HasValue || p.DeletedBy != null);
+                .Where(p => p.DeletedTime.HasValue || p.DeletedBy != null && p.DeletedBy == userId);
 
             var totalRecords = await deletedProductsQuery.CountAsync();
 
@@ -801,7 +801,7 @@ namespace HandmadeProductManagement.Services.Service
             var productRepo = _unitOfWork.GetRepository<Product>();
 
             var productEntity = await productRepo.Entities.FirstOrDefaultAsync(x => x.Id == id) ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageProductNotFound);
-            
+
             if (productEntity.DeletedBy == null || !productEntity.DeletedTime.HasValue)
             {
                 throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageProductDeleted);
@@ -868,7 +868,7 @@ namespace HandmadeProductManagement.Services.Service
                 .ThenInclude(v => v!.Variation)
                 .FirstOrDefaultAsync(p => p.Id == productId)
                 ?? throw new BaseException.NotFoundException(StatusCodeHelper.NotFound.ToString(), Constants.ErrorMessageProductNotFound);
-            if(!product.Category!.PromotionId.IsNullOrEmpty()) await _promotionService.UpdatePromotionStatusByRealtime(product!.Category!.PromotionId!);
+            if (!product.Category!.PromotionId.IsNullOrEmpty()) await _promotionService.UpdatePromotionStatusByRealtime(product!.Category!.PromotionId!);
 
             var promotion = await _unitOfWork.GetRepository<Promotion>().Entities
                 .FirstOrDefaultAsync(p => p.Categories.Any(c => c.Id == product.CategoryId) &&
@@ -983,4 +983,3 @@ namespace HandmadeProductManagement.Services.Service
 
     }
 }
-

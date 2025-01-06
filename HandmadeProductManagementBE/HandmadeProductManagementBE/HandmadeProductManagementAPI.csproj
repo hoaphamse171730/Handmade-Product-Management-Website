@@ -52,17 +52,33 @@
 		<ProjectReference Include="..\HandmadeProductManagement.Validation\HandmadeProductManagement.Validation.csproj" />
 	</ItemGroup>
 
-	<ItemGroup>
+	 <!--<ItemGroup>
 		<None Update="appsettings.Development.json">
 			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
 		</None>
-	</ItemGroup>
-
+	</ItemGroup>--> 
+	
 	<ItemGroup>
-		<Content Update="handmade-product-bde7a-firebase-adminsdk-g3y5r-fd05db8476.json">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Content>
-	</ItemGroup>
+    <!-- Sao chép appsettings cho API vào thư mục output -->
+    <None Update="appsettings.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+
+    <!-- Sao chép appsettings cho API vào thư mục publish -->
+    <None Update="appsettings.json">
+        <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+    </None>
+    
+    <!-- Nếu có appsettings.Development.json cho API -->
+    <None Update="appsettings.Development.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+
+    <None Update="appsettings.Development.json">
+        <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+    </None>
+</ItemGroup>
+
 
 	<ItemGroup>
 		<Folder Include="Properties\ServiceDependencies\" />

@@ -6,5 +6,6 @@
         public string? Message { get; set; }
         public string? Tag { get; set; }
         public string? URL { get; set; }
+        public bool HaveSeen { get; set; } = false;
     }
 }

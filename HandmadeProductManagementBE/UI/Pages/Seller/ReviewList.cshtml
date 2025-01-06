@@ -93,9 +93,9 @@
                 @if (review.Reply != null)
                 {
                     var replyShop = Model.Shops.FirstOrDefault(s => s.Id == review.Reply.ShopId);
-                    <div class="mb-2 font-semibold text-gray-700">
-                        @(replyShop?.Name ?? "Unknown Shop")
-                    </div>
+                    <a href="/Shop/Index?id=@replyShop.Id" class="text-blue-500 hover:underline">
+                        @replyShop.Name
+                    </a>
 
                     <div class="reply-content-@review.Reply.Id">
                         <p>@review.Reply.Content</p>

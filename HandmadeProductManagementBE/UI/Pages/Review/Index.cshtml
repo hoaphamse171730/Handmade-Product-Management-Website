@@ -80,7 +80,21 @@
             @if (review.Reply != null)
             {
                 <div class="relative ml-4 mt-4 rounded-lg border border-gray-300 bg-gray-50 p-2">
-                    <div class="mb-2 font-semibold text-gray-700">@(Model.Shops.FirstOrDefault(shop => shop.Id == review.Reply?.ShopId)?.Name ?? "Unknown Shop")</div>
+                    @{
+                        var replyShop = Model.Shops.FirstOrDefault(shop => shop.Id == review.Reply?.ShopId);
+                    }
+                    <div class="mb-2 font-semibold text-gray-700">
+                        @if (replyShop != null)
+                        {
+                            <a href="/Shop/Index?id=@replyShop.Id" class="text-blue-500 hover:underline">
+                                @replyShop.Name
+                            </a>
+                        }
+                        else
+                        {
+                            <span>Unknown Shop</span>
+                        }
+                    </div>
                     <p>@review.Reply.Content</p>
                 </div>
             }

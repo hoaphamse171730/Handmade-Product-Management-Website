@@ -1,4 +1,5 @@
-﻿using Google.Apis.Storage.v1.Data;
+﻿using Firebase.Auth;
+using Google.Apis.Storage.v1.Data;
 using HandmadeProductManagement.Contract.Repositories.Entity;
 using HandmadeProductManagement.Contract.Repositories.Interface;
 using HandmadeProductManagement.Contract.Services.Interface;
@@ -360,37 +361,24 @@ namespace HandmadeProductManagement.Services.Service
             }
         }
 
-        public async Task<IList<OrderResponseModel>> GetOrdersByPageAsync(int pageNumber, int pageSize)
+        public async Task<IList<OrderByUserDto>> GetOrdersByPageAsync(int pageNumber, int pageSize)
         {
             var repository = _unitOfWork.GetRepository<Order>();
-            var orderDetailRepository = _unitOfWork.GetRepository<Order>();
-            var userRepository = _unitOfWork.GetRepository<ApplicationUser>();
-
-            // Query to get non-deleted orders
-            var query = from order in repository.Entities
-                        join user in userRepository.Entities on order.UserId equals user.Id
-                        where !order.DeletedTime.HasValue
-                        orderby order.CreatedTime descending
-                        select new OrderResponseModel
-                        {
-                            Id = order.Id,
-                            TotalPrice = order.TotalPrice,
-                            OrderDate = order.OrderDate,
-                            Status = order.Status,
-                            UserId = order.UserId,
-                            Username = user.UserName!,
-                            Address = order.Address,
-                            CustomerName = order.CustomerName,
-                            Phone = order.Phone,
-                            Note = order.Note,
-                            CancelReasonId = order.CancelReasonId
-                        };
-
-            // Apply pagination
-            var orders = await query
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
+            var orders = await repository.Entities
+                .Where(o => !o.DeletedTime.HasValue)
+                .OrderByDescending(o => o.CreatedTime) // Sort orders by CreatedTime in descending order
+                .Select(order => new OrderByUserDto
+                {
+                    Id = order.Id,
+                    TotalPrice = order.TotalPrice,
+                    OrderDate = order.OrderDate,
+                    Status = order.Status,
+                    Address = order.Address,
+                    CustomerName = order.CustomerName,
+                    Phone = order.Phone,
+                    Note = order.Note,
+                    CancelReasonId = order.CancelReasonId
+                }).ToListAsync();
 
             return orders;
         }
@@ -502,14 +490,15 @@ namespace HandmadeProductManagement.Services.Service
                 throw new BaseException.ForbiddenException(StatusCodeHelper.Forbidden.ToString(), Constants.ErrorMessageForbidden);
             }
 
-            if (existingOrder.Status != Constants.OrderStatusPending)
+            if (existingOrder.Status != Constants.OrderStatusPending && existingOrder.Status != Constants.OrderStatusPaymentFailed && existingOrder.Status != Constants.OrderStatusAwaitingPayment)
             {
                 throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidOrderStatus);
             }
 
             if (!string.IsNullOrWhiteSpace(order.Address))
             {
-                if (Regex.IsMatch(order.Address, @"[^a-zA-Z0-9\s,\.]"))
+                // Regex allowing Vietnamese letters, numbers, spaces, commas, and periods
+                if (Regex.IsMatch(order.Address, @"[^A-Za-z0-9À-ỹ\s,\.]"))
                 {
                     throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidAddressFormat);
                 }
@@ -518,7 +507,8 @@ namespace HandmadeProductManagement.Services.Service
 
             if (!string.IsNullOrWhiteSpace(order.CustomerName))
             {
-                if (Regex.IsMatch(order.CustomerName, @"[^a-zA-Z\s]"))
+                // Regex allowing only Vietnamese letters and spaces
+                if (Regex.IsMatch(order.CustomerName, @"[^A-Za-zÀ-ỹ\s]"))
                 {
                     throw new BaseException.BadRequestException(StatusCodeHelper.BadRequest.ToString(), Constants.ErrorMessageInvalidCustomerNameFormat);
                 }
@@ -654,7 +644,8 @@ namespace HandmadeProductManagement.Services.Service
                 var validStatusTransitions = new Dictionary<string, List<string>>
                 {
                     { Constants.OrderStatusPending, new List<string> { Constants.OrderStatusCanceled, Constants.OrderStatusProcessing, Constants.OrderStatusAwaitingPayment } },
-                    { Constants.OrderStatusAwaitingPayment, new List<string> { Constants.OrderStatusCanceled, Constants.OrderStatusProcessing } },
+                    { Constants.OrderStatusAwaitingPayment, new List<string> { Constants.OrderStatusCanceled, Constants.OrderStatusProcessing, Constants.OrderStatusPaymentFailed, Constants.OrderStatusAwaitingPayment } },
+                    { Constants.OrderStatusPaymentFailed, new List<string> { Constants.OrderStatusCanceled, Constants.OrderStatusProcessing } },
                     { Constants.OrderStatusProcessing, new List<string> { Constants.OrderStatusCanceled, Constants.OrderStatusDelivering } },
                     { Constants.OrderStatusDelivering, new List<string> { Constants.OrderStatusShipped, Constants.OrderStatusDeliveryFailed } },
                     { Constants.OrderStatusDeliveryFailed, new List<string> { Constants.OrderStatusOnHold } },

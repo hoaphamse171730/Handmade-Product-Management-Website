@@ -1,4 +1,6 @@
-﻿namespace HandmadeProductManagement.ModelViews.VariationCombinationModelViews
+﻿using HandmadeProductManagement.ModelViews.VariationOptionModelViews;
+
+namespace HandmadeProductManagement.ModelViews.VariationCombinationModelViews
 {
     public class VariationCombinationUpdateNewFormatDto
     {

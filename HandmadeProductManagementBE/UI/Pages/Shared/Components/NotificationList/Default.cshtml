@@ -1,14 +1,14 @@
 ﻿
 @model List<HandmadeProductManagement.ModelViews.NotificationModelViews.NotificationModel>
 
-<button id="notification-button" class="rounded-full p-2 text-gray-600 hover:text-blue-600 focus:outline-none transition duration-300">
+@* <button id="notification-button" class="rounded-full p-2 text-gray-600 hover:text-blue-600 focus:outline-none transition duration-300">
     <i class="fa fa-bell text-xl"></i>
     <span class="absolute top-0 right-0 -mt-1 -mr-1 inline-flex items-center justify-center w-4 h-4 text-xs font-bold text-white bg-red-500 rounded-full">
         @ViewData["NotificationCount"] 
     </span>
-</button>
+</button> 
 
-<div id="notificationDropdown" class="hidden absolute right-0 mt-2 custom-dropdown-width origin-top-right rounded-md bg-white shadow-lg z-50">
+ <div id="notificationDropdown" class="hidden absolute right-0 mt-2 custom-dropdown-width origin-top-right rounded-md bg-white shadow-lg z-50">
     <div class="p-4">
         <h3 class="font-semibold text-gray-700 mb-2">Notifications</h3>
         <div class="notification-container">
@@ -33,4 +33,101 @@
             </ul>
         </div>
     </div>
+</div>  *@
+<button id="notification-button" class="relative rounded-full p-2 text-gray-600 hover:text-blue-600 focus:outline-none transition duration-300">
+    <i class="fa fa-bell text-xl"></i>
+    <span id="notificationCount" class="absolute top-0 right-0 -mt-1 -mr-1 inline-flex items-center justify-center w-4 h-4 text-xs font-bold text-white bg-red-500 rounded-full">
+        @ViewData["NotificationCount"]
+    </span>
+</button>
+
+<div id="notificationDropdown" class="hidden absolute right-0 mt-2 custom-dropdown-width origin-top-right rounded-md bg-white shadow-lg z-50">
+    <div class="p-4">
+        <h3 class="font-semibold text-gray-700 mb-2">Notifications</h3>
+        <div class="notification-container">
+            <ul id="notificationList" class="space-y-2">
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var notification in Model)
+                    {
+                        // Đặt màu của thông báo dựa trên trạng thái
+                        var notificationClass = "notification-item";
+                        if (notification.HaveSeen)
+                        {
+                            notificationClass += " bg-gray-200 text-gray-800";  // Đã xem
+                        }
+                        else
+                        {
+                            notificationClass += " bg-blue-500 text-white";  // Chưa xem
+                        }
+                        <li id="notification-@notification.Id" class="@notificationClass" data-notification-id="@notification.Id">
+                            <a href="@notification.URL" class="block px-4 py-3 rounded-md text-base" onclick="markAsSeen('@notification.Id')">
+                                @notification.Message
+                            </a>
+                        </li>
+                    }
+                }
+                else
+                {
+                    <li class="notification-item">
+                        <span class="block text-gray-700 px-3 py-2">Không có thông báo nào.</span>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
 </div>
+
+
+<!-- JavaScript -->
+<script>
+    // Kiểm tra nếu thông báo đã được xem hay chưa
+    function isNotificationSeen(notificationId) {
+        return localStorage.getItem("notification_" + notificationId) === "seen";
+    }
+
+    // Khi người dùng nhấn vào thông báo, đánh dấu là đã xem
+    function markAsSeen(notificationId) {
+        // Lưu trạng thái "seen" vào localStorage
+
+        localStorage.setItem("notification_" + notificationId, "seen");
+
+        // Thay đổi màu của thông báo
+        var notificationElement = document.getElementById("notification-" + notificationId);
+        notificationElement.classList.remove("bg-black", "text-white");
+        notificationElement.classList.add("bg-gray-300", "text-gray-600");
+
+        // Giảm số lượng thông báo chưa xem
+        updateNotificationCount();
+    }
+
+    // Cập nhật số lượng thông báo chưa xem trên UI
+    function updateNotificationCount() {
+        var notificationCountElement = document.getElementById("notificationCount");
+        var count = parseInt(notificationCountElement.innerText);
+
+        // Kiểm tra nếu số lượng thông báo chưa xem còn lớn hơn 0
+        if (count > 0) {
+            notificationCountElement.innerText = count - 1;
+        }
+    }
+
+    // Đảm bảo khi trang được tải lại, trạng thái của các thông báo chưa xem được xử lý đúng
+    window.onload = function () {
+        var notificationItems = document.querySelectorAll('.notification-item');
+        var unreadCount = 0;
+
+        notificationItems.forEach(function (item) {
+            var notificationId = item.getAttribute('data-notification-id');
+            if (isNotificationSeen(notificationId)) {
+                item.classList.add('bg-gray-300', 'text-gray-600');  // Đánh dấu đã xem
+                item.classList.remove('bg-black', 'text-white');
+            } else {
+                unreadCount++;
+            }
+        });
+
+        // Cập nhật lại số lượng thông báo chưa xem sau khi trang tải lại
+        document.getElementById("notificationCount").innerText = unreadCount;
+    };
+</script>

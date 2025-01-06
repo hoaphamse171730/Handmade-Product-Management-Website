@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.IdentityModel.Tokens;
 using System.Linq;
 using System.Net.Http;
+using static HandmadeProductManagement.Core.Base.BaseException;
 
 namespace UI.Pages.Review
 {
@@ -34,6 +35,8 @@ namespace UI.Pages.Review
         [TempData]
         public string? StatusMessage { get; set; }
         public ShopResponseModel? CurrentUserShop { get; set; }
+        public string? ErrorMessage { get; set; }
+        public string? ErrorDetail { get; set; }
         private async Task<ShopResponseModel?> GetCurrentUserShop()
         {
             try
@@ -54,20 +57,33 @@ namespace UI.Pages.Review
         }
         public async Task<IActionResult> OnGetAsync(int pageNumber = 1, int pageSize = 10)
         {
-            PageNumber = pageNumber;
-            CurrentUserShop = await GetCurrentUserShop();
-            var response = await _apiResponseHelper.GetAsync<IList<ReviewModel>>($"{Constants.ApiBaseUrl}/api/review/user?pageNumber={pageNumber}&pageSize={pageSize}");
-            if (response.StatusCode == StatusCodeHelper.OK && response.Data != null)
+            try
             {
-                Reviews = response.Data;
-                var totalPagesResponse = await _apiResponseHelper.GetAsync<int>($"{Constants.ApiBaseUrl}/api/review/totalpages?pageSize={pageSize}");
-                if (totalPagesResponse.StatusCode == StatusCodeHelper.OK)
+                PageNumber = pageNumber;
+                CurrentUserShop = await GetCurrentUserShop();
+                var response = await _apiResponseHelper.GetAsync<IList<ReviewModel>>($"{Constants.ApiBaseUrl}/api/review/user?pageNumber={pageNumber}&pageSize={pageSize}");
+                if (response.StatusCode == StatusCodeHelper.OK && response.Data != null)
                 {
-                    TotalPages = totalPagesResponse.Data;
+                    Reviews = response.Data;
+                    var totalPagesResponse = await _apiResponseHelper.GetAsync<int>($"{Constants.ApiBaseUrl}/api/review/totalpages?pageSize={pageSize}");
+                    if (totalPagesResponse.StatusCode == StatusCodeHelper.OK)
+                    {
+                        TotalPages = totalPagesResponse.Data;
+                    }
                 }
-            }
 
-            await LoadUsersAndShops();
+                await LoadUsersAndShops();
+            }
+            catch (BaseException.ErrorException ex)
+            {
+                ErrorMessage = ex.ErrorDetail.ErrorCode;
+                ErrorDetail = ex.ErrorDetail.ErrorMessage?.ToString();
+                if (ErrorMessage == "unauthorized") return RedirectToPage("/Login");
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = "An unexpected error occurred.";
+            }
             return Page();
         }
 

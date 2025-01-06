@@ -52,12 +52,12 @@ namespace UI.Pages.Promotion
             {
                 ErrorMessage = ex.ErrorDetail.ErrorCode;
                 ErrorDetail = ex.ErrorDetail.ErrorMessage?.ToString();
+                if (ErrorMessage == "unauthorized") return RedirectToPage("/Login");
             }
             catch (Exception ex)
             {
                 ErrorMessage = "An unexpected error occurred.";
             }
-
             return Page();
         }
     }

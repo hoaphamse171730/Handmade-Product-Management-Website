@@ -25,10 +25,10 @@ namespace UI.Pages.Categories
         public string? ErrorDetail { get; set; }
 
         public int PageNumber { get; set; } = 1;
-        public int PageSize { get; set; } = 10;
+        public int PageSize { get; set; } = 12;
         public bool HasNextPage { get; set; } = true;
 
-        public async Task<IActionResult> OnGetAsync(int pageNumber = 1, int pageSize = 10)
+        public async Task<IActionResult> OnGetAsync(int pageNumber = 1, int pageSize = 12)
         {
             try
             {

@@ -1,6 +1,7 @@
 ﻿@page
 @using UI.Pages.Shared
 @using Microsoft.AspNetCore.Http
+@using HandmadeProductManagement.Core.Common
 @using System.IdentityModel.Tokens.Jwt
 @model UI.Pages.ProductDetail.ProductDetailModel
 
@@ -151,7 +152,7 @@
                 <span class="text-lg text-gray-700">Sold Count: @Model.productDetail?.SoldCount</span>
 
             </div>
-            <h2 class="text-3xl font-bold text-gray-800">@Model.productDetail?.Description</h2>
+        <h2 class="text-base text-gray-800">@Model.productDetail?.Description</h2>
 
 
             <div class="container mx-auto p-4">
@@ -218,38 +219,48 @@
                 }
             </div> *@
 
-            <!-- Product Materials -->
-            <div>
-                <div class="mt-2 flex space-x-2">
-                    @foreach (var variation in Model.VariationOptions)
-                    {
-                        <div class="variation-options">
-                            <span class="rounded-full bg-gray-200 px-3 py-1 text-sm">@variation.Name</span>
-                            <div class="mt-1">
-                                @if (variation.Options != null && variation.Options.Any())
+        <!-- Product Materials -->
+        <div>
+            <div class="mt-2">
+                @foreach (var variation in Model.VariationOptions)
+                {
+                    <div class="variation-options mb-4">
+                        <span class="px-3 py-1 text-sm text-gray-700">@variation.Name</span>
+                        <div class="mt-1 flex flex-wrap gap-2">
+                            @if (variation.Options != null && variation.Options.Any())
+                            {
+                                @foreach (var option in variation.Options)
                                 {
-                                    foreach (var option in variation.Options)
-                                    {
+                                    <!-- Wrap each radio input and label pair in a div to scope peer styles -->
+                                    <div class="flex">
                                         <input type="radio"
-                                               id="@option.Id"
+                                               id="@($"{variation.Name}-{option.Id}")"
                                                name="@variation.Name"
-                                               value="@option.Name"
-                                               class="mr-2"
+                                               value="@option.Value"
+                                               class="peer hidden"
                                                onclick="handleRadioClick(this)"
                                                onchange="updateProductInfo()"
                                                data-variation-name="@variation.Name" />
-                                        <label for="@option.Id" class="text-sm">@option.Name</label>
-                                    }
+
+                                        <label for="@($"{variation.Name}-{option.Id}")"
+                                               class="option-label cursor-pointer rounded border border-gray-300 px-4 py-2 text-sm
+transition duration-150 ease-in-out
+hover:bg-blue-100 hover:border-blue-400
+peer-checked:bg-blue-500 peer-checked:text-white peer-checked:border-blue-500">
+                                            @option.Value
+                                        </label>
+                                    </div>
                                 }
-                                else
-                                {
-                                    <span class="text-sm text-gray-500">No options available</span>
-                                }
-                            </div>
+                            }
+                            else
+                            {
+                                <span class="text-sm text-gray-500">No options available</span>
+                            }
                         </div>
-                    }
-                </div>
+                    </div>
+                }
             </div>
+        </div>
 
       
             <div class="price-container">
@@ -258,36 +269,54 @@
             </div>
 
             <span id="remainingQuantity" class="text-sm text-gray-600"></span>
-        <!-- ADD TO CART-->
 
-            <form method="post">
-                <!-- Trường dữ liệu cho CartItem.ProductItemId -->
+        <!-- Add to Cart Form -->
+            <form method="post" id="addToCartForm">
                 <input type="hidden" asp-for="CartItem.ProductItemId" id="productItemId" />
+
                 <div class="container mx-auto p-4">
                     <div class="flex items-center space-x-4">
                         <h2 class="text-lg font-semibold text-gray-800">Quantity</h2>
                         <div class="flex items-center rounded-lg border border-gray-300">
                             <button type="button" onclick="decreaseQuantity()" class="rounded-l-lg px-4 py-2 text-gray-700 hover:bg-gray-200">-</button>
-                        <input id="quantityInput" asp-for="CartItem.ProductQuantity" type="number" min="1" max="50" class="w-16 px-4 py-2 text-center text-gray-800" value="1" onchange="handleInputChange()" />
-                        <button type="button" onclick="increaseQuantity()" class="rounded-r-lg px-4 py-2 text-gray-700 hover:bg-gray-200">+</button>
+                            <input id="quantityInput" asp-for="CartItem.ProductQuantity" type="number" min="1" max="50" class="w-16 px-4 py-2 text-center text-gray-800" value="1"/>
+                            <button type="button" onclick="increaseQuantity()" class="rounded-r-lg px-4 py-2 text-gray-700 hover:bg-gray-200">+</button>
                         </div>
                     </div>
                 </div>
 
                 <div class="mb-10 flex space-x-4">
-                    <!-- Nút "Add to Cart" với điều kiện disable và thay đổi text -->
-                <button type="submit" id="addToCartButton"
-                            class="flex-1 rounded-lg bg-blue-500 px-4 py-3 text-white hover:bg-blue-600
-@(userId == Model.productDetail?.OwnerId ? "opacity-50 cursor-not-allowed pointer-events-none" : "")">
-                        @if (userId == Model.productDetail?.OwnerId)
+                    @if (Model.productDetail?.Status == @Constants.ProductStatusUnavailable)
+                    {
+                        <!-- If status is unavailable, show "Unavailable" instead of the Add to Cart button -->
+                        <button type="button" class="flex-1 cursor-not-allowed rounded-lg bg-gray-500 px-4 py-3 text-white">
+                            <span>Unavailable</span>
+                        </button>
+                    }
+                    else
+                    {
+                        @if (userId == "")
                         {
-                            <span>You cannot add your own product</span>
+                        <button type="button" onclick="showLoginModal()" id="addToCartButton" class="flex-1 rounded-lg bg-blue-500 px-4 py-3 text-white hover:bg-blue-600">
+                                <span><i class="fa fa-shopping-cart mr-2"></i> Add to Cart</span>
+                            </button>
                         }
                         else
                         {
-                            <span><i class="fa fa-shopping-cart mr-2"></i> Add to Cart</span>
+                        <button type="submit" id="addToCartButton"
+                                    class="flex-1 rounded-lg bg-blue-500 px-4 py-3 text-white hover:bg-blue-600
+@(userId == Model.productDetail?.OwnerId ? "opacity-50 cursor-not-allowed pointer-events-none" : "")">
+                                @if (userId == Model.productDetail?.OwnerId)
+                                {
+                                    <span>You cannot add your own product to cart.</span>
+                                }
+                                else
+                                {
+                                    <span><i class="fa fa-shopping-cart mr-2"></i> Add to Cart</span>
+                                }
+                            </button>
                         }
-                    </button>
+                    }
                 </div>
             </form>
         </div>
@@ -411,17 +440,17 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
 @section Scripts{
-    <script>
-        function showLoginModal() {
-            console.log("Modal opened"); // Kiểm tra khi modal được mở
-            document.getElementById('loginModal').classList.remove('hidden');
-        }
+         <script>
+            function showLoginModal() {
+                console.log("Modal opened"); // Kiểm tra khi modal được mở
+                document.getElementById('loginModal').classList.remove('hidden');
+            }
 
 
-        function closeLoginModal() {
-            document.getElementById('loginModal').classList.add('hidden');
-        }
-    </script>
+            function closeLoginModal() {
+                document.getElementById('loginModal').classList.add('hidden');
+            }
+        </script>
     <partial name="_ValidationScriptsPartial" />
     <!-- Swiper Initialization Script -->
     <script>
@@ -518,6 +547,8 @@
         }
 
         const productItems = @Html.Raw(Json.Serialize(productItems));
+        const userId = "@userId";
+        const productOwnerId = "@Model.productDetail?.OwnerId";
 
         function updateProductInfo() {
             // Collect selected options
@@ -540,6 +571,9 @@
             const productItemIdElement = document.getElementById("productItemId");
             const addToCartButton = document.getElementById("addToCartButton");
 
+            // Check if the current user is the owner of the product
+            const isOwner = userId === productOwnerId; // Assuming `userId` and `productOwnerId` are globally available
+
             if (matchingProduct) {
                 // Update product item ID
                 productItemIdElement.value = matchingProduct.id;
@@ -555,14 +589,18 @@
                 quantity = Math.min(quantity, maxQuantity);
                 updateQuantityDisplay();
 
-                // Disable "Add to Cart" if out of stock
-                if (matchingProduct.quantityInStock === 0) {
+                // Handle "You cannot add your own product" condition
+                if (isOwner) {
                     addToCartButton.disabled = true;
-                    addToCartButton.classList.add("opacity-50", "cursor-not-allowed", "pointer-events-none"); // Add gray and disable styles
+                    addToCartButton.classList.add("opacity-50", "cursor-not-allowed", "pointer-events-none");
+                    addToCartButton.innerHTML = "<span>You cannot add your own product</span>";
+                } else if (matchingProduct.quantityInStock === 0) {
+                    addToCartButton.disabled = true;
+                    addToCartButton.classList.add("opacity-50", "cursor-not-allowed", "pointer-events-none");
                     addToCartButton.innerHTML = "<span>Out of stock</span>";
                 } else {
                     addToCartButton.disabled = false;
-                    addToCartButton.classList.remove("opacity-50", "cursor-not-allowed", "pointer-events-none"); // Remove disable styles
+                    addToCartButton.classList.remove("opacity-50", "cursor-not-allowed", "pointer-events-none");
                     addToCartButton.innerHTML = "<i class='fa fa-shopping-cart mr-2'></i> Add to Cart";
                 }
             } else {
@@ -577,7 +615,18 @@
                 // Ensure the button is disabled and gray if no product found
                 addToCartButton.disabled = true;
                 addToCartButton.classList.add("opacity-50", "cursor-not-allowed", "pointer-events-none"); // Add disable styles
-                addToCartButton.innerHTML = "<span>Out of stock</span>";
+                addToCartButton.innerHTML = "<span>Out of Stock.</span>";
+
+                // Ensure the button is disabled and gray if no product found
+                if (isOwner) {
+                    addToCartButton.disabled = true;
+                    addToCartButton.classList.add("opacity-50", "cursor-not-allowed", "pointer-events-none");
+                    addToCartButton.innerHTML = "<span>You cannot add your own product</span>";
+                } else {
+                    addToCartButton.disabled = true;
+                    addToCartButton.classList.add("opacity-50", "cursor-not-allowed", "pointer-events-none");
+                    addToCartButton.innerHTML = "<span>Out of stock</span>";
+                }
             }
         }
 

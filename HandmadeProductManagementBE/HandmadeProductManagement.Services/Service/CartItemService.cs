@@ -180,6 +180,7 @@ namespace HandmadeProductManagement.Services.Service
                 {
                     ShopId = group.Key.ShopId,
                     ShopName = group.Key.ShopName,
+                    TotalCartItemCount = group.Count(),
                     CartItems = group.Select(ci => new CartItemDto
                     {
                         Id = ci.Id,

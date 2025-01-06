@@ -81,21 +81,21 @@
                                 <td class="border-b border-gray-200 p-6 text-lg">@order.Note</td>
                                 <td class="border-b border-gray-200 p-6 text-lg">
                                     <div class="flex space-x-2">
-                                        @if (order.Status == "Pending")
+                                        @if (order.Status == "Pending" || order.Status == "Awaiting Payment" || order.Status == "Payment Failed")
                                         {
                                             <button class="rounded bg-green-500 px-4 py-2 text-white hover:bg-green-600"
                                                     onclick="event.stopPropagation(); openUpdateModal('@order.Id', '@order.CustomerName', '@order.Phone', '@order.Address', '@order.Note')">
                                                 Update
                                             </button>
                                         }
-                                         @if (order.Status == "Awaiting Payment")
+                                        @if (order.Status == "Awaiting Payment" || order.Status == "Pending" || order.Status == "Payment Failed")
                                         {
                                             <button class="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
                                                     onclick="event.stopPropagation(); processPayment('@order.Id')">
                                                  Process payment
                                             </button>
                                         }
-                                        @if (order.Status == "Pending" || order.Status == "Processing" || order.Status == "Awaiting Payment")
+                                        @if (order.Status == "Pending" || order.Status == "Processing" || order.Status == "Awaiting Payment" || order.Status == "Payment Failed")
                                         {
                                             <button class="rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600"
                                                     onclick="event.stopPropagation(); openConfirmModal('@order.Id')">
@@ -277,10 +277,11 @@
         document.getElementById('phoneError').innerText = '';
         document.getElementById('addressError').innerText = '';
 
-        // Name validation
+        // Name validation (allowing Vietnamese letters and spaces)
         const name = document.getElementById('updateName').value.trim();
-        if (name && /[^a-zA-Z\s]/.test(name)) {
-            document.getElementById('nameError').innerText = 'Name should only contain letters and spaces.';
+        const namePattern = /^[A-Za-zÀ-ỹ\s]+$/;
+        if (name && !namePattern.test(name)) {
+            document.getElementById('nameError').innerText = 'Name should only contain Vietnamese letters and spaces.';
             isValid = false;
         }
 
@@ -291,9 +292,10 @@
             isValid = false;
         }
 
-        // Address validation
+        // Address validation (allowing Vietnamese letters, numbers, spaces, commas, and periods)
         const address = document.getElementById('updateAddress').value.trim();
-        if (address && /[^a-zA-Z0-9\s,\.]/.test(address)) {
+        const addressPattern = /^[A-Za-z0-9À-ỹ\s,\.]+$/;
+        if (address && !addressPattern.test(address)) {
             document.getElementById('addressError').innerText = 'Address contains invalid characters.';
             isValid = false;
         }
